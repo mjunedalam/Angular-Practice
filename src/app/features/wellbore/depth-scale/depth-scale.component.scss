@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.depth-scale-svg {
+  display: block;
+  background: #fafbfd;
+  border-right: 1px solid #dde4f0;
+}
+
+:host ::ng-deep {
+  .axis-title {
+    font-size: 9px;
+    font-weight: 600;
+    fill: #5a6a8a;
+    font-family: Arial, sans-serif;
+  }
+
+  .axis-line {
+    stroke: #3a4a6b;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .tick-line {
+    stroke: #3a4a6b;
+    stroke-width: 1.5;
+  }
+
+  .tick-grid {
+    stroke: #c8d0e8;
+    stroke-width: 1;
+    stroke-dasharray: 2, 2;
+  }
+
+  .tick-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    fill: #2c3a58;
+    text-anchor: end;
+    font-family: Arial, sans-serif;
+  }
+
+  .total-depth-label {
+    font-size: 10px;
+    font-weight: 700;
+    fill: #1a5cbf;
+    font-family: Arial, sans-serif;
+  }
+}

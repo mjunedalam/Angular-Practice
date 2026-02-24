@@ -1,0 +1,16 @@
+<div class="chip-strip" role="list" aria-label="Available wells">
+  <span class="chip-strip__label">Wells</span>
+
+  @for (well of wells(); track trackByEpANum($index, well)) {
+    <button
+      class="chip"
+      role="listitem"
+      [ngClass]="{ 'chip--active': well.epANum === selectedEpANum() }"
+      [attr.aria-pressed]="well.epANum === selectedEpANum()"
+      (click)="chipSelected.emit(well.epANum)"
+    >
+      <span class="chip__dot"></span>
+      {{ well.wellName }}
+    </button>
+  }
+</div>

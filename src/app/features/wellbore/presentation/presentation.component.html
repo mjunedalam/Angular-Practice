@@ -1,0 +1,94 @@
+<div class="presentation">
+
+  <!-- Header -->
+  <header class="presentation__header">
+    <div class="header__brand">
+      <span class="header__icon">⛽</span>
+      <h1 class="header__title">Well Design Viewer</h1>
+    </div>
+
+    @if (store.isLoaded()) {
+      <div class="header__meta">
+        @if (store.wellDetails()!.WELL_MASTER[0]; as wm) {
+          <div class="meta-pill">
+            <span class="meta-pill__label">Well</span>
+            <span class="meta-pill__value">{{ wm.well }}</span>
+          </div>
+        }
+        @if (store.wellDetails()!.RIG_IDENTIFICATION[0]; as rig) {
+          <div class="meta-pill">
+            <span class="meta-pill__label">Rig</span>
+            <span class="meta-pill__value">{{ rig.rigShrtName }}</span>
+          </div>
+        }
+        <div class="meta-pill">
+          <span class="meta-pill__label">TD</span>
+          <span class="meta-pill__value">{{ store.totalDepth().toLocaleString() }} ft</span>
+        </div>
+        @if (store.wellDetails()!.EXAD_RCD_PREWAP[0]; as pre) {
+          <div class="meta-pill">
+            <span class="meta-pill__label">Target</span>
+            <span class="meta-pill__value">{{ pre.targetFormation }}</span>
+          </div>
+          <div class="meta-pill">
+            <span class="meta-pill__label">Elev.</span>
+            <span class="meta-pill__value">{{ pre.surfaceElevation }} ft</span>
+          </div>
+        }
+        @if (store.wellDetails()!.RIG_ACTIVITY[0]; as ra) {
+          <div class="meta-pill">
+            <span class="meta-pill__label">Type</span>
+            <span class="meta-pill__value">{{ ra.wWellTypeDesc }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (store.loading()) {
+      <div class="header__loading" role="status" aria-live="polite">
+        <span class="spinner"></span>
+        <span>Loading…</span>
+      </div>
+    }
+  </header>
+
+  <!-- Well Name Chips -->
+  <app-well-name-chips
+    [wells]="store.uniqueWellNames()"
+    [selectedEpANum]="store.selectedEpANum()"
+    (chipSelected)="onWellSelected($event)"
+  />
+
+  <!-- Error Banner -->
+  @if (store.error()) {
+    <div class="error-banner" role="alert">
+      <span>⚠</span> {{ store.error() }}
+    </div>
+  }
+
+  <!-- Diagram Area -->
+  <main class="presentation__diagram">
+
+    @if (!store.isLoaded() && !store.loading()) {
+      <div class="empty-state">
+        <div class="empty-state__icon">🛢</div>
+        <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+      </div>
+    }
+
+    @if (store.isLoaded()) {
+      <div class="diagram-scroll">
+        <app-depth-scale
+          [totalDepth]="store.totalDepth()"
+          [animTrigger]="store.animationTrigger()"
+        />
+        <app-well-bore-view
+          [diagramData]="store.diagramData()"
+          [animTrigger]="store.animationTrigger()"
+        />
+      </div>
+    }
+
+  </main>
+
+</div>
