@@ -458,6 +458,12 @@
             "csgType": "Conductor",
             "csgDepth": 100,
             "csgRemarks": ""
+        },
+        {
+            "csgSize": "24",
+            "csgType": "Conductor",
+            "csgDepth": 2500,
+            "csgRemarks": ""
         },{
             "csgSize": "9 5/8",
             "csgType": "Liner",

@@ -54,16 +54,18 @@ export class DepthScaleComponent implements OnInit {
 
     const svg = select(this.svgRef.nativeElement);
     svg.selectAll('*').remove();
+    
+    // FIX #4: Allow Depth scale to shrink dynamically alongside the wellbore component
     svg
-      .attr('width', depthScaleWidth)
-      .attr('height', svgHeight)
-      .attr('viewBox', `0 0 ${depthScaleWidth} ${svgHeight}`);
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${depthScaleWidth} ${svgHeight}`)
+      .attr('preserveAspectRatio', 'xMidYMin meet');
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
     const ticks = buildDepthTicks(totalDepth, 500);
 
-    // Column header
     g.append('text')
       .attr('class', 'axis-title')
       .attr('x', depthAxisX)
@@ -74,7 +76,6 @@ export class DepthScaleComponent implements OnInit {
         t.append('tspan').attr('x', depthAxisX).attr('dy', 12).text('(ft bgl)');
       });
 
-    // Axis line drawn with animated stroke-dashoffset (linear)
     const lineLen = drawingHeight;
     g.append('line')
       .attr('class', 'axis-line')
@@ -87,7 +88,6 @@ export class DepthScaleComponent implements OnInit {
       .ease(easeLinear)
       .attr('stroke-dashoffset', 0);
 
-    // Tick groups appear as the line draws through each depth
     ticks.forEach((depth) => {
       const yPx   = scale(depth);
       const delay = (depth / totalDepth) * ANIM.SCALE_DURATION + ANIM.TICK_BASE_DELAY;
@@ -117,7 +117,6 @@ export class DepthScaleComponent implements OnInit {
         .style('opacity', 1);
     });
 
-    // Total depth label at the bottom
     g.append('text')
       .attr('class', 'total-depth-label')
       .attr('x', depthAxisX)

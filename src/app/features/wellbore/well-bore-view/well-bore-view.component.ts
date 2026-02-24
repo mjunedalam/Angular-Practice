@@ -65,14 +65,15 @@ export class WellBoreViewComponent implements OnInit {
     if (data) this.redraw(data);
   }
 
-  // ── Bootstrap SVG shell (called once) ──────────────────────────────────────
-
   private bootstrapSvg(): void {
     const { wellboreViewWidth, svgHeight, marginTop } = this.layout;
     const svg = select(this.svgRef.nativeElement) as SvgSel;
-    svg.attr('width', wellboreViewWidth)
-       .attr('height', svgHeight)
-       .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`);
+    
+    // FIX #4: Use responsive viewBox scaling rather than fixed pixel dimensions
+    svg.attr('width', '100%')
+       .attr('height', '100%')
+       .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)
+       .attr('preserveAspectRatio', 'xMidYMin meet');
 
     this.defsEl = svg.append('defs') as DefsSel;
     this.addStaticDefs(this.defsEl);
@@ -81,8 +82,6 @@ export class WellBoreViewComponent implements OnInit {
       .attr('class', 'wellbore-root')
       .attr('transform', `translate(0,${marginTop})`) as GSel;
   }
-
-  // ── Full redraw – only replaces mutable content ────────────────────────────
 
   private redraw(data: WellboreDiagramData): void {
     this.rootG.selectAll('*').remove();
@@ -93,15 +92,16 @@ export class WellBoreViewComponent implements OnInit {
 
     this.drawStaticChrome(geoLineX, casingCenterX);
     this.drawGeologicTops(data.geologicTops, geoLineX, scale);
+    
+    // FIX #2: Call drawOpenHoleAndScreen BEFORE drawCasings so the Liner sits behind the Casing
+    this.drawOpenHoleAndScreen(data, casingCenterX, scale);
     this.drawCasings(data.casings, casingCenterX, scale);
+    
     this.drawCasingLabels(data.casings, casingCenterX, scale);
     this.drawWaterLevel(data, casingCenterX, scale);
-    this.drawOpenHoleAndScreen(data, casingCenterX, scale);
     this.drawDrillArrow(data, scale);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight);
   }
-
-  // ── Static SVG defs ────────────────────────────────────────────────────────
 
   private addStaticDefs(defs: DefsSel): void {
     this.addLinearGradient(defs, 'mainGradient', [
@@ -114,9 +114,9 @@ export class WellBoreViewComponent implements OnInit {
       { offset: '100%', color: '#4ca746' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%',   color: '#c07820' },
-      { offset: '50%',  color: '#ffe090' },
-      { offset: '100%', color: '#c07820' },
+      { offset: '0%',   color: '#5d6264' },
+      { offset: '50%',  color: '#ffffff' },
+      { offset: '100%', color: '#5d6264' },
     ]);
 
     const grid = defs.append('pattern')
@@ -155,8 +155,6 @@ export class WellBoreViewComponent implements OnInit {
     );
   }
 
-  // ── Static chrome (ground line, geo axis) ─────────────────────────────────
-
   private drawStaticChrome(geoLineX: number, centerX: number): void {
     this.rootG.append('line')
       .attr('class', 'ground-line')
@@ -183,8 +181,6 @@ export class WellBoreViewComponent implements OnInit {
         t.append('tspan').attr('x', geoLineX).attr('dy', 12).text('Horizons (ft bgl)');
       });
   }
-
-  // ── Geologic tops ──────────────────────────────────────────────────────────
 
   private drawGeologicTops(
     tops: GeologicTop[],
@@ -223,8 +219,6 @@ export class WellBoreViewComponent implements OnInit {
     });
   }
 
-  // ── Casings – telescopic clip-path animation ───────────────────────────────
-
   private drawCasings(
     casings: CasingInfo[],
     centerX: number,
@@ -237,11 +231,9 @@ export class WellBoreViewComponent implements OnInit {
       const bottomPx = scale(csg.csgDepth);
       const clipId   = `dyn-casing-clip-${i}`;
 
-      // Outer casings animate first (animOrder 0 = outermost)
       const animOrder = casings.length - 1 - i;
       const delay     = animOrder * ANIM.CASING_STAGGER;
 
-      // Clip rect starts at height 0 → grows to reveal casing
       const clipRect = this.defsEl
         .append('clipPath')
         .attr('class', 'dyn-clip')
@@ -262,12 +254,10 @@ export class WellBoreViewComponent implements OnInit {
       clipRect.transition()
         .delay(delay)
         .duration(ANIM.CASING_DURATION)
-        .ease(easeQuadOut)
+        .ease(easeCubicInOut) // FIX #1: More realistic mechanical running pipe easing
         .attr('height', bottomPx + shoeCurveOffset + 20);
     });
   }
-
-  // ── Casing labels ──────────────────────────────────────────────────────────
 
   private drawCasingLabels(
     casings: CasingInfo[],
@@ -325,8 +315,6 @@ export class WellBoreViewComponent implements OnInit {
     });
   }
 
-  // ── Water level ────────────────────────────────────────────────────────────
-
   private drawWaterLevel(
     data: WellboreDiagramData,
     centerX: number,
@@ -361,8 +349,6 @@ export class WellBoreViewComponent implements OnInit {
     wg.transition().delay(ANIM.OVERLAY_DELAY).duration(400).ease(easeCubicInOut).style('opacity', 1);
   }
 
-  // ── Open hole + liner screen ───────────────────────────────────────────────
-
   private drawOpenHoleAndScreen(
     data: WellboreDiagramData,
     centerX: number,
@@ -375,8 +361,14 @@ export class WellBoreViewComponent implements OnInit {
     const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const ohHW     = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
+    
     const shoePx   = scale(deepest.csgDepth);
     const tdPx     = scale(data.totalDepth);
+    
+    // FIX #3: Calculate rat hole offset (space at bottom)
+    const ratHolePx = 15; 
+    const screenBottomPx = tdPx - ratHolePx;
+
     const clipId   = 'dyn-oh-clip';
 
     const clipRect = this.defsEl
@@ -387,25 +379,23 @@ export class WellBoreViewComponent implements OnInit {
       .attr('width', ohHW * 2 + 30)
       .attr('height', 0);
 
-    // Open hole outline
+    // Open hole outline (drills all the way down to TD)
     this.rootG.append('path')
       .attr('class', 'open-hole')
       .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    // Liner screen
+    // Liner screen (stops slightly short of TD creating bottom space)
     this.rootG.append('path')
       .attr('class', 'liner-screen')
-      .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, tdPx))
+      .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    // Screen hangers (fade in at ohDelay)
     const sl = centerX - screenHW, sr = centerX + screenHW;
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
     hangerG.append('path').attr('d', `M${sl},${shoePx} L${sl},${shoePx + 9} L${sl + 18},${shoePx}`);
     hangerG.append('path').attr('d', `M${sr},${shoePx} L${sr},${shoePx + 9} L${sr - 18},${shoePx}`);
 
-    // Open hole label
     const ohLY = shoePx + (tdPx - shoePx) * 0.2;
     const ohLG = this.rootG.append('g').attr('class', 'open-hole-label').style('opacity', 0);
     ohLG.append('line').attr('class', 'oh-label-line')
@@ -418,27 +408,26 @@ export class WellBoreViewComponent implements OnInit {
       .attr('text-anchor', 'end')
       .text('8 1/2" Open Hole');
 
-    // Screen length label
     const screenLen = data.totalDepth - deepest.csgDepth;
     const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
     scrLG.append('line').attr('class', 'screen-label-line')
       .attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28)
-      .attr('y1', tdPx).attr('y2', tdPx);
+      .attr('y1', screenBottomPx).attr('y2', screenBottomPx);
     scrLG.append('path')
-      .attr('d', buildArrowHeadRight(centerX + screenHW + 28, tdPx, 6));
+      .attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
     scrLG.append('text').attr('class', 'screen-label-text')
-      .attr('x', centerX + screenHW + 34).attr('y', tdPx + 4)
+      .attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4)
       .text(`+/- ${screenLen.toLocaleString()} ft of Screen`);
 
     const ohDelay = ANIM.OVERLAY_DELAY;
-    clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeLinear)
+    
+    // FIX #1: Easing logic changed for realistic animation
+    clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
       .attr('height', tdPx - shoePx + 20);
     hangerG.transition().delay(ohDelay).duration(250).style('opacity', 1);
     ohLG.transition().delay(ohDelay + 300).duration(300).style('opacity', 1);
     scrLG.transition().delay(ohDelay + 400).duration(300).style('opacity', 1);
   }
-
-  // ── Drill bit depth arrow ──────────────────────────────────────────────────
 
   private drawDrillArrow(
     data: WellboreDiagramData,
@@ -452,11 +441,9 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', buildDepthArrow(0, 0, arrowCx, 10, 12))
       .transition()
       .duration(ANIM.SCALE_DURATION)
-      .ease(easeLinear)
+      .ease(easeCubicInOut)
       .attr('d', buildDepthArrow(0, endPx, arrowCx, 10, 12));
   }
-
-  // ── Total depth label ──────────────────────────────────────────────────────
 
   private drawTotalDepthLabel(
     totalDepth: number,

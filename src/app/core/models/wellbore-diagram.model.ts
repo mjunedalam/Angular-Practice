@@ -39,12 +39,13 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   shoeCurveOffset: 15,
 };
 
+// FIX #1: Smoother, more realistic cascading animation timings
 export const ANIM = {
-  SCALE_DURATION: 1100,
-  TICK_BASE_DELAY: 100,
-  CASING_DURATION: 700,
-  CASING_STAGGER: 320,
+  SCALE_DURATION: 1200,
+  TICK_BASE_DELAY: 150,
+  CASING_DURATION: 900,
+  CASING_STAGGER: 450,
   GEO_STAGGER: 60,
-  GEO_DELAY: 300,
-  OVERLAY_DELAY: 1500,
+  GEO_DELAY: 200,
+  OVERLAY_DELAY: 1600,
 } as const;

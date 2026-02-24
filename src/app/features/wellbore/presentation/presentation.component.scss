@@ -35,10 +35,10 @@ $danger:     #f85149;
 
   &__diagram {
     flex: 1;
-    overflow: hidden;
+    overflow: hidden; /* FIX #4: Prevent scrolling entirely in main container */
     background: #1a1f2e;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch; /* Allow children to take full height */
     justify-content: center;
     padding: 16px;
   }
@@ -152,15 +152,17 @@ $danger:     #f85149;
   }
 }
 
+/* FIX #4: Changed diagram-scroll to stretch layout and prevent overflows */
 .diagram-scroll {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch; 
   background: #ffffff;
   border-radius: 8px;
   box-shadow:
     0 4px 32px rgba(0, 0, 0, 0.5),
     0 1px 4px rgba(0, 0, 0, 0.3);
-  overflow: auto;
-  max-height: 100%;
-  max-width: 100%;
+  overflow: hidden; 
+  height: 100%;
+  width: 100%;
+  max-width: 1070px; /* Limits excessive stretching on ultra-wide screens */
 }

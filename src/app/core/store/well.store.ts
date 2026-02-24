@@ -76,28 +76,10 @@ export const WellStore = signalStore(
     }),
   })),
 
-  withMethods((store, wellDataService = inject(WellDataService)) => ({
-
-    loadWellNames: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { loading: true, error: null })),
-        switchMap(() =>
-          wellDataService.getWellNames().pipe(
-            tapResponse({
-              next: (wellNames) =>
-                patchState(store, { wellNames, loading: false }),
-              error: (err: Error) =>
-                patchState(store, {
-                  error: err.message ?? 'Failed to load well names',
-                  loading: false,
-                }),
-            }),
-          ),
-        ),
-      ),
-    ),
-
-    selectWell: rxMethod<number>(
+  withMethods((store, wellDataService = inject(WellDataService)) => {
+    
+    // Define selectWell locally so it can be called safely
+    const selectWell = rxMethod<number>(
       pipe(
         tap((epANum) =>
           patchState(store, {
@@ -124,6 +106,37 @@ export const WellStore = signalStore(
           ),
         ),
       ),
-    ),
-  })),
+    );
+
+    const loadWellNames = rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { loading: true, error: null })),
+        switchMap(() =>
+          wellDataService.getWellNames().pipe(
+            tapResponse({
+              next: (wellNames) => {
+                patchState(store, { wellNames, loading: false });
+                
+                // Safely trigger selectWell on the first item
+                if (wellNames.length > 0 && !store.selectedEpANum()) {
+                  selectWell(wellNames[0].epANum);
+                }
+              },
+              error: (err: Error) =>
+                patchState(store, {
+                  error: err.message ?? 'Failed to load well names',
+                  loading: false,
+                }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Export the methods to the store
+    return {
+      selectWell,
+      loadWellNames,
+    };
+  }),
 );
