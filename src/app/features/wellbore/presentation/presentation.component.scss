@@ -1,18 +1,14 @@
-$bg-dark:    #0d1117;
-$bg-mid:     #161b22;
-$bg-card:    #1c2333;
-$border:     #21262d;
-$accent:     #58a6ff;
-$text-muted: #6e7681;
-$text-main:  #c9d1d9;
-$danger:     #f85149;
+$bg-app:     #f1f5f9; 
+$border:     #e2e8f0;
+$accent:     #0ea5e9;
+$danger:     #ef4444;
 
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: $bg-dark;
+  background: $bg-app;
 }
 
 .presentation {
@@ -21,101 +17,59 @@ $danger:     #f85149;
   height: 100%;
   overflow: hidden;
 
-  &__header {
+  &__body {
+    flex: 1;
+    overflow: hidden;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 10px 20px;
-    background: $bg-mid;
-    border-bottom: 1px solid $border;
-    flex-shrink: 0;
+    flex-direction: row; /* Aligns Sidebar and Diagram side-by-side */
+    gap: 20px;
+    padding: 20px;
+  }
+
+  &__sidebar {
+    width: 360px; /* Fixed width for the data cards */
+    min-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    padding-right: 4px; /* Space for scrollbar if needed */
   }
 
   &__diagram {
     flex: 1;
-    overflow: hidden; /* FIX #4: Prevent scrolling entirely in main container */
-    background: #1a1f2e;
     display: flex;
-    align-items: stretch; /* Allow children to take full height */
-    justify-content: center;
-    padding: 16px;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: hidden;
   }
 }
 
-.header {
-  &__brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  &__icon {
-    font-size: 22px;
-    line-height: 1;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 700;
-    color: $accent;
-    letter-spacing: 0.4px;
-  }
-
-  &__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  &__loading {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: $accent;
-    font-weight: 600;
-  }
-}
-
-.meta-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
+.diagram-scroll {
+  display: flex;
+  align-items: stretch; 
+  background: #ffffff;
   border-radius: 12px;
-  background: #111827;
-  border: 1px solid $border;
-
-  &__label {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: $text-muted;
-  }
-
-  &__value {
-    font-size: 11px;
-    font-weight: 600;
-    color: $text-main;
-  }
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden; 
+  height: 100%;
+  width: 100%;
+  max-width: 1100px;
 }
 
-.spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid #1a3a6e;
-  border-top-color: $accent;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+/* Utilities */
+.loading-bar {
+  height: 3px;
+  background: $accent;
+  width: 100%;
+  animation: loading-sweep 1.5s infinite linear;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes loading-sweep {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  50.1% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
 }
 
 .error-banner {
@@ -136,33 +90,9 @@ $danger:     #f85149;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
   gap: 16px;
-  height: 100%;
-  width: 100%;
-
-  &__icon {
-    font-size: 52px;
-    opacity: 0.2;
-  }
-
-  &__text {
-    margin: 0;
-    font-size: 14px;
-    color: $text-muted;
-  }
-}
-
-/* FIX #4: Changed diagram-scroll to stretch layout and prevent overflows */
-.diagram-scroll {
-  display: flex;
-  align-items: stretch; 
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow:
-    0 4px 32px rgba(0, 0, 0, 0.5),
-    0 1px 4px rgba(0, 0, 0, 0.3);
-  overflow: hidden; 
-  height: 100%;
-  width: 100%;
-  max-width: 1070px; /* Limits excessive stretching on ultra-wide screens */
+  color: #94a3b8;
+  
+  &__icon { font-size: 52px; opacity: 0.3; }
 }
