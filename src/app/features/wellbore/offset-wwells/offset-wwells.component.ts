@@ -1,0 +1,24 @@
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { OffsetWellData } from '../../../core/store/well.store';
+import { DecimalPipe, NgClass } from '@angular/common';
+
+@Component({
+  selector: 'app-offset-wwells',
+  standalone: true,
+  imports: [DecimalPipe, NgClass],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './offset-wwells.component.html',
+  styleUrl: './offset-wwells.component.scss'
+})
+export class OffsetWwellsComponent {
+  // Receives the offset wells array directly from the parent component
+  readonly wells = input.required<OffsetWellData[]>();
+  
+  // Tracks the currently expanded accordion card index (defaults to 0 open)
+  readonly selectedIndex = signal<number>(0);
+
+  selectTab(index: number): void {
+    // Allows toggling to close the open card, or opening a new one
+    this.selectedIndex.set(this.selectedIndex() === index ? -1 : index);
+  }
+}
