@@ -1,5 +1,4 @@
 <div class="misc-grid" *ngIf="data() as d">
-  
   <!-- ROW 1 -->
   <div class="card bg-gradient-cyan">
     <div class="text-sub opacity-80 mb-1">Well Name</div>
@@ -11,14 +10,20 @@
     <div class="text-sub dark-text">Targeted Aquifer</div>
     <div class="flex-center icon-text cyan-text mt-2">
       <!-- Jafurah Droplet Icon -->
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="url(#dropletGrad)" class="mr-2 drop-shadow-icon">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="url(#dropletGrad)"
+        class="mr-2 drop-shadow-icon"
+      >
         <defs>
           <linearGradient id="dropletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#0284c7" />
             <stop offset="100%" stop-color="#0ea5e9" />
           </linearGradient>
         </defs>
-        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
       </svg>
       {{ d.targetedAquifer }}
     </div>
@@ -32,7 +37,16 @@
     </div>
     <!-- Gear / Refresh Icon -->
     <div class="icon-gear">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
         <path d="M3 3v5h5"></path>
       </svg>
@@ -41,7 +55,17 @@
 
   <div class="card bg-gradient-dark-blue flex-row">
     <!-- Calendar Icon -->
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-80">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="mr-2 opacity-80"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
       <line x1="16" y1="2" x2="16" y2="6"></line>
       <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -86,7 +110,16 @@
     </div>
     <!-- Downward Waves Icon -->
     <div class="icon-waves">
-      <svg width="28" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        width="28"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M12 2v10M8 8l4 4 4-4"></path>
         <path d="M2 18s2-2 4-2 4 2 4 2 4-2 4 2"></path>
         <path d="M2 22s2-2 4-2 4 2 4 2 4-2 4 2"></path>
@@ -112,5 +145,4 @@
     <div class="text-sub opacity-80">Next Well</div>
     <div class="text-md mt-1">{{ d.nextWell }}</div>
   </div>
-
 </div>
