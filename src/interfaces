@@ -1,0 +1,144 @@
+export interface IBitInfo {
+    bitSz?: number | null;
+}
+
+export interface ICasingIR {
+    csgSize: string;
+    csgType: string;
+    csgDepth: number;
+    csgRemarks?: string | null;
+}
+
+export interface IContact {
+    rigContNum: string;
+    description: string;
+    rigContNumPdf: string;
+    rigDescriptionPdf: string;
+}
+export interface IDrillingFootage {
+    footage: number;
+}
+export interface IDrillingOperationStatus {
+    epANum: number;
+    wPrsntDpth: number;
+    wCsgBotDpth: number;
+    wCsgOdSz: string;
+    wDpthChgDis: number;
+    wMudCircPc: string;
+    wPrevDpth: number;
+    wSpudOprDay: number;
+    wOpRmk: string;
+    nxt24HrPlanRmk: string;
+    spuddays: number;
+    footage: number;
+    targetDepth: number;
+}
+export interface IDrillingOperationSummary {
+    epANum: number;
+    wEvntTime: string;
+    wHolSz: string;
+    wOpRmk: string;
+    wActvDrlgFlg?: string;   // optional – not present in every element
+    wMajOpCd: string;
+    wHoleStaDpth: number;
+    wHoleEndDpth: number;
+    toTm: string;
+}
+export interface IFormationTops {
+    epANum: number;
+    stLongCd: string;
+    wStDmrkDpth: number;
+    wStDmrkRmk?: string | null;
+}
+
+export interface IHeaderIR {
+    dtRemarks: string;
+    mudRemarks: string;
+    loggingRemarks: string;
+}
+export interface IHydrogeologyIR {
+    flowType: string;
+    estTargetAquifier: string;
+    estStaticWaterLevel: number;
+    estWaterQuality: number;
+    estProductivity: number;
+    estH2s: number;
+}
+
+export interface INewTargetDays {
+    targetDays: number;
+}
+export interface INextWellActivity {
+    nextWellActivity: string;
+}
+
+export interface IPreWellData {
+    surfaceElevation: number;
+    estTargetDepth: number;
+    targetFormation: string;
+    supportedBusiness: string;
+}
+export interface IRigActivity {
+    biNum: string;
+    biNumDesc: string;
+    wellName: string;
+    spuddate: string;
+    wRigCd: string;
+    wDrlgLocDesc?: string;
+    welltype: string;
+    waterWell?: string;
+    wDrlgEndDt: string;
+    wDrlgTrgtDay: string;
+    drlgPlanWellDesc: string;
+}
+export interface IRigIdentification {
+    rigname: string;
+}
+export interface IROPData {
+    rop: number | null;
+}
+
+export interface ITopsIR {  // GeologicTop
+    stLongCd: string;
+    planTvdDepth: number;
+    planSsDepth: number;
+}
+
+export interface IWaterIR {
+    offsetWaterWell: string;
+    distance: number;
+    direction: string;
+    aquifer: string;
+    td: number;
+    flowRate: number;
+    rpm: number;
+    staticWaterLevel: number | null;
+    specificCapacity: number | null;
+    drawDown: number | null;
+    fieldTds: number;
+    h2s: number;
+    testDuration: number;
+}
+
+export interface IWaterWellTestOutcome {
+    wellName: string;
+    testType?: string | null;
+    aquifer?: string | null;
+    rpm?: number | null;
+    flowRate?: number | null;
+    temperature?: number | null;
+    tds?: number | null;
+    producitivty?: number | null;
+    h2s?: number | null;
+}
+
+export interface IWellMaster {
+    well: string;
+    utmNorth: number;
+    utmEast: number;
+    lon: number;
+    lat: number;
+}
+
+
+
