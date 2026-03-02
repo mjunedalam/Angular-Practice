@@ -8,11 +8,12 @@ import {
   input,
 } from '@angular/core';
 import { select, Selection } from 'd3-selection';
-import { easeQuadOut, easeLinear, easeCubicInOut } from 'd3-ease';
+import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../core/models/wellbore-diagram.model';
-import { CasingInfo, GeologicTop } from '../../../core/models/well-details.model';
+import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
+import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
+import { ITopsIR } from '../../../shared/models/wwell/tops-ir.model';
 import {
   buildArrowHeadRight,
   buildCasingPath,
@@ -23,18 +24,18 @@ import {
   createDepthScale,
   formatDepth,
   openHoleHalfWidth,
-} from '../../../shared/utils/wellbore-math.util';
+} from '../../../utils/wellbore-math.util';
 
-type SvgSel  = Selection<SVGSVGElement, unknown, null, undefined>;
-type GSel    = Selection<SVGGElement, unknown, null, undefined>;
+type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
+type GSel = Selection<SVGGElement, unknown, null, undefined>;
 type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
 
 @Component({
   selector: 'app-well-bore-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './well-bore-view.component.html',
-  styleUrl: './well-bore-view.component.scss',
+  templateUrl: './wellbore-view.component.html',
+  styleUrl: './wellbore-view.component.scss',
 })
 export class WellBoreViewComponent implements OnInit {
   readonly diagramData = input.required<WellboreDiagramData | null>();
@@ -51,7 +52,7 @@ export class WellBoreViewComponent implements OnInit {
   constructor() {
     effect(() => {
       const trigger = this.animTrigger();
-      const data    = this.diagramData();
+      const data = this.diagramData();
       if (data && (this.ready || trigger > 0)) {
         this.redraw(data);
       }
@@ -68,12 +69,11 @@ export class WellBoreViewComponent implements OnInit {
   private bootstrapSvg(): void {
     const { wellboreViewWidth, svgHeight, marginTop } = this.layout;
     const svg = select(this.svgRef.nativeElement) as SvgSel;
-    
-    // FIX #4: Use responsive viewBox scaling rather than fixed pixel dimensions
+
     svg.attr('width', '100%')
-       .attr('height', '100%')
-       .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)
-       .attr('preserveAspectRatio', 'xMidYMin meet');
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)
+      .attr('preserveAspectRatio', 'xMidYMin meet');
 
     this.defsEl = svg.append('defs') as DefsSel;
     this.addStaticDefs(this.defsEl);
@@ -92,11 +92,10 @@ export class WellBoreViewComponent implements OnInit {
 
     this.drawStaticChrome(geoLineX, casingCenterX);
     this.drawGeologicTops(data.geologicTops, geoLineX, scale);
-    
-    // FIX #2: Call drawOpenHoleAndScreen BEFORE drawCasings so the Liner sits behind the Casing
+
     this.drawOpenHoleAndScreen(data, casingCenterX, scale);
     this.drawCasings(data.casings, casingCenterX, scale);
-    
+
     this.drawCasingLabels(data.casings, casingCenterX, scale);
     this.drawWaterLevel(data, casingCenterX, scale);
     this.drawDrillArrow(data, scale);
@@ -105,17 +104,17 @@ export class WellBoreViewComponent implements OnInit {
 
   private addStaticDefs(defs: DefsSel): void {
     this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%',   color: '#5d6264' },
-      { offset: '50%',  color: '#ffffff' },
+      { offset: '0%', color: '#5d6264' },
+      { offset: '50%', color: '#ffffff' },
       { offset: '100%', color: '#5d6264' },
     ]);
     this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%',   color: '#4ca746' },
+      { offset: '0%', color: '#4ca746' },
       { offset: '100%', color: '#4ca746' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%',   color: '#5d6264' },
-      { offset: '50%',  color: '#ffffff' },
+      { offset: '0%', color: '#5d6264' },
+      { offset: '50%', color: '#ffffff' },
       { offset: '100%', color: '#5d6264' },
     ]);
 
@@ -183,14 +182,14 @@ export class WellBoreViewComponent implements OnInit {
   }
 
   private drawGeologicTops(
-    tops: GeologicTop[],
+    tops: ITopsIR[],
     geoLineX: number,
     scale: ReturnType<typeof createDepthScale>,
   ): void {
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
       const yPx = scale(top.planTvdDepth);
-      const g   = this.rootG.append('g')
+      const g = this.rootG.append('g')
         .attr('class', 'geo-top')
         .attr('transform', `translate(0,${yPx})`)
         .style('opacity', 0);
@@ -220,19 +219,19 @@ export class WellBoreViewComponent implements OnInit {
   }
 
   private drawCasings(
-    casings: CasingInfo[],
+    casings: ICasingIR[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
   ): void {
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
 
     casings.forEach((csg, i) => {
-      const hw       = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
       const bottomPx = scale(csg.csgDepth);
-      const clipId   = `dyn-casing-clip-${i}`;
+      const clipId = `dyn-casing-clip-${i}`;
 
       const animOrder = casings.length - 1 - i;
-      const delay     = animOrder * ANIM.CASING_STAGGER;
+      const delay = animOrder * ANIM.CASING_STAGGER;
 
       const clipRect = this.defsEl
         .append('clipPath')
@@ -260,7 +259,7 @@ export class WellBoreViewComponent implements OnInit {
   }
 
   private drawCasingLabels(
-    casings: CasingInfo[],
+    casings: ICasingIR[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
   ): void {
@@ -268,10 +267,10 @@ export class WellBoreViewComponent implements OnInit {
     const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
 
     casings.forEach((csg, i) => {
-      const hw     = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
       const shoePx = scale(csg.csgDepth);
-      const rEdge  = centerX + hw;
-      const lEnd   = rEdge + 22;
+      const rEdge = centerX + hw;
+      const lEnd = rEdge + 22;
       const labelX = lEnd + 8;
 
       const lg = this.rootG.append('g')
@@ -322,11 +321,11 @@ export class WellBoreViewComponent implements OnInit {
   ): void {
     if (!data.hydrogeology) return;
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const wPx    = scale(data.hydrogeology.estStaticWaterLevel);
+    const wPx = scale(data.hydrogeology.estStaticWaterLevel);
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const lR     = centerX + innerHW + 10;
-    const lL     = centerX - innerHW - 10;
-    const label  = data.hydrogeology.flowType === 'Y'
+    const lR = centerX + innerHW + 10;
+    const lL = centerX - innerHW - 10;
+    const label = data.hydrogeology.flowType === 'Y'
       ? 'Flowing (SIWHP: 50 PSI)'
       : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
 
@@ -343,7 +342,7 @@ export class WellBoreViewComponent implements OnInit {
 
     wg.append('text')
       .attr('class', 'water-label')
-      .attr('x', lR + 8).attr('y', wPx + 4)
+      .attr('x', lR - 350).attr('y', wPx + 4)
       .text(label);
 
     wg.transition().delay(ANIM.OVERLAY_DELAY).duration(400).ease(easeCubicInOut).style('opacity', 1);
@@ -357,19 +356,18 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const deepest  = data.casings[0];
-    const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW     = openHoleHalfWidth(innerHW);
+    const deepest = data.casings[0];
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const ohHW = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
-    
-    const shoePx   = scale(deepest.csgDepth);
-    const tdPx     = scale(data.totalDepth);
-    
-    // FIX #3: Calculate rat hole offset (space at bottom)
-    const ratHolePx = 15; 
+
+    const shoePx = scale(deepest.csgDepth);
+    const tdPx = scale(data.totalDepth);
+
+    const ratHolePx = 15;
     const screenBottomPx = tdPx - ratHolePx;
 
-    const clipId   = 'dyn-oh-clip';
+    const clipId = 'dyn-oh-clip';
 
     const clipRect = this.defsEl
       .append('clipPath').attr('class', 'dyn-clip').attr('id', clipId)
@@ -385,7 +383,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    // Liner screen (stops slightly short of TD creating bottom space)
+    // Liner screen
     this.rootG.append('path')
       .attr('class', 'liner-screen')
       .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
@@ -420,8 +418,7 @@ export class WellBoreViewComponent implements OnInit {
       .text(`+/- ${screenLen.toLocaleString()} ft of Screen`);
 
     const ohDelay = ANIM.OVERLAY_DELAY;
-    
-    // FIX #1: Easing logic changed for realistic animation
+
     clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
       .attr('height', tdPx - shoePx + 20);
     hangerG.transition().delay(ohDelay).duration(250).style('opacity', 1);
@@ -433,7 +430,7 @@ export class WellBoreViewComponent implements OnInit {
     data: WellboreDiagramData,
     scale: ReturnType<typeof createDepthScale>,
   ): void {
-    const endPx  = scale(Math.min(data.currentDepth, data.totalDepth));
+    const endPx = scale(Math.min(data.currentDepth, data.totalDepth));
     const arrowCx = 42;
 
     this.rootG.append('path')
