@@ -15,8 +15,8 @@
 
 :host ::ng-deep {
   .axis-title {
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 900;
     fill: #5a6a8a;
     font-family: Arial, sans-serif;
   }
@@ -39,15 +39,15 @@
   }
 
   .tick-label {
-    font-size: 10.5px;
-    font-weight: 600;
+    font-size: 14.5px;
+    font-weight: 800;
     fill: #2c3a58;
     text-anchor: end;
     font-family: Arial, sans-serif;
   }
 
   .total-depth-label {
-    font-size: 10px;
+    font-size: 15px;
     font-weight: 700;
     fill: #1a5cbf;
     font-family: Arial, sans-serif;
