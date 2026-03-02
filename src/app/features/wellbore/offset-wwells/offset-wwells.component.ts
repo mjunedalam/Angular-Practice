@@ -1,19 +1,19 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
-import { OffsetWellData } from '../../../core/store/well.store';
+import { OffsetWaterWells } from '../../../core/stores/wwell-data/well.store';
 import { DecimalPipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-offset-wwells',
   standalone: true,
-  imports: [DecimalPipe, NgClass],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './offset-wwells.component.html',
   styleUrl: './offset-wwells.component.scss'
 })
 export class OffsetWwellsComponent {
   // Receives the offset wells array directly from the parent component
-  readonly wells = input.required<OffsetWellData[]>();
-  
+  readonly wells = input.required<OffsetWaterWells[]>();
+
   // Tracks the currently expanded accordion card index (defaults to 0 open)
   readonly selectedIndex = signal<number>(0);
 
