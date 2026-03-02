@@ -11,12 +11,8 @@ import { select } from 'd3-selection';
 import { easeLinear } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, DIAGRAM_LAYOUT } from '../../../core/models/wellbore-diagram.model';
-import {
-  buildDepthTicks,
-  createDepthScale,
-  formatDepth,
-} from '../../../shared/utils/wellbore-math.util';
+import { ANIM, DIAGRAM_LAYOUT } from '../../../models/well-design/wellbore-diagram.model';
+import { buildDepthTicks, createDepthScale, formatDepth } from '../../../utils/wellbore-math.util';
 
 @Component({
   selector: 'app-depth-scale',
@@ -26,7 +22,7 @@ import {
   styleUrl: './depth-scale.component.scss',
 })
 export class DepthScaleComponent implements OnInit {
-  readonly totalDepth  = input.required<number>();
+  readonly totalDepth = input.required<number>();
   readonly animTrigger = input.required<number>();
 
   @ViewChild('scaleSvg', { static: true })
@@ -38,7 +34,7 @@ export class DepthScaleComponent implements OnInit {
   constructor() {
     effect(() => {
       const trigger = this.animTrigger();
-      const depth   = this.totalDepth();
+      const depth = this.totalDepth();
       if (this.ready || trigger > 0) {
         this.drawScale(depth);
       }
@@ -54,8 +50,7 @@ export class DepthScaleComponent implements OnInit {
 
     const svg = select(this.svgRef.nativeElement);
     svg.selectAll('*').remove();
-    
-    // FIX #4: Allow Depth scale to shrink dynamically alongside the wellbore component
+
     svg
       .attr('width', '100%')
       .attr('height', '100%')
@@ -89,7 +84,7 @@ export class DepthScaleComponent implements OnInit {
       .attr('stroke-dashoffset', 0);
 
     ticks.forEach((depth) => {
-      const yPx   = scale(depth);
+      const yPx = scale(depth);
       const delay = (depth / totalDepth) * ANIM.SCALE_DURATION + ANIM.TICK_BASE_DELAY;
 
       const tick = g.append('g')
