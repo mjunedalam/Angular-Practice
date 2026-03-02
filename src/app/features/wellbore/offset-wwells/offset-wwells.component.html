@@ -3,9 +3,20 @@
   <div class="header">
     <div class="title">Offset Wells</div>
     <div class="icon-gear">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#60a5fa"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path>
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"
+        ></path>
       </svg>
     </div>
   </div>
@@ -13,23 +24,44 @@
   <!-- Accordion List -->
   <div class="cards-list">
     @for (well of wells(); track well.wellName; let i = $index) {
-      <div class="well-card" [class.well-card--active]="selectedIndex() === i" (click)="selectTab(i)">
-        
+      <div
+        class="well-card"
+        [class.well-card--active]="selectedIndex() === i"
+        (click)="selectTab(i)"
+      >
         <!-- Summary Row (Always Visible) -->
         <div class="summary">
           <div class="well-ident">
             <!-- Bound fill and id correctly for Angular SVG rendering -->
-            <svg width="24" height="24" viewBox="0 0 24 24" [attr.fill]="'url(#dropGrad-' + i + ')'">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              [attr.fill]="'url(#dropGrad-' + i + ')'"
+            >
               <defs>
-                <linearGradient [attr.id]="'dropGrad-' + i" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient
+                  [attr.id]="'dropGrad-' + i"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
                   <stop offset="0%" stop-color="#020617" />
                   <stop offset="40%" stop-color="#1d4ed8" />
                   <stop offset="100%" stop-color="#38bdf8" />
                 </linearGradient>
               </defs>
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
               <!-- 3D droplet highlight -->
-              <path d="M10 7a4 4 0 0 0-3 5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+              <path
+                d="M10 7a4 4 0 0 0-3 5"
+                stroke="#ffffff"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.4"
+              />
             </svg>
             <span class="name">{{ well.wellName }}</span>
           </div>
@@ -42,7 +74,6 @@
         <!-- Details Grid (Accordion Expanded) -->
         @if (selectedIndex() === i) {
           <div class="details-grid">
-            
             <!-- Left Column: Plain Stats -->
             <div class="col-left">
               <div class="stat-plain">
@@ -58,7 +89,7 @@
                 <span class="val">{{ well.h2s }}</span>
               </div>
             </div>
-            
+
             <!-- Right Column: Blue Highlight Stats -->
             <div class="col-right">
               <!-- Distance Block -->
@@ -66,7 +97,17 @@
                 <div class="val">{{ well.distance }}</div>
                 <div class="lbl">Distance</div>
                 <!-- Custom Distance / Waves Icon -->
-                <svg class="icon-waves" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  class="icon-waves"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M4 18s2-2 4-2 4 2 4 2 4-2 4 2"></path>
                   <path d="M4 22s2-2 4-2 4 2 4 2 4-2 4 2"></path>
                   <line x1="18" y1="4" x2="18" y2="14"></line>
@@ -74,13 +115,13 @@
                   <polyline points="15 11 18 14 21 11"></polyline>
                 </svg>
               </div>
-              
+
               <!-- Productivity Block -->
               <div class="stat-blue">
                 <div class="val">{{ well.productivity }}</div>
                 <div class="lbl">Productivity (GPM/FT)</div>
               </div>
-              
+
               <!-- Rate Block -->
               <div class="stat-blue">
                 <div class="val">{{ well.rate }}</div>
