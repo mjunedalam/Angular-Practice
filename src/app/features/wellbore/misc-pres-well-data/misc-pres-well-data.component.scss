@@ -3,6 +3,10 @@
   grid-template-columns: 1.25fr 1fr; /* Pure two-column layout */
   gap: 12px;
   width: 100%;
+
+  .card{
+     border: 1px solid #0000002b;
+  }
 }
 
 .card {
@@ -33,7 +37,7 @@
   }
 
   /* Layout Helpers */
-  &.center-content { align-items: center; text-align: center; }
+  &.center-content { align-items: center; text-align: center;    }
   &.flex-row { flex-direction: row; align-items: center; }
   &.space-between { justify-content: space-between; }
   &.space-around { justify-content: space-around; }
