@@ -140,5 +140,50 @@ export interface IWellMaster {
     lat: number;
 }
 
+import { IBitInfo } from "../../shared/models/wwell/bit-info.model";
+import { ICasingIR } from "../../shared/models/wwell/casing-ir.model";
+import { IContact } from "../../shared/models/wwell/contact.model";
+import { IDrillingFootage } from "../../shared/models/wwell/drilling-footage.model";
+import { IDrillingOperationStatus } from "../../shared/models/wwell/drilling-operation-status.model";
+import { IDrillingOperationSummary } from "../../shared/models/wwell/drilling-operation-summary.model";
+import { IFormationTops } from "../../shared/models/wwell/formation-tops.model";
+import { IHeaderIR } from "../../shared/models/wwell/header-ir.model";
+import { IHydrogeologyIR } from "../../shared/models/wwell/hydrogeology-ir.model";
+import { INewTargetDays } from "../../shared/models/wwell/new-target-days.model";
+import { INextWellActivity } from "../../shared/models/wwell/next-well-activity.model";
+import { IPreWellData } from "../../shared/models/wwell/pre-well-data.model";
+import { IRigActivity } from "../../shared/models/wwell/rig-activity.model";
+import { IRigIdentification } from "../../shared/models/wwell/rig-identification.model";
+import { IROPData } from "../../shared/models/wwell/rop-data.model";
+import { ITopsIR } from "../../shared/models/wwell/tops-ir.model";
+import { IWaterIR } from "../../shared/models/wwell/water-ir.model";
+import { IWaterWellTestOutcome } from "../../shared/models/wwell/water-well-test-outcome.model";
+import { IWellMaster } from "../../shared/models/wwell/well-master.model";
+
+export interface IWellData {
+    RIG_ACTIVITY: IRigActivity[];
+    WELL_MASTER: IWellMaster[];
+    RIG_IDENTIFICATION: IRigIdentification[];
+    CONTACT: IContact[];
+    DRLG_OP_STATUS: IDrillingOperationStatus[];
+    DRLG_FM_TOPS: IFormationTops[];
+    DRLG_FD_TDAY: IDrillingFootage[];
+    ROP_DATA: IROPData[];
+    NEXT_2_WELL_ACTIVITY: INextWellActivity[];
+    NEW_TARGET_DAYS: INewTargetDays[];
+    DRLG_OP_SMRY: IDrillingOperationSummary[];
+    BITINFO: IBitInfo[];
+    EXAD_GWD_IR_HEADER: IHeaderIR[];
+    EXAD_GWD_IR_TOPS: ITopsIR[];
+    EXAD_GWD_IR_CASING: ICasingIR[];
+    EXAD_GWD_IR_HYDROGEOLOGY: IHydrogeologyIR[];
+    EXAD_GWD_IR_WATER: IWaterIR[];
+    EXAD_RCD_PREWAP: IPreWellData[];
+    WATER_WELL_TEST_OUTCOME: IWaterWellTestOutcome[];
+    actualRm?: number;
+    kpiRm?: number;
+    rigMoveDays?: number;
+}
+
 
 
