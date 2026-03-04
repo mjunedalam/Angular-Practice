@@ -1,0 +1,232 @@
+// ── Tokens ─────────────────────────────────────────────────────────
+$nav-h:          56px;
+$nav-bg:         #071e3d;          // deep navy matching AGWA screenshot
+$nav-border:     rgba(56, 189, 248, 0.18);
+$accent:         #38bdf8;
+$accent-glow:    rgba(56, 189, 248, 0.35);
+$text-primary:   #e0f2fe;
+$text-muted:     #7fb9d4;
+// ───────────────────────────────────────────────────────────────────
+
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.top-navbar {
+  display: flex;
+  align-items: center;
+  height: $nav-h;
+  padding: 0 16px 0 0;
+  background: $nav-bg;
+  border-bottom: 1px solid $nav-border;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  position: relative;
+  z-index: 100;
+
+  // subtle grid / watermark texture
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+
+  // ── Brand ────────────────────────────────────────────────────────
+  &__brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 0 12px;
+    height: 100%;
+    border-right: 1px solid $nav-border;
+    min-width: 200px;                    // matches sidenav expanded width
+    transition: min-width 0.3s ease;
+  }
+
+  &__hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+
+    span {
+      display: block;
+      height: 2px;
+      background: $text-muted;
+      border-radius: 2px;
+      transition: background 0.2s, width 0.2s, transform 0.25s;
+
+      &:nth-child(1) { width: 20px; }
+      &:nth-child(2) { width: 14px; }
+      &:nth-child(3) { width: 17px; }
+    }
+
+    &:hover {
+      background: rgba($accent, 0.1);
+      span { background: $accent; }
+    }
+
+    &--active span { background: $accent; }
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  &__logo-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(56,189,248,0.6));
+  }
+
+  &__logo-text {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: $accent;
+    text-shadow: 0 0 16px $accent-glow;
+    text-transform: uppercase;
+  }
+
+  // ── Center title ─────────────────────────────────────────────────
+  &__title {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 24px;
+
+    h1 {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: $text-primary;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+  }
+
+  // ── Right: user area ──────────────────────────────────────────────
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  &__notifications {
+    position: relative;
+  }
+
+  &__icon-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($accent, 0.08);
+    border: 1px solid rgba($accent, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    color: $text-muted;
+
+    svg { width: 16px; height: 16px; }
+
+    &:hover {
+      background: rgba($accent, 0.18);
+      border-color: rgba($accent, 0.5);
+      color: $accent;
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 24px;
+    background: $nav-border;
+  }
+
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+
+  &__user-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: 0.3px;
+  }
+
+  &__user-role {
+    font-size: 9px;
+    color: $text-muted;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  &__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    border: 2px solid rgba($accent, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba($accent, 0.35);
+    transition: box-shadow 0.2s, border-color 0.2s;
+
+    &:hover {
+      box-shadow: 0 0 18px rgba($accent, 0.6);
+      border-color: $accent;
+    }
+  }
+}

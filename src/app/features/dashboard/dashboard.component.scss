@@ -1,0 +1,58 @@
+// ── Tokens ───────────────────────────────────────────────────────
+$topbar-h:   56px;
+$bg-content: #0d2a47;         // dark navy — matches AGWA content area
+// ────────────────────────────────────────────────────────────────
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: $bg-content;
+
+  // ── Top bar slot ─────────────────────────────────────────────
+  &__topbar {
+    flex-shrink: 0;
+    height: $topbar-h;
+  }
+
+  // ── Row below topbar ─────────────────────────────────────────
+  &__body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  // ── Left sidenav slot ────────────────────────────────────────
+  &__sidenav {
+    flex-shrink: 0;
+    height: 100%;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  // ── Main content ─────────────────────────────────────────────
+  &__content {
+    flex: 1;
+    overflow: auto;
+    background: #0f3460;      // slightly lighter for content depth
+    position: relative;
+
+    // subtle radial glow from top-left
+    &::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: -60px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+  }
+}

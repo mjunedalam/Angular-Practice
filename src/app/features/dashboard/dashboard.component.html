@@ -1,0 +1,27 @@
+<div class="dashboard" [class.dashboard--sidenav-collapsed]="sidenavCollapsed()">
+
+  <!-- ① Top Navbar ──────────────────────────────────────────── -->
+  <app-top-navbar
+    class="dashboard__topbar"
+    [sidenavCollapsed]="sidenavCollapsed()"
+    (toggleSidenav)="toggleSidenav()"
+  />
+
+  <!-- ② Body row: Sidenav + Content ─────────────────────────── -->
+  <div class="dashboard__body">
+
+    <!-- ③ Left Sidenav ────────────────────────────────────────── -->
+    <app-left-sidenav
+      class="dashboard__sidenav"
+      [collapsed]="sidenavCollapsed()"
+      [activeRoute]="activeRoute()"
+      (navItemClick)="onNavItemClick($event)"
+    />
+
+    <!-- ④ Main content area ─────────────────────────────────── -->
+    <main class="dashboard__content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

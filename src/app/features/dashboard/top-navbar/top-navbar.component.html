@@ -1,0 +1,61 @@
+<header class="top-navbar">
+
+  <!-- Left: Logo + hamburger -->
+  <div class="top-navbar__brand">
+    <button
+      class="top-navbar__hamburger"
+      (click)="toggleSidenav.emit()"
+      [attr.aria-label]="sidenavCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      [class.top-navbar__hamburger--active]="!sidenavCollapsed()"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="top-navbar__logo">
+      <div class="top-navbar__logo-icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="16" cy="20" rx="9" ry="11" fill="url(#dropGrad)"/>
+          <ellipse cx="16" cy="20" rx="5" ry="7" fill="rgba(255,255,255,0.25)"/>
+          <path d="M16 4 C16 4 22 12 22 18" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="dropGrad" x1="16" y1="9" x2="16" y2="31" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="top-navbar__logo-text">{{ logoText }}</span>
+    </div>
+  </div>
+
+  <!-- Center: App title -->
+  <div class="top-navbar__title">
+    <h1>{{ appTitle }}</h1>
+  </div>
+
+  <!-- Right: User info -->
+  <div class="top-navbar__user">
+    <div class="top-navbar__notifications">
+      <button class="top-navbar__icon-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="top-navbar__badge">3</span>
+      </button>
+    </div>
+
+    <div class="top-navbar__divider"></div>
+
+    <div class="top-navbar__user-info">
+      <span class="top-navbar__user-name">{{ userName }}</span>
+      <span class="top-navbar__user-role">Administrator</span>
+    </div>
+
+    <button class="top-navbar__avatar" aria-label="User menu">
+      <span>{{ userName[0] }}</span>
+    </button>
+  </div>
+
+</header>

@@ -1,5 +1,5 @@
 export interface WellLogsIndicators {
-    readonly rcc: boolean;
-    readonly mudLog: boolean;
-    readonly logging: boolean;
+    readonly rcc: boolean;     // dtRemarks
+    readonly mud: boolean;     // mudRemarks
+    readonly logging: boolean; // loggingRemarks
 }

@@ -1,13 +1,35 @@
-<div
-  class="log-indicator flex justify-between items-center border border-gray-200 rounded"
->
-  <button class="w-1/3 bg-blue-500 text-white py-2 px-4 rounded-l border-none">
-    RCC
-  </button> 
+<div class="log-indicator">
+  <div class="log-indicator__buttons">
 
-  <button class="w-1/3 text-gray-600 py-2 px-4 border-none">Mud Log</button>
+    <button
+      class="log-btn"
+      [ngClass]="store.wellsLogsIndicators()?.rcc ? 'log-btn--active' : 'log-btn--inactive'"
+      [disabled]="!store.wellsLogsIndicators()?.rcc"
+      [title]="store.wellsLogsIndicators()?.rcc ? 'RCC remarks available' : 'No RCC remarks'"
+    >
+      <span class="log-btn__dot"></span>
+      RCC
+    </button>
 
-  <button class="w-1/3 text-gray-600 py-2 px-4 rounded-r border-none">
-    Logging
-  </button>
+    <button
+      class="log-btn"
+      [ngClass]="store.wellsLogsIndicators()?.mud ? 'log-btn--active' : 'log-btn--inactive'"
+      [disabled]="!store.wellsLogsIndicators()?.mud"
+      [title]="store.wellsLogsIndicators()?.mud ? 'Mud log remarks available' : 'No mud log remarks'"
+    >
+      <span class="log-btn__dot"></span>
+      Mud Log
+    </button>
+
+    <button
+      class="log-btn"
+      [ngClass]="store.wellsLogsIndicators()?.logging ? 'log-btn--active' : 'log-btn--inactive'"
+      [disabled]="!store.wellsLogsIndicators()?.logging"
+      [title]="store.wellsLogsIndicators()?.logging ? 'Logging remarks available' : 'No logging remarks'"
+    >
+      <span class="log-btn__dot"></span>
+      Logging
+    </button>
+
+  </div>
 </div>

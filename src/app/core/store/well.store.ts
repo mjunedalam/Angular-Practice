@@ -18,6 +18,7 @@ import { MoriningReportService } from '../services/morning-report-service';
 import { WellName } from '../models/well-name.model';
 import { IFormationTops } from 'src/app/shared/models/wwell/formation-tops.model';
 import { WellLogsIndicators } from 'src/app/shared/models/wwell/well-logs-indicators.model';
+import { IHeaderIR } from 'src/app/shared/models/wwell/header-ir.model';
 
 
 export interface MiscWellData {
@@ -217,11 +218,11 @@ export const WellStore = signalStore(
             const d = wellDetails();
             if (!d) return null;
 
-            const header = d.EXAD_GWD_IR_HEADER?.[0];
+            const header: IHeaderIR | undefined = d.EXAD_GWD_IR_HEADER?.[0];
             return {
-                rcc: !!header?.dtRemarks,          // corrected property name
-                mudLog: !!header?.mudRemarks,      // corrected property name
-                logging: !!header?.loggingRemarks // corrected typo
+                rcc:     !!(header?.dtRemarks?.trim()),      // dtRemarks     → rcc
+                mud:     !!(header?.mudRemarks?.trim()),     // mudRemarks    → mud
+                logging: !!(header?.loggingRemarks?.trim()), // loggingRemarks→ logging
             };
         }),
 
