@@ -90,8 +90,11 @@ export class WellBoreViewComponent implements OnInit {
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
     const scale = createDepthScale(data.totalDepth, drawingHeight);
 
+    // Resolve the target aquifer from ITOPSIR hydrogeology
+    const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
+
     this.drawStaticChrome(geoLineX, casingCenterX);
-    this.drawGeologicTops(data.geologicTops, geoLineX, scale);
+    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
 
     this.drawOpenHoleAndScreen(data, casingCenterX, scale);
     this.drawCasings(data.casings, casingCenterX, scale);
@@ -185,31 +188,53 @@ export class WellBoreViewComponent implements OnInit {
     tops: ITopsIR[],
     geoLineX: number,
     scale: ReturnType<typeof createDepthScale>,
+    targetAquifer: string | null,
   ): void {
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
+      // Task: if estTargetAquifier === stLongCd this top is the target aquifer
+      const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
+
       const yPx = scale(top.planTvdDepth);
       const g = this.rootG.append('g')
-        .attr('class', 'geo-top')
+        .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
         .attr('transform', `translate(0,${yPx})`)
         .style('opacity', 0);
 
+      if (isTarget) {
+        // Highlight band behind the row so it is clearly distinguishable
+        g.append('rect')
+          .attr('class', 'geo-target-band')
+          .attr('x', geoLineX - 80)
+          .attr('y', -11)
+          .attr('width', 220)
+          .attr('height', 22)
+          .attr('rx', 3);
+
+       
+      }
+
+      // Tick line — thicker and coloured for target
       g.append('line')
-        .attr('class', 'geo-tick')
+        .attr('class', isTarget ? 'geo-tick geo-tick--target' : 'geo-tick')
         .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
         .attr('y1', 0).attr('y2', 0);
 
+      // Depth label
       g.append('text')
-        .attr('class', 'geo-depth')
+        .attr('class', isTarget ? 'geo-depth geo-depth--target' : 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
         .text(top.planTvdDepth.toLocaleString());
 
+      // Formation code label
       g.append('text')
-        .attr('class', 'geo-code')
+        .attr('class', isTarget ? 'geo-code geo-code--target' : 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
         .text(top.stLongCd);
+
+     
 
       g.transition()
         .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
@@ -459,3 +484,7 @@ export class WellBoreViewComponent implements OnInit {
       .style('opacity', 1);
   }
 }
+
+
+
+

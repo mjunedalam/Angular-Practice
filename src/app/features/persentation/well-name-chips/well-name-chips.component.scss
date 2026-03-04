@@ -29,6 +29,15 @@ $accent:             #0ea5e9;
     margin-right: 4px;
     flex-shrink: 0;
   }
+
+  &__page-indicator {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
 }
 
 .chip {
@@ -77,6 +86,24 @@ $accent:             #0ea5e9;
     .chip__dot {
       background: #ffffff;
       box-shadow: 0 0 5px #ffffff;
+    }
+  }
+
+  &--nav {
+    min-width: 28px;
+    padding: 5px 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0369a1;
+    border-color: #bae6fd;
+    background: #f0f9ff;
+    line-height: 1;
+
+    &:hover {
+      background: #e0f2fe;
+      border-color: #38bdf8;
+      color: #0284c7;
+      transform: translateY(-1px);
     }
   }
 

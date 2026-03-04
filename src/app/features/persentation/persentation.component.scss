@@ -99,3 +99,63 @@ $danger:     #ef4444;
   
   &__icon { font-size: 52px; opacity: 0.3; }
 }
+
+/* ── Well chips pagination nav ─────────────────────────────────── */
+.well-chips-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+
+  &__chips {
+    flex: 1;
+  }
+}
+
+.well-chips-nav__indicator {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.nav-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+
+  &:hover:not(:disabled) {
+    background: #f0f9ff;
+    border-color: #38bdf8;
+    color: #0369a1;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &--prev { margin-right: 8px; }
+  &--next { margin-left:  8px; }
+}
+/* ─────────────────────────────────────────────────────────────── */

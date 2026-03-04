@@ -403,7 +403,7 @@
        "EXAD_GWD_IR_HEADER":[{
             "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
             "mudRemarks": "Customize Mud Logging Services is required in this well from surface to TD.",
-            " ": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8\" casing shoe. Continue CN/GR to surface."
+            "loggingRemarks": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8\" casing shoe. Continue CN/GR to surface."
         }],
         "EXAD_GWD_IR_TOPS":[
             {

@@ -55,6 +55,8 @@ export interface OffsetWaterWells {
     rate: number;
 }
 
+const PAGE_SIZE = 5;
+
 interface WellState {
     readonly wellNames: WellName[];
     readonly selectedEpANum: number | null;
@@ -62,6 +64,7 @@ interface WellState {
     readonly loading: boolean;
     readonly error: string | null;
     readonly animationTrigger: number;
+    readonly wellNamesPage: number;
 }
 
 const initialState: WellState = {
@@ -71,6 +74,7 @@ const initialState: WellState = {
     loading: false,
     error: null,
     animationTrigger: 0,
+    wellNamesPage: 0,
 };
 
 const FALLBACK_STR = 'N/A';
@@ -106,7 +110,7 @@ export const WellStore = signalStore(
     { providedIn: 'root' },
     withState<WellState>(initialState),
 
-    withComputed(({ wellDetails, wellNames }) => ({
+    withComputed(({ wellDetails, wellNames, wellNamesPage }) => ({
 
         uniqueWellNames: computed(() => {
             const seen = new Set<string>();
@@ -122,6 +126,41 @@ export const WellStore = signalStore(
         totalDepth: computed(
             () => wellDetails()?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 4000,
         ),
+
+        /** Total number of pages given PAGE_SIZE */
+        totalPages: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            return Math.ceil(unique.length / PAGE_SIZE);
+        }),
+
+        /** The 5 well names visible on the current page */
+        pagedWellNames: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            const start = wellNamesPage() * PAGE_SIZE;
+            return unique.slice(start, start + PAGE_SIZE);
+        }),
+
+        hasPrevPage: computed(() => wellNamesPage() > 0),
+
+        hasNextPage: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            return (wellNamesPage() + 1) * PAGE_SIZE < unique.length;
+        }),
 
         diagramData: computed((): WellboreDiagramData | null => {
             const d = wellDetails();
@@ -249,7 +288,32 @@ export const WellStore = signalStore(
         return {
             selectWell,
             loadWellNames,
-
+            nextPage(): void {
+                const nextPageIndex = store.wellNamesPage() + 1;
+                patchState(store, { wellNamesPage: nextPageIndex });
+                // Auto-select first well on the new page
+                const seen = new Set<string>();
+                const unique = store.wellNames().filter((w) => {
+                    if (seen.has(w.wellName)) return false;
+                    seen.add(w.wellName);
+                    return true;
+                });
+                const firstOnPage = unique[nextPageIndex * PAGE_SIZE];
+                if (firstOnPage) selectWell(firstOnPage.epANum);
+            },
+            prevPage(): void {
+                const prevPageIndex = Math.max(0, store.wellNamesPage() - 1);
+                patchState(store, { wellNamesPage: prevPageIndex });
+                // Auto-select first well on the new page
+                const seen = new Set<string>();
+                const unique = store.wellNames().filter((w) => {
+                    if (seen.has(w.wellName)) return false;
+                    seen.add(w.wellName);
+                    return true;
+                });
+                const firstOnPage = unique[prevPageIndex * PAGE_SIZE];
+                if (firstOnPage) selectWell(firstOnPage.epANum);
+            },
         };
     }),
 );

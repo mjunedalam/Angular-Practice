@@ -31,4 +31,12 @@ export class PersentationComponent implements OnInit {
     this.store.selectWell(epANum);
   }
 
+  protected onNextPage(): void {
+    this.store.nextPage();
+  }
+
+  protected onPrevPage(): void {
+    this.store.prevPage();
+  }
+
 }

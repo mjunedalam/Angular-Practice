@@ -14,11 +14,17 @@
     } -->
   </header>
 
-  <!-- Well Name Chips -->
+  <!-- Well Name Chips — paginated (5 per page) -->
   <app-well-name-chips
-    [wells]="store.uniqueWellNames()"
+    [wells]="store.pagedWellNames()"
     [selectedEpANum]="store.selectedEpANum()"
+    [hasPrevPage]="store.hasPrevPage()"
+    [hasNextPage]="store.hasNextPage()"
+    [currentPage]="store.wellNamesPage()"
+    [totalPages]="store.totalPages()"
     (chipSelected)="onWellSelected($event)"
+    (prevPage)="onPrevPage()"
+    (nextPage)="onNextPage()"
   />
 
   <!-- Error Banner -->

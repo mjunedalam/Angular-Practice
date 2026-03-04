@@ -1,6 +1,17 @@
 <div class="chip-strip" role="list" aria-label="Available wells">
   <span class="chip-strip__label">Wells</span>
 
+  <!-- Prev arrow — sits flush before the first chip -->
+  @if (hasPrevPage()) {
+    <button
+      class="chip chip--nav"
+      aria-label="Previous wells"
+      (click)="prevPage.emit()"
+    >
+      ‹
+    </button>
+  }
+
   @for (well of wells(); track trackByEpANum($index, well)) {
     <button
       class="chip"
@@ -13,4 +24,19 @@
       {{ well.wellName }}
     </button>
   }
+
+  <!-- Next arrow — sits flush after the last chip -->
+  @if (hasNextPage()) {
+    <button
+      class="chip chip--nav"
+      aria-label="Next wells"
+      (click)="nextPage.emit()"
+    >
+      ›
+    </button>
+  }
+
+  <span class="chip-strip__page-indicator">
+    {{ pageLabel() }}
+  </span>
 </div>
