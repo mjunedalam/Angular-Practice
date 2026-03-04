@@ -1,542 +1,808 @@
+import { computed, inject } from '@angular/core';
+import {
+    patchState,
+    signalStore,
+    withComputed,
+    withMethods,
+    withState,
+} from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { map, pipe, switchMap, tap } from 'rxjs';
+import { MorningReport } from '../models/well-name.model';
+import { IWellData } from 'src/app/shared/models/wwell/wwell-data.model';
+import { WellboreDiagramData } from '../models/wellbore-diagram.model';
+import { WellDataService } from '../services/well-data.service';
+import { sortCasingsByDepthDesc } from 'src/app/shared/utils/wellbore-math.util';
+import { MoriningReportService } from '../services/morning-report-service';
+import { WellName } from '../models/well-name.model';
+import { IFormationTops } from 'src/app/shared/models/wwell/formation-tops.model';
+import { WellLogsIndicators } from 'src/app/shared/models/wwell/well-logs-indicators.model';
 
-  /* ── Target Aquifer highlight styles ─────────────────────────────── */
 
-  /* Semi-transparent amber band behind the matching row */
-  .geo-target-band {
-    fill: #fff3cd;
-    stroke: #f0a500;
-    stroke-width: 1.2;
-    opacity: 0.85;
+export interface MiscWellData {
+    wellName: string;
+    wellType: string;
+    targetedAquifer: string;
+    currentStatus: string;
+    daysSinceSpud: number;
+    targetDays: number;
+    biNum: string;
+    waterWell: string;
+    footage: number;
+    previousWell: string;
+    currentDepth: number;
+    nextWell: string;
+    feetDrilledToday: number;
+    targetDesc: string;
+    supportingWell: string;
+}
+
+export interface PickedFormationTops {
+    formation: string;
+    depth: number;
+    remarks: string;
+}
+
+export interface OffsetWaterWells {
+    wellName: string;
+    aquifer: string;
+    tds: number;
+    rpm: number;
+    h2s: number;
+    distance: number;
+    productivity: number;
+    rate: number;
+}
+
+const PAGE_SIZE = 5;
+
+interface WellState {
+    readonly wellNames: WellName[];
+    readonly selectedEpANum: number | null;
+    readonly wellDetails: IWellData | null;
+    readonly loading: boolean;
+    readonly error: string | null;
+    readonly animationTrigger: number;
+    readonly wellNamesPage: number;
+}
+
+const initialState: WellState = {
+    wellNames: [],
+    selectedEpANum: null,
+    wellDetails: null,
+    loading: false,
+    error: null,
+    animationTrigger: 0,
+    wellNamesPage: 0,
+};
+
+const FALLBACK_STR = 'N/A';
+
+function mapToMiscWellData(d: IWellData | null): MiscWellData | null {
+    if (!d) return null;
+    const rigActivity = d.RIG_ACTIVITY?.[0];
+    const drlgOpStatus = d.DRLG_OP_STATUS?.[0];
+
+    return {
+        wellName: rigActivity?.wellName ?? d.WELL_MASTER?.[0]?.well ?? FALLBACK_STR,
+        targetDesc: rigActivity?.welltype ?? rigActivity?.drlgPlanWellDesc ?? FALLBACK_STR,
+        targetedAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? FALLBACK_STR,
+        currentStatus: drlgOpStatus?.nxt24HrPlanRmk ?? drlgOpStatus?.wOpRmk ?? FALLBACK_STR,
+        daysSinceSpud: drlgOpStatus?.spuddays ?? 0,
+        targetDays: d.NEW_TARGET_DAYS?.[0]?.targetDays ?? rigActivity?.wDrlgTrgtDay ?? 0,
+        biNum: rigActivity?.biNum ?? FALLBACK_STR,
+        supportingWell: rigActivity?.waterWell ?? FALLBACK_STR,
+        feetDrilledToday: d.DRLG_FD_TDAY?.[0]?.footage ?? drlgOpStatus?.footage ?? 0,
+        previousWell: FALLBACK_STR,
+        currentDepth: drlgOpStatus?.wPrsntDpth ?? 0,
+        nextWell: d.NEXT_2_WELL_ACTIVITY?.[0]?.nextWellActivity ?? FALLBACK_STR,
+
+        wellType: '',
+
+        waterWell: '',
+        footage: 0,
+
+    };
+}
+
+export const WellStore = signalStore(
+    { providedIn: 'root' },
+    withState<WellState>(initialState),
+
+    withComputed(({ wellDetails, wellNames, wellNamesPage }) => ({
+
+        uniqueWellNames: computed(() => {
+            const seen = new Set<string>();
+            return wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+        }),
+
+        isLoaded: computed(() => wellDetails() !== null),
+
+        totalDepth: computed(
+            () => wellDetails()?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 4000,
+        ),
+
+        /** Total number of pages given PAGE_SIZE */
+        totalPages: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            return Math.ceil(unique.length / PAGE_SIZE);
+        }),
+
+        /** The 5 well names visible on the current page */
+        pagedWellNames: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            const start = wellNamesPage() * PAGE_SIZE;
+            return unique.slice(start, start + PAGE_SIZE);
+        }),
+
+        hasPrevPage: computed(() => wellNamesPage() > 0),
+
+        hasNextPage: computed(() => {
+            const seen = new Set<string>();
+            const unique = wellNames().filter((w) => {
+                if (seen.has(w.wellName)) return false;
+                seen.add(w.wellName);
+                return true;
+            });
+            return (wellNamesPage() + 1) * PAGE_SIZE < unique.length;
+        }),
+
+        diagramData: computed((): WellboreDiagramData | null => {
+            const d = wellDetails();
+            if (!d) return null;
+            return {
+                wellName: d.WELL_MASTER?.[0]?.well ?? '',
+                totalDepth: d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 4000,
+                casings: sortCasingsByDepthDesc(d.EXAD_GWD_IR_CASING ?? []),
+                geologicTops: [...(d.EXAD_GWD_IR_TOPS ?? [])].sort(
+                    (a, b) => a.planTvdDepth - b.planTvdDepth,
+                ),
+                hydrogeology: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0] ?? null,
+                prewap: d.EXAD_RCD_PREWAP?.[0] ?? null,
+                rigActivity: d.RIG_ACTIVITY?.[0] ?? null,
+                currentDepth:
+                    d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ??
+                    d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ??
+                    0,
+            };
+        }),
+
+        miscWellData: computed(() => mapToMiscWellData(wellDetails())),
+
+        pickedFormations: computed((): PickedFormationTops[] => {
+            return (wellDetails()?.DRLG_FM_TOPS ?? []).map((fm: IFormationTops) => ({
+                formation: fm.stLongCd ?? '',
+                depth: fm.wStDmrkDpth ?? 0,
+                remarks: fm.wStDmrkRmk ?? ''
+            }));
+        }),
+
+        offsetWells: computed((): OffsetWaterWells[] => {
+            const d = wellDetails();
+            if (!d) return [];
+
+            const offsetData = d.EXAD_GWD_IR_WATER ?? [];
+            const testOutcomes = d.WATER_WELL_TEST_OUTCOME ?? [];
+            return offsetData.map((ow) => {
+                const test = testOutcomes.find(t => t.wellName === ow.offsetWaterWell);
+                return {
+                    wellName: ow.offsetWaterWell,
+                    aquifer: ow.aquifer || test?.aquifer || 'WASI',
+                    tds: test?.tds ?? 0,
+                    rpm: ow?.rpm ?? 0,
+                    h2s: ow.h2s,
+                    distance: ow.distance ?? 0,
+                    productivity: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estProductivity ?? 2.1,
+                    rate: test?.flowRate ?? ow.flowRate ?? 930
+                };
+            });
+        }),
+
+        wellsLogsIndicators: computed<WellLogsIndicators | null>(() => {
+            const d = wellDetails();
+            if (!d) return null;
+
+            const header = d.EXAD_GWD_IR_HEADER?.[0];
+            return {
+                rcc: !!header?.dtRemarks,          // corrected property name
+                mudLog: !!header?.mudRemarks,      // corrected property name
+                logging: !!header?.loggingRemarks // corrected typo
+            };
+        }),
+
+    })),
+
+    withMethods((store, wellDataService = inject(WellDataService), morningReportService = inject(MoriningReportService)) => {
+        const selectWell = rxMethod<number>(
+            pipe(
+                tap((epANum) =>
+                    patchState(store, {
+                        selectedEpANum: epANum,
+                        loading: true,
+                        error: null,
+                    }),
+                ),
+                switchMap((epANum) =>
+                    wellDataService.getWellDetails(epANum).pipe(
+                        tapResponse({
+                            next: (wellDetails) =>
+                                patchState(store, {
+                                    wellDetails,
+                                    loading: false,
+                                    animationTrigger: store.animationTrigger() + 1,
+                                }),
+                            error: (err: Error) =>
+                                patchState(store, {
+                                    error: err.message ?? 'Failed to load well details',
+                                    loading: false,
+                                }),
+                        }),
+                    ),
+                ),
+            ),
+        );
+
+        const loadWellNames = rxMethod<void>(
+            pipe(
+                tap(() => patchState(store, { loading: true, error: null })),
+                switchMap(() =>
+                    morningReportService.getMorningReport().pipe(
+                        map((reports: MorningReport[]) =>
+                            reports.map((report) => ({
+                                wellName: report.wGnrName,
+                                epANum: Number(report.epANum)
+                            }))
+                        ),
+                        tapResponse({
+                            next: (wellNames) => {
+                                patchState(store, { wellNames, loading: false });
+                                if (wellNames.length > 0 && !store.selectedEpANum()) {
+                                    selectWell(wellNames[0].epANum);
+                                }
+                            },
+                            error: (err: Error) =>
+                                patchState(store, {
+                                    error: err.message ?? 'Failed to load well names',
+                                    loading: false,
+                                }),
+                        }),
+                    ),
+                ),
+            ),
+        );
+        return {
+            selectWell,
+            loadWellNames,
+            nextPage(): void {
+                const nextPageIndex = store.wellNamesPage() + 1;
+                patchState(store, { wellNamesPage: nextPageIndex });
+                // Auto-select first well on the new page
+                const seen = new Set<string>();
+                const unique = store.wellNames().filter((w) => {
+                    if (seen.has(w.wellName)) return false;
+                    seen.add(w.wellName);
+                    return true;
+                });
+                const firstOnPage = unique[nextPageIndex * PAGE_SIZE];
+                if (firstOnPage) selectWell(firstOnPage.epANum);
+            },
+            prevPage(): void {
+                const prevPageIndex = Math.max(0, store.wellNamesPage() - 1);
+                patchState(store, { wellNamesPage: prevPageIndex });
+                // Auto-select first well on the new page
+                const seen = new Set<string>();
+                const unique = store.wellNames().filter((w) => {
+                    if (seen.has(w.wellName)) return false;
+                    seen.add(w.wellName);
+                    return true;
+                });
+                const firstOnPage = unique[prevPageIndex * PAGE_SIZE];
+                if (firstOnPage) selectWell(firstOnPage.epANum);
+            },
+        };
+    }),
+);
+
+======
+
+<div class="chip-strip" role="list" aria-label="Available wells">
+  <span class="chip-strip__label">Wells</span>
+
+  <!-- Prev arrow — sits flush before the first chip -->
+  @if (hasPrevPage()) {
+    <button
+      class="chip chip--nav"
+      aria-label="Previous wells"
+      (click)="prevPage.emit()"
+    >
+      ‹
+    </button>
   }
 
-  /* Diamond marker on the axis */
-  .geo-target-diamond {
-    fill: #e65c00;
-    stroke: #a33e00;
-    stroke-width: 1;
+  @for (well of wells(); track trackByEpANum($index, well)) {
+    <button
+      class="chip"
+      role="listitem"
+      [ngClass]="{ 'chip--active': well.epANum === selectedEpANum() }"
+      [attr.aria-pressed]="well.epANum === selectedEpANum()"
+      (click)="chipSelected.emit(well.epANum)"
+    >
+      <span class="chip__dot"></span>
+      {{ well.wellName }}
+    </button>
   }
 
-  /* Thicker, orange tick line for the target row */
-  .geo-tick--target {
-    stroke: #e65c00;
-    stroke-width: 3;
+  <!-- Next arrow — sits flush after the last chip -->
+  @if (hasNextPage()) {
+    <button
+      class="chip chip--nav"
+      aria-label="Next wells"
+      (click)="nextPage.emit()"
+    >
+      ›
+    </button>
   }
 
-  /* Bold amber depth number */
-  .geo-depth--target {
-    font-size: 15px;
-    font-weight: 900;
-    fill: #e65c00;
-    text-anchor: end;
-  }
+  <span class="chip-strip__page-indicator">
+    {{ pageLabel() }}
+  </span>
+</div>
+=======
+$chip-bg:            #ffffff; /* White by default */
+$chip-border:        #cbd5e1;
+$chip-text:          #334155; /* Dark text */
+$chip-active-bg:     #87ceeb; /* Sky blue when selected */
+$chip-active-border: #38bdf8;
+$strip-bg:           #ffffff; /* Removed black background */
+$accent:             #0ea5e9;
 
-  /* Bold amber formation code */
-  .geo-code--target {
-    font-size: 16px;
-    font-weight: 900;
-    fill: #e65c00;
-  }
+.chip-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 20px;
+  background: $strip-bg;
+  border-bottom: 1px solid #e2e8f0;
+ border: 1px solid #0000002e;
+    margin-bottom: 1em;
+    border-radius: 8px;
+    margin-top: 2em;
 
-  /* Small badge label "▶ Target Aquifer" above the row */
-  .geo-target-label {
+  &__label {
     font-size: 10px;
     font-weight: 700;
-    fill: #a33e00;
-    letter-spacing: 0.4px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-right: 4px;
+    flex-shrink: 0;
   }
 
-  /* ────────────────────────────────────────────────────────────────── */
-
-
-
-
-  import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-  effect,
-  input,
-} from '@angular/core';
-import { select, Selection } from 'd3-selection';
-import { easeCubicInOut } from 'd3-ease';
-import 'd3-transition';
-
-import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData  } from 'src/app/core/models/wellbore-diagram.model';
-import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
-import { ITopsIR } from 'src/app/shared/models/wwell/top-sir.model';
-import {
-  buildArrowHeadRight,
-  buildCasingPath,
-  buildDepthArrow,
-  buildOpenHolePath,
-  casingGradientId,
-  computeCasingHalfWidth,
-  createDepthScale,
-  formatDepth,
-  openHoleHalfWidth,
-} from 'src/app/shared/utils/wellbore-math.util'; 
-
-type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
-type GSel = Selection<SVGGElement, unknown, null, undefined>;
-type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
-
-@Component({
-  selector: 'app-well-bore-view',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './wellbore-view.component.html',
-  styleUrl: './wellbore-view.component.scss',
-})
-export class WellBoreViewComponent implements OnInit {
-  readonly diagramData = input.required<WellboreDiagramData | null>();
-  readonly animTrigger = input.required<number>();
-
-  @ViewChild('wellboreSvg', { static: true })
-  private readonly svgRef!: ElementRef<SVGSVGElement>;
-
-  private readonly layout = DIAGRAM_LAYOUT;
-  private rootG!: GSel;
-  private defsEl!: DefsSel;
-  private ready = false;
-
-  constructor() {
-    effect(() => {
-      const trigger = this.animTrigger();
-      const data = this.diagramData();
-      if (data && (this.ready || trigger > 0)) {
-        this.redraw(data);
-      }
-    });
-  }
-
-  ngOnInit(): void {
-    this.bootstrapSvg();
-    this.ready = true;
-    const data = this.diagramData();
-    if (data) this.redraw(data);
-  }
-
-  private bootstrapSvg(): void {
-    const { wellboreViewWidth, svgHeight, marginTop } = this.layout;
-    const svg = select(this.svgRef.nativeElement) as SvgSel;
-
-    svg.attr('width', '100%')
-      .attr('height', '100%')
-      .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)
-      .attr('preserveAspectRatio', 'xMidYMin meet');
-
-    this.defsEl = svg.append('defs') as DefsSel;
-    this.addStaticDefs(this.defsEl);
-
-    this.rootG = svg.append('g')
-      .attr('class', 'wellbore-root')
-      .attr('transform', `translate(0,${marginTop})`) as GSel;
-  }
-
-  private redraw(data: WellboreDiagramData): void {
-    this.rootG.selectAll('*').remove();
-    this.defsEl.selectAll('.dyn-clip').remove();
-
-    const { drawingHeight, geoLineX, casingCenterX } = this.layout;
-    const scale = createDepthScale(data.totalDepth, drawingHeight);
-
-    // Resolve the target aquifer from ITOPSIR hydrogeology
-    const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
-
-    this.drawStaticChrome(geoLineX, casingCenterX);
-    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
-
-    this.drawOpenHoleAndScreen(data, casingCenterX, scale);
-    this.drawCasings(data.casings, casingCenterX, scale);
-
-    this.drawCasingLabels(data.casings, casingCenterX, scale);
-    this.drawWaterLevel(data, casingCenterX, scale);
-    this.drawDrillArrow(data, scale);
-    this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight);
-  }
-
-  private addStaticDefs(defs: DefsSel): void {
-    this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%', color: '#5d6264' },
-      { offset: '50%', color: '#ffffff' },
-      { offset: '100%', color: '#5d6264' },
-    ]);
-    this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%', color: '#4ca746' },
-      { offset: '100%', color: '#4ca746' },
-    ]);
-    this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%', color: '#5d6264' },
-      { offset: '50%', color: '#ffffff' },
-      { offset: '100%', color: '#5d6264' },
-    ]);
-
-    const grid = defs.append('pattern')
-      .attr('id', 'gridPattern')
-      .attr('patternUnits', 'userSpaceOnUse')
-      .attr('width', 6).attr('height', 6);
-    grid.append('path')
-      .attr('d', 'M6,-4 L6,6 L-4,6')
-      .attr('stroke', '#444')
-      .attr('stroke-width', 1.5)
-      .attr('fill', 'none');
-
-    const addMarker = (id: string, fill: string): void => {
-      defs.append('marker')
-        .attr('id', id)
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 5).attr('refY', 0)
-        .attr('markerWidth', 4).attr('markerHeight', 4)
-        .attr('orient', 'auto')
-        .append('path')
-        .attr('d', 'M0,-5L10,0L0,5')
-        .attr('fill', fill);
-    };
-    addMarker('arrowBlack', '#000');
-    addMarker('arrowBlue', '#3CC3FF');
-  }
-
-  private addLinearGradient(
-    defs: DefsSel,
-    id: string,
-    stops: { offset: string; color: string }[],
-  ): void {
-    const g = defs.append('linearGradient').attr('id', id);
-    stops.forEach(({ offset, color }) =>
-      g.append('stop').attr('offset', offset).attr('stop-color', color),
-    );
-  }
-
-  private drawStaticChrome(geoLineX: number, centerX: number): void {
-    this.rootG.append('line')
-      .attr('class', 'ground-line')
-      .attr('x1', centerX - 230).attr('x2', centerX + 320)
-      .attr('y1', -3).attr('y2', -3);
-
-    this.rootG.append('text')
-      .attr('class', 'ground-label')
-      .attr('x', centerX).attr('y', -12)
-      .attr('text-anchor', 'middle')
-      .text('Ground Level');
-
-    this.rootG.append('line')
-      .attr('class', 'geo-axis')
-      .attr('x1', geoLineX).attr('x2', geoLineX)
-      .attr('y1', 0).attr('y2', this.layout.drawingHeight);
-
-    this.rootG.append('text')
-      .attr('class', 'column-label')
-      .attr('x', geoLineX).attr('y', -30)
-      .attr('text-anchor', 'middle')
-      .call((t) => {
-        t.append('tspan').attr('x', geoLineX).attr('dy', 0).text('Geologic');
-        t.append('tspan').attr('x', geoLineX).attr('dy', 12).text('Horizons (ft bgl)');
-      });
-  }
-
-  private drawGeologicTops(
-    tops: ITopsIR[],
-    geoLineX: number,
-    scale: ReturnType<typeof createDepthScale>,
-    targetAquifer: string | null,
-  ): void {
-    const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
-    sorted.forEach((top, idx) => {
-      // Task: if estTargetAquifier === stLongCd this top is the target aquifer
-      const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
-
-      const yPx = scale(top.planTvdDepth);
-      const g = this.rootG.append('g')
-        .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
-        .attr('transform', `translate(0,${yPx})`)
-        .style('opacity', 0);
-
-      if (isTarget) {
-        // Highlight band behind the row so it is clearly distinguishable
-        g.append('rect')
-          .attr('class', 'geo-target-band')
-          .attr('x', geoLineX - 80)
-          .attr('y', -11)
-          .attr('width', 220)
-          .attr('height', 22)
-          .attr('rx', 3);
-
-       
-      }
-
-      // Tick line — thicker and coloured for target
-      g.append('line')
-        .attr('class', isTarget ? 'geo-tick geo-tick--target' : 'geo-tick')
-        .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
-        .attr('y1', 0).attr('y2', 0);
-
-      // Depth label
-      g.append('text')
-        .attr('class', isTarget ? 'geo-depth geo-depth--target' : 'geo-depth')
-        .attr('x', geoLineX - 17)
-        .attr('dy', '0.35em')
-        .text(top.planTvdDepth.toLocaleString());
-
-      // Formation code label
-      g.append('text')
-        .attr('class', isTarget ? 'geo-code geo-code--target' : 'geo-code')
-        .attr('x', geoLineX + 18)
-        .attr('dy', '0.35em')
-        .text(top.stLongCd);
-
-     
-
-      g.transition()
-        .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
-        .duration(220)
-        .style('opacity', 1);
-    });
-  }
-
-  private drawCasings(
-    casings: ICasingIR[],
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-  ): void {
-    const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
-
-    casings.forEach((csg, i) => {
-      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
-      const bottomPx = scale(csg.csgDepth);
-      const clipId = `dyn-casing-clip-${i}`;
-
-      const animOrder = casings.length - 1 - i;
-      const delay = animOrder * ANIM.CASING_STAGGER;
-
-      const clipRect = this.defsEl
-        .append('clipPath')
-        .attr('class', 'dyn-clip')
-        .attr('id', clipId)
-        .append('rect')
-        .attr('x', centerX - hw - 10)
-        .attr('y', -5)
-        .attr('width', hw * 2 + 20)
-        .attr('height', 0);
-
-      this.rootG.append('path')
-        .attr('class', 'casing')
-        .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
-        .attr('clip-path', `url(#${clipId})`)
-        .attr('fill', `url(#${casingGradientId(csg.csgType)})`)
-        .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
-
-      clipRect.transition()
-        .delay(delay)
-        .duration(ANIM.CASING_DURATION)
-        .ease(easeCubicInOut) // FIX #1: More realistic mechanical running pipe easing
-        .attr('height', bottomPx + shoeCurveOffset + 20);
-    });
-  }
-
-  private drawCasingLabels(
-    casings: ICasingIR[],
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-  ): void {
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
-
-    casings.forEach((csg, i) => {
-      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
-      const shoePx = scale(csg.csgDepth);
-      const rEdge = centerX + hw;
-      const lEnd = rEdge + 22;
-      const labelX = lEnd + 8;
-
-      const lg = this.rootG.append('g')
-        .attr('class', 'casing-label')
-        .style('opacity', 0);
-
-      lg.append('line')
-        .attr('class', 'casing-label__line')
-        .attr('x1', rEdge).attr('x2', lEnd)
-        .attr('y1', shoePx).attr('y2', shoePx);
-
-      lg.append('path')
-        .attr('class', 'casing-label__arrow')
-        .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
-
-      lg.append('text')
-        .attr('class', 'casing-label__primary')
-        .attr('x', labelX).attr('y', shoePx + 4)
-        .text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
-
-      if (csg.csgRemarks) {
-        lg.append('text')
-          .attr('class', 'casing-label__secondary')
-          .attr('x', labelX).attr('y', shoePx + 17)
-          .text(`(${csg.csgRemarks})`);
-      }
-
-      this.rootG.append('text')
-        .attr('class', 'casing-size-inner')
-        .attr('x', centerX).attr('y', shoePx - 9)
-        .attr('text-anchor', 'middle')
-        .style('opacity', 0)
-        .text(`${csg.csgSize}"`)
-        .transition().delay(allDone).duration(250).style('opacity', 1);
-
-      lg.transition()
-        .delay(allDone)
-        .duration(300)
-        .ease(easeCubicInOut)
-        .style('opacity', 1);
-    });
-  }
-
-  private drawWaterLevel(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-  ): void {
-    if (!data.hydrogeology) return;
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const wPx = scale(data.hydrogeology.estStaticWaterLevel);
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const lR = centerX + innerHW + 10;
-    const lL = centerX - innerHW - 10;
-    const label = data.hydrogeology.flowType === 'Y'
-      ? 'Flowing (SIWHP: 50 PSI)'
-      : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
-
-    const wg = this.rootG.append('g').attr('class', 'water-level').style('opacity', 0);
-
-    wg.append('line')
-      .attr('class', 'water-line')
-      .attr('x1', lL).attr('x2', lR)
-      .attr('y1', wPx).attr('y2', wPx);
-
-    wg.append('path')
-      .attr('class', 'water-arrow')
-      .attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
-
-    wg.append('text')
-      .attr('class', 'water-label')
-      .attr('x', lR - 350).attr('y', wPx + 4)
-      .text(label);
-
-    wg.transition().delay(ANIM.OVERLAY_DELAY).duration(400).ease(easeCubicInOut).style('opacity', 1);
-  }
-
-  private drawOpenHoleAndScreen(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-  ): void {
-    if (!data.casings.length) return;
-
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const deepest = data.casings[0];
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = openHoleHalfWidth(innerHW);
-    const screenHW = innerHW - 10;
-
-    const shoePx = scale(deepest.csgDepth);
-    const tdPx = scale(data.totalDepth);
-
-    const ratHolePx = 15;
-    const screenBottomPx = tdPx - ratHolePx;
-
-    const clipId = 'dyn-oh-clip';
-
-    const clipRect = this.defsEl
-      .append('clipPath').attr('class', 'dyn-clip').attr('id', clipId)
-      .append('rect')
-      .attr('x', centerX - ohHW - 15)
-      .attr('y', shoePx)
-      .attr('width', ohHW * 2 + 30)
-      .attr('height', 0);
-
-    // Open hole outline (drills all the way down to TD)
-    this.rootG.append('path')
-      .attr('class', 'open-hole')
-      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
-      .attr('clip-path', `url(#${clipId})`);
-
-    // Liner screen
-    this.rootG.append('path')
-      .attr('class', 'liner-screen')
-      .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
-      .attr('clip-path', `url(#${clipId})`);
-
-    const sl = centerX - screenHW, sr = centerX + screenHW;
-    const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
-    hangerG.append('path').attr('d', `M${sl},${shoePx} L${sl},${shoePx + 9} L${sl + 18},${shoePx}`);
-    hangerG.append('path').attr('d', `M${sr},${shoePx} L${sr},${shoePx + 9} L${sr - 18},${shoePx}`);
-
-    const ohLY = shoePx + (tdPx - shoePx) * 0.2;
-    const ohLG = this.rootG.append('g').attr('class', 'open-hole-label').style('opacity', 0);
-    ohLG.append('line').attr('class', 'oh-label-line')
-      .attr('x1', centerX - ohHW).attr('x2', centerX - ohHW - 28)
-      .attr('y1', ohLY).attr('y2', ohLY);
-    ohLG.append('path').attr('class', 'oh-label-arrow')
-      .attr('d', `M${centerX - ohHW - 28} ${ohLY - 5} L${centerX - ohHW - 36} ${ohLY} L${centerX - ohHW - 28} ${ohLY + 5} Z`);
-    ohLG.append('text').attr('class', 'open-hole-text')
-      .attr('x', centerX - ohHW - 40).attr('y', ohLY + 4)
-      .attr('text-anchor', 'end')
-      .text('8 1/2" Open Hole');
-
-    const screenLen = data.totalDepth - deepest.csgDepth;
-    const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
-    scrLG.append('line').attr('class', 'screen-label-line')
-      .attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28)
-      .attr('y1', screenBottomPx).attr('y2', screenBottomPx);
-    scrLG.append('path')
-      .attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
-    scrLG.append('text').attr('class', 'screen-label-text')
-      .attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4)
-      .text(`+/- ${screenLen.toLocaleString()} ft of Screen`);
-
-    const ohDelay = ANIM.OVERLAY_DELAY;
-
-    clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
-      .attr('height', tdPx - shoePx + 20);
-    hangerG.transition().delay(ohDelay).duration(250).style('opacity', 1);
-    ohLG.transition().delay(ohDelay + 300).duration(300).style('opacity', 1);
-    scrLG.transition().delay(ohDelay + 400).duration(300).style('opacity', 1);
-  }
-
-  private drawDrillArrow(
-    data: WellboreDiagramData,
-    scale: ReturnType<typeof createDepthScale>,
-  ): void {
-    const endPx = scale(Math.min(data.currentDepth, data.totalDepth));
-    const arrowCx = 42;
-
-    this.rootG.append('path')
-      .attr('class', 'depth-arrow')
-      .attr('d', buildDepthArrow(0, 0, arrowCx, 10, 12))
-      .transition()
-      .duration(ANIM.SCALE_DURATION)
-      .ease(easeCubicInOut)
-      .attr('d', buildDepthArrow(0, endPx, arrowCx, 10, 12));
-  }
-
-  private drawTotalDepthLabel(
-    totalDepth: number,
-    centerX: number,
-    drawingHeight: number,
-  ): void {
-    this.rootG.append('text')
-      .attr('class', 'total-depth-main')
-      .attr('x', centerX).attr('y', drawingHeight + 26)
-      .attr('text-anchor', 'middle')
-      .style('opacity', 0)
-      .text(`Total Depth : ${formatDepth(totalDepth)}`)
-      .transition()
-      .delay(ANIM.OVERLAY_DELAY + 200)
-      .duration(400)
-      .style('opacity', 1);
+  &__page-indicator {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
+    flex-shrink: 0;
   }
 }
 
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px 5px 10px;
+  border-radius: 20px;
+  border: 1.5px solid $chip-border;
+  background: $chip-bg;
+  color: $chip-text;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: $accent;
+    color: #0f172a;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($accent, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &--active {
+    background: $chip-active-bg;
+    border-color: $chip-active-border;
+    color: #0f172a; /* Dark text for contrast against sky blue */
+    box-shadow: 0 2px 10px rgba(135, 206, 235, 0.55);
+
+    .chip__dot {
+      background: #ffffff;
+      box-shadow: 0 0 5px #ffffff;
+    }
+  }
+
+  &--nav {
+    min-width: 28px;
+    padding: 5px 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0369a1;
+    border-color: #bae6fd;
+    background: #f0f9ff;
+    line-height: 1;
+
+    &:hover {
+      background: #e0f2fe;
+      border-color: #38bdf8;
+      color: #0284c7;
+      transform: translateY(-1px);
+    }
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+    flex-shrink: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+}
+=====
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+} from '@angular/core';
+import { NgClass } from '@angular/common';
+import { WellName } from 'src/app/core/models/well-name.model';
+
+
+@Component({
+  selector: 'app-well-name-chips',
+  standalone: true,
+  imports: [NgClass],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './well-name-chips.component.html',
+  styleUrl: './well-name-chips.component.scss',
+})
+export class WellNameChipsComponent {
+  readonly wells          = input.required<WellName[]>();
+  readonly selectedEpANum = input<number | null>(null);
+  readonly hasPrevPage    = input<boolean>(false);
+  readonly hasNextPage    = input<boolean>(false);
+  readonly currentPage    = input<number>(0);
+  readonly totalPages     = input<number>(1);
+
+  readonly chipSelected = output<number>();
+  readonly prevPage     = output<void>();
+  readonly nextPage     = output<void>();
+
+  protected readonly pageLabel = computed(
+    () => `${this.currentPage() + 1} / ${this.totalPages()}`
+  );
+
+  protected trackByEpANum(_: number, w: WellName): number {
+    return w.epANum;
+  }
+}
+======
+<div class="presentation">
+  <!-- Header -->
+  <header class="presentation__header mb-1">
+    <!-- <div class="header__brand">
+      <span class="header__icon">⛽</span>
+      <h1 class="header__title">Well Design Viewer</h1>
+    </div> -->
+
+    <!-- @if (store.loading()) {
+      <div class="header__loading" role="status" aria-live="polite">
+        <span class="spinner"></span>
+        <span>Loading…</span>
+      </div>
+    } -->
+  </header>
+
+  <!-- Well Name Chips — paginated (5 per page) -->
+  <app-well-name-chips
+    [wells]="store.pagedWellNames()"
+    [selectedEpANum]="store.selectedEpANum()"
+    [hasPrevPage]="store.hasPrevPage()"
+    [hasNextPage]="store.hasNextPage()"
+    [currentPage]="store.wellNamesPage()"
+    [totalPages]="store.totalPages()"
+    (chipSelected)="onWellSelected($event)"
+    (prevPage)="onPrevPage()"
+    (nextPage)="onNextPage()"
+  />
+
+  <!-- Error Banner -->
+  @if (store.error()) {
+    <div class="error-banner" role="alert">
+      <span>⚠</span> {{ store.error() }}
+    </div>
+  }
+
+  <!-- Diagram Area -->
+  <main class="presentation__diagram">
+    <div class="w-1/3">
+      <app-misc-pres-well-data
+        [data]="store.miscWellData()"
+      ></app-misc-pres-well-data>
+      <br />
+
+      <app-picked-formation-tops
+        [tops]="store.pickedFormations()"
+      ></app-picked-formation-tops>
+    </div>
+
+    @if (!store.isLoaded() && !store.loading()) {
+      <div class="empty-state">
+        <div class="empty-state__icon">🛢</div>
+        <p class="empty-state__text">
+          Select a well above to render the wellbore diagram
+        </p>
+      </div>
+    }
+    <div class="w-2/3 ml-4 well-svg-div">
+      @if (store.isLoaded()) {
+        <div class="diagram-scroll">
+          <app-depth-scale
+            [totalDepth]="store.totalDepth()"
+            [animTrigger]="store.animationTrigger()"
+          />
+          <app-well-bore-view
+            [diagramData]="store.diagramData()"
+            [animTrigger]="store.animationTrigger()"
+          />
+        </div>
+      }
+      <app-wwells-logs-indicators></app-wwells-logs-indicators> 
+    </div>
+
+    <aside class="presentation__sidebar presentation__sidebar--right">
+      <app-active-wwell-map></app-active-wwell-map>
+      <app-offset-wwells [wells]="store.offsetWells()"></app-offset-wwells>
+    </aside>
+  </main>
+</div>
+====
+$bg-app:     #f1f5f9; 
+$border:     #e2e8f0;
+$accent:     #0ea5e9;
+$danger:     #ef4444;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: $bg-app;
+}
+
+.presentation {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  &__body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row; /* Aligns Sidebar and Diagram side-by-side */
+    gap: 20px;
+    padding: 20px;
+  }
+
+  &__sidebar {
+    width: 360px; /* Fixed width for the data cards */
+    min-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    padding-right: 4px; /* Space for scrollbar if needed */
+
+        margin-left: 2em;
+  }
+
+  &__diagram {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+}
+
+.diagram-scroll {
+  display: flex;
+  align-items: stretch; 
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden; 
+  height: 94%;
+  width: 100%;
+  max-width: 1100px;
+  border: 1px solid #00000052;
+}
+
+/* Utilities */
+.loading-bar {
+  height: 3px;
+  background: $accent;
+  width: 100%;
+  animation: loading-sweep 1.5s infinite linear;
+}
+
+@keyframes loading-sweep {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  50.1% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: rgba($danger, 0.12);
+  border-bottom: 1px solid rgba($danger, 0.4);
+  color: $danger;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 16px;
+  color: #94a3b8;
+  
+  &__icon { font-size: 52px; opacity: 0.3; }
+}
+
+/* ── Well chips pagination nav ─────────────────────────────────── */
+.well-chips-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+
+  &__chips {
+    flex: 1;
+  }
+}
+
+.well-chips-nav__indicator {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.nav-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+
+  &:hover:not(:disabled) {
+    background: #f0f9ff;
+    border-color: #38bdf8;
+    color: #0369a1;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &--prev { margin-right: 8px; }
+  &--next { margin-left:  8px; }
+}
+/* ─────────────────────────────────────────────────────────────── */
+====
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+
+import { WellBoreViewComponent } from './well-bore-view/wellbore-view.component';
+import { WellStore } from 'src/app/core/store/well.store';
+import { DepthScaleComponent } from "./depth-scale/depth-scale.component";
+import { WellNameChipsComponent } from "./well-name-chips/well-name-chips.component";
+import { MiscPresWellDataComponent } from "./misc-pres-well-data/misc-pres-well-data.component";
+import { PickedFormationTopsComponent } from "./picked-formation-tops/picked-formation-tops.component";
+import { ActiveWwellMapComponent } from "./active-wwell-map/active-wwell-map.component";
+import { OffsetWwellsComponent } from './offset-wwells/offset-wwells.component';
+import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-logs-indicators.component';
 
 
 
+@Component({
+  selector: 'app-persentation',
+  imports: [ WellBoreViewComponent, DepthScaleComponent, WellNameChipsComponent, MiscPresWellDataComponent, PickedFormationTopsComponent, ActiveWwellMapComponent, OffsetWwellsComponent, WwellsLogsIndicatorsComponent],
+  templateUrl: './persentation.component.html',
+  styleUrl: './persentation.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class PersentationComponent implements OnInit {
+
+  protected readonly store = inject(WellStore);
+
+  ngOnInit(): void {
+    this.store.loadWellNames();
+  }
+
+  protected onWellSelected(epANum: number): void {
+    this.store.selectWell(epANum);
+  }
+
+  protected onNextPage(): void {
+    this.store.nextPage();
+  }
+
+  protected onPrevPage(): void {
+    this.store.prevPage();
+  }
+
+}
