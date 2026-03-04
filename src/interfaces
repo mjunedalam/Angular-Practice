@@ -448,6 +448,7 @@ export class WwellsLogsIndicatorsComponent {
 
 
 
+if estTargetAquifier value is equal to the stLongCd value in ITopsIR , you need to mADE CHANGES MAY BE IN THIS METHOD drawGeologicTops IN WellBoreViewComponent
 
 
 
