@@ -18,6 +18,8 @@ export interface RigActivity {
   readonly wDrlgTrgtDay: number;
   readonly waterWell: string;
   readonly wDrlgEndDt: string;
+  readonly biNum?: string;
+  readonly welltype?: string;
 }
 
 export interface RigIdentification {
@@ -35,6 +37,8 @@ export interface DrillingOpStatus {
   readonly nxt24HrPlanRmk: string;
   readonly wDrlgEngName: string;
   readonly wFmanName: string;
+  readonly spuddays?: number;
+  readonly footage?: number;
 }
 
 export interface GeologicTop {
@@ -89,6 +93,26 @@ export interface IrHeader {
   readonly loggingRemarks: string;
 }
 
+// --- NEW INTERFACES FOR SIDEBAR ---
+export interface DrlgFmTop {
+  readonly stLongCd: string;
+  readonly wStDmrkDpth: number;
+  readonly wStDmrkRmk: string;
+}
+
+export interface DrlgFdToday {
+  readonly footage: number;
+}
+
+export interface Next2WellActivity {
+  readonly nextWellActivity: string;
+  readonly wGnrName?: string;
+}
+
+export interface NewTargetDays {
+  readonly targetDays: number;
+}
+
 export interface WellDetails {
   readonly RIG_ACTIVITY: RigActivity[];
   readonly WELL_MASTER: WellMaster[];
@@ -101,6 +125,12 @@ export interface WellDetails {
   readonly EXAD_RCD_PREWAP: PreWap[];
   readonly WATER_WELL_TEST_OUTCOME: WaterWellTestOutcome[];
   readonly EXAD_GWD_IR_HEADER: IrHeader[];
+  
+  // --- NEW ARRAYS FOR SIDEBAR ---
+  readonly DRLG_FM_TOPS?: DrlgFmTop[];
+  readonly DRLG_FD_TDAY?: DrlgFdToday[];
+  readonly NEXT_2_WELL_ACTIVITY?: Next2WellActivity[];
+  readonly NEW_TARGET_DAYS?: NewTargetDays[];
 }
 
 export interface WellDetailsResponse {

@@ -1,0 +1,117 @@
+.misc-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr; /* Pure two-column layout */
+  gap: 12px;
+  width: 100%;
+
+  .card{
+     border: 1px solid #0000002b;
+  }
+}
+
+.card {
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  /* Perfect Gradients matching screenshot */
+  &.bg-gradient-cyan {
+    background: linear-gradient(135deg, #06b6d4, #0284c7);
+    color: #ffffff;
+  }
+  
+  &.bg-gradient-dark-blue {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+  }
+  
+  &.bg-white {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #f1f5f9;
+  }
+
+  /* Layout Helpers */
+  &.center-content { align-items: center; text-align: center;    }
+  &.flex-row { flex-direction: row; align-items: center; }
+  &.space-between { justify-content: space-between; }
+  &.space-around { justify-content: space-around; }
+}
+
+/* Typography */
+.text-xxl { font-size: 28px; font-weight: 800; line-height: 1; }
+.text-xl { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.text-lg { font-size: 17px; font-weight: 700; }
+.text-md { font-size: 15px; font-weight: 700; }
+.text-sm { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.text-xs { font-size: 11px; font-weight: 500; }
+.text-sub { font-size: 12px; font-weight: 500; }
+
+/* Colors */
+.dark-text { color: #64748b; }
+.cyan-text { color: #0284c7; }
+
+/* Utilities */
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mb-1 { margin-bottom: 4px; }
+.ml-2 { margin-left: 8px; }
+.mr-2 { margin-right: 8px; }
+.opacity-80 { opacity: 0.8; }
+.opacity-90 { opacity: 0.9; }
+
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-baseline { display: flex; align-items: baseline; }
+.icon-text { gap: 6px; font-size: 16px; font-weight: 700; }
+.drop-shadow-icon { filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.3)); }
+
+/* Icons & Decorations */
+.icon-gear {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+}
+
+.icon-waves {
+  opacity: 0.5;
+  margin-right: 8px;
+}
+
+/* Gauges */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.gauge-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.gauge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  
+  &--blue {
+    border: 3px solid #0284c7;
+    color: #0284c7;
+  }
+}

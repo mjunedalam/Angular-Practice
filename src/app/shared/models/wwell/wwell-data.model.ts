@@ -1,0 +1,44 @@
+import { IBitInfo } from "./bit-info.model";
+import { ICasingIR } from "./casing-ir.model";
+import { IContact } from "./contact.model";
+import { IDrillingFootage } from "./drilling-footage.model";
+import { IDrillingOperationStatus } from "./drilling-operation-status.model";
+import { IDrillingOperationSummary } from "./drilling-operation-summary.model";
+import { IFormationTops } from "./formation-tops.model";
+import { IHeaderIR } from "./header-ir.model";
+import { IHydrogeologyIR } from "./hydrogeology-ir.model";
+import { INewTargetDays } from "./new-target-days.model";
+import { INextWellActivity } from "./next-well-activity.model";
+import { IPreWellData } from "./pre-well-data.model";
+import { IRigActivity } from "./rig-activity.model";
+import { IRigIdentification } from "./rig-identification.model";
+import { IROPData } from "./rop-data.model";
+import { ITopsIR } from "./top-sir.model";
+import { IWaterIR } from "./water-ir.model";
+import { IWaterWellTestOutcome } from "./water-well-test-outcome.model";
+import { IWellMaster } from "./well-master.model";
+
+export interface IWellData {
+    RIG_ACTIVITY: IRigActivity[];
+    WELL_MASTER: IWellMaster[];
+    RIG_IDENTIFICATION: IRigIdentification[];
+    CONTACT: IContact[];
+    DRLG_OP_STATUS: IDrillingOperationStatus[];
+    DRLG_FM_TOPS: IFormationTops[];
+    DRLG_FD_TDAY: IDrillingFootage[];
+    ROP_DATA: IROPData[];
+    NEXT_2_WELL_ACTIVITY: INextWellActivity[];
+    NEW_TARGET_DAYS: INewTargetDays[];
+    DRLG_OP_SMRY: IDrillingOperationSummary[];
+    BITINFO: IBitInfo[];
+    EXAD_GWD_IR_HEADER: IHeaderIR[];
+    EXAD_GWD_IR_TOPS: ITopsIR[];
+    EXAD_GWD_IR_CASING: ICasingIR[];
+    EXAD_GWD_IR_HYDROGEOLOGY: IHydrogeologyIR[];
+    EXAD_GWD_IR_WATER: IWaterIR[];
+    EXAD_RCD_PREWAP: IPreWellData[];
+    WATER_WELL_TEST_OUTCOME: IWaterWellTestOutcome[];
+    actualRm?: number;
+    kpiRm?: number;
+    rigMoveDays?: number;
+}

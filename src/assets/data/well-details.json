@@ -128,7 +128,7 @@
           "epANum": 80665,
           "wActDt": "2025-07-18T00:00:00",
           "wRigCd": "SINO25",
-          "wPrsntDpth": 15999,
+          "wPrsntDpth": 788888,
           "epLtDataModDt": "2025-07-20T12:04:55",
           "epLtDmoCd": "PLACIDAI",
           "wDpthChgDis": 0,
@@ -403,7 +403,7 @@
        "EXAD_GWD_IR_HEADER":[{
             "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
             "mudRemarks": "Customize Mud Logging Services is required in this well from surface to TD.",
-            "loggingRemarks": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8\" casing shoe. Continue CN/GR to surface."
+            " ": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8\" casing shoe. Continue CN/GR to surface."
         }],
         "EXAD_GWD_IR_TOPS":[
             {
@@ -422,7 +422,7 @@
                 "planSsDepth": -1505
             },
             {
-                "stLongCd": "RUS",
+                "stLongCd": "WASI",
                 "planTvdDepth": 800,
                 "planSsDepth": 145
             },
@@ -492,7 +492,23 @@
             "fieldTds": 2030,
             "h2s": 0,
             "testDuration": 180
-        }],
+        },
+{
+            "offsetWaterWell": "ANDR_7654",
+            "distance": 8.4,
+            "direction": "SW",
+            "aquifer": "WASI",
+            "td": 6600,
+            "flowRate": 770,
+            "rpm": 1500,
+            "staticWaterLevel": 108.4,
+            "specificCapacity": 5.64,
+            "drawDown": 136.58,
+            "fieldTds": 2030,
+            "h2s": 0,
+            "testDuration": 180
+        }
+      ],
         "EXAD_RCD_PREWAP": [{
             "surfaceElevation": 945,
             "estTargetDepth": 3800,

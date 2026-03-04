@@ -1,5 +1,5 @@
 import { ScaleLinear, scaleLinear } from 'd3-scale';
-import { CasingInfo } from '../../core/models/well-details.model';
+import { ICasingIR } from '../models/wwell/casing-ir.model';
 
 export function createDepthScale(
   totalDepth: number,
@@ -16,7 +16,7 @@ export function buildDepthTicks(totalDepth: number, interval = 500): number[] {
   return ticks;
 }
 
-export function sortCasingsByDepthDesc(casings: CasingInfo[]): CasingInfo[] {
+export function sortCasingsByDepthDesc(casings: ICasingIR[]): ICasingIR[] {
   return [...casings].sort((a, b) => b.csgDepth - a.csgDepth);
 }
 
@@ -80,6 +80,54 @@ export function buildDepthArrow(
     `Z`,
   ].join(' ');
 }
+
+// ============================================================================
+// NEW WIDGET UTILITY METHODS
+// ============================================================================
+
+/** Builds a closed rectangle path (used for blank pipe, gravel pack, or screen) */
+export function buildRectPath(
+  centerX: number,
+  halfWidth: number,
+  topPx: number,
+  bottomPx: number
+): string {
+  const l = centerX - halfWidth;
+  const r = centerX + halfWidth;
+  return `M${l},${topPx} L${r},${topPx} L${r},${bottomPx} L${l},${bottomPx} Z`;
+}
+
+/** Builds the two outward-pointing black triangles representing a packer or hanger */
+export function buildPackerTriangles(
+  centerX: number,
+  halfWidth: number,
+  yPx: number,
+  packerWidth = 16,
+  packerHeight = 10
+): string {
+  const lInner = centerX - halfWidth;
+  const rInner = centerX + halfWidth;
+  
+  const leftTriangle = `M${lInner},${yPx} L${lInner - packerWidth},${yPx} L${lInner},${yPx + packerHeight} Z`;
+  const rightTriangle = `M${rInner},${yPx} L${rInner + packerWidth},${yPx} L${rInner},${yPx + packerHeight} Z`;
+  
+  return `${leftTriangle} ${rightTriangle}`;
+}
+
+/** Builds a small standalone downward-pointing blue triangle/arrow */
+export function buildSmallDownArrow(
+  centerX: number,
+  yPx: number,
+  arrowWidth = 12,
+  arrowHeight = 10
+): string {
+  const hw = arrowWidth / 2;
+  return `M${centerX - hw},${yPx} L${centerX + hw},${yPx} L${centerX},${yPx + arrowHeight} Z`;
+}
+
+// ============================================================================
+// FORMATTERS & HELPERS
+// ============================================================================
 
 export function formatDepth(depth: number): string {
   return `${depth.toLocaleString()} ft`;
