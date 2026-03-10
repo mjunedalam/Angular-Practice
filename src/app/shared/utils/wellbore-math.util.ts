@@ -60,6 +60,14 @@ export function buildArrowHeadRight(
   return `M${tipX - size} ${midY - size} L${tipX} ${midY} L${tipX - size} ${midY + size} Z`;
 }
 
+export function buildArrowHeadLeft(
+  tipX: number,
+  midY: number,
+  size = 7,
+): string {
+  return `M${tipX + size} ${midY - size} L${tipX} ${midY} L${tipX + size} ${midY + size} Z`;
+}
+
 export function buildDepthArrow(
   startY: number,
   endY: number,
@@ -123,6 +131,23 @@ export function buildSmallDownArrow(
 ): string {
   const hw = arrowWidth / 2;
   return `M${centerX - hw},${yPx} L${centerX + hw},${yPx} L${centerX},${yPx + arrowHeight} Z`;
+}
+
+/**
+ * Builds a "U-shaped" path representing the gravel pack outline.
+ * The path traces down the left side, across the bottom, and up the right side.
+ */
+export function buildGravelPackUPath(
+  centerX: number,
+  halfWidth: number,
+  topPx: number,
+  bottomPx: number
+): string {
+  const left = centerX - halfWidth;
+  const right = centerX + halfWidth;
+  
+  // Draws a path down the left side, across the bottom shoe, and back up the right side
+  return `M${left},${topPx} L${left},${bottomPx} L${right},${bottomPx} L${right},${topPx}`;
 }
 
 // ============================================================================

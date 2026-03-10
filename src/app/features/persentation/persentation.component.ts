@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-
-import { WellBoreViewComponent } from './well-bore-view/wellbore-view.component';
+import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { WellStore } from 'src/app/core/store/well.store';
 import { DepthScaleComponent } from "./depth-scale/depth-scale.component";
 import { WellNameChipsComponent } from "./well-name-chips/well-name-chips.component";

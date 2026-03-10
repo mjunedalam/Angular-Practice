@@ -24,6 +24,7 @@ import {
   createDepthScale,
   formatDepth,
   openHoleHalfWidth,
+  buildGravelPackUPath
 } from 'src/app/shared/utils/wellbore-math.util'; 
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
@@ -128,6 +129,34 @@ export class WellBoreViewComponent implements OnInit {
       .attr('stroke-width', 1.5)
       .attr('fill', 'none');
 
+    // 🌟 EXACT Gravel Pattern injected per user specifications
+    const gravelPattern = defs.append('pattern')
+      .attr('id', 'gravelpattern')
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('width', 8)
+      .attr('height', 4);
+    
+    gravelPattern.append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', 4)
+      .attr('height', 2);
+      
+    gravelPattern.append('rect')
+      .attr('x', 4)
+      .attr('y', 2)
+      .attr('width', 4)
+      .attr('height', 2);
+
+    const dashedPattern = defs.append('pattern')
+      .attr('id', 'dashed')
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('width', 5)
+      .attr('height', 5);
+      
+    dashedPattern.append('image')
+      .attr('href', "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScgLz4KICA8Y2lyY2xlIGN4PScyLjUnIGN5PScyLjUnIHI9JzIuNScgZmlsbD0nYmxhY2snLz4KPC9zdmc+");
+
     const addMarker = (id: string, fill: string): void => {
       defs.append('marker')
         .attr('id', id)
@@ -152,6 +181,17 @@ export class WellBoreViewComponent implements OnInit {
     stops.forEach(({ offset, color }) =>
       g.append('stop').attr('offset', offset).attr('stop-color', color),
     );
+  }
+
+  /**
+   * Helper to determine the structural "width tier" of a casing. 
+   * This prevents non-structural layers like "Gravel Pack" from 
+   * incorrectly forcing the entire diagram to draw wider.
+   */
+  private getCasingTier(csg: ICasingIR, casings: ICasingIR[]): number {
+    const structuralCasings = casings.filter(c => c.csgType !== 'Gravel Pack');
+    const idx = structuralCasings.indexOf(csg);
+    return idx === -1 ? 0 : idx;
   }
 
   private drawStaticChrome(geoLineX: number, centerX: number): void {
@@ -231,14 +271,18 @@ export class WellBoreViewComponent implements OnInit {
         return; 
       }
 
-      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      // Calculate width using the visual tier helper, ensuring widths don't blow out
+      const tier = this.getCasingTier(csg, casings);
+      const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
+      
       const bottomPx = scale(csg.csgDepth);
       const clipId = `dyn-casing-clip-${i}`;
 
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
 
-      const clipRadius = i === 0 ? openHoleHalfWidth(hw) : hw;
+      // Allow the clip rect to be wide enough for the gravel pack annulus
+      const clipRadius = openHoleHalfWidth(hw) + 20;
 
       const clipRect = this.defsEl
         .append('clipPath')
@@ -250,12 +294,30 @@ export class WellBoreViewComponent implements OnInit {
         .attr('width', clipRadius * 2 + 30)
         .attr('height', 0);
 
-      this.rootG.append('path')
-        .attr('class', 'casing')
-        .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
-        .attr('clip-path', `url(#${clipId})`)
-        .attr('fill', `url(#${casingGradientId(csg.csgType)})`)
-        .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
+      // Render Gravel Pack utilizing exactly your requested structure
+      if (csg.csgType === 'Gravel Pack') {
+        const prevSolid = casings.slice(i + 1).find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const startDepthPx = prevSolid ? scale(prevSolid.csgDepth) : 0;
+        
+        // Find the absolute center of the annulus gap to draw the U-path stroke precisely
+        const ohRadius = openHoleHalfWidth(hw);
+        const annulusCenter = hw + (ohRadius - hw) / 2;
+        
+        this.rootG.append('path')
+          .attr('class', 'gravelHole')
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, bottomPx))
+          .attr('stroke', 'url(#gravelpattern)')
+          .attr('stroke-width', '12')
+          .style('fill', 'none')
+          .attr('clip-path', `url(#${clipId})`);
+      } else {
+        this.rootG.append('path')
+          .attr('class', 'casing')
+          .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
+          .attr('clip-path', `url(#${clipId})`)
+          .attr('fill', `url(#${casingGradientId(csg.csgType)})`)
+          .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
+      }
 
       clipRect.transition()
         .delay(delay)
@@ -274,14 +336,20 @@ export class WellBoreViewComponent implements OnInit {
     const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
 
     casings.forEach((csg, i) => {
-      // PREVENT GENERIC LABEL DRAWING FOR LINERS (To avoid overlaps with the custom screen label)
+      // PREVENT GENERIC LABEL DRAWING FOR LINERS ONLY to avoid overlaps
       if (csg.csgType === 'Liner') {
         return;
       }
 
-      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      // Calculate width using the visual tier helper
+      const tier = this.getCasingTier(csg, casings);
+      const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
+      
       const shoePx = scale(csg.csgDepth);
-      const rEdge = centerX + hw;
+      
+      // If it's a gravel pack, push the arrow out to the open hole wall so it doesn't clip through the gravel rendering
+      const rEdge = csg.csgType === 'Gravel Pack' ? centerX + openHoleHalfWidth(hw) : centerX + hw;
+      
       const lEnd = rEdge + 22;
       const labelX = lEnd + 8;
 
@@ -298,25 +366,35 @@ export class WellBoreViewComponent implements OnInit {
         .attr('class', 'casing-label__arrow')
         .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
 
-      lg.append('text')
-        .attr('class', 'casing-label__primary')
-        .attr('x', labelX).attr('y', shoePx + 4)
-        .text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
-
-      if (csg.csgRemarks) {
+      if (csg.csgType === 'Gravel Pack') {
+        // Render exclusively the remarks label for Gravel Packs
         lg.append('text')
-          .attr('class', 'casing-label__secondary')
-          .attr('x', labelX).attr('y', shoePx + 17)
-          .text(`(${csg.csgRemarks})`);
-      }
+          .attr('class', 'casing-label__primary')
+          .attr('x', labelX).attr('y', shoePx + 4)
+          .text(csg.csgRemarks || 'Gravel Pack');
+      } else {
+        // Standard Rendering for traditional casings
+        lg.append('text')
+          .attr('class', 'casing-label__primary')
+          .attr('x', labelX).attr('y', shoePx + 4)
+          .text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
 
-      this.rootG.append('text')
-        .attr('class', 'casing-size-inner')
-        .attr('x', centerX).attr('y', shoePx - 9)
-        .attr('text-anchor', 'middle')
-        .style('opacity', 0)
-        .text(`${csg.csgSize}"`)
-        .transition().delay(allDone).duration(250).style('opacity', 1);
+        if (csg.csgRemarks) {
+          lg.append('text')
+            .attr('class', 'casing-label__secondary')
+            .attr('x', labelX).attr('y', shoePx + 17)
+            .text(`(${csg.csgRemarks})`);
+        }
+
+        // Add size inside the pipe
+        this.rootG.append('text')
+          .attr('class', 'casing-size-inner')
+          .attr('x', centerX).attr('y', shoePx - 9)
+          .attr('text-anchor', 'middle')
+          .style('opacity', 0)
+          .text(`${csg.csgSize}"`)
+          .transition().delay(allDone).duration(250).style('opacity', 1);
+      }
 
       lg.transition()
         .delay(allDone)
@@ -334,7 +412,12 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.hydrogeology) return;
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const wPx = scale(data.hydrogeology.estStaticWaterLevel);
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    
+    // Dynamically adjust for the widest structure using the tier helper
+    const widestCsg = data.casings[data.casings.length - 1];
+    const tier = widestCsg ? this.getCasingTier(widestCsg, data.casings) : 0;
+    const innerHW = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
+    
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
     const label = data.hydrogeology.flowType === 'Y'
@@ -369,15 +452,15 @@ export class WellBoreViewComponent implements OnInit {
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     
-    // ENSURE OPEN HOLE STARTS AT THE DEEPEST SOLID CASING, NOT THE LINER BOTTOM
-    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner') || data.casings[0];
-    const liner = data.casings.find(c => c.csgType === 'Liner');
-    
-    const solidIdx = data.casings.indexOf(deepestSolid);
-    const innerHW = computeCasingHalfWidth(Math.max(0, solidIdx), baseHalfWidth, halfWidthIncrement);
+    // Tier 0 always represents the innermost width (e.g. the Liner)
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     
     const ohHW = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
+
+    // Open hole starts at the deepest SOLID casing, not the liner bottom
+    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
+    const liner = data.casings.find(c => c.csgType === 'Liner');
 
     const shoePx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);

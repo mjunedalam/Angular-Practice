@@ -457,19 +457,27 @@
             "csgSize": "24",
             "csgType": "Conductor",
             "csgDepth": 100,
-            "csgRemarks": ""
+            "csgRemarks": "test"
         },
         {
             "csgSize": "24",
             "csgType": "Conductor",
             "csgDepth": 2500,
-            "csgRemarks": ""
+            "csgRemarks": "test"
         },{
             "csgSize": "9 5/8",
             "csgType": "Liner",
             "csgDepth": 3075,
-            "csgRemarks": "+/- 20 ft into SFNY"
-        }],
+            "csgRemarks": "+/- 20 ft of screen"
+        },
+        {
+          "csgType": "Gravel Pack",
+          "csgSize": 8.5,
+          "csgDepth": 4000,
+          "csgRemarks": "Wirewrap / Mesh"
+        }
+      
+      ],
         "EXAD_GWD_IR_HYDROGEOLOGY":[{
             "flowType": "N",
             "estTargetAquifier": "WASI",
