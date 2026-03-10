@@ -128,30 +128,6 @@ export class WellBoreViewComponent implements OnInit {
       .attr('stroke-width', 1.5)
       .attr('fill', 'none');
 
-    // 🌟 NEW: Gravel Pack Texture Pattern Match
-    const gpPattern = defs.append('pattern')
-      .attr('id', 'gravelPackPattern')
-      .attr('patternUnits', 'userSpaceOnUse')
-      .attr('width', 12)
-      .attr('height', 12);
-      
-    gpPattern.append('rect')
-      .attr('width', 12)
-      .attr('height', 12)
-      .attr('fill', '#f4f5f8'); // Light grey backing
-      
-    gpPattern.append('path')
-      .attr('d', 'M0,0 L12,0 M0,0 L0,12')
-      .attr('stroke', '#a0aabf')
-      .attr('stroke-width', 1)
-      .attr('fill', 'none'); // Grid lines
-      
-    gpPattern.append('circle')
-      .attr('cx', 6)
-      .attr('cy', 6)
-      .attr('r', 1.5)
-      .attr('fill', '#475569'); // Small mesh dots
-
     const addMarker = (id: string, fill: string): void => {
       defs.append('marker')
         .attr('id', id)
@@ -250,6 +226,11 @@ export class WellBoreViewComponent implements OnInit {
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
 
     casings.forEach((csg, i) => {
+      // PREVENT SOLID DRAWING FOR LINERS
+      if (csg.csgType === 'Liner') {
+        return; 
+      }
+
       const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
       const bottomPx = scale(csg.csgDepth);
       const clipId = `dyn-casing-clip-${i}`;
@@ -257,7 +238,6 @@ export class WellBoreViewComponent implements OnInit {
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
 
-      // Allow the clip rect to be wide enough for the gravel pack annulus if this is the deepest casing
       const clipRadius = i === 0 ? openHoleHalfWidth(hw) : hw;
 
       const clipRect = this.defsEl
@@ -269,9 +249,6 @@ export class WellBoreViewComponent implements OnInit {
         .attr('y', -5)
         .attr('width', clipRadius * 2 + 30)
         .attr('height', 0);
-
-     
-      
 
       this.rootG.append('path')
         .attr('class', 'casing')
@@ -386,16 +363,23 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const deepest = data.casings[0];
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    
+    // ENSURE OPEN HOLE STARTS AT THE DEEPEST SOLID CASING, NOT THE LINER BOTTOM
+    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner') || data.casings[0];
+    const liner = data.casings.find(c => c.csgType === 'Liner');
+    
+    const solidIdx = data.casings.indexOf(deepestSolid);
+    const innerHW = computeCasingHalfWidth(Math.max(0, solidIdx), baseHalfWidth, halfWidthIncrement);
+    
     const ohHW = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
 
-    const shoePx = scale(deepest.csgDepth);
+    const shoePx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);
 
     const ratHolePx = 15;
-    const screenBottomPx = tdPx - ratHolePx;
+    // Limit screen to liner depth if present, otherwise down to TD
+    const screenBottomPx = liner ? scale(liner.csgDepth) : (tdPx - ratHolePx);
 
     const clipId = 'dyn-oh-clip';
 
@@ -403,7 +387,7 @@ export class WellBoreViewComponent implements OnInit {
       .append('clipPath').attr('class', 'dyn-clip').attr('id', clipId)
       .append('rect')
       .attr('x', centerX - ohHW - 15)
-      .attr('y', shoePx)
+      .attr('y', shoePx - 5)
       .attr('width', ohHW * 2 + 30)
       .attr('height', 0);
 
@@ -413,7 +397,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    // Liner screen
+    // Liner screen (Hangs from the deepest solid casing shoe)
     this.rootG.append('path')
       .attr('class', 'liner-screen')
       .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
@@ -436,7 +420,9 @@ export class WellBoreViewComponent implements OnInit {
       .attr('text-anchor', 'end')
       .text('8 1/2" Open Hole');
 
-    const screenLen = data.totalDepth - deepest.csgDepth;
+    // Display correct length based on the defined liner geometry vs solid casing
+    const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
+    
     const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
     scrLG.append('line').attr('class', 'screen-label-line')
       .attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28)
