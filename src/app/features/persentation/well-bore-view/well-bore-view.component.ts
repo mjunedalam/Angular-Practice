@@ -90,11 +90,8 @@ export class WellBoreViewComponent implements OnInit {
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
     const scale = createDepthScale(data.totalDepth, drawingHeight);
 
-    // Resolve the target aquifer from ITOPSIR hydrogeology
-    const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
-
     this.drawStaticChrome(geoLineX, casingCenterX);
-    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
+    this.drawGeologicTops(data.geologicTops, geoLineX, scale);
 
     this.drawOpenHoleAndScreen(data, casingCenterX, scale);
     this.drawCasings(data.casings, casingCenterX, scale);
@@ -130,6 +127,30 @@ export class WellBoreViewComponent implements OnInit {
       .attr('stroke', '#444')
       .attr('stroke-width', 1.5)
       .attr('fill', 'none');
+
+    // 🌟 NEW: Gravel Pack Texture Pattern Match
+    const gpPattern = defs.append('pattern')
+      .attr('id', 'gravelPackPattern')
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('width', 12)
+      .attr('height', 12);
+      
+    gpPattern.append('rect')
+      .attr('width', 12)
+      .attr('height', 12)
+      .attr('fill', '#f4f5f8'); // Light grey backing
+      
+    gpPattern.append('path')
+      .attr('d', 'M0,0 L12,0 M0,0 L0,12')
+      .attr('stroke', '#a0aabf')
+      .attr('stroke-width', 1)
+      .attr('fill', 'none'); // Grid lines
+      
+    gpPattern.append('circle')
+      .attr('cx', 6)
+      .attr('cy', 6)
+      .attr('r', 1.5)
+      .attr('fill', '#475569'); // Small mesh dots
 
     const addMarker = (id: string, fill: string): void => {
       defs.append('marker')
@@ -188,53 +209,31 @@ export class WellBoreViewComponent implements OnInit {
     tops: ITopsIR[],
     geoLineX: number,
     scale: ReturnType<typeof createDepthScale>,
-    targetAquifer: string | null,
   ): void {
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
-      // Task: if estTargetAquifier === stLongCd this top is the target aquifer
-      const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
-
       const yPx = scale(top.planTvdDepth);
       const g = this.rootG.append('g')
-        .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
+        .attr('class', 'geo-top')
         .attr('transform', `translate(0,${yPx})`)
         .style('opacity', 0);
 
-      if (isTarget) {
-        // Highlight band behind the row so it is clearly distinguishable
-        g.append('rect')
-          .attr('class', 'geo-target-band')
-          .attr('x', geoLineX - 80)
-          .attr('y', -11)
-          .attr('width', 220)
-          .attr('height', 22)
-          .attr('rx', 3);
-
-       
-      }
-
-      // Tick line — thicker and coloured for target
       g.append('line')
-        .attr('class', isTarget ? 'geo-tick geo-tick--target' : 'geo-tick')
+        .attr('class', 'geo-tick')
         .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
         .attr('y1', 0).attr('y2', 0);
 
-      // Depth label
       g.append('text')
-        .attr('class', isTarget ? 'geo-depth geo-depth--target' : 'geo-depth')
+        .attr('class', 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
         .text(top.planTvdDepth.toLocaleString());
 
-      // Formation code label
       g.append('text')
-        .attr('class', isTarget ? 'geo-code geo-code--target' : 'geo-code')
+        .attr('class', 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
         .text(top.stLongCd);
-
-     
 
       g.transition()
         .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
@@ -258,15 +257,21 @@ export class WellBoreViewComponent implements OnInit {
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
 
+      // Allow the clip rect to be wide enough for the gravel pack annulus if this is the deepest casing
+      const clipRadius = i === 0 ? openHoleHalfWidth(hw) : hw;
+
       const clipRect = this.defsEl
         .append('clipPath')
         .attr('class', 'dyn-clip')
         .attr('id', clipId)
         .append('rect')
-        .attr('x', centerX - hw - 10)
+        .attr('x', centerX - clipRadius - 15)
         .attr('y', -5)
-        .attr('width', hw * 2 + 20)
+        .attr('width', clipRadius * 2 + 30)
         .attr('height', 0);
+
+     
+      
 
       this.rootG.append('path')
         .attr('class', 'casing')
@@ -278,7 +283,7 @@ export class WellBoreViewComponent implements OnInit {
       clipRect.transition()
         .delay(delay)
         .duration(ANIM.CASING_DURATION)
-        .ease(easeCubicInOut) // FIX #1: More realistic mechanical running pipe easing
+        .ease(easeCubicInOut)
         .attr('height', bottomPx + shoeCurveOffset + 20);
     });
   }
@@ -484,7 +489,3 @@ export class WellBoreViewComponent implements OnInit {
       .style('opacity', 1);
   }
 }
-
-
-
-
