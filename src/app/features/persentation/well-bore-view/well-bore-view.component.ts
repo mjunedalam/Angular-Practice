@@ -274,6 +274,11 @@ export class WellBoreViewComponent implements OnInit {
     const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
 
     casings.forEach((csg, i) => {
+      // PREVENT GENERIC LABEL DRAWING FOR LINERS (To avoid overlaps with the custom screen label)
+      if (csg.csgType === 'Liner') {
+        return;
+      }
+
       const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
       const shoePx = scale(csg.csgDepth);
       const rEdge = centerX + hw;
@@ -421,7 +426,13 @@ export class WellBoreViewComponent implements OnInit {
       .text('8 1/2" Open Hole');
 
     // Display correct length based on the defined liner geometry vs solid casing
-    const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
+    let screenLabel = '';
+    if (liner && liner.csgRemarks) {
+        screenLabel = liner.csgRemarks;
+    } else {
+        const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
+        screenLabel = `+/- ${screenLen.toLocaleString()} ft of Screen`;
+    }
     
     const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
     scrLG.append('line').attr('class', 'screen-label-line')
@@ -431,7 +442,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
     scrLG.append('text').attr('class', 'screen-label-text')
       .attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4)
-      .text(`+/- ${screenLen.toLocaleString()} ft of Screen`);
+      .text(screenLabel);
 
     const ohDelay = ANIM.OVERLAY_DELAY;
 
