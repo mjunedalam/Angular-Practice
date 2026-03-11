@@ -100,6 +100,7 @@ export class WellBoreViewComponent implements OnInit {
     this.drawCasingLabels(data.casings, casingCenterX, scale);
     this.drawWaterLevel(data, casingCenterX, scale);
     this.drawDrillArrow(data, scale);
+    this.drawNotDrilledZone(data, casingCenterX, scale);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight);
   }
 
@@ -129,7 +130,6 @@ export class WellBoreViewComponent implements OnInit {
       .attr('stroke-width', 1.5)
       .attr('fill', 'none');
 
-    // 🌟 EXACT Gravel Pattern injected per user specifications
     const gravelPattern = defs.append('pattern')
       .attr('id', 'gravelpattern')
       .attr('patternUnits', 'userSpaceOnUse')
@@ -137,22 +137,17 @@ export class WellBoreViewComponent implements OnInit {
       .attr('height', 4);
     
     gravelPattern.append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 4)
-      .attr('height', 2);
+      .attr('x', 0).attr('y', 0)
+      .attr('width', 4).attr('height', 2);
       
     gravelPattern.append('rect')
-      .attr('x', 4)
-      .attr('y', 2)
-      .attr('width', 4)
-      .attr('height', 2);
+      .attr('x', 4).attr('y', 2)
+      .attr('width', 4).attr('height', 2);
 
     const dashedPattern = defs.append('pattern')
       .attr('id', 'dashed')
       .attr('patternUnits', 'userSpaceOnUse')
-      .attr('width', 5)
-      .attr('height', 5);
+      .attr('width', 5).attr('height', 5);
       
     dashedPattern.append('image')
       .attr('href', "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScgLz4KICA8Y2lyY2xlIGN4PScyLjUnIGN5PScyLjUnIHI9JzIuNScgZmlsbD0nYmxhY2snLz4KPC9zdmc+");
@@ -183,11 +178,6 @@ export class WellBoreViewComponent implements OnInit {
     );
   }
 
-  /**
-   * Helper to determine the structural "width tier" of a casing. 
-   * This prevents non-structural layers like "Gravel Pack" from 
-   * incorrectly forcing the entire diagram to draw wider.
-   */
   private getCasingTier(csg: ICasingIR, casings: ICasingIR[]): number {
     const structuralCasings = casings.filter(c => c.csgType !== 'Gravel Pack');
     const idx = structuralCasings.indexOf(csg);
@@ -266,23 +256,19 @@ export class WellBoreViewComponent implements OnInit {
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
 
     casings.forEach((csg, i) => {
-      // PREVENT SOLID DRAWING FOR LINERS
-      if (csg.csgType === 'Liner') {
-        return; 
-      }
+      if (csg.csgType === 'Liner') return;
 
-      // Calculate width using the visual tier helper, ensuring widths don't blow out
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-      
       const bottomPx = scale(csg.csgDepth);
       const clipId = `dyn-casing-clip-${i}`;
 
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
 
-      // Allow the clip rect to be wide enough for the gravel pack annulus
-      const clipRadius = openHoleHalfWidth(hw) + 20;
+      const clipRadius = csg.csgType === 'Gravel Pack'
+        ? (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10) + 20  // screenHW + padding
+        : openHoleHalfWidth(hw) + 20;
 
       const clipRect = this.defsEl
         .append('clipPath')
@@ -294,20 +280,26 @@ export class WellBoreViewComponent implements OnInit {
         .attr('width', clipRadius * 2 + 30)
         .attr('height', 0);
 
-      // Render Gravel Pack utilizing exactly your requested structure
       if (csg.csgType === 'Gravel Pack') {
-        const prevSolid = casings.slice(i + 1).find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
-        const startDepthPx = prevSolid ? scale(prevSolid.csgDepth) : 0;
-        
-        // Find the absolute center of the annulus gap to draw the U-path stroke precisely
-        const ohRadius = openHoleHalfWidth(hw);
-        const annulusCenter = hw + (ohRadius - hw) / 2;
-        
+        // Starts at the deepest solid casing shoe (top of liner/screen)
+        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+
+        // Gravel fills around the liner screen but INSIDE the casing wall:
+        //   Gravel fills a thin band JUST INSIDE the liner screen wall:
+        //   outer edge  = screenHW       (inner wall of liner screen)
+        //   inner edge  = screenHW - 10  (thin band hugging the screen wall)
+        //   annulusWidth = 10, annulusCenter = screenHW - 5
+        const innerHW       = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
+        const screenHW      = innerHW - 10;
+        const annulusWidth  = 10;                    // thin band matching screen tube thickness
+        const annulusCenter = screenHW - (annulusWidth / 2);  // hugs the inner wall of screen
+
         this.rootG.append('path')
           .attr('class', 'gravelHole')
           .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, bottomPx))
           .attr('stroke', 'url(#gravelpattern)')
-          .attr('stroke-width', '12')
+          .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
           .attr('clip-path', `url(#${clipId})`);
       } else {
@@ -336,21 +328,17 @@ export class WellBoreViewComponent implements OnInit {
     const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
 
     casings.forEach((csg, i) => {
-      // PREVENT GENERIC LABEL DRAWING FOR LINERS ONLY to avoid overlaps
-      if (csg.csgType === 'Liner') {
-        return;
-      }
+      if (csg.csgType === 'Liner') return;
 
-      // Calculate width using the visual tier helper
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-      
       const shoePx = scale(csg.csgDepth);
-      
-      // If it's a gravel pack, push the arrow out to the open hole wall so it doesn't clip through the gravel rendering
-      const rEdge = csg.csgType === 'Gravel Pack' ? centerX + openHoleHalfWidth(hw) : centerX + hw;
-      
-      const lEnd = rEdge + 22;
+
+      const rEdge = csg.csgType === 'Gravel Pack'
+        ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)  // screenHW
+        : centerX + hw;
+
+      const lEnd   = rEdge + 22;
       const labelX = lEnd + 8;
 
       const lg = this.rootG.append('g')
@@ -367,13 +355,11 @@ export class WellBoreViewComponent implements OnInit {
         .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
 
       if (csg.csgType === 'Gravel Pack') {
-        // Render exclusively the remarks label for Gravel Packs
         lg.append('text')
           .attr('class', 'casing-label__primary')
           .attr('x', labelX).attr('y', shoePx + 4)
           .text(csg.csgRemarks || 'Gravel Pack');
       } else {
-        // Standard Rendering for traditional casings
         lg.append('text')
           .attr('class', 'casing-label__primary')
           .attr('x', labelX).attr('y', shoePx + 4)
@@ -386,7 +372,6 @@ export class WellBoreViewComponent implements OnInit {
             .text(`(${csg.csgRemarks})`);
         }
 
-        // Add size inside the pipe
         this.rootG.append('text')
           .attr('class', 'casing-size-inner')
           .attr('x', centerX).attr('y', shoePx - 9)
@@ -412,12 +397,11 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.hydrogeology) return;
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const wPx = scale(data.hydrogeology.estStaticWaterLevel);
-    
-    // Dynamically adjust for the widest structure using the tier helper
+
     const widestCsg = data.casings[data.casings.length - 1];
     const tier = widestCsg ? this.getCasingTier(widestCsg, data.casings) : 0;
     const innerHW = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-    
+
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
     const label = data.hydrogeology.flowType === 'Y'
@@ -451,41 +435,30 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    
-    // Tier 0 always represents the innermost width (e.g. the Liner)
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    
-    const ohHW = openHoleHalfWidth(innerHW);
+    const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const ohHW     = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
 
-    // Open hole starts at the deepest SOLID casing, not the liner bottom
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const liner = data.casings.find(c => c.csgType === 'Liner');
+    const liner        = data.casings.find(c => c.csgType === 'Liner');
 
-    const shoePx = scale(deepestSolid.csgDepth);
-    const tdPx = scale(data.totalDepth);
-
-    const ratHolePx = 15;
-    // Limit screen to liner depth if present, otherwise down to TD
+    const shoePx       = scale(deepestSolid.csgDepth);
+    const tdPx         = scale(data.totalDepth);
+    const ratHolePx    = 15;
     const screenBottomPx = liner ? scale(liner.csgDepth) : (tdPx - ratHolePx);
 
     const clipId = 'dyn-oh-clip';
-
     const clipRect = this.defsEl
       .append('clipPath').attr('class', 'dyn-clip').attr('id', clipId)
       .append('rect')
-      .attr('x', centerX - ohHW - 15)
-      .attr('y', shoePx - 5)
-      .attr('width', ohHW * 2 + 30)
-      .attr('height', 0);
+      .attr('x', centerX - ohHW - 15).attr('y', shoePx - 5)
+      .attr('width', ohHW * 2 + 30).attr('height', 0);
 
-    // Open hole outline (drills all the way down to TD)
     this.rootG.append('path')
       .attr('class', 'open-hole')
       .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    // Liner screen (Hangs from the deepest solid casing shoe)
     this.rootG.append('path')
       .attr('class', 'liner-screen')
       .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
@@ -508,15 +481,14 @@ export class WellBoreViewComponent implements OnInit {
       .attr('text-anchor', 'end')
       .text('8 1/2" Open Hole');
 
-    // Display correct length based on the defined liner geometry vs solid casing
     let screenLabel = '';
     if (liner && liner.csgRemarks) {
-        screenLabel = liner.csgRemarks;
+      screenLabel = liner.csgRemarks;
     } else {
-        const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
-        screenLabel = `+/- ${screenLen.toLocaleString()} ft of Screen`;
+      const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
+      screenLabel = `+/- ${screenLen.toLocaleString()} ft of Screen`;
     }
-    
+
     const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
     scrLG.append('line').attr('class', 'screen-label-line')
       .attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28)
@@ -528,7 +500,6 @@ export class WellBoreViewComponent implements OnInit {
       .text(screenLabel);
 
     const ohDelay = ANIM.OVERLAY_DELAY;
-
     clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
       .attr('height', tdPx - shoePx + 20);
     hangerG.transition().delay(ohDelay).duration(250).style('opacity', 1);
@@ -566,6 +537,71 @@ export class WellBoreViewComponent implements OnInit {
       .transition()
       .delay(ANIM.OVERLAY_DELAY + 200)
       .duration(400)
+      .style('opacity', 1);
+  }
+
+  private drawNotDrilledZone(
+    data: WellboreDiagramData,
+    centerX: number,
+    scale: ReturnType<typeof createDepthScale>,
+  ): void {
+    if (!data.prewap) return;
+
+    const estTargetDepth = data.prewap.estTargetDepth;
+    const currentDepth   = data.currentDepth;
+
+    // TEMP: hardcoded for testing — bypassing the guard
+    // if (currentDepth >= estTargetDepth) return;
+
+    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const ohHW    = openHoleHalfWidth(innerHW);
+
+    const topPx    = scale(currentDepth);
+    const bottomPx = scale(estTargetDepth);
+
+    const lx = centerX - ohHW;
+    const rx = centerX + ohHW;
+
+    const ndg = this.rootG.append('g')
+      .attr('class', 'not-drilled-zone')
+      .style('opacity', 0);
+
+    ndg.append('line')
+      .attr('class', 'not-drilled-line')
+      .attr('x1', lx).attr('x2', lx)
+      .attr('y1', topPx).attr('y2', bottomPx)
+      .attr('stroke', 'red').attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
+
+    ndg.append('line')
+      .attr('class', 'not-drilled-line')
+      .attr('x1', rx).attr('x2', rx)
+      .attr('y1', topPx).attr('y2', bottomPx)
+      .attr('stroke', 'red').attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
+
+    ndg.append('line')
+      .attr('class', 'not-drilled-line')
+      .attr('x1', lx).attr('x2', rx)
+      .attr('y1', bottomPx).attr('y2', bottomPx)
+      .attr('stroke', 'red').attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
+
+    ndg.append('text')
+      .attr('class', 'not-drilled-label')
+      .attr('x', lx - 8)
+      .attr('y', topPx + (bottomPx - topPx) / 2)
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', 'red')
+      .attr('font-size', '11px')
+      .text('Not Drilled');
+
+    ndg.transition()
+      .delay(ANIM.OVERLAY_DELAY + 300)
+      .duration(400)
+      .ease(easeCubicInOut)
       .style('opacity', 1);
   }
 }
