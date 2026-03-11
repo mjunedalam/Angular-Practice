@@ -282,8 +282,11 @@ export class WellBoreViewComponent implements OnInit {
 
       if (csg.csgType === 'Gravel Pack') {
         // Starts at the deepest solid casing shoe (top of liner/screen)
+        // Ends at the liner shoe — gravel must be shorter than (contained within) the liner
         const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const liner        = casings.find(c => c.csgType === 'Liner');
         const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+        const gravelBottomPx = liner ? scale(liner.csgDepth) : bottomPx;
 
         // Gravel fills around the liner screen but INSIDE the casing wall:
         //   Gravel fills a thin band JUST INSIDE the liner screen wall:
@@ -297,7 +300,7 @@ export class WellBoreViewComponent implements OnInit {
 
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, bottomPx))
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx-15))
           .attr('stroke', 'url(#gravelpattern)')
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
