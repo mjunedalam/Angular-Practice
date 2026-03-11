@@ -611,55 +611,62 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.prewap) return;
 
     const estTargetDepth = data.prewap.estTargetDepth;
-    const currentDepth = data.currentDepth;
+    // Undrilled = estTargetDepth - wPrsntDpth
+    const currentDepth   = data.currentDepth;
+    const undrilledFt    = estTargetDepth - currentDepth;
 
-    // TEMP: hardcoded for testing — bypassing the guard
-    // if (currentDepth >= estTargetDepth) return;
+    // Only draw if there is undrilled section remaining
+    if (undrilledFt <= 0) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = openHoleHalfWidth(innerHW);
+    const ohHW    = openHoleHalfWidth(innerHW);
 
-    const topPx = scale(currentDepth);
+    const topPx    = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);
-
-    const lx = centerX - ohHW;
-    const rx = centerX + ohHW;
+    const height   = bottomPx - topPx;
+    const width    = ohHW * 2;
+    const lx       = centerX - ohHW;
+    const midY     = topPx + height / 2;
 
     const ndg = this.rootG.append('g')
       .attr('class', 'not-drilled-zone')
       .style('opacity', 0);
 
-    ndg.append('line')
-      .attr('class', 'not-drilled-line')
-      .attr('x1', lx).attr('x2', lx)
-      .attr('y1', topPx).attr('y2', bottomPx)
-      .attr('stroke', 'red').attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
+    // Dashed red rectangle
+    ndg.append('rect')
+      .attr('class', 'not-drilled-rect')
+      .attr('x', lx)
+      .attr('y', topPx)
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', 'rgba(255,0,0,0.06)')
+      .attr('stroke', 'red')
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '6,4');
 
-    ndg.append('line')
-      .attr('class', 'not-drilled-line')
-      .attr('x1', rx).attr('x2', rx)
-      .attr('y1', topPx).attr('y2', bottomPx)
-      .attr('stroke', 'red').attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
-
-    ndg.append('line')
-      .attr('class', 'not-drilled-line')
-      .attr('x1', lx).attr('x2', rx)
-      .attr('y1', bottomPx).attr('y2', bottomPx)
-      .attr('stroke', 'red').attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '6,4').attr('fill', 'none');
-
+    // Label inside the rectangle
     ndg.append('text')
       .attr('class', 'not-drilled-label')
-      .attr('x', lx - 8)
-      .attr('y', topPx + (bottomPx - topPx) / 2)
-      .attr('text-anchor', 'end')
+      .attr('x', centerX)
+      .attr('y', midY - 7)
+      .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', 'red')
       .attr('font-size', '11px')
+      .attr('font-weight', '600')
       .text('Not Drilled');
+
+    // Undrilled footage sub-label
+    ndg.append('text')
+      .attr('class', 'not-drilled-footage')
+      .attr('x', centerX)
+      .attr('y', midY + 8)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', 'red')
+      .attr('font-size', '10px')
+      .text(`${undrilledFt.toLocaleString()} ft remaining`);
 
     ndg.transition()
       .delay(ANIM.OVERLAY_DELAY + 300)
