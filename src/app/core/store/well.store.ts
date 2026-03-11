@@ -124,9 +124,15 @@ export const WellStore = signalStore(
 
         isLoaded: computed(() => wellDetails() !== null),
 
-        totalDepth: computed(
-            () => wellDetails()?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 4000,
-        ),
+        totalDepth: computed(() => {
+            const d = wellDetails();
+            if (!d) return 0;
+            const estTargetDepth = d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
+            const maxCasing      = Math.max(0, ...(d.EXAD_GWD_IR_CASING ?? []).map(c => c.csgDepth ?? 0));
+            const maxGeoTop      = Math.max(0, ...(d.EXAD_GWD_IR_TOPS ?? []).map(t => t.planTvdDepth ?? 0));
+            // totalDepth driven by estTargetDepth — scale always fits all structural data
+            return Math.max(estTargetDepth, maxCasing, maxGeoTop);
+        }),
 
         /** Total number of pages given PAGE_SIZE */
         totalPages: computed(() => {
@@ -166,9 +172,17 @@ export const WellStore = signalStore(
         diagramData: computed((): WellboreDiagramData | null => {
             const d = wellDetails();
             if (!d) return null;
+            const estTargetDepth = d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
+            const maxCasing      = Math.max(0, ...(d.EXAD_GWD_IR_CASING ?? []).map(c => c.csgDepth ?? 0));
+            const maxGeoTop      = Math.max(0, ...(d.EXAD_GWD_IR_TOPS ?? []).map(t => t.planTvdDepth ?? 0));
+            // totalDepth driven by estTargetDepth — consistent with store.totalDepth()
+            const totalDepth   = Math.max(estTargetDepth, maxCasing, maxGeoTop);
+            // currentDepth = wPrsntDpth capped to totalDepth to keep drill arrow on-scale
+            const rawDepth     = d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ?? 0;
+            const currentDepth = rawDepth > 0 && rawDepth <= totalDepth ? rawDepth : estTargetDepth;
             return {
                 wellName: d.WELL_MASTER?.[0]?.well ?? '',
-                totalDepth: d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 4000,
+                totalDepth,
                 casings: sortCasingsByDepthDesc(d.EXAD_GWD_IR_CASING ?? []),
                 geologicTops: [...(d.EXAD_GWD_IR_TOPS ?? [])].sort(
                     (a, b) => a.planTvdDepth - b.planTvdDepth,
@@ -176,10 +190,7 @@ export const WellStore = signalStore(
                 hydrogeology: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0] ?? null,
                 prewap: d.EXAD_RCD_PREWAP?.[0] ?? null,
                 rigActivity: d.RIG_ACTIVITY?.[0] ?? null,
-                currentDepth:
-                    d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ??
-                    d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ??
-                    0,
+                currentDepth,
             };
         }),
 

@@ -38,10 +38,10 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   
   // -- RESPONSIVE MIDPOINT MATH --
   depthScaleWidth: 90,
-  depthAxisX: 60, // Leaves exactly 30 units from the right edge of the Depth SVG
+  depthAxisX: 62, // Leaves exactly 30 units from the right edge of the Depth SVG
   
   wellboreViewWidth: 980,
-  geoLineX: 50,   // Starts exactly 50 units from the left edge of the Wellbore SVG
+  geoLineX: 155,   // Starts exactly 50 units from the left edge of the Wellbore SVG
   
   // Total virtual gap = 30 + 50 = 80 units. 
   // True center is 40 units. 
@@ -49,10 +49,10 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   depthArrowX: 10, 
   // ------------------------------
   
-  casingCenterX: 490,
-  baseHalfWidth: 72,
-  halfWidthIncrement: 22,
-  shoeCurveOffset: 15,
+  casingCenterX: 650,  // shifted right to create gap between geo horizon and bore structure
+  baseHalfWidth: 48,
+  halfWidthIncrement: 16,
+  shoeCurveOffset: 12,
 };
 
 // Smoother, more realistic cascading animation timings

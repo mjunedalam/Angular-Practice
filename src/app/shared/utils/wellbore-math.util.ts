@@ -170,3 +170,36 @@ export function casingGradientId(csgType: string): string {
   if (csgType === 'Liner')     return 'linerGradient';
   return 'mainGradient';
 }
+
+/**
+ * Builds the two hanger bracket paths for a liner screen top.
+ *
+ * Shape matches the standard wellbore convention:
+ *   Left  side: drops `dropPx` down then angles back up-right  (filled triangle)
+ *   Right side: drops `dropPx` down then angles back up-left   (filled triangle)
+ *
+ * Example (dropPx=8, size=20):
+ *   Left:  M sl,y  L sl,y+8  L sl+20,y  Z
+ *   Right: M sr,y  L sr,y+8  L sr-20,y  Z
+ *
+ * @param centerX   SVG centre-x of the wellbore
+ * @param y         Y pixel position of the hanger (casing shoe px)
+ * @param halfWidth Half-width of the liner screen (screenHW)
+ * @param dropPx    Vertical drop of the bracket leg  (default 8)
+ * @param size      Horizontal span of the bracket    (default 20)
+ */
+export function buildScreenHanger(
+  centerX: number,
+  y: number,
+  halfWidth: number,
+  dropPx = 8,
+  size = 20,
+): { left: string; right: string } {
+  const sl = centerX - halfWidth; // left  edge of screen
+  const sr = centerX + halfWidth; // right edge of screen
+
+  const left  = `M${sl},${y} L${sl},${y + dropPx} L${sl + size},${y} Z`;
+  const right = `M${sr},${y} L${sr},${y + dropPx} L${sr - size},${y} Z`;
+
+  return { left, right };
+}

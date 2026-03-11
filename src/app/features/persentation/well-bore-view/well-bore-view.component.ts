@@ -11,20 +11,21 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData  } from 'src/app/core/models/wellbore-diagram.model';
-import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
+import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/wellbore-diagram.model';
+import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/top-sir.model';
 import {
   buildArrowHeadRight,
   buildCasingPath,
   buildDepthArrow,
   buildOpenHolePath,
+  buildGravelPackUPath,
+  buildScreenHanger,
   casingGradientId,
   computeCasingHalfWidth,
   createDepthScale,
   formatDepth,
   openHoleHalfWidth,
-  buildGravelPackUPath
 } from 'src/app/shared/utils/wellbore-math.util'; 
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
@@ -91,10 +92,13 @@ export class WellBoreViewComponent implements OnInit {
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
     const scale = createDepthScale(data.totalDepth, drawingHeight);
 
+    const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
+
     this.drawStaticChrome(geoLineX, casingCenterX);
-    this.drawGeologicTops(data.geologicTops, geoLineX, scale);
+    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
 
     this.drawOpenHoleAndScreen(data, casingCenterX, scale);
+    this.drawScreenHanger(data, casingCenterX, scale);  // drawn before casings so it sits behind them
     this.drawCasings(data.casings, casingCenterX, scale);
 
     this.drawCasingLabels(data.casings, casingCenterX, scale);
@@ -135,11 +139,11 @@ export class WellBoreViewComponent implements OnInit {
       .attr('patternUnits', 'userSpaceOnUse')
       .attr('width', 8)
       .attr('height', 4);
-    
+
     gravelPattern.append('rect')
       .attr('x', 0).attr('y', 0)
       .attr('width', 4).attr('height', 2);
-      
+
     gravelPattern.append('rect')
       .attr('x', 4).attr('y', 2)
       .attr('width', 4).attr('height', 2);
@@ -148,7 +152,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('id', 'dashed')
       .attr('patternUnits', 'userSpaceOnUse')
       .attr('width', 5).attr('height', 5);
-      
+
     dashedPattern.append('image')
       .attr('href', "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScgLz4KICA8Y2lyY2xlIGN4PScyLjUnIGN5PScyLjUnIHI9JzIuNScgZmlsbD0nYmxhY2snLz4KPC9zdmc+");
 
@@ -205,6 +209,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('class', 'column-label')
       .attr('x', geoLineX).attr('y', -30)
       .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
       .call((t) => {
         t.append('tspan').attr('x', geoLineX).attr('dy', 0).text('Geologic');
         t.append('tspan').attr('x', geoLineX).attr('dy', 12).text('Horizons (ft bgl)');
@@ -215,27 +220,43 @@ export class WellBoreViewComponent implements OnInit {
     tops: ITopsIR[],
     geoLineX: number,
     scale: ReturnType<typeof createDepthScale>,
+    targetAquifer: string | null,
   ): void {
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
+      const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
+
       const yPx = scale(top.planTvdDepth);
       const g = this.rootG.append('g')
-        .attr('class', 'geo-top')
+        .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
         .attr('transform', `translate(0,${yPx})`)
         .style('opacity', 0);
 
+      if (isTarget) {
+        g.append('rect')
+          .attr('class', 'geo-target-band')
+          .attr('x', geoLineX - 75)
+          .attr('width', 150)
+          .attr('height', 25)
+          .attr('y', -14)
+          .attr('rx', 3);
+      }
+
       g.append('line')
+        //.attr('class', isTarget ? 'geo-tick geo-tick--target' : 'geo-tick')
         .attr('class', 'geo-tick')
         .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
         .attr('y1', 0).attr('y2', 0);
 
       g.append('text')
+        //.attr('class', isTarget ? 'geo-depth geo-depth--target' : 'geo-depth')
         .attr('class', 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
         .text(top.planTvdDepth.toLocaleString());
 
       g.append('text')
+        //.attr('class', isTarget ? 'geo-code geo-code--target' : 'geo-code')
         .attr('class', 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
@@ -281,26 +302,18 @@ export class WellBoreViewComponent implements OnInit {
         .attr('height', 0);
 
       if (csg.csgType === 'Gravel Pack') {
-        // Starts at the deepest solid casing shoe (top of liner/screen)
-        // Ends at the liner shoe — gravel must be shorter than (contained within) the liner
-        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
-        const liner        = casings.find(c => c.csgType === 'Liner');
-        const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
-        const gravelBottomPx = liner ? scale(liner.csgDepth) : bottomPx;
 
-        // Gravel fills around the liner screen but INSIDE the casing wall:
-        //   Gravel fills a thin band JUST INSIDE the liner screen wall:
-        //   outer edge  = screenHW       (inner wall of liner screen)
-        //   inner edge  = screenHW - 10  (thin band hugging the screen wall)
-        //   annulusWidth = 10, annulusCenter = screenHW - 5
-        const innerHW       = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
-        const screenHW      = innerHW - 10;
-        const annulusWidth  = 10;                    // thin band matching screen tube thickness
+        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+
+        const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
+        const screenHW = innerHW - 10;
+        const annulusWidth = 10;                    // thin band matching screen tube thickness
         const annulusCenter = screenHW - (annulusWidth / 2);  // hugs the inner wall of screen
 
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx-15))
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, bottomPx))
           .attr('stroke', 'url(#gravelpattern)')
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
@@ -338,10 +351,10 @@ export class WellBoreViewComponent implements OnInit {
       const shoePx = scale(csg.csgDepth);
 
       const rEdge = csg.csgType === 'Gravel Pack'
-        ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)  // screenHW
+        ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
         : centerX + hw;
 
-      const lEnd   = rEdge + 22;
+      const lEnd = rEdge + 22;
       const labelX = lEnd + 8;
 
       const lg = this.rootG.append('g')
@@ -438,16 +451,16 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW     = openHoleHalfWidth(innerHW);
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const ohHW = openHoleHalfWidth(innerHW);
     const screenHW = innerHW - 10;
 
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const liner        = data.casings.find(c => c.csgType === 'Liner');
+    const liner = data.casings.find(c => c.csgType === 'Liner');
 
-    const shoePx       = scale(deepestSolid.csgDepth);
-    const tdPx         = scale(data.totalDepth);
-    const ratHolePx    = 15;
+    const shoePx = scale(deepestSolid.csgDepth);
+    const tdPx = scale(data.totalDepth);
+    const ratHolePx = 15;
     const screenBottomPx = liner ? scale(liner.csgDepth) : (tdPx - ratHolePx);
 
     const clipId = 'dyn-oh-clip';
@@ -467,10 +480,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
       .attr('clip-path', `url(#${clipId})`);
 
-    const sl = centerX - screenHW, sr = centerX + screenHW;
-    const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
-    hangerG.append('path').attr('d', `M${sl},${shoePx} L${sl},${shoePx + 9} L${sl + 18},${shoePx}`);
-    hangerG.append('path').attr('d', `M${sr},${shoePx} L${sr},${shoePx + 9} L${sr - 18},${shoePx}`);
+    // Hanger drawn separately in drawScreenHanger() after drawCasings() so it renders on top
 
     const ohLY = shoePx + (tdPx - shoePx) * 0.2;
     const ohLG = this.rootG.append('g').attr('class', 'open-hole-label').style('opacity', 0);
@@ -505,9 +515,44 @@ export class WellBoreViewComponent implements OnInit {
     const ohDelay = ANIM.OVERLAY_DELAY;
     clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
       .attr('height', tdPx - shoePx + 20);
-    hangerG.transition().delay(ohDelay).duration(250).style('opacity', 1);
+    // hangerG animation is handled inside drawScreenHanger()
     ohLG.transition().delay(ohDelay + 300).duration(300).style('opacity', 1);
     scrLG.transition().delay(ohDelay + 400).duration(300).style('opacity', 1);
+  }
+
+  private drawScreenHanger(
+    data: WellboreDiagramData,
+    centerX: number,
+    scale: ReturnType<typeof createDepthScale>,
+  ): void {
+    if (!data.casings.length) return;
+
+    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const screenHW = innerHW - 10;
+
+    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
+    const shoePx = scale(deepestSolid.csgDepth);
+
+    const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx + 6, screenHW);
+
+    const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
+    hangerG.append('path')
+      .attr('class', 'screen-hanger screen-hanger--left')
+      .attr('stroke', '#333').attr('stroke-width', '1')
+      .attr('fill', '#333')
+      .attr('d', hangerLeft);
+    hangerG.append('path')
+      .attr('class', 'screen-hanger screen-hanger--right')
+      .attr('stroke', '#333').attr('stroke-width', '1')
+      .attr('fill', '#333')
+      .attr('d', hangerRight);
+
+    hangerG.transition()
+      .delay(ANIM.OVERLAY_DELAY + ANIM.CASING_DURATION)
+      .duration(300)
+      .ease(easeCubicInOut)
+      .style('opacity', 1);
   }
 
   private drawDrillArrow(
@@ -551,16 +596,16 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.prewap) return;
 
     const estTargetDepth = data.prewap.estTargetDepth;
-    const currentDepth   = data.currentDepth;
+    const currentDepth = data.currentDepth;
 
     // TEMP: hardcoded for testing — bypassing the guard
     // if (currentDepth >= estTargetDepth) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW    = openHoleHalfWidth(innerHW);
+    const ohHW = openHoleHalfWidth(innerHW);
 
-    const topPx    = scale(currentDepth);
+    const topPx = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);
 
     const lx = centerX - ohHW;
