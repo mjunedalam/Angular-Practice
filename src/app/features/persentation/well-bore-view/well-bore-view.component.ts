@@ -304,7 +304,12 @@ export class WellBoreViewComponent implements OnInit {
       if (csg.csgType === 'Gravel Pack') {
 
         const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const liner        = casings.find(c => c.csgType === 'Liner');
         const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+
+        // Gravel ends at 70% of the liner screen length — visibly shorter than the liner
+        const linerBottomPx = liner ? scale(liner.csgDepth) : bottomPx;
+        const gravelBottomPx = startDepthPx + (linerBottomPx - startDepthPx) * 0.70;
 
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
         const screenHW = innerHW - 10;
@@ -313,7 +318,7 @@ export class WellBoreViewComponent implements OnInit {
 
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, bottomPx))
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx))
           .attr('stroke', 'url(#gravelpattern)')
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
@@ -350,6 +355,16 @@ export class WellBoreViewComponent implements OnInit {
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
       const shoePx = scale(csg.csgDepth);
 
+      // For Gravel Pack label, point to the actual drawn bottom (70% of liner screen)
+      let labelYPx = shoePx;
+      if (csg.csgType === 'Gravel Pack') {
+        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+        const liner        = casings.find(c => c.csgType === 'Liner');
+        const startPx      = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+        const linerBottomPx = liner ? scale(liner.csgDepth) : shoePx;
+        labelYPx = startPx + (linerBottomPx - startPx) * 0.70;
+      }
+
       const rEdge = csg.csgType === 'Gravel Pack'
         ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
         : centerX + hw;
@@ -364,16 +379,16 @@ export class WellBoreViewComponent implements OnInit {
       lg.append('line')
         .attr('class', 'casing-label__line')
         .attr('x1', rEdge).attr('x2', lEnd)
-        .attr('y1', shoePx).attr('y2', shoePx);
+        .attr('y1', labelYPx).attr('y2', labelYPx);
 
       lg.append('path')
         .attr('class', 'casing-label__arrow')
-        .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
+        .attr('d', buildArrowHeadRight(lEnd, labelYPx, 6));
 
       if (csg.csgType === 'Gravel Pack') {
         lg.append('text')
           .attr('class', 'casing-label__primary')
-          .attr('x', labelX).attr('y', shoePx + 4)
+          .attr('x', labelX).attr('y', labelYPx + 4)
           .text(csg.csgRemarks || 'Gravel Pack');
       } else {
         lg.append('text')
