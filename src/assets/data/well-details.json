@@ -1,4 +1,4 @@
-   {
+{
   "statusCode": 200,
   "error": false,
   "message": "Success",
@@ -400,140 +400,151 @@
         }
       ],
       "BITINFO": [],
-       "EXAD_GWD_IR_HEADER":[{
-            "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
-            "mudRemarks": "Customize Mud Logging Services is required in this well from surface to TD.",
-            "loggingRemarks": ""
-        }],
-        "EXAD_GWD_IR_TOPS":[
-            {
-                "stLongCd": "AHMD",
-                "planTvdDepth": 2760,
-                "planSsDepth": -1815
-            },
-            {
-                "stLongCd": "ARUM",
-                "planTvdDepth": 1960,
-                "planSsDepth": -1015
-            },
-            {
-                "stLongCd": "LAMS",
-                "planTvdDepth": 2450,
-                "planSsDepth": -1505
-            },
-            {
-                "stLongCd": "WASI",
-                "planTvdDepth": 800,
-                "planSsDepth": 145
-            },
-            {
-                "stLongCd": "SFNY",
-                "planTvdDepth": 3055,
-                "planSsDepth": -2110
-            },
-            {
-                "stLongCd": "SHUB",
-                "planTvdDepth": 3825,
-                "planSsDepth": -2880
-            },
-            {
-                "stLongCd": "UMER",
-                "planTvdDepth": 880,
-                "planSsDepth": 65
-            }
-        ],
-        "EXAD_GWD_IR_CASING":[{
-            "csgSize": "13 3/8",
-            "csgType": "Casing",
-            "csgDepth": 1980,
-            "csgRemarks": "+/- 20 ft into ARUM"
-        },
-    {
-            "csgSize": "18 5/8",
-            "csgType": "Casing",
-            "csgDepth": 820,
-            "csgRemarks": "+/- 20 into RUS"
-        },{
-            "csgSize": "24",
-            "csgType": "Conductor",
-            "csgDepth": 100,
-            "csgRemarks": "test"
+      "EXAD_GWD_IR_HEADER": [
+        {
+          "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
+          "mudRemarks": "Customize Mud Logging Services is required in this well from surface to TD.",
+          "loggingRemarks": ""
+        }
+      ],
+      "EXAD_GWD_IR_TOPS": [
+        {
+          "stLongCd": "AHMD",
+          "planTvdDepth": 2760,
+          "planSsDepth": -1815
         },
         {
-            "csgSize": "24",
-            "csgType": "Conductor",
-            "csgDepth": 2500,
-            "csgRemarks": "test"
-        },{
-            "csgSize": "9 5/8",
-            "csgType": "Liner",
-            "csgDepth": 3075,
-            "csgRemarks": "+/- 20 ft of screen"
+          "stLongCd": "ARUM",
+          "planTvdDepth": 1960,
+          "planSsDepth": -1015
+        },
+        {
+          "stLongCd": "LAMS",
+          "planTvdDepth": 2450,
+          "planSsDepth": -1505
+        },
+        {
+          "stLongCd": "WASI",
+          "planTvdDepth": 800,
+          "planSsDepth": 145
+        },
+        {
+          "stLongCd": "SFNY",
+          "planTvdDepth": 3055,
+          "planSsDepth": -2110
+        },
+        {
+          "stLongCd": "SHUB",
+          "planTvdDepth": 3790,
+          "planSsDepth": -2880
+        },
+        {
+          "stLongCd": "UMER",
+          "planTvdDepth": 880,
+          "planSsDepth": 65
+        }
+      ],
+      "EXAD_GWD_IR_CASING": [
+        {
+          "csgSize": "13 3/8",
+          "csgType": "Casing",
+          "csgDepth": 1980,
+          "csgRemarks": "+/- 20 ft into ARUM"
+        },
+        {
+          "csgSize": "18 5/8",
+          "csgType": "Casing",
+          "csgDepth": 820,
+          "csgRemarks": "+/- 20 into RUS"
+        },
+        {
+          "csgSize": "24",
+          "csgType": "Conductor",
+          "csgDepth": 100,
+          "csgRemarks": "test"
+        },
+        {
+          "csgSize": "10 3/4",
+          "csgType": "Casing",
+          "csgDepth": 2500,
+          "csgRemarks": "+/- 20 ft into LAMS"
+        },
+        {
+          "csgSize": "9 5/8",
+          "csgType": "Liner",
+          "csgDepth": 3075,
+          "csgRemarks": "+/- 20 ft of screen"
         },
         {
           "csgType": "Gravel Pack",
           "csgSize": 8.5,
-          "csgDepth": 4000,
+          "csgDepth": 3350,
           "csgRemarks": "Wirewrap / Mesh"
         }
-      
       ],
-        "EXAD_GWD_IR_HYDROGEOLOGY":[{
-            "flowType": "N",
-            "estTargetAquifier": "WASI",
-            "estStaticWaterLevel": 110,
-            "estWaterQuality": 2800,
-            "estProductivity": 500,
-            "estH2s": 0
-        }],
-        "EXAD_GWD_IR_WATER":[{
-            "offsetWaterWell": "ANDR_963",
-            "distance": 6.4,
-            "direction": "SW",
-            "aquifer": "WASI",
-            "td": 3600,
-            "flowRate": 770,
-            "rpm": 1500,
-            "staticWaterLevel": 108.4,
-            "specificCapacity": 5.64,
-            "drawDown": 136.58,
-            "fieldTds": 2030,
-            "h2s": 0,
-            "testDuration": 180
-        },
-{
-            "offsetWaterWell": "ANDR_7654",
-            "distance": 8.4,
-            "direction": "SW",
-            "aquifer": "WASI",
-            "td": 6600,
-            "flowRate": 770,
-            "rpm": 1500,
-            "staticWaterLevel": 108.4,
-            "specificCapacity": 5.64,
-            "drawDown": 136.58,
-            "fieldTds": 2030,
-            "h2s": 0,
-            "testDuration": 180
+      "EXAD_GWD_IR_HYDROGEOLOGY": [
+        {
+          "flowType": "N",
+          "estTargetAquifier": "WASI",
+          "estStaticWaterLevel": 110,
+          "estWaterQuality": 2800,
+          "estProductivity": 500,
+          "estH2s": 0
         }
       ],
-        "EXAD_RCD_PREWAP": [{
-            "surfaceElevation": 945,
-            "estTargetDepth": 3800,
-            "targetFormation": "WSIA",
-            "supportedBusiness": "ANDR-814 REPLACEMENT"
-        }],
-        "WATER_WELL_TEST_OUTCOME": [{
-            "wellName": "ANDR-978",
-            "testType": "flow",
-            "aquifer": "UMER",
-            "rpm": 1700,
-            "flowRate":1000,
-            "temperature": 61,
-            "tds": 2900,
-            "producitivty": 4.37,
-            "h2s": 0
-        }]
+      "EXAD_GWD_IR_WATER": [
+        {
+          "offsetWaterWell": "ANDR_963",
+          "distance": 6.4,
+          "direction": "SW",
+          "aquifer": "WASI",
+          "td": 3600,
+          "flowRate": 770,
+          "rpm": 1500,
+          "staticWaterLevel": 108.4,
+          "specificCapacity": 5.64,
+          "drawDown": 136.58,
+          "fieldTds": 2030,
+          "h2s": 0,
+          "testDuration": 180
+        },
+        {
+          "offsetWaterWell": "ANDR_7654",
+          "distance": 8.4,
+          "direction": "SW",
+          "aquifer": "WASI",
+          "td": 6600,
+          "flowRate": 770,
+          "rpm": 1500,
+          "staticWaterLevel": 108.4,
+          "specificCapacity": 5.64,
+          "drawDown": 136.58,
+          "fieldTds": 2030,
+          "h2s": 0,
+          "testDuration": 180
+        }
+      ],
+      "EXAD_RCD_PREWAP": [
+        {
+          "surfaceElevation": 945,
+          "estTargetDepth": 4800,
+          "targetFormation": "WASI",
+          "supportedBusiness": "ANDR-814 REPLACEMENT"
+        }
+      ],
+      "WATER_WELL_TEST_OUTCOME": [
+        {
+          "wellName": "ANDR-978",
+          "testType": "flow",
+          "aquifer": "UMER",
+          "rpm": 1700,
+          "flowRate": 1000,
+          "temperature": 61,
+          "tds": 2900,
+          "producitivty": 4.37,
+          "h2s": 0
+        }
+      ]
     }
   ]
 }

@@ -41,15 +41,17 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   depthAxisX: 60, // Leaves exactly 30 units from the right edge of the Depth SVG
   
   wellboreViewWidth: 980,
-  geoLineX: 50,   // Starts exactly 50 units from the left edge of the Wellbore SVG
-  
-  // Total virtual gap = 30 + 50 = 80 units. 
-  // True center is 40 units. 
-  // 40 - 30 (the depth SVG gap) = 10 units perfectly into the Wellbore SVG.
-  depthArrowX: 10, 
-  // ------------------------------
-  
-  casingCenterX: 560,  // shifted right to create gap between geo horizon and bore structure
+
+  // ── Horizontal zone layout (left → right inside wellbore SVG) ──────────
+  // [0 - 28]   drill arrow body  (centerX=20, halfWidth=10 → spans 10-30)
+  // [28 - 95]  geo depth labels  (right-aligned at geoLineX-17 = 78, ~5 chars)
+  // [95]       geo axis line
+  // [95 - 170] geo formation codes (left start at geoLineX+18 = 113)
+  // [170+]     gap before bore structure
+  // ─────────────────────────────────────────────────────────────────────
+  depthArrowX: 20,    // arrow centerX — spans x=10 to x=30, clear of geo labels
+  geoLineX: 95,       // geo axis — depth labels end ~x=78, codes start ~x=113
+  casingCenterX: 560, // bore structure center — plenty of gap after geo codes
   baseHalfWidth: 48,
   halfWidthIncrement: 16,
   shoeCurveOffset: 12,

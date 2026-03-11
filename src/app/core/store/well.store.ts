@@ -127,11 +127,9 @@ export const WellStore = signalStore(
         totalDepth: computed(() => {
             const d = wellDetails();
             if (!d) return 0;
-            const estTargetDepth = d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
-            const maxCasing      = Math.max(0, ...(d.EXAD_GWD_IR_CASING ?? []).map(c => c.csgDepth ?? 0));
-            const maxGeoTop      = Math.max(0, ...(d.EXAD_GWD_IR_TOPS ?? []).map(t => t.planTvdDepth ?? 0));
-            // totalDepth driven by estTargetDepth — scale always fits all structural data
-            return Math.max(estTargetDepth, maxCasing, maxGeoTop);
+            // totalDepth = estTargetDepth strictly — the planned target is the master scale anchor.
+            // Casing or geo top data must NEVER push the scale beyond the planned TD.
+            return d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
         }),
 
         /** Total number of pages given PAGE_SIZE */
@@ -172,14 +170,11 @@ export const WellStore = signalStore(
         diagramData: computed((): WellboreDiagramData | null => {
             const d = wellDetails();
             if (!d) return null;
-            const estTargetDepth = d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
-            const maxCasing      = Math.max(0, ...(d.EXAD_GWD_IR_CASING ?? []).map(c => c.csgDepth ?? 0));
-            const maxGeoTop      = Math.max(0, ...(d.EXAD_GWD_IR_TOPS ?? []).map(t => t.planTvdDepth ?? 0));
-            // totalDepth driven by estTargetDepth — consistent with store.totalDepth()
-            const totalDepth   = Math.max(estTargetDepth, maxCasing, maxGeoTop);
-            // currentDepth = wPrsntDpth capped to totalDepth to keep drill arrow on-scale
+            // totalDepth = estTargetDepth strictly — master scale anchor, never exceeded
+            const totalDepth   = d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
+            // currentDepth = wPrsntDpth capped to totalDepth — bad data can never blow the scale
             const rawDepth     = d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ?? 0;
-            const currentDepth = rawDepth > 0 && rawDepth <= totalDepth ? rawDepth : estTargetDepth;
+            const currentDepth = rawDepth > 0 && rawDepth <= totalDepth ? rawDepth : totalDepth;
             return {
                 wellName: d.WELL_MASTER?.[0]?.well ?? '',
                 totalDepth,

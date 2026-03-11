@@ -117,9 +117,10 @@ export class WellBoreViewComponent implements OnInit {
     const t_hangerStart   = t_gravelDone + ANIM.SEQ_GAP;
     const t_hangerDone    = t_hangerStart + ANIM.HANGER_DURATION;
 
-    // Phase 5: drill arrow travels down
-    const t_drillStart    = t_hangerDone + ANIM.SEQ_GAP;
-    const t_drillDone     = t_drillStart + ANIM.SCALE_DURATION;
+    // Phase 5: drill arrow travels down simultaneously with casings
+    // Duration = total casing animation time so arrow reaches bottom when last casing finishes
+    const t_drillStart    = 0;
+    const t_drillDone     = t_casingsDone;
 
     // Phase 6: labels + water level stagger in
     const t_labelsStart   = t_casingsDone + ANIM.SEQ_GAP;  // casing labels alongside OH
@@ -143,7 +144,7 @@ export class WellBoreViewComponent implements OnInit {
     // Labels after casings done
     this.drawCasingLabels(data.casings, casingCenterX, scale, t_labelsStart);
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
-    this.drawDrillArrow(data, scale, t_drillStart);
+    this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
     this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
   }
@@ -231,7 +232,7 @@ export class WellBoreViewComponent implements OnInit {
   private drawStaticChrome(geoLineX: number, centerX: number): void {
     this.rootG.append('line')
       .attr('class', 'ground-line')
-      .attr('x1', centerX - 230).attr('x2', centerX + 320)
+      .attr('x1', 0).attr('x2', centerX + 320)
       .attr('y1', -3).attr('y2', -3);
 
     this.rootG.append('text')
@@ -628,17 +629,20 @@ export class WellBoreViewComponent implements OnInit {
     data: WellboreDiagramData,
     scale: ReturnType<typeof createDepthScale>,
     drillStart: number,
+    t_casingsDone: number,
   ): void {
-    const endPx = scale(Math.min(data.currentDepth, data.totalDepth));
-    const arrowCx = 42;
+    // Arrow always travels to totalDepth (full scale bottom)
+    const arrowHeadH = 12;  // must match the arrowhead height passed to buildDepthArrow
+    const endPx = scale(data.totalDepth) - arrowHeadH;
+    const arrowCx = this.layout.depthArrowX;
+    const duration = t_casingsDone - drillStart;  // synced to casing draw time
 
-    // Drill arrow travels down after all casings are placed
     this.rootG.append('path')
       .attr('class', 'depth-arrow')
       .attr('d', buildDepthArrow(0, 0, arrowCx, 10, 12))
       .transition()
       .delay(drillStart)
-      .duration(ANIM.SCALE_DURATION)
+      .duration(duration)
       .ease(easeCubicInOut)
       .attr('d', buildDepthArrow(0, endPx, arrowCx, 10, 12));
   }
