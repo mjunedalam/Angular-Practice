@@ -625,8 +625,8 @@ export class WellBoreViewComponent implements OnInit {
     const topPx    = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);
     const height   = bottomPx - topPx;
-    const width    = ohHW * 2;
-    const lx       = centerX - ohHW;
+    const width    = ohHW * 2 + 160;  // +80 units each side
+    const lx       = centerX - ohHW - 80;
     const midY     = topPx + height / 2;
 
     const ndg = this.rootG.append('g')
