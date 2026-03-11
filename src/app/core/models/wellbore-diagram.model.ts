@@ -38,10 +38,10 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   
   // -- RESPONSIVE MIDPOINT MATH --
   depthScaleWidth: 90,
-  depthAxisX: 62, // Leaves exactly 30 units from the right edge of the Depth SVG
+  depthAxisX: 60, // Leaves exactly 30 units from the right edge of the Depth SVG
   
   wellboreViewWidth: 980,
-  geoLineX: 155,   // Starts exactly 50 units from the left edge of the Wellbore SVG
+  geoLineX: 50,   // Starts exactly 50 units from the left edge of the Wellbore SVG
   
   // Total virtual gap = 30 + 50 = 80 units. 
   // True center is 40 units. 
@@ -49,19 +49,68 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   depthArrowX: 10, 
   // ------------------------------
   
-  casingCenterX: 650,  // shifted right to create gap between geo horizon and bore structure
+  casingCenterX: 560,  // shifted right to create gap between geo horizon and bore structure
   baseHalfWidth: 48,
   halfWidthIncrement: 16,
   shoeCurveOffset: 12,
 };
 
-// Smoother, more realistic cascading animation timings
+// ─── Animation mode ────────────────────────────────────────────────────────
+// 'realistic' : full cinematic sequence — casings drill down one by one,
+//               then open-hole / overlays appear after all casings finish.
+// 'fast'      : same sequence but 3× faster (good for development).
+// 'instant'   : no animation, everything visible immediately.
+export type AnimMode = 'realistic' | 'fast' | 'instant';
+
+export const ANIM_MODE: AnimMode = 'fast';   // ← change this to switch modes
+
+// Base timing profile (realistic).
+// 'fast' divides every duration & delay by FAST_FACTOR.
+// 'instant' sets everything to 0.
+const FAST_FACTOR = 3;
+
+function animValue(base: number): number {
+  if (ANIM_MODE === 'instant') return 0;
+  if (ANIM_MODE === 'fast')    return Math.round(base / FAST_FACTOR);
+  return base;
+}
+
+// ─── Core durations ────────────────────────────────────────────────────────
+const _BASE = {
+  SCALE_DURATION:   1000,   // depth scale draws down
+  TICK_BASE_DELAY:  120,    // stagger for each depth tick
+  GEO_DELAY:        200,    // geologic tops start appearing
+  GEO_STAGGER:      55,     // stagger between each geo top
+  CASING_DURATION:  800,    // each casing clip reveal duration
+  CASING_STAGGER:   420,    // gap between each casing starting
+  OH_DURATION:      800,    // open hole + liner screen clip reveal
+  GRAVEL_DURATION:  600,    // gravel pack fill reveal
+  HANGER_DURATION:  300,    // hanger bracket fade-in
+  OVERLAY_FADE:     400,    // generic label / overlay fade-in
+  SEQ_GAP:          200,    // breathing gap between sequential phases
+};
+
+// Number of structural casings determines when the last casing finishes.
+// Components that must wait use computeOverlayDelay(casingCount).
+export function computeOverlayDelay(casingCount: number): number {
+  // Last casing (index 0 in draw order = innermost = last to animate) starts at:
+  //   (casingCount - 1) * CASING_STAGGER, finishes after + CASING_DURATION
+  const lastCasingDone = (casingCount - 1) * _BASE.CASING_STAGGER + _BASE.CASING_DURATION;
+  return animValue(lastCasingDone + 100); // 100ms breathing room
+}
+
 export const ANIM = {
-  SCALE_DURATION: 1200,
-  TICK_BASE_DELAY: 150,
-  CASING_DURATION: 900,
-  CASING_STAGGER: 450,
-  GEO_STAGGER: 60,
-  GEO_DELAY: 200,
-  OVERLAY_DELAY: 1600,
+  SCALE_DURATION:  animValue(_BASE.SCALE_DURATION),
+  TICK_BASE_DELAY: animValue(_BASE.TICK_BASE_DELAY),
+  GEO_DELAY:       animValue(_BASE.GEO_DELAY),
+  GEO_STAGGER:     animValue(_BASE.GEO_STAGGER),
+  CASING_DURATION: animValue(_BASE.CASING_DURATION),
+  CASING_STAGGER:  animValue(_BASE.CASING_STAGGER),
+  OH_DURATION:      animValue(_BASE.OH_DURATION),
+  GRAVEL_DURATION:  animValue(_BASE.GRAVEL_DURATION),
+  HANGER_DURATION:  animValue(_BASE.HANGER_DURATION),
+  OVERLAY_FADE:     animValue(_BASE.OVERLAY_FADE),
+  SEQ_GAP:          animValue(_BASE.SEQ_GAP),
+  // Legacy alias so depth-scale component keeps working unchanged
+  OVERLAY_DELAY:   animValue((_BASE.CASING_STAGGER * 3) + _BASE.CASING_DURATION + 100),
 } as const;

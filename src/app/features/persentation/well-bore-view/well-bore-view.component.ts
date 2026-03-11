@@ -11,7 +11,7 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/wellbore-diagram.model';
+import { ANIM, ANIM_MODE, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/wellbore-diagram.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/top-sir.model';
 import {
@@ -91,21 +91,61 @@ export class WellBoreViewComponent implements OnInit {
 
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
     const scale = createDepthScale(data.totalDepth, drawingHeight);
-
     const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
 
+    // ── Build a strict sequential timeline ─────────────────────────────────
+    // Each phase starts only after the previous phase fully completes.
+    // t = absolute ms from t=0 when redraw() fires.
+
+    const structuralCasings = data.casings.filter(
+      c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
+    );
+
+    // Phase 1: casings drill down (outer → inner)
+    const t_casingsStart  = 0;
+    const t_casingsDone   = computeOverlayDelay(structuralCasings.length); // last casing finishes
+
+    // Phase 2: open hole clip reveals after all casings done
+    const t_ohStart       = t_casingsDone + ANIM.SEQ_GAP;
+    const t_ohDone        = t_ohStart + ANIM.OH_DURATION;
+
+    // Phase 3: gravel pack after open hole is visible
+    const t_gravelStart   = t_ohDone + ANIM.SEQ_GAP;
+    const t_gravelDone    = t_gravelStart + ANIM.GRAVEL_DURATION;
+
+    // Phase 4: hanger appears after gravel
+    const t_hangerStart   = t_gravelDone + ANIM.SEQ_GAP;
+    const t_hangerDone    = t_hangerStart + ANIM.HANGER_DURATION;
+
+    // Phase 5: drill arrow travels down
+    const t_drillStart    = t_hangerDone + ANIM.SEQ_GAP;
+    const t_drillDone     = t_drillStart + ANIM.SCALE_DURATION;
+
+    // Phase 6: labels + water level stagger in
+    const t_labelsStart   = t_casingsDone + ANIM.SEQ_GAP;  // casing labels alongside OH
+    const t_ohLabelStart  = t_ohDone + ANIM.SEQ_GAP;
+    const t_waterStart    = t_ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+    const t_notDrilledStart = t_drillDone + ANIM.SEQ_GAP;
+    const t_tdLabelStart  = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+
+    // ── Draw (SVG paint order: earlier = behind) ───────────────────────────
+    // Phase 0: static chrome + geo tops — immediate
     this.drawStaticChrome(geoLineX, casingCenterX);
     this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
 
-    this.drawOpenHoleAndScreen(data, casingCenterX, scale);
-    this.drawScreenHanger(data, casingCenterX, scale);  // drawn before casings so it sits behind them
-    this.drawCasings(data.casings, casingCenterX, scale);
+    // Open hole paths drawn BEFORE casings so casing walls paint over them
+    this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
+    this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
 
-    this.drawCasingLabels(data.casings, casingCenterX, scale);
-    this.drawWaterLevel(data, casingCenterX, scale);
-    this.drawDrillArrow(data, scale);
-    this.drawNotDrilledZone(data, casingCenterX, scale);
-    this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight);
+    // Casings on top of open hole
+    this.drawCasings(data.casings, casingCenterX, scale, t_casingsStart, t_gravelStart, t_gravelDone);
+
+    // Labels after casings done
+    this.drawCasingLabels(data.casings, casingCenterX, scale, t_labelsStart);
+    this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
+    this.drawDrillArrow(data, scale, t_drillStart);
+    this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart);
+    this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
   }
 
   private addStaticDefs(defs: DefsSel): void {
@@ -273,6 +313,9 @@ export class WellBoreViewComponent implements OnInit {
     casings: ICasingIR[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    casingsStart: number,
+    gravelStart: number,
+    gravelDone: number,
   ): void {
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
 
@@ -323,6 +366,13 @@ export class WellBoreViewComponent implements OnInit {
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
           .attr('clip-path', `url(#${clipId})`);
+        // Gravel clip uses its own sequential timing (after open hole)
+        clipRect.transition()
+          .delay(gravelStart)
+          .duration(ANIM.GRAVEL_DURATION)
+          .ease(easeCubicInOut)
+          .attr('height', gravelBottomPx + 20);
+        return;  // skip the generic clipRect transition below
       } else {
         this.rootG.append('path')
           .attr('class', 'casing')
@@ -333,7 +383,7 @@ export class WellBoreViewComponent implements OnInit {
       }
 
       clipRect.transition()
-        .delay(delay)
+        .delay(casingsStart + delay)
         .duration(ANIM.CASING_DURATION)
         .ease(easeCubicInOut)
         .attr('height', bottomPx + shoeCurveOffset + 20);
@@ -344,9 +394,10 @@ export class WellBoreViewComponent implements OnInit {
     casings: ICasingIR[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    labelsStart: number,
   ): void {
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const allDone = ANIM.CASING_STAGGER * casings.length + ANIM.CASING_DURATION;
+    const allDone = labelsStart;
 
     casings.forEach((csg, i) => {
       if (csg.csgType === 'Liner') return;
@@ -424,6 +475,7 @@ export class WellBoreViewComponent implements OnInit {
     data: WellboreDiagramData,
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    waterStart: number,
   ): void {
     if (!data.hydrogeology) return;
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
@@ -455,13 +507,16 @@ export class WellBoreViewComponent implements OnInit {
       .attr('x', lR - 350).attr('y', wPx + 4)
       .text(label);
 
-    wg.transition().delay(ANIM.OVERLAY_DELAY).duration(400).ease(easeCubicInOut).style('opacity', 1);
+    wg.transition().delay(waterStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
   }
 
   private drawOpenHoleAndScreen(
     data: WellboreDiagramData,
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    ohStart: number,
+    ohDone: number,
+    ohLabelStart: number,
   ): void {
     if (!data.casings.length) return;
 
@@ -527,18 +582,17 @@ export class WellBoreViewComponent implements OnInit {
       .attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4)
       .text(screenLabel);
 
-    const ohDelay = ANIM.OVERLAY_DELAY;
-    clipRect.transition().delay(ohDelay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
+    clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut)
       .attr('height', tdPx - shoePx + 20);
-    // hangerG animation is handled inside drawScreenHanger()
-    ohLG.transition().delay(ohDelay + 300).duration(300).style('opacity', 1);
-    scrLG.transition().delay(ohDelay + 400).duration(300).style('opacity', 1);
+    ohLG.transition().delay(ohLabelStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+    scrLG.transition().delay(ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
   }
 
   private drawScreenHanger(
     data: WellboreDiagramData,
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    hangerStart: number,
   ): void {
     if (!data.casings.length) return;
 
@@ -564,8 +618,8 @@ export class WellBoreViewComponent implements OnInit {
       .attr('d', hangerRight);
 
     hangerG.transition()
-      .delay(ANIM.OVERLAY_DELAY + ANIM.CASING_DURATION)
-      .duration(300)
+      .delay(hangerStart)
+      .duration(ANIM.HANGER_DURATION)
       .ease(easeCubicInOut)
       .style('opacity', 1);
   }
@@ -573,14 +627,17 @@ export class WellBoreViewComponent implements OnInit {
   private drawDrillArrow(
     data: WellboreDiagramData,
     scale: ReturnType<typeof createDepthScale>,
+    drillStart: number,
   ): void {
     const endPx = scale(Math.min(data.currentDepth, data.totalDepth));
     const arrowCx = 42;
 
+    // Drill arrow travels down after all casings are placed
     this.rootG.append('path')
       .attr('class', 'depth-arrow')
       .attr('d', buildDepthArrow(0, 0, arrowCx, 10, 12))
       .transition()
+      .delay(drillStart)
       .duration(ANIM.SCALE_DURATION)
       .ease(easeCubicInOut)
       .attr('d', buildDepthArrow(0, endPx, arrowCx, 10, 12));
@@ -590,6 +647,7 @@ export class WellBoreViewComponent implements OnInit {
     totalDepth: number,
     centerX: number,
     drawingHeight: number,
+    tdLabelStart: number,
   ): void {
     this.rootG.append('text')
       .attr('class', 'total-depth-main')
@@ -598,8 +656,8 @@ export class WellBoreViewComponent implements OnInit {
       .style('opacity', 0)
       .text(`Total Depth : ${formatDepth(totalDepth)}`)
       .transition()
-      .delay(ANIM.OVERLAY_DELAY + 200)
-      .duration(400)
+      .delay(tdLabelStart)
+      .duration(ANIM.OVERLAY_FADE)
       .style('opacity', 1);
   }
 
@@ -607,6 +665,7 @@ export class WellBoreViewComponent implements OnInit {
     data: WellboreDiagramData,
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
+    notDrilledStart: number,
   ): void {
     if (!data.prewap) return;
 
@@ -669,8 +728,8 @@ export class WellBoreViewComponent implements OnInit {
       .text(`${undrilledFt.toLocaleString()} ft remaining`);
 
     ndg.transition()
-      .delay(ANIM.OVERLAY_DELAY + 300)
-      .duration(400)
+      .delay(notDrilledStart)
+      .duration(ANIM.OVERLAY_FADE)
       .ease(easeCubicInOut)
       .style('opacity', 1);
   }
