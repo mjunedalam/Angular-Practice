@@ -150,19 +150,24 @@ export class WellBoreViewComponent implements OnInit {
   }
 
   private addStaticDefs(defs: DefsSel): void {
+    // Dark-theme casing gradients — metallic steel look on dark canvas
     this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%', color: '#5d6264' },
-      { offset: '50%', color: '#ffffff' },
-      { offset: '100%', color: '#5d6264' },
+      { offset: '0%',   color: '#2d3748' },
+      { offset: '40%',  color: '#c9d1d9' },
+      { offset: '60%',  color: '#e6edf3' },
+      { offset: '100%', color: '#2d3748' },
     ]);
     this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%', color: '#4ca746' },
-      { offset: '100%', color: '#4ca746' },
+      { offset: '0%',   color: '#1a3a2a' },
+      { offset: '45%',  color: '#3fb950' },
+      { offset: '55%',  color: '#56d364' },
+      { offset: '100%', color: '#1a3a2a' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%', color: '#5d6264' },
-      { offset: '50%', color: '#ffffff' },
-      { offset: '100%', color: '#5d6264' },
+      { offset: '0%',   color: '#2d3748' },
+      { offset: '40%',  color: '#8b949e' },
+      { offset: '60%',  color: '#c9d1d9' },
+      { offset: '100%', color: '#2d3748' },
     ]);
 
     const grid = defs.append('pattern')
@@ -171,8 +176,9 @@ export class WellBoreViewComponent implements OnInit {
       .attr('width', 6).attr('height', 6);
     grid.append('path')
       .attr('d', 'M6,-4 L6,6 L-4,6')
-      .attr('stroke', '#444')
-      .attr('stroke-width', 1.5)
+      .attr('stroke', '#58a6ff')
+      .attr('stroke-width', 1)
+      .attr('opacity', '0.35')
       .attr('fill', 'none');
 
     const gravelPattern = defs.append('pattern')
@@ -183,11 +189,13 @@ export class WellBoreViewComponent implements OnInit {
 
     gravelPattern.append('rect')
       .attr('x', 0).attr('y', 0)
-      .attr('width', 4).attr('height', 2);
+      .attr('width', 4).attr('height', 2)
+      .attr('fill', '#1a1a1a').attr('opacity', '0.85');
 
     gravelPattern.append('rect')
       .attr('x', 4).attr('y', 2)
-      .attr('width', 4).attr('height', 2);
+      .attr('width', 4).attr('height', 2)
+      .attr('fill', '#1a1a1a').attr('opacity', '0.85');
 
     const dashedPattern = defs.append('pattern')
       .attr('id', 'dashed')
@@ -348,12 +356,10 @@ export class WellBoreViewComponent implements OnInit {
       if (csg.csgType === 'Gravel Pack') {
 
         const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
-        const liner        = casings.find(c => c.csgType === 'Liner');
         const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
 
-        // Gravel ends at 70% of the liner screen length — visibly shorter than the liner
-        const linerBottomPx = liner ? scale(liner.csgDepth) : bottomPx;
-        const gravelBottomPx = startDepthPx + (linerBottomPx - startDepthPx) * 0.70;
+        // Gravel bottom = actual csgDepth from data, clamped to totalDepth scale
+        const gravelBottomPx = scale(csg.csgDepth);
 
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
         const screenHW = innerHW - 10;
@@ -407,14 +413,10 @@ export class WellBoreViewComponent implements OnInit {
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
       const shoePx = scale(csg.csgDepth);
 
-      // For Gravel Pack label, point to the actual drawn bottom (70% of liner screen)
+      // For Gravel Pack label, point to the actual csgDepth from data
       let labelYPx = shoePx;
       if (csg.csgType === 'Gravel Pack') {
-        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
-        const liner        = casings.find(c => c.csgType === 'Liner');
-        const startPx      = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
-        const linerBottomPx = liner ? scale(liner.csgDepth) : shoePx;
-        labelYPx = startPx + (linerBottomPx - startPx) * 0.70;
+        labelYPx = scale(csg.csgDepth);
       }
 
       const rEdge = csg.csgType === 'Gravel Pack'
