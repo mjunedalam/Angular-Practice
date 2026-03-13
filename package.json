@@ -21,6 +21,8 @@
     "@angular/router": "19.2.4",
     "@ngrx/operators": "19.0.1",
     "@ngrx/signals": "19.0.1",
+    "ag-grid-angular": "^35.1.0",
+    "ag-grid-community": "^35.1.0",
     "d3-ease": "3.0.1",
     "d3-scale": "4.0.2",
     "d3-selection": "3.0.0",

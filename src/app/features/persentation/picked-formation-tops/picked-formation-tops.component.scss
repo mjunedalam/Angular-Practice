@@ -1,69 +1,61 @@
 .formation-card {
-  background: #ffffff;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-}
+  box-shadow: 0 4px 16px rgba(0, 80, 160, 0.18);
 
-.formation-card__header {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #ffffff;
-  padding: 12px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.formation-table {
-  display: flex;
-  flex-direction: column;
-  
-  &__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    padding: 10px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 12px;
-    align-items: center;
-
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    &--header {
-      background: #1e3a8a;
-      color: #bfdbfe;
-      font-weight: 600;
-      border-bottom: none;
-    }
-  }
-
-  &__body {
-    .formation-table__row {
-      color: #334155;
-      font-weight: 500;
-      
-      &:nth-child(even) {
-        background-color: #f8fafc;
-      }
-    }
-  }
-
-  &__empty {
-    padding: 20px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 12px;
-  }
-}
-
-.col {
-  text-align: left;
-  
-  &--primary {
-    color: #0284c7;
+  &__header {
+    background: linear-gradient(135deg, #00b4d8 0%, #0077b6 50%, #023e8a 100%);
+    color: #ffffff;
+    font-size: 15px;
     font-weight: 700;
+    text-align: center;
+    padding: 10px 16px;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+}
+
+.formation-grid {
+  width: 100%;
+  // Sized to show up to 7 rows + header before scrolling
+  height: calc(36px + (32px * 7));
+
+  // Center-align helper — applied via cellClass / headerClass
+  :deep(.header--center .ag-header-cell-label) {
+    justify-content: center;
+  }
+
+  :deep(.cell--center) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  :deep(.cell--formation) {
+    font-weight: 700;
+    color: #0d3a6e;
+  }
+
+  :deep(.cell--depth) {
+    font-weight: 700;
+    color: #0d3a6e;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :deep(.cell--remarks) {
+    font-weight: 600;
+    color: #1a5276;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :deep(.no-rows) {
+    color: #5d8aa8;
+    font-size: 12px;
   }
 }

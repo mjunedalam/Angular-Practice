@@ -1,14 +1,24 @@
-$bg-app:     #f4f7f9; /* Slightly deeper background to make white cards pop */
-$border:     #e2e8f0;
-$accent:     #0ea5e9;
-$danger:     #ef4444;
+// ─── Presentation Layout — Industrial Precision Theme ─────────────────────
+// Palette: slate-900 base, sky-500 accent, amber warning, clean whites
+// Typography: DM Sans (labels/UI) + DM Mono (data/numbers)
+
+$bg-shell:    #eef2f7;
+$bg-card:     #ffffff;
+$border:      rgba(148, 163, 184, 0.22);
+$accent:      #0ea5e9;
+$danger:      #ef4444;
+$text-muted:  #94a3b8;
 
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: $bg-app;
+  background: $bg-shell;
+
+  // Load technical fonts from Google Fonts via @import in global styles,
+  // or add to index.html: DM Sans + DM Mono
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
 .presentation {
@@ -21,30 +31,29 @@ $danger:     #ef4444;
     flex: 1;
     overflow: hidden;
     display: flex;
-    flex-direction: row; 
-    gap: 24px; /* Increased gap for better breathing room */
-    padding: 24px;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px 24px;
   }
 
   &__sidebar {
-    width: 380px; /* Slightly wider to accommodate new padding */
-    min-width: 380px;
+    width: 370px;
+    min-width: 370px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    
-    /* CRITICAL FIX: Padding prevents child component box-shadows from being clipped by overflow */
-    padding: 12px 12px 12px 4px; 
-    margin-left: 1em;
-    
+    gap: 16px;
+    padding: 8px 12px 8px 4px;
+    margin-left: 0.5em;
     overflow-y: auto;
     overflow-x: hidden;
-    
-    /* Premium custom scrollbar */
-    &::-webkit-scrollbar { width: 6px; }
+
+    &::-webkit-scrollbar { width: 4px; }
     &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    &::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.4);
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
   }
 
   &__diagram {
@@ -53,69 +62,63 @@ $danger:     #ef4444;
     align-items: stretch;
     justify-content: flex-start;
     overflow: hidden;
-    padding-bottom: 12px; /* Prevents the diagram shadow from clipping at the bottom */
+    padding-bottom: 12px;
   }
 }
 
+// ── Main diagram card ───────────────────────────────────────────────────────
 .diagram-scroll {
   display: flex;
-  align-items: stretch; 
-  background: #ffffff;
-  border-radius: 16px; /* Rounder, modern corners */
-  
-  /* Beautiful layered modern shadow */
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e2e8f0; /* Softer, premium border instead of harsh black */
-  
-  overflow: hidden; 
+  align-items: stretch;
+
+  // Subtle warm-white background with faint dot grid for engineering feel
+  background:
+    radial-gradient(circle, rgba(148,163,184,0.18) 1px, transparent 1px),
+    #ffffff;
+  background-size: 20px 20px, 100% 100%;
+
+  border-radius: 14px;
+  border: 1px solid $border;
+
+  // Layered shadow — gives real depth without heaviness
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 12px rgba(0,0,0,0.06),
+    0 16px 32px rgba(0,0,0,0.04);
+
+  overflow: hidden;
   height: 100%;
   width: 100%;
   max-width: 1100px;
-  transition: box-shadow 0.3s ease;
+
+  transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.04),
+      0 8px 20px rgba(0,0,0,0.08),
+      0 24px 40px rgba(0,0,0,0.06);
   }
 }
 
-.master-diagram-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: #ffffff;
-}
-
-/* Utilities */
-.loading-bar {
-  height: 3px;
-  background: $accent;
-  width: 100%;
-  animation: loading-sweep 1.5s infinite linear;
-}
-
-@keyframes loading-sweep {
-  0% { transform: scaleX(0); transform-origin: left; }
-  50% { transform: scaleX(1); transform-origin: left; }
-  50.1% { transform: scaleX(1); transform-origin: right; }
-  100% { transform: scaleX(0); transform-origin: right; }
-}
-
+// ── Error banner ────────────────────────────────────────────────────────────
 .error-banner {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  margin: 12px 24px 0 24px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  margin: 10px 24px 0;
+  background: #fff5f5;
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
   color: $danger;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+  letter-spacing: 0.02em;
   flex-shrink: 0;
 }
 
+// ── Empty state ─────────────────────────────────────────────────────────────
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -123,29 +126,44 @@ $danger:     #ef4444;
   justify-content: center;
   width: 100%;
   height: 100%;
-  gap: 16px;
-  color: #94a3b8;
-  
-  &__icon { font-size: 52px; opacity: 0.3; }
+  gap: 14px;
+  color: $text-muted;
+
+  &__icon {
+    font-size: 48px;
+    opacity: 0.25;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  &__text {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    opacity: 0.6;
+  }
 }
 
-/* ── Well chips pagination nav ─────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+// ── Well chips nav ──────────────────────────────────────────────────────────
 .well-chips-nav {
   display: flex;
   align-items: center;
   gap: 0;
 
-  &__chips {
-    flex: 1;
-  }
+  &__chips { flex: 1; }
 }
 
 .well-chips-nav__indicator {
   text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  letter-spacing: 0.5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: $text-muted;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin-bottom: 4px;
 }
 
@@ -154,41 +172,39 @@ $danger:     #ef4444;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 68px;
-  height: 34px;
-  padding: 0 14px;
+  min-width: 64px;
+  height: 32px;
+  padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: $bg-card;
+  color: #475569;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); /* Subtle elevation */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 
   &:hover:not(:disabled) {
     background: #f0f9ff;
-    border-color: #38bdf8;
+    border-color: rgba(14, 165, 233, 0.5);
     color: #0369a1;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.1);
+    box-shadow: 0 3px 8px rgba(14, 165, 233, 0.12);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
     box-shadow: none;
   }
 
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
   &--prev { margin-right: 8px; }
-  &--next { margin-left:  8px; }
+  &--next { margin-left: 8px; }
 }
-/* ─────────────────────────────────────────────────────────────── */

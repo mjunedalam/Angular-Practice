@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
 } from '@angular/core';
+import { ThemeStore, THEME_OPTIONS } from 'src/app/core/store/theme/theme.store';
 
 @Component({
   selector: 'app-top-navbar',
@@ -17,7 +19,10 @@ export class TopNavbarComponent {
   readonly sidenavCollapsed = input<boolean>(false);
   readonly toggleSidenav    = output<void>();
 
-  readonly appTitle  = 'Aramco Ground Water Application';
-  readonly userName  = 'Abdulrahman';
-  readonly logoText  = 'AGWA';
+  protected readonly theme        = inject(ThemeStore);
+  protected readonly themeOptions = THEME_OPTIONS;
+
+  readonly appTitle = 'Aramco Ground Water Application';
+  readonly userName = 'Abdulrahman';
+  readonly logoText = 'AGWA';
 }

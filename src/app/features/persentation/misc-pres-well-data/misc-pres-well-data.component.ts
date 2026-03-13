@@ -1,32 +1,21 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { DecimalPipe, NgIf } from '@angular/common';
-
-import { MiscWellData } from 'src/app/core/store/well.store';
+/**
+ * MiscPresWellDataComponent — SMART
+ * Reads store.miscWellData() directly.
+ * No @Input needed.
+ */
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { WellStore } from 'src/app/core/store/well.store';
 
 @Component({
   selector: 'app-misc-pres-well-data',
   standalone: true,
-  imports: [NgIf, DecimalPipe],
+  imports: [DecimalPipe],
   templateUrl: './misc-pres-well-data.component.html',
-  styleUrl: './misc-pres-well-data.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush // Optimized performance
+  styleUrl:    './misc-pres-well-data.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MiscPresWellDataComponent {
-
-  readonly data = input<MiscWellData | null>(null);
-
-
-  // private readonly store = inject(WellStore);
-
-
-  // readonly misc = this.store.miscWellData;
-
-
-  // constructor() {
-
-
-
-  //   this.store.loadWellNames();
-  // }
-
+  protected readonly store = inject(WellStore);
+  // In template: store.miscWellData()?.wellName etc.
 }

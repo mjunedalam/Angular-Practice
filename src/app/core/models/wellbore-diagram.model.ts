@@ -1,5 +1,4 @@
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
-import { CasingInfo, GeologicTop, Hydrogeology, PreWap, RigActivity } from './well-details.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/top-sir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
 import { IPreWellData } from 'src/app/shared/models/wwell/pre-well-data.model';

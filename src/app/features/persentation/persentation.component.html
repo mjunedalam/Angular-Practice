@@ -1,79 +1,59 @@
 <div class="presentation">
-  <!-- Header -->
-  <header class="presentation__header mb-1">
-    <!-- <div class="header__brand">
-      <span class="header__icon">⛽</span>
-      <h1 class="header__title">Well Design Viewer</h1>
-    </div> -->
 
-    <!-- @if (store.loading()) {
-      <div class="header__loading" role="status" aria-live="polite">
-        <span class="spinner"></span>
-        <span>Loading…</span>
-      </div>
-    } -->
-  </header>
+  <!--
+    WellNameChipsComponent — SMART
+    Injects WellStore directly, handles its own pagination calls.
+    No inputs or outputs needed here.
+  -->
+  <app-well-name-chips />
 
-  <!-- Well Name Chips — paginated (5 per page) -->
-  <app-well-name-chips
-    [wells]="store.pagedWellNames()"
-    [selectedEpANum]="store.selectedEpANum()"
-    [hasPrevPage]="store.hasPrevPage()"
-    [hasNextPage]="store.hasNextPage()"
-    [currentPage]="store.wellNamesPage()"
-    [totalPages]="store.totalPages()"
-    (chipSelected)="onWellSelected($event)"
-    (prevPage)="onPrevPage()"
-    (nextPage)="onNextPage()"
-  />
-
-  <!-- Error Banner -->
   @if (store.error()) {
-    <div class="error-banner" role="alert">
-      <span>⚠</span> {{ store.error() }}
-    </div>
+  <div class="error-banner" role="alert">
+    <span>⚠</span> {{ store.error() }}
+  </div>
   }
 
-  <!-- Diagram Area -->
   <main class="presentation__diagram">
-    <div class="w-1/3">
-      <app-misc-pres-well-data
-        [data]="store.miscWellData()"
-      ></app-misc-pres-well-data>
-      <br />
 
-      <app-picked-formation-tops
-        [tops]="store.pickedFormations()"
-      ></app-picked-formation-tops>
+    <!--
+      Left panel — SMART components, each inject WellStore internally.
+      Zero prop drilling.
+    -->
+    <div class="w-1/3">
+      <app-misc-pres-well-data />
+      <br />
+      <app-picked-formation-tops />
     </div>
 
     @if (!store.isLoaded() && !store.loading()) {
-      <div class="empty-state">
-        <div class="empty-state__icon">🛢</div>
-        <p class="empty-state__text">
-          Select a well above to render the wellbore diagram
-        </p>
-      </div>
+    <div class="empty-state">
+      <div class="empty-state__icon">🛢</div>
+      <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+    </div>
     }
+
+    <!--
+      Center — DUMB D3 components.
+      These receive data via @Input because they are pure renderers with
+      imperative D3 logic — they must not know about the store.
+      animTrigger is required so the effect() re-runs on new well select.
+    -->
     <div class="w-2/3 ml-4 well-svg-div">
       @if (store.isLoaded()) {
-        <div class="diagram-scroll">
-          <app-depth-scale
-            [totalDepth]="store.totalDepth()"
-            [animTrigger]="store.animationTrigger()"
-          />
-          <app-well-bore-view
-            [diagramData]="store.diagramData()"
-            [animTrigger]="store.animationTrigger()"
-          />
-        </div>
+      <div class="diagram-scroll">
+        <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+        <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+      </div>
       }
-      <app-wwells-logs-indicators></app-wwells-logs-indicators> 
+      <!-- SMART — injects store directly -->
+      <app-wwells-logs-indicators />
     </div>
 
+    <!-- Right sidebar — SMART components -->
     <aside class="presentation__sidebar presentation__sidebar--right">
-      <app-active-wwell-map></app-active-wwell-map>
-      <app-offset-wwells [wells]="store.offsetWells()"></app-offset-wwells>
+      <app-active-wwell-map />
+      <app-offset-wwells />
     </aside>
+
   </main>
 </div>

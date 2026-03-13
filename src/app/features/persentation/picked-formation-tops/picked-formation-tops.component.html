@@ -1,26 +1,13 @@
 <div class="formation-card">
   <div class="formation-card__header">
-    Picked Formation
+    Picked Formation Tops
   </div>
-  
-  <div class="formation-table">
-    <div class="formation-table__row formation-table__row--header">
-      <div class="col">Formation...</div>
-      <div class="col">Depth</div>
-      <div class="col">Remarks</div>
-    </div>
-    
-    <div class="formation-table__body">
-      @for (top of tops(); track top.formation) {
-        <div class="formation-table__row">
-          <div class="col col--primary">{{ top.formation }}</div>
-          <div class="col">{{ top.depth | number }}</div>
-          <div class="col">{{ top.remarks }}</div>
-        </div>
-      }
-      @if (tops().length === 0) {
-        <div class="formation-table__empty">No formations picked yet.</div>
-      }
-    </div>
-  </div>
+
+  <ag-grid-angular
+    class="formation-grid"
+    [theme]="theme"
+    [columnDefs]="columnDefs"
+    [gridOptions]="gridOptions"
+    (gridReady)="onGridReady($event)"
+  />
 </div>

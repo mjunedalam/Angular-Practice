@@ -478,7 +478,7 @@
         {
           "csgType": "Gravel Pack",
           "csgSize": 8.5,
-          "csgDepth": 3350,
+          "csgDepth": 2900,
           "csgRemarks": "Wirewrap / Mesh"
         }
       ],
@@ -527,7 +527,7 @@
       "EXAD_RCD_PREWAP": [
         {
           "surfaceElevation": 945,
-          "estTargetDepth": 4800,
+          "estTargetDepth": 4000,
           "targetFormation": "WASI",
           "supportedBusiness": "ANDR-814 REPLACEMENT"
         }

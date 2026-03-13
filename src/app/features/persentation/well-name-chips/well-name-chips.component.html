@@ -1,42 +1,34 @@
 <div class="chip-strip" role="list" aria-label="Available wells">
   <span class="chip-strip__label">Wells</span>
 
-  <!-- Prev arrow — sits flush before the first chip -->
-  @if (hasPrevPage()) {
+  @if (store.hasPrevPage()) {
     <button
       class="chip chip--nav"
       aria-label="Previous wells"
-      (click)="prevPage.emit()"
-    >
-      ‹
-    </button>
+      (click)="store.prevPage()"
+    >‹</button>
   }
 
-  @for (well of wells(); track trackByEpANum($index, well)) {
+  @for (well of store.pagedWellNames(); track well.epANum) {
     <button
       class="chip"
       role="listitem"
-      [ngClass]="{ 'chip--active': well.epANum === selectedEpANum() }"
-      [attr.aria-pressed]="well.epANum === selectedEpANum()"
-      (click)="chipSelected.emit(well.epANum)"
+      [ngClass]="{ 'chip--active': well.epANum === store.selectedEpANum() }"
+      [attr.aria-pressed]="well.epANum === store.selectedEpANum()"
+      (click)="store.selectWell(well.epANum)"
     >
       <span class="chip__dot"></span>
       {{ well.wellName }}
     </button>
   }
 
-  <!-- Next arrow — sits flush after the last chip -->
-  @if (hasNextPage()) {
+  @if (store.hasNextPage()) {
     <button
       class="chip chip--nav"
       aria-label="Next wells"
-      (click)="nextPage.emit()"
-    >
-      ›
-    </button>
+      (click)="store.nextPage()"
+    >›</button>
   }
 
-  <span class="chip-strip__page-indicator">
-    {{ pageLabel() }}
-  </span>
+  <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>
 </div>

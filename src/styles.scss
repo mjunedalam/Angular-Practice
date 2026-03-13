@@ -1,46 +1,107 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+// ─── Reset ────────────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+// ─── DARK (default — also :root so there is always a fallback) ────────────────
+:root,
+[data-theme='dark'] {
+  --bg-app:        #0b1628;
+  --bg-surface:    #0f2240;
+  --bg-card:       #112845;
+  --bg-sidenav:    #071e3d;
+  --bg-topbar:     #071e3d;
+  --bg-content:    #0d2a47;
+  --border:        rgba(56, 189, 248, 0.14);
+  --border-sub:    rgba(255, 255, 255, 0.06);
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --text-on-accent: #ffffff;
+  --accent:        #0ea5e9;
+  --accent-hover:  #38bdf8;
+  --accent-muted:  rgba(14, 165, 233, 0.15);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger:  #ef4444;
+  --scrollbar-track: #0f172a;
+  --scrollbar-thumb: #1e3a5f;
+  --skel-base:  #1e3a5f;
+  --skel-shine: #1e4976;
 }
 
-html,
-body {
+// ─── LIGHT ────────────────────────────────────────────────────────────────────
+[data-theme='light'] {
+  --bg-app:        #f0f6ff;
+  --bg-surface:    #ffffff;
+  --bg-card:       #ffffff;
+  --bg-sidenav:    #1e3a5f;
+  --bg-topbar:     #1e3a5f;
+  --bg-content:    #e8f2fc;
+  --border:        rgba(0, 80, 160, 0.14);
+  --border-sub:    rgba(0, 0, 0, 0.06);
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --text-on-accent: #ffffff;
+  --accent:        #0284c7;
+  --accent-hover:  #0369a1;
+  --accent-muted:  rgba(2, 132, 199, 0.1);
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger:  #dc2626;
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #94a3b8;
+  --skel-base:  #e2e8f0;
+  --skel-shine: #f8fafc;
+}
+
+// ─── CUSTOM (teal) ────────────────────────────────────────────────────────────
+[data-theme='custom'] {
+  --bg-app:        #0a1a1f;
+  --bg-surface:    #0d2228;
+  --bg-card:       #0f2930;
+  --bg-sidenav:    #0d2228;
+  --bg-topbar:     #0d2228;
+  --bg-content:    #0a1f26;
+  --border:        rgba(20, 184, 166, 0.16);
+  --border-sub:    rgba(255, 255, 255, 0.05);
+  --text-primary:   #e0f2f1;
+  --text-secondary: #80cbc4;
+  --text-muted:     #4db6ac;
+  --text-on-accent: #0a1a1f;
+  --accent:        #14b8a6;
+  --accent-hover:  #2dd4bf;
+  --accent-muted:  rgba(20, 184, 166, 0.15);
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --danger:  #f87171;
+  --scrollbar-track: #0a1a1f;
+  --scrollbar-thumb: #14b8a6;
+  --skel-base:  #0f2930;
+  --skel-shine: #134040;
+}
+
+// ─── Base ─────────────────────────────────────────────────────────────────────
+html, body {
   height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0; padding: 0;
+  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+// ─── Scrollbar ────────────────────────────────────────────────────────────────
+::-webkit-scrollbar        { width: 7px; height: 7px; }
+::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 4px;
+  &:hover { filter: brightness(1.2); }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-  &:hover { background: #94a3b8; }
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* =========================================
-   GLOBAL SKELETON LOADER ANIMATION
-========================================= */
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 .skeleton {
-  background: #e2e8f0;
-  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg,
+    var(--skel-base) 25%, var(--skel-shine) 50%, var(--skel-base) 75%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s infinite linear;
   border-radius: inherit;
@@ -48,14 +109,11 @@ button {
   border-color: transparent !important;
   box-shadow: none !important;
   pointer-events: none;
-  
-  /* Hides any text/icons inside the skeleton block */
-  * {
-    visibility: hidden !important;
-  }
+  * { visibility: hidden !important; }
 }
-
 @keyframes skeleton-pulse {
-  0% { background-position: 200% 0; }
+  0%   { background-position:  200% 0; }
   100% { background-position: -200% 0; }
 }
+
+button { font-family: inherit; cursor: pointer; }

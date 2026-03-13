@@ -1,55 +1,63 @@
-/* FIX #4: Setup to maintain proportional width dynamically */
+// ─── Depth Scale — matches Industrial Precision theme ─────────────────────
 :host {
   display: block;
-  flex: 0 0 8.4%; /* Proportion relative to 1070px total diagram width */
+  flex: 0 0 8.4%;
   height: 100%;
 }
 
 .depth-scale-svg {
   display: block;
-  background: #fafbfd;
-  border-right: 1px solid #dde4f0;
+  background: #f8fafc;
+  border-right: 1px solid rgba(148, 163, 184, 0.25);
   width: 100%;
   height: 100%;
 }
 
 :host ::ng-deep {
+
   .axis-title {
-    font-size: 12px;
-    font-weight: 900;
-    fill: #5a6a8a;
-    font-family: Arial, sans-serif;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    fill: #64748b;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .axis-line {
-    stroke: #3a4a6b;
-    stroke-width: 2;
+    stroke: #94a3b8;
+    stroke-width: 1.5;
     fill: none;
+    opacity: 0.6;
   }
 
   .tick-line {
-    stroke: #3a4a6b;
-    stroke-width: 1.5;
+    stroke: #94a3b8;
+    stroke-width: 1.2;
+    opacity: 0.6;
   }
 
   .tick-grid {
-    stroke: #c8d0e8;
+    stroke: #cbd5e1;
     stroke-width: 1;
-    stroke-dasharray: 2, 2;
+    stroke-dasharray: 2, 3;
+    opacity: 0.5;
   }
 
   .tick-label {
-    font-size: 14.5px;
-    font-weight: 800;
-    fill: #2c3a58;
+    font-family: 'DM Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    fill: #475569;
     text-anchor: end;
-    font-family: Arial, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   .total-depth-label {
-    font-size: 15px;
-    font-weight: 700;
-    fill: #1a5cbf;
-    font-family: Arial, sans-serif;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    fill: #1d4ed8;
+    letter-spacing: 0.04em;
   }
 }

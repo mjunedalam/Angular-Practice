@@ -1,6 +1,6 @@
 <header class="top-navbar">
 
-  <!-- Left: Logo + hamburger -->
+  <!-- Left: hamburger + logo -->
   <div class="top-navbar__brand">
     <button
       class="top-navbar__hamburger"
@@ -15,11 +15,11 @@
       <div class="top-navbar__logo-icon">
         <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <ellipse cx="16" cy="20" rx="9" ry="11" fill="url(#dropGrad)"/>
-          <ellipse cx="16" cy="20" rx="5" ry="7" fill="rgba(255,255,255,0.25)"/>
+          <ellipse cx="16" cy="20" rx="5"  ry="7"  fill="rgba(255,255,255,0.25)"/>
           <path d="M16 4 C16 4 22 12 22 18" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/>
           <defs>
             <linearGradient id="dropGrad" x1="16" y1="9" x2="16" y2="31" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="0%"   stop-color="#38bdf8"/>
               <stop offset="100%" stop-color="#0369a1"/>
             </linearGradient>
           </defs>
@@ -29,13 +29,29 @@
     </div>
   </div>
 
-  <!-- Center: App title -->
+  <!-- Center: title -->
   <div class="top-navbar__title">
     <h1>{{ appTitle }}</h1>
   </div>
 
-  <!-- Right: User info -->
+  <!-- Right: theme switcher + notifications + user -->
   <div class="top-navbar__user">
+
+    <!-- Theme switcher — driven by ThemeStore, no inputs needed -->
+    <div class="theme-switcher" role="group" aria-label="Theme selection">
+      @for (opt of themeOptions; track opt.mode) {
+        <button
+          class="theme-btn"
+          [class.theme-btn--active]="theme.mode() === opt.mode"
+          (click)="theme.setTheme(opt.mode)"
+          [title]="opt.label + ' theme'"
+          [attr.aria-pressed]="theme.mode() === opt.mode"
+        >{{ opt.icon }}</button>
+      }
+    </div>
+
+    <div class="top-navbar__divider"></div>
+
     <div class="top-navbar__notifications">
       <button class="top-navbar__icon-btn" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

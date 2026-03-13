@@ -1,13 +1,12 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  output,
-} from '@angular/core';
+/**
+ * WellNameChipsComponent — SMART
+ * Injects WellStore — reads pagedWellNames, selectedEpANum, pagination signals.
+ * Calls store.selectWell(), store.nextPage(), store.prevPage() directly.
+ * Zero @Input / @Output needed.
+ */
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { WellName } from 'src/app/core/models/well-name.model';
-
+import { WellStore } from 'src/app/core/store/well.store';
 
 @Component({
   selector: 'app-well-name-chips',
@@ -15,25 +14,12 @@ import { WellName } from 'src/app/core/models/well-name.model';
   imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './well-name-chips.component.html',
-  styleUrl: './well-name-chips.component.scss',
+  styleUrl:    './well-name-chips.component.scss',
 })
 export class WellNameChipsComponent {
-  readonly wells          = input.required<WellName[]>();
-  readonly selectedEpANum = input<number | null>(null);
-  readonly hasPrevPage    = input<boolean>(false);
-  readonly hasNextPage    = input<boolean>(false);
-  readonly currentPage    = input<number>(0);
-  readonly totalPages     = input<number>(1);
+  protected readonly store = inject(WellStore);
 
-  readonly chipSelected = output<number>();
-  readonly prevPage     = output<void>();
-  readonly nextPage     = output<void>();
-
-  protected readonly pageLabel = computed(
-    () => `${this.currentPage() + 1} / ${this.totalPages()}`
+  protected readonly pageLabel = computed(() =>
+    `${this.store.wellNamesPage() + 1} / ${this.store.totalPages()}`
   );
-
-  protected trackByEpANum(_: number, w: WellName): number {
-    return w.epANum;
-  }
 }

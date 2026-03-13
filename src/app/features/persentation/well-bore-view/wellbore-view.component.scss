@@ -1,3 +1,4 @@
+// ─── Wellbore View — Industrial Precision Theme ───────────────────────────
 :host {
   display: block;
   flex: 1;
@@ -7,201 +8,219 @@
 
 .wellbore-svg {
   display: block;
-  background: #ffffff;
+  background: transparent;
 }
 
 :host ::ng-deep {
+
   text {
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: 700;
+    font-family: 'DM Mono', 'Fira Code', 'Consolas', monospace;
+    font-weight: 500;
+    letter-spacing: 0.01em;
   }
 
   .ground-line {
-    stroke: #c5410a;
-    stroke-width: 3;
+    stroke: #b94a12;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    opacity: 0.9;
   }
 
   .ground-label {
-    font-size: 11px;
-    fill: #c5410a;
-  }
-
-  .geo-axis {
-    stroke: #2855b5;
-    stroke-width: 2;
-    opacity: 0.5;
-  }
-
-  .column-label {
-    font-size: 9px;
-    fill: #2855b5;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 10.5px;
     font-weight: 600;
-  }
-
-  .geo-tick {
-    stroke: #1a2f6e;
-    stroke-width: 1.5;
-  }
-
-  .geo-depth {
-    font-size: 15px;
-    font-weight: 800;
-    fill: #000000;
-    text-anchor: end;
-  }
-
-  .geo-code {
-    font-size: 16px;
-    font-weight: 800;
-    fill: #000000;
-    font-weight: 700;
-  }
-
-  /* ── Target Aquifer highlight styles ─────────────────────────────── */
-
-  /* Semi-transparent amber band behind the matching row */
-  .geo-target-band {
-    fill: #fff3cd;
-    stroke: #f0a500;
-    stroke-width: 1.2;
+    fill: #b94a12;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     opacity: 0.85;
   }
 
-  /* Diamond marker on the axis */
-  .geo-target-diamond {
-    fill: #e65c00;
-    stroke: #a33e00;
+  .geo-axis {
+    stroke: #3b67d4;
+    stroke-width: 1.5;
+    opacity: 0.3;
+  }
+
+  .column-label {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 9.5px;
+    fill: #3b67d4;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+  }
+
+  .geo-tick {
+    stroke: #1e3a8a;
+    stroke-width: 1.5;
+    opacity: 0.65;
+  }
+
+  .geo-depth {
+    font-size: 10.5px;
+    font-weight: 600;
+    fill: #475569;
+    text-anchor: end;
+    opacity: 0.85;
+  }
+
+  .geo-code {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 12.5px;
+    font-weight: 800;
+    fill: #1e293b;
+    letter-spacing: 0.05em;
+  }
+
+  .geo-target-band {
+    fill: rgba(251, 191, 36, 0.10);
+    stroke: rgba(245, 158, 11, 0.5);
     stroke-width: 1;
   }
-
-  /* Thicker, orange tick line for the target row */
-  .geo-tick--target {
-    stroke: #e65c00;
-    stroke-width: 3;
-  }
-
-  /* Bold amber depth number */
-  .geo-depth--target {
-    font-size: 15px;
-    font-weight: 900;
-    fill: #e65c00;
-    text-anchor: end;
-  }
-
-  /* Bold amber formation code */
-  .geo-code--target {
-    font-size: 16px;
-    font-weight: 900;
-    fill: #e65c00;
-  }
-
-  /* Small badge label "▶ Target Aquifer" above the row */
-  .geo-target-label {
-    font-size: 10px;
-    font-weight: 700;
-    fill: #a33e00;
-    letter-spacing: 0.4px;
-  }
-
-  /* ────────────────────────────────────────────────────────────────── */
+  .geo-tick--target  { stroke: #d97706; stroke-width: 2.5; }
+  .geo-depth--target { font-size: 10.5px; font-weight: 700; fill: #d97706; text-anchor: end; }
+  .geo-code--target  { font-size: 12.5px; font-weight: 900; fill: #d97706; letter-spacing: 0.05em; }
+  .geo-target-label  { font-size: 9px; font-weight: 700; fill: #92400e; letter-spacing: 0.5px; }
 
   .casing {
-    stroke: #000;
-    stroke-width: 5.5;
+    stroke: #1e293b;
+    stroke-width: 5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.20));
   }
 
   .casing-label__line {
-    stroke: #000;
-    stroke-width: 1.5;
+    stroke: #64748b;
+    stroke-width: 1;
+    opacity: 0.75;
   }
 
   .casing-label__arrow {
-    fill: #000;
+    fill: #64748b;
+    opacity: 0.75;
   }
 
   .casing-label__primary {
-    font-size: 14.5px;
-    font-weight: 800;
-    fill: #111;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    fill: #1e293b;
+    letter-spacing: 0.02em;
   }
 
   .casing-label__secondary {
-    font-size: 13px;
-    font-weight: 680;
-    fill: #666;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 10px;
     font-weight: 400;
+    fill: #94a3b8;
+    font-style: italic;
   }
 
   .casing-size-inner {
-    font-size: 14.5px;
-    font-size: 800;
-    fill: #333;
+    font-family: 'DM Mono', 'Fira Code', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    fill: #64748b;
+    opacity: 0.70;
   }
 
   .water-line {
-    stroke: #3CC3FF;
-    stroke-width: 2.5;
-    stroke-dasharray: 5, 5;
+    stroke: #0ea5e9;
+    stroke-width: 1.8;
+    stroke-dasharray: 7, 4;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.30));
   }
 
   .water-arrow {
-    fill: #3CC3FF;
-    stroke: #3CC3FF;
+    fill: #0ea5e9;
+    stroke: #0ea5e9;
+    opacity: 0.8;
   }
 
   .water-label {
-    font-size: 14.5px;
-    fill: #0b0e0f;
-    font-weight: 700;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 11px;
+    fill: #0369a1;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   .open-hole {
-    stroke: #000;
-    stroke-width: 2;
+    stroke: #475569;
+    stroke-width: 1.6;
     fill: none;
-    stroke-dasharray: 4, 3;
+    stroke-dasharray: 5, 3;
+    opacity: 0.55;
   }
 
   .oh-label-line {
-    stroke: #000;
-    stroke-width: 1.5;
+    stroke: #64748b;
+    stroke-width: 1;
+    opacity: 0.65;
   }
 
   .oh-label-arrow {
-    fill: #000;
+    fill: #64748b;
+    opacity: 0.65;
   }
 
   .open-hole-text {
-    font-size: 14.5px;
-    font-weight: 800;
-    fill: #222;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    fill: #475569;
+    opacity: 0.82;
   }
 
   .liner-screen {
-    stroke: #000;
-    stroke-width: 2;
+    stroke: #334155;
+    stroke-width: 1.8;
     fill: url(#gridPattern);
+    opacity: 0.72;
+  }
+
+  .screen-hanger {
+    opacity: 0.78;
   }
 
   .screen-label-line {
-    stroke: #000;
-    stroke-width: 1.5;
+    stroke: #64748b;
+    stroke-width: 1;
+    opacity: 0.65;
   }
 
   .screen-label-text {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
     font-size: 10px;
-    fill: #222;
+    font-weight: 500;
+    fill: #64748b;
+  }
+
+  .gravelHole {
+    opacity: 0.65;
   }
 
   .depth-arrow {
-    fill: #111;
-    stroke: #111;
+    fill: #0f172a;
+    stroke: #0f172a;
+    stroke-width: 0.5;
+    filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.30));
   }
 
   .total-depth-main {
-    font-size: 16px;
-    font-weight: 900;
-    fill: #1a1a1a;
-    font-weight: 900;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 12.5px;
+    font-weight: 800;
+    fill: #1d4ed8;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+  }
+
+  .not-drilled-label,
+  .not-drilled-footage {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    letter-spacing: 0.03em;
   }
 }
