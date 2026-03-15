@@ -11,8 +11,8 @@ import { select } from 'd3-selection';
 import { easeLinear } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/wellbore-diagram.model'; 
-import { buildDepthTicks, createDepthScale, formatDepth  } from 'src/app/shared/utils/wellbore-math.util'; 
+import { ANIM, ANIM_MODE, DIAGRAM_LAYOUT } from '../../../../models/well-design/wellbore-diagram.model';
+import { buildDepthTicks, createDepthScale, formatDepth } from '../../../../utils/wellbore-math.util';
 
 @Component({
   selector: 'app-depth-scale',
@@ -83,7 +83,7 @@ export class DepthScaleComponent implements OnInit {
       .ease(easeLinear)
       .attr('stroke-dashoffset', 0);
 
-    ticks.forEach((depth) => {
+    ticks.forEach((depth: number) => {
       const yPx = scale(depth);
       const delay = (depth / totalDepth) * ANIM.SCALE_DURATION + ANIM.TICK_BASE_DELAY;
 

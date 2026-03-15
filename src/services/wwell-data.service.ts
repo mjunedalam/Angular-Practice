@@ -1,17 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { MorningReport, WellName } from '../models/well-name.model';
-import { WellDetails, WellDetailsResponse } from '../models/well-details.model';
-import { IWellData } from 'src/app/shared/models/wwell/wwell-data.model';
-import { APiResponse } from 'src/app/shared/models/wwell/api-response.model';
+import { MorningReport } from '../models/morining-report.model';
+import { WellName } from '../models/well-design/well-name.model';
+import { WellDetails, WellDetailsResponse } from '../app/core/models/well-details.model';
+import { IWellData } from '../models/well-design/wwell-data.model';
+import { APiResponse } from '../shared/models/wwell/api-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class WellDataService {
   [x: string]: any;
 
   private readonly http = inject(HttpClient);
-   apiUrl = "";
+  apiUrl = "";
   /** Fetches the list of well names for chip rendering. */
   getWellNames(): Observable<WellName[]> {
     return this.http.get<WellName[]>('/assets/data/well-names.json');

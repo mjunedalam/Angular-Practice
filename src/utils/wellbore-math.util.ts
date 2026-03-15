@@ -1,5 +1,5 @@
 import { ScaleLinear, scaleLinear } from 'd3-scale';
-import { ICasingIR } from '../models/wwell/casing-ir.model';
+import { ICasingIR } from '../shared/models/wwell/casing-ir.model';
 
 export function createDepthScale(
   totalDepth: number,

@@ -125,7 +125,7 @@ export interface WellDetails {
   readonly EXAD_RCD_PREWAP: PreWap[];
   readonly WATER_WELL_TEST_OUTCOME: WaterWellTestOutcome[];
   readonly EXAD_GWD_IR_HEADER: IrHeader[];
-  
+
   // --- NEW ARRAYS FOR SIDEBAR ---
   readonly DRLG_FM_TOPS?: DrlgFmTop[];
   readonly DRLG_FD_TDAY?: DrlgFdToday[];
@@ -138,4 +138,37 @@ export interface WellDetailsResponse {
   readonly error: boolean;
   readonly message: string;
   readonly data: WellDetails[];
+}
+
+export interface MiscWellData {
+  readonly wellName: string;
+  readonly targetDesc: string;
+  readonly targetedAquifer: string;
+  readonly currentStatus: string;
+  readonly daysSinceSpud: number;
+  readonly targetDays: number;
+  readonly biNum: string;
+  readonly supportingWell: string;
+  readonly feetDrilledToday: number;
+  readonly previousWell: string;
+  readonly currentDepth: number;
+  readonly nextWell: string;
+  readonly footage: number;
+}
+
+export interface PickedFormationTops {
+  readonly formation: string;
+  readonly depth: number;
+  readonly remarks: string;
+}
+
+export interface OffsetWaterWells {
+  readonly wellName: string;
+  readonly aquifer: string;
+  readonly tds: number;
+  readonly rpm: number;
+  readonly h2s: number;
+  readonly distance: number;
+  readonly productivity: number;
+  readonly rate: number;
 }

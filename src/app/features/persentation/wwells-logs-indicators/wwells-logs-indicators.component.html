@@ -13,9 +13,9 @@
 
     <button
       class="log-btn"
-      [ngClass]="store.wellsLogsIndicators()?.mud ? 'log-btn--active' : 'log-btn--inactive'"
-      [disabled]="!store.wellsLogsIndicators()?.mud"
-      [title]="store.wellsLogsIndicators()?.mud ? 'Mud log remarks available' : 'No mud log remarks'"
+      [ngClass]="store.wellsLogsIndicators()?.mudLog ? 'log-btn--active' : 'log-btn--inactive'"
+      [disabled]="!store.wellsLogsIndicators()?.mudLog"
+      [title]="store.wellsLogsIndicators()?.mudLog ? 'Mud log remarks available' : 'No mud log remarks'"
     >
       <span class="log-btn__dot"></span>
       Mud Log

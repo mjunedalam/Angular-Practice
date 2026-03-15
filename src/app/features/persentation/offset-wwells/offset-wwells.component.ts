@@ -12,7 +12,7 @@ import { WellStore } from 'src/app/core/store/well.store';
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './offset-wwells.component.html',
-  styleUrl:    './offset-wwells.component.scss',
+  styleUrl: './offset-wwells.component.scss',
 })
 export class OffsetWwellsComponent {
   protected readonly store = inject(WellStore);

@@ -11,9 +11,9 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, ANIM_MODE, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/wellbore-diagram.model';
-import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
-import { ITopsIR } from 'src/app/shared/models/wwell/top-sir.model';
+import { ANIM, ANIM_MODE, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../../models/well-design/wellbore-diagram.model';
+import { ICasingIR } from '../../../../shared/models/wwell/casing-ir.model';
+import { ITopsIR } from '../../../../shared/models/wwell/top-sir.model';
 import {
   buildArrowHeadRight,
   buildCasingPath,
@@ -26,7 +26,8 @@ import {
   createDepthScale,
   formatDepth,
   openHoleHalfWidth,
-} from 'src/app/shared/utils/wellbore-math.util'; 
+  sortCasingsByDepthDesc
+} from '../../../../utils/wellbore-math.util';
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
 type GSel = Selection<SVGGElement, unknown, null, undefined>;
@@ -98,36 +99,36 @@ export class WellBoreViewComponent implements OnInit {
     // t = absolute ms from t=0 when redraw() fires.
 
     const structuralCasings = data.casings.filter(
-      c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
+      (c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
     );
 
     // Phase 1: casings drill down (outer → inner)
-    const t_casingsStart  = 0;
-    const t_casingsDone   = computeOverlayDelay(structuralCasings.length); // last casing finishes
+    const t_casingsStart = 0;
+    const t_casingsDone = computeOverlayDelay(structuralCasings.length); // last casing finishes
 
     // Phase 2: open hole clip reveals after all casings done
-    const t_ohStart       = t_casingsDone + ANIM.SEQ_GAP;
-    const t_ohDone        = t_ohStart + ANIM.OH_DURATION;
+    const t_ohStart = t_casingsDone + ANIM.SEQ_GAP;
+    const t_ohDone = t_ohStart + ANIM.OH_DURATION;
 
     // Phase 3: gravel pack after open hole is visible
-    const t_gravelStart   = t_ohDone + ANIM.SEQ_GAP;
-    const t_gravelDone    = t_gravelStart + ANIM.GRAVEL_DURATION;
+    const t_gravelStart = t_ohDone + ANIM.SEQ_GAP;
+    const t_gravelDone = t_gravelStart + ANIM.GRAVEL_DURATION;
 
     // Phase 4: hanger appears after gravel
-    const t_hangerStart   = t_gravelDone + ANIM.SEQ_GAP;
-    const t_hangerDone    = t_hangerStart + ANIM.HANGER_DURATION;
+    const t_hangerStart = t_gravelDone + ANIM.SEQ_GAP;
+    const t_hangerDone = t_hangerStart + ANIM.HANGER_DURATION;
 
     // Phase 5: drill arrow travels down simultaneously with casings
     // Duration = total casing animation time so arrow reaches bottom when last casing finishes
-    const t_drillStart    = 0;
-    const t_drillDone     = t_casingsDone;
+    const t_drillStart = 0;
+    const t_drillDone = t_casingsDone;
 
     // Phase 6: labels + water level stagger in
-    const t_labelsStart   = t_casingsDone + ANIM.SEQ_GAP;  // casing labels alongside OH
-    const t_ohLabelStart  = t_ohDone + ANIM.SEQ_GAP;
-    const t_waterStart    = t_ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+    const t_labelsStart = t_casingsDone + ANIM.SEQ_GAP;  // casing labels alongside OH
+    const t_ohLabelStart = t_ohDone + ANIM.SEQ_GAP;
+    const t_waterStart = t_ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
     const t_notDrilledStart = t_drillDone + ANIM.SEQ_GAP;
-    const t_tdLabelStart  = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+    const t_tdLabelStart = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
 
     // ── Draw (SVG paint order: earlier = behind) ───────────────────────────
     // Phase 0: static chrome + geo tops — immediate
@@ -152,21 +153,21 @@ export class WellBoreViewComponent implements OnInit {
   private addStaticDefs(defs: DefsSel): void {
     // Dark-theme casing gradients — metallic steel look on dark canvas
     this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%',   color: '#2d3748' },
-      { offset: '40%',  color: '#c9d1d9' },
-      { offset: '60%',  color: '#e6edf3' },
+      { offset: '0%', color: '#2d3748' },
+      { offset: '40%', color: '#c9d1d9' },
+      { offset: '60%', color: '#e6edf3' },
       { offset: '100%', color: '#2d3748' },
     ]);
     this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%',   color: '#1a3a2a' },
-      { offset: '45%',  color: '#3fb950' },
-      { offset: '55%',  color: '#56d364' },
+      { offset: '0%', color: '#1a3a2a' },
+      { offset: '45%', color: '#3fb950' },
+      { offset: '55%', color: '#56d364' },
       { offset: '100%', color: '#1a3a2a' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%',   color: '#2d3748' },
-      { offset: '40%',  color: '#8b949e' },
-      { offset: '60%',  color: '#c9d1d9' },
+      { offset: '0%', color: '#2d3748' },
+      { offset: '40%', color: '#8b949e' },
+      { offset: '60%', color: '#c9d1d9' },
       { offset: '100%', color: '#2d3748' },
     ]);
 
@@ -526,10 +527,11 @@ export class WellBoreViewComponent implements OnInit {
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const ohHW = openHoleHalfWidth(innerHW);
+    const layout = this.layout;
     const screenHW = innerHW - 10;
 
-    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const liner = data.casings.find(c => c.csgType === 'Liner');
+    const deepestSolid = data.casings.find((c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
+    const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
 
     const shoePx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);
@@ -600,7 +602,7 @@ export class WellBoreViewComponent implements OnInit {
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const innerHW  = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - 10;
 
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
@@ -677,22 +679,22 @@ export class WellBoreViewComponent implements OnInit {
 
     const estTargetDepth = data.prewap.estTargetDepth;
     // Undrilled = estTargetDepth - wPrsntDpth
-    const currentDepth   = data.currentDepth;
-    const undrilledFt    = estTargetDepth - currentDepth;
+    const currentDepth = data.currentDepth;
+    const undrilledFt = estTargetDepth - currentDepth;
 
     // Only draw if there is undrilled section remaining
     if (undrilledFt <= 0) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW    = openHoleHalfWidth(innerHW);
+    const ohHW = openHoleHalfWidth(innerHW);
 
-    const topPx    = scale(currentDepth);
+    const topPx = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);
-    const height   = bottomPx - topPx;
-    const width    = ohHW * 2 + 160;  // +80 units each side
-    const lx       = centerX - ohHW - 80;
-    const midY     = topPx + height / 2;
+    const height = bottomPx - topPx;
+    const width = ohHW * 2 + 160;  // +80 units each side
+    const lx = centerX - ohHW - 80;
+    const midY = topPx + height / 2;
 
     const ndg = this.rootG.append('g')
       .attr('class', 'not-drilled-zone')

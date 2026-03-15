@@ -1,4 +1,4 @@
-import { IWellData } from "./wwell-data.model";
+import { IWellData } from "../../../models/well-design/wwell-data.model";
 
 export interface APiResponse<T> {
     statusCode: number;
