@@ -10,6 +10,7 @@ import {
     MiscWellData,
     OffsetWaterWells,
     PickedFormationTops,
+    WellTestResult,
 } from './well.store';
 
 export const PAGE_SIZE = 5;
@@ -114,4 +115,18 @@ export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicator
         mudLog: !!(h?.mudRemarks?.trim()),
         logging: !!(h?.loggingRemarks?.trim()),
     };
+}
+export function selectWellTestResults(d: IWellData | null): WellTestResult[] {
+    if (!d) return [];
+    return (d.WATER_WELL_TEST_OUTCOME ?? []).map(t => ({
+        wellName:     t.wellName ?? '',
+        testType:     t.testType ?? 'N/A',
+        aquifer:      t.aquifer  ?? 'N/A',
+        rpm:          t.rpm          ?? 0,
+        flowRate:     t.flowRate     ?? 0,
+        temperature:  t.temperature  ?? 0,
+        tds:          t.tds          ?? 0,
+        productivity: t.producitivty ?? 0,
+        h2s:          t.h2s          ?? 0,
+    }));
 }

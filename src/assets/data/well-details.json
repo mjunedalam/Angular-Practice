@@ -447,13 +447,13 @@
       "EXAD_GWD_IR_CASING": [
         {
           "csgSize": "13 3/8",
-          "csgType": "Casing",
+          "csgType": "Conductor",
           "csgDepth": 1980,
           "csgRemarks": "+/- 20 ft into ARUM"
         },
         {
           "csgSize": "18 5/8",
-          "csgType": "Casing",
+          "csgType": "Conductor",
           "csgDepth": 820,
           "csgRemarks": "+/- 20 into RUS"
         },

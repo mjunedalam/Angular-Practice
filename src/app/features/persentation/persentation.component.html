@@ -1,46 +1,38 @@
 <div class="presentation">
-  <!-- Header -->
 
-  <!-- Well Name Chips — paginated (5 per page) -->
   <app-well-name-chips />
 
-  <!-- Error Banner -->
   @if (store.error()) {
-  <div class="error-banner" role="alert">
-    <span>⚠</span> {{ store.error() }}
-  </div>
+    <div class="error-banner" role="alert">⚠ {{ store.error() }}</div>
   }
 
-  <!-- Diagram Area -->
   <main class="presentation__diagram">
-    <div class="w-1/3">
-      <app-misc-pres-well-data />
-      <br />
 
+    <div class="pres-left">
+      <app-misc-pres-well-data />
       <app-picked-formation-tops />
     </div>
 
-    @if (!store.isLoaded() && !store.loading()) {
-    <div class="empty-state">
-      <div class="empty-state__icon">🛢</div>
-      <p class="empty-state__text">
-        Select a well above to render the wellbore diagram
-      </p>
-    </div>
-    }
-    <div class="w-2/3 ml-4 well-svg-div">
-      @if (store.isLoaded()) {
-      <div class="diagram-scroll">
-        <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-        <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-      </div>
+    <div class="pres-center">
+      @if (!store.isLoaded()) {
+        <div class="empty-state">
+          <div class="empty-state__icon">🛢</div>
+          <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+        </div>
+      } @else {
+        <div class="diagram-scroll">
+          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+          <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+        </div>
       }
-      <app-wwells-logs-indicators></app-wwells-logs-indicators>
+      <app-wwells-logs-indicators />
     </div>
 
-    <aside class="presentation__sidebar presentation__sidebar--right">
-      <app-active-wwell-map></app-active-wwell-map>
+    <aside class="pres-right">
+      <app-active-wwell-map />
       <app-offset-wwells />
+      <app-wwell-test-result />
     </aside>
+
   </main>
 </div>

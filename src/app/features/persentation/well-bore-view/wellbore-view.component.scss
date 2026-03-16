@@ -1,4 +1,3 @@
-// ─── Wellbore View — Industrial Precision Theme ───────────────────────────
 :host {
   display: block;
   flex: 1;
@@ -12,215 +11,62 @@
 }
 
 :host ::ng-deep {
-
   text {
     font-family: 'DM Mono', 'Fira Code', 'Consolas', monospace;
     font-weight: 500;
-    letter-spacing: 0.01em;
   }
 
-  .ground-line {
-    stroke: #b94a12;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    opacity: 0.9;
-  }
+  .ground-line   { stroke: #b94a12; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
+  .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 10.5px; font-weight: 600; fill: #b94a12; text-transform: uppercase; opacity: 0.85; }
+  .geo-axis      { stroke: var(--accent); stroke-width: 1.5; opacity: 0.3; }
+  .column-label  { font-family: 'DM Sans', sans-serif; font-size: 9.5px; fill: var(--accent); font-weight: 700; opacity: 0.9; }
+  .geo-tick      { stroke: var(--accent); stroke-width: 1.5; opacity: 0.65; }
+  .geo-depth     { font-size: 10.5px; font-weight: 600; fill: var(--text-secondary); text-anchor: end; opacity: 0.85; }
+  .geo-code      { font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
 
-  .ground-label {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 10.5px;
-    font-weight: 600;
-    fill: #b94a12;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.85;
-  }
+  .geo-target-band  { fill: rgba(251,191,36,0.10); stroke: rgba(245,158,11,0.5); stroke-width: 1; }
+  .geo-tick--target { stroke: #d97706; stroke-width: 2.5; }
+  .geo-depth--target{ font-size: 10.5px; font-weight: 700; fill: #d97706; text-anchor: end; }
+  .geo-code--target { font-size: 12.5px; font-weight: 900; fill: #d97706; }
 
-  .geo-axis {
-    stroke: #3b67d4;
-    stroke-width: 1.5;
-    opacity: 0.3;
-  }
-
-  .column-label {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 9.5px;
-    fill: #3b67d4;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    opacity: 0.9;
-  }
-
-  .geo-tick {
-    stroke: #1e3a8a;
-    stroke-width: 1.5;
-    opacity: 0.65;
-  }
-
-  .geo-depth {
-    font-size: 10.5px;
-    font-weight: 600;
-    fill: #475569;
-    text-anchor: end;
-    opacity: 0.85;
-  }
-
-  .geo-code {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 12.5px;
-    font-weight: 800;
-    fill: #1e293b;
-    letter-spacing: 0.05em;
-  }
-
-  .geo-target-band {
-    fill: rgba(251, 191, 36, 0.10);
-    stroke: rgba(245, 158, 11, 0.5);
-    stroke-width: 1;
-  }
-  .geo-tick--target  { stroke: #d97706; stroke-width: 2.5; }
-  .geo-depth--target { font-size: 10.5px; font-weight: 700; fill: #d97706; text-anchor: end; }
-  .geo-code--target  { font-size: 12.5px; font-weight: 900; fill: #d97706; letter-spacing: 0.05em; }
-  .geo-target-label  { font-size: 9px; font-weight: 700; fill: #92400e; letter-spacing: 0.5px; }
-
-  .casing {
-    stroke: #1e293b;
-    stroke-width: 5;
-    stroke-linecap: round;
-    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.20));
-  }
-
-  .casing-label__line {
-    stroke: #64748b;
-    stroke-width: 1;
-    opacity: 0.75;
-  }
-
-  .casing-label__arrow {
-    fill: #64748b;
-    opacity: 0.75;
-  }
-
+  .casing            { stroke-linecap: round; }
+  .casing-label__line   { stroke: var(--text-muted); stroke-width: 1; opacity: 0.75; }
+  .casing-label__arrow  { fill: var(--text-muted); opacity: 0.75; }
   .casing-label__primary {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 11.5px;
-    font-weight: 700;
-    fill: #1e293b;
-    letter-spacing: 0.02em;
+    font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 700;
+    fill: var(--text-primary); letter-spacing: 0.02em;
   }
-
   .casing-label__secondary {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 10px;
-    font-weight: 400;
-    fill: #94a3b8;
-    font-style: italic;
+    font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 400;
+    fill: var(--text-muted); font-style: italic;
   }
-
   .casing-size-inner {
-    font-family: 'DM Mono', 'Fira Code', monospace;
-    font-size: 10.5px;
-    font-weight: 600;
-    fill: #64748b;
-    opacity: 0.70;
+    font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 600;
+    fill: var(--text-muted); opacity: 0.70;
   }
 
-  .water-line {
-    stroke: #0ea5e9;
-    stroke-width: 1.8;
-    stroke-dasharray: 7, 4;
-    opacity: 0.8;
-    filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.30));
-  }
+  .water-line  { stroke: #0ea5e9; stroke-width: 1.8; stroke-dasharray: 7,4; opacity: 0.8; }
+  .water-arrow { fill: #0ea5e9; stroke: #0ea5e9; opacity: 0.8; }
+  .water-label { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--accent); font-weight: 600; }
 
-  .water-arrow {
-    fill: #0ea5e9;
-    stroke: #0ea5e9;
-    opacity: 0.8;
-  }
+  .open-hole        { stroke: var(--text-secondary); stroke-width: 1.6; fill: none; stroke-dasharray: 5,3; opacity: 0.55; }
+  .oh-label-line    { stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
+  .oh-label-arrow   { fill: var(--text-muted); opacity: 0.65; }
+  .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 10.5px; font-weight: 600; fill: var(--text-secondary); opacity: 0.82; }
 
-  .water-label {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 11px;
-    fill: #0369a1;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
+  .liner-screen     { stroke: var(--text-secondary); stroke-width: 1.8; fill: url(#gridPattern); opacity: 0.72; }
+  .screen-hanger    { opacity: 0.78; }
+  .screen-label-line{ stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
+  .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; fill: var(--text-muted); }
 
-  .open-hole {
-    stroke: #475569;
-    stroke-width: 1.6;
-    fill: none;
-    stroke-dasharray: 5, 3;
-    opacity: 0.55;
-  }
+  .gravelHole { opacity: 0.65; }
 
-  .oh-label-line {
-    stroke: #64748b;
-    stroke-width: 1;
-    opacity: 0.65;
-  }
-
-  .oh-label-arrow {
-    fill: #64748b;
-    opacity: 0.65;
-  }
-
-  .open-hole-text {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 10.5px;
-    font-weight: 600;
-    fill: #475569;
-    opacity: 0.82;
-  }
-
-  .liner-screen {
-    stroke: #334155;
-    stroke-width: 1.8;
-    fill: url(#gridPattern);
-    opacity: 0.72;
-  }
-
-  .screen-hanger {
-    opacity: 0.78;
-  }
-
-  .screen-label-line {
-    stroke: #64748b;
-    stroke-width: 1;
-    opacity: 0.65;
-  }
-
-  .screen-label-text {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    fill: #64748b;
-  }
-
-  .gravelHole {
-    opacity: 0.65;
-  }
-
-  .depth-arrow {
-    fill: #0f172a;
-    stroke: #0f172a;
-    stroke-width: 0.5;
-    filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.30));
-  }
-
+  .depth-arrow   { fill: var(--accent); stroke: var(--accent); stroke-width: 0.5; }
   .total-depth-main {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 12.5px;
-    font-weight: 800;
-    fill: #1d4ed8;
-    letter-spacing: 0.05em;
-    opacity: 0.9;
+    font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 800;
+    fill: var(--accent); letter-spacing: 0.05em; opacity: 0.9;
   }
-
-  .not-drilled-label,
-  .not-drilled-footage {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    letter-spacing: 0.03em;
+  .not-drilled-label, .not-drilled-footage {
+    font-family: 'DM Sans', sans-serif; letter-spacing: 0.03em;
   }
 }

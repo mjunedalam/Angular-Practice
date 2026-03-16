@@ -2,16 +2,9 @@ import { Injectable, signal, computed } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class LoaderService {
-  // Counter-based: multiple callers can show/hide independently
   private readonly _count = signal(0);
-
   readonly isLoading = computed(() => this._count() > 0);
 
-  show(): void {
-    this._count.update((n) => n + 1);
-  }
-
-  hide(): void {
-    this._count.update((n) => Math.max(0, n - 1));
-  }
+  show(): void { this._count.update((n) => n + 1); }
+  hide(): void { this._count.update((n) => Math.max(0, n - 1)); }
 }

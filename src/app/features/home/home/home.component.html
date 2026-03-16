@@ -1,0 +1,24 @@
+<div class="home">
+
+  <!-- ══ Quick List ══ -->
+  <div class="quick-list">
+    <div class="quick-list__title">Quick List</div>
+
+    @for (item of quickItems; track item.route) {
+      <button class="ql-item" (click)="navigate(item.route)">
+        <span class="ql-item__icon" [style.background]="'radial-gradient(circle at 35% 35%, ' + item.color + 'cc, ' + item.color + '55)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            @for (p of item.iconPaths; track $index) {
+              <path [attr.d]="p" />
+            }
+          </svg>
+        </span>
+        <span class="ql-item__label">{{ item.label }}</span>
+      </button>
+    }
+  </div>
+
+
+
+</div>

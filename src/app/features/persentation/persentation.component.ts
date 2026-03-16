@@ -1,17 +1,6 @@
 /**
  * PersentationComponent — SMART component
- * ─────────────────────────────────────────────────────────────────────────────
- * Responsibilities:
- *   ✔ Bootstrap well data on init
- *   ✔ Expose store signals to template
- *   ✔ Orchestrate layout of dumb child components
- *
- * What it does NOT do:
- *   ✗ Pass data down as inputs to store-aware children
- *   ✗ Handle child events — children call store methods directly
- *   ✗ Contain any business logic
  */
-
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { WellStore } from 'src/app/core/store/well.store';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -22,6 +11,7 @@ import { PickedFormationTopsComponent } from './picked-formation-tops/picked-for
 import { ActiveWwellMapComponent } from './active-wwell-map/active-wwell-map.component';
 import { OffsetWwellsComponent } from './offset-wwells/offset-wwells.component';
 import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-logs-indicators.component';
+import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
 
 @Component({
   selector: 'app-persentation',
@@ -35,6 +25,7 @@ import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-l
     ActiveWwellMapComponent,
     OffsetWwellsComponent,
     WwellsLogsIndicatorsComponent,
+    WwellTestResultComponent,
   ],
   templateUrl: './persentation.component.html',
   styleUrl: './persentation.component.scss',

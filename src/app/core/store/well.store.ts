@@ -14,7 +14,7 @@ import { delay, map, pipe, switchMap, tap } from 'rxjs';
 import { IWellData } from '../../../models/well-design/wwell-data.model';
 import { WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { MorningReport } from '../../models/morining-report.model';
+import { MorningReport } from 'src/models/morining-report.model';
 import { WellName } from '../../../models/well-design/well-name.model';
 import { WellDataService } from '../../../services/wwell-data.service';
 import { MoriningReportService } from '../../../services/morining-report.service';
@@ -33,6 +33,7 @@ import {
     selectPickedFormations,
     selectOffsetWells,
     selectWellLogsIndicators,
+    selectWellTestResults,
 } from './well.selectors';
 
 const MIN_LOADER_DELAY = 800;
@@ -85,6 +86,18 @@ export interface OffsetWaterWells {
     readonly rate: number;
 }
 
+export interface WellTestResult {
+    readonly wellName: string;
+    readonly testType: string;
+    readonly aquifer: string;
+    readonly rpm: number;
+    readonly flowRate: number;
+    readonly temperature: number;
+    readonly tds: number;
+    readonly productivity: number;
+    readonly h2s: number;
+}
+
 interface WellState {
     readonly wellNames: WellName[];
     readonly selectedEpANum: number | null;
@@ -124,6 +137,7 @@ export const WellStore = signalStore(
             pickedFormations: computed((): PickedFormationTops[] => selectPickedFormations(wellDetails())),
             offsetWells: computed((): OffsetWaterWells[] => selectOffsetWells(wellDetails())),
             wellsLogsIndicators: computed((): WellLogsIndicators | null => selectWellLogsIndicators(wellDetails())),
+            wellTestResults: computed((): WellTestResult[] => selectWellTestResults(wellDetails())),
         };
     }),
 
@@ -143,7 +157,10 @@ export const WellStore = signalStore(
                         selectedEpANum: epANum,
                         loading: true,
                         error: null,
-                        wellDetails: null, // ← reset so pickedFormations() = [] and isLoaded() = false
+                        // DO NOT set wellDetails: null here.
+                        // Keeping old data in place prevents every @if from
+                        // destroying and recreating the DOM (the cause of blinking).
+                        // The new data will replace it when the request completes.
                     });
                 }),
                 switchMap(epANum =>
@@ -224,15 +241,3 @@ export const WellStore = signalStore(
 );
 
 export { WellActions, WellEvents };
-
-
-
-
-
-
-
-
-
-
-
-

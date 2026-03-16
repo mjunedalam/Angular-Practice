@@ -15,6 +15,7 @@ export const WellEvents = {
     wellNamesLoadFailed: '[Well] Well Names Load Failed',
     wellDetailsLoaded: '[Well] Well Details Loaded',
     wellDetailsLoadFailed: '[Well] Well Details Load Failed',
+    wellTestResultsLoaded: '[Well] Well Test Results Loaded',
 } as const;
 
 // ─── Typed payloads ───────────────────────────────────────────────────────────

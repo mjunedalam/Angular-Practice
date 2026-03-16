@@ -32,3 +32,8 @@
 
   <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>
 </div>
+
+<!-- Loading bar — sits directly below chip strip, inline in flow, no fixed position -->
+<div class="well-loading-bar" [class.well-loading-bar--active]="store.loading()">
+  <div class="well-loading-bar__fill"></div>
+</div>

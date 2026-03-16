@@ -5,7 +5,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { ThemeStore, THEME_OPTIONS } from 'src/app/core/store/theme/theme.store';
+import { ThemeStore } from 'src/app/core/store/theme/theme.store';
 
 @Component({
   selector: 'app-top-navbar',
@@ -19,8 +19,7 @@ export class TopNavbarComponent {
   readonly sidenavCollapsed = input<boolean>(false);
   readonly toggleSidenav    = output<void>();
 
-  protected readonly theme        = inject(ThemeStore);
-  protected readonly themeOptions = THEME_OPTIONS;
+  protected readonly theme = inject(ThemeStore);
 
   readonly appTitle = 'Aramco Ground Water Application';
   readonly userName = 'Abdulrahman';

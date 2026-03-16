@@ -217,7 +217,7 @@ export class WellBoreViewComponent implements OnInit {
         .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', fill);
     };
-    addMarker('arrowBlack', '#000');
+    addMarker('arrowBlack', 'var(--text-secondary)');
     addMarker('arrowBlue', '#3CC3FF');
   }
 
@@ -364,8 +364,8 @@ export class WellBoreViewComponent implements OnInit {
 
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
         const screenHW = innerHW - 10;
-        const annulusWidth = 10;                    // thin band matching screen tube thickness
-        const annulusCenter = screenHW - (annulusWidth / 2);  // hugs the inner wall of screen
+        const annulusWidth = 10;                       // thin band matching screen tube thickness
+        const annulusCenter = screenHW + (annulusWidth / 2);  // ✅ just OUTSIDE the screen wall
 
         this.rootG.append('path')
           .attr('class', 'gravelHole')
@@ -387,6 +387,8 @@ export class WellBoreViewComponent implements OnInit {
           .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
           .attr('clip-path', `url(#${clipId})`)
           .attr('fill', `url(#${casingGradientId(csg.csgType)})`)
+          .attr('stroke', '#1e293b')
+          .attr('stroke-width', '5')
           .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
       }
 
@@ -613,13 +615,13 @@ export class WellBoreViewComponent implements OnInit {
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
     hangerG.append('path')
       .attr('class', 'screen-hanger screen-hanger--left')
-      .attr('stroke', '#333').attr('stroke-width', '1')
-      .attr('fill', '#333')
+      .attr('stroke', '#1e293b').attr('stroke-width', '1')
+      .attr('fill', '#1e293b')
       .attr('d', hangerLeft);
     hangerG.append('path')
       .attr('class', 'screen-hanger screen-hanger--right')
-      .attr('stroke', '#333').attr('stroke-width', '1')
-      .attr('fill', '#333')
+      .attr('stroke', '#1e293b').attr('stroke-width', '1')
+      .attr('fill', '#1e293b')
       .attr('d', hangerRight);
 
     hangerG.transition()
