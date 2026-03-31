@@ -17,6 +17,7 @@ import { ITopsIR } from "../../shared/models/wwell/top-sir.model";
 import { IWaterIR } from "../../shared/models/wwell/water-ir.model";
 import { IWaterWellTestOutcome } from "../../shared/models/wwell/water-well-test-outcome.model";
 import { IWellMaster } from "../../shared/models/wwell/well-master.model";
+import { IMudCirculation } from "./mud-circulation.model"; 
 
 export interface IWellData {
     RIG_ACTIVITY: IRigActivity[];
@@ -38,6 +39,7 @@ export interface IWellData {
     EXAD_GWD_IR_WATER: IWaterIR[];
     EXAD_RCD_PREWAP: IPreWellData[];
     WATER_WELL_TEST_OUTCOME: IWaterWellTestOutcome[];
+    WWELL_MUD_CIRC?: IMudCirculation[];
     actualRm?: number;
     kpiRm?: number;
     rigMoveDays?: number;

@@ -4,15 +4,21 @@ import { IHydrogeologyIR } from '../../shared/models/wwell/hydrogeology-ir.model
 import { IPreWellData } from '../../shared/models/wwell/pre-well-data.model';
 import { IRigActivity } from '../../shared/models/wwell/rig-activity.model';
 
+export interface MudCircPoint {
+  readonly depth: number;  // parsed from W_PRSNT_DPTH
+  readonly pct: number;    // parsed from W_MUD_CIRC_PC
+}
+
 export interface WellboreDiagramData {
   readonly wellName: string;
   readonly totalDepth: number;
-  readonly casings: ICasingIR[]
+  readonly casings: ICasingIR[];
   readonly geologicTops: ITopsIR[];
   readonly hydrogeology: IHydrogeologyIR | null;
   readonly prewap: IPreWellData | null;
   readonly rigActivity: IRigActivity | null;
   readonly currentDepth: number;
+  readonly mudCirculation: MudCircPoint[];  // parsed mud circulation data
 }
 
 export interface DiagramLayout {

@@ -12,76 +12,139 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+}
 
-  &__diagram {
+// ── Toolbar row ────────────────────────────────────────────────────────────────
+.presentation__toolbar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;  // so the toggle can sit on top of chip strip edge
+
+  .toolbar__chips {
     flex: 1;
-    display: flex;
-    align-items: stretch;
-    overflow: hidden;
-    padding: 0 24px 12px;
-    gap: 16px;
+    min-width: 0;
+  }
+}
+
+// ── Layout toggle — icon-only pill, sits at far right ─────────────────────────
+.layout-toggle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-right: 10px;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
   }
 
-  &__sidebar {
-    width: 370px;
-    min-width: 370px;
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-muted);
+  }
+
+  // Active / ON state
+  &--on {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  }
+}
+
+// ── Error banner ───────────────────────────────────────────────────────────────
+.error-banner {
+  flex-shrink: 0;
+  margin: 0 12px 4px;
+  padding: 7px 14px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODE A — FIXED three-column layout (default)
+// ══════════════════════════════════════════════════════════════════════════════
+.pres-fixed {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 0;
+  gap: 0;
+
+  // Left panel — width driven by signal
+  &__left {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 8px 4px 8px 4px;
+    gap: 10px;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 8px 0 8px 8px;
+    min-width: 0;
 
-    &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    // Make draggable-card children fill available height
+    app-draggable-card {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &::-webkit-scrollbar { width: 3px; }
+    &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  }
+
+  // Center panel — fills remaining space
+  &__center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    padding: 8px 0;
+    gap: 8px;
+  }
+
+  // Right panel — width driven by signal
+  &__right {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 8px 8px 0;
+    min-width: 0;
+
+    app-draggable-card {
+      flex-shrink: 0;
+    }
+
+    &::-webkit-scrollbar { width: 3px; }
+    &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   }
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-// Use visibility + opacity instead of @if — keeps DOM stable, no blink
-.empty-state {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  color: var(--text-muted);
-  pointer-events: none;
-  // visible by default
-  opacity: 1;
-  transition: opacity 0.2s ease;
-
-  &--hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  &__icon {
-    font-size: 48px;
-    opacity: 0.25;
-    animation: float 3s ease-in-out infinite;
-  }
-
-  &__text {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    opacity: 0.6;
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-
-// ── Diagram scroll ────────────────────────────────────────────────────────────
-// Always in DOM — shown/hidden via opacity + visibility, not @if
+// Wellbore diagram fills center
 .diagram-scroll {
+  flex: 1;
   display: flex;
   align-items: stretch;
   background: var(--bg-card);
@@ -89,87 +152,51 @@
   border: 1px solid var(--border);
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   overflow: hidden;
-  height: 100%;
-  width: 100%;
-  max-width: 1100px;
-  // Smooth fade instead of hard appear/disappear
-  opacity: 1;
-  transition: opacity 0.25s ease;
-
-  &--hidden {
-    opacity: 0;
-    // Keep in layout flow so nothing shifts — just invisible
-    pointer-events: none;
-  }
-}
-
-// ── Left panel widths ─────────────────────────────────────────────────────────
-.w-1\/3 {
-  width: 33.333%;
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding-top: 8px;
-}
-
-.w-2\/3 {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.ml-4 { margin-left: 16px; }
-
-.well-svg-div {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   min-height: 0;
-  padding-top: 8px;
 }
 
-// ── Error banner ──────────────────────────────────────────────────────────────
-.error-banner {
+// ══════════════════════════════════════════════════════════════════════════════
+// MODE B — FREE canvas layout
+// ══════════════════════════════════════════════════════════════════════════════
+.pres-canvas {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  min-height: 0;
+
+  // Subtle dot grid backdrop
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 12px 12px;
+  padding: 8px;
+
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+}
+
+// Diagram in free mode
+.diagram-inner {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 20px;
-  margin: 0 24px 6px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
-  color: var(--danger);
-  font-size: 12.5px;
-  font-weight: 600;
-  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-// ── Nav buttons ───────────────────────────────────────────────────────────────
-.nav-btn {
-  flex-shrink: 0;
-  display: inline-flex;
+// ── Shared empty state ─────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 64px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  height: 100%;
+  gap: 14px;
+  color: var(--text-muted);
+  padding: 24px;
 
-  &:hover:not(:disabled) {
-    background: var(--accent-muted);
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-1px);
-  }
-  &:disabled { opacity: 0.35; cursor: not-allowed; }
+  &__icon { font-size: 40px; opacity: 0.22; animation: float 3s ease-in-out infinite; }
+  &__text  { font-size: 12px; font-weight: 500; opacity: 0.6; text-align: center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
 }

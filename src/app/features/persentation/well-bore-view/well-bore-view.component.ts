@@ -637,21 +637,174 @@ export class WellBoreViewComponent implements OnInit {
     drillStart: number,
     t_casingsDone: number,
   ): void {
-    // Arrow always travels to totalDepth (full scale bottom)
-    const arrowHeadH = 12;  // must match the arrowhead height passed to buildDepthArrow
-    const endPx = scale(data.totalDepth) - arrowHeadH;
-    const arrowCx = this.layout.depthArrowX;
-    const duration = t_casingsDone - drillStart;  // synced to casing draw time
+    const arrowCx  = this.layout.depthArrowX;
+    const shaftHW  = 4;    // half-width of shaft
+    const headH    = 14;   // arrowhead triangle height
+    const headHW   = 9;    // arrowhead half-width at base
+    const duration = t_casingsDone - drillStart;
+    const totalPx  = scale(data.totalDepth);
+    const currPx   = scale(data.currentDepth);
+    const points   = data.mudCirculation;
 
-    this.rootG.append('path')
-      .attr('class', 'depth-arrow')
-      .attr('d', buildDepthArrow(0, 0, arrowCx, 10, 12))
+    const circColour = (pct: number): string => {
+      if (pct >= 98) return '#22c55e';  // bright green  — excellent ≥ 98%
+      if (pct >= 92) return '#84cc16';  // lime           — good     92–97%
+      if (pct >= 85) return '#f59e0b';  // amber          — fair     85–91%
+      if (pct >= 70) return '#f97316';  // orange         — poor     70–84%
+      return '#ef4444';                 // red            — critical  < 70%
+    };
+
+    const arrowG = this.rootG.append('g').attr('class', 'depth-arrow-group');
+
+    // ── ClipPath — slides top→bottom to reveal the shaft ────────────────────
+    const clipId = `arrow-clip-${Date.now()}`;
+    this.defsEl.append('clipPath')
+      .attr('class', 'dyn-clip')
+      .attr('id', clipId)
+      .append('rect')
+        .attr('x', arrowCx - headHW - 4).attr('y', -4)
+        .attr('width', (headHW + 4) * 2).attr('height', 0)
       .transition()
-      .delay(drillStart)
-      .duration(duration)
-      .ease(easeCubicInOut)
-      .attr('d', buildDepthArrow(0, endPx, arrowCx, 10, 12));
+        .delay(drillStart).duration(duration).ease(easeCubicInOut)
+        .attr('height', totalPx + 4);
+
+    const shaftG = arrowG.append('g').attr('clip-path', `url(#${clipId})`);
+
+    // ── Build a single linearGradient for the drilled section ───────────────
+    // Hard stops (no blending): each boundary gets two stops at the same offset,
+    // one for the colour above and one for the colour below → seamless bands.
+    if (points.length && currPx > 0) {
+      const gradId = `circ-grad-${Date.now()}`;
+      const grad   = this.defsEl.append('linearGradient')
+        .attr('class', 'dyn-clip')        // tagged so redraw() removes it
+        .attr('id', gradId)
+        .attr('gradientUnits', 'userSpaceOnUse')
+        .attr('x1', arrowCx).attr('y1', 0)
+        .attr('x2', arrowCx).attr('y2', currPx);
+
+      // Build segments list (clamped to currentDepth)
+      const segs: { topPx: number; botPx: number; pct: number; topDepth: number; botDepth: number }[] = [];
+      for (let i = 0; i < points.length; i++) {
+        const topDepth = i === 0 ? 0 : points[i - 1].depth;
+        const botDepth = points[i].depth;
+        const top      = Math.min(topDepth, data.currentDepth);
+        const bot      = Math.min(botDepth, data.currentDepth);
+        if (top >= bot) continue;
+        segs.push({ topPx: scale(top), botPx: scale(bot), pct: points[i].pct, topDepth: top, botDepth: bot });
+      }
+
+      // Add hard-stop gradient stops — two stops per boundary (same offset, colour switches)
+      segs.forEach((seg, idx) => {
+        const col     = circColour(seg.pct);
+        const topPct  = (seg.topPx / currPx) * 100;
+        const botPct  = (seg.botPx / currPx) * 100;
+        // Top stop for this segment (may duplicate previous bot stop — that's intentional)
+        grad.append('stop')
+          .attr('offset', `${topPct.toFixed(4)}%`)
+          .attr('stop-color', col);
+        // Bottom stop — hard edge: if next segment exists, next colour starts immediately
+        const nextCol = idx + 1 < segs.length ? circColour(segs[idx + 1].pct) : col;
+        grad.append('stop')
+          .attr('offset', `${botPct.toFixed(4)}%`)
+          .attr('stop-color', col);
+        if (nextCol !== col) {
+          grad.append('stop')
+            .attr('offset', `${botPct.toFixed(4)}%`)
+            .attr('stop-color', nextCol);
+        }
+      });
+
+      // Single rect for the entire drilled section — no gaps, no rounded ends
+      shaftG.append('rect')
+        .attr('x', arrowCx - shaftHW).attr('y', 0)
+        .attr('width', shaftHW * 2).attr('height', currPx)
+        .attr('fill', `url(#${gradId})`);
+
+      // Highlight stripe — left half, semi-transparent white overlay for depth
+      shaftG.append('rect')
+        .attr('x', arrowCx - shaftHW).attr('y', 0)
+        .attr('width', shaftHW).attr('height', currPx)
+        .attr('fill', 'rgba(255,255,255,0.10)')
+        .attr('pointer-events', 'none');
+
+      // ── Invisible hover hit areas for tooltips ────────────────────────────
+      segs.forEach(seg => {
+        const fill  = circColour(seg.pct);
+        const segH  = Math.max(1, seg.botPx - seg.topPx);
+        const midY  = seg.topPx + segH / 2;
+        const ttipX = arrowCx + shaftHW + 8;
+        const line1 = `${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`;
+        const line2 = `Circulation: ${seg.pct}%`;
+        const boxW  = 124;
+        const boxH  = 34;
+
+        const ttipG = arrowG.append('g')
+          .attr('class', 'circ-tooltip')
+          .style('opacity', 0).style('pointer-events', 'none');
+
+        ttipG.append('rect')
+          .attr('x', ttipX).attr('y', midY - boxH / 2)
+          .attr('width', boxW).attr('height', boxH).attr('rx', 5)
+          .attr('fill', '#0f172a').attr('stroke', fill)
+          .attr('stroke-width', 1.5).attr('opacity', 0.95);
+
+        ttipG.append('circle')
+          .attr('cx', ttipX + 10).attr('cy', midY - 4)
+          .attr('r', 3.5).attr('fill', fill);
+
+        ttipG.append('text')
+          .attr('x', ttipX + 19).attr('y', midY - 1)
+          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '600').attr('fill', '#94a3b8').text(line1);
+
+        ttipG.append('text')
+          .attr('x', ttipX + 10).attr('y', midY + 11)
+          .attr('font-size', '9.5').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '800').attr('fill', fill).text(line2);
+
+        // Transparent hit rect sitting on top of gradient shaft
+        shaftG.append('rect')
+          .attr('x', arrowCx - shaftHW).attr('y', seg.topPx)
+          .attr('width', shaftHW * 2).attr('height', segH)
+          .attr('fill', 'transparent')
+          .attr('class', 'mud-circ-seg')
+          .on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1))
+          .on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
+      });
+
+    } else {
+      // No circulation data — plain accent shaft
+      shaftG.append('rect')
+        .attr('x', arrowCx - shaftHW).attr('y', 0)
+        .attr('width', shaftHW * 2).attr('height', currPx)
+        .attr('fill', 'var(--accent)');
+    }
+
+    // ── Undrilled section: dark shaft from currentDepth → totalDepth ─────────
+    if (data.currentDepth < data.totalDepth) {
+      shaftG.append('rect')
+        .attr('x', arrowCx - shaftHW).attr('y', currPx)
+        .attr('width', shaftHW * 2).attr('height', totalPx - currPx)
+        .attr('fill', '#1e293b');
+    }
+
+    // ── Arrowhead — outside clip, animates independently ─────────────────────
+    const headG = arrowG.append('g').attr('class', 'depth-arrow-head-g');
+
+    headG.append('circle')
+      .attr('cx', arrowCx).attr('cy', 0).attr('r', 7)
+      .attr('fill', 'var(--accent)').attr('opacity', 0.22)
+      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
+      .attr('cy', totalPx);
+
+    headG.append('path')
+      .attr('class', 'depth-arrow-head')
+      .attr('d', `M${arrowCx - headHW},0 L${arrowCx + headHW},0 L${arrowCx},${headH} Z`)
+      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
+      .attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx + headHW},${totalPx - headH} L${arrowCx},${totalPx} Z`);
   }
+
+
 
   private drawTotalDepthLabel(
     totalDepth: number,

@@ -1,38 +1,148 @@
 <div class="presentation">
 
-  <app-well-name-chips />
+  <!-- ── Chip bar + layout toggle icon ─────────────────────────────────────── -->
+  <div class="presentation__toolbar">
+    <app-well-name-chips class="toolbar__chips" />
+    <button
+      class="layout-toggle"
+      [class.layout-toggle--on]="draggableMode()"
+      (click)="toggleDraggable()"
+      [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'"
+      aria-label="Toggle layout mode"
+    >
+      @if (!draggableMode()) {
+        <!-- Grid / fixed icon -->
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      } @else {
+        <!-- Free / drag icon -->
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M7 6l-4 4 4 4M13 6l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      }
+    </button>
+  </div>
 
   @if (store.error()) {
     <div class="error-banner" role="alert">⚠ {{ store.error() }}</div>
   }
 
-  <main class="presentation__diagram">
+  <!-- ════════════════════════════════════════════════════════════════════════
+       MODE A — FIXED (default): standard three-column flex layout
+       ════════════════════════════════════════════════════════════════════════ -->
+  @if (!draggableMode()) {
+    <main class="pres-fixed">
 
-    <div class="pres-left">
-      <app-misc-pres-well-data />
-      <app-picked-formation-tops />
+      <!-- Left -->
+      <div class="pres-fixed__left" [style.width.px]="leftWidth()">
+        <app-draggable-card title="Well Overview" [draggable]="false">
+          <app-misc-pres-well-data />
+        </app-draggable-card>
+        <app-draggable-card title="Picked Formation Tops" [draggable]="false">
+          <app-picked-formation-tops />
+        </app-draggable-card>
+      </div>
+
+      <app-resize-divider (drag)="onLeftDrag($event)" />
+
+      <!-- Center -->
+      <div class="pres-fixed__center">
+        @if (!store.isLoaded()) {
+          <div class="empty-state">
+            <div class="empty-state__icon">🛢</div>
+            <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+          </div>
+        } @else {
+          <div class="diagram-scroll">
+            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+          </div>
+        }
+        <app-wwells-logs-indicators />
+      </div>
+
+      <app-resize-divider (drag)="onRightDrag($event)" />
+
+      <!-- Right -->
+      <aside class="pres-fixed__right" [style.width.px]="rightWidth()">
+        <app-draggable-card title="Active Well Map" [draggable]="false">
+          <app-active-wwell-map />
+        </app-draggable-card>
+        <app-draggable-card title="Offset Wells" [draggable]="false">
+          <app-offset-wwells />
+        </app-draggable-card>
+        <app-draggable-card title="Well Test Results" [draggable]="false">
+          <app-wwell-test-result />
+        </app-draggable-card>
+      </aside>
+
+    </main>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       MODE B — FREE: every card is independently draggable + resizable
+       ════════════════════════════════════════════════════════════════════════ -->
+  @if (draggableMode()) {
+    <div class="pres-canvas">
+
+      <app-draggable-card title="Well Overview"
+        [draggable]="true" [initialW]="280" [initialH]="420"
+        style="position:absolute; left:0; top:0">
+        <app-misc-pres-well-data />
+      </app-draggable-card>
+
+      <app-draggable-card title="Picked Formation Tops"
+        [draggable]="true" [initialW]="280" [initialH]="260"
+        style="position:absolute; left:0; top:430px">
+        <app-picked-formation-tops />
+      </app-draggable-card>
+
+      <app-draggable-card title="Wellbore Diagram"
+        [draggable]="true" [initialW]="460" [initialH]="700"
+        style="position:absolute; left:296px; top:0">
+        @if (!store.isLoaded()) {
+          <div class="empty-state">
+            <div class="empty-state__icon">🛢</div>
+            <p class="empty-state__text">Select a well to render the diagram</p>
+          </div>
+        } @else {
+          <div class="diagram-inner">
+            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+          </div>
+        }
+      </app-draggable-card>
+
+      <app-draggable-card title="Log Indicators"
+        [draggable]="true" [initialW]="460" [initialH]="72"
+        style="position:absolute; left:296px; top:710px">
+        <app-wwells-logs-indicators />
+      </app-draggable-card>
+
+      <app-draggable-card title="Active Well Map"
+        [draggable]="true" [initialW]="320" [initialH]="180"
+        style="position:absolute; left:772px; top:0">
+        <app-active-wwell-map />
+      </app-draggable-card>
+
+      <app-draggable-card title="Offset Wells"
+        [draggable]="true" [initialW]="320" [initialH]="300"
+        style="position:absolute; left:772px; top:190px">
+        <app-offset-wwells />
+      </app-draggable-card>
+
+      <app-draggable-card title="Well Test Results"
+        [draggable]="true" [initialW]="320" [initialH]="260"
+        style="position:absolute; left:772px; top:500px">
+        <app-wwell-test-result />
+      </app-draggable-card>
+
     </div>
+  }
 
-    <div class="pres-center">
-      @if (!store.isLoaded()) {
-        <div class="empty-state">
-          <div class="empty-state__icon">🛢</div>
-          <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
-        </div>
-      } @else {
-        <div class="diagram-scroll">
-          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-          <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-        </div>
-      }
-      <app-wwells-logs-indicators />
-    </div>
-
-    <aside class="pres-right">
-      <app-active-wwell-map />
-      <app-offset-wwells />
-      <app-wwell-test-result />
-    </aside>
-
-  </main>
 </div>

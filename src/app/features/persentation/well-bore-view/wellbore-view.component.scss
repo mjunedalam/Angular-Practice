@@ -61,7 +61,28 @@
 
   .gravelHole { opacity: 0.65; }
 
-  .depth-arrow   { fill: var(--accent); stroke: var(--accent); stroke-width: 0.5; }
+  .depth-arrow-group {
+    .mud-circ-seg {
+      cursor: crosshair;
+      rect { transition: filter 0.15s; }
+      &:hover rect:first-child { filter: brightness(1.35) saturate(1.2); }
+    }
+  }
+
+  .depth-arrow-head {
+    fill: var(--accent);
+    filter: drop-shadow(0 0 4px var(--accent));
+  }
+
+  .depth-arrow-head-g circle {
+    filter: blur(2px);
+  }
+
+  .circ-tooltip {
+    pointer-events: none;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+  }
+
   .total-depth-main {
     font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 800;
     fill: var(--accent); letter-spacing: 0.05em; opacity: 0.9;
