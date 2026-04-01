@@ -603,7 +603,7 @@
         },
         {
           "W_PRSNT_DPTH": "1645",
-          "W_MUD_CIRC_PC": "100",
+          "W_MUD_CIRC_PC": "0",
           "W_DPTH_CHG_DIS": "95"
         },
         {
@@ -658,22 +658,22 @@
         },
         {
           "W_PRSNT_DPTH": "3765",
-          "W_MUD_CIRC_PC": "100",
+          "W_MUD_CIRC_PC": "70",
           "W_DPTH_CHG_DIS": "278"
         },
         {
           "W_PRSNT_DPTH": "4115",
-          "W_MUD_CIRC_PC": "100",
+          "W_MUD_CIRC_PC": "60",
           "W_DPTH_CHG_DIS": "350"
         },
         {
           "W_PRSNT_DPTH": "4355",
-          "W_MUD_CIRC_PC": "100",
+          "W_MUD_CIRC_PC": "20",
           "W_DPTH_CHG_DIS": "240"
         },
         {
           "W_PRSNT_DPTH": "4539",
-          "W_MUD_CIRC_PC": "100",
+          "W_MUD_CIRC_PC": "10",
           "W_DPTH_CHG_DIS": "184"
         }
       ]

@@ -12,7 +12,7 @@ import { tapResponse } from '@ngrx/operators';
 import { delay, map, pipe, switchMap, tap } from 'rxjs';
 
 import { IWellData } from '../../../models/well-design/wwell-data.model';
-import { WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
+import { WellboreDiagramData } from '../../models/well-design/wellbore-diagram.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
 import { MorningReport } from 'src/models/morining-report.model';
 import { WellName } from '../../../models/well-design/well-name.model';

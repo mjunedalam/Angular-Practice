@@ -1,5 +1,5 @@
 import { IBitInfo } from "../../shared/models/wwell/bit-info.model";
-import { ICasingIR } from "../../shared/models/wwell/casing-ir.model";
+import { ICasingIR } from "../../app/shared/models/wwell/casing-ir.model";
 import { IContact } from "../../shared/models/wwell/contact.model";
 import { IDrillingFootage } from "../../shared/models/wwell/drilling-footage.model";
 import { IDrillingOperationStatus } from "../../shared/models/wwell/drilling-operation-status.model";
@@ -13,7 +13,7 @@ import { IPreWellData } from "../../shared/models/wwell/pre-well-data.model";
 import { IRigActivity } from "../../shared/models/wwell/rig-activity.model";
 import { IRigIdentification } from "../../shared/models/wwell/rig-identification.model";
 import { IROPData } from "../../shared/models/wwell/rop-data.model";
-import { ITopsIR } from "../../shared/models/wwell/top-sir.model";
+import { ITopsIR } from "../../app/shared/models/wwell/tops-ir.model";
 import { IWaterIR } from "../../shared/models/wwell/water-ir.model";
 import { IWaterWellTestOutcome } from "../../shared/models/wwell/water-well-test-outcome.model";
 import { IWellMaster } from "../../shared/models/wwell/well-master.model";

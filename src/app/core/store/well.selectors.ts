@@ -2,9 +2,9 @@ import { IWellData } from '../../../models/well-design/wwell-data.model';
 import { IFormationTops } from '../../../shared/models/wwell/formation-tops.model';
 import { IHeaderIR } from '../../../shared/models/wwell/header-ir.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { WellboreDiagramData, MudCircPoint } from '../../../models/well-design/wellbore-diagram.model';
+import { WellboreDiagramData, MudCircPoint } from '../../models/well-design/wellbore-diagram.model';
 import { WellName } from '../../../models/well-design/well-name.model';
-import { sortCasingsByDepthDesc } from '../../../utils/wellbore-math.util';
+import { sortCasingsByDepthDesc } from '../../utils/wellbore-math.util';
 
 import { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult } from './well.store';
 

@@ -1,8 +1,8 @@
 import { ICasingIR } from '../../shared/models/wwell/casing-ir.model';
-import { ITopsIR } from '../../shared/models/wwell/top-sir.model';
-import { IHydrogeologyIR } from '../../shared/models/wwell/hydrogeology-ir.model';
-import { IPreWellData } from '../../shared/models/wwell/pre-well-data.model';
-import { IRigActivity } from '../../shared/models/wwell/rig-activity.model';
+import { ITopsIR } from '../../shared/models/wwell/tops-ir.model';
+import { IHydrogeologyIR } from '../../../shared/models/wwell/hydrogeology-ir.model';
+import { IPreWellData } from '../../../shared/models/wwell/pre-well-data.model';
+import { IRigActivity } from '../../../shared/models/wwell/rig-activity.model';
 
 export interface MudCircPoint {
   readonly depth: number;  // parsed from W_PRSNT_DPTH

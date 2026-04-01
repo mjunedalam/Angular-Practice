@@ -11,13 +11,12 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, ANIM_MODE, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../../models/well-design/wellbore-diagram.model';
-import { ICasingIR } from '../../../../shared/models/wwell/casing-ir.model';
-import { ITopsIR } from '../../../../shared/models/wwell/top-sir.model';
+import { ANIM, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
+import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
+import { ITopsIR } from '../../../shared/models/wwell/tops-ir.model';
 import {
   buildArrowHeadRight,
   buildCasingPath,
-  buildDepthArrow,
   buildOpenHolePath,
   buildGravelPackUPath,
   buildScreenHanger,
@@ -26,8 +25,7 @@ import {
   createDepthScale,
   formatDepth,
   openHoleHalfWidth,
-  sortCasingsByDepthDesc
-} from '../../../../utils/wellbore-math.util';
+} from '../../../utils/wellbore-math.util';
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
 type GSel = Selection<SVGGElement, unknown, null, undefined>;
@@ -177,9 +175,9 @@ export class WellBoreViewComponent implements OnInit {
       .attr('width', 6).attr('height', 6);
     grid.append('path')
       .attr('d', 'M6,-4 L6,6 L-4,6')
-      .attr('stroke', '#58a6ff')
-      .attr('stroke-width', 1)
-      .attr('opacity', '0.35')
+      .attr('stroke', '#000000')
+      .attr('stroke-width', 2)
+      .attr('opacity', '1')
       .attr('fill', 'none');
 
     const gravelPattern = defs.append('pattern')
@@ -241,7 +239,7 @@ export class WellBoreViewComponent implements OnInit {
   private drawStaticChrome(geoLineX: number, centerX: number): void {
     this.rootG.append('line')
       .attr('class', 'ground-line')
-      .attr('x1', 0).attr('x2', centerX + 320)
+      .attr('x1', geoLineX + 200).attr('x2', centerX + 300)
       .attr('y1', -3).attr('y2', -3);
 
     this.rootG.append('text')
@@ -637,21 +635,22 @@ export class WellBoreViewComponent implements OnInit {
     drillStart: number,
     t_casingsDone: number,
   ): void {
-    const arrowCx  = this.layout.depthArrowX;
-    const shaftHW  = 4;    // half-width of shaft
-    const headH    = 14;   // arrowhead triangle height
-    const headHW   = 9;    // arrowhead half-width at base
+    const arrowCx = this.layout.depthArrowX;
+    const shaftHW = 4;    // half-width of shaft
+    const headH = 14;   // arrowhead triangle height
+    const headHW = 9;    // arrowhead half-width at base
     const duration = t_casingsDone - drillStart;
-    const totalPx  = scale(data.totalDepth);
-    const currPx   = scale(data.currentDepth);
-    const points   = data.mudCirculation;
+    const totalPx = scale(data.totalDepth);
+    const currPx = scale(data.currentDepth);
+    const points = data.mudCirculation;
 
+    // 0 % → hue 0 (red, high intensity)  …  100 % → hue 120 (green)
     const circColour = (pct: number): string => {
-      if (pct >= 98) return '#22c55e';  // bright green  — excellent ≥ 98%
-      if (pct >= 92) return '#84cc16';  // lime           — good     92–97%
-      if (pct >= 85) return '#f59e0b';  // amber          — fair     85–91%
-      if (pct >= 70) return '#f97316';  // orange         — poor     70–84%
-      return '#ef4444';                 // red            — critical  < 70%
+      const clamped = Math.max(0, Math.min(100, pct));
+      const hue = (clamped / 100) * 120;        // 0 → 120
+      const sat = 85 - (clamped * 0.15);         // 85 % → 70 % (slightly desaturate toward green)
+      const lgt = 45 + (clamped * 0.08);         // 45 % → 53 % (brighter toward green)
+      return `hsl(${hue.toFixed(0)}, ${sat.toFixed(0)}%, ${lgt.toFixed(0)}%)`;
     };
 
     const arrowG = this.rootG.append('g').attr('class', 'depth-arrow-group');
@@ -662,42 +661,43 @@ export class WellBoreViewComponent implements OnInit {
       .attr('class', 'dyn-clip')
       .attr('id', clipId)
       .append('rect')
-        .attr('x', arrowCx - headHW - 4).attr('y', -4)
-        .attr('width', (headHW + 4) * 2).attr('height', 0)
+      .attr('x', arrowCx - headHW - 4).attr('y', -4)
+      .attr('width', (headHW + 4) * 2).attr('height', 0)
       .transition()
-        .delay(drillStart).duration(duration).ease(easeCubicInOut)
-        .attr('height', totalPx + 4);
+      .delay(drillStart).duration(duration).ease(easeCubicInOut)
+      .attr('height', totalPx + 4);
 
     const shaftG = arrowG.append('g').attr('clip-path', `url(#${clipId})`);
 
-    // ── Build a single linearGradient for the drilled section ───────────────
-    // Hard stops (no blending): each boundary gets two stops at the same offset,
-    // one for the colour above and one for the colour below → seamless bands.
-    if (points.length && currPx > 0) {
+
+    const maxCircDepth = points.length ? Math.max(...points.map(p => p.depth)) : 0;
+    const effectiveDepth = Math.max(data.currentDepth, maxCircDepth);
+    const effectivePx = scale(effectiveDepth);
+    const shaftMaxPx = totalPx - headH;
+
+    if (points.length && effectivePx > 0) {
       const gradId = `circ-grad-${Date.now()}`;
-      const grad   = this.defsEl.append('linearGradient')
+      const grad = this.defsEl.append('linearGradient')
         .attr('class', 'dyn-clip')        // tagged so redraw() removes it
         .attr('id', gradId)
         .attr('gradientUnits', 'userSpaceOnUse')
         .attr('x1', arrowCx).attr('y1', 0)
-        .attr('x2', arrowCx).attr('y2', currPx);
+        .attr('x2', arrowCx).attr('y2', Math.min(effectivePx, shaftMaxPx));
 
-      // Build segments list (clamped to currentDepth)
+      // Build segments list — use all circulation data points (no clamping)
       const segs: { topPx: number; botPx: number; pct: number; topDepth: number; botDepth: number }[] = [];
       for (let i = 0; i < points.length; i++) {
         const topDepth = i === 0 ? 0 : points[i - 1].depth;
         const botDepth = points[i].depth;
-        const top      = Math.min(topDepth, data.currentDepth);
-        const bot      = Math.min(botDepth, data.currentDepth);
-        if (top >= bot) continue;
-        segs.push({ topPx: scale(top), botPx: scale(bot), pct: points[i].pct, topDepth: top, botDepth: bot });
+        if (topDepth >= botDepth) continue;
+        segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth });
       }
 
       // Add hard-stop gradient stops — two stops per boundary (same offset, colour switches)
       segs.forEach((seg, idx) => {
-        const col     = circColour(seg.pct);
-        const topPct  = (seg.topPx / currPx) * 100;
-        const botPct  = (seg.botPx / currPx) * 100;
+        const col = circColour(seg.pct);
+        const topPct = (seg.topPx / effectivePx) * 100;
+        const botPct = (seg.botPx / effectivePx) * 100;
         // Top stop for this segment (may duplicate previous bot stop — that's intentional)
         grad.append('stop')
           .attr('offset', `${topPct.toFixed(4)}%`)
@@ -717,26 +717,26 @@ export class WellBoreViewComponent implements OnInit {
       // Single rect for the entire drilled section — no gaps, no rounded ends
       shaftG.append('rect')
         .attr('x', arrowCx - shaftHW).attr('y', 0)
-        .attr('width', shaftHW * 2).attr('height', currPx)
+        .attr('width', shaftHW * 2).attr('height', effectivePx)
         .attr('fill', `url(#${gradId})`);
 
       // Highlight stripe — left half, semi-transparent white overlay for depth
       shaftG.append('rect')
         .attr('x', arrowCx - shaftHW).attr('y', 0)
-        .attr('width', shaftHW).attr('height', currPx)
+        .attr('width', shaftHW).attr('height', effectivePx)
         .attr('fill', 'rgba(255,255,255,0.10)')
         .attr('pointer-events', 'none');
 
       // ── Invisible hover hit areas for tooltips ────────────────────────────
       segs.forEach(seg => {
-        const fill  = circColour(seg.pct);
-        const segH  = Math.max(1, seg.botPx - seg.topPx);
-        const midY  = seg.topPx + segH / 2;
-        const ttipX = arrowCx + shaftHW + 8;
+        const fill = circColour(seg.pct);
+        const segH = Math.max(1, seg.botPx - seg.topPx);
+        const midY = seg.topPx + segH / 2;
+        const ttipX = arrowCx + shaftHW + 10;
         const line1 = `${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`;
         const line2 = `Circulation: ${seg.pct}%`;
-        const boxW  = 124;
-        const boxH  = 34;
+        const boxW = 220;
+        const boxH = 58;
 
         const ttipG = arrowG.append('g')
           .attr('class', 'circ-tooltip')
@@ -744,22 +744,22 @@ export class WellBoreViewComponent implements OnInit {
 
         ttipG.append('rect')
           .attr('x', ttipX).attr('y', midY - boxH / 2)
-          .attr('width', boxW).attr('height', boxH).attr('rx', 5)
+          .attr('width', boxW).attr('height', boxH).attr('rx', 8)
           .attr('fill', '#0f172a').attr('stroke', fill)
-          .attr('stroke-width', 1.5).attr('opacity', 0.95);
+          .attr('stroke-width', 2).attr('opacity', 0.97);
 
         ttipG.append('circle')
-          .attr('cx', ttipX + 10).attr('cy', midY - 4)
-          .attr('r', 3.5).attr('fill', fill);
+          .attr('cx', ttipX + 16).attr('cy', midY - 7)
+          .attr('r', 6).attr('fill', fill);
 
         ttipG.append('text')
-          .attr('x', ttipX + 19).attr('y', midY - 1)
-          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '600').attr('fill', '#94a3b8').text(line1);
+          .attr('x', ttipX + 28).attr('y', midY - 3)
+          .attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '600').attr('fill', '#e2e8f0').text(line1);
 
         ttipG.append('text')
-          .attr('x', ttipX + 10).attr('y', midY + 11)
-          .attr('font-size', '9.5').attr('font-family', 'DM Sans, sans-serif')
+          .attr('x', ttipX + 16).attr('y', midY + 18)
+          .attr('font-size', '14.5').attr('font-family', 'DM Sans, sans-serif')
           .attr('font-weight', '800').attr('fill', fill).text(line2);
 
         // Transparent hit rect sitting on top of gradient shaft
@@ -780,22 +780,18 @@ export class WellBoreViewComponent implements OnInit {
         .attr('fill', 'var(--accent)');
     }
 
-    // ── Undrilled section: dark shaft from currentDepth → totalDepth ─────────
-    if (data.currentDepth < data.totalDepth) {
+    // ── Undrilled section: dark shaft from effectiveDepth → totalDepth ────────
+    if (effectiveDepth < data.totalDepth) {
       shaftG.append('rect')
-        .attr('x', arrowCx - shaftHW).attr('y', currPx)
-        .attr('width', shaftHW * 2).attr('height', totalPx - currPx)
+        .attr('x', arrowCx - shaftHW).attr('y', effectivePx)
+        .attr('width', shaftHW * 2).attr('height', totalPx - effectivePx)
         .attr('fill', '#1e293b');
     }
 
     // ── Arrowhead — outside clip, animates independently ─────────────────────
     const headG = arrowG.append('g').attr('class', 'depth-arrow-head-g');
 
-    headG.append('circle')
-      .attr('cx', arrowCx).attr('cy', 0).attr('r', 7)
-      .attr('fill', 'var(--accent)').attr('opacity', 0.22)
-      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
-      .attr('cy', totalPx);
+
 
     headG.append('path')
       .attr('class', 'depth-arrow-head')
@@ -803,8 +799,6 @@ export class WellBoreViewComponent implements OnInit {
       .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
       .attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx + headHW},${totalPx - headH} L${arrowCx},${totalPx} Z`);
   }
-
-
 
   private drawTotalDepthLabel(
     totalDepth: number,
