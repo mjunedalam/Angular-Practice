@@ -435,7 +435,7 @@
         },
         {
           "stLongCd": "SHUB",
-          "planTvdDepth": 3790,
+          "planTvdDepth": 4000,
           "planSsDepth": -2880
         },
         {
@@ -527,7 +527,7 @@
       "EXAD_RCD_PREWAP": [
         {
           "surfaceElevation": 945,
-          "estTargetDepth": 6000,
+          "estTargetDepth": 5320,
           "targetFormation": "WASI",
           "supportedBusiness": "ANDR-814 REPLACEMENT"
         }

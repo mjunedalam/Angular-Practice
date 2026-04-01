@@ -74,7 +74,7 @@ export class WellBoreViewComponent implements OnInit {
     svg.attr('width', '100%')
       .attr('height', '100%')
       .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)
-      .attr('preserveAspectRatio', 'xMidYMin meet');
+      .attr('preserveAspectRatio', 'none');
 
     this.defsEl = svg.append('defs') as DefsSel;
     this.addStaticDefs(this.defsEl);
@@ -797,7 +797,7 @@ export class WellBoreViewComponent implements OnInit {
       .attr('class', 'depth-arrow-head')
       .attr('d', `M${arrowCx - headHW},0 L${arrowCx + headHW},0 L${arrowCx},${headH} Z`)
       .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
-      .attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx + headHW},${totalPx - headH} L${arrowCx},${totalPx} Z`);
+      .attr('d', `M${arrowCx - headHW},${totalPx} L${arrowCx + headHW},${totalPx} L${arrowCx},${totalPx + headH} Z`);
   }
 
   private drawTotalDepthLabel(

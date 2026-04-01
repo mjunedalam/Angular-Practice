@@ -55,7 +55,7 @@ export class DepthScaleComponent implements OnInit {
       .attr('width', '100%')
       .attr('height', '100%')
       .attr('viewBox', `0 0 ${depthScaleWidth} ${svgHeight}`)
-      .attr('preserveAspectRatio', 'xMidYMin meet');
+      .attr('preserveAspectRatio', 'none');
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
