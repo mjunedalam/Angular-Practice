@@ -1,19 +1,40 @@
 <div class="map-card">
   <div class="map-card__header">Active WWell Map</div>
 
-  <!-- Placeholder for an actual map integration (Leaflet/Google Maps/etc) -->
-  <div class="map-placeholder">
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-      <circle cx="12" cy="10" r="3"></circle>
-    </svg>
-    <span class="mt-2">Map View</span>
-  </div>
+  @if (store.loading()) {
+    <div class="blueprint-view skeleton"></div>
+  } @else {
+    <div class="blueprint-view">
+      <!-- SVG Blueprint grid -->
+      <svg class="blueprint-grid" width="100%" height="100%" viewBox="0 0 400 300" preserveAspectRatio="none">
+        <defs>
+          <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        
+        <!-- Stylized Radar Circles -->
+        <circle cx="200" cy="150" r="120" stroke="rgba(56, 189, 248, 0.05)" stroke-width="2" fill="none" />
+        <circle cx="200" cy="150" r="80" stroke="rgba(56, 189, 248, 0.05)" stroke-width="2" fill="none" />
+        <circle cx="200" cy="150" r="40" stroke="rgba(56, 189, 248, 0.05)" stroke-width="2" fill="none" />
+        
+        <!-- Axis lines -->
+        <line x1="200" y1="0" x2="200" y2="300" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1" />
+        <line x1="0" y1="150" x2="400" y2="150" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1" />
+        
+        <!-- Well Point -->
+        <g class="well-marker">
+          <circle cx="200" cy="150" r="6" fill="var(--accent)" />
+          <circle cx="200" cy="150" r="12" stroke="var(--accent)" stroke-width="2" fill="none" class="marker-pulse" />
+        </g>
+      </svg>
+      
+      <div class="blueprint-overlay">
+        <div class="coord-tag">LAT: 25.123N</div>
+        <div class="coord-tag">LON: 49.456E</div>
+        <div class="map-label">LIVE POSITIONING</div>
+      </div>
+    </div>
+  }
 </div>

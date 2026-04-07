@@ -48,18 +48,20 @@
 
     <!-- Center -->
     <div class="pres-fixed__center">
-      @if (!store.isLoaded()) {
-      <div class="empty-state">
-        <div class="empty-state__icon">🛢</div>
-        <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
-      </div>
+      @if (!store.loading() && !store.isLoaded()) {
+        <div class="empty-state">
+          <div class="empty-state__icon">🛢</div>
+          <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+        </div>
       } @else {
-      <div class="diagram-scroll">
-        <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-        <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-      </div>
+        <div class="diagram-card">
+          <div class="diagram-scroll-area">
+            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+          </div>
+          <app-wwells-logs-indicators />
+        </div>
       }
-      <app-wwells-logs-indicators />
     </div>
 
     <app-resize-divider (drag)="onRightDrag($event)" />
@@ -84,38 +86,33 @@
   @if (draggableMode()) {
   <div class="pres-canvas">
 
+    <!-- 1. Diagram Section (Full Width Hero) -->
+    <div class="canvas__section canvas__section--diagram">
+      @if (!store.loading() && !store.isLoaded()) {
+        <div class="empty-state">
+          <div class="empty-state__icon">🛢</div>
+          <p class="empty-state__text">Select a well to render the diagram</p>
+        </div>
+      } @else {
+        <div class="diagram-inner">
+          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+          <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+        </div>
+      }
+      <app-wwells-logs-indicators />
+    </div>
 
+    <!-- 2. Dashboard Components -->
     <app-misc-pres-well-data />
-
-
 
     <app-picked-formation-tops />
 
-
-
-    @if (!store.isLoaded()) {
-    <div class="empty-state">
-      <div class="empty-state__icon">🛢</div>
-      <p class="empty-state__text">Select a well to render the diagram</p>
+    <div class="canvas__row">
+      <app-active-wwell-map class="flex-1" />
+      <app-offset-wwells class="flex-1" />
     </div>
-    } @else {
-    <div class="diagram-inner">
-      <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-      <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-    </div>
-    }
-
-
-
-    <app-wwells-logs-indicators />
-
-
-    <app-active-wwell-map />
-
-    <app-offset-wwells />
 
     <app-wwell-test-result />
-
 
   </div>
   }

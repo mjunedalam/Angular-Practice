@@ -4,12 +4,13 @@
  * No @Input needed.
  */
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { WellStore } from 'src/app/core/store/well.store';
 
 @Component({
   selector: 'app-offset-wwells',
   standalone: true,
-  imports: [],
+  imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './offset-wwells.component.html',
   styleUrl: './offset-wwells.component.scss',

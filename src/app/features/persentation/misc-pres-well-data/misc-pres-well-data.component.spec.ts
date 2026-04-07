@@ -25,6 +25,8 @@ describe('MiscPresWellDataComponent', () => {
         previousWell: 'Prev Well',
         currentDepth: 5000,
         nextWell: 'Next Well',
+        operationSummary: 'Summary 1',
+        next24HrOperation: 'Next 24 1'
       }),
     };
 

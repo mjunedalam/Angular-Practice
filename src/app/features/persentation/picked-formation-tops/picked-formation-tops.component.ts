@@ -20,7 +20,7 @@ import { PickedFormationTops } from '../../../core/models/well-details.model';
   styleUrl: './picked-formation-tops.component.scss',
 })
 export class PickedFormationTopsComponent implements OnInit {
-  private readonly store = inject(WellStore);
+  protected readonly store = inject(WellStore);
   private readonly injector = inject(Injector);
   private gridApi: GridApi<PickedFormationTops> | null = null;
 
@@ -44,23 +44,23 @@ export class PickedFormationTopsComponent implements OnInit {
   }
 
   readonly theme = themeQuartz.withParams({
-    accentColor: '#1a8fc1',
-    backgroundColor: '#e8f6fb',
-    foregroundColor: '#0d3a6e',
-    headerBackgroundColor: '#1565c0',
+    accentColor: '#2563eb',
+    backgroundColor: '#ffffff',
+    foregroundColor: '#1e3a8a',
+    headerBackgroundColor: '#2563eb',
     headerTextColor: '#ffffff',
-    headerFontSize: 12,
+    headerFontSize: 13,
     headerFontWeight: 700,
-    rowHoverColor: 'rgba(0,150,200,0.12)',
-    oddRowBackgroundColor: '#d0eef8',
-    borderColor: '#a8d4e8',
+    rowHoverColor: '#eff6ff',
+    oddRowBackgroundColor: '#eff6ff',
+    borderColor: 'transparent',
     borderRadius: 0,
     fontSize: 12,
-    rowHeight: 32,
-    headerHeight: 36,
-    spacing: 4,
+    rowHeight: 36,
+    headerHeight: 40,
+    spacing: 2,
     fontFamily: 'inherit',
-    cellHorizontalPaddingScale: 1.2,
+    cellHorizontalPaddingScale: 1.5,
   });
 
   readonly columnDefs: ColDef<PickedFormationTops>[] = [
@@ -76,6 +76,7 @@ export class PickedFormationTopsComponent implements OnInit {
     {
       field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 120,
       headerClass: 'header--center', cellClass: 'cell--center cell--remarks',
+      valueGetter: (params) => params.data?.remarks?.toUpperCase() || '',
       tooltipField: 'remarks',
     },
   ];

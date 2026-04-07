@@ -70,7 +70,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         wellName: rig?.wellName ?? FALLBACK_STR,
         targetDesc: rig?.drlgPlanWellDesc ?? FALLBACK_STR,
         targetedAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? FALLBACK_STR,
-        currentStatus: status?.nxt24HrPlanRmk ?? status?.wOpRmk ?? FALLBACK_STR,
+        currentStatus: FALLBACK_STR,
         daysSinceSpud: status?.spuddays ?? 0,
         targetDays: d.NEW_TARGET_DAYS?.[0]?.targetDays ?? rig?.wDrlgTrgtDay ?? 0,
         biNum: rig?.biNum ?? FALLBACK_STR,
@@ -79,7 +79,9 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         previousWell: FALLBACK_STR,
         currentDepth: status?.wPrsntDpth ?? 0,
         nextWell: d.NEXT_2_WELL_ACTIVITY?.[0]?.nextWellActivity ?? FALLBACK_STR,
-        footage: status?.wDpthChgDis ?? 0, // ✅ fixed missing fallback
+        footage: status?.wDpthChgDis ?? 0,
+        operationSummary: d.DRLG_OP_SMRY?.[0]?.wOpRmk ?? FALLBACK_STR,
+        next24HrOperation: status?.nxt24HrPlanRmk ?? FALLBACK_STR,
     };
 }
 

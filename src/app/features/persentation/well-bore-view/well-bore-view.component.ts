@@ -2,15 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnInit,
-  ViewChild,
   effect,
   input,
+  viewChild,
 } from '@angular/core';
 import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
+import { WellStore } from '../../../core/store/well.store';
 import { ANIM, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
 import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
 import { ITopsIR } from '../../../shared/models/wwell/tops-ir.model';
@@ -39,11 +41,11 @@ type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
   styleUrl: './wellbore-view.component.scss',
 })
 export class WellBoreViewComponent implements OnInit {
+  protected readonly store = inject(WellStore);
   readonly diagramData = input.required<WellboreDiagramData | null>();
   readonly animTrigger = input.required<number>();
 
-  @ViewChild('wellboreSvg', { static: true })
-  private readonly svgRef!: ElementRef<SVGSVGElement>;
+  private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('wellboreSvg');
 
   private readonly layout = DIAGRAM_LAYOUT;
   private rootG!: GSel;
@@ -52,24 +54,38 @@ export class WellBoreViewComponent implements OnInit {
 
   constructor() {
     effect(() => {
+      const svgEl = this.svgRef();
       const trigger = this.animTrigger();
       const data = this.diagramData();
-      if (data && (this.ready || trigger > 0)) {
-        this.redraw(data);
+      const loading = this.store.loading();
+
+      if (svgEl?.nativeElement && !loading && data && (this.ready || trigger > 0)) {
+        // SVG element is present, and we are not loading.
+        // If not bootstrapped yet, do it now.
+        if (!this.rootG) {
+          this.bootstrapSvg(svgEl.nativeElement);
+        }
+        
+        // If bootstrapped (might have just happened), redraw.
+        if (this.rootG) {
+          this.redraw(data);
+        }
+      } else if (loading || !data) {
+        // When switching back to loading state, the SVG element is removed from DOM.
+        // We reset the bootstrap references so they are recreated when the SVG returns.
+        this.rootG = undefined as any;
+        this.defsEl = undefined as any;
       }
     });
   }
 
   ngOnInit(): void {
-    this.bootstrapSvg();
     this.ready = true;
-    const data = this.diagramData();
-    if (data) this.redraw(data);
   }
 
-  private bootstrapSvg(): void {
+  private bootstrapSvg(element: SVGSVGElement): void {
     const { wellboreViewWidth, svgHeight, marginTop } = this.layout;
-    const svg = select(this.svgRef.nativeElement) as SvgSel;
+    const svg = select(element) as SvgSel;
 
     svg.attr('width', '100%')
       .attr('height', '100%')
@@ -85,6 +101,8 @@ export class WellBoreViewComponent implements OnInit {
   }
 
   private redraw(data: WellboreDiagramData): void {
+    if (!this.rootG) return;
+    
     this.rootG.selectAll('*').remove();
     this.defsEl.selectAll('.dyn-clip').remove();
 
@@ -93,63 +111,43 @@ export class WellBoreViewComponent implements OnInit {
     const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
 
     // ── Build a strict sequential timeline ─────────────────────────────────
-    // Each phase starts only after the previous phase fully completes.
-    // t = absolute ms from t=0 when redraw() fires.
-
     const structuralCasings = data.casings.filter(
       (c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
     );
 
-    // Phase 1: casings drill down (outer → inner)
     const t_casingsStart = 0;
-    const t_casingsDone = computeOverlayDelay(structuralCasings.length); // last casing finishes
-
-    // Phase 2: open hole clip reveals after all casings done
+    const t_casingsDone = computeOverlayDelay(structuralCasings.length);
     const t_ohStart = t_casingsDone + ANIM.SEQ_GAP;
     const t_ohDone = t_ohStart + ANIM.OH_DURATION;
-
-    // Phase 3: gravel pack after open hole is visible
     const t_gravelStart = t_ohDone + ANIM.SEQ_GAP;
     const t_gravelDone = t_gravelStart + ANIM.GRAVEL_DURATION;
-
-    // Phase 4: hanger appears after gravel
     const t_hangerStart = t_gravelDone + ANIM.SEQ_GAP;
-    const t_hangerDone = t_hangerStart + ANIM.HANGER_DURATION;
-
-    // Phase 5: drill arrow travels down simultaneously with casings
-    // Duration = total casing animation time so arrow reaches bottom when last casing finishes
     const t_drillStart = 0;
-    const t_drillDone = t_casingsDone;
-
-    // Phase 6: labels + water level stagger in
-    const t_labelsStart = t_casingsDone + ANIM.SEQ_GAP;  // casing labels alongside OH
+    const t_labelsStart = t_casingsDone + ANIM.SEQ_GAP;
     const t_ohLabelStart = t_ohDone + ANIM.SEQ_GAP;
     const t_waterStart = t_ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
-    const t_notDrilledStart = t_drillDone + ANIM.SEQ_GAP;
+    const t_notDrilledStart = t_casingsDone + ANIM.SEQ_GAP;
     const t_tdLabelStart = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
 
-    // ── Draw (SVG paint order: earlier = behind) ───────────────────────────
-    // Phase 0: static chrome + geo tops — immediate
+    // ── Draw ───────────────────────────────────────────────────────────────
     this.drawStaticChrome(geoLineX, casingCenterX);
     this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
-
-    // Open hole paths drawn BEFORE casings so casing walls paint over them
     this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
     this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
-
-    // Casings on top of open hole
     this.drawCasings(data.casings, casingCenterX, scale, t_casingsStart, t_gravelStart, t_gravelDone);
-
-    // Labels after casings done
     this.drawCasingLabels(data.casings, casingCenterX, scale, t_labelsStart);
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
-    this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart);
+
+    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const ohHW = openHoleHalfWidth(innerHW);
+
+    this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart, ohHW);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
   }
 
   private addStaticDefs(defs: DefsSel): void {
-    // Dark-theme casing gradients — metallic steel look on dark canvas
     this.addLinearGradient(defs, 'mainGradient', [
       { offset: '0%', color: '#2d3748' },
       { offset: '40%', color: '#c9d1d9' },
@@ -217,6 +215,8 @@ export class WellBoreViewComponent implements OnInit {
     };
     addMarker('arrowBlack', 'var(--text-secondary)');
     addMarker('arrowBlue', '#3CC3FF');
+
+    addMarker('arrowBlue', '#3CC3FF');
   }
 
   private addLinearGradient(
@@ -273,7 +273,6 @@ export class WellBoreViewComponent implements OnInit {
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
       const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
-
       const yPx = scale(top.planTvdDepth);
       const g = this.rootG.append('g')
         .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
@@ -291,20 +290,17 @@ export class WellBoreViewComponent implements OnInit {
       }
 
       g.append('line')
-        //.attr('class', isTarget ? 'geo-tick geo-tick--target' : 'geo-tick')
         .attr('class', 'geo-tick')
         .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
         .attr('y1', 0).attr('y2', 0);
 
       g.append('text')
-        //.attr('class', isTarget ? 'geo-depth geo-depth--target' : 'geo-depth')
         .attr('class', 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
         .text(top.planTvdDepth.toLocaleString());
 
       g.append('text')
-        //.attr('class', isTarget ? 'geo-code geo-code--target' : 'geo-code')
         .attr('class', 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
@@ -326,20 +322,16 @@ export class WellBoreViewComponent implements OnInit {
     gravelDone: number,
   ): void {
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
-
     casings.forEach((csg, i) => {
       if (csg.csgType === 'Liner') return;
-
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
       const bottomPx = scale(csg.csgDepth);
       const clipId = `dyn-casing-clip-${i}`;
-
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
-
       const clipRadius = csg.csgType === 'Gravel Pack'
-        ? (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10) + 20  // screenHW + padding
+        ? (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10) + 20
         : openHoleHalfWidth(hw) + 20;
 
       const clipRect = this.defsEl
@@ -353,18 +345,13 @@ export class WellBoreViewComponent implements OnInit {
         .attr('height', 0);
 
       if (csg.csgType === 'Gravel Pack') {
-
         const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
         const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
-
-        // Gravel bottom = actual csgDepth from data, clamped to totalDepth scale
         const gravelBottomPx = scale(csg.csgDepth);
-
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
         const screenHW = innerHW - 10;
-        const annulusWidth = 10;                       // thin band matching screen tube thickness
-        const annulusCenter = screenHW + (annulusWidth / 2);  // ✅ just OUTSIDE the screen wall
-
+        const annulusWidth = 10;
+        const annulusCenter = screenHW + (annulusWidth / 2);
         this.rootG.append('path')
           .attr('class', 'gravelHole')
           .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx))
@@ -372,13 +359,11 @@ export class WellBoreViewComponent implements OnInit {
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
           .attr('clip-path', `url(#${clipId})`);
-        // Gravel clip uses its own sequential timing (after open hole)
         clipRect.transition()
           .delay(gravelStart)
           .duration(ANIM.GRAVEL_DURATION)
           .ease(easeCubicInOut)
           .attr('height', gravelBottomPx + 20);
-        return;  // skip the generic clipRect transition below
       } else {
         this.rootG.append('path')
           .attr('class', 'casing')
@@ -388,13 +373,12 @@ export class WellBoreViewComponent implements OnInit {
           .attr('stroke', '#1e293b')
           .attr('stroke-width', '5')
           .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
+        clipRect.transition()
+          .delay(casingsStart + delay)
+          .duration(ANIM.CASING_DURATION)
+          .ease(easeCubicInOut)
+          .attr('height', bottomPx + shoeCurveOffset + 20);
       }
-
-      clipRect.transition()
-        .delay(casingsStart + delay)
-        .duration(ANIM.CASING_DURATION)
-        .ease(easeCubicInOut)
-        .attr('height', bottomPx + shoeCurveOffset + 20);
     });
   }
 
@@ -405,41 +389,30 @@ export class WellBoreViewComponent implements OnInit {
     labelsStart: number,
   ): void {
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const allDone = labelsStart;
-
     casings.forEach((csg, i) => {
       if (csg.csgType === 'Liner') return;
-
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
       const shoePx = scale(csg.csgDepth);
-
-      // For Gravel Pack label, point to the actual csgDepth from data
       let labelYPx = shoePx;
       if (csg.csgType === 'Gravel Pack') {
         labelYPx = scale(csg.csgDepth);
       }
-
       const rEdge = csg.csgType === 'Gravel Pack'
         ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
         : centerX + hw;
-
       const lEnd = rEdge + 22;
       const labelX = lEnd + 8;
-
       const lg = this.rootG.append('g')
         .attr('class', 'casing-label')
         .style('opacity', 0);
-
       lg.append('line')
         .attr('class', 'casing-label__line')
         .attr('x1', rEdge).attr('x2', lEnd)
         .attr('y1', labelYPx).attr('y2', labelYPx);
-
       lg.append('path')
         .attr('class', 'casing-label__arrow')
         .attr('d', buildArrowHeadRight(lEnd, labelYPx, 6));
-
       if (csg.csgType === 'Gravel Pack') {
         lg.append('text')
           .attr('class', 'casing-label__primary')
@@ -450,398 +423,166 @@ export class WellBoreViewComponent implements OnInit {
           .attr('class', 'casing-label__primary')
           .attr('x', labelX).attr('y', shoePx + 4)
           .text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
-
         if (csg.csgRemarks) {
           lg.append('text')
             .attr('class', 'casing-label__secondary')
             .attr('x', labelX).attr('y', shoePx + 17)
             .text(`(${csg.csgRemarks})`);
         }
-
         this.rootG.append('text')
           .attr('class', 'casing-size-inner')
           .attr('x', centerX).attr('y', shoePx - 9)
           .attr('text-anchor', 'middle')
           .style('opacity', 0)
           .text(`${csg.csgSize}"`)
-          .transition().delay(allDone).duration(250).style('opacity', 1);
+          .transition().delay(labelsStart).duration(250).style('opacity', 1);
       }
-
-      lg.transition()
-        .delay(allDone)
-        .duration(300)
-        .ease(easeCubicInOut)
-        .style('opacity', 1);
+      lg.transition().delay(labelsStart).duration(300).ease(easeCubicInOut).style('opacity', 1);
     });
   }
 
-  private drawWaterLevel(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-    waterStart: number,
-  ): void {
+  private drawWaterLevel(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, waterStart: number): void {
     if (!data.hydrogeology) return;
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const wPx = scale(data.hydrogeology.estStaticWaterLevel);
-
     const widestCsg = data.casings[data.casings.length - 1];
     const tier = widestCsg ? this.getCasingTier(widestCsg, data.casings) : 0;
     const innerHW = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
-    const label = data.hydrogeology.flowType === 'Y'
-      ? 'Flowing (SIWHP: 50 PSI)'
-      : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
-
+    const label = data.hydrogeology.flowType === 'Y' ? 'Flowing (SIWHP: 50 PSI)' : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
     const wg = this.rootG.append('g').attr('class', 'water-level').style('opacity', 0);
-
-    wg.append('line')
-      .attr('class', 'water-line')
-      .attr('x1', lL).attr('x2', lR)
-      .attr('y1', wPx).attr('y2', wPx);
-
-    wg.append('path')
-      .attr('class', 'water-arrow')
-      .attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
-
-    wg.append('text')
-      .attr('class', 'water-label')
-      .attr('x', lR - 350).attr('y', wPx + 4)
-      .text(label);
-
+    wg.append('line').attr('class', 'water-line').attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx);
+    wg.append('path').attr('class', 'water-arrow').attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
+    wg.append('text').attr('class', 'water-label').attr('x', lR - 350).attr('y', wPx + 4).text(label);
     wg.transition().delay(waterStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
   }
 
-  private drawOpenHoleAndScreen(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-    ohStart: number,
-    ohDone: number,
-    ohLabelStart: number,
-  ): void {
+  private drawOpenHoleAndScreen(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohDone: number, ohLabelStart: number): void {
     if (!data.casings.length) return;
-
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const ohHW = openHoleHalfWidth(innerHW);
-    const layout = this.layout;
     const screenHW = innerHW - 10;
-
     const deepestSolid = data.casings.find((c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
-
     const shoePx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);
-    const ratHolePx = 15;
-    const screenBottomPx = liner ? scale(liner.csgDepth) : (tdPx - ratHolePx);
-
+    const screenBottomPx = liner ? scale(liner.csgDepth) : (tdPx - 15);
     const clipId = 'dyn-oh-clip';
-    const clipRect = this.defsEl
-      .append('clipPath').attr('class', 'dyn-clip').attr('id', clipId)
-      .append('rect')
-      .attr('x', centerX - ohHW - 15).attr('y', shoePx - 5)
-      .attr('width', ohHW * 2 + 30).attr('height', 0);
-
-    this.rootG.append('path')
-      .attr('class', 'open-hole')
-      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
-      .attr('clip-path', `url(#${clipId})`);
-
-    this.rootG.append('path')
-      .attr('class', 'liner-screen')
-      .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
-      .attr('clip-path', `url(#${clipId})`);
-
-    // Hanger drawn separately in drawScreenHanger() after drawCasings() so it renders on top
-
+    const clipRect = this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
+      .attr('x', centerX - ohHW - 15).attr('y', shoePx - 5).attr('width', ohHW * 2 + 30).attr('height', 0);
+    this.rootG.append('path').attr('class', 'open-hole').attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx)).attr('clip-path', `url(#${clipId})`);
+    this.rootG.append('path').attr('class', 'liner-screen').attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx)).attr('clip-path', `url(#${clipId})`);
     const ohLY = shoePx + (tdPx - shoePx) * 0.2;
     const ohLG = this.rootG.append('g').attr('class', 'open-hole-label').style('opacity', 0);
-    ohLG.append('line').attr('class', 'oh-label-line')
-      .attr('x1', centerX - ohHW).attr('x2', centerX - ohHW - 28)
-      .attr('y1', ohLY).attr('y2', ohLY);
-    ohLG.append('path').attr('class', 'oh-label-arrow')
-      .attr('d', `M${centerX - ohHW - 28} ${ohLY - 5} L${centerX - ohHW - 36} ${ohLY} L${centerX - ohHW - 28} ${ohLY + 5} Z`);
-    ohLG.append('text').attr('class', 'open-hole-text')
-      .attr('x', centerX - ohHW - 40).attr('y', ohLY + 4)
-      .attr('text-anchor', 'end')
-      .text('8 1/2" Open Hole');
-
-    let screenLabel = '';
-    if (liner && liner.csgRemarks) {
-      screenLabel = liner.csgRemarks;
-    } else {
-      const screenLen = liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth);
-      screenLabel = `+/- ${screenLen.toLocaleString()} ft of Screen`;
-    }
-
+    ohLG.append('line').attr('class', 'oh-label-line').attr('x1', centerX - ohHW).attr('x2', centerX - ohHW - 28).attr('y1', ohLY).attr('y2', ohLY);
+    ohLG.append('path').attr('class', 'oh-label-arrow').attr('d', `M${centerX - ohHW - 28} ${ohLY - 5} L${centerX - ohHW - 36} ${ohLY} L${centerX - ohHW - 28} ${ohLY + 5} Z`);
+    ohLG.append('text').attr('class', 'open-hole-text').attr('x', centerX - ohHW - 40).attr('y', ohLY + 4).attr('text-anchor', 'end').text('8 1/2" Open Hole');
+    let screenLabel = (liner && liner.csgRemarks) ? liner.csgRemarks : `+/- ${(liner ? (liner.csgDepth - deepestSolid.csgDepth) : (data.totalDepth - deepestSolid.csgDepth)).toLocaleString()} ft of Screen`;
     const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
-    scrLG.append('line').attr('class', 'screen-label-line')
-      .attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28)
-      .attr('y1', screenBottomPx).attr('y2', screenBottomPx);
-    scrLG.append('path')
-      .attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
-    scrLG.append('text').attr('class', 'screen-label-text')
-      .attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4)
-      .text(screenLabel);
-
-    clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut)
-      .attr('height', tdPx - shoePx + 20);
+    scrLG.append('line').attr('class', 'screen-label-line').attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28).attr('y1', screenBottomPx).attr('y2', screenBottomPx);
+    scrLG.append('path').attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
+    scrLG.append('text').attr('class', 'screen-label-text').attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4).text(screenLabel);
+    clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', tdPx - shoePx + 20);
     ohLG.transition().delay(ohLabelStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
     scrLG.transition().delay(ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
   }
 
-  private drawScreenHanger(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-    hangerStart: number,
-  ): void {
+  private drawScreenHanger(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, hangerStart: number): void {
     if (!data.casings.length) return;
-
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - 10;
-
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const shoePx = scale(deepestSolid.csgDepth);
-
     const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx + 6, screenHW);
-
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
-    hangerG.append('path')
-      .attr('class', 'screen-hanger screen-hanger--left')
-      .attr('stroke', '#1e293b').attr('stroke-width', '1')
-      .attr('fill', '#1e293b')
-      .attr('d', hangerLeft);
-    hangerG.append('path')
-      .attr('class', 'screen-hanger screen-hanger--right')
-      .attr('stroke', '#1e293b').attr('stroke-width', '1')
-      .attr('fill', '#1e293b')
-      .attr('d', hangerRight);
-
-    hangerG.transition()
-      .delay(hangerStart)
-      .duration(ANIM.HANGER_DURATION)
-      .ease(easeCubicInOut)
-      .style('opacity', 1);
+    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerLeft);
+    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerRight);
+    hangerG.transition().delay(hangerStart).duration(ANIM.HANGER_DURATION).ease(easeCubicInOut).style('opacity', 1);
   }
 
-  private drawDrillArrow(
-    data: WellboreDiagramData,
-    scale: ReturnType<typeof createDepthScale>,
-    drillStart: number,
-    t_casingsDone: number,
-  ): void {
+  private drawDrillArrow(data: WellboreDiagramData, scale: ReturnType<typeof createDepthScale>, drillStart: number, t_casingsDone: number): void {
     const arrowCx = this.layout.depthArrowX;
-    const shaftHW = 4;    // half-width of shaft
-    const headH = 14;   // arrowhead triangle height
-    const headHW = 9;    // arrowhead half-width at base
+    const shaftHW = 4;
+    const headH = 14;
+    const headHW = 9;
     const duration = t_casingsDone - drillStart;
     const totalPx = scale(data.totalDepth);
     const currPx = scale(data.currentDepth);
     const points = data.mudCirculation;
-
-    // 0 % → hue 0 (red, high intensity)  …  100 % → hue 120 (green)
     const circColour = (pct: number): string => {
       const clamped = Math.max(0, Math.min(100, pct));
-      const hue = (clamped / 100) * 120;        // 0 → 120
-      const sat = 85 - (clamped * 0.15);         // 85 % → 70 % (slightly desaturate toward green)
-      const lgt = 45 + (clamped * 0.08);         // 45 % → 53 % (brighter toward green)
+      const hue = (clamped / 100) * 120;
+      const sat = 85 - (clamped * 0.15);
+      const lgt = 45 + (clamped * 0.08);
       return `hsl(${hue.toFixed(0)}, ${sat.toFixed(0)}%, ${lgt.toFixed(0)}%)`;
     };
-
     const arrowG = this.rootG.append('g').attr('class', 'depth-arrow-group');
-
-    // ── ClipPath — slides top→bottom to reveal the shaft ────────────────────
     const clipId = `arrow-clip-${Date.now()}`;
-    this.defsEl.append('clipPath')
-      .attr('class', 'dyn-clip')
-      .attr('id', clipId)
-      .append('rect')
-      .attr('x', arrowCx - headHW - 4).attr('y', -4)
-      .attr('width', (headHW + 4) * 2).attr('height', 0)
-      .transition()
-      .delay(drillStart).duration(duration).ease(easeCubicInOut)
-      .attr('height', totalPx + 4);
-
+    this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
+      .attr('x', arrowCx - headHW - 4).attr('y', -4).attr('width', (headHW + 4) * 2).attr('height', 0)
+      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut).attr('height', totalPx + 4);
     const shaftG = arrowG.append('g').attr('clip-path', `url(#${clipId})`);
-
-
     const maxCircDepth = points.length ? Math.max(...points.map(p => p.depth)) : 0;
     const effectiveDepth = Math.max(data.currentDepth, maxCircDepth);
     const effectivePx = scale(effectiveDepth);
     const shaftMaxPx = totalPx - headH;
-
     if (points.length && effectivePx > 0) {
       const gradId = `circ-grad-${Date.now()}`;
-      const grad = this.defsEl.append('linearGradient')
-        .attr('class', 'dyn-clip')        // tagged so redraw() removes it
-        .attr('id', gradId)
-        .attr('gradientUnits', 'userSpaceOnUse')
-        .attr('x1', arrowCx).attr('y1', 0)
-        .attr('x2', arrowCx).attr('y2', Math.min(effectivePx, shaftMaxPx));
-
-      // Build segments list — use all circulation data points (no clamping)
+      const grad = this.defsEl.append('linearGradient').attr('class', 'dyn-clip').attr('id', gradId).attr('gradientUnits', 'userSpaceOnUse').attr('x1', arrowCx).attr('y1', 0).attr('x2', arrowCx).attr('y2', Math.min(effectivePx, shaftMaxPx));
       const segs: { topPx: number; botPx: number; pct: number; topDepth: number; botDepth: number }[] = [];
       for (let i = 0; i < points.length; i++) {
         const topDepth = i === 0 ? 0 : points[i - 1].depth;
         const botDepth = points[i].depth;
-        if (topDepth >= botDepth) continue;
-        segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth });
+        if (topDepth < botDepth) segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth });
       }
-
-      // Add hard-stop gradient stops — two stops per boundary (same offset, colour switches)
       segs.forEach((seg, idx) => {
         const col = circColour(seg.pct);
         const topPct = (seg.topPx / effectivePx) * 100;
         const botPct = (seg.botPx / effectivePx) * 100;
-        // Top stop for this segment (may duplicate previous bot stop — that's intentional)
-        grad.append('stop')
-          .attr('offset', `${topPct.toFixed(4)}%`)
-          .attr('stop-color', col);
-        // Bottom stop — hard edge: if next segment exists, next colour starts immediately
+        grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', col);
         const nextCol = idx + 1 < segs.length ? circColour(segs[idx + 1].pct) : col;
-        grad.append('stop')
-          .attr('offset', `${botPct.toFixed(4)}%`)
-          .attr('stop-color', col);
-        if (nextCol !== col) {
-          grad.append('stop')
-            .attr('offset', `${botPct.toFixed(4)}%`)
-            .attr('stop-color', nextCol);
-        }
+        grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
+        if (nextCol !== col) grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', nextCol);
       });
-
-      // Single rect for the entire drilled section — no gaps, no rounded ends
-      shaftG.append('rect')
-        .attr('x', arrowCx - shaftHW).attr('y', 0)
-        .attr('width', shaftHW * 2).attr('height', effectivePx)
-        .attr('fill', `url(#${gradId})`);
-
-      // Highlight stripe — left half, semi-transparent white overlay for depth
-      shaftG.append('rect')
-        .attr('x', arrowCx - shaftHW).attr('y', 0)
-        .attr('width', shaftHW).attr('height', effectivePx)
-        .attr('fill', 'rgba(255,255,255,0.10)')
-        .attr('pointer-events', 'none');
-
-      // ── Invisible hover hit areas for tooltips ────────────────────────────
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', effectivePx).attr('fill', `url(#${gradId})`);
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW).attr('height', effectivePx).attr('fill', 'rgba(255,255,255,0.10)').attr('pointer-events', 'none');
       segs.forEach(seg => {
         const fill = circColour(seg.pct);
         const segH = Math.max(1, seg.botPx - seg.topPx);
         const midY = seg.topPx + segH / 2;
         const ttipX = arrowCx + shaftHW + 10;
-        const line1 = `${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`;
-        const line2 = `Circulation: ${seg.pct}%`;
-        const boxW = 220;
-        const boxH = 58;
-
-        const ttipG = arrowG.append('g')
-          .attr('class', 'circ-tooltip')
-          .style('opacity', 0).style('pointer-events', 'none');
-
-        ttipG.append('rect')
-          .attr('x', ttipX).attr('y', midY - boxH / 2)
-          .attr('width', boxW).attr('height', boxH).attr('rx', 8)
-          .attr('fill', '#0f172a').attr('stroke', fill)
-          .attr('stroke-width', 2).attr('opacity', 0.97);
-
-        ttipG.append('circle')
-          .attr('cx', ttipX + 16).attr('cy', midY - 7)
-          .attr('r', 6).attr('fill', fill);
-
-        ttipG.append('text')
-          .attr('x', ttipX + 28).attr('y', midY - 3)
-          .attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '600').attr('fill', '#e2e8f0').text(line1);
-
-        ttipG.append('text')
-          .attr('x', ttipX + 16).attr('y', midY + 18)
-          .attr('font-size', '14.5').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '800').attr('fill', fill).text(line2);
-
-        // Transparent hit rect sitting on top of gradient shaft
-        shaftG.append('rect')
-          .attr('x', arrowCx - shaftHW).attr('y', seg.topPx)
-          .attr('width', shaftHW * 2).attr('height', segH)
-          .attr('fill', 'transparent')
-          .attr('class', 'mud-circ-seg')
-          .on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1))
-          .on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
+        const ttipG = arrowG.append('g').attr('class', 'circ-tooltip').style('opacity', 0).style('pointer-events', 'none');
+        ttipG.append('rect').attr('x', ttipX).attr('y', midY - 29).attr('width', 220).attr('height', 58).attr('rx', 8).attr('fill', '#0f172a').attr('stroke', fill).attr('stroke-width', 2).attr('opacity', 0.97);
+        ttipG.append('circle').attr('cx', ttipX + 16).attr('cy', midY - 7).attr('r', 6).attr('fill', fill);
+        ttipG.append('text').attr('x', ttipX + 28).attr('y', midY - 3).attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '600').attr('fill', '#e2e8f0').text(`${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`);
+        ttipG.append('text').attr('x', ttipX + 16).attr('y', midY + 18).attr('font-size', '14.5').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '800').attr('fill', fill).text(`Circulation: ${seg.pct}%`);
+        shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', seg.topPx).attr('width', shaftHW * 2).attr('height', segH).attr('fill', 'transparent').attr('class', 'mud-circ-seg').on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1)).on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
       });
-
     } else {
-      // No circulation data — plain accent shaft
-      shaftG.append('rect')
-        .attr('x', arrowCx - shaftHW).attr('y', 0)
-        .attr('width', shaftHW * 2).attr('height', currPx)
-        .attr('fill', 'var(--accent)');
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', currPx).attr('fill', 'var(--accent)');
     }
-
-    // ── Undrilled section: dark shaft from effectiveDepth → totalDepth ────────
-    if (effectiveDepth < data.totalDepth) {
-      shaftG.append('rect')
-        .attr('x', arrowCx - shaftHW).attr('y', effectivePx)
-        .attr('width', shaftHW * 2).attr('height', totalPx - effectivePx)
-        .attr('fill', '#1e293b');
+    if (effectivePx < totalPx) {
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', effectivePx).attr('width', shaftHW * 2).attr('height', totalPx - effectivePx).attr('fill', '#1e293b');
     }
-
-    // ── Arrowhead — outside clip, animates independently ─────────────────────
     const headG = arrowG.append('g').attr('class', 'depth-arrow-head-g');
-
-
-
-    headG.append('path')
-      .attr('class', 'depth-arrow-head')
-      .attr('d', `M${arrowCx - headHW},0 L${arrowCx + headHW},0 L${arrowCx},${headH} Z`)
-      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut)
-      .attr('d', `M${arrowCx - headHW},${totalPx} L${arrowCx + headHW},${totalPx} L${arrowCx},${totalPx + headH} Z`);
+    headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx},${totalPx} L${arrowCx + headHW},${totalPx - headH} Z`);
   }
 
-  private drawTotalDepthLabel(
-    totalDepth: number,
-    centerX: number,
-    drawingHeight: number,
-    tdLabelStart: number,
-  ): void {
-    this.rootG.append('text')
-      .attr('class', 'total-depth-main')
-      .attr('x', centerX).attr('y', drawingHeight + 26)
-      .attr('text-anchor', 'middle')
-      .style('opacity', 0)
-      .text(`Total Depth : ${formatDepth(totalDepth)}`)
-      .transition()
-      .delay(tdLabelStart)
-      .duration(ANIM.OVERLAY_FADE)
-      .style('opacity', 1);
-  }
-
-  private drawNotDrilledZone(
-    data: WellboreDiagramData,
-    centerX: number,
-    scale: ReturnType<typeof createDepthScale>,
-    notDrilledStart: number,
-  ): void {
-    if (!data.prewap) return;
-
-    const estTargetDepth = data.prewap.estTargetDepth;
-    // Undrilled = estTargetDepth - wPrsntDpth
+  private drawNotDrilledZone(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, start: number, ohHW: number): void {
+    const estTargetDepth = data.totalDepth;
     const currentDepth = data.currentDepth;
     const undrilledFt = estTargetDepth - currentDepth;
 
     // Only draw if there is undrilled section remaining
-    if (undrilledFt <= 0) return;
-
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = openHoleHalfWidth(innerHW);
+    if (undrilledFt <= 1) return;
 
     const topPx = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);
     const height = bottomPx - topPx;
-    const width = ohHW * 2 + 160;  // +80 units each side
+    const width = ohHW * 2 + 160; // +80 units each side
     const lx = centerX - ohHW - 80;
     const midY = topPx + height / 2;
 
@@ -849,45 +590,49 @@ export class WellBoreViewComponent implements OnInit {
       .attr('class', 'not-drilled-zone')
       .style('opacity', 0);
 
-    // Dashed red rectangle
+    // Dark semi-transparent soft red overlay for the entire section
     ndg.append('rect')
-      .attr('class', 'not-drilled-rect')
       .attr('x', lx)
       .attr('y', topPx)
       .attr('width', width)
       .attr('height', height)
-      .attr('fill', 'rgba(255,0,0,0.06)')
-      .attr('stroke', 'red')
-      .attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '6,4');
+      .attr('fill', 'rgba(239, 68, 68, 0.12)') // Soft light red
+      .attr('stroke', 'rgba(239, 68, 68, 0.3)') // Matching light red stroke
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '8,4');
 
-    // Label inside the rectangle
+    // Central "NOT DRILLED" label
     ndg.append('text')
       .attr('class', 'not-drilled-label')
       .attr('x', centerX)
-      .attr('y', midY - 7)
+      .attr('y', midY - 6)
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', 'red')
-      .attr('font-size', '11px')
-      .attr('font-weight', '600')
-      .text('Not Drilled');
+      .attr('fill', '#fbbf24') // yellow-400
+      .style('font-size', '14px')
+      .style('font-weight', '800')
+      .style('letter-spacing', '0.15em')
+      .text('NOT DRILLED');
 
-    // Undrilled footage sub-label
+    // Footage remaining label
     ndg.append('text')
       .attr('class', 'not-drilled-footage')
       .attr('x', centerX)
-      .attr('y', midY + 8)
+      .attr('y', midY + 12)
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', 'red')
-      .attr('font-size', '10px')
-      .text(`${undrilledFt.toLocaleString()} ft remaining`);
+      .attr('fill', '#fca5a5') // light red-300
+      .style('font-size', '11px')
+      .style('font-weight', '600')
+      .text(`REMAINING: ${undrilledFt.toLocaleString()} FT`);
 
     ndg.transition()
-      .delay(notDrilledStart)
+      .delay(start)
       .duration(ANIM.OVERLAY_FADE)
-      .ease(easeCubicInOut)
       .style('opacity', 1);
+  }
+
+  private drawTotalDepthLabel(td: number, centerX: number, drawingHeight: number, start: number): void {
+    const g = this.rootG.append('g').attr('class', 'td-label').style('opacity', 0);
+    g.append('text').attr('class', 'total-depth-main').attr('x', centerX).attr('y', drawingHeight + 35).attr('text-anchor', 'middle').text(`TOTAL DEPTH: ${td.toLocaleString()} FT`);
+    g.transition().delay(start).duration(ANIM.OVERLAY_FADE).style('opacity', 1);
   }
 }

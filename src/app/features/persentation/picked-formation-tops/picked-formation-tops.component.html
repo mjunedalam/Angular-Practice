@@ -1,11 +1,23 @@
 <div class="formation-card">
   <div class="formation-card__header">Picked Formation Tops</div>
 
-  <ag-grid-angular
-    class="formation-grid"
-    [theme]="theme"
-    [columnDefs]="columnDefs"
-    [gridOptions]="gridOptions"
-    (gridReady)="onGridReady($event)"
-  />
+  @if (store.loading()) {
+    <div class="formation-skeleton-list">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton--text" style="width: 30%;"></div>
+          <div class="skeleton skeleton--text" style="width: 20%;"></div>
+          <div class="skeleton skeleton--text" style="width: 40%;"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <ag-grid-angular
+      class="formation-grid"
+      [theme]="theme"
+      [columnDefs]="columnDefs"
+      [gridOptions]="gridOptions"
+      (gridReady)="onGridReady($event)"
+    />
+  }
 </div>

@@ -1,31 +1,39 @@
 // ─── Reset ────────────────────────────────────────────────────────────────────
 *, *::before, *::after { box-sizing: border-box; }
 
-// ─── DARK (default — also :root so there is always a fallback) ────────────────
+// ─── DARK (default) ──────────────────────────────────────────────────────────
 :root,
 [data-theme='dark'] {
-  --bg-app:        #0b1628;
-  --bg-surface:    #0f2240;
-  --bg-card:       #112845;
-  --bg-sidenav:    #071e3d;
-  --bg-topbar:     #071e3d;
-  --bg-content:    #0d2a47;
-  --border:        rgba(56, 189, 248, 0.14);
-  --border-sub:    rgba(255, 255, 255, 0.06);
-  --text-primary:   #e2e8f0;
+  --bg-app:        #080e1a;
+  --bg-surface:    #0c1425;
+  --bg-card:       rgba(17, 34, 64, 0.7); // Glass-ready
+  --bg-sidenav:    #061224;
+  --bg-topbar:     #050b18;
+  --bg-content:    #091120;
+  --border:        rgba(56, 189, 248, 0.12);
+  --border-sub:    rgba(255, 255, 255, 0.05);
+  --text-primary:   #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted:     #64748b;
   --text-on-accent: #ffffff;
   --accent:        #0ea5e9;
   --accent-hover:  #38bdf8;
-  --accent-muted:  rgba(14, 165, 233, 0.15);
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger:  #ef4444;
-  --scrollbar-track: #0f172a;
-  --scrollbar-thumb: #1e3a5f;
-  --skel-base:  #1e3a5f;
-  --skel-shine: #1e4976;
+  --accent-muted:  rgba(14, 165, 233, 0.12);
+  --success:       #10b981;
+  --warning:       #f59e0b;
+  --danger:        #ef4444;
+  
+  // Premium Tokens
+  --radius-card:   16px;
+  --radius-inner:  12px;
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md:     0 8px 30px rgba(0, 0, 0, 0.3);
+  --shadow-glow:   0 0 15px rgba(14, 165, 233, 0.25);
+  --glass-blur:    blur(10px);
+
+  // Skeleton Tokens (Neutral Grays)
+  --skel-base:     #1a202e;
+  --skel-shine:    #2a3447;
 }
 
 // ─── LIGHT ────────────────────────────────────────────────────────────────────
@@ -104,12 +112,19 @@ html, body {
     var(--skel-base) 25%, var(--skel-shine) 50%, var(--skel-base) 75%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s infinite linear;
-  border-radius: inherit;
+  border-radius: 4px;
   color: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
   pointer-events: none;
+  overflow: hidden;
+  
   * { visibility: hidden !important; }
+
+  &--rect   { width: 100%; height: 100%; }
+  &--circle { border-radius: 50%; }
+  &--text   { height: 12px; width: 80%; border-radius: 2px; }
+  &--pill   { border-radius: 999px; }
 }
 @keyframes skeleton-pulse {
   0%   { background-position:  200% 0; }

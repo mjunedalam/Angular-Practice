@@ -1,123 +1,158 @@
-@if (store.miscWellData(); as d) {
+@let details = store.miscWellData();
+
+@if (store.loading()) {
+  <div class="misc-grid">
+    @for (i of [1,2,3,4,5,6,7,8]; track i) {
+      <div class="card card--skeleton">
+        <div class="skel-text-sm skeleton"></div>
+        <div class="skel-text-lg skeleton"></div>
+      </div>
+    }
+    <div class="card card--skeleton full-width">
+      <div class="skel-text-sm skeleton"></div>
+      <div class="skel-text-md skeleton"></div>
+    </div>
+    <div class="card card--skeleton full-width">
+      <div class="skel-text-sm skeleton"></div>
+      <div class="skel-text-md skeleton"></div>
+    </div>
+  </div>
+} @else if (details) {
   <div class="misc-grid">
 
     <!-- ROW 1: Well Name | Targeted Aquifer -->
-    <div class="card bg-gradient-cyan">
-      <div class="text-sub opacity-80 mb-1">Well Name</div>
-      <div class="text-xl">{{ d.wellName }}</div>
-      <div class="text-xs mt-1 opacity-90">{{ d.targetDesc }}</div>
+    <div class="card card--well-name">
+      <div class="card__label">Well Name</div>
+      <div class="card__value-lg">{{ details.wellName }}</div>
+      <div class="card__sub-value">{{ details.targetDesc }}</div>
     </div>
 
-    <div class="card bg-white center-content">
-      <div class="text-sub dark-text mb-1">Targeted Aquifer</div>
-      <div class="aquifer-icon">
-        <svg viewBox="0 0 24 24" fill="url(#dropGrad)">
+    <div class="card card--aquifer center-content">
+      <div class="card__label dark-text">Targeted Aquifer</div>
+      <div class="aquifer-logo mt-2">
+        <svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.5 2C22.5 2 34 16.5 34 26.5C34 32.8513 28.8513 38 22.5 38C16.1487 38 11 32.8513 11 26.5C11 16.5 22.5 2 22.5 2Z" 
+                fill="url(#drop-grad)" />
+          <path d="M22.5 35C27.1944 35 31 31.1944 31 26.5C31 20.5 22.5 11 22.5 11C22.5 11 14 20.5 14 26.5C14 31.1944 17.8056 35 22.5 35Z" 
+                fill="white" fill-opacity="0.3" />
           <defs>
-            <linearGradient id="dropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#0ea5e9"/>
-              <stop offset="100%" stop-color="#0284c7"/>
+            <linearGradient id="drop-grad" x1="22.5" y1="2" x2="22.5" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6"/>
+              <stop offset="1" stop-color="#1d4ed8"/>
             </linearGradient>
           </defs>
-          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
         </svg>
       </div>
-      <div class="cyan-text text-md">{{ d.targetedAquifer }}</div>
+      <div class="aquifer-name">{{ details.targetedAquifer }}</div>
     </div>
 
-    <!-- ROW 2: Current Status | Days counter -->
-    <div class="card bg-white flex-row space-between">
+    <!-- ROW 2: Current Status | Days Progress -->
+    <div class="card card--status flex-row space-between">
       <div>
-        <div class="text-sub dark-text">Current Status</div>
-        <div class="text-md cyan-text mt-1">{{ d.currentStatus }}</div>
+        <div class="card__label dark-text">Current Status</div>
+        <div class="card__value-md primary-text mt-1">On Target</div>
       </div>
-      <div class="icon-gear">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
-                   a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
-                   A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83
-                   l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
-                   A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83
-                   l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
-                   a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83
-                   l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
-                   a1.65 1.65 0 0 0-1.51 1z"/>
+      <div class="status-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
         </svg>
       </div>
     </div>
 
-    <div class="card bg-gradient-dark-blue flex-row">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-80">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8"  y1="2" x2="8"  y2="6"/>
-        <line x1="3"  y1="10" x2="21" y2="10"/>
-        <circle cx="8"  cy="14" r="1" fill="currentColor" stroke="none"/>
-        <circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/>
-        <circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/>
-        <circle cx="8"  cy="18" r="1" fill="currentColor" stroke="none"/>
-        <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
-        <circle cx="16" cy="18" r="1" fill="currentColor" stroke="none"/>
-      </svg>
+    <div class="card card--days flex-row">
+      <div class="calendar-icon mr-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18"/>
+          <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+        </svg>
+      </div>
       <div>
-        <div class="text-xs opacity-90">Days</div>
-        <div class="text-md mt-1">{{ d.daysSinceSpud }} / {{ d.targetDays }}</div>
+        <div class="card__label-light">Days</div>
+        <div class="card__value-md bold-text">{{ details.daysSinceSpud | number:'1.2-2' }}/{{ details.targetDays }}</div>
       </div>
     </div>
 
     <!-- ROW 3: Gauges | BI / Supporting -->
-    <div class="card bg-white flex-row space-around">
-      <div class="gauge-container">
-        <div class="gauge-title">Days since<br>Spud</div>
-        <div class="gauge gauge--blue">{{ d.daysSinceSpud }}</div>
+    <div class="card card--white flex-row space-around">
+      <div class="gauge-box">
+        <div class="gauge-box__label">Days since<br>Spud</div>
+        <div class="gauge-ring">{{ details.daysSinceSpud }}</div>
       </div>
-      <div class="gauge-container">
-        <div class="gauge-title">Target<br>Days</div>
-        <div class="gauge gauge--blue">{{ d.targetDays }}</div>
+      <div class="gauge-box">
+        <div class="gauge-box__label">Target<br>Days</div>
+        <div class="gauge-ring">{{ details.targetDays }}</div>
       </div>
     </div>
 
-    <div class="card bg-gradient-cyan">
-      <div class="text-lg">BI{{ d.biNum }}</div>
-      <div class="text-sub opacity-90 mt-1">Supporting</div>
-      <div class="text-md mt-1">Well {{ d.supportingWell }}</div>
+    <div class="card card--supporting">
+      <div class="card__value-md bold-text">BI{{ details.biNum }} Supporting</div>
+      <div class="card__value-md">Well {{ details.supportingWell }}</div>
     </div>
 
     <!-- ROW 4: Feet Drilled | Previous Well -->
-    <div class="card bg-gradient-cyan flex-row space-between">
+    <div class="card card--feet flex-row space-between">
       <div class="flex-baseline">
-        <div class="text-xxl">{{ d.feetDrilledToday | number }}</div>
-        <div class="text-sm ml-2 opacity-90">Feet</div>
+        <div class="card__value-xxl">{{ details.feetDrilledToday | number }}</div>
+        <div class="card__label-light ml-2">Feet</div>
       </div>
-      <div class="icon-waves">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v10M8 8l4 4 4-4"/>
-          <path d="M2 18s2-2 4-2 4 2 4 2 4-2 4 2"/>
-          <path d="M2 22s2-2 4-2 4 2 4 2 4-2 4 2"/>
+      <div class="feet-graphic">
+        <svg viewBox="0 0 40 40" fill="none" stroke="white" stroke-width="1.8">
+          <path d="M20 5v15M13 13l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 25c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3" opacity="0.6"/>
+          <path d="M5 32c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3" opacity="0.4"/>
         </svg>
       </div>
     </div>
 
-    <div class="card bg-gradient-dark-blue">
-      <div class="text-sub opacity-80">Previous Well</div>
-      <div class="text-md mt-1">{{ d.previousWell }}</div>
+    <div class="card card--previous">
+      <div class="card__label-light">Previous Well</div>
+      <div class="card__value-md mt-1">{{ details.previousWell }}</div>
     </div>
 
     <!-- ROW 5: Current Depth | Next Well -->
-    <div class="card bg-gradient-cyan flex-row space-between">
+    <div class="card card--depth flex-row space-between">
       <div>
-        <div class="text-sm opacity-90">Current</div>
-        <div class="text-sm opacity-90">Depth (FT.DF)</div>
+        <div class="card__label-light">Current</div>
+        <div class="card__label-light">Depth</div>
       </div>
-      <div class="text-xxl">{{ d.currentDepth | number }}</div>
+      <div class="card__value-xxl">{{ details.currentDepth | number }}</div>
     </div>
 
-    <div class="card bg-gradient-dark-blue">
-      <div class="text-sub opacity-80">Next Well</div>
-      <div class="text-md mt-1">{{ d.nextWell }}</div>
+    <div class="card card--next">
+      <div class="card__label-light">Next Well</div>
+      <div class="card__value-md mt-1">{{ details.nextWell }}</div>
+    </div>
+
+    <!-- ROW 6: Operation Summary (Full Width) -->
+    <div class="card card--white full-width flex-row">
+      <div class="icon-summary mr-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+      </div>
+      <div class="status-container">
+        <div class="card__label dark-text">Operation Summary</div>
+        <div class="status-text">{{ details.operationSummary }}</div>
+      </div>
+    </div>
+
+    <!-- ROW 7: Next 24 Hour Operation (Full Width) -->
+    <div class="card card--white full-width flex-row">
+      <div class="icon-next-plan mr-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="status-container">
+        <div class="card__label dark-text">Next 24 Hour Operation</div>
+        <div class="status-text">{{ details.next24HrOperation }}</div>
+      </div>
     </div>
 
   </div>

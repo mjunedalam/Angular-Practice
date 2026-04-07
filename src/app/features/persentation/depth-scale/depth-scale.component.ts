@@ -2,15 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  inject,
   OnInit,
-  ViewChild,
   effect,
   input,
+  viewChild,
 } from '@angular/core';
 import { select } from 'd3-selection';
 import { easeLinear } from 'd3-ease';
 import 'd3-transition';
 
+import { WellStore } from '../../../core/store/well.store';
 import { ANIM, ANIM_MODE, DIAGRAM_LAYOUT } from '../../../models/well-design/wellbore-diagram.model';
 import { buildDepthTicks, createDepthScale, formatDepth } from '../../../utils/wellbore-math.util';
 
@@ -22,33 +24,33 @@ import { buildDepthTicks, createDepthScale, formatDepth } from '../../../utils/w
   styleUrl: './depth-scale.component.scss',
 })
 export class DepthScaleComponent implements OnInit {
+  protected readonly store = inject(WellStore);
   readonly totalDepth = input.required<number>();
   readonly animTrigger = input.required<number>();
 
-  @ViewChild('scaleSvg', { static: true })
-  private readonly svgRef!: ElementRef<SVGSVGElement>;
+  private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('scaleSvg');
 
   private readonly layout = DIAGRAM_LAYOUT;
-  private ready = false;
 
   constructor() {
     effect(() => {
-      const trigger = this.animTrigger();
+      const svgEl = this.svgRef();
       const depth = this.totalDepth();
-      if (this.ready || trigger > 0) {
-        this.drawScale(depth);
+      const loading = this.store.loading();
+
+      // Draw if we have the SVG element and we aren't loading
+      if (svgEl?.nativeElement && !loading) {
+        this.drawScale(depth, svgEl.nativeElement);
       }
     });
   }
 
-  ngOnInit(): void {
-    this.ready = true;
-  }
+  ngOnInit(): void {}
 
-  private drawScale(totalDepth: number): void {
+  private drawScale(totalDepth: number, element: SVGSVGElement): void {
     const { depthScaleWidth, svgHeight, marginTop, drawingHeight, depthAxisX } = this.layout;
 
-    const svg = select(this.svgRef.nativeElement);
+    const svg = select(element);
     svg.selectAll('*').remove();
 
     svg

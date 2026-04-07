@@ -1,64 +1,72 @@
-<div class="test-results">
-
+<div class="test-results-container">
   <!-- ── Section header ── -->
-  <div class="test-results__header">
-    <div class="test-results__title">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
-      </svg>
-      Well Test Results
+  <div class="results-header">
+    <div class="results-header__title">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <span>Well Test Results</span>
     </div>
-    <span class="test-results__count">{{ store.wellTestResults().length }}</span>
+    <div class="results-header__badge">{{ store.wellTestResults().length }}</div>
   </div>
 
-  <!-- ── Empty state ── -->
-  @if (store.wellTestResults().length === 0) {
-    <div class="test-results__empty">No test results available.</div>
-  }
+  <!-- ── List of results ── -->
+  <div class="results-list">
+    @if (store.loading()) {
+      @for (i of [1,2,3]; track i) {
+        <div class="result-tab skeleton" style="height: 64px; margin-bottom: 8px;"></div>
+      }
+    } @else {
+      @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
+        <button class="result-tab" (click)="openDialog(result)">
+          <div class="result-tab__left">
+            <div class="well-indicator">
+              <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </svg>
+            </div>
+            <div class="well-details">
+              <div class="name">{{ result.wellName }}</div>
+              <div class="aquifer">{{ result.aquifer }} Aquifer</div>
+            </div>
+          </div>
 
-  <!-- ── Tab rows — one per test result ── -->
-  <div class="test-results__list">
-    @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
-      <button class="test-tab" (click)="openDialog(result)">
+          <div class="result-tab__right">
+            <div class="main-stat">
+              <span class="val">{{ result.flowRate | number }}</span>
+              <span class="unit">GPM</span>
+            </div>
+            <div class="view-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+      }
 
-        <!-- Left: well drop icon + name -->
-        <span class="test-tab__ident">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="url(#tabDropGrad)">
-            <defs>
-              <linearGradient id="tabDropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stop-color="#0ea5e9"/>
-                <stop offset="100%" stop-color="#0369a1"/>
-              </linearGradient>
-            </defs>
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-          </svg>
-          <span class="test-tab__name">{{ result.wellName }}</span>
-        </span>
-
-        <!-- Middle: aquifer badge + test type -->
-        <span class="test-tab__meta">
-          <span class="test-tab__aquifer">{{ result.aquifer }}</span>
-          <span class="test-tab__type">{{ result.testType | titlecase }}</span>
-        </span>
-
-        <!-- Right: key stat + open icon -->
-        <span class="test-tab__stat">
-          <span class="test-tab__flow">{{ result.flowRate | number }} GPM</span>
-          <svg class="test-tab__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </span>
-
-      </button>
+      @if (store.wellTestResults().length === 0) {
+        <div class="results-empty">No test records registered.</div>
+      }
     }
   </div>
-
 </div>
 
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true">
+  <defs>
+    <linearGradient id="res-drop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 <!-- ═══════════════════ DIALOG OVERLAY ═══════════════════════════════════ -->
-@if (selectedResult(); as r) {
+@let r = selectedResult();
+
+@if (r) {
   <div class="dialog-backdrop" (click)="closeDialog()">
     <div class="dialog" (click)="stopPropagation($event)" role="dialog" aria-modal="true">
 

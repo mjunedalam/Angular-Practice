@@ -10,6 +10,55 @@
   background: transparent;
 }
 
+.wellbore-skeleton {
+  width: 100%;
+  height: 840px; // matches core layout
+  display: flex;
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+
+  &__bore {
+    position: absolute;
+    left: 560px; // matches casingCenterX
+    top: 55px; // matches marginTop
+    width: 60px;
+    height: 100%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .skel-wall { width: 10px; height: 85%; border-radius: 99px; }
+    .skel-bit  { width: 32px; height: 32px; border-radius: 50%; margin-top: -10px; }
+  }
+
+  &__grounds {
+    position: absolute;
+    left: 95px; // matches geoLineX
+    top: 100px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+
+    .skel-geo {
+      width: 110px;
+      height: 18px;
+      border-radius: 4px;
+      background: var(--skel-base);
+      position: relative;
+
+      // Small tick-like attachment
+      &::before {
+        content: ''; position: absolute; left: -15px; top: 8px;
+        width: 15px; height: 1.5px; background: var(--skel-shine);
+      }
+    }
+  }
+}
+
 :host ::ng-deep {
   text {
     font-family: 'DM Mono', 'Fira Code', 'Consolas', monospace;

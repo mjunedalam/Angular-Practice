@@ -1,1 +1,14 @@
-<svg #scaleSvg class="depth-scale-svg" aria-label="Depth scale" role="img"></svg>
+@if (store.loading()) {
+  <div class="depth-scale-skeleton">
+    <div class="skel-ruler skeleton"></div>
+    <div class="skel-ticks">
+      <div class="skel-tick skeleton"></div>
+      <div class="skel-tick skeleton"></div>
+      <div class="skel-tick skeleton"></div>
+      <div class="skel-tick skeleton"></div>
+      <div class="skel-tick skeleton"></div>
+    </div>
+  </div>
+} @else {
+  <svg #scaleSvg class="depth-scale-svg" aria-label="Depth scale" role="img"></svg>
+}

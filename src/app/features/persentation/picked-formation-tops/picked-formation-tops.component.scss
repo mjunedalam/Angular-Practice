@@ -1,27 +1,51 @@
 .formation-card {
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,80,160,0.18);
+  box-shadow: 0 4px 20px rgba(30,58,138,0.12);
+  border: 1px solid var(--border);
 
   &__header {
-    background: linear-gradient(135deg, #00b4d8 0%, #0077b6 50%, #023e8a 100%);
+    background: #1e3a8a; // Dark Navy Blue
     color: #ffffff;
-    font-size: 15px; font-weight: 700;
-    text-align: center; padding: 10px 16px;
-    letter-spacing: 0.04em;
+    font-size: 16px; font-weight: 800;
+    text-align: center; padding: 12px 16px;
+    letter-spacing: 0.05em;
+    text-transform: none; // Match image casing
   }
 }
 
 .formation-grid {
   width: 100%;
-  height: calc(36px + (32px * 7));
+  height: 400px;
 
   :deep(.header--center .ag-header-cell-label) { justify-content: center; }
   :deep(.cell--center) { display: flex; align-items: center; justify-content: center; text-align: center; }
-  :deep(.cell--formation) { font-weight: 700; color: var(--text-primary); }
-  :deep(.cell--depth)     { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-  :deep(.cell--remarks)   { font-weight: 600; color: var(--text-secondary); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  :deep(.no-rows)         { color: var(--text-muted); font-size: 12px; }
+  :deep(.cell--formation) { font-weight: 800; color: #1e3a8a; }
+  :deep(.cell--depth)     { font-weight: 700; color: #1e3a8a; font-variant-numeric: tabular-nums; }
+  :deep(.cell--remarks)   { font-weight: 600; color: #2563eb; font-size: 10.5px; white-space: nowrap; }
+  :deep(.no-rows)         { color: var(--text-muted); font-size: 12px; padding: 20px; text-align: center; }
+
+  // Overriding some grid lines for a cleaner look
+  :deep(.ag-root-wrapper) { border: none; }
+  :deep(.ag-header) { border-bottom: 2px solid #1e3a8a; }
+}
+
+.formation-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+  height: 400px;
+  background: var(--bg-surface);
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-sub);
+  
+  &:last-child { border-bottom: none; }
 }

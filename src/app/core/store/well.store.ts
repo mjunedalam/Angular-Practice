@@ -36,7 +36,7 @@ import {
     selectWellTestResults,
 } from './well.selectors';
 
-const MIN_LOADER_DELAY = 800;
+const MIN_LOADER_DELAY = 1000;
 
 const EXPECTED_KEYS: (keyof IWellData)[] = [
     'WELL_MASTER', 'RIG_ACTIVITY', 'DRLG_OP_STATUS', 'DRLG_FD_TDAY',
@@ -67,6 +67,8 @@ export interface MiscWellData {
     readonly currentDepth: number;
     readonly nextWell: string;
     readonly footage: number;
+    readonly operationSummary: string;
+    readonly next24HrOperation: string;
 }
 
 export interface PickedFormationTops {
@@ -122,7 +124,7 @@ export const WellStore = signalStore(
     { providedIn: 'root' },
     withState<WellState>(initialState),
 
-    withComputed(({ wellDetails, wellNames, wellNamesPage }) => {
+    withComputed(({ wellDetails, wellNames, wellNamesPage, loading }) => {
         const unique = computed(() => uniqueByWellName(wellNames()));
         return {
             uniqueWellNames: unique,
@@ -138,6 +140,8 @@ export const WellStore = signalStore(
             offsetWells: computed((): OffsetWaterWells[] => selectOffsetWells(wellDetails())),
             wellsLogsIndicators: computed((): WellLogsIndicators | null => selectWellLogsIndicators(wellDetails())),
             wellTestResults: computed((): WellTestResult[] => selectWellTestResults(wellDetails())),
+            isInitialLoading: computed(() => wellNames().length === 0 && loading()),
+            isDetailsLoading: computed(() => wellNames().length > 0 && loading()),
         };
     }),
 
@@ -157,12 +161,9 @@ export const WellStore = signalStore(
                         selectedEpANum: epANum,
                         loading: true,
                         error: null,
-                        // DO NOT set wellDetails: null here.
-                        // Keeping old data in place prevents every @if from
-                        // destroying and recreating the DOM (the cause of blinking).
-                        // The new data will replace it when the request completes.
                     });
                 }),
+                delay(MIN_LOADER_DELAY),
                 switchMap(epANum =>
                     wellDataService.getWellDetails(epANum).pipe(
                         tapResponse({

@@ -1,35 +1,39 @@
-<div class="log-indicator">
-  <div class="log-indicator__buttons">
+<div class="log-panel">
+  <div class="log-panel__title">Well Logs & Indicators</div>
+  
+  <div class="log-strip">
+    @if (store.loading()) {
+      @for (i of [1,2,3]; track i) {
+        <div class="indicator-toggle skeleton skeleton--pill" style="width: 80px; height: 28px; border: none;"></div>
+      }
+    } @else {
+      @let data = store.wellsLogsIndicators();
+      <div
+        class="indicator-toggle"
+        [class.indicator-toggle--active]="data?.rcc"
+        [title]="data?.rcc ? 'RCC Data Available' : 'No RCC Data'"
+      >
+        <div class="indicator-toggle__light"></div>
+        <span class="indicator-toggle__label">RCC</span>
+      </div>
 
-    <button
-      class="log-btn"
-      [ngClass]="store.wellsLogsIndicators()?.rcc ? 'log-btn--active' : 'log-btn--inactive'"
-      [disabled]="!store.wellsLogsIndicators()?.rcc"
-      [title]="store.wellsLogsIndicators()?.rcc ? 'RCC remarks available' : 'No RCC remarks'"
-    >
-      <span class="log-btn__dot"></span>
-      RCC
-    </button>
+      <div
+        class="indicator-toggle"
+        [class.indicator-toggle--active]="data?.mudLog"
+        [title]="data?.mudLog ? 'Mud Log Available' : 'No Mud Log Data'"
+      >
+        <div class="indicator-toggle__light"></div>
+        <span class="indicator-toggle__label">Mud Log</span>
+      </div>
 
-    <button
-      class="log-btn"
-      [ngClass]="store.wellsLogsIndicators()?.mudLog ? 'log-btn--active' : 'log-btn--inactive'"
-      [disabled]="!store.wellsLogsIndicators()?.mudLog"
-      [title]="store.wellsLogsIndicators()?.mudLog ? 'Mud log remarks available' : 'No mud log remarks'"
-    >
-      <span class="log-btn__dot"></span>
-      Mud Log
-    </button>
-
-    <button
-      class="log-btn"
-      [ngClass]="store.wellsLogsIndicators()?.logging ? 'log-btn--active' : 'log-btn--inactive'"
-      [disabled]="!store.wellsLogsIndicators()?.logging"
-      [title]="store.wellsLogsIndicators()?.logging ? 'Logging remarks available' : 'No logging remarks'"
-    >
-      <span class="log-btn__dot"></span>
-      Logging
-    </button>
-
+      <div
+        class="indicator-toggle"
+        [class.indicator-toggle--active]="data?.logging"
+        [title]="data?.logging ? 'Logging Data Available' : 'No Logging Data'"
+      >
+        <div class="indicator-toggle__light"></div>
+        <span class="indicator-toggle__label">Logging</span>
+      </div>
+    }
   </div>
 </div>
