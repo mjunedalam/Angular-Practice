@@ -19,7 +19,6 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  position: relative; // so the toggle can sit on top of chip strip edge
 
   .toolbar__chips {
     flex: 1;
@@ -27,9 +26,12 @@
   }
 }
 
-// ── Layout toggle — icon-only pill, sits at far right ─────────────────────────
-.layout-toggle {
-  flex-shrink: 0;
+// ── Layout toggle — absolute corner button inside diagram area ────────────────
+.diagram-layout-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
   width: 32px;
   height: 32px;
   display: flex;
@@ -40,8 +42,7 @@
   background: var(--bg-surface);
   color: var(--text-muted);
   cursor: pointer;
-  margin-right: 10px;
-  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
 
   svg {
     width: 15px;
@@ -53,9 +54,10 @@
     border-color: var(--accent);
     color: var(--accent);
     background: var(--accent-muted);
+    transform: scale(1.05);
   }
 
-  // Active / ON state
+  // Active / Free-mode state
   &--on {
     border-color: var(--accent);
     background: var(--accent-muted);
@@ -126,6 +128,7 @@
     min-width: 0;
     padding: 8px 0;
     gap: 8px;
+    position: relative; // needed for canvas-controls absolute positioning
   }
 
   // Right panel — width driven by signal
@@ -181,8 +184,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  padding: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 12px 24px;
   gap: 12px;
   min-height: 0;
 
@@ -191,6 +195,15 @@
   background-size: 28px 28px;
   background-position: 14px 14px;
   background-color: var(--bg-content);
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
 }
 
 .canvas__section {
@@ -198,8 +211,8 @@
   position: relative;
 
   &--diagram {
-    flex: 1;
-    min-height: auto;
+    flex-shrink: 0;
+    height: calc(100vh - 68px);
     background: var(--bg-card);
     border-radius: 18px;
     padding: 50px 16px 16px;
@@ -208,91 +221,12 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-  }
-}
+    overflow: hidden;
 
-// Control buttons container at top-right of canvas section
-.canvas-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 100;
-  display: flex;
-  gap: 8px;
-  flex-direction: row-reverse;
-}
-
-// Layout toggle button
-.layout-toggle {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
-
-  svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    border-color: var(--accent);
-    background: var(--accent-muted);
-    color: var(--accent);
-    transform: scale(1.05);
-  }
-
-  // Active / ON state
-  &--on {
-    border-color: var(--accent);
-    background: var(--accent-muted);
-    color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-  }
-}
-
-// Canvas maximize button
-.canvas-maximize-btn {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
-
-  svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    border-color: var(--accent);
-    background: var(--accent-muted);
-    color: var(--accent);
-    transform: scale(1.05);
-  }
-
-  // Active state when maximized
-  &--active {
-    border-color: var(--accent);
-    background: var(--accent-muted);
-    color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    // Logs indicator must not be squeezed by diagram-inner (flex:1)
+    app-wwells-logs-indicators {
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -315,7 +249,7 @@
 .diagram-inner {
   flex: 1;
   display: flex;
-  height: 500px;
+  min-height: 0;
   background: var(--bg-surface);
   border-radius: 12px;
   overflow: hidden;
@@ -346,24 +280,108 @@
   }
 }
 
-// Maximized canvas mode
-.pres-canvas--maximized {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+// ══════════════════════════════════════════════════════════════════════════════
+// UNIFIED INFO PANEL — tabbed card in Free Mode
+// ══════════════════════════════════════════════════════════════════════════════
+.info-panel {
   width: 100%;
-  height: 100vh;
-  z-index: 999;
-  padding: 20px;
-  background: var(--bg-app);
-  overflow-y: auto;
-  border-radius: 0;
+  flex-shrink: 0;
+  min-height: 480px;
+  background: var(--bg-card);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
-  .canvas__section--diagram {
+  // ── Tab navigation bar ───────────────────────────────────────────────────
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 10px 0;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    flex-shrink: 0;
+
+    &::-webkit-scrollbar { height: 0; }
+  }
+
+  // ── Tab content area ─────────────────────────────────────────────────────
+  &__content {
     flex: 1;
-    min-height: 0;
+    overflow-y: auto;
+    min-height: 400px;
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    // Stretch child components to fill
+    > * {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+// ── Individual tab button ────────────────────────────────────────────────────
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.18s, background 0.18s;
+  flex-shrink: 0;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.18s;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    transform: translateX(-50%);
+    transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    background: rgba(14, 165, 233, 0.06);
+
+    svg { opacity: 1; }
+  }
+
+  &--active {
+    color: var(--accent);
+    background: rgba(14, 165, 233, 0.08);
+
+    svg { opacity: 1; color: var(--accent); }
+
+    &::after {
+      width: calc(100% - 16px);
+    }
   }
 }
 

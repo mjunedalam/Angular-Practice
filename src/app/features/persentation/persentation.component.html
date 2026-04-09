@@ -29,6 +29,28 @@
 
     <!-- Center -->
     <div class="pres-fixed__center">
+
+      <!-- Layout Toggle — top-right corner of diagram area -->
+      <button class="diagram-layout-toggle" [class.diagram-layout-toggle--on]="draggableMode()" (click)="toggleDraggable()"
+        [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'"
+        aria-label="Toggle layout mode">
+        @if (!draggableMode()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="5 9 2 12 5 15"></polyline>
+            <polyline points="9 5 12 2 15 5"></polyline>
+            <polyline points="15 9 18 12 15 15"></polyline>
+            <polyline points="9 15 12 18 15 15"></polyline>
+          </svg>
+        }
+      </button>
+
       @if (!store.loading() && !store.isLoaded()) {
         <div class="empty-state">
           <div class="empty-state__icon">🛢</div>
@@ -65,52 +87,22 @@
        MODE B — FREE: every card is independently draggable + resizable
        ════════════════════════════════════════════════════════════════════════ -->
   @if (draggableMode()) {
-  <div class="pres-canvas" [class.pres-canvas--maximized]="canvasMaximized()">
+  <div class="pres-canvas">
 
     <!-- 1. Diagram Section (Full Width Hero) -->
     <div class="canvas__section canvas__section--diagram">
-      <!-- Control Buttons -->
-      <div class="canvas-controls">
-        <!-- Layout Toggle Button -->
-        <button class="layout-toggle" [class.layout-toggle--on]="draggableMode()" (click)="toggleDraggable()"
-          [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'"
-          aria-label="Toggle layout mode">
-          @if (!draggableMode()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-          } @else {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="5 9 2 12 5 15"></polyline>
-              <polyline points="9 5 12 2 15 5"></polyline>
-              <polyline points="15 9 18 12 15 15"></polyline>
-              <polyline points="9 15 12 18 15 15"></polyline>
-            </svg>
-          }
-        </button>
 
-        <!-- Maximize Button -->
-        <button class="canvas-maximize-btn" [class.canvas-maximize-btn--active]="canvasMaximized()" (click)="toggleCanvasMaximize()"
-          [title]="canvasMaximized() ? 'Minimize diagram' : 'Maximize diagram'"
-          aria-label="Toggle diagram fullscreen">
-          @if (!canvasMaximized()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <polyline points="9 21 3 21 3 15"></polyline>
-              <line x1="21" y1="3" x2="3" y2="21"></line>
-            </svg>
-          } @else {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 8 3 3 8 3"></polyline>
-              <polyline points="21 16 21 21 16 21"></polyline>
-              <line x1="21" y1="3" x2="3" y2="21"></line>
-            </svg>
-          }
-        </button>
-      </div>
+      <!-- Layout Toggle — top-right corner of diagram area -->
+      <button class="diagram-layout-toggle diagram-layout-toggle--on" (click)="toggleDraggable()"
+        title="Switch to Fixed Layout"
+        aria-label="Toggle layout mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="5 9 2 12 5 15"></polyline>
+          <polyline points="9 5 12 2 15 5"></polyline>
+          <polyline points="15 9 18 12 15 15"></polyline>
+          <polyline points="9 15 12 18 15 15"></polyline>
+        </svg>
+      </button>
 
       @if (!store.loading() && !store.isLoaded()) {
         <div class="empty-state">
@@ -126,17 +118,51 @@
       <app-wwells-logs-indicators />
     </div>
 
-    <!-- 2. Dashboard Components -->
-    <app-misc-pres-well-data />
-
-    <app-picked-formation-tops />
-
-    <div class="canvas__row">
-      <app-active-wwell-map class="flex-1" />
-      <app-offset-wwells class="flex-1" />
+    <!-- 2. Unified Info Panel -->
+    <div class="info-panel">
+      <!-- Tab Navigation -->
+      <div class="info-panel__tabs">
+        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'info'" (click)="setTab('info')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          Well Info
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'formation'" (click)="setTab('formation')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M3 6h18M3 12h18M3 18h18"/>
+          </svg>
+          Formation
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'map'" (click)="setTab('map')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          Map
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'offset'" (click)="setTab('offset')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+          </svg>
+          Offset Wells
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'test'" (click)="setTab('test')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Test Results
+        </button>
+      </div>
+      <!-- Tab Content -->
+      <div class="info-panel__content">
+        @if (activeTab() === 'info') { <app-misc-pres-well-data /> }
+        @if (activeTab() === 'formation') { <app-picked-formation-tops /> }
+        @if (activeTab() === 'map') { <app-active-wwell-map /> }
+        @if (activeTab() === 'offset') { <app-offset-wwells /> }
+        @if (activeTab() === 'test') { <app-wwell-test-result /> }
+      </div>
     </div>
-
-    <app-wwell-test-result />
 
   </div>
   }

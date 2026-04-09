@@ -42,8 +42,8 @@ export class PersentationComponent implements OnInit {
   /** false = fixed three-column (default), true = free draggable canvas */
   protected readonly draggableMode = signal(false);
 
-  /** false = normal canvas, true = fullscreen canvas */
-  protected readonly canvasMaximized = signal(false);
+  /** Active tab in the unified info panel (Free Mode) */
+  protected readonly activeTab = signal<'info' | 'formation' | 'map' | 'offset' | 'test'>('info');
 
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
@@ -56,8 +56,8 @@ export class PersentationComponent implements OnInit {
     this.draggableMode.update(v => !v);
   }
 
-  protected toggleCanvasMaximize(): void {
-    this.canvasMaximized.update(v => !v);
+  protected setTab(tab: 'info' | 'formation' | 'map' | 'offset' | 'test'): void {
+    this.activeTab.set(tab);
   }
 
   protected onLeftDrag(delta: number): void {

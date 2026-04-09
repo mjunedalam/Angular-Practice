@@ -1,113 +1,393 @@
+// ── Outer card wrapper ─────────────────────────────────────────────────────────
+.misc-card {
+  padding: 10px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+// ── 2-column grid ─────────────────────────────────────────────────────────────
 .misc-grid {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
-.card {
-  border-radius: 16px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+// ── Base cell ─────────────────────────────────────────────────────────────────
+.cell {
+  border-radius: 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative;
   overflow: hidden;
+  position: relative;
   border: 1px solid var(--border);
-  transition: transform 0.2s;
-
-  &--well-name {
-    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-    color: #fff; border: none;
-  }
-  &--aquifer {
-    background: #fff;
-    .aquifer-name { font-size: 18px; font-weight: 800; color: #1e3a8a; }
-  }
-  &--status {
-    background: #fff;
-    .status-icon-box {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: linear-gradient(135deg, #22d3ee, #0ea5e9);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 10px rgba(14,165,233,0.3);
-      svg { width: 24px; height: 24px; }
-    }
-  }
-  &--days {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    color: #fff; border: none;
-    .calendar-icon svg { width: 28px; height: 28px; opacity: 0.9; }
-  }
-  &--white { background: #fff; }
-  &--supporting {
-    background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%);
-    color: #fff; border: none;
-  }
-  &--feet {
-    background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
-    color: #fff; border: none;
-  }
-  &--previous, &--next {
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
-    color: #fff; border: none;
-  }
-  &--depth {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0891b2 100%);
-    color: #fff; border: none;
-  }
-
-  &.full-width { grid-column: 1 / -1; min-height: 80px; align-items: flex-start; }
+  min-height: 72px;
 }
 
-.card__label { font-size: 12px; font-weight: 500; opacity: 0.8; letter-spacing: 0.01em; }
-.card__label-light { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.85); }
-.card__value-lg { font-size: 19px; font-weight: 800; line-height: 1.2; margin: 4px 0; }
-.card__value-md { font-size: 16px; font-weight: 700; }
-.card__value-xxl { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
-.card__sub-value { font-size: 12px; font-weight: 500; opacity: 0.9; }
+// ── Cell color variants ────────────────────────────────────────────────────────
 
-.bold-text { font-weight: 800; }
-.primary-text { color: #2563eb; }
-.dark-text { color: #64748b; }
-
-.gauge-box {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  &__label { font-size: 11px; font-weight: 600; color: #94a3b8; text-align: center; line-height: 1.2; }
-}
-.gauge-ring {
-  width: 64px; height: 64px; border-radius: 50%;
-  border: 3px solid #0ea5e9;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; font-weight: 800; color: #1e3a8a;
-  box-shadow: inset 0 0 0 4px rgba(14,165,233,0.1);
-}
-
-.aquifer-logo svg { width: 48px; height: 48px; }
-.feet-graphic svg { width: 48px; height: 48px; }
-
-.flex-row { display: flex; flex-direction: row; align-items: center; }
-.space-between { justify-content: space-between; }
-.space-around { justify-content: space-around; }
-.center-content { align-items: center; text-align: center; }
-.flex-baseline { display: flex; align-items: baseline; }
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mr-2 { margin-right: 10px; }
-.mr-3 { margin-right: 14px; }
-.ml-2 { margin-left: 8px; }
-
-.status-container { flex: 1; min-width: 0; }
-.status-text {
-  font-size: 11px; word-break: break-word; line-height: 1.5; color: #0ea5e9; font-weight: 600;
-}
-
-.icon-summary, .icon-next-plan {
-  width: 42px; height: 42px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+// Row 1 — left: blue-purple gradient
+.cell--well-name {
+  background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+  border: none;
   color: #fff;
-  svg { width: 22px; height: 22px; }
+  min-height: 80px;
 }
-.icon-summary { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-.icon-next-plan { background: linear-gradient(135deg, #10b981, #059669); }
+
+// Row 1 — right: white / light surface
+.cell--aquifer {
+  background: var(--bg-card, #fff);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+// Row 2 — left: white / light surface
+.cell--status {
+  background: var(--bg-card, #fff);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+// Row 2 — right: blue gradient
+.cell--days {
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+// Row 3 — left: white / gauges
+.cell--gauges {
+  background: var(--bg-card, #fff);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 12px 10px;
+}
+
+// Row 3 — right: blue gradient supporting
+.cell--bi {
+  background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%);
+  border: none;
+  color: #fff;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+// Row 4 — left: cyan gradient feet
+.cell--feet {
+  background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Row 4 — right: navy gradient previous well
+.cell--prev {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  border: none;
+  color: #fff;
+}
+
+// Row 5 — left: cyan gradient depth
+.cell--depth {
+  background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 100%);
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+// Row 5 — right: navy gradient next well
+.cell--next {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  border: none;
+  color: #fff;
+}
+
+// ── Text helpers ───────────────────────────────────────────────────────────────
+
+// Label on colored/dark background (small white label)
+.cell__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+// Label on white/light background
+.cell__label--dark {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// Semi-transparent white label on gradient cells
+.cell__label-light {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+// Well name large text
+.cell__name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+// Subtitle under well name
+.cell__sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.3;
+}
+
+// ── Aquifer cell internals ─────────────────────────────────────────────────────
+.aquifer-drop {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.aquifer-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e3a8a;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+// ── Status cell internals ──────────────────────────────────────────────────────
+.status-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0ea5e9;
+}
+
+.status-gear {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ── Days cell internals ────────────────────────────────────────────────────────
+.days-cal {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.days-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+// ── Gauge internals ────────────────────────────────────────────────────────────
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.gauge__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.gauge__ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid #0ea5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e3a8a;
+  box-shadow: inset 0 0 0 5px rgba(14, 165, 233, 0.1),
+              0 0 0 1px rgba(14, 165, 233, 0.15);
+  background: #fff;
+}
+
+// ── BI cell internals ──────────────────────────────────────────────────────────
+.bi-num {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.bi-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bi-well {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2px;
+}
+
+// ── Feet cell internals ────────────────────────────────────────────────────────
+.feet-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.feet-value {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.feet-icon {
+  flex-shrink: 0;
+
+  svg {
+    width: 42px;
+    height: 42px;
+    opacity: 0.85;
+  }
+}
+
+// ── Depth cell internals ───────────────────────────────────────────────────────
+.depth-labels {
+  display: flex;
+  flex-direction: column;
+}
+
+.depth-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+// ── Operation Summary & Next 24 Hr (full-width rows) ─────────────────────────
+.cell--op-summary {
+  grid-column: 1 / -1;
+  background: var(--bg-card, #fff);
+  min-height: 60px;
+  gap: 6px;
+}
+
+.cell--next24 {
+  grid-column: 1 / -1;
+  background: var(--bg-surface, #f1f5f9);
+  min-height: 60px;
+  gap: 6px;
+  border: 1px solid var(--border);
+}
+
+.op-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: #0ea5e9;
+  }
+}
+
+.op-header__label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.op-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+// ── Previous/Next well value text ─────────────────────────────────────────────
+.well-name-val {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 4px;
+  word-break: break-word;
+}
