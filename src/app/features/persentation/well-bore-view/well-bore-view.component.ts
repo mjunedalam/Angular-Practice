@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   inject,
-  OnInit,
   effect,
   input,
   viewChild,
@@ -40,7 +39,7 @@ type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
   templateUrl: './wellbore-view.component.html',
   styleUrl: './wellbore-view.component.scss',
 })
-export class WellBoreViewComponent implements OnInit {
+export class WellBoreViewComponent {
   protected readonly store = inject(WellStore);
   readonly diagramData = input.required<WellboreDiagramData | null>();
   readonly animTrigger = input.required<number>();
@@ -50,37 +49,23 @@ export class WellBoreViewComponent implements OnInit {
   private readonly layout = DIAGRAM_LAYOUT;
   private rootG!: GSel;
   private defsEl!: DefsSel;
-  private ready = false;
 
   constructor() {
     effect(() => {
       const svgEl = this.svgRef();
-      const trigger = this.animTrigger();
       const data = this.diagramData();
-      const loading = this.store.loading();
 
-      if (svgEl?.nativeElement && !loading && data && (this.ready || trigger > 0)) {
-        // SVG element is present, and we are not loading.
-        // If not bootstrapped yet, do it now.
-        if (!this.rootG) {
-          this.bootstrapSvg(svgEl.nativeElement);
-        }
-        
-        // If bootstrapped (might have just happened), redraw.
-        if (this.rootG) {
-          this.redraw(data);
-        }
-      } else if (loading || !data) {
-        // When switching back to loading state, the SVG element is removed from DOM.
-        // We reset the bootstrap references so they are recreated when the SVG returns.
-        this.rootG = undefined as any;
-        this.defsEl = undefined as any;
+      if (!svgEl?.nativeElement || !data) return;
+
+      // Bootstrap once; redraw on every data/trigger change.
+      if (!this.rootG) {
+        this.bootstrapSvg(svgEl.nativeElement);
+      }
+
+      if (this.rootG) {
+        this.redraw(data);
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.ready = true;
   }
 
   private bootstrapSvg(element: SVGSVGElement): void {

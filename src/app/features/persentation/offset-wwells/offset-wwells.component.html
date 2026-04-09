@@ -8,11 +8,6 @@
   </div>
 
   <div class="offset-list">
-    @if (store.loading()) {
-      @for (i of [1,2,3]; track i) {
-        <div class="well-accordion skeleton" style="height: 52px; margin-bottom: 8px;"></div>
-      }
-    } @else {
       @for (well of store.offsetWells(); track well.wellName; let i = $index) {
         <div
           class="well-accordion"
@@ -80,7 +75,6 @@
       @if (store.offsetWells().length === 0) {
         <div class="empty-state">No offset wells found for selection.</div>
       }
-    }
   </div>
 
   <svg style="width:0;height:0;position:absolute;" aria-hidden="true">

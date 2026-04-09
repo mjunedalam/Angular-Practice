@@ -1,11 +1,22 @@
-<div class="chip-strip" role="list" aria-label="Available wells">
-  <span class="chip-strip__label">Wells</span>
+<div class="well-chips-container">
+  <!-- Date picker section — positioned on the left -->
+  <div class="date-picker-section">
+    <label for="well-date-input" class="date-picker-label">Date:</label>
+    <input
+      #dateInput
+      id="well-date-input"
+      type="date"
+      class="date-picker-input"
+      [value]="formattedDate()"
+      (change)="onDateChange($event)"
+      aria-label="Select date for well data"
+    />
+  </div>
 
-  @if (store.isInitialLoading()) {
-    @for (i of [1,2,3,4,5]; track i) {
-      <div class="chip skeleton skeleton--pill" style="width: 100px; height: 32px; margin-bottom: 0;"></div>
-    }
-  } @else {
+  <!-- Well name chips and navigation — centered -->
+  <div class="chip-strip" role="list" aria-label="Available wells">
+    <span class="chip-strip__label">Active Wells</span>
+
     @if (store.hasPrevPage()) {
       <button
         class="chip chip--nav"
@@ -20,7 +31,7 @@
         role="listitem"
         [ngClass]="{ 'chip--active': well.epANum === store.selectedEpANum() }"
         [attr.aria-pressed]="well.epANum === store.selectedEpANum()"
-        (click)="store.selectWell(well.epANum)"
+        (click)="onWellChipClick(well.epANum)"
       >
         <span class="chip__dot"></span>
         {{ well.wellName }}
@@ -34,9 +45,9 @@
         (click)="store.nextPage()"
       >›</button>
     }
-  }
 
-  <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>
+    <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>
+  </div>
 </div>
 
 <!-- Loading bar — sits directly below chip strip, inline in flow, no fixed position -->

@@ -18,6 +18,7 @@ import { MorningReport } from 'src/models/morining-report.model';
 import { WellName } from '../../../models/well-design/well-name.model';
 import { WellDataService } from '../../../services/wwell-data.service';
 import { MoriningReportService } from '../../../services/morining-report.service';
+import { formatDateForInput } from 'src/utils/date.util';
 
 import { WellActions, WellEvents } from './well.actions';
 import {
@@ -103,6 +104,7 @@ export interface WellTestResult {
 interface WellState {
     readonly wellNames: WellName[];
     readonly selectedEpANum: number | null;
+    readonly selectedDate: Date;
     readonly wellDetails: IWellData | null;
     readonly loading: boolean;
     readonly error: string | null;
@@ -113,6 +115,7 @@ interface WellState {
 const initialState: WellState = {
     wellNames: [],
     selectedEpANum: null,
+    selectedDate: new Date(),
     wellDetails: null,
     loading: false,
     error: null,
@@ -154,21 +157,22 @@ export const WellStore = signalStore(
             return store.uniqueWellNames()[pageIdx * PAGE_SIZE];
         }
 
-        const selectWell = rxMethod<number>(
+        const selectWell = rxMethod<{ epANum: number; date?: Date }>(
             pipe(
-                tap((epANum) => {
+                tap(({ epANum, date }) => {
                     patchState(store, {
                         selectedEpANum: epANum,
+                        selectedDate: date || new Date(),
                         loading: true,
                         error: null,
                     });
                 }),
                 delay(MIN_LOADER_DELAY),
-                switchMap(epANum =>
-                    wellDataService.getWellDetails(epANum).pipe(
+                switchMap(({ epANum, date }) =>
+                    wellDataService.getWellDetails(epANum, date).pipe(
                         tapResponse({
                             next: (wellDetails) => {
-                                logMissingKeys(wellDetails, store.selectedEpANum()!);
+                                logMissingKeys(wellDetails, epANum);
                                 patchState(store, {
                                     wellDetails,
                                     loading: false,
@@ -202,7 +206,7 @@ export const WellStore = signalStore(
                             next: (wellNames) => {
                                 patchState(store, { wellNames, loading: false });
                                 if (wellNames.length > 0 && !store.selectedEpANum()) {
-                                    selectWell(wellNames[0].epANum);
+                                    selectWell({ epANum: wellNames[0].epANum });
                                 }
                             },
                             error: (err: Error) => {
@@ -220,17 +224,27 @@ export const WellStore = signalStore(
         return {
             selectWell,
             loadWellNames,
+            setSelectedDate(date: Date): void {
+                patchState(store, { selectedDate: date });
+                // Reload well data for the newly selected date if a well is selected
+                if (store.selectedEpANum() !== null) {
+                    selectWell({ epANum: store.selectedEpANum()!, date });
+                }
+            },
+            getFormattedDate(): string {
+                return formatDateForInput(store.selectedDate());
+            },
             nextPage(): void {
                 const idx = store.wellNamesPage() + 1;
                 patchState(store, { wellNamesPage: idx });
                 const first = firstOnPage(idx);
-                if (first) selectWell(first.epANum);
+                if (first) selectWell({ epANum: first.epANum, date: store.selectedDate() });
             },
             prevPage(): void {
                 const idx = Math.max(0, store.wellNamesPage() - 1);
                 patchState(store, { wellNamesPage: idx });
                 const first = firstOnPage(idx);
-                if (first) selectWell(first.epANum);
+                if (first) selectWell({ epANum: first.epANum, date: store.selectedDate() });
             },
         };
     }),

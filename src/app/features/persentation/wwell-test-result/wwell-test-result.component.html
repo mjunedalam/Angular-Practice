@@ -14,11 +14,6 @@
 
   <!-- ── List of results ── -->
   <div class="results-list">
-    @if (store.loading()) {
-      @for (i of [1,2,3]; track i) {
-        <div class="result-tab skeleton" style="height: 64px; margin-bottom: 8px;"></div>
-      }
-    } @else {
       @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
         <button class="result-tab" (click)="openDialog(result)">
           <div class="result-tab__left">
@@ -50,7 +45,6 @@
       @if (store.wellTestResults().length === 0) {
         <div class="results-empty">No test records registered.</div>
       }
-    }
   </div>
 </div>
 

@@ -31,9 +31,11 @@
   --shadow-glow:   0 0 15px rgba(14, 165, 233, 0.25);
   --glass-blur:    blur(10px);
 
-  // Skeleton Tokens (Neutral Grays)
-  --skel-base:     #1a202e;
-  --skel-shine:    #2a3447;
+  // Skeleton tokens
+  --sk-base:       rgba(255,255,255,0.05);
+  --sk-shine:      rgba(255,255,255,0.11);
+  --scrollbar-track: #080e1a;
+  --scrollbar-thumb: #1e293b;
 }
 
 // ─── LIGHT ────────────────────────────────────────────────────────────────────
@@ -58,8 +60,8 @@
   --danger:  #dc2626;
   --scrollbar-track: #e2e8f0;
   --scrollbar-thumb: #94a3b8;
-  --skel-base:  #e2e8f0;
-  --skel-shine: #f8fafc;
+  --sk-base:  rgba(0,0,0,0.07);
+  --sk-shine: rgba(0,0,0,0.13);
 }
 
 // ─── CUSTOM (teal) ────────────────────────────────────────────────────────────
@@ -84,8 +86,8 @@
   --danger:  #f87171;
   --scrollbar-track: #0a1a1f;
   --scrollbar-thumb: #14b8a6;
-  --skel-base:  #0f2930;
-  --skel-shine: #134040;
+  --sk-base:  rgba(255,255,255,0.04);
+  --sk-shine: rgba(255,255,255,0.09);
 }
 
 // ─── Base ─────────────────────────────────────────────────────────────────────
@@ -106,29 +108,28 @@ html, body {
   &:hover { filter: brightness(1.2); }
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-.skeleton {
-  background: linear-gradient(90deg,
-    var(--skel-base) 25%, var(--skel-shine) 50%, var(--skel-base) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.5s infinite linear;
-  border-radius: 4px;
-  color: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  pointer-events: none;
-  overflow: hidden;
-  
-  * { visibility: hidden !important; }
 
-  &--rect   { width: 100%; height: 100%; }
-  &--circle { border-radius: 50%; }
-  &--text   { height: 12px; width: 80%; border-radius: 2px; }
-  &--pill   { border-radius: 999px; }
-}
-@keyframes skeleton-pulse {
-  0%   { background-position:  200% 0; }
-  100% { background-position: -200% 0; }
-}
 
 button { font-family: inherit; cursor: pointer; }
+
+// ─── Skeleton shimmer ─────────────────────────────────────────────────────────
+@keyframes sk-shimmer {
+  0%   { background-position: -1200px 0; }
+  100% { background-position:  1200px 0; }
+}
+.sk {
+  background: var(--sk-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--sk-base)  0%,
+    var(--sk-shine) 40%,
+    var(--sk-base)  80%
+  );
+  background-size: 1200px 100%;
+  animation: sk-shimmer 1.8s infinite linear;
+  border-radius: 4px;
+  flex-shrink: 0;
+  &--circle { border-radius: 50%  !important; }
+  &--pill   { border-radius: 999px !important; }
+  &--rect   { border-radius: 0    !important; }
+}

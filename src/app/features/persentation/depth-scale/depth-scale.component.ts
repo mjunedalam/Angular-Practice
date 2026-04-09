@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   inject,
-  OnInit,
   effect,
   input,
   viewChild,
@@ -23,7 +22,7 @@ import { buildDepthTicks, createDepthScale, formatDepth } from '../../../utils/w
   templateUrl: './depth-scale.component.html',
   styleUrl: './depth-scale.component.scss',
 })
-export class DepthScaleComponent implements OnInit {
+export class DepthScaleComponent {
   protected readonly store = inject(WellStore);
   readonly totalDepth = input.required<number>();
   readonly animTrigger = input.required<number>();
@@ -36,16 +35,15 @@ export class DepthScaleComponent implements OnInit {
     effect(() => {
       const svgEl = this.svgRef();
       const depth = this.totalDepth();
-      const loading = this.store.loading();
+      this.animTrigger(); // track trigger so we redraw on every new well load
 
-      // Draw if we have the SVG element and we aren't loading
-      if (svgEl?.nativeElement && !loading) {
+      if (svgEl?.nativeElement) {
         this.drawScale(depth, svgEl.nativeElement);
       }
     });
   }
 
-  ngOnInit(): void {}
+
 
   private drawScale(totalDepth: number, element: SVGSVGElement): void {
     const { depthScaleWidth, svgHeight, marginTop, drawingHeight, depthAxisX } = this.layout;

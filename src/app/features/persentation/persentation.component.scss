@@ -201,12 +201,33 @@
     background: var(--border);
     border-radius: 6px;
   }
+
+  &--maximized {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 999;
+    padding: 20px;
+    background: var(--bg-app);
+    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .canvas__section--diagram {
+      min-height: calc(100vh - 40px);
+      flex-grow: 1;
+    }
+  }
 }
 
 .canvas__section {
   width: 100%;
 
   &--diagram {
+    position: relative;
     min-height: 735px;
     //min-height: 600px;
     background: var(--bg-card);
@@ -217,6 +238,44 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+}
+
+// ── Canvas maximize button ──────────────────────────────────────────────────────
+.canvas-maximize-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+    color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  &--active {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
   }
 }
 

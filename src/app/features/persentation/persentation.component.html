@@ -84,10 +84,28 @@
        MODE B — FREE: every card is independently draggable + resizable
        ════════════════════════════════════════════════════════════════════════ -->
   @if (draggableMode()) {
-  <div class="pres-canvas">
+  <div class="pres-canvas" [class.pres-canvas--maximized]="canvasMaximized()">
 
     <!-- 1. Diagram Section (Full Width Hero) -->
     <div class="canvas__section canvas__section--diagram">
+      <!-- Maximize button -->
+      <button class="canvas-maximize-btn" [class.canvas-maximize-btn--active]="canvasMaximized()"
+        (click)="toggleCanvasMaximize()"
+        [title]="canvasMaximized() ? 'Exit fullscreen' : 'Enter fullscreen'"
+        aria-label="Toggle canvas fullscreen">
+        @if (!canvasMaximized()) {
+        <!-- Expand icon -->
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2h6v2H4v4H2V2zm16 0v6h-2V4h-4V2h6zm0 16h-6v-2h4v-4h2v6zM2 12v4h4v2H2v-6z" fill="currentColor" />
+        </svg>
+        } @else {
+        <!-- Collapse icon -->
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 6h6v2H4v4H2V6zm12 0h6v6h-2V8h-4V6zm0 8v4h4v2h-6v-6h2zM2 14v-2h2v4h6v2H2v-2z" fill="currentColor" />
+        </svg>
+        }
+      </button>
+
       @if (!store.loading() && !store.isLoaded()) {
         <div class="empty-state">
           <div class="empty-state__icon">🛢</div>

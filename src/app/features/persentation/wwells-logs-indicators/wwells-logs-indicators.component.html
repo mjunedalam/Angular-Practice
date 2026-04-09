@@ -2,11 +2,6 @@
   <div class="log-panel__title">Well Logs & Indicators</div>
   
   <div class="log-strip">
-    @if (store.loading()) {
-      @for (i of [1,2,3]; track i) {
-        <div class="indicator-toggle skeleton skeleton--pill" style="width: 80px; height: 28px; border: none;"></div>
-      }
-    } @else {
       @let data = store.wellsLogsIndicators();
       <div
         class="indicator-toggle"
@@ -34,6 +29,5 @@
         <div class="indicator-toggle__light"></div>
         <span class="indicator-toggle__label">Logging</span>
       </div>
-    }
   </div>
 </div>

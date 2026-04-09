@@ -43,8 +43,9 @@ describe('WellStore', () => {
       const mockDetails = { EXAD_RCD_PREWAP: [{ estTargetDepth: 1234 }] };
       wellDataServiceMock.getWellDetails.mockReturnValue(of(mockDetails));
 
-      store.selectWell(100);
-      tick();
+      store.selectWell({ epANum: 100 });
+      tick(1000); // delay(MIN_LOADER_DELAY)
+      tick(); // resolve the service call
 
       expect(store.selectedEpANum()).toBe(100);
       expect(store.loading()).toBe(false);
@@ -56,8 +57,9 @@ describe('WellStore', () => {
     it('should handle selectWell error', fakeAsync(() => {
       wellDataServiceMock.getWellDetails.mockReturnValue(throwError(() => new Error('Error Loading Details')));
 
-      store.selectWell(100);
-      tick();
+      store.selectWell({ epANum: 100 });
+      tick(1000); // delay(MIN_LOADER_DELAY)
+      tick(); // resolve the service call
 
       expect(store.loading()).toBe(false);
       expect(store.error()).toBe('Error Loading Details');
@@ -71,30 +73,31 @@ describe('WellStore', () => {
         { wGnrName: 'Well 2', epANum: '20' }
       ];
       morningReportServiceMock.getMorningReport.mockReturnValue(of(mockReports));
-      wellDataServiceMock.getWellDetails.mockReturnValue(of({})); 
+      wellDataServiceMock.getWellDetails.mockReturnValue(of({}));
 
       store.loadWellNames();
-      
+
       expect(store.loading()).toBe(true);
 
-      // delay(MIN_LOADER_DELAY) which is 800
-      tick(800);
+      // delay(MIN_LOADER_DELAY) which is 1000
+      tick(1000);
 
       expect(store.wellNames()).toEqual([
         { wellName: 'Well 1', epANum: 10 },
         { wellName: 'Well 2', epANum: 20 }
       ]);
-      
+
       // It should also call selectWell on the first item automatically
       expect(store.selectedEpANum()).toBe(10);
+      tick(1000); // selectWell's delay
       tick(); // resolve the selectWell
     }));
 
     it('should handle loadWellNames error correctly', fakeAsync(() => {
       morningReportServiceMock.getMorningReport.mockReturnValue(throwError(() => new Error('Load Error')));
-      
+
       store.loadWellNames();
-      tick(800);
+      tick(1000);
 
       expect(store.loading()).toBe(false);
       expect(store.error()).toBe('Load Error');
@@ -105,20 +108,24 @@ describe('WellStore', () => {
     it('should update wellNamesPage and call selectWell on nextPage and prevPage', fakeAsync(() => {
       const mockReports = Array.from({ length: 15 }).map((_, i) => ({ wGnrName: `Well ${i}`, epANum: `${i}` }));
       morningReportServiceMock.getMorningReport.mockReturnValue(of(mockReports));
-      wellDataServiceMock.getWellDetails.mockReturnValue(of({})); 
-      
+      wellDataServiceMock.getWellDetails.mockReturnValue(of({}));
+
       store.loadWellNames();
-      tick(800);
-      tick();
+      tick(1000); // loadWellNames delay
+      tick(); // selectWell gets invoked
+      tick(1000); // selectWell delay
+      tick(); // selectWell completes
 
       expect(store.wellNamesPage()).toBe(0);
       expect(store.selectedEpANum()).toBe(0);
 
       store.nextPage();
+      tick(1000); // nextPage calls selectWell with delay
       tick();
       expect(store.wellNamesPage()).toBe(1);
-      
+
       store.prevPage();
+      tick(1000); // prevPage calls selectWell with delay
       tick();
       expect(store.wellNamesPage()).toBe(0);
     }));

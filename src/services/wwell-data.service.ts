@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError } from 'rxjs';
 import { MorningReport } from '../models/morining-report.model';
 import { WellName } from '../models/well-design/well-name.model';
 import { WellDetails, WellDetailsResponse } from '../app/core/models/well-details.model';
@@ -9,8 +9,6 @@ import { APiResponse } from '../shared/models/wwell/api-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class WellDataService {
-  [x: string]: any;
-
   private readonly http = inject(HttpClient);
   apiUrl = "";
   /** Fetches the list of well names for chip rendering. */
@@ -19,16 +17,45 @@ export class WellDataService {
   }
 
   /**
-   * Fetches well design data for the given EPA number.
-   * Replace the static asset path with your real API endpoint:
-   *   return this.http.get<WellDetailsResponse>(`/api/wells/${epANum}/details`)
-   *              .pipe(map(res => res.data[0]));
+   * Fetches well design data for the given EPA number and optional date.
+   *
+   * @param epANum - The EPA number of the well
+   * @param date - Optional date for which to load data; defaults to today
+   *
+   * Loads date-specific JSON variants from /assets/data/well-details-{YYYYMMDD}.json.
+   * Falls back to baseline (20260401) if the date file is not found.
    */
-  getWellDetails(epANum: number): Observable<IWellData> {
-    void epANum;
+  getWellDetails(epANum: number, date?: Date): Observable<IWellData> {
+    const queryDate = date || new Date();
+    const dateStr = this.formatDateForAsset(queryDate);
+    const assetPath = `/assets/data/well-details-${dateStr}.json`;
+
     return this.http
-      .get<APiResponse<IWellData>>('/assets/data/well-details.json')
-      .pipe(map((res) => res.data[0]));
+      .get<APiResponse<IWellData>>(assetPath)
+      .pipe(
+        map((res) => res.data[0]),
+        catchError(() => {
+          // Fallback to baseline if date variant not found
+          return this.http
+            .get<APiResponse<IWellData>>('/assets/data/well-details-20260401.json')
+            .pipe(
+              map((res) => res.data[0])
+            );
+        })
+      );
+  }
+
+  /**
+   * Formats a date to YYYYMMDD string for asset path construction.
+   *
+   * @param date - The date to format
+   * @returns Date string in YYYYMMDD format (e.g., '20260410')
+   */
+  private formatDateForAsset(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
   }
 
   /** Fetches the morning report to extract dynamic well names. */

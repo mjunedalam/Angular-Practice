@@ -1,24 +1,6 @@
-@if (store.loading()) {
-  <div class="wellbore-skeleton">
-    <!-- Centered borehole skeleton -->
-    <div class="wellbore-skeleton__bore">
-      <div class="skel-wall skeleton"></div>
-      <div class="skel-bit skeleton"></div>
-    </div>
-    
-    <!-- Geologic horizons skeleton -->
-    <div class="wellbore-skeleton__grounds">
-      <div class="skel-geo skeleton"></div>
-      <div class="skel-geo skeleton"></div>
-      <div class="skel-geo skeleton"></div>
-      <div class="skel-geo skeleton"></div>
-    </div>
-  </div>
-} @else {
-  <svg
-    #wellboreSvg
-    class="wellbore-svg"
-    aria-label="Wellbore design diagram"
-    role="img"
-  ></svg>
-}
+<svg
+  #wellboreSvg
+  class="wellbore-svg"
+  aria-label="Wellbore design diagram"
+  role="img"
+></svg>

@@ -10,6 +10,7 @@ import { ActiveWwellMapComponent } from './active-wwell-map/active-wwell-map.com
 import { OffsetWwellsComponent } from './offset-wwells/offset-wwells.component';
 import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-logs-indicators.component';
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
+import { PresentationSkeletonComponent } from './presentation-skeleton/presentation-skeleton.component';
 
 const LEFT_DEFAULT = 280; const LEFT_MIN = 180; const LEFT_MAX = 520;
 const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
@@ -29,6 +30,7 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
     OffsetWwellsComponent,
     WwellsLogsIndicatorsComponent,
     WwellTestResultComponent,
+    PresentationSkeletonComponent,
   ],
   templateUrl: './persentation.component.html',
   styleUrl: './persentation.component.scss',
@@ -40,6 +42,9 @@ export class PersentationComponent implements OnInit {
   /** false = fixed three-column (default), true = free draggable canvas */
   protected readonly draggableMode = signal(false);
 
+  /** false = normal view (default), true = canvas maximized to fullscreen */
+  protected readonly canvasMaximized = signal(false);
+
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
 
@@ -49,6 +54,10 @@ export class PersentationComponent implements OnInit {
 
   protected toggleDraggable(): void {
     this.draggableMode.update(v => !v);
+  }
+
+  protected toggleCanvasMaximize(): void {
+    this.canvasMaximized.update(v => !v);
   }
 
   protected onLeftDrag(delta: number): void {
