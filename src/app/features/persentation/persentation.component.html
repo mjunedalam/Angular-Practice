@@ -1,27 +1,8 @@
 <div class="presentation">
 
-  <!-- ── Chip bar + layout toggle icon ─────────────────────────────────────── -->
+  <!-- ── Chip bar ────────────────────────────────────────────────────────────── -->
   <div class="presentation__toolbar">
     <app-well-name-chips class="toolbar__chips" />
-    <button class="layout-toggle" [class.layout-toggle--on]="draggableMode()" (click)="toggleDraggable()"
-      [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'" aria-label="Toggle layout mode">
-      @if (!draggableMode()) {
-      <!-- Grid / fixed icon -->
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" />
-        <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" />
-        <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" />
-        <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" />
-      </svg>
-      } @else {
-      <!-- Free / drag icon -->
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-        <path d="M7 6l-4 4 4 4M13 6l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-          stroke-linejoin="round" />
-      </svg>
-      }
-    </button>
   </div>
 
   @if (store.error()) {
@@ -88,23 +69,48 @@
 
     <!-- 1. Diagram Section (Full Width Hero) -->
     <div class="canvas__section canvas__section--diagram">
-      <!-- Maximize button -->
-      <button class="canvas-maximize-btn" [class.canvas-maximize-btn--active]="canvasMaximized()"
-        (click)="toggleCanvasMaximize()"
-        [title]="canvasMaximized() ? 'Exit fullscreen' : 'Enter fullscreen'"
-        aria-label="Toggle canvas fullscreen">
-        @if (!canvasMaximized()) {
-        <!-- Expand icon -->
-        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 2h6v2H4v4H2V2zm16 0v6h-2V4h-4V2h6zm0 16h-6v-2h4v-4h2v6zM2 12v4h4v2H2v-6z" fill="currentColor" />
-        </svg>
-        } @else {
-        <!-- Collapse icon -->
-        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 6h6v2H4v4H2V6zm12 0h6v6h-2V8h-4V6zm0 8v4h4v2h-6v-6h2zM2 14v-2h2v4h6v2H2v-2z" fill="currentColor" />
-        </svg>
-        }
-      </button>
+      <!-- Control Buttons -->
+      <div class="canvas-controls">
+        <!-- Layout Toggle Button -->
+        <button class="layout-toggle" [class.layout-toggle--on]="draggableMode()" (click)="toggleDraggable()"
+          [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'"
+          aria-label="Toggle layout mode">
+          @if (!draggableMode()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="5 9 2 12 5 15"></polyline>
+              <polyline points="9 5 12 2 15 5"></polyline>
+              <polyline points="15 9 18 12 15 15"></polyline>
+              <polyline points="9 15 12 18 15 15"></polyline>
+            </svg>
+          }
+        </button>
+
+        <!-- Maximize Button -->
+        <button class="canvas-maximize-btn" [class.canvas-maximize-btn--active]="canvasMaximized()" (click)="toggleCanvasMaximize()"
+          [title]="canvasMaximized() ? 'Minimize diagram' : 'Maximize diagram'"
+          aria-label="Toggle diagram fullscreen">
+          @if (!canvasMaximized()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="3" y2="21"></line>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 8 3 3 8 3"></polyline>
+              <polyline points="21 16 21 21 16 21"></polyline>
+              <line x1="21" y1="3" x2="3" y2="21"></line>
+            </svg>
+          }
+        </button>
+      </div>
 
       @if (!store.loading() && !store.isLoaded()) {
         <div class="empty-state">

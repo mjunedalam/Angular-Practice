@@ -42,7 +42,7 @@ export class PersentationComponent implements OnInit {
   /** false = fixed three-column (default), true = free draggable canvas */
   protected readonly draggableMode = signal(false);
 
-  /** false = normal view (default), true = canvas maximized to fullscreen */
+  /** false = normal canvas, true = fullscreen canvas */
   protected readonly canvasMaximized = signal(false);
 
   protected readonly leftWidth = signal(LEFT_DEFAULT);
