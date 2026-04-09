@@ -12,7 +12,7 @@ import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-l
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
 import { PresentationSkeletonComponent } from './presentation-skeleton/presentation-skeleton.component';
 
-const LEFT_DEFAULT = 280; const LEFT_MIN = 180; const LEFT_MAX = 520;
+const LEFT_DEFAULT = 340; const LEFT_MIN = 220; const LEFT_MAX = 520;
 const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 
 @Component({

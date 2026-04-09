@@ -1,62 +1,60 @@
 // ── Outer card wrapper ─────────────────────────────────────────────────────────
 .misc-card {
-  padding: 10px;
+  padding: 8px;
   height: 100%;
   box-sizing: border-box;
+  container-type: inline-size;
+  container-name: misc;
 }
 
 // ── 2-column grid ─────────────────────────────────────────────────────────────
 .misc-grid {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  gap: 8px;
+  gap: clamp(4px, 1.5cqi, 10px);
   width: 100%;
 }
 
 // ── Base cell ─────────────────────────────────────────────────────────────────
 .cell {
-  border-radius: 14px;
-  padding: 12px 14px;
+  border-radius: clamp(8px, 2.5cqi, 14px);
+  padding: clamp(6px, 2cqi, 14px) clamp(8px, 2.5cqi, 16px);
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
   position: relative;
   border: 1px solid var(--border);
-  min-height: 72px;
+  min-height: clamp(52px, 14cqi, 80px);
 }
 
 // ── Cell color variants ────────────────────────────────────────────────────────
 
-// Row 1 — left: blue-purple gradient
 .cell--well-name {
   background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
   border: none;
   color: #fff;
-  min-height: 80px;
+  min-height: clamp(64px, 18cqi, 90px);
 }
 
-// Row 1 — right: white / light surface
 .cell--aquifer {
   background: var(--bg-card, #fff);
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: clamp(4px, 1.5cqi, 10px);
+  padding: clamp(6px, 2cqi, 12px) clamp(8px, 2.5cqi, 14px);
 }
 
-// Row 2 — left: white / light surface
 .cell--status {
   background: var(--bg-card, #fff);
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: clamp(4px, 1.5cqi, 10px);
 }
 
-// Row 2 — right: blue gradient
 .cell--days {
   background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
   border: none;
@@ -64,21 +62,19 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: clamp(4px, 1.5cqi, 10px);
 }
 
-// Row 3 — left: white / gauges
 .cell--gauges {
   background: var(--bg-card, #fff);
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
-  gap: 8px;
-  padding: 12px 10px;
+  gap: clamp(4px, 1.5cqi, 10px);
+  padding: clamp(6px, 2cqi, 14px) clamp(4px, 1.5cqi, 12px);
 }
 
-// Row 3 — right: blue gradient supporting
 .cell--bi {
   background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%);
   border: none;
@@ -86,10 +82,9 @@
   align-items: center;
   text-align: center;
   justify-content: center;
-  gap: 2px;
+  gap: clamp(1px, 0.5cqi, 3px);
 }
 
-// Row 4 — left: cyan gradient feet
 .cell--feet {
   background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
   border: none;
@@ -100,14 +95,12 @@
   justify-content: space-between;
 }
 
-// Row 4 — right: navy gradient previous well
 .cell--prev {
   background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
   border: none;
   color: #fff;
 }
 
-// Row 5 — left: cyan gradient depth
 .cell--depth {
   background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 100%);
   border: none;
@@ -115,10 +108,9 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: clamp(6px, 2cqi, 14px);
 }
 
-// Row 5 — right: navy gradient next well
 .cell--next {
   background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
   border: none;
@@ -127,83 +119,98 @@
 
 // ── Text helpers ───────────────────────────────────────────────────────────────
 
-// Label on colored/dark background (small white label)
 .cell__label {
-  font-size: 10px;
+  font-size: clamp(8px, 2.2cqi, 11px);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: clamp(2px, 0.5cqi, 5px);
+  white-space: nowrap;
 }
 
-// Label on white/light background
 .cell__label--dark {
   color: #94a3b8;
-  font-size: 10px;
+  font-size: clamp(8px, 2.2cqi, 11px);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-// Semi-transparent white label on gradient cells
 .cell__label-light {
-  font-size: 10px;
+  font-size: clamp(8px, 2.2cqi, 11px);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  margin-bottom: clamp(1px, 0.4cqi, 3px);
+  white-space: nowrap;
 }
 
-// Well name large text
 .cell__name {
-  font-size: 16px;
+  font-size: clamp(12px, 3.8cqi, 18px);
   font-weight: 800;
   color: #fff;
   line-height: 1.2;
-  margin-bottom: 2px;
+  margin-bottom: clamp(1px, 0.4cqi, 3px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-// Subtitle under well name
 .cell__sub {
-  font-size: 11px;
+  font-size: clamp(9px, 2.4cqi, 12px);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.72);
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-// ── Aquifer cell internals ─────────────────────────────────────────────────────
+// ── Aquifer cell ───────────────────────────────────────────────────────────────
 .aquifer-drop {
-  width: 40px;
-  height: 40px;
+  width: clamp(24px, 7cqi, 42px);
+  height: clamp(24px, 7cqi, 42px);
   flex-shrink: 0;
 }
 
 .aquifer-name {
-  font-size: 14px;
+  font-size: clamp(10px, 3cqi, 15px);
   font-weight: 800;
   color: #1e3a8a;
   line-height: 1.2;
   word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
-// ── Status cell internals ──────────────────────────────────────────────────────
+// ── Status cell ────────────────────────────────────────────────────────────────
 .status-left {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: clamp(2px, 0.8cqi, 5px);
+  min-width: 0;
 }
 
 .status-value {
-  font-size: 14px;
+  font-size: clamp(11px, 3cqi, 15px);
   font-weight: 700;
   color: #0ea5e9;
+  white-space: nowrap;
 }
 
 .status-gear {
-  width: 40px;
-  height: 40px;
+  width: clamp(28px, 8cqi, 42px);
+  height: clamp(28px, 8cqi, 42px);
   border-radius: 50%;
   background: linear-gradient(135deg, #0ea5e9, #2563eb);
   display: flex;
@@ -213,16 +220,16 @@
   box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: clamp(14px, 4cqi, 22px);
+    height: clamp(14px, 4cqi, 22px);
   }
 }
 
-// ── Days cell internals ────────────────────────────────────────────────────────
+// ── Days cell ──────────────────────────────────────────────────────────────────
 .days-cal {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: clamp(26px, 7cqi, 38px);
+  height: clamp(26px, 7cqi, 38px);
+  border-radius: clamp(6px, 1.5cqi, 10px);
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
@@ -230,17 +237,18 @@
   flex-shrink: 0;
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: clamp(14px, 3.5cqi, 22px);
+    height: clamp(14px, 3.5cqi, 22px);
   }
 }
 
 .days-value {
-  font-size: 16px;
+  font-size: clamp(11px, 3.2cqi, 17px);
   font-weight: 800;
   color: #fff;
   line-height: 1;
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 // ── Gauge internals ────────────────────────────────────────────────────────────
@@ -248,45 +256,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: clamp(3px, 1cqi, 7px);
 }
 
 .gauge__label {
-  font-size: 10px;
+  font-size: clamp(7px, 2cqi, 10px);
   font-weight: 600;
   color: #94a3b8;
   text-align: center;
   line-height: 1.25;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .gauge__ring {
-  width: 56px;
-  height: 56px;
+  width: clamp(38px, 11cqi, 58px);
+  height: clamp(38px, 11cqi, 58px);
   border-radius: 50%;
-  border: 3px solid #0ea5e9;
+  border: clamp(2px, 0.6cqi, 3px) solid #0ea5e9;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: clamp(13px, 3.8cqi, 20px);
   font-weight: 800;
   color: #1e3a8a;
-  box-shadow: inset 0 0 0 5px rgba(14, 165, 233, 0.1),
+  box-shadow: inset 0 0 0 4px rgba(14, 165, 233, 0.1),
               0 0 0 1px rgba(14, 165, 233, 0.15);
   background: #fff;
 }
 
-// ── BI cell internals ──────────────────────────────────────────────────────────
+// ── BI cell ────────────────────────────────────────────────────────────────────
 .bi-num {
-  font-size: 20px;
+  font-size: clamp(14px, 4.5cqi, 22px);
   font-weight: 900;
   color: #fff;
   line-height: 1;
 }
 
 .bi-label {
-  font-size: 10px;
+  font-size: clamp(7px, 2cqi, 10px);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
   text-transform: uppercase;
@@ -294,100 +303,124 @@
 }
 
 .bi-well {
-  font-size: 13px;
+  font-size: clamp(9px, 2.8cqi, 13px);
   font-weight: 700;
   color: #fff;
   margin-top: 2px;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-// ── Feet cell internals ────────────────────────────────────────────────────────
+// ── Feet cell ──────────────────────────────────────────────────────────────────
 .feet-left {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .feet-value {
-  font-size: 22px;
+  font-size: clamp(16px, 5cqi, 26px);
   font-weight: 900;
   color: #fff;
   line-height: 1;
   margin-bottom: 2px;
+  white-space: nowrap;
 }
 
 .feet-icon {
   flex-shrink: 0;
 
   svg {
-    width: 42px;
-    height: 42px;
+    width: clamp(28px, 8cqi, 44px);
+    height: clamp(28px, 8cqi, 44px);
     opacity: 0.85;
   }
 }
 
-// ── Depth cell internals ───────────────────────────────────────────────────────
+// ── Depth cell ─────────────────────────────────────────────────────────────────
 .depth-labels {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .depth-value {
-  font-size: 26px;
+  font-size: clamp(18px, 5.5cqi, 30px);
   font-weight: 900;
   color: #fff;
   letter-spacing: -0.5px;
   line-height: 1;
+  white-space: nowrap;
 }
 
-// ── Operation Summary & Next 24 Hr (full-width rows) ─────────────────────────
+// ── Previous / Next well text ─────────────────────────────────────────────────
+.well-name-val {
+  font-size: clamp(11px, 3.2cqi, 16px);
+  font-weight: 800;
+  color: #fff;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+// ── Operation summary & Next 24 Hr (full-width) ───────────────────────────────
 .cell--op-summary {
   grid-column: 1 / -1;
   background: var(--bg-card, #fff);
-  min-height: 60px;
-  gap: 6px;
+  min-height: clamp(48px, 14cqi, 70px);
+  gap: clamp(3px, 1cqi, 7px);
 }
 
 .cell--next24 {
   grid-column: 1 / -1;
   background: var(--bg-surface, #f1f5f9);
-  min-height: 60px;
-  gap: 6px;
+  min-height: clamp(48px, 14cqi, 70px);
+  gap: clamp(3px, 1cqi, 7px);
   border: 1px solid var(--border);
 }
 
 .op-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: clamp(4px, 1.2cqi, 7px);
 
   svg {
-    width: 14px;
-    height: 14px;
+    width: clamp(11px, 2.8cqi, 15px);
+    height: clamp(11px, 2.8cqi, 15px);
     flex-shrink: 0;
     color: #0ea5e9;
   }
 }
 
 .op-header__label {
-  font-size: 10px;
+  font-size: clamp(8px, 2.2cqi, 11px);
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .op-text {
-  font-size: 12px;
+  font-size: clamp(9px, 2.4cqi, 12px);
   font-weight: 500;
   color: var(--text-primary, #1e293b);
   line-height: 1.5;
   word-break: break-word;
-}
-
-// ── Previous/Next well value text ─────────────────────────────────────────────
-.well-name-val {
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  margin-top: 4px;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
