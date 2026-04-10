@@ -53,7 +53,9 @@
   border: 1px solid var(--border-sub);
   border-radius: var(--radius-inner);
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  transition: background 0.22s ease, border-color 0.22s ease,
+              transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease;
   width: 100%;
   text-align: left;
 
@@ -61,6 +63,7 @@
     background: var(--accent-muted);
     border-color: var(--accent);
     transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.12);
   }
 
   &__left {
@@ -72,8 +75,8 @@
       width: 20px; height: 20px;
       filter: drop-shadow(0 0 5px rgba(14, 165, 233, 0.3));
     }
-    .name    { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-    .aquifer { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .name    { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .aquifer { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
   }
 
   &__right {
@@ -84,7 +87,7 @@
     .main-stat {
       text-align: right;
       .val  { font-size: 15px; font-weight: 800; color: var(--accent); }
-      .unit { font-size: 10px; font-weight: 700; color: var(--text-muted); margin-left: 3px; }
+      .unit { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-left: 3px; }
     }
     .view-btn {
       width: 26px; height: 26px;
@@ -160,7 +163,7 @@
 }
 
 .dialog__subtitle {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -190,7 +193,13 @@
   border: 1px solid var(--border-sub);
   display: flex; flex-direction: column;
   gap: 4px;
-  transition: border-color 0.15s;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+
+  &:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.1);
+    transform: translateY(-1px);
+  }
 
   &__icon {
     color: var(--accent);
@@ -200,14 +209,14 @@
   }
 
   &__value {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.1;
   }
 
   &__label {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -245,7 +254,7 @@
   padding: 36px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-style: italic;
   opacity: 0.7;
 }

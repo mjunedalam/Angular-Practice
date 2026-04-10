@@ -1,11 +1,67 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// MASK SHIMMER — YouTube / Facebook style
+//
+// Instead of animating every .sk element independently (fragmented look),
+// a SINGLE gradient wave sweeps across the entire skeleton container once,
+// producing the cohesive "one light source moving left-to-right" effect
+// seen on YouTube, Facebook, LinkedIn, etc.
+//
+// How it works:
+//   1. .pres-skel is `position:relative; overflow:hidden`
+//   2. .pres-skel::after is an absolutely-positioned translucent gradient
+//      panel that slides from -100% → +100% in X.
+//   3. .sk items are plain solid boxes — no individual animations.
+//   4. The wave passes over them all simultaneously.
+// ═══════════════════════════════════════════════════════════════════════════
+
 // ── Outer grid mirroring pres-fixed ──────────────────────────────────────────
 .pres-skel {
   display: grid;
-  grid-template-columns: 340px 1fr 360px;
+  grid-template-columns: var(--pres-left-w, 340px) 1fr var(--pres-right-w, 360px);
   height: 100%;
   width: 100%;
   overflow: hidden;
   background: var(--bg-app);
+
+  // ── Single mask wave (the Facebook/YouTube trick) ─────────────────────────
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    // Soft highlight gradient — wider than the viewport so the
+    // leading/trailing fade is never visible as a hard edge.
+    background: linear-gradient(
+      90deg,
+      transparent          0%,
+      var(--sk-wave-mid)  40%,
+      var(--sk-wave-peak) 50%,
+      var(--sk-wave-mid)  60%,
+      transparent         100%
+    );
+    // Start fully off-screen left, end fully off-screen right.
+    transform: translateX(-100%);
+    animation: mask-wave var(--sk-speed, 1.8s) ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  // Accessibility: users who prefer reduced motion get a gentle pulse instead.
+  @media (prefers-reduced-motion: reduce) {
+    &::after { animation: mask-pulse 2s ease-in-out infinite; }
+  }
+}
+
+// ── Keyframes ────────────────────────────────────────────────────────────────
+@keyframes mask-wave {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+
+@keyframes mask-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.9; }
 }
 
 // ── Shared card helpers ───────────────────────────────────────────────────────
@@ -15,9 +71,9 @@
   border-radius: 12px;
   padding: 12px;
 
-  &--flex-col  { display: flex; flex-direction: column; }
-  &--flex-row  { display: flex; align-items: center; }
-  &--center    { align-items: center; }
+  &--flex-col { display: flex; flex-direction: column; }
+  &--flex-row { display: flex; align-items: center; }
+  &--center   { align-items: center; }
 
   &--accent {
     background: var(--accent);
@@ -71,7 +127,7 @@
   padding: 5px 0;
   border-bottom: 1px solid var(--border-sub);
   &:last-child { border-bottom: none; }
-  &--header { margin-bottom: 4px; }
+  &--header    { margin-bottom: 4px; }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -221,13 +277,11 @@
 // Casing labels column
 .skel-labels-col {
   width: 158px; flex-shrink: 0;
-  padding: 10px 10px 10px 6px;
+  padding: 28px 10px 10px 6px;
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
   border-left: 1px solid var(--border-sub);
-  gap: 0;
-  padding-top: 28px;
 }
 
 .skel-casing-label {

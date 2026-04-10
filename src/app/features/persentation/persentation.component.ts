@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from 'src/app/core/store/well.store';
+import { formatDateForInput, parseDateFromInput } from 'src/utils/date.util';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
@@ -41,6 +43,9 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 })
 export class PersentationComponent implements OnInit {
   protected readonly store = inject(WellStore);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
 
   /** false = fixed three-column (default), true = free draggable modal */
   protected readonly draggableMode = signal(false);
@@ -50,6 +55,28 @@ export class PersentationComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.loadWellNames();
+
+    const params = this.route.snapshot.queryParamMap;
+    const rawEpANum = params.get('epANum');
+    const rawDate = params.get('date');
+
+    if (rawEpANum) {
+      const epANum = parseInt(rawEpANum, 10);
+      const date = rawDate ? parseDateFromInput(rawDate) : this.store.selectedDate();
+      this.store.selectWell({ epANum, date });
+    }
+
+    effect(() => {
+      const epANum = this.store.selectedEpANum();
+      const date = this.store.selectedDate();
+      if (epANum == null) return;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { epANum, date: formatDateForInput(date) },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }, { injector: this.injector });
   }
 
   protected toggleDraggable(): void {
