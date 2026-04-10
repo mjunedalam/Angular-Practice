@@ -1,199 +1,238 @@
-// ── Tokens ───────────────────────────────────────────────────────
-$nav-bg:         #071e3d;
-$nav-bg-light:   #0c2e58;
-$nav-border:     rgba(56, 189, 248, 0.14);
-$accent:         #38bdf8;
-$accent-glow:    rgba(56, 189, 248, 0.35);
-$text-primary:   #cde8f8;
-$text-muted:     #5c93b5;
-$active-bg:      rgba(56, 189, 248, 0.12);
-$active-border:  rgba(56, 189, 248, 0.55);
+// ── Layout constants ────────────────────────────────────────────────────────
+$expanded-w:  224px;
+$collapsed-w: 64px;
+$ease:        cubic-bezier(0.4, 0, 0.2, 1);
+$transition:  0.26s $ease;
 
-$expanded-w:     200px;
-$collapsed-w:    60px;
-$transition:     0.28s cubic-bezier(0.4, 0, 0.2, 1);
-// ────────────────────────────────────────────────────────────────
-
+// ── Host ────────────────────────────────────────────────────────────────────
 :host {
   display: block;
   flex-shrink: 0;
 }
 
+// ── Shell ───────────────────────────────────────────────────────────────────
 .sidenav {
   display: flex;
   flex-direction: column;
   width: $expanded-w;
   height: 100%;
-  background: $nav-bg;
-  border-right: 1px solid $nav-border;
+  background: var(--bg-sidenav);
+  border-right: 1px solid var(--border);
   overflow: hidden;
   transition: width $transition;
   position: relative;
 
-  // background grid texture
-  &::before {
+  // Subtle right-edge glow
+  &::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
-    background-size: 28px 28px;
+    top: 0; right: 0;
+    width: 1px; height: 100%;
+    background: linear-gradient(
+      to bottom,
+      rgba(14, 165, 233, 0.35),
+      rgba(14, 165, 233, 0.08) 40%,
+      transparent 70%
+    );
     pointer-events: none;
   }
 
-  // ── Collapsed state ────────────────────────────────────────────
+  // ── Collapsed state ────────────────────────────────────────────────────
   &--collapsed {
     width: $collapsed-w;
 
     .sidenav__label,
-    .sidenav__badge,
-    .sidenav__footer-text { opacity: 0; width: 0; overflow: hidden; }
+    .sidenav__footer-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+
+    .sidenav__badge-prime {
+      display: none;
+    }
 
     .sidenav__btn {
       justify-content: center;
-      padding: 0 14px;
+      padding: 0;
     }
 
     .sidenav__icon { margin-right: 0; }
+
+    .sidenav__section-label { opacity: 0; height: 0; padding: 0; overflow: hidden; }
   }
 
-  // ── List ───────────────────────────────────────────────────────
+  // ── Section label ──────────────────────────────────────────────────────
+  &__section-label {
+    padding: 20px 18px 6px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.55;
+    transition: opacity $transition, height $transition, padding $transition;
+    white-space: nowrap;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  // ── List ───────────────────────────────────────────────────────────────
   &__list {
     list-style: none;
     margin: 0;
-    padding: 12px 0;
+    padding: 4px 0 16px;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar { width: 0; }
   }
 
   &__item {
-    padding: 2px 8px;
+    padding: 2px 10px;
   }
 
-  // ── Button ────────────────────────────────────────────────────
+  // ── Nav button ─────────────────────────────────────────────────────────
   &__btn {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
-    height: 44px;
-    padding: 0 12px;
+    height: 48px;
+    padding: 0 14px 0 6px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: transparent;
-    color: $text-muted;
+    color: var(--text-muted);
     cursor: pointer;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    font-size: 12.5px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 13.5px;
     font-weight: 500;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.1px;
     gap: 0;
     transition:
       background $transition,
       color $transition,
-      box-shadow $transition;
+      box-shadow $transition,
+      transform 0.15s ease;
     overflow: hidden;
     white-space: nowrap;
 
     &:hover {
-      background: rgba($accent, 0.08);
-      color: $text-primary;
+      background: rgba(14, 165, 233, 0.07);
+      color: var(--text-primary);
+      transform: translateX(2px);
 
-      .sidenav__icon svg {
-        stroke: $accent;
-        filter: drop-shadow(0 0 4px $accent-glow);
+      .sidenav__icon {
+        background: rgba(14, 165, 233, 0.1);
+
+        svg {
+          stroke: var(--accent);
+          filter: drop-shadow(0 0 5px rgba(14, 165, 233, 0.4));
+        }
       }
     }
 
     &--active {
-      background: $active-bg;
-      color: $accent;
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--accent);
       font-weight: 700;
-      box-shadow: inset 0 0 0 1px $active-border;
+      box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.18);
 
-      .sidenav__icon svg {
-        stroke: $accent;
-        filter: drop-shadow(0 0 6px $accent-glow);
+      .sidenav__icon {
+        background: rgba(14, 165, 233, 0.14);
+
+        svg {
+          stroke: var(--accent);
+          filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.55));
+        }
       }
     }
   }
 
-  // ── Icon ──────────────────────────────────────────────────────
+  // ── Icon container ─────────────────────────────────────────────────────
   &__icon {
-    width: 20px;
-    height: 20px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 10px;
     margin-right: 10px;
-    transition: margin $transition;
+    transition: margin $transition, background $transition;
 
     svg {
-      width: 18px;
-      height: 18px;
-      transition: stroke 0.2s, filter 0.2s;
+      width: 20px;
+      height: 20px;
+      transition: stroke 0.2s ease, filter 0.2s ease;
     }
   }
 
-  // ── Label ─────────────────────────────────────────────────────
+  // ── Label ──────────────────────────────────────────────────────────────
   &__label {
     flex: 1;
     transition: opacity $transition, width $transition;
     white-space: nowrap;
   }
 
-  // ── Badge ─────────────────────────────────────────────────────
-  &__badge {
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 2px 5px;
-    border-radius: 4px;
-    background: rgba($accent, 0.2);
-    border: 1px solid rgba($accent, 0.4);
-    color: $accent;
-    transition: opacity $transition, width $transition;
+  // ── PrimeNG badge override ──────────────────────────────────────────────
+  &__badge-prime {
+    flex-shrink: 0;
+    transition: opacity $transition;
+
+    ::ng-deep .p-badge {
+      font-size: 9px;
+      font-weight: 800;
+      min-width: 20px;
+      height: 18px;
+      line-height: 18px;
+      border-radius: 6px;
+      letter-spacing: 0.3px;
+    }
   }
 
-  // ── Active bar (right edge) ────────────────────────────────────
+  // ── Active indicator (left edge) ────────────────────────────────────────
   &__active-bar {
     position: absolute;
-    right: 0;
-    top: 8px;
-    bottom: 8px;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
     width: 3px;
-    background: $accent;
-    border-radius: 2px 0 0 2px;
-    box-shadow: 0 0 8px $accent-glow;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 2px 0 12px rgba(14, 165, 233, 0.5);
   }
 
-  // ── Footer ────────────────────────────────────────────────────
+  // ── Footer ─────────────────────────────────────────────────────────────
   &__footer {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 14px 16px;
-    border-top: 1px solid $nav-border;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
     flex-shrink: 0;
+    background: rgba(14, 165, 233, 0.03);
   }
 
   &__water-logo {
     width: 28px;
     height: 34px;
     flex-shrink: 0;
-    filter: drop-shadow(0 0 8px rgba(56,189,248,0.5));
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.6));
 
     svg { width: 100%; height: 100%; }
   }
 
   &__footer-text {
-    font-size: 10px;
-    font-weight: 600;
-    color: $text-muted;
-    letter-spacing: 0.8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
     white-space: nowrap;
     transition: opacity $transition, width $transition;
+    text-transform: uppercase;
+    opacity: 0.9;
   }
 }

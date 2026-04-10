@@ -94,13 +94,19 @@
 }
 
 // ─── Base ─────────────────────────────────────────────────────────────────────
+html {
+  font-size: 15px;
+}
+
 html, body {
   height: 100%;
   margin: 0; padding: 0;
   font-family: 'DM Sans', Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--bg-app);
   color: var(--text-primary);
+  line-height: 1.5;
   transition: background 0.25s ease, color 0.25s ease;
 }
 
@@ -117,20 +123,22 @@ button { font-family: inherit; cursor: pointer; }
 
 // ─── Skeleton shimmer ─────────────────────────────────────────────────────────
 @keyframes sk-shimmer {
-  0%   { background-position: -1200px 0; }
-  100% { background-position:  1200px 0; }
+  0%   { background-position: -1400px 0; }
+  100% { background-position:  1400px 0; }
 }
 .sk {
   background: var(--sk-base);
   background-image: linear-gradient(
     90deg,
-    var(--sk-base)  0%,
-    var(--sk-shine) 40%,
-    var(--sk-base)  80%
+    var(--sk-base)   0%,
+    var(--sk-shine)  35%,
+    rgba(255,255,255,0.06) 50%,
+    var(--sk-shine)  65%,
+    var(--sk-base)   100%
   );
-  background-size: 1200px 100%;
-  animation: sk-shimmer 1.8s infinite linear;
-  border-radius: 4px;
+  background-size: 1400px 100%;
+  animation: sk-shimmer 1.5s infinite linear;
+  border-radius: 6px;
   flex-shrink: 0;
   &--circle { border-radius: 50%  !important; }
   &--pill   { border-radius: 999px !important; }

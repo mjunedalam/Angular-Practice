@@ -4,7 +4,13 @@
       "Bash(npm run:*)",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(npm install:*)",
+      "Bash(pkill -f \"ng serve\")",
+      "Bash(pkill -f \"webpack\")"
     ]
   }
 }
