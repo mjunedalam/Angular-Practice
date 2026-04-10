@@ -19,7 +19,7 @@
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE A — FIXED (default): standard three-column flex layout
        ════════════════════════════════════════════════════════════════════════ -->
-  @if (!store.loading() && !draggableMode()) {
+  @if (!store.loading()) {
   <main class="pres-fixed">
 
     <!-- Left -->
@@ -36,25 +36,16 @@
     <!-- Center -->
     <div class="pres-fixed__center">
 
-      <!-- Layout Toggle — top-right corner of diagram area -->
-      <button class="diagram-layout-toggle" [class.diagram-layout-toggle--on]="draggableMode()" (click)="toggleDraggable()"
-        [title]="draggableMode() ? 'Switch to Fixed Layout' : 'Switch to Free Layout'"
-        aria-label="Toggle layout mode">
-        @if (!draggableMode()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="5 9 2 12 5 15"></polyline>
-            <polyline points="9 5 12 2 15 5"></polyline>
-            <polyline points="15 9 18 12 15 15"></polyline>
-            <polyline points="9 15 12 18 15 15"></polyline>
-          </svg>
-        }
+      <!-- Layout Toggle — top-right corner of diagram area, opens modal -->
+      <button class="diagram-layout-toggle" (click)="toggleDraggable()"
+        title="Open Free Layout"
+        aria-label="Open free layout modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
       </button>
 
       @if (!store.isLoaded()) {
@@ -90,86 +81,43 @@
   }
 
   <!-- ════════════════════════════════════════════════════════════════════════
-       MODE B — FREE: every card is independently draggable + resizable
+       MODE B — FREE LAYOUT MODAL
+       Opens as an overlay — fixed layout stays intact behind it
        ════════════════════════════════════════════════════════════════════════ -->
-  @if (!store.loading() && draggableMode()) {
-  <div class="pres-canvas">
+  @if (draggableMode()) {
+  <div class="pres-modal-backdrop" (click)="toggleDraggable()" role="dialog" aria-modal="true" aria-label="Free layout">
+    <div #presModal class="pres-modal" (click)="$event.stopPropagation()"
+      [style.transform]="'translate(' + modalX() + 'px,' + modalY() + 'px)'">
 
-    <!-- 1. Diagram Section (Full Width Hero) -->
-    <div class="canvas__section canvas__section--diagram">
-
-      <!-- Layout Toggle — top-right corner of diagram area -->
-      <button class="diagram-layout-toggle diagram-layout-toggle--on" (click)="toggleDraggable()"
-        title="Switch to Fixed Layout"
-        aria-label="Toggle layout mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="5 9 2 12 5 15"></polyline>
-          <polyline points="9 5 12 2 15 5"></polyline>
-          <polyline points="15 9 18 12 15 15"></polyline>
-          <polyline points="9 15 12 18 15 15"></polyline>
-        </svg>
-      </button>
-
-      @if (!store.isLoaded()) {
-        <div class="empty-state">
-          <div class="empty-state__icon">🛢</div>
-          <p class="empty-state__text">Select a well to render the diagram</p>
-        </div>
-      } @else {
-        <div class="diagram-inner">
-          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-          <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-        </div>
-      }
-      <app-wwells-logs-indicators />
-    </div>
-
-    <!-- 2. Unified Info Panel -->
-    <div class="info-panel">
-      <!-- Tab Navigation -->
-      <div class="info-panel__tabs">
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'info'" (click)="setTab('info')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      <!-- Modal header — drag handle -->
+      <div class="pres-modal__header" (mousedown)="onModalHeaderMouseDown($event)">
+        <span class="pres-modal__title--spacer"></span>
+        <span class="pres-modal__title">Daily Drilling Operations Summary</span>
+        <button class="pres-modal__close" (click)="toggleDraggable()" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          Well Info
-        </button>
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'formation'" (click)="setTab('formation')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M3 6h18M3 12h18M3 18h18"/>
-          </svg>
-          Formation
-        </button>
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'map'" (click)="setTab('map')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          Map
-        </button>
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'offset'" (click)="setTab('offset')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-          </svg>
-          Offset Wells
-        </button>
-        <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'test'" (click)="setTab('test')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          Test Results
         </button>
       </div>
-      <!-- Tab Content -->
-      <div class="info-panel__content">
-        @if (activeTab() === 'info') { <app-misc-pres-well-data /> }
-        @if (activeTab() === 'formation') { <app-picked-formation-tops /> }
-        @if (activeTab() === 'map') { <app-active-wwell-map /> }
-        @if (activeTab() === 'offset') { <app-offset-wwells /> }
-        @if (activeTab() === 'test') { <app-wwell-test-result /> }
-      </div>
-    </div>
 
+      <!-- Modal body — wellbore diagram only -->
+      <div class="pres-modal__body">
+        @if (!store.isLoaded()) {
+          <div class="empty-state">
+            <div class="empty-state__icon">🛢</div>
+            <p class="empty-state__text">Select a well to render the diagram</p>
+          </div>
+        } @else {
+          <div class="modal-diagram">
+            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+          </div>
+          <app-wwells-logs-indicators />
+        }
+      </div>
+
+    </div>
   </div>
   }
 

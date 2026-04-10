@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { WellStore } from 'src/app/core/store/well.store';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -48,12 +48,49 @@ export class PersentationComponent implements OnInit {
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
 
+  // ── Modal drag state ──────────────────────────────────────────────────────
+  protected readonly modalX = signal(0);
+  protected readonly modalY = signal(0);
+  private _dragging = false;
+  private _dragStartX = 0;
+  private _dragStartY = 0;
+  private _modalStartX = 0;
+  private _modalStartY = 0;
+
+  @ViewChild('presModal') presModal!: ElementRef<HTMLElement>;
+
   ngOnInit(): void {
     this.store.loadWellNames();
   }
 
   protected toggleDraggable(): void {
     this.draggableMode.update(v => !v);
+    if (!this.draggableMode()) {
+      this.modalX.set(0);
+      this.modalY.set(0);
+    }
+  }
+
+  protected onModalHeaderMouseDown(event: MouseEvent): void {
+    if ((event.target as HTMLElement).closest('button')) return;
+    this._dragging = true;
+    this._dragStartX = event.clientX;
+    this._dragStartY = event.clientY;
+    this._modalStartX = this.modalX();
+    this._modalStartY = this.modalY();
+    event.preventDefault();
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (!this._dragging) return;
+    this.modalX.set(this._modalStartX + event.clientX - this._dragStartX);
+    this.modalY.set(this._modalStartY + event.clientY - this._dragStartY);
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this._dragging = false;
   }
 
   protected setTab(tab: 'info' | 'formation' | 'map' | 'offset' | 'test'): void {

@@ -35,6 +35,122 @@
   min-height: 0;
 }
 
+// ── Modal overlay ──────────────────────────────────────────────────────────────
+.pres-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modal-fade-in 0.18s ease;
+}
+
+.pres-modal {
+  width: 92vw;
+  height: 90vh;
+  max-width: 1600px;
+  background: var(--bg-app);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modal-slide-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-surface);
+    cursor: grab;
+    user-select: none;
+    position: relative;
+
+    &:active { cursor: grabbing; }
+  }
+
+  &__title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  &__title--spacer {
+    flex: 1;
+  }
+
+  &__close {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    svg { width: 14px; height: 14px; }
+
+    &:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    .pres-canvas {
+      flex: 1;
+      height: 100%;
+    }
+
+    .canvas__section--diagram {
+      height: calc(90vh - 130px);
+    }
+  }
+}
+
+// Diagram layout inside modal — depth scale + wellbore view side by side
+.modal-diagram {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 0;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-slide-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 // ── Layout toggle — absolute corner button inside diagram area ────────────────
 .diagram-layout-toggle {
   position: absolute;
