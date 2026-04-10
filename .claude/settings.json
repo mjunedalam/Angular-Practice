@@ -3,5 +3,17 @@
   "env": {
     "MAX_THINKING_TOKENS": "10000",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
+  },
+    "skills": {
+    "allowed": [
+      "frontend-patterns",
+      "frontend-design",
+      "angular-19-jest-unit-testing",
+      "d3-signals",
+      "primeng",
+      "ngrx-signal-store",
+      "tdd-workflow",
+      "e2e-testing"
+    ]
   }
 }
