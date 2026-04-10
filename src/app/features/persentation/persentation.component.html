@@ -85,8 +85,8 @@
        Opens as an overlay — fixed layout stays intact behind it
        ════════════════════════════════════════════════════════════════════════ -->
   @if (draggableMode()) {
-  <div class="pres-modal-backdrop" (click)="toggleDraggable()" role="dialog" aria-modal="true" aria-label="Free layout">
-    <div #presModal class="pres-modal" (click)="$event.stopPropagation()"
+  <div @backdropAnim class="pres-modal-backdrop" (click)="toggleDraggable()" role="dialog" aria-modal="true" aria-label="Free layout">
+    <div @modalAnim #presModal class="pres-modal" (click)="$event.stopPropagation()"
       [style.transform]="'translate(' + modalX() + 'px,' + modalY() + 'px)'">
 
       <!-- Modal header — drag handle -->

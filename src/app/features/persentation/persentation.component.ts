@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { trigger, transition, animate, style, keyframes } from '@angular/animations';
 import { WellStore } from 'src/app/core/store/well.store';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -35,6 +36,69 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
   templateUrl: './persentation.component.html',
   styleUrl: './persentation.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('backdropAnim', [
+      transition(':enter', [
+        style({ opacity: 0, background: 'rgba(0,0,0,0)' }),
+        animate('400ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, background: 'rgba(0,0,0,0.6)' })
+        ),
+      ]),
+      transition(':leave', [
+        animate('280ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 0, background: 'rgba(0,0,0,0)' })
+        ),
+      ]),
+    ]),
+    trigger('modalAnim', [
+      transition(':enter', [
+        animate('580ms cubic-bezier(0.34, 1.4, 0.64, 1)', keyframes([
+          style({
+            opacity: 0,
+            transform: 'perspective(1400px) rotateX(42deg) translateY(-140px) scale(0.45)',
+            filter: 'blur(24px)',
+            offset: 0,
+          }),
+          style({
+            opacity: 1,
+            transform: 'perspective(1400px) rotateX(-5deg) translateY(10px) scale(1.04)',
+            filter: 'blur(0px)',
+            offset: 0.62,
+          }),
+          style({
+            transform: 'perspective(1400px) rotateX(2deg) translateY(-4px) scale(0.98)',
+            offset: 0.8,
+          }),
+          style({
+            transform: 'perspective(1400px) rotateX(0deg) translateY(0) scale(1)',
+            offset: 1,
+          }),
+        ])),
+      ]),
+      transition(':leave', [
+        animate('300ms cubic-bezier(0.55, 0, 0.85, 0.05)', keyframes([
+          style({
+            opacity: 1,
+            transform: 'perspective(1400px) rotateX(0deg) scale(1)',
+            filter: 'blur(0px)',
+            offset: 0,
+          }),
+          style({
+            opacity: 0.7,
+            transform: 'perspective(1400px) rotateX(-10deg) scale(1.05)',
+            filter: 'blur(4px)',
+            offset: 0.18,
+          }),
+          style({
+            opacity: 0,
+            transform: 'perspective(1400px) rotateX(48deg) translateY(100px) scale(0.4)',
+            filter: 'blur(28px)',
+            offset: 1,
+          }),
+        ])),
+      ]),
+    ]),
+  ],
 })
 export class PersentationComponent implements OnInit {
   protected readonly store = inject(WellStore);
