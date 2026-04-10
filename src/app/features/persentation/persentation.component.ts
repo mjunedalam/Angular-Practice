@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { WellStore } from 'src/app/core/store/well.store';
 import { DialogModule } from 'primeng/dialog';
-import { TabsModule } from 'primeng/tabs';
 import { MessageModule } from 'primeng/message';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -23,7 +22,6 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
   standalone: true,
   imports: [
     DialogModule,
-    TabsModule,
     MessageModule,
     ResizeDividerComponent,
     WellBoreViewComponent,

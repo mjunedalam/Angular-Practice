@@ -83,58 +83,28 @@
   letter-spacing: 0.03em;
 }
 
-// ── Modal body & tabs ─────────────────────────────────────────────────────────
+// ── Modal body — vertical stack: diagram on top, logs below ──────────────────
 .pres-modal__body {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: calc(90vh - 60px);
-}
+  gap: 0;
 
-::ng-deep .pres-modal-tabs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-
-  .p-tablist {
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  .p-tab {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-
-    &[aria-selected="true"] { color: var(--accent); }
-  }
-
-  .p-tabpanels {
-    flex: 1;
-    overflow: hidden;
-    background: transparent;
-    min-height: 0;
-  }
-
-  .p-tabpanel {
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-  }
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 }
 
 // Diagram layout inside modal — depth scale + wellbore view side by side
 .modal-diagram {
-  flex: 1;
+  flex-shrink: 0;
+  height: calc(90vh - 160px);
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  min-height: 0;
 }
 
 // ── Error message ─────────────────────────────────────────────────────────────

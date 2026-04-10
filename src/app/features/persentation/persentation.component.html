@@ -91,32 +91,18 @@
     </ng-template>
 
     <div class="pres-modal__body">
-      <p-tabs value="wellbore" styleClass="pres-modal-tabs">
-        <p-tablist>
-          <p-tab value="wellbore">Wellbore Diagram</p-tab>
-          <p-tab value="logs">Logs &amp; Indicators</p-tab>
-        </p-tablist>
-
-        <p-tabpanels>
-          <p-tabpanel value="wellbore">
-            @if (!store.isLoaded()) {
-              <div class="empty-state">
-                <div class="empty-state__icon">🛢</div>
-                <p class="empty-state__text">Select a well to render the diagram</p>
-              </div>
-            } @else {
-              <div class="modal-diagram">
-                <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-                <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-              </div>
-            }
-          </p-tabpanel>
-
-          <p-tabpanel value="logs">
-            <app-wwells-logs-indicators />
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
+      @if (!store.isLoaded()) {
+        <div class="empty-state">
+          <div class="empty-state__icon">🛢</div>
+          <p class="empty-state__text">Select a well to render the diagram</p>
+        </div>
+      } @else {
+        <div class="modal-diagram">
+          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+          <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+        </div>
+        <app-wwells-logs-indicators />
+      }
     </div>
 
   </p-dialog>
