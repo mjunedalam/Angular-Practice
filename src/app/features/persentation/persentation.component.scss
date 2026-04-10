@@ -26,6 +26,15 @@
   }
 }
 
+// ── Skeleton wrapper — fills content area below toolbar ───────────────────────
+.pres-skeleton-wrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 // ── Layout toggle — absolute corner button inside diagram area ────────────────
 .diagram-layout-toggle {
   position: absolute;

@@ -9,17 +9,23 @@
   <div class="error-banner" role="alert">⚠ {{ store.error() }}</div>
   }
 
+  <!-- ── SKELETON — shown during any loading state ──────────────────────────── -->
+  @if (store.loading()) {
+  <div class="pres-skeleton-wrap">
+    <app-presentation-skeleton />
+  </div>
+  }
+
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE A — FIXED (default): standard three-column flex layout
        ════════════════════════════════════════════════════════════════════════ -->
-  @if (!draggableMode()) {
+  @if (!store.loading() && !draggableMode()) {
   <main class="pres-fixed">
 
     <!-- Left -->
     <div class="pres-fixed__left" [style.width.px]="leftWidth()">
 
       <app-misc-pres-well-data />
-
 
       <app-picked-formation-tops />
 
@@ -51,7 +57,7 @@
         }
       </button>
 
-      @if (!store.loading() && !store.isLoaded()) {
+      @if (!store.isLoaded()) {
         <div class="empty-state">
           <div class="empty-state__icon">🛢</div>
           <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
@@ -86,7 +92,7 @@
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE B — FREE: every card is independently draggable + resizable
        ════════════════════════════════════════════════════════════════════════ -->
-  @if (draggableMode()) {
+  @if (!store.loading() && draggableMode()) {
   <div class="pres-canvas">
 
     <!-- 1. Diagram Section (Full Width Hero) -->
@@ -104,7 +110,7 @@
         </svg>
       </button>
 
-      @if (!store.loading() && !store.isLoaded()) {
+      @if (!store.isLoaded()) {
         <div class="empty-state">
           <div class="empty-state__icon">🛢</div>
           <p class="empty-state__text">Select a well to render the diagram</p>
