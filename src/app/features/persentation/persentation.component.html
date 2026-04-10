@@ -6,119 +6,119 @@
   </div>
 
   @if (store.error()) {
-  <div class="error-banner" role="alert">⚠ {{ store.error() }}</div>
+    <p-message severity="error" [text]="store.error()!" styleClass="pres-error-banner" />
   }
 
   <!-- ── SKELETON — shown during any loading state ──────────────────────────── -->
   @if (store.loading()) {
-  <div class="pres-skeleton-wrap">
-    <app-presentation-skeleton />
-  </div>
+    <div class="pres-skeleton-wrap">
+      <app-presentation-skeleton />
+    </div>
   }
 
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE A — FIXED (default): standard three-column flex layout
        ════════════════════════════════════════════════════════════════════════ -->
   @if (!store.loading()) {
-  <main class="pres-fixed">
+    <main class="pres-fixed">
 
-    <!-- Left -->
-    <div class="pres-fixed__left" [style.width.px]="leftWidth()">
-
-      <app-misc-pres-well-data />
-
-      <app-picked-formation-tops />
-
-    </div>
-
-    <app-resize-divider (drag)="onLeftDrag($event)" />
-
-    <!-- Center -->
-    <div class="pres-fixed__center">
-
-      <!-- Layout Toggle — top-right corner of diagram area, opens modal -->
-      <button class="diagram-layout-toggle" (click)="toggleDraggable()"
-        title="Open Free Layout"
-        aria-label="Open free layout modal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      </button>
-
-      @if (!store.isLoaded()) {
-        <div class="empty-state">
-          <div class="empty-state__icon">🛢</div>
-          <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
-        </div>
-      } @else {
-        <div class="diagram-card">
-          <div class="diagram-scroll-area">
-            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
-          </div>
-          <app-wwells-logs-indicators />
-        </div>
-      }
-    </div>
-
-    <app-resize-divider (drag)="onRightDrag($event)" />
-
-    <!-- Right -->
-    <aside class="pres-fixed__right" [style.width.px]="rightWidth()">
-
-      <app-active-wwell-map />
-
-      <app-offset-wwells />
-
-      <app-wwell-test-result />
-
-    </aside>
-
-  </main>
-  }
-
-  <!-- ════════════════════════════════════════════════════════════════════════
-       MODE B — FREE LAYOUT MODAL
-       Opens as an overlay — fixed layout stays intact behind it
-       ════════════════════════════════════════════════════════════════════════ -->
-  @if (draggableMode()) {
-  <div @backdropAnim class="pres-modal-backdrop" (click)="toggleDraggable()" role="dialog" aria-modal="true" aria-label="Free layout">
-    <div @modalAnim #presModal class="pres-modal" (click)="$event.stopPropagation()"
-      [style.transform]="'translate(' + modalX() + 'px,' + modalY() + 'px)'">
-
-      <!-- Modal header — drag handle -->
-      <div class="pres-modal__header" (mousedown)="onModalHeaderMouseDown($event)">
-        <span class="pres-modal__title--spacer"></span>
-        <span class="pres-modal__title">Daily Drilling Operations Summary</span>
-        <button class="pres-modal__close" (click)="toggleDraggable()" aria-label="Close modal">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+      <!-- Left -->
+      <div class="pres-fixed__left" [style.width.px]="leftWidth()">
+        <app-misc-pres-well-data />
+        <app-picked-formation-tops />
       </div>
 
-      <!-- Modal body — wellbore diagram only -->
-      <div class="pres-modal__body">
+      <app-resize-divider (drag)="onLeftDrag($event)" />
+
+      <!-- Center -->
+      <div class="pres-fixed__center">
+
+        <!-- Layout Toggle — top-right corner of diagram area, opens modal -->
+        <button class="diagram-layout-toggle" (click)="toggleDraggable()"
+          title="Open Free Layout"
+          aria-label="Open free layout modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+
         @if (!store.isLoaded()) {
           <div class="empty-state">
             <div class="empty-state__icon">🛢</div>
-            <p class="empty-state__text">Select a well to render the diagram</p>
+            <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
           </div>
         } @else {
-          <div class="modal-diagram">
-            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
-            <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+          <div class="diagram-card">
+            <div class="diagram-scroll-area">
+              <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+              <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+            </div>
+            <app-wwells-logs-indicators />
           </div>
-          <app-wwells-logs-indicators />
         }
       </div>
 
-    </div>
-  </div>
+      <app-resize-divider (drag)="onRightDrag($event)" />
+
+      <!-- Right -->
+      <aside class="pres-fixed__right" [style.width.px]="rightWidth()">
+        <app-active-wwell-map />
+        <app-offset-wwells />
+        <app-wwell-test-result />
+      </aside>
+
+    </main>
   }
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       MODE B — FREE LAYOUT — PrimeNG Dialog
+       ════════════════════════════════════════════════════════════════════════ -->
+  <p-dialog
+    [visible]="draggableMode()"
+    (visibleChange)="toggleDraggable()"
+    [draggable]="true"
+    [resizable]="false"
+    [modal]="true"
+    [style]="{ width: '92vw', height: '90vh' }"
+    styleClass="pres-modal-dialog"
+    appendTo="body"
+  >
+    <ng-template pTemplate="header">
+      <span class="pres-modal__title">Daily Drilling Operations Summary</span>
+    </ng-template>
+
+    <div class="pres-modal__body">
+      <p-tabs value="wellbore" styleClass="pres-modal-tabs">
+        <p-tablist>
+          <p-tab value="wellbore">Wellbore Diagram</p-tab>
+          <p-tab value="logs">Logs &amp; Indicators</p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+          <p-tabpanel value="wellbore">
+            @if (!store.isLoaded()) {
+              <div class="empty-state">
+                <div class="empty-state__icon">🛢</div>
+                <p class="empty-state__text">Select a well to render the diagram</p>
+              </div>
+            } @else {
+              <div class="modal-diagram">
+                <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+                <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
+              </div>
+            }
+          </p-tabpanel>
+
+          <p-tabpanel value="logs">
+            <app-wwells-logs-indicators />
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    </div>
+
+  </p-dialog>
 
 </div>

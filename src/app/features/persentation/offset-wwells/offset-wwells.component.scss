@@ -27,52 +27,67 @@
       color: var(--text-muted);
       letter-spacing: 1px;
     }
-    .header-badge {
-      background: var(--accent-muted);
-      color: var(--accent);
-      font-size: 12px; font-weight: 800;
-      padding: 4px 10px; border-radius: 12px;
-      border: 1px solid var(--border);
-    }
   }
 }
 
-.offset-list {
+// ── PrimeNG Accordion overrides ───────────────────────────────────────────────
+::ng-deep .offset-accordion {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
+  gap: 8px;
 
-.well-accordion {
-  border: 1px solid var(--border-sub);
-  border-radius: var(--radius-inner);
-  background: rgba(255, 255, 255, 0.02);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  .p-accordionpanel {
+    border: 1px solid var(--border-sub);
+    border-radius: var(--radius-inner) !important;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
 
-  &:hover {
-    border-color: var(--accent);
-    background: rgba(14, 165, 233, 0.04);
-  }
+    &:hover {
+      border-color: var(--accent);
+      background: rgba(14, 165, 233, 0.04);
+    }
 
-  &--active {
-    border-color: var(--accent);
-    background: rgba(14, 165, 233, 0.06);
-    box-shadow: inset 0 0 15px rgba(14, 165, 233, 0.05);
-
-    .well-chevron svg {
-      transform: rotate(180deg);
-      color: var(--accent);
+    &.p-accordionpanel-active {
+      border-color: var(--accent);
+      background: rgba(14, 165, 233, 0.06);
     }
   }
 
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .p-accordionheader {
+    background: transparent !important;
+    border: none !important;
     padding: 14px 16px;
+    color: var(--text-primary);
+    font-family: inherit;
+
+    &:hover { background: transparent !important; }
   }
+
+  .p-accordioncontent-content {
+    background: transparent;
+    border: none;
+    padding: 0 16px 16px;
+  }
+
+  // Hide the default PrimeNG expand icon — well info row has its own layout
+  .p-accordionheader-toggle-icon { display: none; }
+}
+
+// ── Header badge ─────────────────────────────────────────────────────────────
+::ng-deep .header-badge-prime .p-badge {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+// ── H₂S tag ──────────────────────────────────────────────────────────────────
+::ng-deep .h2s-tag .p-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .well-info {
@@ -94,14 +109,7 @@
   }
 }
 
-.well-chevron svg {
-  width: 18px; height: 18px;
-  color: var(--text-muted);
-  transition: transform 0.3s, color 0.3s;
-}
-
 .well-accordion__content {
-  padding: 0 16px 16px;
   animation: slide-down 0.3s ease-out;
 }
 

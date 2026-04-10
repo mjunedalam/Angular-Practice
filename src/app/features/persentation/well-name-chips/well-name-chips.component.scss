@@ -194,49 +194,50 @@
   }
 }
 
-// ── Loading bar — inline below chip strip ─────────────────────────────────
-.well-loading-bar {
-  height: 4px;
-  width: 100%;
-  background: var(--border-sub);
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity 0.4s ease-out; // Slower fade out to allow success color to be seen
+// ── PrimeNG DatePicker overrides ──────────────────────────────────────────────
+::ng-deep .p-datepicker {
+  .p-inputtext {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 140px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &--active {
-    opacity: 1;
-    transition: opacity 0.1s ease-in;
+    &:hover {
+      border-color: var(--accent-hover);
+      background: var(--accent-muted);
+    }
 
-    .well-loading-bar__fill {
-      animation: well-load-progress 1s cubic-bezier(0.1, 0.5, 0.4, 1) forwards;
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-muted);
     }
   }
 
-  &__fill {
-    height: 100%;
-    width: 0%;
-    position: absolute;
-    border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+  .p-datepicker-trigger {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+
+    &:hover { color: var(--accent); }
   }
 }
 
-@keyframes well-load-progress {
-  0%   {
-    width: 0%;
+// ── PrimeNG ProgressBar — inline loading bar ──────────────────────────────────
+::ng-deep .well-loading-bar.p-progressbar {
+  height: 4px;
+  border-radius: 0;
+  background: var(--border-sub);
+
+  .p-progressbar-value {
     background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-  }
-  70%  {
-    width: 85%;
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-  }
-  100% {
-    width: 100%;
-    background: var(--success);
-    box-shadow: 0 0 15px var(--success);
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
   }
 }
 

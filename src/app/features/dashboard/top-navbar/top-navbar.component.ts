@@ -6,11 +6,13 @@ import {
   output,
 } from '@angular/core';
 import { ThemeStore } from 'src/app/core/store/theme/theme.store';
+import { AvatarModule } from 'primeng/avatar';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-top-navbar',
   standalone: true,
-  imports: [],
+  imports: [AvatarModule, BadgeModule],
   templateUrl: './top-navbar.component.html',
   styleUrl: './top-navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

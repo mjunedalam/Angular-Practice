@@ -35,13 +35,6 @@
     }
   }
 
-  &__badge {
-    background: var(--accent-muted);
-    color: var(--accent);
-    font-size: 11px; font-weight: 700;
-    padding: 3px 9px; border-radius: 6px;
-    border: 1px solid rgba(14, 165, 233, 0.2);
-  }
 }
 
 // ── Result list ───────────────────────────────────────────────────────────────
@@ -104,102 +97,83 @@
   }
 }
 
-// ── Dialog overlay ────────────────────────────────────────────────────────────
-.dialog-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-  perspective: 1200px;
-}
+// ── PrimeNG Dialog overrides ──────────────────────────────────────────────────
+::ng-deep .well-result-dialog {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.08) !important;
 
-.dialog {
-  width: 92%;
-  max-width: 520px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.08);
-  overflow: hidden;
-  transform-origin: top center;
-
-  // ── Header — also the drag handle ──────────────────────────────────────────
-  &__header {
-    padding: 18px 20px;
-    background: linear-gradient(135deg,
-      rgba(14, 165, 233, 0.12) 0%,
-      var(--bg-surface) 60%
-    );
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  .p-dialog-header {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, var(--bg-surface) 60%);
     border-bottom: 1px solid var(--border-sub);
+    padding: 16px 20px;
     cursor: grab;
-    user-select: none;
-    position: relative;
 
     &:active { cursor: grabbing; }
   }
 
-  &__icon-wrap {
-    width: 38px; height: 38px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(14, 165, 233, 0.12);
-    border: 1px solid rgba(14, 165, 233, 0.25);
-    border-radius: 10px;
+  .p-dialog-content {
+    background: var(--bg-card);
+    padding: 0;
   }
 
-  &__title-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__well-name {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__subtitle {
-    font-size: 11px;
+  .p-dialog-header-icon {
     color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  &__drag-hint {
-    color: var(--text-muted);
-    opacity: 0.4;
-    flex-shrink: 0;
-  }
-
-  &__close {
-    flex-shrink: 0;
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
     border-radius: 8px;
     border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    width: 30px; height: 30px;
 
     &:hover {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: var(--danger, #ef4444);
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #ef4444 !important;
     }
   }
+}
 
-  &__body { padding: 22px 20px 20px; }
+// ── Dialog header internals ───────────────────────────────────────────────────
+.dialog__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog__icon-wrap {
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: 10px;
+}
+
+.dialog__well-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dialog__subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.dialog__body { padding: 22px 20px 20px; }
+
+// ── Header badge ─────────────────────────────────────────────────────────────
+::ng-deep .results-header__badge-prime .p-badge {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 // ── Metric grid ───────────────────────────────────────────────────────────────
@@ -258,24 +232,12 @@
   }
 }
 
-// ── Summary pills ─────────────────────────────────────────────────────────────
+// ── Summary tags row ──────────────────────────────────────────────────────────
 .dialog__summary-row {
   margin-top: 18px;
   padding-top: 16px;
   border-top: 1px solid var(--border-sub);
   display: flex; flex-wrap: wrap; gap: 8px;
-}
-
-.summary-pill {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex; align-items: center; gap: 6px;
-
-  &--aquifer { background: rgba(56, 189, 248, 0.12); color: var(--accent); border: 1px solid rgba(14, 165, 233, 0.2); }
-  &--type    { background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border-sub); }
-  &--warn    { background: rgba(245, 158, 11, 0.12); color: var(--warning, #f59e0b); border: 1px solid rgba(245, 158, 11, 0.25); }
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────

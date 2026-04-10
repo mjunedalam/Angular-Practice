@@ -5,22 +5,28 @@
  */
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { AccordionModule } from 'primeng/accordion';
+import { BadgeModule } from 'primeng/badge';
+import { TagModule } from 'primeng/tag';
 import { WellStore } from 'src/app/core/store/well.store';
 
 @Component({
   selector: 'app-offset-wwells',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, AccordionModule, BadgeModule, TagModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './offset-wwells.component.html',
   styleUrl: './offset-wwells.component.scss',
 })
 export class OffsetWwellsComponent {
   protected readonly store = inject(WellStore);
-  // Local UI state — accordion index is not global, belongs here
-  protected readonly selectedIndex = signal<number>(0);
+  protected readonly activeValue = signal<string>('0');
 
-  selectTab(index: number): void {
-    this.selectedIndex.set(this.selectedIndex() === index ? -1 : index);
+  protected onValueChange(value: string | number | string[] | number[]): void {
+    if (Array.isArray(value)) {
+      this.activeValue.set(String(value[0] ?? '0'));
+    } else {
+      this.activeValue.set(String(value));
+    }
   }
 }

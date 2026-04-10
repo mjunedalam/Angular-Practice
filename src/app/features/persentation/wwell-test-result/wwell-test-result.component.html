@@ -9,42 +9,42 @@
       </div>
       <span>Well Test Results</span>
     </div>
-    <div class="results-header__badge">{{ store.wellTestResults().length }}</div>
+    <p-badge [value]="store.wellTestResults().length.toString()" class="results-header__badge-prime" />
   </div>
 
   <!-- ── List of results ── -->
   <div class="results-list">
-      @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
-        <button class="result-tab" (click)="openDialog(result)">
-          <div class="result-tab__left">
-            <div class="well-indicator">
-              <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-              </svg>
-            </div>
-            <div class="well-details">
-              <div class="name">{{ result.wellName }}</div>
-              <div class="aquifer">{{ result.aquifer }} Aquifer</div>
-            </div>
+    @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
+      <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
+        <div class="result-tab__left">
+          <div class="well-indicator">
+            <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
           </div>
-
-          <div class="result-tab__right">
-            <div class="main-stat">
-              <span class="val">{{ result.flowRate | number }}</span>
-              <span class="unit">GPM</span>
-            </div>
-            <div class="view-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
+          <div class="well-details">
+            <div class="name">{{ result.wellName }}</div>
+            <div class="aquifer">{{ result.aquifer }} Aquifer</div>
           </div>
-        </button>
-      }
+        </div>
 
-      @if (store.wellTestResults().length === 0) {
-        <div class="results-empty">No test records registered.</div>
-      }
+        <div class="result-tab__right">
+          <div class="main-stat">
+            <span class="val">{{ result.flowRate | number }}</span>
+            <span class="unit">GPM</span>
+          </div>
+          <div class="view-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+      </button>
+    }
+
+    @if (store.wellTestResults().length === 0) {
+      <div class="results-empty">No test records registered.</div>
+    }
   </div>
 </div>
 
@@ -57,140 +57,122 @@
   </defs>
 </svg>
 
-<!-- ═══════════════════ DIALOG OVERLAY ═══════════════════════════════════ -->
+<!-- ═══════════════════ PrimeNG DIALOG ═══════════════════════════════════ -->
 @let r = selectedResult();
 
-@if (r) {
-  <div @backdropAnim class="dialog-backdrop" (click)="closeDialog()">
-    <div @dialogAnim class="dialog" (click)="stopPropagation($event)" role="dialog" aria-modal="true"
-         [style.transform]="'translate(' + dialogX() + 'px,' + dialogY() + 'px)'">
-
-      <!-- Dialog header — drag handle -->
-      <div class="dialog__header" (mousedown)="onHeaderMouseDown($event)">
-        <div class="dialog__title-group">
-          <div class="dialog__icon-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="url(#dlgDropGrad)">
-              <defs>
-                <linearGradient id="dlgDropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%"   stop-color="#38bdf8"/>
-                  <stop offset="100%" stop-color="#0369a1"/>
-                </linearGradient>
-              </defs>
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            </svg>
-          </div>
-          <div>
-            <div class="dialog__well-name">{{ r.wellName }}</div>
-            <div class="dialog__subtitle">{{ r.testType | titlecase }} Test · {{ r.aquifer }} Aquifer</div>
-          </div>
-        </div>
-        <div class="dialog__drag-hint">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/>
-            <circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/>
-            <circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/>
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="onDialogHide()"
+  [draggable]="true"
+  [resizable]="false"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  styleClass="well-result-dialog"
+  appendTo="body"
+>
+  @if (r) {
+    <ng-template pTemplate="header">
+      <div class="dialog__title-group">
+        <div class="dialog__icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="url(#dlgDropGrad2)">
+            <defs>
+              <linearGradient id="dlgDropGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#0369a1"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
           </svg>
         </div>
-        <button class="dialog__close" (click)="closeDialog()" aria-label="Close">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6"  y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
+        <div>
+          <div class="dialog__well-name">{{ r.wellName }}</div>
+          <div class="dialog__subtitle">{{ r.testType | titlecase }} Test · {{ r.aquifer }} Aquifer</div>
+        </div>
       </div>
+    </ng-template>
 
-      <!-- Dialog body — metric grid -->
-      <div class="dialog__body">
+    <!-- Dialog body — metric grid -->
+    <div class="dialog__body">
+      <div class="metric-grid">
 
-        <div class="metric-grid">
-
-          <div class="metric metric--highlight">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M4 18s2-2 4-2 4 2 4 2 4-2 4 2"/>
-                <path d="M4 22s2-2 4-2 4 2 4 2 4-2 4 2"/>
-                <line x1="18" y1="4" x2="18" y2="14"/>
-                <polyline points="15 7 18 4 21 7"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.flowRate | number }}</div>
-            <div class="metric__label">Flow Rate (GPM)</div>
+        <div class="metric metric--highlight">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 18s2-2 4-2 4 2 4 2 4-2 4 2"/>
+              <path d="M4 22s2-2 4-2 4 2 4 2 4-2 4 2"/>
+              <line x1="18" y1="4" x2="18" y2="14"/>
+              <polyline points="15 7 18 4 21 7"/>
+            </svg>
           </div>
-
-          <div class="metric metric--highlight">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.rpm | number }}</div>
-            <div class="metric__label">RPM</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
-                <path d="M12 8v4l3 3"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.tds | number }}</div>
-            <div class="metric__label">TDS (PPM)</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.temperature | number:'1.0-1' }}°C</div>
-            <div class="metric__label">Temperature</div>
-          </div>
-
-          <div class="metric">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.productivity | number:'1.2-2' }}</div>
-            <div class="metric__label">Productivity (GPM/FT)</div>
-          </div>
-
-          <div class="metric" [class.metric--warn]="r.h2s > 0">
-            <div class="metric__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                <line x1="12" y1="9"  x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <div class="metric__value">{{ r.h2s | number }}</div>
-            <div class="metric__label">H₂S (PPM)</div>
-          </div>
-
+          <div class="metric__value">{{ r.flowRate | number }}</div>
+          <div class="metric__label">Flow Rate (GPM)</div>
         </div>
 
-        <!-- Aquifer + test type summary row -->
-        <div class="dialog__summary-row">
-          <div class="summary-pill summary-pill--aquifer">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        <div class="metric metric--highlight">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
             </svg>
-            {{ r.aquifer }}
           </div>
-          <div class="summary-pill summary-pill--type">{{ r.testType | titlecase }} Test</div>
-          @if (r.h2s > 0) {
-            <div class="summary-pill summary-pill--warn">H₂S Detected</div>
-          }
+          <div class="metric__value">{{ r.rpm | number }}</div>
+          <div class="metric__label">RPM</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
+              <path d="M12 8v4l3 3"/>
+            </svg>
+          </div>
+          <div class="metric__value">{{ r.tds | number }}</div>
+          <div class="metric__label">TDS (PPM)</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+            </svg>
+          </div>
+          <div class="metric__value">{{ r.temperature | number:'1.0-1' }}°C</div>
+          <div class="metric__label">Temperature</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="metric__value">{{ r.productivity | number:'1.2-2' }}</div>
+          <div class="metric__label">Productivity (GPM/FT)</div>
+        </div>
+
+        <div class="metric" [class.metric--warn]="r.h2s > 0">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9"  x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="metric__value">{{ r.h2s | number }}</div>
+          <div class="metric__label">H₂S (PPM)</div>
         </div>
 
       </div>
 
+      <!-- Summary tags row -->
+      <div class="dialog__summary-row">
+        <p-tag [value]="r.aquifer" severity="info" class="summary-tag--aquifer" />
+        <p-tag [value]="(r.testType | titlecase) + ' Test'" severity="secondary" />
+        @if (r.h2s > 0) {
+          <p-tag value="H₂S Detected" severity="warn" />
+        }
+      </div>
     </div>
-  </div>
-}
+  }
+</p-dialog>

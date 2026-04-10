@@ -35,100 +35,96 @@
   min-height: 0;
 }
 
-// ── Modal overlay ──────────────────────────────────────────────────────────────
-.pres-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1400px;
-  transform-style: preserve-3d;
-}
+// ── PrimeNG Dialog overrides — Free Layout modal ──────────────────────────────
+::ng-deep .pres-modal-dialog {
+  background: var(--bg-app) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4) !important;
 
-.pres-modal {
-  width: 92vw;
-  height: 90vh;
-  max-width: 1600px;
-  background: var(--bg-app);
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+  .p-dialog-header {
     background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
     cursor: grab;
-    user-select: none;
-    position: relative;
 
     &:active { cursor: grabbing; }
   }
 
-  &__title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  &__title--spacer {
-    flex: 1;
-  }
-
-  &__close {
-    width: 28px;
-    height: 28px;
+  .p-dialog-content {
+    background: var(--bg-app);
+    padding: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .p-dialog-header-icon {
+    color: var(--text-muted);
     border-radius: 8px;
     border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-
-    svg { width: 14px; height: 14px; }
+    width: 28px;
+    height: 28px;
 
     &:hover {
-      background: var(--bg-card);
-      color: var(--text-primary);
+      background: var(--bg-card) !important;
+      color: var(--text-primary) !important;
     }
   }
+}
 
-  &__body {
+// ── Modal title ───────────────────────────────────────────────────────────────
+.pres-modal__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+}
+
+// ── Modal body & tabs ─────────────────────────────────────────────────────────
+.pres-modal__body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: calc(90vh - 60px);
+}
+
+::ng-deep .pres-modal-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .p-tablist {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .p-tab {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+
+    &[aria-selected="true"] { color: var(--accent); }
+  }
+
+  .p-tabpanels {
     flex: 1;
+    overflow: hidden;
+    background: transparent;
+    min-height: 0;
+  }
+
+  .p-tabpanel {
+    height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-
-    .pres-canvas {
-      flex: 1;
-      height: 100%;
-    }
-
-    .canvas__section--diagram {
-      height: calc(90vh - 130px);
-    }
+    padding: 0;
   }
 }
 
@@ -141,14 +137,11 @@
   min-height: 0;
 }
 
-@keyframes modal-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes modal-slide-in {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+// ── Error message ─────────────────────────────────────────────────────────────
+::ng-deep .pres-error-banner {
+  flex-shrink: 0;
+  margin: 0 12px 4px;
+  border-radius: 8px;
 }
 
 // ── Layout toggle — absolute corner button inside diagram area ────────────────

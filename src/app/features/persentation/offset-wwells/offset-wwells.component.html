@@ -4,18 +4,14 @@
       <div class="header-title">Offset Wells</div>
       <div class="header-sub">SURROUNDING DATA ANALYSIS</div>
     </div>
-    <div class="header-badge">{{ store.offsetWells().length }}</div>
+    <p-badge [value]="store.offsetWells().length.toString()" class="header-badge-prime" />
   </div>
 
-  <div class="offset-list">
-      @for (well of store.offsetWells(); track well.wellName; let i = $index) {
-        <div
-          class="well-accordion"
-          [class.well-accordion--active]="selectedIndex() === i"
-          (click)="selectTab(i)"
-        >
-          <!-- Header Row -->
-          <div class="well-accordion__header">
+  <p-accordion [value]="activeValue()" (valueChange)="onValueChange($event)" class="offset-accordion">
+    @for (well of store.offsetWells(); track well.wellName; let i = $index) {
+      <p-accordion-panel [value]="i.toString()">
+        <p-accordion-header>
+          <div class="well-header-row">
             <div class="well-info">
               <div class="drop-icon">
                 <svg viewBox="0 0 24 24" fill="url(#well-drop-grad)">
@@ -27,55 +23,52 @@
                 <div class="well-aquifer">{{ well.aquifer }} Aquifer</div>
               </div>
             </div>
-            
-            <div class="well-chevron">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
+            @if (well.h2s > 0) {
+              <p-tag value="H₂S" severity="warn" class="h2s-tag" />
+            }
+          </div>
+        </p-accordion-header>
+
+        <p-accordion-content>
+          <div class="well-accordion__content">
+            <div class="stats-row">
+              <div class="stat-box">
+                <div class="stat-box__label">TDS (PPM)</div>
+                <div class="stat-box__value">{{ well.tds | number }}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box__label">RPM</div>
+                <div class="stat-box__value">{{ well.rpm | number }}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box__label">H2S</div>
+                <div class="stat-box__value" [class.highlight-warn]="well.h2s > 0">{{ well.h2s }}</div>
+              </div>
+            </div>
+
+            <div class="premium-row">
+              <div class="p-stat">
+                <div class="p-stat__label">Distance</div>
+                <div class="p-stat__val">{{ well.distance }} ft</div>
+              </div>
+              <div class="p-stat">
+                <div class="p-stat__label">Productivity</div>
+                <div class="p-stat__val">{{ well.productivity }}</div>
+              </div>
+              <div class="p-stat">
+                <div class="p-stat__label">Flow Rate</div>
+                <div class="p-stat__val">{{ well.rate }} GPM</div>
+              </div>
             </div>
           </div>
+        </p-accordion-content>
+      </p-accordion-panel>
+    }
+  </p-accordion>
 
-          <!-- Expanded Details -->
-          @if (selectedIndex() === i) {
-            <div class="well-accordion__content">
-              <div class="stats-row">
-                <div class="stat-box">
-                  <div class="stat-box__label">TDS (PPM)</div>
-                  <div class="stat-box__value">{{ well.tds | number }}</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-box__label">RPM</div>
-                  <div class="stat-box__value">{{ well.rpm | number }}</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-box__label">H2S</div>
-                  <div class="stat-box__value" [class.highlight-warn]="well.h2s > 0">{{ well.h2s }}</div>
-                </div>
-              </div>
-
-              <div class="premium-row">
-                <div class="p-stat">
-                  <div class="p-stat__label">Distance</div>
-                  <div class="p-stat__val">{{ well.distance }} ft</div>
-                </div>
-                <div class="p-stat">
-                  <div class="p-stat__label">Productivity</div>
-                  <div class="p-stat__val">{{ well.productivity }}</div>
-                </div>
-                <div class="p-stat">
-                  <div class="p-stat__label">Flow Rate</div>
-                  <div class="p-stat__val">{{ well.rate }} GPM</div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      }
-
-      @if (store.offsetWells().length === 0) {
-        <div class="empty-state">No offset wells found for selection.</div>
-      }
-  </div>
+  @if (store.offsetWells().length === 0) {
+    <div class="empty-state">No offset wells found for selection.</div>
+  }
 
   <svg style="width:0;height:0;position:absolute;" aria-hidden="true">
     <defs>

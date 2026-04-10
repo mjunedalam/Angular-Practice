@@ -7,9 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Angular 19** — Standalone components, async `OnPush` change detection
 - **Angular Signals** — Fine-grained reactivity (via `@angular/core` — not a separate package)
 - **NgRx Signals Store** — State management with `@ngrx/signals`
+- **PrimeNG 19.2.0-lts** — UI component library; configured with `providePrimeNG()` + Aura preset; `darkModeSelector: '[data-theme="dark"]'` integrates with ThemeStore
+- **@primeuix/themes** — Separate package providing the Aura design preset for PrimeNG 19
 - **D3.js** — Data-driven SVG rendering (d3-selection, d3-scale, d3-transition, d3-ease)
 - **AG Grid** — Enterprise data tables for reports
-- **Custom SCSS** — Styled with CSS variables (no Tailwind); theme support via `data-theme` attribute
+- **Custom SCSS** — Styled with CSS variables (no Tailwind); theme support via `data-theme` attribute; PrimeNG styles overridden via `::ng-deep` in component SCSS
 - **Jest + jest-preset-angular** — Testing framework; D3 modules configured in `transformIgnorePatterns`
 
 ## Commands
@@ -137,6 +139,7 @@ When working on this project, these Claude Skills provide expert guidance:
 |-------|----------|
 | **`/d3-signals`** | Integrating D3.js visualizations with Angular Signals (WellBoreView, DepthScale components) |
 | **`/ngrx-signal-store`** | Building stores, mutations with `patchState()`, computed state, and component consumption |
+| **`/primeng`** | Using PrimeNG 19 components in this project — import paths, dialog dragging, tabs, dark mode integration |
 
 ### Global Skills
 
@@ -156,6 +159,7 @@ When working on this project, these Claude Skills provide expert guidance:
 - **Critical user flows?** → `/e2e-testing` (Playwright tests)
 - **Using NgRx Signals Store?** → `/ngrx-signal-store` (patchState, computed, methods)
 - **Building D3 visualizations?** → `/d3-signals` (effect-driven rendering)
+- **Adding PrimeNG components?** → `/primeng` (import paths, dialog/tabs patterns, dark mode)
 
 **Project-Specific Notes:**
 - All components must use `standalone: true` and `ChangeDetectionStrategy.OnPush`
@@ -168,8 +172,16 @@ When working on this project, these Claude Skills provide expert guidance:
 ### Dashboard Layout Shell
 The root route loads `DashboardComponent` (with sidenav + navbar), which wraps all feature pages via `<router-outlet>`. Child routes use `withComponentInputBinding()` from the router config, allowing store signals to flow into component `@Input()` properties directly.
 
+### PrimeNG Configuration
+`providePrimeNG()` is configured in `app.config.ts` with the Aura preset from `@primeuix/themes/aura`. Key settings:
+- `darkModeSelector: '[data-theme="dark"]'` — hooks into the existing `ThemeStore` which sets this attribute on `<html>`
+- `cssLayer: { name: 'primeng', order: 'primeng, app' }` — ensures app SCSS overrides PrimeNG styles
+- `provideAnimationsAsync()` replaces `provideAnimations()` (required by PrimeNG 19)
+
+PrimeNG component styles are scoped via `::ng-deep` in each component's SCSS file. All overrides use the component's `styleClass` input as a namespace (e.g., `styleClass="pres-modal-dialog"` → `::ng-deep .pres-modal-dialog { ... }`).
+
 ### Animations
-`provideAnimations()` is enabled in `app.config.ts` to support Angular animations. Add `@trigger` animations to components as needed; the provider makes them available globally.
+Angular animations (`@angular/animations`) remain available for non-dialog triggers. `provideAnimationsAsync()` in `app.config.ts` provides this globally.
 
 ### Mock API
 `WellDataService.getWellDetails()` currently returns static JSON regardless of `epANum` parameter. The real API endpoint pattern is noted in the service comments — swap the HTTP call when backend is ready.

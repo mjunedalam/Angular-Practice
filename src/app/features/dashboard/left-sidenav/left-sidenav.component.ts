@@ -4,6 +4,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { BadgeModule } from 'primeng/badge';
 
 export interface NavItem {
   id: string;
@@ -16,7 +17,7 @@ export interface NavItem {
 @Component({
   selector: 'app-left-sidenav',
   standalone: true,
-  imports: [],
+  imports: [BadgeModule],
   templateUrl: './left-sidenav.component.html',
   styleUrl: './left-sidenav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
