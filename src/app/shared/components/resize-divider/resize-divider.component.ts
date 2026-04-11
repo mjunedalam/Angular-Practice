@@ -130,8 +130,8 @@ import {
   `],
 })
 export class ResizeDividerComponent implements OnDestroy {
-  readonly drag    = output<number>();
-  readonly dragEnd = output<void>();
+  readonly dividerDrag = output<number>();
+  readonly dividerDragEnd = output<void>();
 
   protected readonly dragging = signal(false);
 
@@ -152,7 +152,7 @@ export class ResizeDividerComponent implements OnDestroy {
   private handleMove(e: MouseEvent): void {
     const delta = e.clientX - this.lastX;
     this.lastX  = e.clientX;
-    if (delta !== 0) this.drag.emit(delta);
+    if (delta !== 0) this.dividerDrag.emit(delta);
   }
 
   private handleUp(): void {
@@ -161,7 +161,7 @@ export class ResizeDividerComponent implements OnDestroy {
     document.body.style.userSelect = '';
     window.removeEventListener('mousemove', this.onMove);
     window.removeEventListener('mouseup',   this.onUp);
-    this.dragEnd.emit();
+    this.dividerDragEnd.emit();
   }
 
   ngOnDestroy(): void {

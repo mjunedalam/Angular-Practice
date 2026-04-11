@@ -1,0 +1,915 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1775863959067" clover="3.2.0">
+  <project timestamp="1775863959067" name="All files">
+    <metrics statements="714" coveredstatements="604" conditionals="255" coveredconditionals="160" methods="186" coveredmethods="120" elements="1155" coveredelements="884" complexity="0" loc="714" ncloc="714" packages="23" files="42" classes="42"/>
+    <package name="app.core.store">
+      <metrics statements="109" coveredstatements="89" conditionals="127" coveredconditionals="98" methods="58" coveredmethods="38"/>
+      <file name="well.actions.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/core/store/well.actions.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="5" count="11" type="stmt"/>
+        <line num="13" count="11" type="stmt"/>
+      </file>
+      <file name="well.selectors.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/core/store/well.selectors.ts">
+        <metrics statements="43" coveredstatements="41" conditionals="102" coveredconditionals="83" methods="19" coveredmethods="17"/>
+        <line num="7" count="11" type="stmt"/>
+        <line num="13" count="11" type="stmt"/>
+        <line num="14" count="11" type="stmt"/>
+        <line num="16" count="11" type="stmt"/>
+        <line num="17" count="2" type="stmt"/>
+        <line num="18" count="2" type="stmt"/>
+        <line num="19" count="18" type="cond" truecount="1" falsecount="0"/>
+        <line num="20" count="17" type="stmt"/>
+        <line num="21" count="17" type="stmt"/>
+        <line num="25" count="11" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="29" count="11" type="stmt"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="33" count="11" type="stmt"/>
+        <line num="34" count="2" type="stmt"/>
+        <line num="37" count="11" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="43" count="11" type="stmt"/>
+        <line num="44" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="47" count="11" type="stmt"/>
+        <line num="48" count="2" type="cond" truecount="1" falsecount="0"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="53" count="0" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="0" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="11" type="stmt"/>
+        <line num="66" count="3" type="cond" truecount="1" falsecount="0"/>
+        <line num="67" count="2" type="stmt"/>
+        <line num="68" count="2" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="88" count="11" type="stmt"/>
+        <line num="89" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="96" count="11" type="stmt"/>
+        <line num="97" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="98" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="99" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="113" count="11" type="stmt"/>
+        <line num="114" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="115" count="1" type="stmt"/>
+        <line num="116" count="1" type="stmt"/>
+        <line num="123" count="11" type="stmt"/>
+        <line num="124" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="125" count="1" type="cond" truecount="1" falsecount="1"/>
+      </file>
+      <file name="well.store.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/core/store/well.store.ts">
+        <metrics statements="64" coveredstatements="46" conditionals="25" coveredconditionals="15" methods="39" coveredmethods="21"/>
+        <line num="1" count="10" type="stmt"/>
+        <line num="2" count="10" type="stmt"/>
+        <line num="10" count="10" type="stmt"/>
+        <line num="11" count="10" type="stmt"/>
+        <line num="12" count="10" type="stmt"/>
+        <line num="19" count="10" type="stmt"/>
+        <line num="20" count="10" type="stmt"/>
+        <line num="21" count="10" type="stmt"/>
+        <line num="23" count="10" type="stmt"/>
+        <line num="24" count="10" type="stmt"/>
+        <line num="40" count="10" type="stmt"/>
+        <line num="42" count="10" type="stmt"/>
+        <line num="50" count="70" type="stmt"/>
+        <line num="51" count="70" type="cond" truecount="2" falsecount="0"/>
+        <line num="52" count="5" type="cond" truecount="1" falsecount="0"/>
+        <line num="53" count="5" type="cond" truecount="0" falsecount="1"/>
+        <line num="54" count="5" type="cond" truecount="1" falsecount="2"/>
+        <line num="115" count="10" type="stmt"/>
+        <line num="126" count="10" type="stmt"/>
+        <line num="131" count="6" type="stmt"/>
+        <line num="132" count="6" type="stmt"/>
+        <line num="134" count="0" type="stmt"/>
+        <line num="135" count="0" type="stmt"/>
+        <line num="136" count="0" type="stmt"/>
+        <line num="137" count="0" type="stmt"/>
+        <line num="138" count="0" type="stmt"/>
+        <line num="139" count="0" type="stmt"/>
+        <line num="140" count="0" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="142" count="0" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
+        <line num="144" count="0" type="stmt"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="146" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="147" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="157" count="2" type="stmt"/>
+        <line num="160" count="6" type="stmt"/>
+        <line num="163" count="6" type="stmt"/>
+        <line num="172" count="6" type="stmt"/>
+        <line num="175" count="5" type="stmt"/>
+        <line num="176" count="5" type="stmt"/>
+        <line num="183" count="1" type="stmt"/>
+        <line num="194" count="6" type="stmt"/>
+        <line num="197" count="3" type="stmt"/>
+        <line num="200" count="3" type="stmt"/>
+        <line num="203" count="17" type="stmt"/>
+        <line num="207" count="2" type="stmt"/>
+        <line num="208" count="2" type="cond" truecount="3" falsecount="0"/>
+        <line num="209" count="2" type="stmt"/>
+        <line num="213" count="1" type="stmt"/>
+        <line num="224" count="6" type="stmt"/>
+        <line num="228" count="0" type="stmt"/>
+        <line num="230" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="231" count="0" type="stmt"/>
+        <line num="235" count="0" type="stmt"/>
+        <line num="238" count="1" type="stmt"/>
+        <line num="239" count="1" type="stmt"/>
+        <line num="240" count="1" type="stmt"/>
+        <line num="241" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="244" count="1" type="stmt"/>
+        <line num="245" count="1" type="stmt"/>
+        <line num="246" count="1" type="stmt"/>
+        <line num="247" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="258" count="10" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.core.store.theme">
+      <metrics statements="25" coveredstatements="17" conditionals="4" coveredconditionals="1" methods="11" coveredmethods="9"/>
+      <file name="theme.store.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/core/store/theme/theme.store.ts">
+        <metrics statements="25" coveredstatements="17" conditionals="4" coveredconditionals="1" methods="11" coveredmethods="9"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="2" count="2" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="15" count="2" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="2" type="stmt"/>
+        <line num="24" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="40" count="2" type="stmt"/>
+        <line num="41" count="2" type="stmt"/>
+        <line num="44" count="2" type="stmt"/>
+        <line num="46" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="58" count="2" type="stmt"/>
+        <line num="60" count="2" type="stmt"/>
+        <line num="61" count="2" type="stmt"/>
+        <line num="62" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.dashboard">
+      <metrics statements="17" coveredstatements="11" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="1"/>
+      <file name="dashboard.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/dashboard.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="dashboard.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/dashboard.component.ts">
+        <metrics statements="16" coveredstatements="10" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="30" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.dashboard.left-sidenav">
+      <metrics statements="9" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+      <file name="left-sidenav.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/left-sidenav/left-sidenav.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
+      </file>
+      <file name="left-sidenav.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/left-sidenav/left-sidenav.component.ts">
+        <metrics statements="8" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="25" count="2" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="28" count="2" type="stmt"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.dashboard.top-navbar">
+      <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="top-navbar.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/top-navbar/top-navbar.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
+      </file>
+      <file name="top-navbar.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/dashboard/top-navbar/top-navbar.component.ts">
+        <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="10" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+        <line num="21" count="2" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="28" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.home">
+      <metrics statements="7" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+      <file name="home.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/home/home.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="home.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/home/home.component.ts">
+        <metrics statements="6" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.maps">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="maps.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/maps/maps.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="maps.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/maps/maps.component.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.active-wwell-map">
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="active-wwell-map.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/active-wwell-map/active-wwell-map.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="active-wwell-map.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/active-wwell-map/active-wwell-map.component.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.depth-scale">
+      <metrics statements="41" coveredstatements="41" conditionals="3" coveredconditionals="3" methods="5" coveredmethods="5"/>
+      <file name="depth-scale.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/depth-scale/depth-scale.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="depth-scale.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/depth-scale/depth-scale.component.ts">
+        <metrics statements="40" coveredstatements="40" conditionals="3" coveredconditionals="3" methods="5" coveredmethods="5"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="27" count="4" type="stmt"/>
+        <line num="28" count="4" type="stmt"/>
+        <line num="30" count="4" type="stmt"/>
+        <line num="32" count="4" type="stmt"/>
+        <line num="35" count="4" type="stmt"/>
+        <line num="36" count="5" type="stmt"/>
+        <line num="37" count="5" type="stmt"/>
+        <line num="38" count="5" type="stmt"/>
+        <line num="40" count="5" type="cond" truecount="1" falsecount="0"/>
+        <line num="41" count="5" type="stmt"/>
+        <line num="49" count="5" type="stmt"/>
+        <line num="51" count="5" type="stmt"/>
+        <line num="52" count="5" type="stmt"/>
+        <line num="54" count="5" type="stmt"/>
+        <line num="60" count="5" type="stmt"/>
+        <line num="61" count="5" type="stmt"/>
+        <line num="62" count="5" type="stmt"/>
+        <line num="64" count="5" type="stmt"/>
+        <line num="70" count="5" type="stmt"/>
+        <line num="71" count="5" type="stmt"/>
+        <line num="74" count="5" type="stmt"/>
+        <line num="75" count="5" type="stmt"/>
+        <line num="86" count="5" type="stmt"/>
+        <line num="87" count="17" type="stmt"/>
+        <line num="88" count="17" type="stmt"/>
+        <line num="90" count="17" type="stmt"/>
+        <line num="95" count="17" type="stmt"/>
+        <line num="99" count="17" type="stmt"/>
+        <line num="105" count="17" type="stmt"/>
+        <line num="109" count="17" type="stmt"/>
+        <line num="115" count="5" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.misc-pres-well-data">
+      <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="misc-pres-well-data.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/misc-pres-well-data/misc-pres-well-data.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="misc-pres-well-data.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/misc-pres-well-data/misc-pres-well-data.component.ts">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="7" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.offset-wwells">
+      <metrics statements="13" coveredstatements="13" conditionals="4" coveredconditionals="3" methods="2" coveredmethods="2"/>
+      <file name="offset-wwells.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/offset-wwells/offset-wwells.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="offset-wwells.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/offset-wwells/offset-wwells.component.ts">
+        <metrics statements="12" coveredstatements="12" conditionals="4" coveredconditionals="3" methods="2" coveredmethods="2"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="22" count="6" type="stmt"/>
+        <line num="23" count="6" type="stmt"/>
+        <line num="26" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="27" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="29" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.picked-formation-tops">
+      <metrics statements="22" coveredstatements="21" conditionals="8" coveredconditionals="6" methods="6" coveredmethods="5"/>
+      <file name="picked-formation-tops.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/picked-formation-tops/picked-formation-tops.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="picked-formation-tops.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/picked-formation-tops/picked-formation-tops.component.ts">
+        <metrics statements="21" coveredstatements="20" conditionals="8" coveredconditionals="6" methods="6" coveredmethods="5"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="5" type="stmt"/>
+        <line num="24" count="5" type="stmt"/>
+        <line num="25" count="5" type="stmt"/>
+        <line num="28" count="5" type="stmt"/>
+        <line num="30" count="6" type="stmt"/>
+        <line num="31" count="6" type="stmt"/>
+        <line num="33" count="6" type="cond" truecount="3" falsecount="0"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="46" count="5" type="stmt"/>
+        <line num="66" count="5" type="stmt"/>
+        <line num="74" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="79" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="84" count="5" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.well-bore-view">
+      <metrics statements="271" coveredstatements="259" conditionals="74" coveredconditionals="43" methods="36" coveredmethods="33"/>
+      <file name="well-bore-view.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/well-bore-view/well-bore-view.component.ts">
+        <metrics statements="270" coveredstatements="258" conditionals="74" coveredconditionals="43" methods="36" coveredmethods="33"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="10" type="stmt"/>
+        <line num="44" count="10" type="stmt"/>
+        <line num="45" count="10" type="stmt"/>
+        <line num="47" count="10" type="stmt"/>
+        <line num="49" count="10" type="stmt"/>
+        <line num="54" count="10" type="stmt"/>
+        <line num="55" count="11" type="stmt"/>
+        <line num="56" count="11" type="stmt"/>
+        <line num="58" count="11" type="cond" truecount="2" falsecount="1"/>
+        <line num="61" count="11" type="cond" truecount="1" falsecount="0"/>
+        <line num="62" count="10" type="stmt"/>
+        <line num="65" count="11" type="cond" truecount="1" falsecount="0"/>
+        <line num="66" count="11" type="stmt"/>
+        <line num="72" count="10" type="stmt"/>
+        <line num="73" count="10" type="stmt"/>
+        <line num="75" count="10" type="stmt"/>
+        <line num="80" count="10" type="stmt"/>
+        <line num="81" count="10" type="stmt"/>
+        <line num="83" count="10" type="stmt"/>
+        <line num="89" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="91" count="11" type="stmt"/>
+        <line num="92" count="11" type="stmt"/>
+        <line num="94" count="11" type="stmt"/>
+        <line num="95" count="11" type="stmt"/>
+        <line num="96" count="11" type="cond" truecount="1" falsecount="1"/>
+        <line num="99" count="11" type="stmt"/>
+        <line num="100" count="22" type="cond" truecount="2" falsecount="0"/>
+        <line num="103" count="11" type="stmt"/>
+        <line num="104" count="11" type="stmt"/>
+        <line num="105" count="11" type="stmt"/>
+        <line num="106" count="11" type="stmt"/>
+        <line num="107" count="11" type="stmt"/>
+        <line num="108" count="11" type="stmt"/>
+        <line num="109" count="11" type="stmt"/>
+        <line num="110" count="11" type="stmt"/>
+        <line num="111" count="11" type="stmt"/>
+        <line num="112" count="11" type="stmt"/>
+        <line num="113" count="11" type="stmt"/>
+        <line num="114" count="11" type="stmt"/>
+        <line num="115" count="11" type="stmt"/>
+        <line num="118" count="11" type="stmt"/>
+        <line num="119" count="11" type="stmt"/>
+        <line num="120" count="11" type="stmt"/>
+        <line num="121" count="11" type="stmt"/>
+        <line num="122" count="11" type="stmt"/>
+        <line num="123" count="11" type="stmt"/>
+        <line num="124" count="11" type="stmt"/>
+        <line num="125" count="11" type="stmt"/>
+        <line num="127" count="11" type="stmt"/>
+        <line num="128" count="11" type="stmt"/>
+        <line num="129" count="11" type="stmt"/>
+        <line num="131" count="11" type="stmt"/>
+        <line num="132" count="11" type="stmt"/>
+        <line num="136" count="10" type="stmt"/>
+        <line num="142" count="10" type="stmt"/>
+        <line num="148" count="10" type="stmt"/>
+        <line num="155" count="10" type="stmt"/>
+        <line num="159" count="10" type="stmt"/>
+        <line num="166" count="10" type="stmt"/>
+        <line num="172" count="10" type="stmt"/>
+        <line num="177" count="10" type="stmt"/>
+        <line num="182" count="10" type="stmt"/>
+        <line num="187" count="10" type="stmt"/>
+        <line num="190" count="10" type="stmt"/>
+        <line num="191" count="30" type="stmt"/>
+        <line num="201" count="10" type="stmt"/>
+        <line num="202" count="10" type="stmt"/>
+        <line num="204" count="10" type="stmt"/>
+        <line num="212" count="30" type="stmt"/>
+        <line num="213" count="30" type="stmt"/>
+        <line num="214" count="120" type="stmt"/>
+        <line num="219" count="110" type="stmt"/>
+        <line num="220" count="55" type="stmt"/>
+        <line num="221" count="55" type="cond" truecount="1" falsecount="1"/>
+        <line num="225" count="11" type="stmt"/>
+        <line num="230" count="11" type="stmt"/>
+        <line num="236" count="11" type="stmt"/>
+        <line num="241" count="11" type="stmt"/>
+        <line num="247" count="11" type="stmt"/>
+        <line num="248" count="11" type="stmt"/>
+        <line num="258" count="11" type="stmt"/>
+        <line num="259" count="11" type="stmt"/>
+        <line num="260" count="20" type="cond" truecount="2" falsecount="0"/>
+        <line num="261" count="20" type="stmt"/>
+        <line num="262" count="20" type="stmt"/>
+        <line num="267" count="20" type="cond" truecount="1" falsecount="0"/>
+        <line num="268" count="10" type="stmt"/>
+        <line num="277" count="20" type="stmt"/>
+        <line num="282" count="20" type="stmt"/>
+        <line num="288" count="20" type="stmt"/>
+        <line num="294" count="20" type="stmt"/>
+        <line num="309" count="11" type="stmt"/>
+        <line num="310" count="11" type="stmt"/>
+        <line num="311" count="22" type="cond" truecount="0" falsecount="1"/>
+        <line num="312" count="22" type="stmt"/>
+        <line num="313" count="22" type="stmt"/>
+        <line num="314" count="22" type="stmt"/>
+        <line num="315" count="22" type="stmt"/>
+        <line num="316" count="22" type="stmt"/>
+        <line num="317" count="22" type="stmt"/>
+        <line num="318" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="322" count="22" type="stmt"/>
+        <line num="332" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="333" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="334" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="335" count="0" type="stmt"/>
+        <line num="336" count="0" type="stmt"/>
+        <line num="337" count="0" type="stmt"/>
+        <line num="338" count="0" type="stmt"/>
+        <line num="339" count="0" type="stmt"/>
+        <line num="340" count="0" type="stmt"/>
+        <line num="347" count="0" type="stmt"/>
+        <line num="353" count="22" type="stmt"/>
+        <line num="361" count="22" type="stmt"/>
+        <line num="376" count="11" type="stmt"/>
+        <line num="377" count="11" type="stmt"/>
+        <line num="378" count="22" type="cond" truecount="0" falsecount="1"/>
+        <line num="379" count="22" type="stmt"/>
+        <line num="380" count="22" type="stmt"/>
+        <line num="381" count="22" type="stmt"/>
+        <line num="382" count="22" type="stmt"/>
+        <line num="383" count="22" type="cond" truecount="0" falsecount="1"/>
+        <line num="384" count="0" type="stmt"/>
+        <line num="386" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="389" count="22" type="stmt"/>
+        <line num="390" count="22" type="stmt"/>
+        <line num="391" count="22" type="stmt"/>
+        <line num="394" count="22" type="stmt"/>
+        <line num="398" count="22" type="stmt"/>
+        <line num="401" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="402" count="0" type="stmt"/>
+        <line num="407" count="22" type="stmt"/>
+        <line num="411" count="22" type="cond" truecount="1" falsecount="0"/>
+        <line num="412" count="22" type="stmt"/>
+        <line num="417" count="22" type="stmt"/>
+        <line num="425" count="22" type="stmt"/>
+        <line num="430" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="431" count="11" type="stmt"/>
+        <line num="432" count="11" type="stmt"/>
+        <line num="433" count="11" type="stmt"/>
+        <line num="434" count="11" type="cond" truecount="1" falsecount="1"/>
+        <line num="435" count="11" type="stmt"/>
+        <line num="436" count="11" type="stmt"/>
+        <line num="437" count="11" type="stmt"/>
+        <line num="438" count="11" type="cond" truecount="1" falsecount="1"/>
+        <line num="439" count="11" type="stmt"/>
+        <line num="440" count="11" type="stmt"/>
+        <line num="441" count="11" type="stmt"/>
+        <line num="442" count="11" type="stmt"/>
+        <line num="443" count="11" type="stmt"/>
+        <line num="447" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="448" count="11" type="stmt"/>
+        <line num="449" count="11" type="stmt"/>
+        <line num="450" count="11" type="stmt"/>
+        <line num="451" count="11" type="stmt"/>
+        <line num="452" count="11" type="cond" truecount="3" falsecount="1"/>
+        <line num="453" count="22" type="stmt"/>
+        <line num="454" count="11" type="stmt"/>
+        <line num="455" count="11" type="stmt"/>
+        <line num="456" count="11" type="cond" truecount="1" falsecount="1"/>
+        <line num="457" count="11" type="stmt"/>
+        <line num="458" count="11" type="stmt"/>
+        <line num="460" count="11" type="stmt"/>
+        <line num="461" count="11" type="stmt"/>
+        <line num="462" count="11" type="stmt"/>
+        <line num="463" count="11" type="stmt"/>
+        <line num="464" count="11" type="stmt"/>
+        <line num="465" count="11" type="stmt"/>
+        <line num="466" count="11" type="stmt"/>
+        <line num="467" count="11" type="cond" truecount="3" falsecount="3"/>
+        <line num="468" count="11" type="stmt"/>
+        <line num="469" count="11" type="stmt"/>
+        <line num="470" count="11" type="stmt"/>
+        <line num="471" count="11" type="stmt"/>
+        <line num="472" count="11" type="stmt"/>
+        <line num="473" count="11" type="stmt"/>
+        <line num="474" count="11" type="stmt"/>
+        <line num="478" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="479" count="11" type="stmt"/>
+        <line num="480" count="11" type="stmt"/>
+        <line num="481" count="11" type="stmt"/>
+        <line num="482" count="11" type="cond" truecount="3" falsecount="1"/>
+        <line num="483" count="11" type="stmt"/>
+        <line num="484" count="11" type="stmt"/>
+        <line num="485" count="11" type="stmt"/>
+        <line num="486" count="11" type="stmt"/>
+        <line num="487" count="11" type="stmt"/>
+        <line num="488" count="11" type="stmt"/>
+        <line num="492" count="11" type="stmt"/>
+        <line num="493" count="11" type="stmt"/>
+        <line num="494" count="11" type="stmt"/>
+        <line num="495" count="11" type="stmt"/>
+        <line num="496" count="11" type="stmt"/>
+        <line num="497" count="11" type="stmt"/>
+        <line num="498" count="11" type="stmt"/>
+        <line num="499" count="11" type="stmt"/>
+        <line num="500" count="11" type="stmt"/>
+        <line num="501" count="55" type="stmt"/>
+        <line num="502" count="55" type="stmt"/>
+        <line num="503" count="55" type="stmt"/>
+        <line num="504" count="55" type="stmt"/>
+        <line num="505" count="55" type="stmt"/>
+        <line num="507" count="11" type="stmt"/>
+        <line num="508" count="11" type="stmt"/>
+        <line num="509" count="11" type="stmt"/>
+        <line num="512" count="11" type="stmt"/>
+        <line num="513" count="22" type="cond" truecount="1" falsecount="1"/>
+        <line num="514" count="11" type="stmt"/>
+        <line num="515" count="11" type="stmt"/>
+        <line num="516" count="11" type="stmt"/>
+        <line num="517" count="11" type="cond" truecount="3" falsecount="1"/>
+        <line num="518" count="11" type="stmt"/>
+        <line num="519" count="11" type="stmt"/>
+        <line num="520" count="11" type="stmt"/>
+        <line num="521" count="11" type="stmt"/>
+        <line num="522" count="22" type="cond" truecount="2" falsecount="0"/>
+        <line num="523" count="22" type="stmt"/>
+        <line num="524" count="22" type="cond" truecount="1" falsecount="0"/>
+        <line num="526" count="11" type="stmt"/>
+        <line num="527" count="22" type="stmt"/>
+        <line num="528" count="22" type="stmt"/>
+        <line num="529" count="22" type="stmt"/>
+        <line num="530" count="22" type="stmt"/>
+        <line num="531" count="22" type="cond" truecount="2" falsecount="0"/>
+        <line num="532" count="22" type="stmt"/>
+        <line num="533" count="22" type="cond" truecount="1" falsecount="0"/>
+        <line num="535" count="11" type="stmt"/>
+        <line num="536" count="11" type="stmt"/>
+        <line num="537" count="11" type="stmt"/>
+        <line num="538" count="22" type="stmt"/>
+        <line num="539" count="22" type="stmt"/>
+        <line num="540" count="22" type="stmt"/>
+        <line num="541" count="22" type="stmt"/>
+        <line num="542" count="22" type="stmt"/>
+        <line num="543" count="22" type="stmt"/>
+        <line num="544" count="22" type="stmt"/>
+        <line num="545" count="22" type="stmt"/>
+        <line num="546" count="22" type="stmt"/>
+        <line num="547" count="22" type="stmt"/>
+        <line num="550" count="0" type="stmt"/>
+        <line num="552" count="11" type="cond" truecount="1" falsecount="0"/>
+        <line num="553" count="11" type="stmt"/>
+        <line num="555" count="11" type="stmt"/>
+        <line num="556" count="11" type="stmt"/>
+        <line num="560" count="11" type="stmt"/>
+        <line num="561" count="11" type="stmt"/>
+        <line num="562" count="11" type="stmt"/>
+        <line num="565" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="567" count="11" type="stmt"/>
+        <line num="568" count="11" type="stmt"/>
+        <line num="569" count="11" type="stmt"/>
+        <line num="570" count="11" type="stmt"/>
+        <line num="571" count="11" type="stmt"/>
+        <line num="572" count="11" type="stmt"/>
+        <line num="574" count="11" type="stmt"/>
+        <line num="579" count="11" type="stmt"/>
+        <line num="590" count="11" type="stmt"/>
+        <line num="602" count="11" type="stmt"/>
+        <line num="612" count="11" type="stmt"/>
+        <line num="619" count="11" type="stmt"/>
+        <line num="620" count="11" type="stmt"/>
+        <line num="621" count="11" type="stmt"/>
+      </file>
+      <file name="wellbore-view.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/well-bore-view/wellbore-view.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.well-name-chips">
+      <metrics statements="16" coveredstatements="15" conditionals="2" coveredconditionals="1" methods="5" coveredmethods="4"/>
+      <file name="well-name-chips.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/well-name-chips/well-name-chips.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="well-name-chips.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/well-name-chips/well-name-chips.component.ts">
+        <metrics statements="15" coveredstatements="14" conditionals="2" coveredconditionals="1" methods="5" coveredmethods="4"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="24" count="8" type="stmt"/>
+        <line num="26" count="8" type="stmt"/>
+        <line num="27" count="8" type="stmt"/>
+        <line num="30" count="8" type="stmt"/>
+        <line num="31" count="8" type="stmt"/>
+        <line num="32" count="8" type="cond" truecount="1" falsecount="1"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.wwell-test-result">
+      <metrics statements="16" coveredstatements="16" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+      <file name="wwell-test-result.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/wwell-test-result/wwell-test-result.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="wwell-test-result.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/wwell-test-result/wwell-test-result.component.ts">
+        <metrics statements="15" coveredstatements="15" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="32" count="8" type="stmt"/>
+        <line num="34" count="8" type="stmt"/>
+        <line num="35" count="8" type="stmt"/>
+        <line num="38" count="4" type="stmt"/>
+        <line num="39" count="4" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.presentation.wwells-logs-indicators">
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="wwells-logs-indicators.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/wwells-logs-indicators/wwells-logs-indicators.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="wwells-logs-indicators.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/presentation/wwells-logs-indicators/wwells-logs-indicators.component.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.production">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="production.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/production/production.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="production.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/production/production.component.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.features.reports">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="reports.component.html" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/reports/reports.component.html">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="reports.component.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/features/reports/reports.component.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.models.well-design">
+      <metrics statements="11" coveredstatements="10" conditionals="2" coveredconditionals="1" methods="2" coveredmethods="2"/>
+      <file name="wellbore-diagram.model.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/models/well-design/wellbore-diagram.model.ts">
+        <metrics statements="11" coveredstatements="10" conditionals="2" coveredconditionals="1" methods="2" coveredmethods="2"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="72" count="2" type="stmt"/>
+        <line num="77" count="2" type="stmt"/>
+        <line num="80" count="35" type="cond" truecount="0" falsecount="1"/>
+        <line num="81" count="35" type="cond" truecount="1" falsecount="0"/>
+        <line num="82" count="0" type="stmt"/>
+        <line num="86" count="2" type="stmt"/>
+        <line num="102" count="2" type="stmt"/>
+        <line num="105" count="11" type="stmt"/>
+        <line num="106" count="11" type="stmt"/>
+        <line num="109" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.shared.components.global-loader">
+      <metrics statements="6" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="1"/>
+      <file name="loader.service.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/shared/components/global-loader/loader.service.ts">
+        <metrics statements="6" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="app.utils">
+      <metrics statements="60" coveredstatements="43" conditionals="12" coveredconditionals="4" methods="18" coveredmethods="11"/>
+      <file name="wellbore-math.util.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/app/utils/wellbore-math.util.ts">
+        <metrics statements="60" coveredstatements="43" conditionals="12" coveredconditionals="4" methods="18" coveredmethods="11"/>
+        <line num="1" count="11" type="stmt"/>
+        <line num="4" count="11" type="stmt"/>
+        <line num="8" count="16" type="stmt"/>
+        <line num="11" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="12" count="5" type="stmt"/>
+        <line num="13" count="5" type="stmt"/>
+        <line num="14" count="17" type="stmt"/>
+        <line num="16" count="5" type="stmt"/>
+        <line num="19" count="11" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="23" count="11" type="stmt"/>
+        <line num="28" count="88" type="stmt"/>
+        <line num="31" count="11" type="stmt"/>
+        <line num="38" count="22" type="stmt"/>
+        <line num="39" count="22" type="stmt"/>
+        <line num="40" count="22" type="stmt"/>
+        <line num="41" count="22" type="stmt"/>
+        <line num="44" count="11" type="stmt"/>
+        <line num="50" count="22" type="stmt"/>
+        <line num="51" count="22" type="stmt"/>
+        <line num="52" count="22" type="stmt"/>
+        <line num="55" count="11" type="stmt"/>
+        <line num="60" count="33" type="stmt"/>
+        <line num="63" count="11" type="stmt"/>
+        <line num="68" count="0" type="stmt"/>
+        <line num="71" count="11" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="79" count="0" type="stmt"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="97" count="11" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="105" count="0" type="stmt"/>
+        <line num="109" count="11" type="stmt"/>
+        <line num="116" count="0" type="stmt"/>
+        <line num="117" count="0" type="stmt"/>
+        <line num="119" count="0" type="stmt"/>
+        <line num="120" count="0" type="stmt"/>
+        <line num="122" count="0" type="stmt"/>
+        <line num="126" count="11" type="stmt"/>
+        <line num="132" count="0" type="stmt"/>
+        <line num="133" count="0" type="stmt"/>
+        <line num="140" count="11" type="stmt"/>
+        <line num="146" count="0" type="stmt"/>
+        <line num="147" count="0" type="stmt"/>
+        <line num="150" count="0" type="stmt"/>
+        <line num="157" count="11" type="stmt"/>
+        <line num="158" count="5" type="stmt"/>
+        <line num="161" count="11" type="stmt"/>
+        <line num="165" count="44" type="stmt"/>
+        <line num="168" count="11" type="stmt"/>
+        <line num="169" count="22" type="cond" truecount="1" falsecount="0"/>
+        <line num="170" count="11" type="cond" truecount="0" falsecount="1"/>
+        <line num="171" count="11" type="stmt"/>
+        <line num="191" count="11" type="stmt"/>
+        <line num="198" count="11" type="stmt"/>
+        <line num="199" count="11" type="stmt"/>
+        <line num="201" count="11" type="stmt"/>
+        <line num="202" count="11" type="stmt"/>
+        <line num="204" count="11" type="stmt"/>
+      </file>
+    </package>
+    <package name="services">
+      <metrics statements="27" coveredstatements="8" conditionals="14" coveredconditionals="0" methods="14" coveredmethods="0"/>
+      <file name="morning-report.service.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/services/morning-report.service.ts">
+        <metrics statements="7" coveredstatements="4" conditionals="6" coveredconditionals="0" methods="4" coveredmethods="0"/>
+        <line num="1" count="10" type="stmt"/>
+        <line num="2" count="10" type="stmt"/>
+        <line num="3" count="10" type="stmt"/>
+        <line num="12" count="10" type="stmt"/>
+        <line num="15" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+      </file>
+      <file name="well-data.service.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/services/well-data.service.ts">
+        <metrics statements="20" coveredstatements="4" conditionals="8" coveredconditionals="0" methods="10" coveredmethods="0"/>
+        <line num="1" count="10" type="stmt"/>
+        <line num="2" count="10" type="stmt"/>
+        <line num="3" count="10" type="stmt"/>
+        <line num="11" count="10" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="29" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="58" count="0" type="stmt"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="64" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="utils">
+      <metrics statements="27" coveredstatements="6" conditionals="3" coveredconditionals="0" methods="6" coveredmethods="0"/>
+      <file name="date.util.ts" path="/Users/junedalam/local-proj/Angular-Practice/src/utils/date.util.ts">
+        <metrics statements="27" coveredstatements="6" conditionals="3" coveredconditionals="0" methods="6" coveredmethods="0"/>
+        <line num="7" count="10" type="stmt"/>
+        <line num="8" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="10" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="14" count="0" type="stmt"/>
+        <line num="23" count="10" type="stmt"/>
+        <line num="24" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="37" count="10" type="stmt"/>
+        <line num="38" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="55" count="10" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="58" count="0" type="stmt"/>
+        <line num="67" count="10" type="stmt"/>
+        <line num="68" count="0" type="stmt"/>
+        <line num="69" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="82" count="10" type="stmt"/>
+        <line num="83" count="0" type="stmt"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="85" count="0" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

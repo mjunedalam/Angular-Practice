@@ -11,13 +11,13 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { delay, map, pipe, switchMap, tap } from 'rxjs';
 
-import { IWellData } from '../../../models/well-design/wwell-data.model';
+import { IWellData } from '../../../models/well-design/well-data.model';
 import { WellboreDiagramData } from '../../models/well-design/wellbore-diagram.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { MorningReport } from 'src/models/morining-report.model';
+import { MorningReport } from 'src/models/morning-report.model';
 import { WellName } from '../../../models/well-design/well-name.model';
-import { WellDataService } from '../../../services/wwell-data.service';
-import { MoriningReportService } from '../../../services/morining-report.service';
+import { WellDataService } from '../../../services/well-data.service';
+import { MorningReportService } from '../../../services/morning-report.service';
 import { formatDateForInput } from 'src/utils/date.util';
 
 import { WellActions, WellEvents } from './well.actions';
@@ -151,7 +151,7 @@ export const WellStore = signalStore(
     withMethods((
         store,
         wellDataService = inject(WellDataService),
-        morningReportService = inject(MoriningReportService),
+        morningReportService = inject(MorningReportService),
     ) => {
         function firstOnPage(pageIdx: number): WellName | undefined {
             return store.uniqueWellNames()[pageIdx * PAGE_SIZE];

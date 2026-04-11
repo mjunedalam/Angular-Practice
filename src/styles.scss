@@ -155,10 +155,7 @@ button { font-family: inherit; cursor: pointer; }
 // Legacy fallback: if .sk is used OUTSIDE a mask-shimmer container
 // (e.g. in a future one-off loader), it falls back to the old per-element shimmer.
 .sk--standalone {
-  @keyframes sk-shimmer-standalone {
-    0%   { background-position: -800px 0; }
-    100% { background-position:  800px 0; }
-  }
+  // ── Declarations placed BEFORE nested rules (Sass forward‑compatibility) ──
   background-image: linear-gradient(
     90deg,
     var(--sk-base)      0%,
@@ -167,6 +164,12 @@ button { font-family: inherit; cursor: pointer; }
   );
   background-size: 800px 100%;
   animation: sk-shimmer-standalone 1.5s infinite linear;
+
+  // ── Nested at‑rules after declarations ──
+  @keyframes sk-shimmer-standalone {
+    0%   { background-position: -800px 0; }
+    100% { background-position:  800px 0; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;

@@ -11,13 +11,13 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { delay, map, pipe, switchMap, tap } from 'rxjs';
 
-import { IWellData } from '../../../models/well-design/wwell-data.model';
+import { IWellData } from '../../../models/well-design/well-data.model';
 import { WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { MorningReport } from '../../../models/morining-report.model';
+import { MorningReport } from '../../../models/morning-report.model';
 import { WellName } from '../../../models/well-design/well-name.model';
-import { WwellDataService } from '../../../services/wwell-data.service';
-import { MoriningReportService } from '../../../services/morining-report.service';
+import { WellDataService } from '../../../services/well-data.service';
+import { MorningReportService } from '../../../services/morning-report.service';
 
 import { WellActions, WellEvents } from './well.actions';
 import {
@@ -129,8 +129,8 @@ export const WellStore = signalStore(
 
     withMethods((
         store,
-        wellDataService = inject(WwellDataService),
-        morningReportService = inject(MoriningReportService),
+        wellDataService = inject(WellDataService),
+        morningReportService = inject(MorningReportService),
     ) => {
         function firstOnPage(pageIdx: number): WellName | undefined {
             return store.uniqueWellNames()[pageIdx * PAGE_SIZE];
@@ -227,7 +227,7 @@ export { WellActions, WellEvents };
 
 
 ===
-import { IWellData } from '../../../models/well-design/wwell-data.model';
+import { IWellData } from '../../../models/well-design/well-data.model';
 import { IFormationTops } from '../../../shared/models/wwell/formation-tops.model';
 import { IHeaderIR } from '../../../shared/models/wwell/header-ir.model';
 import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
@@ -347,7 +347,7 @@ export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicator
 
 ====
 
-import { IWellData } from '../../../models/well-design/wwell-data.model';
+import { IWellData } from '../../../models/well-design/well-data.model';
 import { WellName } from '../../../models/well-design/well-name.model';
 
 // ─── Commands (triggered by UI / lifecycle) ───────────────────────────────────
@@ -395,7 +395,7 @@ import {
 } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridOptions, GridReadyEvent, themeQuartz } from 'ag-grid-community';
-import { PickedFormationTops, WellStore } from '../../core/stores/wwell-data/well.store';
+import { PickedFormationTops, WellStore } from '../../core/store/well.store';
 
 @Component({
   selector: 'app-picked-formation-tops',
@@ -527,4 +527,3 @@ export class PickedFormationTopsComponent implements OnInit {
     </aside>
   </main>
 </div>
-

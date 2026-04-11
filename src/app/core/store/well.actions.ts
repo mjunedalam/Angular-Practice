@@ -1,4 +1,4 @@
-import { IWellData } from '../../../models/well-design/wwell-data.model';
+import { IWellData } from '../../../models/well-design/well-data.model';
 import { WellName } from '../../../models/well-design/well-name.model';
 
 // ─── Commands (triggered by UI / lifecycle) ───────────────────────────────────

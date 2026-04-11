@@ -1,13 +1,22 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { WellStore } from './well.store';
-import { WellDataService } from '../../../services/wwell-data.service';
-import { MoriningReportService } from '../../../services/morining-report.service';
+import { WellDataService } from '../../../services/well-data.service';
+import { MorningReportService } from '../../../services/morning-report.service';
 import { of, throwError } from 'rxjs';
 
+//type WellStoreInstance = ReturnType<typeof TestBed.inject<WellStore>>;
+type WellStoreInstance = InstanceType<typeof WellStore>;
+interface WellDataServiceMock {
+  getWellDetails: jest.Mock;
+}
+interface MorningReportServiceMock {
+  getMorningReport: jest.Mock;
+}
+
 describe('WellStore', () => {
-  let store: any;
-  let wellDataServiceMock: any;
-  let morningReportServiceMock: any;
+  let store: WellStoreInstance;
+  let wellDataServiceMock: WellDataServiceMock;
+  let morningReportServiceMock: MorningReportServiceMock;
 
   beforeEach(() => {
     wellDataServiceMock = {
@@ -21,7 +30,7 @@ describe('WellStore', () => {
       providers: [
         WellStore,
         { provide: WellDataService, useValue: wellDataServiceMock },
-        { provide: MoriningReportService, useValue: morningReportServiceMock }
+        { provide: MorningReportService, useValue: morningReportServiceMock }
       ]
     });
 

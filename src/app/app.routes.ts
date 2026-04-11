@@ -16,15 +16,15 @@ export const routes: Routes = [
       {
         path: 'home',
         loadComponent: () =>
-          import('./features/home/home/home.component').then(
+          import('./features/home/home.component').then(
             (m) => m.HomeComponent,
           ),
       },
       {
         path: 'presentations',
         loadComponent: () =>
-          import('./features/persentation/persentation.component').then(
-            (m) => m.PersentationComponent,
+          import('./features/presentation/presentation.component').then(
+            (m) => m.PresentationComponent,
           ),
       },
       {

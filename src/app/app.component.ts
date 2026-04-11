@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader/global-loader.component';
+import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
 import { LoaderService } from './shared/components/global-loader/loader.service';
 import { ThemeStore } from './core/store/theme/theme.store';
 
