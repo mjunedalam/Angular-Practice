@@ -12,6 +12,8 @@
 
 // ══════════════════ QUICK LIST ════════════════════════════════════════════════
 .quick-list {
+  width: fit-content;
+  min-width: 220px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border);
   border-radius: 14px;

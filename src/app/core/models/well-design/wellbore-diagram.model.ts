@@ -57,8 +57,8 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   depthArrowX: 20,    // arrow centerX — spans x=10 to x=30, clear of geo labels
   geoLineX: 95,       // geo axis — depth labels end ~x=78, codes start ~x=113
   casingCenterX: 560, // bore structure center — plenty of gap after geo codes
-  baseHalfWidth: 48,
-  halfWidthIncrement: 16,
+  baseHalfWidth: 58,
+  halfWidthIncrement: 20,
   shoeCurveOffset: 12,
 };
 

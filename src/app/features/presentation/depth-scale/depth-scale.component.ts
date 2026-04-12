@@ -71,17 +71,32 @@ export class DepthScaleComponent {
         t.append('tspan').attr('x', depthAxisX).attr('dy', 12).text('(ft bgl)');
       });
 
-    const lineLen = drawingHeight;
+    const arrowHeadH = 8;
+    const arrowHeadHW = 5;
+    const scaleTipY = scale(totalDepth); // === drawingHeight
+    const lineEndY = scaleTipY - arrowHeadH;
+    const lineLen = lineEndY;
+
     g.append('line')
       .attr('class', 'axis-line')
       .attr('x1', depthAxisX).attr('x2', depthAxisX)
-      .attr('y1', 0).attr('y2', drawingHeight)
+      .attr('y1', 0).attr('y2', lineEndY)
       .attr('stroke-dasharray', lineLen)
       .attr('stroke-dashoffset', lineLen)
       .transition()
       .duration(ANIM.SCALE_DURATION)
       .ease(easeLinear)
       .attr('stroke-dashoffset', 0);
+
+    // Arrowhead tip synced exactly to scale(totalDepth)
+    g.append('path')
+      .attr('class', 'axis-arrow')
+      .attr('d', `M${depthAxisX - arrowHeadHW},${lineEndY} L${depthAxisX},${scaleTipY} L${depthAxisX + arrowHeadHW},${lineEndY} Z`)
+      .style('opacity', 0)
+      .transition()
+      .delay(ANIM.SCALE_DURATION)
+      .duration(200)
+      .style('opacity', 1);
 
     ticks.forEach((depth: number) => {
       const yPx = scale(depth);
