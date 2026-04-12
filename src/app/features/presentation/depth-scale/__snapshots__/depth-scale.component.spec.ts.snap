@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
 <div>
@@ -35,17 +35,12 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
       </text>
       <line
         class="axis-line"
-        stroke-dasharray="732"
-        stroke-dashoffset="732"
+        stroke-dasharray="740"
+        stroke-dashoffset="740"
         x1="60"
         x2="60"
         y1="0"
-        y2="732"
-      />
-      <path
-        class="axis-arrow"
-        d="M55,732 L60,740 L65,732 Z"
-        style="opacity: 0;"
+        y2="740"
       />
       <g
         class="tick"

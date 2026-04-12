@@ -10,7 +10,9 @@
       "Bash(git stash:*)",
       "Bash(npm install:*)",
       "Bash(pkill -f \"ng serve\")",
-      "Bash(pkill -f \"webpack\")"
+      "Bash(pkill -f \"webpack\")",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

@@ -259,7 +259,29 @@
     }
 
     <section class="report-map-section">
-      <app-wwellmap #wwellMap></app-wwellmap>
+      <div class="map-container">
+        <app-wwellmap #wwellMap></app-wwellmap>
+      </div>
+      
+      <!-- Map Legend matching image -->
+      <div class="map-legend">
+        <div class="map-legend__item">
+          <span class="map-legend__dot map-legend__dot--wasi"></span>
+          <span class="map-legend__text">WASI</span>
+        </div>
+        <div class="map-legend__item">
+          <span class="map-legend__dot map-legend__dot--ownership"></span>
+          <span class="map-legend__text">WELLS OWNERSHIP</span>
+        </div>
+        <div class="map-legend__item">
+          <span class="map-legend__dot map-legend__dot--aquifer"></span>
+          <span class="map-legend__text">Target Aquifer</span>
+        </div>
+        <div class="map-legend__item">
+          <span class="map-legend__dot map-legend__dot--active"></span>
+          <span class="map-legend__text">Active Well</span>
+        </div>
+      </div>
     </section>
   </div>
 </div>

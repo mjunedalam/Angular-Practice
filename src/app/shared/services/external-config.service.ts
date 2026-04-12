@@ -25,7 +25,7 @@ export class ExternalConfigService {
   get settings(): AgwaConfig {
     if (!this.config) {
       throw new Error('AppConfig not loaded');
-    }
+}
     return this.config;
   }
 }

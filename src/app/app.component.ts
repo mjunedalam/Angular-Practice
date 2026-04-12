@@ -4,6 +4,7 @@ import {
   inject,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Toast } from 'primeng/toast';
 import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
 import { AuthStore } from './core/store/auth/auth.store';
 import { ThemeStore } from './core/store/theme/theme.store';
@@ -11,11 +12,12 @@ import { ThemeStore } from './core/store/theme/theme.store';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, GlobalLoaderComponent],
+  imports: [RouterOutlet, GlobalLoaderComponent, Toast],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <router-outlet />
     <app-global-loader />
+    <p-toast position="bottom-right" />
   `,
   styles: [`:host { display: block; height: 100vh; overflow: hidden; }`],
 })

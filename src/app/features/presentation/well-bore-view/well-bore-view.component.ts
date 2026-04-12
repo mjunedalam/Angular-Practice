@@ -550,7 +550,7 @@ export class WellBoreViewComponent {
     if (effectivePx < totalPx) {
       shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', effectivePx).attr('width', shaftHW * 2).attr('height', totalPx - effectivePx).attr('fill', '#1e293b');
     }
-    const headG = arrowG.append('g').attr('class', 'depth-arrow-head-g');
+    const headG = shaftG.append('g').attr('class', 'depth-arrow-head-g');
     headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx},${totalPx} L${arrowCx + headHW},${totalPx - headH} Z`);
   }
 
