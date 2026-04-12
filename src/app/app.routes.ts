@@ -3,6 +3,23 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/login/login.component').then(
+        (m) => m.LoginComponent,
+      ),
+  },
+  {
+    path: 'main',
+    redirectTo: 'home',
+    pathMatch: 'full',
+  },
+  {
+    path: '',
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then(
         (m) => m.DashboardComponent,
@@ -28,27 +45,13 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'reports',
+        path: 'morning-report',
         loadComponent: () =>
-          import('./features/reports/reports.component').then(
-            (m) => m.ReportsComponent,
-          ),
-      },
-      {
-        path: 'maps',
-        loadComponent: () =>
-          import('./features/maps/maps.component').then(
-            (m) => m.MapsComponent,
-          ),
-      },
-      {
-        path: 'production',
-        loadComponent: () =>
-          import('./features/production/production.component').then(
-            (m) => m.ProductionComponent,
+          import('./features/morning-report/morning-report.component').then(
+            (m) => m.MorningReportComponent,
           ),
       },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'login' },
 ];

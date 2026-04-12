@@ -2,12 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Well Design Viewer</title>
+  <title>AGWA</title>
   <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --boot-bg: #080e1a;
+      --boot-track: rgba(148, 163, 184, 0.16);
+      --boot-accent: #0ea5e9;
+    }
+
+    html[data-theme='light'] {
+      --boot-bg: #eef6ff;
+      --boot-track: rgba(15, 23, 42, 0.08);
+      --boot-accent: #0284c7;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--boot-bg);
+      font-family: 'DM Sans', Arial, sans-serif;
+    }
+
+    .boot-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      height: 3px;
+      background: var(--boot-track);
+      transition: opacity 180ms ease, visibility 180ms ease;
+    }
+
+    .boot-loader--hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .boot-loader__bar {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--boot-accent);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--boot-accent) 28%, transparent);
+      transition: width 180ms ease;
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('agwa-theme');
+        document.documentElement.setAttribute('data-theme', savedTheme === 'light' ? 'light' : 'dark');
+      } catch (_) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 </head>
 <body>
+  <div id="boot-loader" class="boot-loader" aria-hidden="true">
+    <span class="boot-loader__bar" id="boot-loader-bar"></span>
+  </div>
   <app-root></app-root>
+  <script>
+    (function () {
+      var loaderEl = document.getElementById('boot-loader');
+      var barEl = document.getElementById('boot-loader-bar');
+      var progress = 10;
+      var timer = null;
+
+      function sync() {
+        if (barEl) barEl.style.width = progress + '%';
+      }
+
+      sync();
+
+      timer = window.setInterval(function () {
+        progress = Math.min(90, progress + (progress < 55 ? 8 : 2));
+        sync();
+      }, 220);
+
+      window.__agwaBootLoader = {
+        setProgress: function (value) {
+          progress = Math.max(progress, Math.min(100, value));
+          sync();
+        },
+        complete: function () {
+          progress = 100;
+          sync();
+          if (timer) {
+            window.clearInterval(timer);
+            timer = null;
+          }
+          window.setTimeout(function () {
+            if (!loaderEl) return;
+            loaderEl.classList.add('boot-loader--hidden');
+            window.setTimeout(function () {
+              if (loaderEl && loaderEl.parentNode) loaderEl.parentNode.removeChild(loaderEl);
+            }, 180);
+          }, 40);
+        }
+      };
+    })();
+  </script>
 </body>
 </html>

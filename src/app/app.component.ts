@@ -2,12 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  OnInit,
 } from '@angular/core';
-import { NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import { RouterOutlet } from '@angular/router';
 import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
-import { LoaderService } from './shared/components/global-loader/loader.service';
+import { AuthStore } from './core/store/auth/auth.store';
 import { ThemeStore } from './core/store/theme/theme.store';
 
 @Component({
@@ -21,20 +19,13 @@ import { ThemeStore } from './core/store/theme/theme.store';
   `,
   styles: [`:host { display: block; height: 100vh; overflow: hidden; }`],
 })
-export class AppComponent implements OnInit {
-  private readonly router = inject(Router);
-  private readonly loader = inject(LoaderService);
+export class AppComponent {
   // Injecting ThemeStore here triggers its instantiation at app startup,
   // which fires withHooks.onInit → sets data-theme on <html>
   private readonly _theme = inject(ThemeStore);
+  private readonly _auth = inject(AuthStore);
 
-  ngOnInit(): void {
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationStart))
-      .subscribe(() => this.loader.show());
-
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => this.loader.hide());
+  constructor() {
+    this._auth.autoLogin();
   }
 }

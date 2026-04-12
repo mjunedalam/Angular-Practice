@@ -1,0 +1,64 @@
+<section class="login">
+  <div class="login__shell">
+    <div class="login__card">
+      <div class="login__card-head">
+        <strong>Login</strong>
+        <span>Secure workspace access</span>
+      </div>
+
+      <form class="login__form" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+        <div class="login__field">
+          <p-floatlabel variant="in">
+            <input
+              id="username"
+              pInputText
+              type="text"
+              formControlName="username"
+              class="login__input"
+              placeholder=" "
+              [class.ng-invalid]="isFieldInvalid('username')"
+              [class.ng-dirty]="isFieldInvalid('username')"
+            />
+            <label for="username">Username</label>
+          </p-floatlabel>
+
+          @if (isFieldInvalid('username')) {
+            <p-message severity="error" [text]="'Username is required.'" styleClass="login__message" />
+          }
+        </div>
+
+        <div class="login__field">
+          <p-floatlabel variant="in">
+            <p-password
+              inputId="password"
+              formControlName="password"
+              [feedback]="false"
+              [toggleMask]="true"
+              placeholder=" "
+              [styleClass]="isFieldInvalid('password') ? 'login__password ng-invalid ng-dirty' : 'login__password'"
+              [inputStyleClass]="isFieldInvalid('password') ? 'login__input ng-invalid ng-dirty' : 'login__input'"
+            />
+            <label for="password">Password</label>
+          </p-floatlabel>
+
+          @if (isFieldInvalid('password')) {
+            <p-message severity="error" [text]="'Password is required.'" styleClass="login__message" />
+          }
+        </div>
+
+        @if (authStore.error()) {
+          <p-message severity="error" [text]="authStore.error()!" styleClass="login__message login__message--block" />
+        }
+
+        <button
+          pButton
+          type="submit"
+          class="login__submit"
+          [disabled]="loginForm.invalid || authStore.isLoading()"
+        >
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</section>

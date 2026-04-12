@@ -89,17 +89,63 @@
 
     <div class="top-navbar__divider"></div>
 
-    <div class="top-navbar__user-info">
-      <span class="top-navbar__user-name">{{ userName }}</span>
-      <span class="top-navbar__user-role">Administrator</span>
-    </div>
+    <div class="top-navbar__menu">
+      <button
+        pButton
+        type="button"
+        class="top-navbar__menu-trigger"
+        (click)="openUserMenu($event)"
+        aria-haspopup="menu"
+        aria-label="Open user menu"
+      >
+        <div class="top-navbar__user-info">
+          <span class="top-navbar__user-name">{{ auth.displayUsername() }}</span>
+        </div>
 
-    <p-avatar
-      [label]="userName[0]"
-      shape="circle"
-      class="top-navbar__avatar-prime"
-      aria-label="User menu"
-    />
+        <p-avatar
+          [label]="userInitial()"
+          shape="circle"
+          class="top-navbar__avatar-prime"
+          aria-hidden="true"
+        />
+
+        <svg class="top-navbar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <p-popover
+        #userMenu
+        styleClass="top-navbar__menu-popup"
+      >
+        <div class="top-navbar__profile-card">
+          <div class="top-navbar__profile-head">
+            <p-avatar
+              [label]="userInitial()"
+              shape="circle"
+              class="top-navbar__profile-avatar"
+              aria-hidden="true"
+            />
+
+            <div class="top-navbar__profile-copy">
+              <span class="top-navbar__profile-label">Signed in as</span>
+              <strong class="top-navbar__profile-name">{{ auth.displayUsername() }}</strong>
+            </div>
+          </div>
+
+          <button
+            pButton
+            type="button"
+            class="top-navbar__logout-btn"
+            icon="pi pi-sign-out"
+            severity="secondary"
+            (click)="logout()"
+          >
+            Logout
+          </button>
+        </div>
+      </p-popover>
+    </div>
   </div>
 
 </header>

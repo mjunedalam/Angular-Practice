@@ -35,7 +35,7 @@ export class LeftSidenavComponent {
       active: true,
     },
     {
-      id: 'reports',
+      id: 'morning-report',
       label: 'Reports',
       icon: 'M9 17v-2m3 2v-4m3 4v-6M5 20h14a2 2 0 002-2V8l-5-5H5a2 2 0 00-2 2v13a2 2 0 002 2z',
     },

@@ -14,8 +14,8 @@ import {
   PAGE_SIZE,
   FALLBACK_STR
 } from './well.selectors';
-import { IWellData } from '../../../models/well-design/well-data.model';
-import { WellName } from '../../../models/well-design/well-name.model';
+import { IWellData } from 'src/app/core/models/well-design/well-data.model';
+import { WellName } from 'src/app/core/models/well-design/well-name.model';
 import { expect, it, describe } from '@jest/globals';
 
 describe('Well Selectors', () => {

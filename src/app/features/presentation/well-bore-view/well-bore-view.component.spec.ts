@@ -2,10 +2,10 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { WellBoreViewComponent } from './well-bore-view.component';
 import { ComponentRef } from '@angular/core';
-import { WellboreDiagramData } from '../../../models/well-design/wellbore-diagram.model';
-import { ICasingIR } from '../../../shared/models/wwell/casing-ir.model';
-import { ITopsIR } from '../../../shared/models/wwell/tops-ir.model';
-import { IHydrogeologyIR } from '../../../../shared/models/wwell/hydrogeology-ir.model';
+import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
+import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
+import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
 import { WellStore } from 'src/app/core/store/well.store';
 
 describe('WellBoreViewComponent', () => {

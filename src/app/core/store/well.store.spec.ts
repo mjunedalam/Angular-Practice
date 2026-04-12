@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { WellStore } from './well.store';
-import { WellDataService } from '../../../services/well-data.service';
-import { MorningReportService } from '../../../services/morning-report.service';
+import { WellDataService } from 'src/app/core/services/well-data.service';
+import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { of, throwError } from 'rxjs';
 
 //type WellStoreInstance = ReturnType<typeof TestBed.inject<WellStore>>;

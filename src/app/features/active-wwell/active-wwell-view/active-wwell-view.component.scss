@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.active-wwell-view {
+  display: grid;
+  gap: 1rem;
+}
+
+.active-wwell-view__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}

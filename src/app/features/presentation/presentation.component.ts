@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from 'src/app/core/store/well.store';
-import { formatDateForInput, parseDateFromInput } from 'src/utils/date.util';
+import { formatDateForInput, parseDateFromInput } from 'src/app/utils/date.util';
 import { DialogModule } from 'primeng/dialog';
 import { MessageModule } from 'primeng/message';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';

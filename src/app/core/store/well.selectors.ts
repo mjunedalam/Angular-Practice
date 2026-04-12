@@ -1,10 +1,10 @@
-import { IWellData } from '../../../models/well-design/well-data.model';
-import { IFormationTops } from '../../../shared/models/wwell/formation-tops.model';
-import { IHeaderIR } from '../../../shared/models/wwell/header-ir.model';
-import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { WellboreDiagramData } from '../../models/well-design/wellbore-diagram.model';
-import { WellName } from '../../../models/well-design/well-name.model';
-import { sortCasingsByDepthDesc } from '../../utils/wellbore-math.util';
+import { IWellData } from 'src/app/core/models/well-design/well-data.model';
+import { WellLogsIndicators } from 'src/app/core/models/well-design/well-logs-indicators.model';
+import { WellName } from 'src/app/core/models/well-design/well-name.model';
+import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { IFormationTops } from 'src/app/shared/models/wwell/formation-tops.model';
+import { IHeaderIR } from 'src/app/shared/models/wwell/header-ir.model';
+import { sortCasingsByDepthDesc } from 'src/app/utils/wellbore-math.util';
 
 import { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult } from './well.store';
 

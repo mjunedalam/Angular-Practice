@@ -12,8 +12,8 @@ import { easeLinear } from 'd3-ease';
 import 'd3-transition';
 
 import { WellStore } from '../../../core/store/well.store';
-import { ANIM, DIAGRAM_LAYOUT } from '../../../models/well-design/wellbore-diagram.model';
-import { buildDepthTicks, createDepthScale, formatDepth } from '../../../utils/wellbore-math.util';
+import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { buildDepthTicks, createDepthScale, formatDepth } from 'src/app/utils/wellbore-math.util';
 
 @Component({
   selector: 'app-depth-scale',

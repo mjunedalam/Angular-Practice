@@ -1,10 +1,15 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
+import { ExternalConfigService } from './shared/services/external-config.service';
+
+function initializeAppConfig(configService: ExternalConfigService): () => Promise<void> {
+  return () => configService.loadConfig();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +26,11 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAppConfig,
+      deps: [ExternalConfigService],
+      multi: true,
+    },
   ],
 };

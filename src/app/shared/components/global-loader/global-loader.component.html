@@ -1,5 +1,8 @@
 @if (loader.isLoading()) {
-  <div class="progress-bar" aria-hidden="true">
-    <div class="progress-bar__fill"></div>
+  <div class="app-loader" aria-hidden="true">
+    <span
+      class="app-loader__bar"
+      [style.width.%]="loader.progress()"
+    ></span>
   </div>
 }

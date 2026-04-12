@@ -1,0 +1,265 @@
+<div class="report-shell">
+  <div class="report-header">
+    <div class="report-header__bar">
+      <span class="report-header__title">Daily Drilling Operation Summary</span>
+    </div>
+  </div>
+
+  <div class="report-toolbar">
+    <button
+      pButton
+      type="button"
+      (click)="sendEmail()"
+      class="report-toolbar__button"
+    >
+      <span class="report-toolbar__glow"></span>
+      <span class="report-toolbar__button-inner">
+        <i class="pi pi-envelope"></i>
+        <span>Email Report</span>
+      </span>
+    </button>
+  </div>
+
+  <div id="report-content" class="report-content">
+    @if (hasError() && !isLoadingState()) {
+    <div class="report-error">
+      <p>Error ({{ statusCode() }}): {{ errorMessage() }}</p>
+    </div>
+    }
+
+    @if (isLoadingState()) {
+    <section class="report-section report-section--skeleton">
+      <div class="report-section__heading">
+        <span class="report-section__title">Water Well Test Results</span>
+      </div>
+
+      <div class="report-skeleton-mask">
+        @for (card of skeletonCards; track card) {
+        <div class="report-card report-card--skeleton">
+          <div class="test-result-grid">
+            <div class="test-result-grid__column test-result-grid__column--left">
+              <div class="test-result-grid__rows">
+                @for (line of skeletonLines; track line) {
+                <span class="sk report-skeleton report-skeleton--label"></span>
+                <span class="sk report-skeleton report-skeleton--value"></span>
+                }
+              </div>
+            </div>
+
+            <div class="test-result-grid__column">
+              <div class="test-result-grid__rows">
+                @for (line of [1, 2, 3]; track line) {
+                <span class="sk report-skeleton report-skeleton--label"></span>
+                <span class="sk report-skeleton report-skeleton--value"></span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+
+    <div class="report-skeleton-mask">
+      @for (card of skeletonCards; track card) {
+      <div class="report-card report-card--skeleton report-card--summary-skeleton">
+        <div class="report-summary__header report-summary__header--skeleton">
+          <span class="sk report-skeleton report-skeleton--title"></span>
+          <span class="sk report-skeleton report-skeleton--button"></span>
+        </div>
+
+        <div class="report-summary__grid">
+          <div class="report-summary__column">
+            <div class="report-summary__row-grid">
+              @for (line of skeletonLines; track line) {
+              <span class="sk report-skeleton report-skeleton--summary-label"></span>
+              <span class="sk report-skeleton report-skeleton--summary-value"></span>
+              }
+              <span class="sk report-skeleton report-skeleton--operation-label"></span>
+              <span class="sk report-skeleton report-skeleton--operation-value"></span>
+            </div>
+          </div>
+
+          <div class="report-summary__column">
+            <div class="report-summary__row-grid">
+              @for (line of [1, 2, 3]; track line) {
+              <span class="sk report-skeleton report-skeleton--summary-label"></span>
+              <span class="sk report-skeleton report-skeleton--summary-value"></span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    } @else {
+    @if (!hasError()) {
+    <section class="report-section">
+      <div class="report-section__heading">
+        <span class="report-section__title">Water Well Test Results</span>
+      </div>
+
+      @for (result of waterWelltestResult(); track result.wellName; let i = $index) {
+      <p-card styleClass="report-card report-card--test">
+        <div class="test-result-grid">
+          <div class="test-result-grid__column test-result-grid__column--left">
+            <div class="test-result-grid__rows">
+              <div class="test-result-grid__label">Well Name:</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.wellName"
+              >
+                {{ result.wellName || "Missing" }}
+              </div>
+
+              <div class="test-result-grid__label">RPM</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.rPM"
+              >
+                {{ result.rPM || "0" }}
+              </div>
+
+              <div class="test-result-grid__label">H2S (PPM)</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.h2sPPM"
+              >
+                {{ result.h2sPPM || "Missing" }}
+              </div>
+
+              <div class="test-result-grid__label">Temperature (°C)</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.temperature"
+              >
+                {{ result.temperature || "Missing" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="test-result-grid__column">
+            <div class="test-result-grid__rows">
+              <div class="test-result-grid__label">Aquifer</div>
+              <div class="test-result-grid__value">
+                {{ result.trgtRsvrCd || "Missing" }}
+              </div>
+
+              <div class="test-result-grid__label">Test rate (GPM)</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.testRate"
+              >
+                {{ result?.testRate || "Missing" }}
+              </div>
+
+              <div class="test-result-grid__label">Well productivity (GPM/ft):</div>
+              <div
+                class="test-result-grid__value"
+                [class.report-value--missing]="!result.wellProductivity"
+              >
+                {{ result?.wellProductivity || "Missing" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-card>
+      }
+    </section>
+    }
+
+    @for (report of morningReport(); track report.epANum; let i = $index) {
+    <p-card styleClass="report-card report-card--summary">
+      <div class="report-summary__header">
+        <div class="report-summary__title">
+          <span>{{ report.wGnrName }}</span>
+          <span class="report-summary__rig">{{ report.wRigCd }}</span>
+        </div>
+
+        <div class="report-summary__status">
+          <div class="report-summary__status-input">
+            <input
+              pInputText
+              placeholder="Rig status"
+              [ngModel]="report.rigStatus"
+              (ngModelChange)="store.updateRigStatus(i, $event)"
+              name="rigStatus"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="report-summary__grid">
+        <div class="report-summary__column">
+          <div class="report-summary__row-grid">
+            <div class="report-summary__label">Target Aquafier:</div>
+            <div
+              class="report-summary__value"
+              [class.report-value--missing]="!report.trgtRsvrCd"
+              [class.report-value--present]="report.trgtRsvrCd"
+            >
+              {{ report.trgtRsvrCd || "Missing" }}
+            </div>
+
+            <div class="report-summary__label">Planned Total Depth (ft):</div>
+            <div
+              class="report-summary__value"
+              [class.report-value--missing]="!report.plLtrlEndDpth"
+              [class.report-value--present]="report.plLtrlEndDpth"
+            >
+              {{ report.plLtrlEndDpth || "Missing" }}
+            </div>
+
+            <div class="report-summary__label">Footage(ft):</div>
+            <div
+              class="report-summary__value"
+              [class.report-value--missing]="!report.wDpthChgDis"
+              [class.report-value--present]="report.wDpthChgDis"
+            >
+              {{ report.wDpthChgDis || "Missing" }}
+            </div>
+
+            <div class="report-summary__label report-summary__label--wide">Operation:</div>
+            <div
+              class="report-summary__value report-summary__value--operation"
+              [class.report-value--present]="report.wOpRmk"
+            >
+              {{ report.wOpRmk || "XXXX" }}
+            </div>
+          </div>
+        </div>
+
+        <div class="report-summary__column">
+          <div class="report-summary__row-grid">
+            <div class="report-summary__label">Current Formation(ft):</div>
+            <div
+              class="report-summary__value"
+              [class.report-value--present]="report.stLongCd"
+              [class.report-value--missing]="!report.stLongCd"
+            >
+              {{ report.stLongCd || "NA" }}
+            </div>
+
+            <div class="report-summary__label">Current Depth(ft):</div>
+            <div
+              class="report-summary__value"
+              [class.report-value--missing]="!report.wPrsntDpth"
+              [class.report-value--present]="report.wPrsntDpth"
+            >
+              {{ report?.wPrsntDpth || "Missing" }}
+            </div>
+
+            <div class="report-summary__label">Supporting:</div>
+            <div class="report-summary__value report-summary__value--empty"></div>
+          </div>
+        </div>
+      </div>
+    </p-card>
+    }
+    }
+
+    <section class="report-map-section">
+      <app-wwellmap #wwellMap></app-wwellmap>
+    </section>
+  </div>
+</div>

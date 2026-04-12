@@ -1,5 +1,5 @@
-import { IWellData } from '../../../models/well-design/well-data.model';
-import { WellName } from '../../../models/well-design/well-name.model';
+import { IWellData } from 'src/app/core/models/well-design/well-data.model';
+import { WellName } from 'src/app/core/models/well-design/well-name.model';
 
 // ─── Commands (triggered by UI / lifecycle) ───────────────────────────────────
 export const WellActions = {

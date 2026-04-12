@@ -1,0 +1,41 @@
+import { inject, Injectable } from '@angular/core';
+import { EmailRequest } from 'src/app/shared/models/email/email-request.model';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MorningReport } from '../../models/morning-report/morning-report.model';
+import { EMAIL_FROM, EMAIL_CC, EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME, EMAIL_TO } from 'src/app/shared/models/config/email.config';
+import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+@Injectable({
+  providedIn: 'root'
+})
+export class EmailService {
+
+  private extConfigService = inject(ExternalConfigService);
+  private http = inject(HttpClient);
+  private apiUrl = `${this.extConfigService.settings.emailServiceUrl}` + "/send-email";
+
+
+  sendEmail(emailRequest: EmailRequest): Observable<void> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<void>(this.apiUrl, emailRequest, { headers });
+  }
+
+  buildEmailRequest(reports: MorningReport[], mapImageData: string, waterWellTestResults?: WaterWellTestResult[]): EmailRequest {
+    return {
+      subject: EMAIL_SUBJECT,
+      from: EMAIL_FROM,
+      to: [EMAIL_TO],
+      cc: [EMAIL_CC],
+      bcc: [],
+      replyTo: '',
+      templateName: EMAIL_TEMPLATE_NAME,
+      generatePdf: false,
+      templateData: {
+        morningReport: reports,
+        mapImageData: mapImageData,
+        waterWellTestResults
+      }
+    };
+  }
+}

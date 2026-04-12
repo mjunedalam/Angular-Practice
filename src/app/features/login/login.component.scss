@@ -1,0 +1,147 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.16), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 28%),
+    var(--bg-app);
+}
+
+.login__shell {
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 420px);
+  gap: 24px;
+  align-items: center;
+}
+
+.login__brand,
+.login__card {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+}
+
+.login__brand {
+  padding: 32px;
+}
+
+.login__eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--accent-hover);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.login__brand h1 {
+  margin: 0 0 12px;
+  color: var(--text-primary);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.login__brand p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  max-width: 42ch;
+}
+
+.login__card {
+  padding: 24px;
+}
+
+.login__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.login__card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.login__card-head strong {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.login__card-head span {
+  color: var(--text-secondary);
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+
+.login__submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+.login__message {
+  width: 100%;
+}
+
+.login__message--block {
+  margin-top: -0.25rem;
+}
+
+:host ::ng-deep .login__field .p-floatlabel {
+  width: 100%;
+}
+
+:host ::ng-deep .login__input.p-inputtext,
+:host ::ng-deep .login__password .p-inputtext,
+:host ::ng-deep .login__submit.p-button {
+  width: 100%;
+  border-radius: 14px;
+}
+
+:host ::ng-deep .login__password {
+  width: 100%;
+}
+
+:host ::ng-deep .login__password .p-password-input {
+  width: 100%;
+}
+
+:host ::ng-deep .login__submit.p-button {
+  padding-block: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-glow);
+}
+
+:host ::ng-deep .login__field .p-message {
+  border-radius: 0.85rem;
+}
+
+:host ::ng-deep .login__field .p-floatlabel label,
+:host ::ng-deep .login__card .p-floatlabel label {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 840px) {
+  .login__shell {
+    grid-template-columns: 1fr;
+  }
+}

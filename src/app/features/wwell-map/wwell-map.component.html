@@ -1,0 +1,25 @@
+<p-card styleClass="wwell-map-card">
+  <div class="wwell-map-header">
+    <div>
+      <h3 class="wwell-map-title">Map Of Active Water Wells</h3>
+    </div>
+ 
+  </div>
+
+  @if (errorMessage()) {
+  <p-message severity="error" [text]="errorMessage()!" styleClass="wwell-map-message" />
+  }
+
+  <div class="wwell-map-frame">
+    <div #mapViewNode class="wwell-map-canvas"></div>
+
+    <div class="wwell-map-legend">
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--owner">Wells Ownership</div>
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--green">3300</div>
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--purple">58</div>
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--red">1514</div>
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--blue">60</div>
+      <div class="wwell-map-legend__chip wwell-map-legend__chip--aquifer">Aquifier</div>
+    </div>
+  </div>
+</p-card>

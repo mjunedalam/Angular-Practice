@@ -11,14 +11,14 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { delay, map, pipe, switchMap, tap } from 'rxjs';
 
-import { IWellData } from '../../../models/well-design/well-data.model';
-import { WellboreDiagramData } from '../../models/well-design/wellbore-diagram.model';
-import { WellLogsIndicators } from '../../../models/well-design/well-logs-indicators.model';
-import { MorningReport } from 'src/models/morning-report.model';
-import { WellName } from '../../../models/well-design/well-name.model';
-import { WellDataService } from '../../../services/well-data.service';
-import { MorningReportService } from '../../../services/morning-report.service';
-import { formatDateForInput } from 'src/utils/date.util';
+import { MorningReport } from 'src/app/core/models/morning-report/morning-report.model';
+import { IWellData } from 'src/app/core/models/well-design/well-data.model';
+import { WellLogsIndicators } from 'src/app/core/models/well-design/well-logs-indicators.model';
+import { WellName } from 'src/app/core/models/well-design/well-name.model';
+import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { MorningReportService } from 'src/app/core/services/morning-report.service';
+import { WellDataService } from 'src/app/core/services/well-data.service';
+import { formatDateForInput } from 'src/app/utils/date.util';
 
 import { WellActions, WellEvents } from './well.actions';
 import {
