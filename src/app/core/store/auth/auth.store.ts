@@ -24,7 +24,7 @@ export const AuthStore = signalStore(
     extAppConfigService = inject(ExternalConfigService),
   ) => ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async login(credentials: LoginRequest) {
+    async login(credentials?: LoginRequest) {
       loading.startLogin('Contacting identity service...');
       patchState(store, { isLoading: true });
 
