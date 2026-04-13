@@ -9,7 +9,7 @@ This skill documents PrimeNG usage patterns specific to this project (Angular 19
 ### Package
 
 ```bash
-npm install primeng@19.2.0-lts @primeuix/themes
+npm install primeng@19.2.0 @primeuix/themes
 ```
 
 The Aura theme preset ships in `@primeuix/themes`, not inside `primeng` itself.
