@@ -25,9 +25,8 @@ export class EmailService {
     return {
       subject: EMAIL_SUBJECT,
       from: EMAIL_FROM,
-      to: [EMAIL_TO],
-      cc: [EMAIL_CC],
-      bcc: [],
+      to: EMAIL_TO,
+      cc: EMAIL_CC,
       replyTo: '',
       templateName: EMAIL_TEMPLATE_NAME,
       generatePdf: false,

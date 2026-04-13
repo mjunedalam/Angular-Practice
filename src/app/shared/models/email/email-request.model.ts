@@ -6,7 +6,6 @@ export interface EmailRequest {
   from: string;
   to: string[];
   cc?: string[];
-  bcc?: string[];
   replyTo?: string;
   templateData: {
     morningReport: MorningReport[];

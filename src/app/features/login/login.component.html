@@ -1,18 +1,23 @@
-<!-- login.component.html -->
 <section class="login">
-  <div class="login__shell">
-    <div class="login__card">
-      <!-- Avatar Section -->
-      <div class="login__avatar">
-        <p-avatar 
-          icon="pi pi-user" 
-          shape="circle" 
-          size="xlarge" 
-          styleClass="login__avatar-icon"
+  <div class="login__card">
+
+    <!-- LEFT: Full bleed background image only -->
+    <div class="login__left"></div>
+
+    <!-- RIGHT: Original form, completely unchanged -->
+    <div class="login__right">
+
+      <div class="login__avatar-container">
+        <p-avatar
+          icon="pi pi-user"
+          styleClass="login__avatar"
+          shape="circle"
+          size="xlarge"
         ></p-avatar>
       </div>
 
-      <!-- SSO Login Button - Always Visible -->
+      <h2 class="login__title">Log In</h2>
+
       <button
         pButton
         type="button"
@@ -23,7 +28,6 @@
         Login with SSO
       </button>
 
-      <!-- OR Divider - Only visible when credentials section is collapsed -->
       @if (!isCredentialsExpanded()) {
         <div class="login__or-divider">
           <p-divider align="center" type="solid">
@@ -32,7 +36,6 @@
         </div>
       }
 
-      <!-- Expand/Collapse Trigger for Credentials -->
       <button
         type="button"
         class="login__toggle-btn"
@@ -48,43 +51,49 @@
         <i class="pi" [class]="!isCredentialsExpanded() ? 'pi-chevron-down' : 'pi-chevron-up'"></i>
       </button>
 
-      <!-- Credentials Form - Collapsible Section -->
       @if (isCredentialsExpanded()) {
         <form class="login__form" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+
           <div class="login__field">
-            <span class="p-float-label">
-              <input
-                id="username"
-                pInputText
-                type="text"
-                formControlName="username"
-                class="login__input"
-                [class.ng-invalid]="isFieldInvalid('username')"
-                [class.ng-dirty]="isFieldInvalid('username')"
-              />
-              <label for="username">Username</label>
-            </span>
+            <label for="username" class="login__label">Email Address</label>
+            <input
+              id="username"
+              pInputText
+              type="email"
+              formControlName="username"
+              class="login__input"
+              placeholder="Enter Your Email"
+              [class.ng-invalid]="isFieldInvalid('username')"
+              [class.ng-dirty]="isFieldInvalid('username')"
+            />
             @if (isFieldInvalid('username')) {
-              <p-message severity="error" [text]="'Username is required.'" styleClass="login__message" />
+              <p-message severity="error" [text]="'Email is required.'" styleClass="login__message" />
             }
           </div>
 
           <div class="login__field">
-            <span class="p-float-label">
-              <p-password
-                id="password"
-                formControlName="password"
-                [feedback]="false"
-                [toggleMask]="true"
-                styleClass="login__password"
-                inputStyleClass="login__input"
-                [class.ng-invalid]="isFieldInvalid('password')"
-              />
-              <label for="password">Password</label>
-            </span>
+            <label for="password" class="login__label">Password</label>
+            <p-password
+              id="password"
+              formControlName="password"
+              [feedback]="false"
+              [toggleMask]="true"
+              placeholder="Enter Password"
+              styleClass="login__password"
+              inputStyleClass="login__input"
+              [class.ng-invalid]="isFieldInvalid('password')"
+            />
             @if (isFieldInvalid('password')) {
               <p-message severity="error" [text]="'Password is required.'" styleClass="login__message" />
             }
+          </div>
+
+          <div class="login__options">
+            <div class="login__remember">
+              <input type="checkbox" id="remember" class="login__checkbox">
+              <label for="remember" class="login__remember-label">Remember Me</label>
+            </div>
+            <a href="#" class="login__forgot">Forgot Password?</a>
           </div>
 
           @if (authStore.error()) {
@@ -97,10 +106,17 @@
             class="login__submit"
             [disabled]="loginForm.invalid || authStore.isLoading()"
           >
-            Sign In
+            Login
           </button>
+
+          <div class="login__signup">
+            <span class="login__signup-text">Don't have an account?</span>
+            <a href="#" class="login__signup-link">Sign Up</a>
+          </div>
+
         </form>
       }
+
     </div>
   </div>
 </section>

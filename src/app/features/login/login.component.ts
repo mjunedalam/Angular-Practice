@@ -7,9 +7,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { DividerModule } from 'primeng/divider';
-import { AvatarModule } from 'primeng/avatar';
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { LoginRequest } from 'src/app/core/store/auth/auth.selectors';
+import { AvatarModule } from 'primeng/avatar';
 
 interface LoginForm {
   username: FormControl<string>;
@@ -27,7 +27,7 @@ interface LoginForm {
     MessageModule,
     PasswordModule,
     DividerModule,
-    AvatarModule,
+    AvatarModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
