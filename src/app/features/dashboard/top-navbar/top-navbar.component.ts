@@ -1,44 +1,46 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
+  HostListener,
   input,
   output,
-  ViewChild,
+  inject,
+  signal,
 } from '@angular/core';
+import { MatBadgeModule } from '@angular/material/badge';
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
-import { ThemeStore } from 'src/app/core/store/theme/theme.store';
-import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
-import { ButtonModule } from 'primeng/button';
-import { Popover, PopoverModule } from 'primeng/popover';
 
 @Component({
   selector: 'app-top-navbar',
   standalone: true,
-  imports: [AvatarModule, BadgeModule, ButtonModule, PopoverModule],
+  imports: [MatBadgeModule],
   templateUrl: './top-navbar.component.html',
   styleUrl: './top-navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TopNavbarComponent {
-  @ViewChild('userMenu') private userMenu?: Popover;
-
   readonly sidenavCollapsed = input<boolean>(false);
-  readonly toggleSidenav    = output<void>();
+  readonly toggleSidenav = output<void>();
 
-  protected readonly theme = inject(ThemeStore);
   protected readonly auth = inject(AuthStore);
+  protected readonly menuOpen = signal(false);
 
   readonly appTitle = 'Aramco Ground Water Application';
   readonly logoText = 'AGWA';
 
-  protected openUserMenu(event: MouseEvent): void {
-    this.userMenu?.toggle(event);
+  @HostListener('document:click')
+  protected closeUserMenu(): void {
+    this.menuOpen.set(false);
   }
 
-  protected logout(): void {
-    this.userMenu?.hide();
+  protected toggleUserMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.menuOpen.update((open) => !open);
+  }
+
+  protected logout(event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.menuOpen.set(false);
     this.auth.logout();
   }
 

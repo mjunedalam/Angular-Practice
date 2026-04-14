@@ -9,7 +9,7 @@
       </div>
       <span>Well Test Results</span>
     </div>
-    <p-badge [value]="store.wellTestResults().length.toString()" class="results-header__badge-prime" />
+    <div class="results-header__badge">{{ store.wellTestResults().length }}</div>
   </div>
 
   <!-- ── List of results ── -->
@@ -57,22 +57,12 @@
   </defs>
 </svg>
 
-<!-- ═══════════════════ PrimeNG DIALOG ═══════════════════════════════════ -->
 @let r = selectedResult();
 
-<p-dialog
-  [visible]="dialogVisible()"
-  (visibleChange)="onDialogHide()"
-  [draggable]="true"
-  [resizable]="false"
-  [modal]="true"
-  [style]="{ width: '520px' }"
-  styleClass="well-result-dialog"
-  appendTo="body"
->
+<ng-template #resultDialog>
   @if (r) {
-    <ng-template pTemplate="header">
-      <div class="dialog__title-group">
+      <div class="dialog__header" mat-dialog-title>
+        <div class="dialog__title-group">
         <div class="dialog__icon-wrap">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="url(#dlgDropGrad2)">
             <defs>
@@ -88,11 +78,15 @@
           <div class="dialog__well-name">{{ r.wellName }}</div>
           <div class="dialog__subtitle">{{ r.testType | titlecase }} Test · {{ r.aquifer }} Aquifer</div>
         </div>
+        </div>
+        <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close test result dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
-    </ng-template>
 
-    <!-- Dialog body — metric grid -->
-    <div class="dialog__body">
+    <mat-dialog-content class="dialog__body">
       <div class="metric-grid">
 
         <div class="metric metric--highlight">
@@ -167,12 +161,12 @@
 
       <!-- Summary tags row -->
       <div class="dialog__summary-row">
-        <p-tag [value]="r.aquifer" severity="info" class="summary-tag--aquifer" />
-        <p-tag [value]="(r.testType | titlecase) + ' Test'" severity="secondary" />
+        <span class="summary-tag summary-tag--aquifer">{{ r.aquifer }}</span>
+        <span class="summary-tag">{{ (r.testType | titlecase) + ' Test' }}</span>
         @if (r.h2s > 0) {
-          <p-tag value="H₂S Detected" severity="warn" />
+          <span class="summary-tag summary-tag--warn">H₂S Detected</span>
         }
       </div>
-    </div>
+    </mat-dialog-content>
   }
-</p-dialog>
+</ng-template>

@@ -7,11 +7,6 @@
   display: block;
 }
 
-:host-context([data-theme='dark']) {
-  --map-card-bg: color-mix(in srgb, var(--bg-card) 92%, #08111f 8%);
-  --map-panel: color-mix(in srgb, var(--bg-surface) 84%, #0b1220 16%);
-}
-
 .wwell-map-card {
   overflow: hidden;
   border: 1px solid var(--map-border);
@@ -72,6 +67,11 @@
 .wwell-map-message {
   display: block;
   margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, white);
+  color: var(--danger);
 }
 
 .wwell-map-frame {
@@ -140,12 +140,8 @@
   background: #22b8e6;
 }
 
-:host ::ng-deep .wwell-map-card .p-card-body {
+:host ::ng-deep .wwell-map-card {
   padding: 1.25rem;
-}
-
-:host ::ng-deep .wwell-map-card .p-card-content {
-  padding: 0;
 }
 
 @media (max-width: 720px) {

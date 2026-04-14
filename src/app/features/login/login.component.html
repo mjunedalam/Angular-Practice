@@ -8,18 +8,18 @@
     <div class="login__right">
 
       <div class="login__avatar-container">
-        <p-avatar
-          icon="pi pi-user"
-          styleClass="login__avatar"
-          shape="circle"
-          size="xlarge"
-        ></p-avatar>
+        <div class="login__avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20 21a8 8 0 0 0-16 0"/>
+            <circle cx="12" cy="8" r="4"/>
+          </svg>
+        </div>
       </div>
 
       <h2 class="login__title">Log In</h2>
 
       <button
-        pButton
+        mat-flat-button
         type="button"
         class="login__sso-btn"
         [disabled]="authStore.isLoading()"
@@ -30,9 +30,9 @@
 
       @if (!isCredentialsExpanded()) {
         <div class="login__or-divider">
-          <p-divider align="center" type="solid">
-            <span class="login__or-text">OR</span>
-          </p-divider>
+          <mat-divider></mat-divider>
+          <span class="login__or-text">OR</span>
+          <mat-divider></mat-divider>
         </div>
       }
 
@@ -48,7 +48,13 @@
             Cancel
           }
         </span>
-        <i class="pi" [class]="!isCredentialsExpanded() ? 'pi-chevron-down' : 'pi-chevron-up'"></i>
+        <svg class="login__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          @if (!isCredentialsExpanded()) {
+            <path d="m6 9 6 6 6-6" />
+          } @else {
+            <path d="m18 15-6-6-6 6" />
+          }
+        </svg>
       </button>
 
       @if (isCredentialsExpanded()) {
@@ -58,33 +64,43 @@
             <label for="username" class="login__label">Email Address</label>
             <input
               id="username"
-              pInputText
               type="email"
               formControlName="username"
               class="login__input"
               placeholder="Enter Your Email"
-              [class.ng-invalid]="isFieldInvalid('username')"
-              [class.ng-dirty]="isFieldInvalid('username')"
+              [class.login__input--invalid]="isFieldInvalid('username')"
             />
             @if (isFieldInvalid('username')) {
-              <p-message severity="error" [text]="'Email is required.'" styleClass="login__message" />
+              <div class="login__message">Email is required.</div>
             }
           </div>
 
           <div class="login__field">
             <label for="password" class="login__label">Password</label>
-            <p-password
-              id="password"
-              formControlName="password"
-              [feedback]="false"
-              [toggleMask]="true"
-              placeholder="Enter Password"
-              styleClass="login__password"
-              inputStyleClass="login__input"
-              [class.ng-invalid]="isFieldInvalid('password')"
-            />
+            <div class="login__password">
+              <input
+                id="password"
+                [type]="hidePassword() ? 'password' : 'text'"
+                formControlName="password"
+                class="login__input"
+                placeholder="Enter Password"
+                [class.login__input--invalid]="isFieldInvalid('password')"
+              />
+              <button
+                type="button"
+                class="login__password-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+              >
+                @if (hidePassword()) {
+                  Show
+                } @else {
+                  Hide
+                }
+              </button>
+            </div>
             @if (isFieldInvalid('password')) {
-              <p-message severity="error" [text]="'Password is required.'" styleClass="login__message" />
+              <div class="login__message">Password is required.</div>
             }
           </div>
 
@@ -97,11 +113,11 @@
           </div>
 
           @if (authStore.error()) {
-            <p-message severity="error" [text]="authStore.error()!" styleClass="login__message login__message--block" />
+            <div class="login__message login__message--block">{{ authStore.error()! }}</div>
           }
 
           <button
-            pButton
+            mat-flat-button
             type="submit"
             class="login__submit"
             [disabled]="loginForm.invalid || authStore.isLoading()"

@@ -34,7 +34,7 @@
             <span class="sidenav__label">{{ item.label }}</span>
 
             @if (item.badge) {
-              <p-badge [value]="item.badge.toString()" severity="danger" class="sidenav__badge-prime" />
+              <span class="sidenav__badge">{{ item.badge }}</span>
             }
           }
 

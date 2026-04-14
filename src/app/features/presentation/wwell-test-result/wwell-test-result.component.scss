@@ -100,39 +100,11 @@
   }
 }
 
-// ── PrimeNG Dialog overrides ──────────────────────────────────────────────────
-::ng-deep .well-result-dialog {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-card) !important;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.08) !important;
-
-  .p-dialog-header {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, var(--bg-surface) 60%);
-    border-bottom: 1px solid var(--border-sub);
-    padding: 16px 20px;
-    cursor: grab;
-
-    &:active { cursor: grabbing; }
-  }
-
-  .p-dialog-content {
-    background: var(--bg-card);
-    padding: 0;
-  }
-
-  .p-dialog-header-icon {
-    color: var(--text-muted);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    width: 30px; height: 30px;
-
-    &:hover {
-      background: rgba(239, 68, 68, 0.1) !important;
-      border-color: rgba(239, 68, 68, 0.3) !important;
-      color: #ef4444 !important;
-    }
-  }
+::ng-deep .well-result-dialog .mat-mdc-dialog-surface {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.08);
 }
 
 // ── Dialog header internals ───────────────────────────────────────────────────
@@ -168,15 +140,35 @@
   margin-top: 2px;
 }
 
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, var(--bg-surface) 60%);
+  border-bottom: 1px solid var(--border-sub);
+  padding: 16px 20px;
+}
+
+.dialog__close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
 .dialog__body { padding: 22px 20px 20px; }
 
-// ── Header badge ─────────────────────────────────────────────────────────────
-::ng-deep .results-header__badge-prime .p-badge {
+.results-header__badge {
   background: var(--accent-muted);
   color: var(--accent);
   border: 1px solid rgba(14, 165, 233, 0.2);
   font-size: 11px;
   font-weight: 700;
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
 }
 
 // ── Metric grid ───────────────────────────────────────────────────────────────
@@ -247,6 +239,28 @@
   padding-top: 16px;
   border-top: 1px solid var(--border-sub);
   display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+.summary-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-sub);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &--aquifer {
+    color: var(--accent);
+  }
+
+  &--warn {
+    color: var(--warning);
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+    background: color-mix(in srgb, var(--warning) 8%, white);
+  }
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────

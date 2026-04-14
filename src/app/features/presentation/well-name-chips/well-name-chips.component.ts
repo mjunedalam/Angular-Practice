@@ -8,14 +8,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DatePickerModule } from 'primeng/datepicker';
-import { ProgressBarModule } from 'primeng/progressbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WellStore } from 'src/app/core/store/well.store';
+import { formatDateForInput, parseDateFromInput } from 'src/app/utils/date.util';
 
 @Component({
   selector: 'app-well-name-chips',
   standalone: true,
-  imports: [NgClass, FormsModule, DatePickerModule, ProgressBarModule],
+  imports: [NgClass, FormsModule, MatProgressBarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './well-name-chips.component.html',
   styleUrl:    './well-name-chips.component.scss',
@@ -32,6 +32,10 @@ export class WellNameChipsComponent {
     return d instanceof Date ? d : new Date(d);
   });
 
+  protected readonly selectedDateString = computed(() =>
+    formatDateForInput(this.selectedDate())
+  );
+
   /**
    * Called when a well name chip is clicked.
    * Loads well data for the selected well and current date.
@@ -43,11 +47,10 @@ export class WellNameChipsComponent {
     });
   }
 
-  /**
-   * Called when the PrimeNG datepicker emits a selected date.
-   * Updates the selected date and reloads well data if a well is selected.
-   */
-  protected onDateSelect(date: Date): void {
-    this.store.setSelectedDate(date);
+  protected onDateInputChange(value: string): void {
+    const date = parseDateFromInput(value);
+    if (!Number.isNaN(date.getTime())) {
+      this.store.setSelectedDate(date);
+    }
   }
 }

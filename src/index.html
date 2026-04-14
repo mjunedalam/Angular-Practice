@@ -6,14 +6,9 @@
   <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <style>
     :root {
-      --boot-bg: #080e1a;
-      --boot-track: rgba(148, 163, 184, 0.16);
-      --boot-accent: #0ea5e9;
-    }
-
-    html[data-theme='light'] {
       --boot-bg: #eef6ff;
       --boot-track: rgba(15, 23, 42, 0.08);
       --boot-accent: #0284c7;
@@ -52,16 +47,6 @@
       transition: width 180ms ease;
     }
   </style>
-  <script>
-    (function () {
-      try {
-        var savedTheme = localStorage.getItem('agwa-theme');
-        document.documentElement.setAttribute('data-theme', savedTheme === 'light' ? 'light' : 'dark');
-      } catch (_) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    })();
-  </script>
 </head>
 <body>
   <div id="boot-loader" class="boot-loader" aria-hidden="true">

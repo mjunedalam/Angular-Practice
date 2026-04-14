@@ -1,15 +1,10 @@
 // login.component.ts
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
-import { DividerModule } from 'primeng/divider';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { LoginRequest } from 'src/app/core/store/auth/auth.selectors';
-import { AvatarModule } from 'primeng/avatar';
 
 interface LoginForm {
   username: FormControl<string>;
@@ -21,13 +16,8 @@ interface LoginForm {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    ButtonModule,
-    FloatLabelModule,
-    InputTextModule,
-    MessageModule,
-    PasswordModule,
-    DividerModule,
-    AvatarModule
+    MatButtonModule,
+    MatDividerModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -39,6 +29,7 @@ export class LoginComponent {
   
   // Collapsible state for credentials form - default collapsed (false)
   protected readonly isCredentialsExpanded = signal(false);
+  protected readonly hidePassword = signal(true);
 
   protected readonly loginForm = new FormGroup<LoginForm>({
     username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -70,6 +61,10 @@ export class LoginComponent {
     }
 
     this.authStore.login(this.loginForm.getRawValue() as LoginRequest);
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.hidePassword.update((hidden) => !hidden);
   }
 
   protected isFieldInvalid(field: keyof LoginRequest): boolean {

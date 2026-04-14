@@ -1,52 +1,10 @@
-// ─── PrimeNG CSS Layer ───────────────────────────────────────────────────────
-@layer primeng;
-@import 'primeicons/primeicons.css';
+@import '@angular/material/prebuilt-themes/azure-blue.css';
 
 // ─── Reset ────────────────────────────────────────────────────────────────────
 *, *::before, *::after { box-sizing: border-box; }
 
-// ─── DARK (default) ──────────────────────────────────────────────────────────
-:root,
-[data-theme='dark'] {
-  --bg-app:        #080e1a;
-  --bg-surface:    #0c1425;
-  --bg-card:       rgba(17, 34, 64, 0.7);
-  --bg-sidenav:    #061224;
-  --bg-topbar:     #050b18;
-  --bg-content:    #091120;
-  --border:        rgba(56, 189, 248, 0.12);
-  --border-sub:    rgba(255, 255, 255, 0.05);
-  --text-primary:   #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted:     #64748b;
-  --text-on-accent: #ffffff;
-  --accent:        #0ea5e9;
-  --accent-hover:  #38bdf8;
-  --accent-muted:  rgba(14, 165, 233, 0.12);
-  --success:       #10b981;
-  --warning:       #f59e0b;
-  --danger:        #ef4444;
-
-  // Premium tokens
-  --radius-card:   16px;
-  --radius-inner:  12px;
-  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md:     0 8px 30px rgba(0, 0, 0, 0.3);
-  --shadow-glow:   0 0 15px rgba(14, 165, 233, 0.25);
-  --glass-blur:    blur(10px);
-
-  // ── Skeleton / mask-shimmer tokens ────────────────────────────────────────
-  --sk-base:       rgba(255, 255, 255, 0.06);  // solid fill of each .sk box
-  --sk-wave-mid:   rgba(255, 255, 255, 0.06);  // leading/trailing gradient edge
-  --sk-wave-peak:  rgba(255, 255, 255, 0.14);  // brightest point of the wave
-  --sk-speed:      1.8s;                        // wave travel time
-
-  --scrollbar-track: #080e1a;
-  --scrollbar-thumb: #1e293b;
-}
-
-// ─── LIGHT ────────────────────────────────────────────────────────────────────
-[data-theme='light'] {
+// ─── App tokens ──────────────────────────────────────────────────────────────
+:root {
   --bg-app:        #f0f6ff;
   --bg-surface:    #ffffff;
   --bg-card:       #ffffff;
@@ -62,47 +20,20 @@
   --accent:        #0284c7;
   --accent-hover:  #0369a1;
   --accent-muted:  rgba(2, 132, 199, 0.1);
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger:  #dc2626;
+  --success:       #16a34a;
+  --warning:       #d97706;
+  --danger:        #dc2626;
 
-  --sk-base:       rgba(0, 0, 0, 0.07);
-  --sk-wave-mid:   rgba(0, 0, 0, 0.04);
-  --sk-wave-peak:  rgba(255, 255, 255, 0.55);  // bright highlight on light bg
-  --sk-speed:      1.8s;
+  // Premium tokens
+  --radius-card:   16px;
+  --radius-inner:  12px;
+  --shadow-sm:     0 2px 8px rgba(15, 23, 42, 0.08);
+  --shadow-md:     0 12px 30px rgba(15, 23, 42, 0.12);
+  --shadow-glow:   0 0 15px rgba(2, 132, 199, 0.18);
+  --glass-blur:    blur(10px);
 
   --scrollbar-track: #e2e8f0;
   --scrollbar-thumb: #94a3b8;
-}
-
-// ─── CUSTOM (teal) ────────────────────────────────────────────────────────────
-[data-theme='custom'] {
-  --bg-app:        #0a1a1f;
-  --bg-surface:    #0d2228;
-  --bg-card:       #0f2930;
-  --bg-sidenav:    #0d2228;
-  --bg-topbar:     #0d2228;
-  --bg-content:    #0a1f26;
-  --border:        rgba(20, 184, 166, 0.16);
-  --border-sub:    rgba(255, 255, 255, 0.05);
-  --text-primary:   #e0f2f1;
-  --text-secondary: #80cbc4;
-  --text-muted:     #4db6ac;
-  --text-on-accent: #0a1a1f;
-  --accent:        #14b8a6;
-  --accent-hover:  #2dd4bf;
-  --accent-muted:  rgba(20, 184, 166, 0.15);
-  --success: #22c55e;
-  --warning: #fbbf24;
-  --danger:  #f87171;
-
-  --sk-base:       rgba(255, 255, 255, 0.05);
-  --sk-wave-mid:   rgba(255, 255, 255, 0.04);
-  --sk-wave-peak:  rgba(255, 255, 255, 0.12);
-  --sk-speed:      1.8s;
-
-  --scrollbar-track: #0a1a1f;
-  --scrollbar-thumb: #14b8a6;
 }
 
 // ─── Base ─────────────────────────────────────────────────────────────────────
@@ -131,49 +62,12 @@ html, body {
 
 button { font-family: inherit; cursor: pointer; }
 
-// ─── Skeleton base box ────────────────────────────────────────────────────────
-// .sk elements are now PLAIN colored boxes.
-// Animation is handled by the single ::after wave on the skeleton container.
-// This matches the YouTube / Facebook "one light source" pattern.
-.sk {
-  display: block;
-  background: var(--sk-base);
-  border-radius: 6px;
-  flex-shrink: 0;
-
-  // Modifier helpers
-  &--circle { border-radius: 50%   !important; }
-  &--pill   { border-radius: 999px !important; }
-  &--rect   { border-radius: 0     !important; }
-
-  // Accessibility: if someone reaches this element directly (unlikely),
-  // still honour reduced-motion by hiding the container wave.
-  @media (prefers-reduced-motion: reduce) {
-    // The container's ::after will switch to a gentle pulse; no extra work needed.
-  }
+.app-snackbar {
+  --mdc-snackbar-container-color: var(--bg-surface);
+  --mdc-snackbar-supporting-text-color: var(--text-primary);
+  --mat-snack-bar-button-color: var(--accent);
 }
 
-// Legacy fallback: if .sk is used OUTSIDE a mask-shimmer container
-// (e.g. in a future one-off loader), it falls back to the old per-element shimmer.
-.sk--standalone {
-  // ── Declarations placed BEFORE nested rules (Sass forward‑compatibility) ──
-  background-image: linear-gradient(
-    90deg,
-    var(--sk-base)      0%,
-    var(--sk-wave-peak) 50%,
-    var(--sk-base)      100%
-  );
-  background-size: 800px 100%;
-  animation: sk-shimmer-standalone 1.5s infinite linear;
-
-  // ── Nested at‑rules after declarations ──
-  @keyframes sk-shimmer-standalone {
-    0%   { background-position: -800px 0; }
-    100% { background-position:  800px 0; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-    opacity: 0.6;
-  }
+.app-snackbar--warn {
+  --mdc-snackbar-container-color: color-mix(in srgb, var(--warning) 12%, var(--bg-surface));
 }

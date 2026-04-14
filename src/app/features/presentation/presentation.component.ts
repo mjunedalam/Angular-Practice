@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from 'src/app/core/store/well.store';
 import { formatDateForInput, parseDateFromInput } from 'src/app/utils/date.util';
-import { DialogModule } from 'primeng/dialog';
-import { MessageModule } from 'primeng/message';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { DepthScaleComponent } from './depth-scale/depth-scale.component';
@@ -14,7 +13,6 @@ import { ActiveWwellMapComponent } from './active-wwell-map/active-wwell-map.com
 import { OffsetWwellsComponent } from './offset-wwells/offset-wwells.component';
 import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-logs-indicators.component';
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
-import { PresentationSkeletonComponent } from './presentation-skeleton/presentation-skeleton.component';
 
 const LEFT_DEFAULT = 340; const LEFT_MIN = 220; const LEFT_MAX = 520;
 const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
@@ -23,8 +21,7 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
   selector: 'app-presentation',
   standalone: true,
   imports: [
-    DialogModule,
-    MessageModule,
+    MatDialogModule,
     ResizeDividerComponent,
     WellBoreViewComponent,
     DepthScaleComponent,
@@ -35,17 +32,20 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
     OffsetWwellsComponent,
     WwellsLogsIndicatorsComponent,
     WwellTestResultComponent,
-    PresentationSkeletonComponent,
   ],
   templateUrl: './presentation.component.html',
   styleUrl: './presentation.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PresentationComponent implements OnInit {
+  @ViewChild('freeLayoutDialog') private freeLayoutDialog?: TemplateRef<unknown>;
+
   protected readonly store = inject(WellStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
+  private readonly dialog = inject(MatDialog);
+  private dialogRef?: MatDialogRef<unknown>;
 
   /** false = fixed three-column (default), true = free draggable modal */
   protected readonly draggableMode = signal(false);
@@ -79,8 +79,26 @@ export class PresentationComponent implements OnInit {
     }, { injector: this.injector });
   }
 
-  protected toggleDraggable(): void {
-    this.draggableMode.update(v => !v);
+  protected openDraggableDialog(): void {
+    if (!this.freeLayoutDialog || this.draggableMode()) return;
+
+    this.draggableMode.set(true);
+    this.dialogRef = this.dialog.open(this.freeLayoutDialog, {
+      autoFocus: false,
+      panelClass: 'pres-modal-dialog',
+      width: '92vw',
+      maxWidth: '92vw',
+      height: '90vh',
+    });
+
+    this.dialogRef.afterClosed().subscribe(() => {
+      this.draggableMode.set(false);
+      this.dialogRef = undefined;
+    });
+  }
+
+  protected closeDraggableDialog(): void {
+    this.dialogRef?.close();
   }
 
   protected onLeftDrag(delta: number): void {

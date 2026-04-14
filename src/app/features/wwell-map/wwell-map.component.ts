@@ -19,8 +19,7 @@ import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import MapImageLayer from '@arcgis/core/layers/MapImageLayer';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
+import { MatCardModule } from '@angular/material/card';
 import { Subject, takeUntil } from 'rxjs';
 import { MorningReport } from 'src/app/core/models/morning-report/morning-report.model';
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
@@ -46,7 +45,7 @@ const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 @Component({
   selector: 'app-wwellmap',
   standalone: true,
-  imports: [CardModule, MessageModule],
+  imports: [MatCardModule],
   templateUrl: './wwell-map.component.html',
   styleUrl: './wwell-map.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

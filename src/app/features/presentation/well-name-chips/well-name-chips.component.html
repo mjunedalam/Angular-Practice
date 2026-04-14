@@ -2,16 +2,13 @@
   <!-- Date picker section — positioned on the left -->
   <div class="date-picker-section">
     <label class="date-picker-label" for="well-date-input">Date:</label>
-    <p-datepicker
-      [ngModel]="selectedDate()"
-      (onSelect)="onDateSelect($event)"
-      dateFormat="yy-mm-dd"
-      [showIcon]="true"
-      inputId="well-date-input"
-      inputStyleClass="date-picker-input"
-      panelStyleClass="well-date-panel"
+    <input
+      id="well-date-input"
+      type="date"
+      class="date-picker-input"
+      [ngModel]="selectedDateString()"
+      (ngModelChange)="onDateInputChange($event)"
       aria-label="Select date for well data"
-      appendTo="body"
     />
   </div>
 
@@ -54,5 +51,5 @@
 
 <!-- Loading bar — sits directly below chip strip, inline in flow, no fixed position -->
 @if (store.loading()) {
-  <p-progressbar mode="indeterminate" styleClass="well-loading-bar" />
+  <mat-progress-bar mode="indeterminate" class="well-loading-bar" />
 }

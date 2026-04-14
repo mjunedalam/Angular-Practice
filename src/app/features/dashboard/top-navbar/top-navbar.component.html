@@ -34,52 +34,17 @@
     <h1>{{ appTitle }}</h1>
   </div>
 
-  <!-- Right: theme toggle + notifications + user -->
+  <!-- Right: notifications + user -->
   <div class="top-navbar__user">
 
-    <!-- Dark / Light toggle -->
-    <button
-      class="theme-toggle"
-      (click)="theme.toggle()"
-      [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
-      [attr.aria-pressed]="theme.isLight()"
-      title="{{ theme.isDark() ? 'Light mode' : 'Dark mode' }}"
-    >
-      <span class="theme-toggle__track" [class.theme-toggle__track--light]="theme.isLight()">
-        <span class="theme-toggle__thumb" [class.theme-toggle__thumb--light]="theme.isLight()">
-
-          <!-- Moon icon (dark mode indicator) -->
-          @if (theme.isDark()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-          }
-
-          <!-- Sun icon (light mode indicator) -->
-          @if (theme.isLight()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1"  x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1"  y1="12" x2="3"  y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36"/>
-              <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
-            </svg>
-          }
-
-        </span>
-      </span>
-    </button>
-
-    <div class="top-navbar__divider"></div>
-
     <div class="top-navbar__notifications">
-      <button class="top-navbar__icon-btn" aria-label="Notifications" pBadge value="3" severity="danger">
+      <button
+        class="top-navbar__icon-btn"
+        aria-label="Notifications"
+        [matBadge]="3"
+        matBadgeColor="warn"
+        [matBadgeOverlap]="true"
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 01-3.46 0"/>
@@ -91,60 +56,51 @@
 
     <div class="top-navbar__menu">
       <button
-        pButton
         type="button"
         class="top-navbar__menu-trigger"
-        (click)="openUserMenu($event)"
+        (click)="toggleUserMenu($event)"
         aria-haspopup="menu"
+        [attr.aria-expanded]="menuOpen()"
         aria-label="Open user menu"
       >
         <div class="top-navbar__user-info">
           <span class="top-navbar__user-name">{{ auth.displayUsername() }}</span>
         </div>
 
-        <p-avatar
-          [label]="userInitial()"
-          shape="circle"
-          class="top-navbar__avatar-prime"
-          aria-hidden="true"
-        />
+        <div class="top-navbar__avatar" aria-hidden="true">{{ userInitial() }}</div>
 
         <svg class="top-navbar__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
 
-      <p-popover
-        #userMenu
-        styleClass="top-navbar__menu-popup"
-      >
-        <div class="top-navbar__profile-card">
-          <div class="top-navbar__profile-head">
-            <p-avatar
-              [label]="userInitial()"
-              shape="circle"
-              class="top-navbar__profile-avatar"
-              aria-hidden="true"
-            />
+      @if (menuOpen()) {
+        <div class="top-navbar__menu-popup">
+          <div class="top-navbar__profile-card">
+            <div class="top-navbar__profile-head">
+              <div class="top-navbar__profile-avatar" aria-hidden="true">{{ userInitial() }}</div>
 
-            <div class="top-navbar__profile-copy">
-              <span class="top-navbar__profile-label">Signed in as</span>
-              <strong class="top-navbar__profile-name">{{ auth.displayUsername() }}</strong>
+              <div class="top-navbar__profile-copy">
+                <span class="top-navbar__profile-label">Signed in as</span>
+                <strong class="top-navbar__profile-name">{{ auth.displayUsername() }}</strong>
+              </div>
             </div>
-          </div>
 
-          <button
-            pButton
-            type="button"
-            class="top-navbar__logout-btn"
-            icon="pi pi-sign-out"
-            severity="secondary"
-            (click)="logout()"
-          >
-            Logout
-          </button>
+            <button
+              type="button"
+              class="top-navbar__logout-btn"
+              (click)="logout($event)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Logout
+            </button>
+          </div>
         </div>
-      </p-popover>
+      }
     </div>
   </div>
 

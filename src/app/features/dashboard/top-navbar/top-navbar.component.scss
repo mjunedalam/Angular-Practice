@@ -176,19 +176,6 @@ $ease:    cubic-bezier(0.4, 0, 0.2, 1);
       color: var(--accent);
       box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
     }
-
-    // PrimeNG badge override
-    ::ng-deep .p-badge {
-      font-size: 9px;
-      font-weight: 800;
-      min-width: 17px;
-      height: 17px;
-      line-height: 17px;
-      top: -5px;
-      right: -5px;
-      border-radius: 6px;
-      letter-spacing: 0.3px;
-    }
   }
 
   &__divider {
@@ -240,28 +227,19 @@ $ease:    cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
-  &__avatar-prime {
-    cursor: inherit;
-
-    ::ng-deep .p-avatar {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
-      border: 2px solid rgba(14, 165, 233, 0.5);
-      border-radius: 50%;
-      font-size: 14px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 0.5px;
-      box-shadow: 0 0 12px rgba(14, 165, 233, 0.4);
-      transition: box-shadow 0.2s $ease, border-color 0.2s $ease, transform 0.15s ease;
-
-      &:hover {
-        box-shadow: 0 0 20px rgba(14, 165, 233, 0.65);
-        border-color: var(--accent);
-        transform: scale(1.05);
-      }
-    }
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    border: 2px solid rgba(14, 165, 233, 0.5);
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 12px rgba(14, 165, 233, 0.4);
   }
 
   &__chevron {
@@ -272,14 +250,16 @@ $ease:    cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-:host ::ng-deep .top-navbar__menu-popup.p-popover {
+.top-navbar__menu-popup {
   min-width: 15rem;
   border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: 0 18px 34px rgba(2, 6, 23, 0.26);
-}
-
-:host ::ng-deep .top-navbar__menu-popup .p-popover-content {
-  padding: 0;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
 }
 
 .top-navbar__profile-card {
@@ -314,81 +294,43 @@ $ease:    cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .top-navbar__profile-avatar {
-  ::ng-deep .p-avatar {
-    width: 2.75rem;
-    height: 2.75rem;
-    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
-    color: #fff;
-    box-shadow: 0 0 14px rgba(14, 165, 233, 0.28);
-  }
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.28);
 }
 
 .top-navbar__logout-btn {
   width: 100%;
-  justify-content: flex-start;
-}
-
-// ── Theme toggle ──────────────────────────────────────────────────────────────
-.theme-toggle {
   display: flex;
   align-items: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  border-radius: 20px;
+  gap: 0.6rem;
+  justify-content: flex-start;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
 
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-    border-radius: 20px;
+  svg {
+    width: 16px;
+    height: 16px;
   }
+}
 
-  &__track {
-    position: relative;
-    width: 50px;
-    height: 28px;
-    border-radius: 14px;
-    background: rgba(30, 30, 60, 0.85);
-    border: 1.5px solid var(--border);
-    transition: background 0.3s ease, border-color 0.3s ease;
-
-    &--light {
-      background: rgba(219, 234, 254, 0.9);
-      border-color: rgba(14, 165, 233, 0.5);
-    }
-  }
-
-  &__thumb {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1e3a5f, #0369a1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                background 0.3s ease,
-                box-shadow 0.3s ease;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
-
-    svg {
-      width: 11px;
-      height: 11px;
-      stroke: #7dd3fc;
-    }
-
-    &--light {
-      transform: translateX(22px);
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      box-shadow: 0 1px 8px rgba(245, 158, 11, 0.5);
-
-      svg { stroke: #ffffff; }
-    }
-  }
+:host ::ng-deep .mat-badge-content {
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  line-height: 17px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
 }
 
 @media (max-width: 900px) {

@@ -40,13 +40,19 @@
   }
 
   &__avatar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    border: 3px solid var(--bg-card) !important;
-    box-shadow: var(--shadow-sm) !important;
+    width: 5rem;
+    height: 5rem;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 3px solid var(--bg-card);
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
 
-    ::ng-deep .p-avatar-icon {
-      font-size: 2rem !important;
+    svg {
+      width: 2rem;
+      height: 2rem;
     }
   }
 
@@ -84,10 +90,9 @@
   &__or-divider {
     width: 100%;
     margin: 0 0 0.9rem;
-
-    ::ng-deep .p-divider::before {
-      border-color: var(--border-sub) !important;
-    }
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   &__or-text {
@@ -119,11 +124,11 @@
       border-color: var(--accent);
       color: var(--text-primary);
     }
+  }
 
-    .pi {
-      font-size: 0.875rem;
-      transition: transform 0.2s ease;
-    }
+  &__toggle-icon {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   &__form {
@@ -146,35 +151,45 @@
   }
 
   &__input {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    background: var(--bg-surface) !important;
-    border-color: var(--border) !important;
-    color: var(--text-primary) !important;
-    border-radius: 0.625rem !important;
-    font-size: 0.875rem !important;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    padding: 0.75rem 0.95rem;
 
     &::placeholder {
-      color: var(--text-muted) !important;
+      color: var(--text-muted);
     }
 
     &:focus {
-      border-color: var(--accent) !important;
-      box-shadow: 0 0 0 2px var(--accent-muted) !important;
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-muted);
+    }
+
+    &--invalid {
+      border-color: var(--danger);
     }
   }
 
   &__password {
     width: 100%;
-    display: block;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.6rem;
+  }
 
-    ::ng-deep {
-      .p-password,
-      .p-password-input {
-        width: 100%;
-        box-sizing: border-box;
-      }
-    }
+  &__password-toggle {
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--accent);
+    border-radius: 0.625rem;
+    padding: 0.72rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
   }
 
   &__options {
@@ -219,10 +234,7 @@
     display: block;
     margin-top: 0.4rem;
     font-size: 0.75rem;
-
-    ::ng-deep .p-message-wrapper {
-      padding: 0.4rem 0.6rem;
-    }
+    color: var(--danger);
 
     &--block {
       margin-bottom: 0.75rem;
@@ -295,22 +307,4 @@
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-:host ::ng-deep {
-  .p-inputtext {
-    width: 100%;
-    box-sizing: border-box;
-    background: var(--bg-surface);
-    border-color: var(--border);
-    color: var(--text-primary);
-  }
-
-  .p-password {
-    width: 100%;
-
-    .p-password-input {
-      width: 100%;
-    }
-  }
 }

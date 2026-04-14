@@ -30,64 +30,27 @@
   }
 }
 
-// ── PrimeNG Accordion overrides ───────────────────────────────────────────────
-::ng-deep .offset-accordion {
+.offset-accordion {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  .p-accordionpanel {
-    border: 1px solid var(--border-sub);
-    border-radius: var(--radius-inner) !important;
-    background: rgba(255, 255, 255, 0.02);
-    overflow: hidden;
-    transition: border-color 0.3s, background 0.3s;
-
-    &:hover {
-      border-color: var(--accent);
-      background: rgba(14, 165, 233, 0.04);
-    }
-
-    &.p-accordionpanel-active {
-      border-color: var(--accent);
-      background: rgba(14, 165, 233, 0.06);
-    }
-  }
-
-  .p-accordionheader {
-    background: transparent !important;
-    border: none !important;
-    padding: 14px 16px;
-    color: var(--text-primary);
-    font-family: inherit;
-
-    &:hover { background: transparent !important; }
-  }
-
-  .p-accordioncontent-content {
-    background: transparent;
-    border: none;
-    padding: 0 16px 16px;
-  }
-
-  // Hide the default PrimeNG expand icon — well info row has its own layout
-  .p-accordionheader-toggle-icon { display: none; }
 }
 
-// ── Header badge ─────────────────────────────────────────────────────────────
-::ng-deep .header-badge-prime .p-badge {
+.header-badge {
   background: var(--accent-muted);
   color: var(--accent);
   border: 1px solid var(--border);
   font-size: 12px;
   font-weight: 800;
+  border-radius: 999px;
+  padding: 0.15rem 0.65rem;
 }
 
-// ── H₂S tag ──────────────────────────────────────────────────────────────────
-::ng-deep .h2s-tag .p-tag {
+.h2s-tag {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.5px;
+  color: var(--warning);
 }
 
 .well-info {
@@ -158,4 +121,19 @@
   padding: 40px;
   color: var(--text-muted);
   font-size: 14px; font-style: italic;
+}
+
+:host ::ng-deep .offset-accordion .mat-expansion-panel {
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius-inner);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+}
+
+:host ::ng-deep .offset-accordion .mat-expansion-panel-header {
+  padding: 14px 16px;
+}
+
+:host ::ng-deep .offset-accordion .mat-expansion-panel-body {
+  padding: 0 16px 16px;
 }

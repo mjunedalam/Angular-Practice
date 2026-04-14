@@ -177,20 +177,17 @@ $transition:  0.26s $ease;
     white-space: nowrap;
   }
 
-  // ── PrimeNG badge override ──────────────────────────────────────────────
-  &__badge-prime {
+  &__badge {
     flex-shrink: 0;
     transition: opacity $transition;
-
-    ::ng-deep .p-badge {
-      font-size: 9px;
-      font-weight: 800;
-      min-width: 20px;
-      height: 18px;
-      line-height: 18px;
-      border-radius: 6px;
-      letter-spacing: 0.3px;
-    }
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    background: rgba(220, 38, 38, 0.12);
+    color: #dc2626;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
   }
 
   // ── Active indicator (left edge) ────────────────────────────────────────

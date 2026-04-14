@@ -1,15 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
@@ -23,9 +21,8 @@ import { WwellmapComponent } from '../wwell-map/wwell-map.component';
   imports: [
     WwellmapComponent,
     FormsModule,
-    ButtonModule,
-    CardModule,
-    InputTextModule,
+    MatButtonModule,
+    MatCardModule,
   ],
   templateUrl: './morning-report.component.html',
   styleUrl: './morning-report.component.scss',
@@ -44,13 +41,6 @@ export class MorningReportComponent implements OnInit {
   protected readonly errorMessage = this.store.errorMessage;
   protected readonly waterWelltestResult = this.store.waterWelltestResult;
   protected readonly statusCode = this.store.statusCode;
-  protected readonly loading = this.store.loading;
-  protected readonly waterWellTestResultsLoading = this.store.waterWellTestResultsLoading;
-  protected readonly isLoadingState = computed(
-    () => this.loading() || this.waterWellTestResultsLoading(),
-  );
-  protected readonly skeletonCards = [1, 2, 3];
-  protected readonly skeletonLines = [1, 2, 3, 4];
 
   ngOnInit(): void {
     this.store.loadMorningReportData();

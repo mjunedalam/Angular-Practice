@@ -1,4 +1,4 @@
-<p-card styleClass="wwell-map-card">
+<mat-card class="wwell-map-card">
   <div class="wwell-map-header">
     <div>
       <h3 class="wwell-map-title">Map Of Active Water Wells</h3>
@@ -7,7 +7,7 @@
   </div>
 
   @if (errorMessage()) {
-  <p-message severity="error" [text]="errorMessage()!" styleClass="wwell-map-message" />
+  <div class="wwell-map-message">{{ errorMessage()! }}</div>
   }
 
   <div class="wwell-map-frame">
@@ -22,4 +22,4 @@
       <div class="wwell-map-legend__chip wwell-map-legend__chip--aquifer">Aquifier</div>
     </div>
   </div>
-</p-card>
+</mat-card>

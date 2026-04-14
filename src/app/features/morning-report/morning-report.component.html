@@ -7,92 +7,29 @@
 
   <div class="report-toolbar">
     <button
-      pButton
+      mat-flat-button
       type="button"
       (click)="sendEmail()"
       class="report-toolbar__button"
     >
       <span class="report-toolbar__glow"></span>
       <span class="report-toolbar__button-inner">
-        <i class="pi pi-envelope"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 6h16v12H4z"/>
+          <path d="m4 7 8 6 8-6"/>
+        </svg>
         <span>Email Report</span>
       </span>
     </button>
   </div>
 
   <div id="report-content" class="report-content">
-    @if (hasError() && !isLoadingState()) {
+    @if (hasError()) {
     <div class="report-error">
       <p>Error ({{ statusCode() }}): {{ errorMessage() }}</p>
     </div>
     }
 
-    @if (isLoadingState()) {
-    <section class="report-section report-section--skeleton">
-      <div class="report-section__heading">
-        <span class="report-section__title">Water Well Test Results</span>
-      </div>
-
-      <div class="report-skeleton-mask">
-        @for (card of skeletonCards; track card) {
-        <div class="report-card report-card--skeleton">
-          <div class="test-result-grid">
-            <div class="test-result-grid__column test-result-grid__column--left">
-              <div class="test-result-grid__rows">
-                @for (line of skeletonLines; track line) {
-                <span class="sk report-skeleton report-skeleton--label"></span>
-                <span class="sk report-skeleton report-skeleton--value"></span>
-                }
-              </div>
-            </div>
-
-            <div class="test-result-grid__column">
-              <div class="test-result-grid__rows">
-                @for (line of [1, 2, 3]; track line) {
-                <span class="sk report-skeleton report-skeleton--label"></span>
-                <span class="sk report-skeleton report-skeleton--value"></span>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-        }
-      </div>
-    </section>
-
-    <div class="report-skeleton-mask">
-      @for (card of skeletonCards; track card) {
-      <div class="report-card report-card--skeleton report-card--summary-skeleton">
-        <div class="report-summary__header report-summary__header--skeleton">
-          <span class="sk report-skeleton report-skeleton--title"></span>
-          <span class="sk report-skeleton report-skeleton--button"></span>
-        </div>
-
-        <div class="report-summary__grid">
-          <div class="report-summary__column">
-            <div class="report-summary__row-grid">
-              @for (line of skeletonLines; track line) {
-              <span class="sk report-skeleton report-skeleton--summary-label"></span>
-              <span class="sk report-skeleton report-skeleton--summary-value"></span>
-              }
-              <span class="sk report-skeleton report-skeleton--operation-label"></span>
-              <span class="sk report-skeleton report-skeleton--operation-value"></span>
-            </div>
-          </div>
-
-          <div class="report-summary__column">
-            <div class="report-summary__row-grid">
-              @for (line of [1, 2, 3]; track line) {
-              <span class="sk report-skeleton report-skeleton--summary-label"></span>
-              <span class="sk report-skeleton report-skeleton--summary-value"></span>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-      }
-    </div>
-    } @else {
     @if (!hasError()) {
     <section class="report-section">
       <div class="report-section__heading">
@@ -100,7 +37,7 @@
       </div>
 
       @for (result of waterWelltestResult(); track result.wellName; let i = $index) {
-      <p-card styleClass="report-card report-card--test">
+      <mat-card class="report-card report-card--test">
         <div class="test-result-grid">
           <div class="test-result-grid__column test-result-grid__column--left">
             <div class="test-result-grid__rows">
@@ -163,13 +100,13 @@
             </div>
           </div>
         </div>
-      </p-card>
+      </mat-card>
       }
     </section>
     }
 
     @for (report of morningReport(); track report.epANum; let i = $index) {
-    <p-card styleClass="report-card report-card--summary">
+    <mat-card class="report-card report-card--summary">
       <div class="report-summary__header">
         <div class="report-summary__title">
           <span>{{ report.wGnrName }}</span>
@@ -179,7 +116,6 @@
         <div class="report-summary__status">
           <div class="report-summary__status-input">
             <input
-              pInputText
               placeholder="Rig status"
               [ngModel]="report.rigStatus"
               (ngModelChange)="store.updateRigStatus(i, $event)"
@@ -254,8 +190,7 @@
           </div>
         </div>
       </div>
-    </p-card>
-    }
+    </mat-card>
     }
 
     <section class="report-map-section">

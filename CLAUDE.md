@@ -6,7 +6,7 @@
 - TypeScript (strict mode)
 - Angular Signals (`@angular/core`)
 - NgRx Signals Store (`@ngrx/signals`)
-- PrimeNG 19 (Aura theme via @primeuix/themes)
+- Angular Material UI
 - D3.js (selection, scale, transition, ease)
 - AG Grid (enterprise tables)
 - SCSS (CSS variables, no Tailwind)
@@ -135,7 +135,6 @@
 - Always use PrimeNG components
 - Use PrimeIcons for icons
 - Follow Aura theme
-- Respect dark mode (`data-theme="dark"`)
 - Do NOT introduce new UI libraries
 
 ---

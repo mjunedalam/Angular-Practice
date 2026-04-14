@@ -111,7 +111,7 @@ describe('WellNameChipsComponent', () => {
     mockStore.loading.set(true);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    const loadingBar = compiled.querySelector('.well-loading-bar, p-progressbar');
+    const loadingBar = compiled.querySelector('.well-loading-bar, mat-progress-bar');
     expect(loadingBar).toBeTruthy();
   });
 });

@@ -3,7 +3,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { TopNavbarComponent } from './top-navbar.component';
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
-import { ThemeStore } from 'src/app/core/store/theme/theme.store';
 
 describe('TopNavbarComponent', () => {
   let component: TopNavbarComponent;
@@ -12,18 +11,11 @@ describe('TopNavbarComponent', () => {
     displayUsername: jest.fn(() => 'jane.doe'),
     logout: jest.fn(),
   };
-  const themeStoreMock = {
-    toggle: jest.fn(),
-    isDark: jest.fn(() => true),
-    isLight: jest.fn(() => false),
-  };
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TopNavbarComponent, NoopAnimationsModule],
       providers: [
         { provide: AuthStore, useValue: authStoreMock },
-        { provide: ThemeStore, useValue: themeStoreMock },
       ],
     })
     .compileComponents();
