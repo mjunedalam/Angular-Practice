@@ -52,6 +52,6 @@ export class HomeComponent {
   ];
 
   protected navigate(route: string): void {
-    this.router.navigate([route]);
+    this.router.navigate(['main', route]);
   }
 }

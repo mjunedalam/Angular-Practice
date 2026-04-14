@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { authGuard } from './auth.guard';
 import { AuthStore } from '../store/auth/auth.store';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -10,7 +10,7 @@ const authStoreMock = {
 };
 
 const routerMock = {
-  navigate: jest.fn(),
+  createUrlTree: jest.fn(),
 };
 
 function createRouteSnapshot(): ActivatedRouteSnapshot {
@@ -46,38 +46,37 @@ describe('authGuard (functional guard)', () => {
     );
 
     expect(result).toBeTruthy();
-    expect(routerMock.navigate).not.toHaveBeenCalled();
+    expect(routerMock.createUrlTree).not.toHaveBeenCalled();
   });
 
   it('should redirect to /login when not authenticated', () => {
     authStoreMock.isAuthenticated.mockReturnValue(false);
     authStoreMock.isTokenExpired.mockReturnValue(false);
+    const loginTree = {} as UrlTree;
+    routerMock.createUrlTree.mockReturnValue(loginTree);
 
-    const result = TestBed.runInInjectionContext(() => {
+    const result = TestBed.runInInjectionContext(() =>
       authGuard(createRouteSnapshot(), createStateSnapshot())
-    });
+    );
 
-    expect(result).toBeFalsy();
-    expect(routerMock.navigate).toHaveBeenCalledTimes(1);
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-  })
+    expect(result).toBe(loginTree);
+    expect(routerMock.createUrlTree).toHaveBeenCalledTimes(1);
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
+  });
 
   it('should redirect to /login when token is expired', () => {
     authStoreMock.isAuthenticated.mockReturnValue(true);
     authStoreMock.isTokenExpired.mockReturnValue(true);
+    const loginTree = {} as UrlTree;
+    routerMock.createUrlTree.mockReturnValue(loginTree);
 
-    TestBed.runInInjectionContext(() => {
-      authStoreMock.isAuthenticated.mockReturnValue(true);
-      authStoreMock.isTokenExpired.mockReturnValue(true);
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard(createRouteSnapshot(), createStateSnapshot())
+    );
 
-      const result = TestBed.runInInjectionContext(() => {
-        authGuard(createRouteSnapshot(), createStateSnapshot())
-      });
-
-      expect(result).toBeFalsy();
-      expect(routerMock.navigate).toHaveBeenCalledTimes(1);
-      expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-    });
-  })
+    expect(result).toBe(loginTree);
+    expect(routerMock.createUrlTree).toHaveBeenCalledTimes(1);
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
+  });
 
 });

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { EmailService } from './email.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+import { EMAIL_CC, EMAIL_FROM, EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
 
 describe('EmailService', () => {
   let service: EmailService;
@@ -27,5 +28,24 @@ describe('EmailService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('builds an email request addressed to the current user email', () => {
+    const request = service.buildEmailRequest([], 'map-image-data', 'junedalam@gmail.com');
+
+    expect(request).toEqual({
+      subject: EMAIL_SUBJECT,
+      from: EMAIL_FROM,
+      to: ['junedalam@gmail.com'],
+      cc: EMAIL_CC,
+      replyTo: '',
+      templateName: EMAIL_TEMPLATE_NAME,
+      generatePdf: false,
+      templateData: {
+        morningReport: [],
+        mapImageData: 'map-image-data',
+        waterWellTestResults: undefined,
+      },
+    });
   });
 });

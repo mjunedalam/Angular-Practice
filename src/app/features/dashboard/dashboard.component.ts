@@ -27,7 +27,7 @@ export class DashboardComponent {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
-        const segment = e.urlAfterRedirects.split('/').filter(Boolean)[0] ?? 'home';
+        const segment = e.urlAfterRedirects.split('/').filter(Boolean)[1] ?? 'home';
         this.activeRoute.set(segment);
       });
   }
@@ -38,6 +38,6 @@ export class DashboardComponent {
 
   protected onNavItemClick(id: string): void {
     this.activeRoute.set(id);
-    this.router.navigate([id]);
+    this.router.navigate(['main', id]);
   }
 }

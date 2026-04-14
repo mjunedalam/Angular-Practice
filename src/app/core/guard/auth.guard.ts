@@ -3,15 +3,12 @@ import { AuthStore } from '../store/auth/auth.store';
 import { inject } from '@angular/core';
 
 export const authGuard: CanActivateFn = () => {
-
-  const authStore = inject(AuthStore)
+  const authStore = inject(AuthStore);
   const router = inject(Router);
 
   if (authStore.isAuthenticated() && !authStore.isTokenExpired()) {
     return true;
   }
 
-  router.navigate(["/login"])
-
-  return false;
+  return router.createUrlTree(['/login']);
 };

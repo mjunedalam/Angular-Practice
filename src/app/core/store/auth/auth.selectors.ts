@@ -48,3 +48,21 @@ export function selectDisplayUsername(user: AuthUser | null): string {
     ? username.trim()
     : 'User';
 }
+
+export function selectUserEmail(user: AuthUser | null): string | null {
+  const upn = user?.upn;
+
+  if (typeof upn !== 'string') {
+    return null;
+  }
+
+  const normalizedUpn = upn.trim();
+
+  if (!normalizedUpn) {
+    return null;
+  }
+
+  return normalizedUpn.includes('@')
+    ? normalizedUpn
+    : `${normalizedUpn}@gmail.com`;
+}

@@ -6,7 +6,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { JwtService } from 'src/app/core/services/jwt/jwt.service';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
-import { AuthState, initialState, LoginRequest, selectDisplayUsername, selectIsTokenExpired } from './auth.selectors';
+import { AuthState, initialState, LoginRequest, selectDisplayUsername, selectIsTokenExpired, selectUserEmail } from './auth.selectors';
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },
@@ -14,6 +14,7 @@ export const AuthStore = signalStore(
   withComputed(({ token, user }) => ({
     isTokenExpired: computed(() => selectIsTokenExpired(token(), inject(JwtService))),
     displayUsername: computed(() => selectDisplayUsername(user())),
+    userEmail: computed(() => selectUserEmail(user())),
   })),
   withMethods((
     store,

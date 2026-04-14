@@ -11,6 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 
+import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
 import { MorningReportStore } from 'src/app/core/store/morning-report/morning-report';
 import { EmailService } from '../../core/services/email/email.service';
@@ -34,6 +35,7 @@ export class MorningReportComponent implements OnInit {
   @ViewChild('wwellMap') protected wwellMap!: WwellmapComponent;
 
   protected readonly store = inject(MorningReportStore);
+  private authStore = inject(AuthStore);
   private emailStore = inject(EmailStore);
   private emailService = inject(EmailService);
 
@@ -57,10 +59,22 @@ export class MorningReportComponent implements OnInit {
 
   protected async sendEmail(): Promise<void> {
     try {
+      const recipientEmail = this.authStore.userEmail();
+
+      if (!recipientEmail) {
+        this.showError('Unable to determine the logged-in user email.');
+        return;
+      }
+
       const morningReport = this.morningReport();
       const mapData = await this.wwellMap.captureMapAsBase64();
       const waterWelltestResults = this.waterWelltestResult();
-      const emailRequest = this.emailService.buildEmailRequest(morningReport, mapData!, waterWelltestResults);
+      const emailRequest = this.emailService.buildEmailRequest(
+        morningReport,
+        mapData!,
+        recipientEmail,
+        waterWelltestResults,
+      );
       this.emailStore.sendEmail(emailRequest);
 
       // this.snackBar.open('Email sent successfully!', 'Dismiss', {
