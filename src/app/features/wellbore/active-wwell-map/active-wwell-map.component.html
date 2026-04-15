@@ -1,19 +1,140 @@
-<div class="map-card">
-  <div class="map-card__header">Active WWell Map</div>
+<div class="border-4 border-blue-300 bg-white shadow-lg ">
+  <div class="flex">
+    <div class="w-1/12 bg-gray-100 text-white p-2 border-r border-gray-100 flex flex-col gap-4 text-center">
+      <div class="font-bold pb-2 text-white">
+        <div class="bg-yellow-100 border border-black px-8 py-1 font-bold text-center text-black rounded-lg well-list grow">
+          Wells List
+        </div>
 
-  <!-- Placeholder for an actual map integration (Leaflet/Google Maps/etc) -->
-  <div class="map-placeholder">
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-      <circle cx="12" cy="10" r="3"></circle>
-    </svg>
-    <span class="mt-2">Map View</span>
+        <mat-chip-listbox class="mat-mdc-chip-set-stacked">
+          @for (well of morningReportStore.visibleWells(); track well.epANum) {
+          <mat-chip-option [selected]="morningReportStore.selectedWellId() === well.epANum"
+            (click)="onWellSelect(well.epANum)">
+            {{ well.wGnrName }}
+          </mat-chip-option>
+          }
+        </mat-chip-listbox>
+      </div>
+      <div class="mt-20 leading-tight text-gray-700 text-xl">
+        Wellsite & Water Operation Department
+      </div>
+    </div>
+
+    <div class="w-11/12 p-2">
+      <div class="flex gap-2 mb-2">
+        <div class="bg-yellow-100 border border-black px-8 py-1 font-bold text-center rounded-lg grow">
+          Single Well Review
+        </div>
+        <!-- <div class="bg-yellow-100 px-4 py-1 border border-gray-400 font-bold">
+          File Uploader List
+        </div> -->
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div class="col-span-2 space-y-4">
+          <app-wwell-header [data]="wwellDataStore.miscWellData()"></app-wwell-header>
+          <app-database-info [data]="wwellDataStore.miscWellData()"></app-database-info>
+          <app-operation-summary [data]="wwellDataStore.miscWellData()"></app-operation-summary>
+
+
+          <div class="border border-gray-300 rounded-lg overflow-hidden shadow-sm bg-white mt-2">
+            <div class="bg-yellow-100 font-bold p-2 border-b border-black text-sm uppercase tracking-wider">
+              Drilling Remarks
+            </div>
+
+            <input type="text" class="p-1 w-full h-15" [value]="wwellDataStore.miscWellData()?.ops" />
+          </div>
+          <app-formation-tops-and-casing [data]="wwellDataStore.miscWellData()"></app-formation-tops-and-casing>
+          <app-casing-info [data]="wwellDataStore.miscWellData()"></app-casing-info>
+          <app-wwell-test [data]="wwellDataStore.miscWellData()"></app-wwell-test>
+        </div>
+
+        <div class="col-span-1 flex flex-col gap-2">
+          <app-file-upload></app-file-upload>
+
+          <div class="lt-orange border border-black grid grid-cols-2 gap-4 p-2 rounded">
+
+            <mat-form-field class=" p-1  text-center font-bold">
+              <mat-label> Status </mat-label>
+              <mat-select [(ngModel)]="selectedValue" name="food">
+                @for (status of statuses; track status) {
+                <mat-option [value]="status.value">{{
+                  status.value
+                  }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class=" p-1  text-center font-bold">
+              <mat-label>Area</mat-label>
+              <mat-select [(ngModel)]="selectedArea" name="food">
+                @for (area of areas; track area) {
+                <mat-option [value]="area.value">{{
+                  area.value
+                  }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="bg-gray-200 box rounded">
+              <mat-label>Formation Drilling</mat-label>
+              <div class="text-sm font-semibold">{{ 56 }}</div>
+            </div>
+            <div class="bg-gray-200 box rounded">
+              <mat-label>Bit Size</mat-label>
+              <div class="text-sm font-semibold">{{ 200 }}</div>
+            </div>
+            <div class="bg-gray-200 box rounded">
+              <mat-label>Circulation</mat-label>
+              <div class="text-sm font-semibold">{{ 40 }}</div>
+            </div>
+            <div class="bg-gray-200 box rounded">
+              <mat-label>Mud Weight</mat-label>
+              <div class="text-sm font-semibold">{{ 123 }}</div>
+            </div>
+            <div class="box col-span-2  w-1/2 bg-gray-200 rounded" style="    margin: 0 auto;
+    margin-bottom: 1em;">
+              <mat-label>Avg ROP</mat-label>
+              <div class="text-sm font-semibold">{{ 100 }}</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-gray-400 p-4 flex justify-between items-end bg-gray-50">
+    <div class="text-[12px] text-gray-500">
+      Saudi Aramco Company General Use
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="font-bold italic text-sm mr-4 text-gray-700">Data Source Legend</span>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-gray-500"></div>
+          Drill Eye
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-white border border-black"></div>
+          Manually Written
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-orange-500"></div>
+          GIS
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-yellow-100"></div>
+          Headers
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-blue-400"></div>
+          IR
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="w-8 h-4 bg-orange-200"></div>
+          List Insert
+        </div>
+      </div>
+    </div>
   </div>
 </div>
