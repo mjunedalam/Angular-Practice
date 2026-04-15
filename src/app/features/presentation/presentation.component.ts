@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, s
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from 'src/app/core/store/well.store';
-import { formatDateForInput, parseDateFromInput } from 'src/app/utils/date.util';
+import { formatDateForInput } from 'src/app/utils/date.util';
 import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { DepthScaleComponent } from './depth-scale/depth-scale.component';
@@ -62,7 +62,7 @@ export class PresentationComponent implements OnInit {
 
     if (rawEpANum) {
       const epANum = parseInt(rawEpANum, 10);
-      const date = rawDate ? parseDateFromInput(rawDate) : this.store.selectedDate();
+      const date = rawDate ?? formatDateForInput(this.store.selectedDate());
       this.store.selectWell({ epANum, date });
     }
 

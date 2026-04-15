@@ -13,11 +13,11 @@ export { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult };
 export const PAGE_SIZE = 5;
 export const FALLBACK_STR = 'N/A';
 
-export function uniqueByWellName(names: WellName[]): WellName[] {
-    const seen = new Set<string>();
+export function uniqueByEpANum(names: WellName[]): WellName[] {
+    const seen = new Set<number>();
     return names.filter(w => {
-        if (seen.has(w.wellName)) return false;
-        seen.add(w.wellName);
+        if (seen.has(w.epANum)) return false;
+        seen.add(w.epANum);
         return true;
     });
 }

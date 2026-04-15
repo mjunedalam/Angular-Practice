@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { computed } from '@angular/core';
 import { EmailRequest } from 'src/app/shared/models/email/email-request.model';
 import { EmailService } from '../../services/email/email.service';
 
@@ -14,8 +15,13 @@ const initialState: EmailState = {
 };
 
 export const EmailStore = signalStore(
-  { providedIn: 'root' },
   withState(initialState),
+  withComputed((store) => ({
+    isSending: computed(() => store.status() === 'sending'),
+    isSent: computed(() => store.status() === 'sent'),
+    hasFailed: computed(() => store.status() === 'failed'),
+    isIdle: computed(() => store.status() === 'idle'),
+  })),
   withMethods((store, emailService = inject(EmailService)) => ({
     sendEmail(request: EmailRequest) {
       patchState(store, { status: 'sending', error: null });

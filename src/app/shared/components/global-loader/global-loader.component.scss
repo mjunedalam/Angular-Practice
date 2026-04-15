@@ -16,7 +16,7 @@
   display: block;
   height: 100%;
   min-width: 0;
-  background: var(--accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);
+  background: #3b82f6; /* overridden by [style.background] binding */
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
   transition: width 180ms ease;
 }

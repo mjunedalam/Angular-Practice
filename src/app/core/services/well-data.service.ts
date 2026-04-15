@@ -1,69 +1,75 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError } from 'rxjs';
-import { MorningReport } from '../models/morning-report/morning-report.model';
-import { WellName } from '../models/well-design/well-name.model';
+import { Observable, catchError, map, timeout } from 'rxjs';
 import { IWellData } from '../models/well-design/well-data.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
+import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+const CONNECTION_TIMEOUT_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class WellDataService {
   private readonly http = inject(HttpClient);
-  apiUrl = "";
-  /** Fetches the list of well names for chip rendering. */
- 
+  private readonly extConfigService = inject(ExternalConfigService);
+  private readonly snackBar = inject(MatSnackBar);
 
-  /**
-   * Fetches well design data for the given EPA number and optional date.
-   *
-   * @param epANum - The EPA number of the well
-   * @param date - Optional date for which to load data; defaults to today
-   *
-   * Loads date-specific JSON variants from /assets/data/well-details-{YYYYMMDD}.json.
-   * Falls back to baseline (20260401) if the date file is not found.
-   */
-  getWellDetails(epANum: number, date?: Date): Observable<IWellData> {
-    const queryDate = date || new Date();
-    const dateStr = this.formatDateForAsset(queryDate);
-    const assetPath = `/assets/data/well-details-${dateStr}.json`;
+  private get apiUrl(): string {
+    const s = this.extConfigService.settings;
+    return s.dailyOperationServiceUrl ?? s.dailyOperatioServicenUrl ?? '';
+  }
 
-    return this.http
-      .get<ApiResponse<IWellData>>(assetPath)
+  private notifyFallback(): void {
+    this.snackBar.open('Connected to local data - service unavailable.', 'Dismiss', {
+      duration: 8000,
+      panelClass: ['app-snackbar', 'app-snackbar--warn'],
+      horizontalPosition: 'right',
+      verticalPosition: 'bottom',
+    });
+  }
+
+  private withFallback<T>(
+    apiCall: Observable<T>,
+    localFallback: Observable<T>,
+  ): Observable<T> {
+    if (!this.apiUrl) {
+      this.notifyFallback();
+      return localFallback;
+    }
+    return apiCall.pipe(
+      timeout(CONNECTION_TIMEOUT_MS),
+      catchError(() => {
+        this.notifyFallback();
+        return localFallback;
+      }),
+    );
+  }
+
+  getWellDetails(epANum: number, date: string): Observable<IWellData> {
+    const assetDate = date.replace(/-/g, '');
+    const localFallback = this.http
+      .get<ApiResponse<IWellData>>(`/assets/data/well-details-${epANum}-${assetDate}.json`)
       .pipe(
         map((res) => res.data[0]),
-        catchError(() => {
-          // Fallback to baseline if date variant not found
-          return this.http
-            .get<ApiResponse<IWellData>>('/assets/data/well-details-20260401.json')
+        catchError(() =>
+          this.http
+            .get<ApiResponse<IWellData>>(`/assets/data/well-details-${epANum}-20260401.json`)
             .pipe(
-              map((res) => res.data[0])
-            );
-        })
+              map((res) => res.data[0]),
+              catchError(() =>
+                this.http
+                  .get<ApiResponse<IWellData>>('/assets/data/well-details-20260401.json')
+                  .pipe(map((res) => res.data[0]))
+              )
+            )
+        )
       );
-  }
 
-  /**
-   * Formats a date to YYYYMMDD string for asset path construction.
-   *
-   * @param date - The date to format
-   * @returns Date string in YYYYMMDD format (e.g., '20260410')
-   */
-  private formatDateForAsset(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}${month}${day}`;
-  }
-
-  /** Fetches the morning report to extract dynamic well names. */
-  getMorningReport(): Observable<MorningReport[]> {
-    return this.http.get<MorningReport[]>(`${this.apiUrl}/morning-report`).pipe(
-      map(reports => reports.map(report => ({
-        ...report,
-        plLtrlEndDpth: report.plLtrlEndDpth ? Number(report.plLtrlEndDpth) : null,
-        wDpthChgDis: report.wDpthChgDis ? Number(report.wDpthChgDis) : null,
-        wPrsntDpth: report.wPrsntDpth ? Number(report.wPrsntDpth) : null
-      })))
+    return this.withFallback(
+      this.http
+        .get<ApiResponse<IWellData>>(`${this.apiUrl}/drilling-eye?date=${date}&epANum=${epANum}`)
+        .pipe(map((res) => res.data[0])),
+      localFallback,
     );
   }
 }

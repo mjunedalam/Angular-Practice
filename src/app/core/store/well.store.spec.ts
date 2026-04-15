@@ -52,7 +52,7 @@ describe('WellStore', () => {
       const mockDetails = { EXAD_RCD_PREWAP: [{ estTargetDepth: 1234 }] };
       wellDataServiceMock.getWellDetails.mockReturnValue(of(mockDetails));
 
-      store.selectWell({ epANum: 100 });
+      store.selectWell({ epANum: 100, date: '2026-04-16' });
       tick(1000); // delay(MIN_LOADER_DELAY)
       tick(); // resolve the service call
 
@@ -66,7 +66,7 @@ describe('WellStore', () => {
     it('should handle selectWell error', fakeAsync(() => {
       wellDataServiceMock.getWellDetails.mockReturnValue(throwError(() => new Error('Error Loading Details')));
 
-      store.selectWell({ epANum: 100 });
+      store.selectWell({ epANum: 100, date: '2026-04-16' });
       tick(1000); // delay(MIN_LOADER_DELAY)
       tick(); // resolve the service call
 

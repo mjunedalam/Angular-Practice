@@ -1,5 +1,5 @@
 import {
-  uniqueByWellName,
+  uniqueByEpANum,
   selectTotalPages,
   selectPagedWellNames,
   selectHasPrevPage,
@@ -19,14 +19,14 @@ import { WellName } from 'src/app/core/models/well-design/well-name.model';
 import { expect, it, describe } from '@jest/globals';
 
 describe('Well Selectors', () => {
-  describe('uniqueByWellName', () => {
-    it('should return unique well names', () => {
+  describe('uniqueByEpANum', () => {
+    it('should return unique wells by epANum', () => {
       const names: WellName[] = [
         { wellName: 'A', epANum: 1 },
         { wellName: 'B', epANum: 2 },
         { wellName: 'A', epANum: 1 }
       ];
-      const result = uniqueByWellName(names);
+      const result = uniqueByEpANum(names);
       expect(result).toEqual([{ wellName: 'A', epANum: 1 }, { wellName: 'B', epANum: 2 }]);
     });
   });

@@ -87,11 +87,11 @@
   }
 }
 
-// ── Chip strip — centered ────────────────────────────────────────────────────
+// ── Chip strip — left-anchored ───────────────────────────────────────────────
 .chip-strip {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 10px;
   flex: 1;
@@ -182,7 +182,13 @@
   --mdc-linear-progress-track-height: 4px;
   --mdc-linear-progress-active-indicator-height: 4px;
   --mdc-linear-progress-track-color: var(--border-sub);
-  --mdc-linear-progress-active-indicator-color: var(--accent);
+  --mdc-linear-progress-active-indicator-color: transparent;
+}
+
+:host ::ng-deep .well-loading-bar .mdc-linear-progress__bar-inner {
+  border-top: none !important;
+  height: 4px;
+  background: linear-gradient(to right, #3b82f6, #22c55e);
 }
 
 @keyframes chip-dot-pulse {

@@ -128,7 +128,7 @@
           "epANum": 80665,
           "wActDt": "2025-07-18T00:00:00",
           "wRigCd": "SINO25",
-          "wPrsntDpth": 2900,
+          "wPrsntDpth": 2714,
           "epLtDataModDt": "2025-07-20T12:04:55",
           "epLtDmoCd": "PLACIDAI",
           "wDpthChgDis": 0,
@@ -527,7 +527,7 @@
       "EXAD_RCD_PREWAP": [
         {
           "surfaceElevation": 945,
-          "estTargetDepth": 5360,
+          "estTargetDepth": 5420,
           "targetFormation": "WASI",
           "supportedBusiness": "ANDR-814 REPLACEMENT"
         }

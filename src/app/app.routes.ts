@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guard/auth.guard';
+import { WellStore } from './core/store/well.store';
+import { MorningReportStore } from './core/store/morning-report/morning-report';
+import { EmailStore } from './core/store/email/email.store';
 
 export const routes: Routes = [
   {
@@ -41,6 +44,7 @@ export const routes: Routes = [
           import('./features/presentation/presentation.component').then(
             (m) => m.PresentationComponent,
           ),
+        providers: [WellStore],
       },
       {
         path: 'morning-report',
@@ -48,6 +52,7 @@ export const routes: Routes = [
           import('./features/morning-report/morning-report.component').then(
             (m) => m.MorningReportComponent,
           ),
+        providers: [MorningReportStore, EmailStore],
       },
     ],
   },

@@ -43,7 +43,7 @@ export class WellNameChipsComponent {
   protected onWellChipClick(epANum: number): void {
     this.store.selectWell({
       epANum,
-      date: this.store.selectedDate(),
+      date: this.selectedDateString(),
     });
   }
 

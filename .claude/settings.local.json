@@ -12,7 +12,10 @@
       "Bash(pkill -f \"ng serve\")",
       "Bash(pkill -f \"webpack\")",
       "Bash(npx tsc:*)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(ng build:*)",
+      "Bash(/Users/junedalam/angular-with-ngrx/Angular-Practice/node_modules/.bin/tsc --noEmit)",
+      "Bash(tsc --noEmit --project /Users/junedalam/angular-with-ngrx/Angular-Practice/tsconfig.json)"
     ]
   }
 }

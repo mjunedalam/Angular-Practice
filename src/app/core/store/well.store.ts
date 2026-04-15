@@ -23,7 +23,7 @@ import { formatDateForInput } from 'src/app/utils/date.util';
 import { WellActions, WellEvents } from './well.actions';
 import {
     PAGE_SIZE,
-    uniqueByWellName,
+    uniqueByEpANum,
     selectTotalPages,
     selectPagedWellNames,
     selectHasPrevPage,
@@ -37,7 +37,7 @@ import {
     selectWellTestResults,
 } from './well.selectors';
 
-const MIN_LOADER_DELAY = 1000;
+const MIN_LOADER_DELAY = 1500;
 
 const EXPECTED_KEYS: (keyof IWellData)[] = [
     'WELL_MASTER', 'RIG_ACTIVITY', 'DRLG_OP_STATUS', 'DRLG_FD_TDAY',
@@ -124,11 +124,10 @@ const initialState: WellState = {
 };
 
 export const WellStore = signalStore(
-    { providedIn: 'root' },
     withState<WellState>(initialState),
 
     withComputed(({ wellDetails, wellNames, wellNamesPage, loading }) => {
-        const unique = computed(() => uniqueByWellName(wellNames()));
+        const unique = computed(() => uniqueByEpANum(wellNames()));
         return {
             uniqueWellNames: unique,
             totalPages: computed(() => selectTotalPages(unique())),
@@ -157,12 +156,12 @@ export const WellStore = signalStore(
             return store.uniqueWellNames()[pageIdx * PAGE_SIZE];
         }
 
-        const selectWell = rxMethod<{ epANum: number; date?: Date }>(
+        const selectWell = rxMethod<{ epANum: number; date: string }>(
             pipe(
                 tap(({ epANum, date }) => {
                     patchState(store, {
                         selectedEpANum: epANum,
-                        selectedDate: date || new Date(),
+                        selectedDate: new Date(date + 'T00:00:00'),
                         loading: true,
                         error: null,
                     });
@@ -197,7 +196,7 @@ export const WellStore = signalStore(
                     patchState(store, { loading: true, error: null });
                 }),
                 switchMap(() => {
-                    const date = store.selectedDate().toISOString().slice(0, 10);
+                    const date = formatDateForInput(store.selectedDate());
                     return morningReportService.getMorningReport(date).pipe(
                         delay(MIN_LOADER_DELAY),
                         map((reports: MorningReport[]) => reports.map(r => ({ wellName: r.wGnrName, epANum: Number(r.epANum) }))),
@@ -205,7 +204,7 @@ export const WellStore = signalStore(
                             next: (wellNames) => {
                                 patchState(store, { wellNames, loading: false });
                                 if (wellNames.length > 0 && !store.selectedEpANum()) {
-                                    selectWell({ epANum: wellNames[0].epANum });
+                                    selectWell({ epANum: wellNames[0].epANum, date: formatDateForInput(store.selectedDate()) });
                                 }
                             },
                             error: (err: Error) => {
@@ -224,8 +223,11 @@ export const WellStore = signalStore(
             selectWell,
             loadWellNames,
             setSelectedDate(date: Date): void {
-                patchState(store, { selectedDate: date, selectedEpANum: null, wellDetails: null });
-                loadWellNames();
+                patchState(store, { selectedDate: date, wellDetails: null });
+                const epANum = store.selectedEpANum();
+                if (epANum != null) {
+                    selectWell({ epANum, date: formatDateForInput(date) });
+                }
             },
             getFormattedDate(): string {
                 return formatDateForInput(store.selectedDate());
@@ -234,13 +236,13 @@ export const WellStore = signalStore(
                 const idx = store.wellNamesPage() + 1;
                 patchState(store, { wellNamesPage: idx });
                 const first = firstOnPage(idx);
-                if (first) selectWell({ epANum: first.epANum, date: store.selectedDate() });
+                if (first) selectWell({ epANum: first.epANum, date: formatDateForInput(store.selectedDate()) });
             },
             prevPage(): void {
                 const idx = Math.max(0, store.wellNamesPage() - 1);
                 patchState(store, { wellNamesPage: idx });
                 const first = firstOnPage(idx);
-                if (first) selectWell({ epANum: first.epANum, date: store.selectedDate() });
+                if (first) selectWell({ epANum: first.epANum, date: formatDateForInput(store.selectedDate()) });
             },
         };
     }),

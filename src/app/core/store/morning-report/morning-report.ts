@@ -44,15 +44,15 @@ const initialState: MorningReportState = {
 const SKELETON_PREVIEW_DELAY_MS = 1200;
 
 export const MorningReportStore = signalStore(
-  { providedIn: 'root' },
   withState<MorningReportState>(initialState),
-  withComputed(({ morningReport, waterWellTestResults, uiError }) => ({
+  withComputed(({ morningReport, waterWellTestResults, uiError, loading }) => ({
     hasError: computed(() => waterWellTestResults().error),
     errorMessage: computed(() => waterWellTestResults().message),
     waterWelltestResult: computed(() => waterWellTestResults().data),
     statusCode: computed(() => waterWellTestResults().statusCode),
     reportCount: computed(() => morningReport().length),
     uiErrorMessage: computed(() => uiError()),
+    isLoading: computed(() => loading()),
   })),
   withMethods((store, morningReportService = inject(MorningReportService)) => {
     const loadMorningReportData = rxMethod<string>(

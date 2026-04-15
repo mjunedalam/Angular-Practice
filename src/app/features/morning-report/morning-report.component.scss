@@ -69,48 +69,161 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 1.25rem;
 }
 
-.report-toolbar__datepicker {
-  width: 180px;
+.date-picker-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
-  .mat-mdc-form-field-subscript-wrapper {
+.date-picker-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-picker-input {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-inner);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 140px;
+  width: auto;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  &:hover {
+    border-color: var(--accent-hover);
+    background: var(--accent-muted);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--accent-muted);
+    box-shadow: 0 0 0 3px var(--accent-muted);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.9;
+    pointer-events: auto;
+    width: 24px;
+    height: 24px;
+    filter: brightness(0.6);
+  }
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
     display: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &::-moz-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 1;
   }
 }
 
-.report-toolbar__button {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--accent) 36%, white 12%);
-  border-radius: 999px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 72%, white 20%), color-mix(in srgb, var(--success) 35%, var(--accent) 65%));
-  color: #fff;
-  box-shadow:
-    0 14px 28px rgba(15, 23, 42, 0.16),
-    0 0 0 6px var(--report-action-ring);
+.report-loading-bar {
+  height: 4px;
+  --mdc-linear-progress-track-height: 4px;
+  --mdc-linear-progress-active-indicator-height: 4px;
+  --mdc-linear-progress-track-color: var(--border-sub);
+  --mdc-linear-progress-active-indicator-color: transparent;
 }
 
-.report-toolbar__glow {
+:host ::ng-deep .report-loading-bar .mdc-linear-progress__bar-inner {
+  border-top: none !important;
+  height: 4px;
+  background: linear-gradient(to right, #3b82f6, #22c55e);
+}
+
+.email-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1.1rem 0.55rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+
+  &:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 38%, transparent);
+
+    .email-btn__arrow {
+      transform: translateX(3px);
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.email-btn__shimmer {
   position: absolute;
-  inset: -1px;
-  background: linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.45) 42%, transparent 66%);
-  transform: translateX(-120%);
-  animation: report-button-sheen 3s ease-in-out infinite;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.22) 50%, transparent 70%);
+  transform: translateX(-110%);
+  animation: email-btn-sheen 3.5s ease-in-out infinite;
   pointer-events: none;
 }
 
-.report-toolbar__button-inner {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
+.email-btn__icon {
+  display: flex;
   align-items: center;
-  gap: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  flex-shrink: 0;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.email-btn__label {
+  white-space: nowrap;
+}
+
+.email-btn__arrow {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: transform 180ms ease;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
 }
 
 .report-content {
@@ -413,23 +526,18 @@
   stroke-linejoin: round;
 }
 
-:host ::ng-deep .report-toolbar__button {
-  padding: 0.8rem 1.25rem;
-  border-radius: 999px;
-}
-
 /* Animations */
-@keyframes report-button-sheen {
+@keyframes email-btn-sheen {
   0%, 15% {
-    transform: translateX(-125%);
+    transform: translateX(-110%);
   }
   45%, 100% {
-    transform: translateX(125%);
+    transform: translateX(110%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .report-toolbar__glow {
+  .email-btn__shimmer {
     animation: none;
   }
 }
