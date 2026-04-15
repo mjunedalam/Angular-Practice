@@ -14,6 +14,7 @@ import { MorningReport } from 'src/app/core/models/morning-report/morning-report
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { formatDateForInput, getTodayAtMidnight } from 'src/app/utils/date.util';
 
 interface MorningReportState {
   readonly morningReport: MorningReport[];
@@ -21,6 +22,7 @@ interface MorningReportState {
   readonly loading: boolean;
   readonly waterWellTestResultsLoading: boolean;
   readonly uiError: string | null;
+  readonly selectedDate: string;
 }
 
 const initialWaterWellTestResults: ApiResponse<WaterWellTestResult> = {
@@ -36,6 +38,7 @@ const initialState: MorningReportState = {
   loading: true,
   waterWellTestResultsLoading: false,
   uiError: null,
+  selectedDate: formatDateForInput(getTodayAtMidnight()),
 };
 
 const SKELETON_PREVIEW_DELAY_MS = 1200;
@@ -52,13 +55,13 @@ export const MorningReportStore = signalStore(
     uiErrorMessage: computed(() => uiError()),
   })),
   withMethods((store, morningReportService = inject(MorningReportService)) => {
-    const loadMorningReportData = rxMethod<void>(
+    const loadMorningReportData = rxMethod<string>(
       pipe(
-        tap(() => patchState(store, { loading: true, uiError: null })),
-        switchMap(() =>
+        tap((date) => patchState(store, { loading: true, uiError: null, selectedDate: date })),
+        switchMap((date) =>
           timer(SKELETON_PREVIEW_DELAY_MS).pipe(
             switchMap(() =>
-              morningReportService.getMorningReport().pipe(
+              morningReportService.getMorningReport(date).pipe(
                 tapResponse({
                   next: (reports) => {
                     patchState(store, {
@@ -116,6 +119,9 @@ export const MorningReportStore = signalStore(
     return {
       loadMorningReportData,
       loadWaterWellTestResults,
+      setDate(date: string): void {
+        loadMorningReportData(date);
+      },
       updateRigStatus(index: number, rigStatus: string): void {
         patchState(store, {
           morningReport: store.morningReport().map((report, reportIndex) =>

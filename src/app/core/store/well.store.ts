@@ -196,12 +196,11 @@ export const WellStore = signalStore(
                 tap(() => {
                     patchState(store, { loading: true, error: null });
                 }),
-                switchMap(() =>
-                    morningReportService.getMorningReport().pipe(
+                switchMap(() => {
+                    const date = store.selectedDate().toISOString().slice(0, 10);
+                    return morningReportService.getMorningReport(date).pipe(
                         delay(MIN_LOADER_DELAY),
-                        map((reports: MorningReport[]) =>
-                            reports.map(r => ({ wellName: r.wGnrName, epANum: Number(r.epANum) }))
-                        ),
+                        map((reports: MorningReport[]) => reports.map(r => ({ wellName: r.wGnrName, epANum: Number(r.epANum) }))),
                         tapResponse({
                             next: (wellNames) => {
                                 patchState(store, { wellNames, loading: false });
@@ -216,8 +215,8 @@ export const WellStore = signalStore(
                                 });
                             },
                         }),
-                    ),
-                ),
+                    );
+                }),
             ),
         );
 
@@ -225,11 +224,8 @@ export const WellStore = signalStore(
             selectWell,
             loadWellNames,
             setSelectedDate(date: Date): void {
-                patchState(store, { selectedDate: date });
-                // Reload well data for the newly selected date if a well is selected
-                if (store.selectedEpANum() !== null) {
-                    selectWell({ epANum: store.selectedEpANum()!, date });
-                }
+                patchState(store, { selectedDate: date, selectedEpANum: null, wellDetails: null });
+                loadWellNames();
             },
             getFormattedDate(): string {
                 return formatDateForInput(store.selectedDate());

@@ -6,7 +6,7 @@
 - TypeScript (strict mode)
 - Angular Signals (`@angular/core`)
 - NgRx Signals Store (`@ngrx/signals`)
-- Angular Material UI
+- Angular Material (MDC-based components)
 - D3.js (selection, scale, transition, ease)
 - AG Grid (enterprise tables)
 - SCSS (CSS variables, no Tailwind)
@@ -130,11 +130,11 @@
 
 ---
 
-## UI Rules (PrimeNG)
+## UI Rules (Angular Material)
 
-- Always use PrimeNG components
-- Use PrimeIcons for icons
-- Follow Aura theme
+- Always use Angular Material components
+- Use Material icons (`mat-icon`)
+- Follow the existing Material theme
 - Do NOT introduce new UI libraries
 
 ---
@@ -172,6 +172,18 @@
 
 - Avoid heavy DOM testing
 - Mock D3 modules
+
+---
+
+## Skills (use with `/skill-name`)
+
+| Skill | When to use |
+|-------|-------------|
+| `angular-component` | Creating or refactoring standalone Angular components |
+| `ngrx-signal-store` | NgRx Signal Store patterns (`signalStore`, `withState`, `withComputed`, `withMethods`) |
+| `d3-signals` | D3 + Angular Signals integration, `effect()`-driven rendering |
+| `d3-chart` | D3 chart construction, scales, axes, transitions |
+| `multi-frontend` | Angular Material component patterns and theming |
 
 ---
 

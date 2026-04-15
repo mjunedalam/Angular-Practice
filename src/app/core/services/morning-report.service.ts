@@ -56,14 +56,23 @@ export class MorningReportService {
     }));
   }
 
-  getMorningReport(): Observable<MorningReport[]> {
+  getMorningReport(date: string): Observable<MorningReport[]> {
+    const fallbackUrl = `assets/data/mr-report-${date}.json`;
     return this.withFallback(
-      this.http.get<MorningReport[]>(`${this.apiUrl}/morning-report`).pipe(
+      this.http.get<MorningReport[]>(`${this.apiUrl}/morning-report?date=${date}`).pipe(
         map(reports => this.transformReports(reports)),
       ),
-      this.http.get<MorningReport[]>('assets/data/mr-report.json').pipe(
+      this.http.get<MorningReport[]>(fallbackUrl).pipe(
         map(reports => this.transformReports(reports)),
       ),
+    );
+  }
+
+  getMorningReportByDate(date: string): Observable<MorningReport> {
+    const fallbackUrl = `assets/data/mr-report-${date}.json`;
+    return this.withFallback(
+      this.http.get<MorningReport>(`${this.apiUrl}/morning-report?date=${date}`),
+      this.http.get<MorningReport>(fallbackUrl),
     );
   }
 

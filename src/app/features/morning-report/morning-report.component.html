@@ -6,6 +6,20 @@
   </div>
 
   <div class="report-toolbar">
+    <mat-form-field class="report-toolbar__datepicker" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Report Date</mat-label>
+      <input
+        matInput
+        [matDatepicker]="datepicker"
+        [max]="maxDate"
+        [value]="selectedDate"
+        (dateChange)="onDateChange($event.value)"
+        readonly
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="datepicker" />
+      <mat-datepicker #datepicker />
+    </mat-form-field>
+
     <button
       mat-flat-button
       type="button"

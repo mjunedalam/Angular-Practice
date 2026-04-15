@@ -8,6 +8,10 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
@@ -23,6 +27,10 @@ import { WwellmapComponent } from '../wwell-map/wwell-map.component';
     FormsModule,
     MatButtonModule,
     MatCardModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
   ],
   templateUrl: './morning-report.component.html',
   styleUrl: './morning-report.component.scss',
@@ -42,9 +50,22 @@ export class MorningReportComponent implements OnInit {
   protected readonly waterWelltestResult = this.store.waterWelltestResult;
   protected readonly statusCode = this.store.statusCode;
 
+  protected readonly maxDate = new Date();
+  protected selectedDate = new Date();
+
   ngOnInit(): void {
-    this.store.loadMorningReportData();
+    this.store.loadMorningReportData(this.toIso(this.selectedDate));
     this.store.loadWaterWellTestResults();
+  }
+
+  protected onDateChange(date: Date | null): void {
+    if (!date) return;
+    this.selectedDate = date;
+    this.store.setDate(this.toIso(date));
+  }
+
+  private toIso(date: Date): string {
+    return date.toISOString().slice(0, 10);
   }
 
   protected async sendEmail(): Promise<void> {

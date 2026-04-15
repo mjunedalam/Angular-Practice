@@ -11,9 +11,7 @@ export class WellDataService {
   private readonly http = inject(HttpClient);
   apiUrl = "";
   /** Fetches the list of well names for chip rendering. */
-  getWellNames(): Observable<WellName[]> {
-    return this.http.get<WellName[]>('/assets/data/well-names.json');
-  }
+ 
 
   /**
    * Fetches well design data for the given EPA number and optional date.
