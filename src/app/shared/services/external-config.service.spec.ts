@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ExternalConfigService } from './external-config.service';
+import { ExternalConfigService } from '@shared/services/external-config.service';
 
 describe('ExternalConfigServiceService', () => {
   let service: ExternalConfigService;

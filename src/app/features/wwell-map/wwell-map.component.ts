@@ -37,7 +37,7 @@ import {
   WWell,
   wwellIdTextSymbol,
 } from 'src/app/shared/models/config/agwa-map.config';
-import { createLegendLayer, findNonOverlappingPosition, translatePolygon  } from 'src/app/utils/wwell-placement-utils';
+import { createLegendLayer, findNonOverlappingPosition, translatePolygon  } from 'src/app/shared/utils/wwell-placement-utils';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 
 const WWELL_MAP_BOOT_TASK = 'arcgis-map';

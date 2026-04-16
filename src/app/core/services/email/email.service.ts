@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { EmailRequest } from 'src/app/shared/models/email/email-request.model';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { MorningReport } from '../../models/morning-report/morning-report.model';
+import { MorningReport } from '@models/morning-report/morning-report.model';
 import { EMAIL_FROM, EMAIL_CC, EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';

@@ -1,8 +1,8 @@
 import { HttpHandlerFn, HttpRequest, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { authInterceptor } from './auth.interceptor';
-import { AuthStore } from '../store/auth/auth.store';
+import { authInterceptor } from '@interceptors/auth.interceptor';
+import { AuthStore } from '../../features/auth/store/auth.store';
 
 describe('authInterceptor', () => {
   const authStoreMock = {

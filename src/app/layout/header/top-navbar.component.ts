@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
-import { AuthStore } from 'src/app/core/store/auth/auth.store';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 
 @Component({
   selector: 'app-top-navbar',

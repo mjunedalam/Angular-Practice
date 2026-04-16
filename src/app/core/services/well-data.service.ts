@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, timeout } from 'rxjs';
-import { IWellData } from '../models/well-design/well-data.model';
+import { IWellData } from '@models/well-design/well-data.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '@shared/components/notification/notification.service';
 
 const CONNECTION_TIMEOUT_MS = 5000;
 
@@ -12,7 +12,7 @@ const CONNECTION_TIMEOUT_MS = 5000;
 export class WellDataService {
   private readonly http = inject(HttpClient);
   private readonly extConfigService = inject(ExternalConfigService);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notify = inject(NotificationService);
 
   private get apiUrl(): string {
     const s = this.extConfigService.settings;
@@ -20,12 +20,7 @@ export class WellDataService {
   }
 
   private notifyFallback(): void {
-    this.snackBar.open('Connected to local data - service unavailable.', 'Dismiss', {
-      duration: 8000,
-      panelClass: ['app-snackbar', 'app-snackbar--warn'],
-      horizontalPosition: 'right',
-      verticalPosition: 'bottom',
-    });
+    this.notify.error('Connected to local data - service unavailable.');
   }
 
   private withFallback<T>(

@@ -11,7 +11,7 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { WellStore } from '../../../core/store/well.store';
+import { WellStore } from '@store/well.store';
 import { ANIM, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
@@ -25,7 +25,7 @@ import {
   computeCasingHalfWidth,
   createDepthScale,
   openHoleHalfWidth,
-} from 'src/app/utils/wellbore-math.util';
+} from 'src/app/shared/utils/wellbore-math.util';
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
 type GSel = Selection<SVGGElement, unknown, null, undefined>;

@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, s
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from 'src/app/core/store/well.store';
-import { formatDateForInput } from 'src/app/utils/date.util';
-import { ResizeDividerComponent } from '../../shared/components/resize-divider/resize-divider.component';
+import { formatDateForInput } from 'src/app/shared/utils/date.util';
+import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { DepthScaleComponent } from './depth-scale/depth-scale.component';
 import { WellNameChipsComponent } from './well-name-chips/well-name-chips.component';

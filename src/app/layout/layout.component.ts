@@ -6,18 +6,18 @@ import {
 } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
-import { TopNavbarComponent } from './top-navbar/top-navbar.component';
-import { LeftSidenavComponent } from './left-sidenav/left-sidenav.component';
+import { TopNavbarComponent } from './header/top-navbar.component';
+import { LeftSidenavComponent } from './sidebar/left-sidenav.component';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-layout',
   standalone: true,
   imports: [TopNavbarComponent, LeftSidenavComponent, RouterOutlet],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss',
+  templateUrl: './layout.component.html',
+  styleUrl: './layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {
+export class LayoutComponent {
   private  readonly router           = inject(Router);
   protected readonly sidenavCollapsed = signal<boolean>(false);
   protected readonly activeRoute      = signal<string>('home');

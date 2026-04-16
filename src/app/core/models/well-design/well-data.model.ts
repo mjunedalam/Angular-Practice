@@ -17,7 +17,7 @@ import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IWaterIR } from 'src/app/shared/models/wwell/water-ir.model';
 import { IWaterWellTestOutcome } from 'src/app/shared/models/wwell/water-well-test-outcome.model';
 import { IWellMaster } from 'src/app/shared/models/wwell/well-master.model';
-import { IMudCirculation } from './mud-circulation.model';
+import { IMudCirculation } from '@models/well-design/mud-circulation.model';
 
 export interface IWellData {
     RIG_ACTIVITY: IRigActivity[];

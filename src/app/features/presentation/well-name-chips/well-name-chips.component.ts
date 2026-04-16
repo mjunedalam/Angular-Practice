@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WellStore } from 'src/app/core/store/well.store';
-import { formatDateForInput, parseDateFromInput } from 'src/app/utils/date.util';
+import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-well-name-chips',

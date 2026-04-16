@@ -26,6 +26,38 @@
 
 ---
 
+## Path Aliases (TypeScript)
+
+Use aliases for `core/` and `shared/` imports. Use relative paths within `features/` and `layout/`.
+
+```json
+"paths": {
+  "@core/*":         ["src/app/core/*"],
+  "@shared/*":       ["src/app/shared/*"],
+  "@env/*":          ["src/environments/*"],
+  "@models/*":       ["src/app/core/models/*"],
+  "@store/*":        ["src/app/core/store/*"],
+  "@services/*":     ["src/app/core/services/*"],
+  "@guards/*":       ["src/app/core/guards/*"],
+  "@interceptors/*": ["src/app/core/interceptors/*"]
+}
+```
+
+Examples:
+```ts
+import { WellStore }      from '@store/well.store';
+import { AuthStore }      from '@store/auth/auth.store';       // ← if in core
+import { AuthGuard }      from '@guards/auth.guard';
+import { AuthInterceptor} from '@interceptors/auth.interceptor';
+import { MorningReport }  from '@models/morning-report/morning-report.model';
+import { SomeService }    from '@services/some.service';
+import { SomeComponent }  from '@shared/components/some/some.component';
+// features & layout → relative
+import { LoginComponent } from '../auth/login.component';
+```
+
+---
+
 ## Response Style
 
 - Prefer code over explanation
@@ -161,7 +193,7 @@
 
 ---
 
-## Testing
+## Testingx
 
 - Use Jest only
 - No Karma/Jasmine
@@ -196,6 +228,9 @@ npm run build:prod
 npm test
 npm run lint
 
+---
+
+## Directory Structure (MANDATORY)
 src/
 └── app/
     ├── core/

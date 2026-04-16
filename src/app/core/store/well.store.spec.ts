@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { WellStore } from './well.store';
+import { WellStore } from '@store/well.store';
 import { WellDataService } from 'src/app/core/services/well-data.service';
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { of, throwError } from 'rxjs';

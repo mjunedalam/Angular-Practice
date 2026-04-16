@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpRequest } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { throwError } from 'rxjs';
-import { errorInterceptor } from './error.interceptor';
+import { errorInterceptor } from '@interceptors/error.interceptor';
 
 describe('errorInterceptor', () => {
   beforeEach(() => {

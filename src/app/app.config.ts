@@ -4,8 +4,8 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { routes } from './app.routes';
-import { ExternalConfigService } from './shared/services/external-config.service';
-import { AuthStore } from './core/store/auth/auth.store';
+import { ExternalConfigService } from '@shared/services/external-config.service';
+import { AuthStore } from './features/auth/store/auth.store';
 
 function initializeAppConfig(configService: ExternalConfigService): () => Promise<void> {
   return () => configService.loadConfig();

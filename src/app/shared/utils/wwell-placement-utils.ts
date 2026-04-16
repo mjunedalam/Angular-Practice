@@ -4,7 +4,7 @@ import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
-import { ArcGISPoint, BubblePoint, LEGEND_FONT_SMAAL_BOLD, WWellGraphics, tilesArray, tilesMap  } from "../shared/models/config/agwa-map.config";
+import { ArcGISPoint, BubblePoint, LEGEND_FONT_SMAAL_BOLD, WWellGraphics, tilesArray, tilesMap  } from "../models/config/agwa-map.config";
 
 export function isValidPlacement(
     bubblePoint: Point | null | undefined,

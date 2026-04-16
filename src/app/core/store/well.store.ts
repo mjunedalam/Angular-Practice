@@ -18,9 +18,9 @@ import { WellName } from 'src/app/core/models/well-design/well-name.model';
 import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { WellDataService } from 'src/app/core/services/well-data.service';
-import { formatDateForInput } from 'src/app/utils/date.util';
+import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
-import { WellActions, WellEvents } from './well.actions';
+import { WellActions, WellEvents } from '@store/well.actions';
 import {
     PAGE_SIZE,
     uniqueByEpANum,
@@ -35,7 +35,7 @@ import {
     selectOffsetWells,
     selectWellLogsIndicators,
     selectWellTestResults,
-} from './well.selectors';
+} from '@store/well.selectors';
 
 const MIN_LOADER_DELAY = 1500;
 

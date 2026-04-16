@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { catchError, map, Observable, timeout } from 'rxjs';
-import { MorningReport } from '../models/morning-report/morning-report.model';
+import { MorningReport } from '@models/morning-report/morning-report.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -14,7 +14,7 @@ export class MorningReportService {
 
   private readonly extConfigService = inject(ExternalConfigService);
   private readonly http = inject(HttpClient);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notify = inject(NotificationService);
 
   private get apiUrl(): string {
     const s = this.extConfigService.settings;
@@ -22,12 +22,7 @@ export class MorningReportService {
   }
 
   private notifyFallback(): void {
-    this.snackBar.open('Connected to local data - service unavailable.', 'Dismiss', {
-      duration: 8000,
-      panelClass: ['app-snackbar', 'app-snackbar--warn'],
-      horizontalPosition: 'right',
-      verticalPosition: 'bottom',
-    });
+    this.notify.error('Connected to local data - service unavailable.');
   }
 
   private withFallback<T>(

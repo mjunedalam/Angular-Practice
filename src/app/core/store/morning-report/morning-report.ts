@@ -14,7 +14,7 @@ import { MorningReport } from 'src/app/core/models/morning-report/morning-report
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
-import { formatDateForInput, getTodayAtMidnight } from 'src/app/utils/date.util';
+import { formatDateForInput, getTodayAtMidnight } from 'src/app/shared/utils/date.util';
 
 interface MorningReportState {
   readonly morningReport: MorningReport[];

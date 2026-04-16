@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { computed } from '@angular/core';
 import { EmailRequest } from 'src/app/shared/models/email/email-request.model';
-import { EmailService } from '../../services/email/email.service';
+import { EmailService } from '@services/email/email.service';
 
 interface EmailState {
   status: 'idle' | 'sending' | 'sent' | 'failed';

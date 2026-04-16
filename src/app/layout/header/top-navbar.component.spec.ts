@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { TopNavbarComponent } from './top-navbar.component';
-import { AuthStore } from 'src/app/core/store/auth/auth.store';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 
 describe('TopNavbarComponent', () => {
   let component: TopNavbarComponent;

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { LoaderService } from './loader.service';
+import { LoaderService } from '@shared/components/global-loader/loader.service';
 
 @Component({
   selector: 'app-global-loader',

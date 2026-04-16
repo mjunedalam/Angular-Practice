@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { authGuard } from './auth.guard';
-import { AuthStore } from '../store/auth/auth.store';
+import { authGuard } from '@guards/auth.guard';
+import { AuthStore } from '../../features/auth/store/auth.store';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 const authStoreMock = {

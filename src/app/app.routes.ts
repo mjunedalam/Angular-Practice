@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guard/auth.guard';
-import { WellStore } from './core/store/well.store';
-import { MorningReportStore } from './core/store/morning-report/morning-report';
-import { EmailStore } from './core/store/email/email.store';
+import { authGuard } from '@guards/auth.guard';
+import { WellStore } from '@store/well.store';
+import { MorningReportStore } from '@store/morning-report/morning-report';
+import { EmailStore } from '@store/email/email.store';
 
 export const routes: Routes = [
   {
@@ -13,15 +13,15 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/login/login.component').then(
+      import('./features/auth/login.component').then(
         (m) => m.LoginComponent,
       ),
   },
   {
     path: 'main',
     loadComponent: () =>
-      import('./features/dashboard/dashboard.component').then(
-        (m) => m.DashboardComponent,
+      import('./layout/layout.component').then(
+        (m) => m.LayoutComponent,
       ),
     canActivate: [authGuard],
     canActivateChild: [authGuard],

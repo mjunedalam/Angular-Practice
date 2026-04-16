@@ -4,9 +4,9 @@ import { WellName } from 'src/app/core/models/well-design/well-name.model';
 import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { IFormationTops } from 'src/app/shared/models/wwell/formation-tops.model';
 import { IHeaderIR } from 'src/app/shared/models/wwell/header-ir.model';
-import { sortCasingsByDepthDesc } from 'src/app/utils/wellbore-math.util';
+import { sortCasingsByDepthDesc } from 'src/app/shared/utils/wellbore-math.util';
 
-import { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult } from './well.store';
+import { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult } from '@store/well.store';
 
 export { MiscWellData, OffsetWaterWells, PickedFormationTops, WellTestResult };
 

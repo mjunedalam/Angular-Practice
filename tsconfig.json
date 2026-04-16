@@ -20,17 +20,22 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-    "lib": ["ES2022", "dom"]
+    "lib": ["ES2022", "dom"],
+    "paths": {
+      "@core/*": ["src/app/core/*"],
+      "@shared/*": ["src/app/shared/*"],
+      "@env/*": ["src/environments/*"],
+      "@models/*": ["src/app/core/models/*"],
+      "@store/*": ["src/app/core/store/*"],
+      "@services/*": ["src/app/core/services/*"],
+      "@guards/*": ["src/app/core/guards/*"],
+      "@interceptors/*": ["src/app/core/interceptors/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-//   "paths": {
-//   "@core/*": ["src/app/core/*"],
-//   "@shared/*": ["src/app/shared/*"],
-//   "@utils/*": ["src/app/utils/*"]
-// }
+  }
 }

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EmailService } from './email.service';
+import { EmailService } from '@services/email/email.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { EMAIL_CC, EMAIL_FROM, EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';

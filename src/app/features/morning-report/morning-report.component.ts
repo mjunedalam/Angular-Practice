@@ -9,12 +9,12 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-import { AuthStore } from 'src/app/core/store/auth/auth.store';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
 import { MorningReportStore } from 'src/app/core/store/morning-report/morning-report';
-import { EmailService } from '../../core/services/email/email.service';
+import { EmailService } from '@services/email/email.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
-import { formatDateForInput } from 'src/app/utils/date.util';
+import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-morningreport',

@@ -4,8 +4,8 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthStore } from 'src/app/core/store/auth/auth.store';
-import { LoginRequest } from 'src/app/core/store/auth/auth.selectors';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
+import { LoginRequest } from 'src/app/features/auth/store/auth.selectors';
 
 interface LoginForm {
   username: FormControl<string>;

@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { AgwaConfig } from '../models/config/agwa-config';
-import { environment } from '../../../environments/environment';
+import { AgwaConfig } from '@shared/models/config/agwa-config';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root'

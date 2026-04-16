@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { PickedFormationTopsComponent } from './picked-formation-tops.component';
-import { WellStore } from '../../../core/store/well.store';
+import { WellStore } from '@store/well.store';
 import { signal, WritableSignal } from '@angular/core';
 import { ColDef, GridReadyEvent } from 'ag-grid-community';
 

@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 
-import { DashboardComponent } from './dashboard.component';
-import { AuthStore } from 'src/app/core/store/auth/auth.store';
+import { LayoutComponent } from './layout.component';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('LayoutComponent', () => {
+  let component: LayoutComponent;
+  let fixture: ComponentFixture<LayoutComponent>;
   const routerEvents$ = new Subject<unknown>();
   const routerMock = {
     events: routerEvents$,
@@ -19,7 +19,7 @@ describe('DashboardComponent', () => {
   };
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent],
+      imports: [LayoutComponent],
       providers: [
         { provide: Router, useValue: routerMock },
         { provide: AuthStore, useValue: authStoreMock },
@@ -27,7 +27,7 @@ describe('DashboardComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(LayoutComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
