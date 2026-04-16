@@ -131,12 +131,16 @@
 
 // ── Loading bar ────────────────────────────────────────────────────────────────
 .report-loading-bar {
-  height: 4px;
-  --mdc-linear-progress-track-height: 4px;
-  --mdc-linear-progress-active-indicator-height: 4px;
-  --mdc-linear-progress-track-color: var(--border-sub);
+  position: fixed;
+  top: 62px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99;
+  --mdc-linear-progress-track-height: 3px;
+  --mdc-linear-progress-active-indicator-height: 3px;
+  --mdc-linear-progress-track-color: transparent;
   --mdc-linear-progress-active-indicator-color: transparent;
-  margin-bottom: 0.75rem;
 }
 
 :host ::ng-deep .report-loading-bar .mdc-linear-progress__bar-inner {

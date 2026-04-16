@@ -195,3 +195,54 @@ npm run build
 npm run build:prod
 npm test
 npm run lint
+
+src/
+└── app/
+    ├── core/
+    │   ├── services/
+    │   ├── guards/
+    │   ├── interceptors/
+    │   ├── config/
+    │   └── core.module.ts
+
+    ├── shared/
+    │   ├── components/
+    │   ├── directives/
+    │   ├── pipes/
+    │   ├── models/
+    │   ├── utils/
+    │   └── shared.module.ts
+
+    ├── features/
+    │   ├── auth/
+    │   │   ├── components/
+    │   │   ├── pages/
+    │   │   ├── store/
+    │   │   │   ├── auth.store.ts
+    │   │   │   ├── auth.state.ts
+    │   │   │   └── auth.selectors.ts (optional)
+    │   │   ├── services/
+    │   │   └── auth.routes.ts
+    │   │
+    │   ├── dashboard/
+    │   │   ├── components/
+    │   │   ├── pages/
+    │   │   ├── store/
+    │   │   │   └── dashboard.store.ts
+    │   │   └── dashboard.routes.ts
+    │   │
+    │   └── user/
+    │       ├── components/
+    │       ├── pages/
+    │       ├── store/
+    │       │   └── user.store.ts
+    │       ├── services/
+    │       └── user.routes.ts
+
+    ├── layout/
+    │   ├── header/
+    │   ├── sidebar/
+    │   └── layout.component.ts
+
+    ├── app.routes.ts
+    └── main.ts
