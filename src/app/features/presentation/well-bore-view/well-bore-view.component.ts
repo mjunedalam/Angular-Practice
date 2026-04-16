@@ -512,9 +512,10 @@ export class WellBoreViewComponent {
     const effectiveDepth = Math.max(data.currentDepth, maxCircDepth);
     const effectivePx = scale(effectiveDepth);
     const shaftMaxPx = totalPx - headH;
+    const cappedEffectivePx = Math.min(effectivePx, shaftMaxPx);
     if (points.length && effectivePx > 0) {
       const gradId = `circ-grad-${Date.now()}`;
-      const grad = this.defsEl.append('linearGradient').attr('class', 'dyn-clip').attr('id', gradId).attr('gradientUnits', 'userSpaceOnUse').attr('x1', arrowCx).attr('y1', 0).attr('x2', arrowCx).attr('y2', Math.min(effectivePx, shaftMaxPx));
+      const grad = this.defsEl.append('linearGradient').attr('class', 'dyn-clip').attr('id', gradId).attr('gradientUnits', 'userSpaceOnUse').attr('x1', arrowCx).attr('y1', 0).attr('x2', arrowCx).attr('y2', cappedEffectivePx);
       const segs: { topPx: number; botPx: number; pct: number; topDepth: number; botDepth: number }[] = [];
       for (let i = 0; i < points.length; i++) {
         const topDepth = i === 0 ? 0 : points[i - 1].depth;
@@ -530,8 +531,8 @@ export class WellBoreViewComponent {
         grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
         if (nextCol !== col) grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', nextCol);
       });
-      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', effectivePx).attr('fill', `url(#${gradId})`);
-      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW).attr('height', effectivePx).attr('fill', 'rgba(255,255,255,0.10)').attr('pointer-events', 'none');
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', cappedEffectivePx).attr('fill', `url(#${gradId})`);
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW).attr('height', cappedEffectivePx).attr('fill', 'rgba(255,255,255,0.10)').attr('pointer-events', 'none');
       segs.forEach(seg => {
         const fill = circColour(seg.pct);
         const segH = Math.max(1, seg.botPx - seg.topPx);
@@ -545,10 +546,10 @@ export class WellBoreViewComponent {
         shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', seg.topPx).attr('width', shaftHW * 2).attr('height', segH).attr('fill', 'transparent').attr('class', 'mud-circ-seg').on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1)).on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
       });
     } else {
-      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', currPx).attr('fill', 'var(--accent)');
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', Math.min(currPx, shaftMaxPx)).attr('fill', 'var(--accent)');
     }
-    if (effectivePx < totalPx) {
-      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', effectivePx).attr('width', shaftHW * 2).attr('height', totalPx - effectivePx).attr('fill', '#1e293b');
+    if (cappedEffectivePx < shaftMaxPx) {
+      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', cappedEffectivePx).attr('width', shaftHW * 2).attr('height', shaftMaxPx - cappedEffectivePx).attr('fill', '#1e293b');
     }
     const headG = shaftG.append('g').attr('class', 'depth-arrow-head-g');
     headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx},${totalPx} L${arrowCx + headHW},${totalPx - headH} Z`);
