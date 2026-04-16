@@ -1,44 +1,29 @@
-/* ── Outer shell ──────────────────────────────────────── */
+/* ── Outer shell — full-page background ───────────────── */
 .login {
   height: 100vh;
   width: 100vw;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #0f172a;
-}
-
-/* ── Two-panel card ───────────────────────────────────── */
-.login__card {
-  display: flex;
-  width: 900px;
-  max-width: 96vw;
-  min-height: 540px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.6);
-  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ── Left panel (full-bleed image) ───────────────────── */
-.login__left {
-  flex: 1;
-  background: linear-gradient(160deg, #1e3a5f 0%, #0ea5e9 60%, #18e3e3 100%);
+  justify-content: flex-end;
+  background-image: url('/assets/images/login-background.png');
   background-size: cover;
   background-position: center;
-  min-height: 100%;
+  background-repeat: no-repeat;
 }
 
-/* ── Right panel ─────────────────────────────────────── */
+/* ── Login card — floats on the right ────────────────── */
 .login__right {
-  width: 400px;
+  width: 420px;
+  max-height: 100vh;
   flex-shrink: 0;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.97);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 40px 32px;
+  padding: 48px 36px;
   overflow-y: auto;
+  box-shadow: -8px 0 48px rgba(0, 0, 0, 0.35);
+  animation: slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ── Header (logo area at top of right panel) ─────────── */
@@ -255,27 +240,26 @@
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-/* ── Responsive: stack on small screens ──────────────── */
+/* ── Responsive: full width on small screens ─────────── */
 @media (max-width: 640px) {
-  .login__card {
-    flex-direction: column;
-    width: 100%;
-    min-height: 100vh;
-    border-radius: 0;
+  .login {
+    justify-content: center;
+    align-items: flex-start;
   }
-
-  .login__left { display: none; }
 
   .login__right {
     width: 100%;
+    max-height: unset;
+    min-height: 100vh;
     padding: 40px 24px;
+    box-shadow: none;
   }
 }
 
 /* ── Animations ──────────────────────────────────────── */
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slide-down {
