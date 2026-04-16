@@ -13,6 +13,7 @@ import { ActiveWwellMapComponent } from './active-wwell-map/active-wwell-map.com
 import { OffsetWwellsComponent } from './offset-wwells/offset-wwells.component';
 import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-logs-indicators.component';
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
+import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer/active-wwell-docs-viewer.component';
 
 const LEFT_DEFAULT = 340; const LEFT_MIN = 220; const LEFT_MAX = 520;
 const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
@@ -32,6 +33,7 @@ const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
     OffsetWwellsComponent,
     WwellsLogsIndicatorsComponent,
     WwellTestResultComponent,
+    ActiveWwellDocsViewerComponent,
   ],
   templateUrl: './presentation.component.html',
   styleUrl: './presentation.component.scss',

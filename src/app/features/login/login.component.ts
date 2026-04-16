@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from 'src/app/core/store/auth/auth.store';
 import { LoginRequest } from 'src/app/core/store/auth/auth.selectors';
 
@@ -25,11 +26,28 @@ interface LoginForm {
 })
 export class LoginComponent {
   protected readonly authStore = inject(AuthStore);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly submitted = signal(false);
-  
+
+  protected readonly sessionExpiredMessage = signal<string | null>(null);
+
   // Collapsible state for credentials form - default collapsed (false)
   protected readonly isCredentialsExpanded = signal(false);
   protected readonly hidePassword = signal(true);
+
+  constructor() {
+    // If the user already has a valid session, send them straight to the app.
+    if (this.authStore.isAuthenticated() && !this.authStore.isTokenExpired()) {
+      void this.router.navigate(['/main']);
+      return;
+    }
+
+    // Show session-expired banner when redirected by the auth guard.
+    if (this.route.snapshot.queryParamMap.get('reason') === 'session-expired') {
+      this.sessionExpiredMessage.set('Your session has expired. Please log in again.');
+    }
+  }
 
   protected readonly loginForm = new FormGroup<LoginForm>({
     username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

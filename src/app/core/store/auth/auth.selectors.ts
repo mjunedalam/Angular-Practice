@@ -21,6 +21,7 @@ export interface AuthState {
   readonly user: AuthUser | null;
   readonly isLoading: boolean;
   readonly error: string | null;
+  readonly sessionExpired: boolean;
 }
 
 export const initialState: AuthState = {
@@ -29,6 +30,7 @@ export const initialState: AuthState = {
   user: null,
   isLoading: false,
   error: null,
+  sessionExpired: false,
 };
 
 export function selectIsTokenExpired(token: string | null, jwt: JwtService): boolean {

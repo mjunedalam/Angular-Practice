@@ -40,6 +40,24 @@
   height: auto;
 }
 
+/* ── Session-expired banner ──────────────────────────── */
+.session-expired-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #c2410c;
+  font-size: 13px;
+  font-weight: 500;
+  animation: fade-in 0.3s ease;
+
+  svg { flex-shrink: 0; }
+}
+
 /* ── Action area ─────────────────────────────────────── */
 .login-actions {
   display: flex;

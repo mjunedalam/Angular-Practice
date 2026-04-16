@@ -162,13 +162,33 @@
 .dialog__body { padding: 22px 20px 20px; }
 
 .results-header__badge {
-  background: var(--accent-muted);
-  color: var(--accent);
-  border: 1px solid rgba(14, 165, 233, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 7px;
+  border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  border-radius: 999px;
-  padding: 0.15rem 0.65rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(56, 189, 248, 0.06));
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 6px #38bdf8;
+    animation: badge-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.45; transform: scale(0.75); }
 }
 
 // ── Metric grid ───────────────────────────────────────────────────────────────

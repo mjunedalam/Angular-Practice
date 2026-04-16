@@ -62,7 +62,7 @@ export const AuthStore = signalStore(
       void router.navigate(['/login']);
     },
 
-    // Token Refresh
+    // Token Refresh — called at app bootstrap via APP_INITIALIZER
     autoLogin() {
       const token = localStorage.getItem('agwa_token');
 
@@ -71,12 +71,16 @@ export const AuthStore = signalStore(
           token,
           isAuthenticated: true,
           user: jwt.decode(token),
+          sessionExpired: false,
         });
         return;
       }
 
       localStorage.removeItem('agwa_token');
-      patchState(store, initialState);
+
+      // If a token existed but is now expired, flag it so the guard can
+      // redirect to login with a session-expired message.
+      patchState(store, { ...initialState, sessionExpired: !!token });
     },
   })),
 );

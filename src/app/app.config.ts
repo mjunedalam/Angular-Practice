@@ -1,13 +1,19 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, inject, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { routes } from './app.routes';
 import { ExternalConfigService } from './shared/services/external-config.service';
+import { AuthStore } from './core/store/auth/auth.store';
 
 function initializeAppConfig(configService: ExternalConfigService): () => Promise<void> {
   return () => configService.loadConfig();
+}
+
+function initializeAuth(): () => void {
+  const authStore = inject(AuthStore);
+  return () => authStore.autoLogin();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -21,6 +27,12 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeAppConfig,
       deps: [ExternalConfigService],
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [],
       multi: true,
     },
   ],
