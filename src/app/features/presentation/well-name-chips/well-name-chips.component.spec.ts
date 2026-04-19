@@ -81,7 +81,7 @@ describe('WellNameChipsComponent', () => {
     (chips[1] as HTMLElement).click();
     expect(mockStore.selectWell).toHaveBeenCalledWith({
       epANum: 2,
-      date: mockStore.selectedDate(),
+      date: '2026-04-11',
     });
   });
 

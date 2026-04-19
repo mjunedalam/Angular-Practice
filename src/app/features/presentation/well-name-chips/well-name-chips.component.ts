@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WellStore } from 'src/app/core/store/well.store';
-import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-well-name-chips',
@@ -22,6 +22,7 @@ import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/dat
 })
 export class WellNameChipsComponent {
   protected readonly store = inject(WellStore);
+  protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
 
   protected readonly pageLabel = computed(() =>
     `${this.store.wellNamesPage() + 1} / ${this.store.totalPages()}`
@@ -49,7 +50,8 @@ export class WellNameChipsComponent {
 
   protected onDateInputChange(value: string): void {
     const date = parseDateFromInput(value);
-    if (!Number.isNaN(date.getTime())) {
+    const today = getTodayAtMidnight();
+    if (!Number.isNaN(date.getTime()) && date <= today) {
       this.store.setSelectedDate(date);
     }
   }

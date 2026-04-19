@@ -14,7 +14,7 @@ import { EmailStore } from 'src/app/core/store/email/email.store';
 import { MorningReportStore } from 'src/app/core/store/morning-report/morning-report';
 import { EmailService } from '@services/email/email.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
-import { formatDateForInput } from 'src/app/shared/utils/date.util';
+import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-morningreport',
@@ -43,7 +43,8 @@ export class MorningReportComponent implements OnInit {
   protected readonly waterWelltestResult = this.store.waterWelltestResult;
   protected readonly statusCode = this.store.statusCode;
 
-  protected selectedDateString = formatDateForInput(new Date());
+  protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
+  protected selectedDateString = this.maxDateString;
 
   ngOnInit(): void {
     this.store.loadMorningReportData(this.selectedDateString);
@@ -52,6 +53,12 @@ export class MorningReportComponent implements OnInit {
 
   protected onDateChange(value: string): void {
     if (!value) return;
+
+    const selectedDate = parseDateFromInput(value);
+    if (Number.isNaN(selectedDate.getTime()) || selectedDate > getTodayAtMidnight()) {
+      return;
+    }
+
     this.selectedDateString = value;
     this.store.setDate(value);
   }
