@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   effect,
+  ElementRef,
   inject,
   Injector,
   signal,
@@ -46,6 +47,7 @@ export class ActiveWwellDocsViewerComponent {
   protected readonly wellStore = inject(WellStore);
   protected readonly docsStore = inject(WellDocsStore);
   private readonly injector = inject(Injector);
+  private readonly el = inject(ElementRef<HTMLElement>);
 
   protected readonly collapsed = signal(true);
 
@@ -62,7 +64,28 @@ export class ActiveWwellDocsViewerComponent {
   }
 
   protected toggleCollapse(): void {
-    this.collapsed.update(v => !v);
+    this.collapsed.update(v => {
+      if (v) setTimeout(() => this.scrollToSelf(), 300);
+      return !v;
+    });
+  }
+
+  private scrollToSelf(): void {
+    const el: HTMLElement = this.el.nativeElement;
+    const scrollParent = this.findScrollParent(el);
+    if (!scrollParent) return;
+    const offset = el.getBoundingClientRect().top - scrollParent.getBoundingClientRect().top;
+    scrollParent.scrollTo({ top: scrollParent.scrollTop + offset, behavior: 'smooth' });
+  }
+
+  private findScrollParent(el: HTMLElement): HTMLElement | null {
+    let parent = el.parentElement;
+    while (parent && parent !== document.body) {
+      const { overflowY } = window.getComputedStyle(parent);
+      if (overflowY === 'auto' || overflowY === 'scroll') return parent;
+      parent = parent.parentElement;
+    }
+    return null;
   }
 
   protected openDoc(doc: WellDoc): void {

@@ -9,7 +9,8 @@
 
   <div class="offset-accordion">
     @for (well of store.offsetWells(); track well.wellName; let i = $index) {
-      <mat-expansion-panel [expanded]="activeValue() === i.toString()" (opened)="onValueChange(i.toString())">
+      <div #panelContainer>
+      <mat-expansion-panel [expanded]="activeValue() === i.toString()" (opened)="onPanelOpen(i.toString(), panelContainer)">
         <mat-expansion-panel-header>
           <div class="well-header-row">
             <div class="well-info">
@@ -61,6 +62,7 @@
           </div>
         </div>
       </mat-expansion-panel>
+      </div>
     }
   </div>
 

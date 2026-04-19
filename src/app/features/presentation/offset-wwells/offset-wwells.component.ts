@@ -18,13 +18,27 @@ import { WellStore } from 'src/app/core/store/well.store';
 })
 export class OffsetWwellsComponent {
   protected readonly store = inject(WellStore);
-  protected readonly activeValue = signal<string>('0');
+  protected readonly activeValue = signal<string>('-1');
 
-  protected onValueChange(value: string | number | string[] | number[]): void {
-    if (Array.isArray(value)) {
-      this.activeValue.set(String(value[0] ?? '0'));
-    } else {
-      this.activeValue.set(String(value));
+  protected onPanelOpen(index: string, container: HTMLElement): void {
+    this.activeValue.set(index);
+    setTimeout(() => this.scrollToPanel(container), 260);
+  }
+
+  private scrollToPanel(el: HTMLElement): void {
+    const scrollParent = this.findScrollParent(el);
+    if (!scrollParent) return;
+    const offset = el.getBoundingClientRect().top - scrollParent.getBoundingClientRect().top;
+    scrollParent.scrollTo({ top: scrollParent.scrollTop + offset, behavior: 'smooth' });
+  }
+
+  private findScrollParent(el: HTMLElement): HTMLElement | null {
+    let parent = el.parentElement;
+    while (parent && parent !== document.body) {
+      const { overflowY } = window.getComputedStyle(parent);
+      if (overflowY === 'auto' || overflowY === 'scroll') return parent;
+      parent = parent.parentElement;
     }
+    return null;
   }
 }
