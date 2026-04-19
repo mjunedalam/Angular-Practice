@@ -51,6 +51,6 @@
 </div>
 
 <!-- Loading bar — sits directly below chip strip, inline in flow, no fixed position -->
-@if (store.loading()) {
+@if (store.isDetailsLoading()) {
   <mat-progress-bar mode="indeterminate" class="well-loading-bar" />
 }

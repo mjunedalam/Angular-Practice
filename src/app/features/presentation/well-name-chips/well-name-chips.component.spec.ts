@@ -18,7 +18,7 @@ describe('WellNameChipsComponent', () => {
     hasNextPage: ReturnType<typeof signal<boolean>>;
     pagedWellNames: ReturnType<typeof signal<WellChip[]>>;
     selectedEpANum: ReturnType<typeof signal<number | null>>;
-    loading: ReturnType<typeof signal<boolean>>;
+    isDetailsLoading: ReturnType<typeof signal<boolean>>;
     selectedDate: jest.Mock;
     selectWell: jest.Mock;
     setSelectedDate: jest.Mock;
@@ -37,7 +37,7 @@ describe('WellNameChipsComponent', () => {
         { wellName: 'Well 2', epANum: 2 }
       ]),
       selectedEpANum: signal(1),
-      loading: signal(false),
+      isDetailsLoading: signal(false),
       selectedDate: jest.fn().mockReturnValue(new Date('2026-04-11T00:00:00.000Z')),
       selectWell: jest.fn(),
       setSelectedDate: jest.fn(),
@@ -107,8 +107,8 @@ describe('WellNameChipsComponent', () => {
     expect(label?.textContent).toBe('1 / 2');
   });
 
-  it('should show loading bar when store is loading', () => {
-    mockStore.loading.set(true);
+  it('should show loading bar when store is loading well details', () => {
+    mockStore.isDetailsLoading.set(true);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const loadingBar = compiled.querySelector('.well-loading-bar, mat-progress-bar');
