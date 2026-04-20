@@ -1,0 +1,46 @@
+<div class="upload-card">
+  <div class="upload-card__header well-header">
+    <mat-icon class="upload-card__header-icon">attach_file</mat-icon>
+    <span>File Uploader</span>
+  </div>
+
+  <div class="upload-card__body">
+    <label class="dropzone">
+      <input type="file" multiple class="dropzone__input" (change)="onFileChange($event)"
+             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+      <mat-icon class="dropzone__icon">cloud_upload</mat-icon>
+      <span class="dropzone__title">Click to upload or drag & drop</span>
+      <span class="dropzone__hint">PDF, DOC, DOCX, JPG, PNG</span>
+    </label>
+
+    @if (files().length) {
+      <ul class="file-list">
+        @for (item of files(); track item.id) {
+          <li class="file-row">
+            <mat-icon class="file-row__type-icon">{{ fileIcon(item.file) }}</mat-icon>
+            <div class="file-row__info">
+              <span class="file-row__name" [title]="item.file.name">{{ item.file.name }}</span>
+              <span class="file-row__size">{{ fileSizeLabel(item.file.size) }}</span>
+            </div>
+            <div class="file-row__actions">
+              <button mat-icon-button class="action-btn action-btn--view"
+                      matTooltip="Preview"
+                      (click)="previewFile(item.file)"
+                      aria-label="Preview file">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn action-btn--delete"
+                      matTooltip="Remove"
+                      (click)="removeFile(item.id)"
+                      aria-label="Remove file">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty-state">No files attached.</p>
+    }
+  </div>
+</div>

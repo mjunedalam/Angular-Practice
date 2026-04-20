@@ -32,7 +32,7 @@ import {
 } from '../active-wwell.helpers';
 import { displayValue, selectLatestFormation } from '@store/active-wwell/active-wwell.selectors';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
-import { FileUploadComponent } from '../file-upload/file-upload.component';
+import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
 
 const AREAS = [
   { value: 'RAK' },

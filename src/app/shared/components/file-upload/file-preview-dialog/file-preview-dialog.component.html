@@ -1,0 +1,32 @@
+<div class="preview-dialog">
+  <div class="preview-dialog__header">
+    <div class="preview-dialog__title-row">
+      <mat-icon class="preview-dialog__file-icon">insert_drive_file</mat-icon>
+      <span class="preview-dialog__title" [title]="fileName">{{ fileName }}</span>
+    </div>
+    <button mat-icon-button class="preview-dialog__close" (click)="close()" aria-label="Close preview">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="preview-dialog__body">
+    @switch (previewType) {
+      @case ('image') {
+        <img [src]="safeUrl" [alt]="fileName" class="preview-img" />
+      }
+      @case ('pdf') {
+        <iframe [src]="safeUrl" class="preview-frame" title="PDF Preview"></iframe>
+      }
+      @case ('unsupported') {
+        <div class="preview-unsupported">
+          <mat-icon class="preview-unsupported__icon">description</mat-icon>
+          <p class="preview-unsupported__text">Preview not available for this file type.</p>
+          <button mat-stroked-button class="preview-unsupported__download" (click)="download()">
+            <mat-icon>download</mat-icon>
+            Download File
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
