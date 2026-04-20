@@ -241,7 +241,7 @@ export class WellBoreViewComponent {
       .attr('class', 'column-label')
       .attr('x', geoLineX).attr('y', -30)
       .attr('text-anchor', 'middle')
-      .style('font-size', '12px')
+      .style('font-size', '13px')
       .call((t) => {
         t.append('tspan').attr('x', geoLineX).attr('dy', 0).text('Geologic');
         t.append('tspan').attr('x', geoLineX).attr('dy', 12).text('Horizons (ft bgl)');
@@ -541,8 +541,8 @@ export class WellBoreViewComponent {
         const ttipG = arrowG.append('g').attr('class', 'circ-tooltip').style('opacity', 0).style('pointer-events', 'none');
         ttipG.append('rect').attr('x', ttipX).attr('y', midY - 29).attr('width', 220).attr('height', 58).attr('rx', 8).attr('fill', '#0f172a').attr('stroke', fill).attr('stroke-width', 2).attr('opacity', 0.97);
         ttipG.append('circle').attr('cx', ttipX + 16).attr('cy', midY - 7).attr('r', 6).attr('fill', fill);
-        ttipG.append('text').attr('x', ttipX + 28).attr('y', midY - 3).attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '600').attr('fill', '#e2e8f0').text(`${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`);
-        ttipG.append('text').attr('x', ttipX + 16).attr('y', midY + 18).attr('font-size', '14.5').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '800').attr('fill', fill).text(`Circulation: ${seg.pct}%`);
+        ttipG.append('text').attr('x', ttipX + 28).attr('y', midY - 3).attr('font-size', '14').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '700').attr('fill', '#e2e8f0').text(`${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`);
+        ttipG.append('text').attr('x', ttipX + 16).attr('y', midY + 18).attr('font-size', '16').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '800').attr('fill', fill).text(`Circulation: ${seg.pct}%`);
         shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', seg.topPx).attr('width', shaftHW * 2).attr('height', segH).attr('fill', 'transparent').attr('class', 'mud-circ-seg').on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1)).on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
       });
     } else {
@@ -592,7 +592,7 @@ export class WellBoreViewComponent {
       .attr('y', midY - 6)
       .attr('text-anchor', 'middle')
       .attr('fill', '#fbbf24') // yellow-400
-      .style('font-size', '14px')
+      .style('font-size', '16px')
       .style('font-weight', '800')
       .style('letter-spacing', '0.15em')
       .text('NOT DRILLED');
@@ -601,11 +601,11 @@ export class WellBoreViewComponent {
     ndg.append('text')
       .attr('class', 'not-drilled-footage')
       .attr('x', centerX)
-      .attr('y', midY + 12)
+      .attr('y', midY + 14)
       .attr('text-anchor', 'middle')
       .attr('fill', '#fca5a5') // light red-300
-      .style('font-size', '11px')
-      .style('font-weight', '600')
+      .style('font-size', '13px')
+      .style('font-weight', '700')
       .text(`REMAINING: ${undrilledFt.toLocaleString()} FT`);
 
     ndg.transition()
