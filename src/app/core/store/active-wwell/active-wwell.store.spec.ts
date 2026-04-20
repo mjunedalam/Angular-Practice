@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { WellDataService } from 'src/app/core/services/well-data.service';
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 type WellStoreInstance = InstanceType<typeof WellStore>;
 interface WellDataServiceMock {
@@ -84,10 +84,7 @@ describe('WellStore', () => {
       wellDataServiceMock.getWellDetails.mockReturnValue(of({}));
 
       store.loadWellNames();
-
-      expect(store.loading()).toBe(true);
-
-      tick(1000);
+      tick();
 
       expect(store.wellNames()).toEqual([
         { wellName: 'Well 1', epANum: 10 },
@@ -108,6 +105,44 @@ describe('WellStore', () => {
       expect(store.loading()).toBe(false);
       expect(store.error()).toBe('Load Error');
     }));
+  });
+
+  describe('setSelectedDate', () => {
+    it('should keep current well details visible while loading a new date', fakeAsync(() => {
+      const existingDetails = { EXAD_RCD_PREWAP: [{ estTargetDepth: 1234 }] };
+      const updatedDetails = { EXAD_RCD_PREWAP: [{ estTargetDepth: 2345 }] };
+      const pendingDetails$ = new Subject<typeof updatedDetails>();
+
+      wellDataServiceMock.getWellDetails
+        .mockReturnValueOnce(of(existingDetails))
+        .mockReturnValueOnce(pendingDetails$);
+
+      store.selectWell({ epANum: 100, date: '2026-04-16' });
+      tick();
+      expect(store.wellDetails()).toEqual(existingDetails);
+
+      store.setSelectedDate(new Date('2026-04-17T00:00:00'));
+
+      expect(store.loading()).toBe(true);
+      expect(store.wellDetails()).toEqual(existingDetails);
+
+      pendingDetails$.next(updatedDetails);
+      pendingDetails$.complete();
+      tick();
+      expect(store.wellDetails()).toEqual(updatedDetails);
+    }));
+
+    it('should not reload when the picked date matches the current date', () => {
+      wellDataServiceMock.getWellDetails.mockReturnValue(of({}));
+
+      store.selectWell({ epANum: 100, date: '2026-04-16' });
+      expect(wellDataServiceMock.getWellDetails).toHaveBeenCalledTimes(1);
+      wellDataServiceMock.getWellDetails.mockClear();
+
+      store.setSelectedDate(new Date('2026-04-16T00:00:00'));
+
+      expect(wellDataServiceMock.getWellDetails).not.toHaveBeenCalled();
+    });
   });
 
   describe('pagination methods', () => {

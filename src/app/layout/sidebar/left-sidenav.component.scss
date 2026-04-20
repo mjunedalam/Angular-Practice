@@ -1,5 +1,5 @@
 // ── Layout constants ────────────────────────────────────────────────────────
-$expanded-w:  224px;
+$expanded-w:  244px;
 $collapsed-w: 64px;
 $ease:        cubic-bezier(0.4, 0, 0.2, 1);
 $transition:  0.26s $ease;
@@ -82,7 +82,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   &__list {
     list-style: none;
     margin: 0;
-    padding: 8px 0 16px;
+    padding: 14px 0 18px;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -91,7 +91,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   }
 
   &__item {
-    padding: 2px 10px;
+    padding: 4px 12px;
   }
 
   // ── Nav button ─────────────────────────────────────────────────────────
@@ -100,18 +100,18 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     display: flex;
     align-items: center;
     width: 100%;
-    height: 50px;
-    padding: 0 14px 0 6px;
+    height: 58px;
+    padding: 0 16px 0 10px;
     border: none;
-    border-radius: 12px;
-    background: transparent;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
     color: $nav-muted;
     cursor: pointer;
     font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 14.5px;
-    font-weight: 500;
-    letter-spacing: 0.15px;
-    gap: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    gap: 2px;
     transition:
       background $transition,
       color $transition,
@@ -121,12 +121,13 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     white-space: nowrap;
 
     &:hover {
-      background: $nav-hover-bg;
+      background: rgba(14, 165, 233, 0.14);
       color: $nav-text;
       transform: translateX(2px);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.14);
 
       .sidenav__icon {
-        background: rgba(14, 165, 233, 0.12);
+        background: rgba(14, 165, 233, 0.16);
 
         svg {
           stroke: #38bdf8;
@@ -136,13 +137,15 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     }
 
     &--active {
-      background: rgba(14, 165, 233, 0.12);
-      color: #38bdf8;
-      font-weight: 700;
-      box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.22);
+      background: linear-gradient(90deg, rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.08) 100%);
+      color: #dff6ff;
+      font-weight: 800;
+      box-shadow:
+        inset 0 0 0 1px rgba(56, 189, 248, 0.28),
+        0 8px 18px rgba(2, 132, 199, 0.12);
 
       .sidenav__icon {
-        background: rgba(14, 165, 233, 0.16);
+        background: rgba(14, 165, 233, 0.22);
 
         svg {
           stroke: #38bdf8;
@@ -154,19 +157,19 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
 
   // ── Icon container ─────────────────────────────────────────────────────
   &__icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    margin-right: 11px;
+    border-radius: 12px;
+    margin-right: 13px;
     transition: margin $transition, background $transition;
 
     svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       stroke: currentColor;
       transition: stroke 0.2s ease, filter 0.2s ease;
     }
@@ -175,6 +178,10 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   // ── Label ──────────────────────────────────────────────────────────────
   &__label {
     flex: 1;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    color: inherit;
     transition: opacity $transition, width $transition;
     white-space: nowrap;
   }
@@ -183,20 +190,20 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   &__active-bar {
     position: absolute;
     left: 0;
-    top: 10px;
-    bottom: 10px;
-    width: 3px;
+    top: 9px;
+    bottom: 9px;
+    width: 4px;
     background: #38bdf8;
-    border-radius: 0 3px 3px 0;
-    box-shadow: 2px 0 12px rgba(14, 165, 233, 0.5);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 2px 0 14px rgba(14, 165, 233, 0.55);
   }
 
   // ── Footer ─────────────────────────────────────────────────────────────
   &__footer {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 18px;
+    gap: 12px;
+    padding: 16px 18px;
     border-top: 1px solid $nav-border;
     flex-shrink: 0;
     background: rgba(14, 165, 233, 0.03);
@@ -212,10 +219,10 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   }
 
   &__footer-text {
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 800;
     color: $nav-muted;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     white-space: nowrap;
     transition: opacity $transition, width $transition;
     text-transform: uppercase;

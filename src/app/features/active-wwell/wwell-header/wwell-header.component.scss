@@ -1,23 +1,97 @@
+:host {
+  display: block;
+}
+
+.aw-section {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.well-header {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.aw-grid--3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.6rem;
+}
+
+.aw-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 0.75rem;
+  background: #f8fafc;
+}
+
+.aw-cell--gis {
+  background: #fff6ea;
+}
+
+.aw-cell--ir {
+  background: #2563eb;
+}
+
 .wh-empty {
   padding: 2.5rem;
   text-align: center;
   color: #9ca3af;
   font-style: italic;
-  font-size: 0.85rem;
+  font-size: 0.96rem;
+  line-height: 1.6;
 }
 
 .aw-label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .aw-value {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.45;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.aw-cell--ir .aw-label {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.aw-cell--ir .aw-value {
+  color: #ffffff;
 }
 
 .aw-status-badge {
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.15rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 0.22rem 0.7rem;
+}
+
+@media (max-width: 960px) {
+  .aw-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .aw-grid--3 {
+    grid-template-columns: 1fr;
+  }
 }

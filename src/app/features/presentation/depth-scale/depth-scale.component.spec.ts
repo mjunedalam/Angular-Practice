@@ -66,6 +66,10 @@ describe('DepthScaleComponent', () => {
     // Verify updating inputs does not break the component
     const compiled = fixture.nativeElement as HTMLElement;
     const labels = compiled.querySelectorAll('.tick-label');
+    const tickGrids = compiled.querySelectorAll('.tick-grid');
+    const tickLines = compiled.querySelectorAll('.tick-line');
     expect(labels.length).toBeGreaterThan(0);
+    expect(tickLines.length).toBe(labels.length);
+    expect(tickGrids.length).toBe(0);
   });
 });

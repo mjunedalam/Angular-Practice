@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WellStore } from '@store/active-wwell/active-wwell.store';
@@ -15,8 +15,8 @@ import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-l
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
 import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer/active-wwell-docs-viewer.component';
 
-const LEFT_DEFAULT = 340; const LEFT_MIN = 220; const LEFT_MAX = 520;
-const RIGHT_DEFAULT = 360; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
+const LEFT_DEFAULT = 320; const LEFT_MIN = 220; const LEFT_MAX = 520;
+const RIGHT_DEFAULT = 340; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 
 @Component({
   selector: 'app-presentation',
@@ -43,6 +43,7 @@ export class PresentationComponent implements OnInit {
   @ViewChild('freeLayoutDialog') private freeLayoutDialog?: TemplateRef<unknown>;
 
   protected readonly store = inject(WellStore);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
@@ -51,9 +52,41 @@ export class PresentationComponent implements OnInit {
 
   /** false = fixed three-column (default), true = free draggable modal */
   protected readonly draggableMode = signal(false);
+  protected readonly loadingVisible = signal(false);
 
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
+
+  private loadingTimer: ReturnType<typeof setTimeout> | null = null;
+  private loadingShownAt = 0;
+
+  constructor() {
+    effect(() => {
+      const isLoading = this.store.isDetailsLoading();
+
+      if (isLoading) {
+        this.clearLoadingTimer();
+        this.loadingShownAt = Date.now();
+        this.loadingVisible.set(true);
+        return;
+      }
+
+      if (!this.loadingVisible()) {
+        return;
+      }
+
+      const elapsed = Date.now() - this.loadingShownAt;
+      const remaining = Math.max(0, 380 - elapsed);
+
+      this.clearLoadingTimer();
+      this.loadingTimer = setTimeout(() => {
+        this.loadingVisible.set(false);
+        this.loadingTimer = null;
+      }, remaining);
+    });
+
+    this.destroyRef.onDestroy(() => this.clearLoadingTimer());
+  }
 
   ngOnInit(): void {
     this.store.loadWellNames();
@@ -109,5 +142,12 @@ export class PresentationComponent implements OnInit {
 
   protected onRightDrag(delta: number): void {
     this.rightWidth.update(w => Math.min(RIGHT_MAX, Math.max(RIGHT_MIN, w - delta)));
+  }
+
+  private clearLoadingTimer(): void {
+    if (this.loadingTimer !== null) {
+      clearTimeout(this.loadingTimer);
+      this.loadingTimer = null;
+    }
   }
 }

@@ -18,7 +18,7 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
         class="axis-title"
         text-anchor="middle"
         x="60"
-        y="-32"
+        y="-34"
       >
         <tspan
           dy="0"
@@ -27,7 +27,7 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
           Depth
         </tspan>
         <tspan
-          dy="12"
+          dy="16"
           x="60"
         >
           (ft bgl)
@@ -49,21 +49,19 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
       >
         <line
           class="tick-line"
-          x1="54"
-          x2="60"
+          x1="50"
+          x2="70"
+          y1="0"
+          y2="0"
         />
         <text
           class="tick-label"
-          dy="0.32em"
-          x="51"
+          dominant-baseline="middle"
+          x="44"
+          y="0"
         >
           0
         </text>
-        <line
-          class="tick-grid"
-          x1="60"
-          x2="68"
-        />
       </g>
       <g
         class="tick"
@@ -72,21 +70,19 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
       >
         <line
           class="tick-line"
-          x1="54"
-          x2="60"
+          x1="50"
+          x2="70"
+          y1="0"
+          y2="0"
         />
         <text
           class="tick-label"
-          dy="0.32em"
-          x="51"
+          dominant-baseline="middle"
+          x="44"
+          y="0"
         >
           500
         </text>
-        <line
-          class="tick-grid"
-          x1="60"
-          x2="68"
-        />
       </g>
       <g
         class="tick"
@@ -95,28 +91,26 @@ exports[`DepthScaleComponent should match the saved DOM snapshot 1`] = `
       >
         <line
           class="tick-line"
-          x1="54"
-          x2="60"
+          x1="50"
+          x2="70"
+          y1="0"
+          y2="0"
         />
         <text
           class="tick-label"
-          dy="0.32em"
-          x="51"
+          dominant-baseline="middle"
+          x="44"
+          y="0"
         >
           1,000
         </text>
-        <line
-          class="tick-grid"
-          x1="60"
-          x2="68"
-        />
       </g>
       <text
         class="total-depth-label"
         style="opacity: 0;"
         text-anchor="middle"
         x="60"
-        y="766"
+        y="772"
       >
         1,000 ft
       </text>

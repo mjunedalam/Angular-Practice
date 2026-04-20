@@ -17,18 +17,18 @@
     padding-bottom: 14px;
 
     .header-title {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
+      font-family: var(--font-sans);
+      font-size: 17px;
       font-weight: 700;
       color: var(--text-primary);
-      letter-spacing: -0.1px;
+      letter-spacing: 0.01em;
     }
     .header-sub {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 10px;
+      font-family: var(--font-sans);
+      font-size: 11px;
       font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
   }
@@ -46,20 +46,20 @@
   gap: 5px;
   padding: 3px 10px 3px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.18), rgba(167, 139, 250, 0.06));
-  color: #a78bfa;
-  border: 1px solid rgba(167, 139, 250, 0.3);
-  box-shadow: 0 0 10px rgba(167, 139, 250, 0.15);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(134, 239, 172, 0.08));
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.12);
 
   &::before {
     content: '';
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #a78bfa;
-    box-shadow: 0 0 6px #a78bfa;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
     animation: badge-pulse 2s ease-in-out infinite;
     flex-shrink: 0;
   }
@@ -71,9 +71,9 @@
 }
 
 .h2s-tag {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   color: var(--warning);
 }
 
@@ -87,16 +87,18 @@
     filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4));
   }
   .well-name {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text-primary);
+    line-height: 1.35;
   }
   .well-aquifer {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
+    font-family: var(--font-sans);
+    font-size: 13px;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--text-secondary);
+    line-height: 1.45;
   }
 }
 
@@ -119,8 +121,8 @@
   text-align: center;
   border: 1px solid var(--border-sub);
 
-  &__label { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  &__value { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--text-primary); font-weight: 500; margin-top: 3px; }
+  &__label { font-family: var(--font-sans); font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.35; }
+  &__value { font-family: var(--font-mono); font-size: 15px; color: var(--text-primary); font-weight: 600; margin-top: 4px; line-height: 1.35; }
 
   .highlight-warn { color: var(--warning); text-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
 }
@@ -135,8 +137,8 @@
 }
 
 .p-stat {
-  &__label { font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
-  &__val   { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-top: 2px; }
+  &__label { font-family: var(--font-sans); font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.35; }
+  &__val   { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 3px; line-height: 1.35; }
 }
 
 @keyframes slide-down {
@@ -147,8 +149,9 @@
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: var(--text-muted);
-  font-size: 14px; font-style: italic;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 :host ::ng-deep .offset-accordion .mat-expansion-panel {

@@ -26,13 +26,6 @@ function waitForNextPaint(): Promise<void> {
 bootstrapApplication(AppComponent, appConfig)
   .then(async (appRef) => {
     const loader = appRef.injector.get(LoaderService);
-    const appStable = firstValueFrom(
-      appRef.isStable.pipe(
-        filter((isStable) => isStable),
-        take(1),
-      ),
-    );
-
     const router = appRef.injector.get(Router);
     const navigationDone = router.navigated
       ? Promise.resolve()
@@ -47,7 +40,7 @@ bootstrapApplication(AppComponent, appConfig)
           ),
         ).then(() => undefined);
 
-    await Promise.all([appStable, navigationDone]);
+    await navigationDone;
     await waitForNextPaint();
 
     loader.markAppShellReady();

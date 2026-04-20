@@ -1,13 +1,15 @@
 :host {
   display: block;
-  flex: 0 0 8.4%;
+  flex: 0 0 10%;
   height: 100%;
 }
 
 .depth-scale-svg {
   display: block;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-right: 1px solid rgba(15, 23, 42, 0.14);
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
   width: 100%;
   height: 100%;
 }
@@ -15,24 +17,25 @@
 
 
 :host ::ng-deep {
+
+
   .axis-title {
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    font-size: 10.5px; font-weight: 700;
-    fill: var(--text-secondary);
+   
+    font-size: 15px; font-weight: 900;
+    fill: #000;
     letter-spacing: 0.06em; text-transform: uppercase;
   }
-  .axis-line  { stroke: var(--text-muted); stroke-width: 1.5; fill: none; opacity: 0.6; }
-  .axis-arrow { fill: var(--text-muted); opacity: 0.6; }
-  .tick-line  { stroke: var(--text-muted); stroke-width: 1.2; opacity: 0.6; }
-  .tick-grid  { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2,3; opacity: 0.5; }
+  .axis-line  { stroke: #000; stroke-width: 2; fill: none; opacity: 1; }
+  .axis-arrow { fill: #000; opacity: 1; }
+  .tick-line  { stroke: #000; stroke-width: 1.8; stroke-linecap: round; opacity: 1; }
   .tick-label {
-    font-family: 'DM Mono', 'Fira Code', monospace;
-    font-size: 11px; font-weight: 500;
-    fill: var(--text-secondary); text-anchor: end;
+   
+    font-weight: 900;
+    fill: #000; text-anchor: end;
   }
   .total-depth-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px; font-weight: 800;
-    fill: var(--accent); letter-spacing: 0.04em;
+   
+    font-size: 16px; font-weight: 900;
+    fill: #000; letter-spacing: 0.05em;
   }
 }

@@ -66,5 +66,5 @@ export function selectUserEmail(user: AuthUser | null): string | null {
 
   return normalizedUpn.includes('@')
     ? normalizedUpn
-    : `${normalizedUpn}@gmail.com`;
+    : `${normalizedUpn}@aramco.com`;
 }

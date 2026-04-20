@@ -31,12 +31,12 @@ describe('EmailService', () => {
   });
 
   it('builds an email request addressed to the current user email', () => {
-    const request = service.buildEmailRequest([], 'map-image-data', 'junedalam@gmail.com');
+    const request = service.buildEmailRequest([], 'map-image-data', 'junedalam@aramco.com');
 
     expect(request).toEqual({
       subject: EMAIL_SUBJECT,
       from: EMAIL_FROM,
-      to: ['junedalam@gmail.com'],
+      to: ['junedalam@aramco.com'],
       cc: EMAIL_CC,
       replyTo: '',
       templateName: EMAIL_TEMPLATE_NAME,

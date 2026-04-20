@@ -87,7 +87,7 @@ export class LoaderService {
   markAppShellReady(): void {
     if (this.bootCompleted) return;
     this.appShellReady = true;
-    this.pushBootProgress(this.bootTasks.size === 0 ? 96 : 84);
+    this.pushBootProgress(96);
     this.completeBootIfReady();
   }
 
@@ -106,10 +106,10 @@ export class LoaderService {
   }
 
   private completeBootIfReady(): void {
-    if (!this.appShellReady || this.bootTasks.size > 0 || this.bootCompleted) return;
+    if (!this.appShellReady || this.bootCompleted) return;
     this.bootCompleted = true;
     this.pushBootProgress(100);
-    window.setTimeout(() => window.__agwaBootLoader?.complete(), 40);
+    window.__agwaBootLoader?.complete();
   }
 
   private pushBootProgress(progress: number): void {

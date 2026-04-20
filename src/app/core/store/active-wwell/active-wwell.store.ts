@@ -9,7 +9,7 @@ import {
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { delay, map, pipe, switchMap, tap } from 'rxjs';
+import { map, pipe, switchMap, tap } from 'rxjs';
 
 import { MorningReport } from 'src/app/core/models/morning-report/morning-report.model';
 import { IWellData } from 'src/app/core/models/well-design/well-data.model';
@@ -55,7 +55,6 @@ import {
     WellTestResult,
 } from '@models/active-wwell/active-wwell-view.model';
 
-const MIN_LOADER_DELAY = 1500;
 
 const EXPECTED_KEYS: (keyof IWellData)[] = [
     'WELL_MASTER', 'RIG_ACTIVITY', 'DRLG_OP_STATUS', 'DRLG_FD_TDAY',
@@ -81,6 +80,7 @@ interface WellState {
     readonly error: string | null;
     readonly animationTrigger: number;
     readonly wellNamesPage: number;
+    readonly hasLoadedOnce: boolean;
 }
 
 const initialState: WellState = {
@@ -92,12 +92,13 @@ const initialState: WellState = {
     error: null,
     animationTrigger: 0,
     wellNamesPage: 0,
+    hasLoadedOnce: false,
 };
 
 export const WellStore = signalStore(
     withState<WellState>(initialState),
 
-    withComputed(({ wellDetails, wellNames, wellNamesPage, loading, selectedEpANum, selectedDate }) => {
+    withComputed(({ wellDetails, wellNames, wellNamesPage, loading, selectedEpANum, selectedDate, hasLoadedOnce }) => {
         const unique = computed(() => uniqueByEpANum(wellNames()));
         return {
             uniqueWellNames: unique,
@@ -114,7 +115,7 @@ export const WellStore = signalStore(
             wellsLogsIndicators: computed((): WellLogsIndicators | null => selectWellLogsIndicators(wellDetails())),
             wellTestResults: computed((): WellTestResult[] => selectWellTestResults(wellDetails())),
             isInitialLoading: computed(() => wellNames().length === 0 && loading()),
-            isDetailsLoading: computed(() => wellNames().length > 0 && loading()),
+            isDetailsLoading: computed(() => wellNames().length > 0 && loading() && hasLoadedOnce()),
             wellHeaderData: computed((): WellHeaderViewModel | null => selectWellHeaderViewModel(wellDetails(), selectedEpANum())),
             databaseInfo: computed((): DatabaseInfoViewModel | null => selectDatabaseInfoViewModel(wellDetails(), selectedDate())),
             operationSummary: computed((): OperationSummaryViewModel | null => selectOperationSummaryViewModel(wellDetails())),
@@ -143,7 +144,6 @@ export const WellStore = signalStore(
                         error: null,
                     });
                 }),
-                delay(MIN_LOADER_DELAY),
                 switchMap(({ epANum, date }) =>
                     wellDataService.getWellDetails(epANum, date).pipe(
                         tapResponse({
@@ -152,6 +152,7 @@ export const WellStore = signalStore(
                                 patchState(store, {
                                     wellDetails,
                                     loading: false,
+                                    hasLoadedOnce: true,
                                     animationTrigger: store.animationTrigger() + 1,
                                 });
                             },
@@ -175,7 +176,6 @@ export const WellStore = signalStore(
                 switchMap(() => {
                     const date = formatDateForInput(store.selectedDate());
                     return morningReportService.getMorningReport(date).pipe(
-                        delay(MIN_LOADER_DELAY),
                         map((reports: MorningReport[]) => reports.map(r => ({ wellName: r.wGnrName, epANum: Number(r.epANum) }))),
                         tapResponse({
                             next: (wellNames) => {
@@ -200,10 +200,17 @@ export const WellStore = signalStore(
             selectWell,
             loadWellNames,
             setSelectedDate(date: Date): void {
-                patchState(store, { selectedDate: date, wellDetails: null });
+                const nextDate = formatDateForInput(date);
+                const currentDate = formatDateForInput(store.selectedDate());
+
+                if (nextDate === currentDate) {
+                    return;
+                }
+
+                patchState(store, { selectedDate: date, error: null });
                 const epANum = store.selectedEpANum();
                 if (epANum != null) {
-                    selectWell({ epANum, date: formatDateForInput(date) });
+                    selectWell({ epANum, date: nextDate });
                 }
             },
             getFormattedDate(): string {

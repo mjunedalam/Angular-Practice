@@ -12,18 +12,22 @@
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE A — FIXED (default): standard three-column flex layout
        ════════════════════════════════════════════════════════════════════════ -->
-  <main class="pres-fixed">
+  <main class="pres-fixed" [class.pres-fixed--loading]="loadingVisible()">
 
     <!-- Left -->
-    <div class="pres-fixed__left" [style.width.px]="leftWidth()">
-      <app-misc-pres-well-data />
-      <app-picked-formation-tops />
+    <div class="pres-fixed__left" [style.width.px]="leftWidth()" [class.pres-fixed__left--loading]="loadingVisible()">
+      <div class="pres-section-card pres-section-card--left">
+        <app-misc-pres-well-data />
+      </div>
+      <div class="pres-section-card pres-section-card--left">
+        <app-picked-formation-tops />
+      </div>
     </div>
 
     <app-resize-divider (dividerDrag)="onLeftDrag($event)" />
 
     <!-- Center -->
-    <div class="pres-fixed__center">
+    <div class="pres-fixed__center" [class.pres-fixed__center--loading]="loadingVisible()">
 
       <!-- Layout Toggle — top-right corner of diagram area, opens modal -->
       <button class="diagram-layout-toggle" (click)="openDraggableDialog()"
@@ -43,7 +47,7 @@
           <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
         </div>
       } @else {
-        <div class="diagram-card">
+        <div class="diagram-card" [class.diagram-card--loading]="loadingVisible()">
           <div class="diagram-scroll-area">
             <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
             <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
@@ -56,11 +60,19 @@
     <app-resize-divider (dividerDrag)="onRightDrag($event)" />
 
     <!-- Right -->
-    <aside class="pres-fixed__right" [style.width.px]="rightWidth()">
-      <app-active-wwell-map />
-      <app-offset-wwells />
-      <app-wwell-test-result />
-      <app-active-wwell-docs-viewer />
+    <aside class="pres-fixed__right" [style.width.px]="rightWidth()" [class.pres-fixed__right--loading]="loadingVisible()">
+      <div class="pres-section-card pres-section-card--right">
+        <app-active-wwell-map />
+      </div>
+      <div class="pres-section-card pres-section-card--right">
+        <app-offset-wwells />
+      </div>
+      <div class="pres-section-card pres-section-card--right">
+        <app-wwell-test-result />
+      </div>
+      <div class="pres-section-card pres-section-card--right">
+        <app-active-wwell-docs-viewer />
+      </div>
     </aside>
 
   </main>
@@ -78,14 +90,14 @@
       </button>
     </div>
 
-    <mat-dialog-content class="pres-modal__body">
+    <mat-dialog-content class="pres-modal__body" [class.pres-modal__body--loading]="loadingVisible()">
       @if (!store.isLoaded()) {
         <div class="empty-state">
           <div class="empty-state__icon">🛢</div>
           <p class="empty-state__text">Select a well to render the diagram</p>
         </div>
       } @else {
-        <div class="modal-diagram">
+        <div class="modal-diagram" [class.modal-diagram--loading]="loadingVisible()">
           <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
           <app-well-bore-view [diagramData]="store.diagramData()" [animTrigger]="store.animationTrigger()" />
         </div>
