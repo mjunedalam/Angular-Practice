@@ -13,6 +13,7 @@ export interface MorningReport {
     readonly wOpRmk: string;
     readonly foremanRmk: string;
     readonly plLtrlEndDpth: number | null;
+    readonly supportings: string;
     readonly wEvntTime: string;
     readonly rigStatus: string;
 }

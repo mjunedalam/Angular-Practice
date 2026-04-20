@@ -140,7 +140,10 @@
                   <td class="card-table__value" [class.missing]="!report.wDpthChgDis" [class.present]="report.wDpthChgDis">
                     {{ report.wDpthChgDis || 'Missing' }}
                   </td>
-                  <td class="card-table__label" colspan="2"></td>
+                  <td class="card-table__label">Supportings</td>
+                  <td class="card-table__value" [class.missing]="!report.supportings" [class.present]="report.supportings">
+                    {{ report.supportings || 'Missing' }}
+                  </td>
                 </tr>
                 <tr>
                   <td class="card-table__label">Operation</td>
