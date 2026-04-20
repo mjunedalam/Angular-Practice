@@ -1,4 +1,10 @@
-<section class="active-wwell-card">
-  <header class="active-wwell-card__header">Operation Summary</header>
-  <p class="active-wwell-card__body">Operation summary content will render here.</p>
-</section>
+<div class="aw-section">
+  <div class="well-header">Summary Of Operation</div>
+  <div class="ops-grid">
+    <div class="ops-label">Operation (retrieved from Drill Eye)</div>
+    <textarea class="ops-textarea" rows="4" readonly [value]="data()?.operation ?? 'N/A'"></textarea>
+
+    <div class="ops-label">Next Operation</div>
+    <textarea class="ops-textarea" rows="4" readonly [value]="data()?.nextOperation ?? 'N/A'"></textarea>
+  </div>
+</div>

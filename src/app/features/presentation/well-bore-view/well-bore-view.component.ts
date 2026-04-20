@@ -11,7 +11,7 @@ import { select, Selection } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
-import { WellStore } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { ANIM, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';

@@ -20,7 +20,7 @@ import { MorningReportService } from 'src/app/core/services/morning-report.servi
 import { WellDataService } from 'src/app/core/services/well-data.service';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
-import { WellActions, WellEvents } from '@store/well.actions';
+import { WellActions, WellEvents } from '@store/active-wwell/active-wwell.actions';
 import {
     PAGE_SIZE,
     uniqueByEpANum,
@@ -35,7 +35,25 @@ import {
     selectOffsetWells,
     selectWellLogsIndicators,
     selectWellTestResults,
-} from '@store/well.selectors';
+    selectWellHeaderViewModel,
+    selectDatabaseInfoViewModel,
+    selectOperationSummaryViewModel,
+    selectFormationInfoViewModel,
+    selectCasingInfoViewModel,
+    selectWwellTestViewModel,
+} from '@store/active-wwell/active-wwell.selectors';
+import {
+    MiscWellData,
+    OffsetWaterWells,
+    PickedFormationTops,
+    WellHeaderViewModel,
+    DatabaseInfoViewModel,
+    OperationSummaryViewModel,
+    FormationInfoViewModel,
+    CasingInfoViewModel,
+    WwellTestViewModel,
+    WellTestResult,
+} from '@models/active-wwell/active-wwell-view.model';
 
 const MIN_LOADER_DELAY = 1500;
 
@@ -52,53 +70,6 @@ function logMissingKeys(data: IWellData, epANum: number): void {
     if (missing.length) console.warn(`[${WellEvents.wellDetailsLoaded}] epANum=${epANum} missing:`, missing);
     if (empty.length) console.info(`[${WellEvents.wellDetailsLoaded}] epANum=${epANum} empty:`, empty);
     if (!missing.length && !empty.length) console.log(`[${WellEvents.wellDetailsLoaded}] epANum=${epANum} ✓`);
-}
-
-export interface MiscWellData {
-    readonly wellName: string;
-    readonly targetDesc: string;
-    readonly targetedAquifer: string;
-    readonly currentStatus: string;
-    readonly daysSinceSpud: number;
-    readonly targetDays: number;
-    readonly biNum: string;
-    readonly supportingWell: string;
-    readonly feetDrilledToday: number;
-    readonly previousWell: string;
-    readonly currentDepth: number;
-    readonly nextWell: string;
-    readonly footage: number;
-    readonly operationSummary: string;
-    readonly next24HrOperation: string;
-}
-
-export interface PickedFormationTops {
-    readonly formation: string;
-    readonly depth: number;
-    readonly remarks: string;
-}
-
-export interface OffsetWaterWells {
-    readonly wellName: string;
-    readonly aquifer: string;
-    readonly tds: number;
-    readonly rpm: number;
-    readonly h2s: number;
-    readonly distance: number;
-    readonly productivity: number;
-    readonly rate: number;
-}
-
-export interface WellTestResult {
-    readonly wellName: string;
-    readonly testType: string;
-    readonly aquifer: string;
-    readonly rpm: number;
-    readonly flowRate: number;
-    readonly temperature: number;
-    readonly tds: number;
-    readonly productivity: number;
-    readonly h2s: number;
 }
 
 interface WellState {
@@ -126,7 +97,7 @@ const initialState: WellState = {
 export const WellStore = signalStore(
     withState<WellState>(initialState),
 
-    withComputed(({ wellDetails, wellNames, wellNamesPage, loading }) => {
+    withComputed(({ wellDetails, wellNames, wellNamesPage, loading, selectedEpANum, selectedDate }) => {
         const unique = computed(() => uniqueByEpANum(wellNames()));
         return {
             uniqueWellNames: unique,
@@ -144,6 +115,12 @@ export const WellStore = signalStore(
             wellTestResults: computed((): WellTestResult[] => selectWellTestResults(wellDetails())),
             isInitialLoading: computed(() => wellNames().length === 0 && loading()),
             isDetailsLoading: computed(() => wellNames().length > 0 && loading()),
+            wellHeaderData: computed((): WellHeaderViewModel | null => selectWellHeaderViewModel(wellDetails(), selectedEpANum())),
+            databaseInfo: computed((): DatabaseInfoViewModel | null => selectDatabaseInfoViewModel(wellDetails(), selectedDate())),
+            operationSummary: computed((): OperationSummaryViewModel | null => selectOperationSummaryViewModel(wellDetails())),
+            formationInfo: computed((): FormationInfoViewModel | null => selectFormationInfoViewModel(wellDetails())),
+            casingInfo: computed((): CasingInfoViewModel | null => selectCasingInfoViewModel(wellDetails())),
+            wwellTest: computed((): WwellTestViewModel | null => selectWwellTestViewModel(wellDetails())),
         };
     }),
 

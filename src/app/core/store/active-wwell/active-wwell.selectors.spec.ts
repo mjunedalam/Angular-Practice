@@ -13,7 +13,7 @@ import {
   selectWellTestResults,
   PAGE_SIZE,
   FALLBACK_STR
-} from '@store/well.selectors';
+} from '@store/active-wwell/active-wwell.selectors';
 import { IWellData } from 'src/app/core/models/well-design/well-data.model';
 import { WellName } from 'src/app/core/models/well-design/well-name.model';
 import { expect, it, describe } from '@jest/globals';
@@ -68,7 +68,7 @@ describe('Well Selectors', () => {
       expect(selectTotalDepth(null)).toBe(0);
       expect(selectTotalDepth({} as IWellData)).toBe(0);
     });
-    
+
     it('should return estTargetDepth when valid', () => {
       expect(selectTotalDepth({ EXAD_RCD_PREWAP: [{ estTargetDepth: 1000 }] } as IWellData)).toBe(1000);
     });
@@ -85,7 +85,7 @@ describe('Well Selectors', () => {
         EXAD_RCD_PREWAP: [{ estTargetDepth: 1500 }],
         DRLG_OP_STATUS: [{ wPrsntDpth: 1400 }]
       } as unknown as IWellData;
-      
+
       const res = selectDiagramData(mockData);
       expect(res?.wellName).toBe('TestWell');
       expect(res?.totalDepth).toBe(1500);
@@ -97,7 +97,7 @@ describe('Well Selectors', () => {
     it('should return null if d is null', () => {
       expect(selectMiscWellData(null)).toBeNull();
     });
-    
+
     it('should provide fallbacks', () => {
       const data = selectMiscWellData({} as IWellData);
       expect(data?.wellName).toBe(FALLBACK_STR);
@@ -105,7 +105,7 @@ describe('Well Selectors', () => {
       expect(data?.targetedAquifer).toBe(FALLBACK_STR);
       expect(data?.currentStatus).toBe(FALLBACK_STR);
     });
-    
+
     it('should map values correctly', () => {
       const mockData = {
         RIG_ACTIVITY: [{
@@ -153,14 +153,14 @@ describe('Well Selectors', () => {
        expect(res[0]).toEqual({ formation: 'FM1', depth: 100, remarks: 'Rm' });
     });
   });
-  
+
   describe('selectOffsetWells', () => {
     it('should map correctly to OffsetWaterWells list', () => {
       const mock = {
         EXAD_GWD_IR_WATER: [{ offsetWaterWell: 'W-1', specificCapacity: 5 }],
         WATER_WELL_TEST_OUTCOME: [{ wellName: 'W-1', flowRate: 50 }]
       } as unknown as IWellData;
-      
+
       const res = selectOffsetWells(mock);
       expect(res.length).toBe(1);
       expect(res[0].wellName).toBe('W-1');
@@ -176,13 +176,13 @@ describe('Well Selectors', () => {
        expect(res).toEqual({ rcc: true, mudLog: false, logging: false });
     });
   });
-  
+
   describe('selectWellTestResults', () => {
     it('should map well test outcomes correctly', () => {
       const mock = {
         WATER_WELL_TEST_OUTCOME: [{ testType: 'Type-A', flowRate: 400 }]
       } as unknown as IWellData;
-      
+
       const res = selectWellTestResults(mock);
       expect(res.length).toBe(1);
       expect(res[0].testType).toBe('Type-A');

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { WellDocsStore } from './well-docs.store';
 import { signal } from '@angular/core';
 

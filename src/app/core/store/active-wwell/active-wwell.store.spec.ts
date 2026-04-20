@@ -1,10 +1,9 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { WellStore } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { WellDataService } from 'src/app/core/services/well-data.service';
 import { MorningReportService } from 'src/app/core/services/morning-report.service';
 import { of, throwError } from 'rxjs';
 
-//type WellStoreInstance = ReturnType<typeof TestBed.inject<WellStore>>;
 type WellStoreInstance = InstanceType<typeof WellStore>;
 interface WellDataServiceMock {
   getWellDetails: jest.Mock;
@@ -53,8 +52,8 @@ describe('WellStore', () => {
       wellDataServiceMock.getWellDetails.mockReturnValue(of(mockDetails));
 
       store.selectWell({ epANum: 100, date: '2026-04-16' });
-      tick(1000); // delay(MIN_LOADER_DELAY)
-      tick(); // resolve the service call
+      tick(1000);
+      tick();
 
       expect(store.selectedEpANum()).toBe(100);
       expect(store.loading()).toBe(false);
@@ -67,8 +66,8 @@ describe('WellStore', () => {
       wellDataServiceMock.getWellDetails.mockReturnValue(throwError(() => new Error('Error Loading Details')));
 
       store.selectWell({ epANum: 100, date: '2026-04-16' });
-      tick(1000); // delay(MIN_LOADER_DELAY)
-      tick(); // resolve the service call
+      tick(1000);
+      tick();
 
       expect(store.loading()).toBe(false);
       expect(store.error()).toBe('Error Loading Details');
@@ -88,7 +87,6 @@ describe('WellStore', () => {
 
       expect(store.loading()).toBe(true);
 
-      // delay(MIN_LOADER_DELAY) which is 1000
       tick(1000);
 
       expect(store.wellNames()).toEqual([
@@ -96,10 +94,9 @@ describe('WellStore', () => {
         { wellName: 'Well 2', epANum: 20 }
       ]);
 
-      // It should also call selectWell on the first item automatically
       expect(store.selectedEpANum()).toBe(10);
-      tick(1000); // selectWell's delay
-      tick(); // resolve the selectWell
+      tick(1000);
+      tick();
     }));
 
     it('should handle loadWellNames error correctly', fakeAsync(() => {
@@ -120,21 +117,21 @@ describe('WellStore', () => {
       wellDataServiceMock.getWellDetails.mockReturnValue(of({}));
 
       store.loadWellNames();
-      tick(1000); // loadWellNames delay
-      tick(); // selectWell gets invoked
-      tick(1000); // selectWell delay
-      tick(); // selectWell completes
+      tick(1000);
+      tick();
+      tick(1000);
+      tick();
 
       expect(store.wellNamesPage()).toBe(0);
       expect(store.selectedEpANum()).toBe(0);
 
       store.nextPage();
-      tick(1000); // nextPage calls selectWell with delay
+      tick(1000);
       tick();
       expect(store.wellNamesPage()).toBe(1);
 
       store.prevPage();
-      tick(1000); // prevPage calls selectWell with delay
+      tick(1000);
       tick();
       expect(store.wellNamesPage()).toBe(0);
     }));

@@ -6,7 +6,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 @Component({
   selector: 'app-offset-wwells',

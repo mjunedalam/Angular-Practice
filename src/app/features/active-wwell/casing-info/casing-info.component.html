@@ -1,4 +1,23 @@
-<section class="active-wwell-card">
-  <header class="active-wwell-card__header">Casing Info</header>
-  <p class="active-wwell-card__body">Casing information content will render here.</p>
-</section>
+<div class="aw-section">
+  <div class="well-header">Casing/Liner Information (MD FT)</div>
+  <div class="ci-body">
+    <div class="ci-grid">
+      <div class="aw-db-cell hover-card">
+        <span class="aw-db-label">Casing Type</span>
+        <span class="aw-db-value">{{ data()?.csgType ?? 'N/A' }}</span>
+      </div>
+      <div class="aw-db-cell hover-card">
+        <span class="aw-db-label">Casing Size</span>
+        <span class="aw-db-value">{{ data()?.csgSize ?? 'N/A' }}</span>
+      </div>
+      <div class="aw-db-cell hover-card">
+        <span class="aw-db-label">Casing Depth</span>
+        <span class="aw-db-value">{{ data()?.csgDepth ?? 'N/A' }}</span>
+      </div>
+      <div class="aw-db-cell hover-card">
+        <span class="aw-db-label">Casing Bot Depth</span>
+        <span class="aw-db-value">{{ data()?.csgBotDpth ?? 'N/A' }}</span>
+      </div>
+    </div>
+  </div>
+</div>

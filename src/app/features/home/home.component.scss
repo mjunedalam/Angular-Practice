@@ -6,7 +6,7 @@
   padding: 16px 14px;
   height: 100%;
   overflow-y: auto;
-  background: var(--bg-content);
+  background: #ffffff;
   width: 100%;
 }
 
@@ -14,16 +14,21 @@
 .quick-list {
   width: fit-content;
   min-width: 220px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
   padding: 16px 14px 12px;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.07),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
   &__title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: #64748b;
     letter-spacing: 0.04em;
     margin-bottom: 14px;
     padding-left: 2px;
@@ -47,10 +52,10 @@
   &:last-child { margin-bottom: 0; }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(0, 0, 0, 0.04);
     transform: translateX(3px);
 
-    .ql-item__label { color: var(--text-primary); }
+    .ql-item__label { color: #1e293b; }
   }
 
   &:active { transform: translateX(1px) scale(0.98); }
@@ -85,7 +90,7 @@
   &__label {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: #475569;
     letter-spacing: 0.01em;
     transition: color 0.18s;
   }

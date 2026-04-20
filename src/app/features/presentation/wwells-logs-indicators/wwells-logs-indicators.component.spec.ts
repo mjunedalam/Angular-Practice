@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { signal, WritableSignal } from '@angular/core';
 
 interface WellLogsIndicatorsState {

@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { WwellTestResultComponent } from './wwell-test-result.component';
-import { WellStore, WellTestResult } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
 import { signal, WritableSignal } from '@angular/core';
 
 type WwellTestResultComponentPrivate = WwellTestResultComponent & {

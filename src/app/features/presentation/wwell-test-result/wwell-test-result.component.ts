@@ -9,8 +9,8 @@ import {
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { DecimalPipe, TitleCasePipe } from '@angular/common';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { WellStore } from 'src/app/core/store/well.store';
-import { WellTestResult } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
   selector: 'app-wwell-test-result',

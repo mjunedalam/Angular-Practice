@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@guards/auth.guard';
-import { WellStore } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { MorningReportStore } from '@store/morning-report/morning-report';
 import { EmailStore } from '@store/email/email.store';
 
@@ -43,6 +43,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/presentation/presentation.component').then(
             (m) => m.PresentationComponent,
+          ),
+        providers: [WellStore],
+      },
+      {
+        path: 'active-wwell',
+        loadComponent: () =>
+          import('./features/active-wwell/active-wwell-view/active-wwell-view.component').then(
+            (m) => m.ActiveWwellViewComponent,
           ),
         providers: [WellStore],
       },

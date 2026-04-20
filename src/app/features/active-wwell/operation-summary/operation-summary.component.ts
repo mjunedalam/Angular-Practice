@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 @Component({
   selector: 'app-operation-summary',
@@ -8,4 +9,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: './operation-summary.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OperationSummaryComponent {}
+export class OperationSummaryComponent {
+  private readonly store = inject(WellStore);
+
+  protected readonly data = this.store.operationSummary;
+}

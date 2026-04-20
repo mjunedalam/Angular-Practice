@@ -1,22 +1,51 @@
-:host {
-  display: block;
+.wt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 0.3rem;
 }
 
-.active-wwell-card {
-  height: 100%;
-  padding: 1rem;
-  border: 1px solid var(--border, rgba(148, 163, 184, 0.2));
-  border-radius: 1rem;
-  background: var(--bg-card, #fff);
+.wt-field {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.3rem;
 }
 
-.active-wwell-card__header {
-  font-size: 1rem;
+.wt-label {
+  flex: 0 0 9rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: var(--text-primary, #0f172a);
+  color: #374151;
+  text-align: right;
+  line-height: 1.2;
 }
 
-.active-wwell-card__body {
-  margin: 0.5rem 0 0;
-  color: var(--text-secondary, #475569);
+.wt-input {
+  flex: 1;
+  background: #2fb9e8;
+  color: #fff;
+  border: none;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.68rem;
+  min-height: 1.6rem;
+  outline: none;
+  min-width: 0;
+}
+
+.wt-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.3rem 0.4rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.wt-update-btn {
+  background-color: #2fb9e8 !important;
+  color: #fff !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-height: 1.8rem;
+  line-height: 1;
 }

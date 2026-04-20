@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { OffsetWwellsComponent } from './offset-wwells.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { signal, WritableSignal } from '@angular/core';
 
 interface OffsetWell {

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WellNameChipsComponent } from './well-name-chips.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { signal } from '@angular/core';
 
 interface WellChip {

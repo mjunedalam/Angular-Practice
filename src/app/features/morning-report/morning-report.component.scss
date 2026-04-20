@@ -23,26 +23,20 @@
 
   display: block;
   padding: 2rem 1rem 3rem;
-  background:
-    radial-gradient(circle at top center, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 40%),
-    var(--bg-app);
+  background: var(--bg-app);
 }
 
-// ── Shell ──────────────────────────────────────────────────────────────────────
 .report-shell {
   max-width: 1080px;
   margin: 0 auto;
   padding: 1rem 1rem 2rem;
   border: 1px solid var(--report-border);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--report-bg) 92%, white 8%), var(--report-bg)),
-    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 8%, transparent), transparent 36%);
+  background: var(--report-bg);
   box-shadow: var(--report-shadow);
   color: var(--report-text);
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────────
 .report-header {
   margin-bottom: 1.25rem;
 }
@@ -55,7 +49,6 @@
   border: 1px solid color-mix(in srgb, var(--report-header-end) 28%, white 20%);
   border-radius: 16px;
   background: linear-gradient(180deg, var(--report-header-start), var(--report-header-end));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .report-header__title {
@@ -66,7 +59,6 @@
   text-transform: uppercase;
 }
 
-// ── Toolbar ────────────────────────────────────────────────────────────────────
 .report-toolbar {
   display: flex;
   align-items: center;
@@ -101,11 +93,9 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.2s ease, background 0.2s ease;
   min-width: 140px;
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
 
   &:hover {
     border-color: var(--accent-hover);
@@ -129,7 +119,6 @@
   }
 }
 
-// ── Loading bar ────────────────────────────────────────────────────────────────
 .report-loading-bar {
   position: fixed;
   top: 62px;
@@ -149,7 +138,6 @@
   background: linear-gradient(to right, #3b82f6, #22c55e);
 }
 
-// ── Email button ───────────────────────────────────────────────────────────────
 .email-btn {
   position: relative;
   display: inline-flex;
@@ -162,17 +150,15 @@
   color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
   cursor: pointer;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 
   &:hover {
     background: var(--bg-surface);
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.18);
 
     .email-btn__arrow { transform: translateX(3px); }
   }
@@ -180,30 +166,23 @@
   &:active { transform: scale(0.97); }
 }
 
-.email-btn__shimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.22) 50%, transparent 70%);
-  transform: translateX(-110%);
-  animation: email-btn-sheen 3.5s ease-in-out infinite;
-  pointer-events: none;
+.email-btn__icon,
+.email-btn__arrow {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.email-btn__icon {
-  display: flex; align-items: center; flex-shrink: 0;
-  svg { width: 15px; height: 15px; }
-}
+.email-btn__icon svg { width: 15px; height: 15px; }
 
 .email-btn__label { white-space: nowrap; }
 
 .email-btn__arrow {
-  display: flex; align-items: center; flex-shrink: 0;
   opacity: 0.7;
   transition: transform 180ms ease;
   svg { width: 13px; height: 13px; }
 }
 
-// ── Content + sections ─────────────────────────────────────────────────────────
 .report-content {
   display: flex;
   flex-direction: column;
@@ -237,7 +216,6 @@
   text-align: center;
 }
 
-// ── 2-column card grid ─────────────────────────────────────────────────────────
 .report-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -247,18 +225,15 @@
   overflow: hidden;
 }
 
-// ── Card shell ─────────────────────────────────────────────────────────────────
 .report-card {
   overflow: hidden;
   border: 1px solid var(--report-border-strong);
   border-radius: 0;
   background: var(--bg-card);
-  // collapse shared borders
   margin-right: -1px;
   margin-bottom: -1px;
 }
 
-// ── Card header ────────────────────────────────────────────────────────────────
 .card-header {
   display: flex;
   align-items: center;
@@ -289,7 +264,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .card-header__rig {
@@ -302,7 +276,6 @@
   color: rgba(255, 255, 255, 0.88);
   font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -322,13 +295,11 @@
   font-size: 0.88rem;
   font-weight: 600;
   text-align: center;
-  backdrop-filter: blur(6px);
 
   &::placeholder { color: rgba(255, 255, 255, 0.7); }
   &:focus { outline: none; background: rgba(255, 255, 255, 0.22); }
 }
 
-// ── Card table ─────────────────────────────────────────────────────────────────
 .card-table {
   width: 100%;
   border-collapse: collapse;
@@ -355,7 +326,6 @@
   border-right: 2px solid rgba(255, 255, 255, 0.18);
   vertical-align: middle;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 
   .report-card--test & {
     background: linear-gradient(90deg, var(--report-green-start), var(--report-green-end));
@@ -388,7 +358,6 @@
   }
 }
 
-// ── Map section ────────────────────────────────────────────────────────────────
 .report-map-section {
   margin-top: 0.5rem;
   border: 1px solid var(--report-border-strong);
@@ -431,10 +400,10 @@
   border-radius: 3px;
   flex-shrink: 0;
 
-  &--wasi      { background: var(--wasi-color);       box-shadow: 0 0 0 2px color-mix(in srgb, var(--wasi-color) 30%, transparent); }
-  &--ownership { background: var(--ownership-color);  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ownership-color) 30%, transparent); }
-  &--aquifer   { background: var(--aquifer-color);    box-shadow: 0 0 0 2px color-mix(in srgb, var(--aquifer-color) 30%, transparent); }
-  &--active    { background: var(--active-well-color); border-radius: 50%; box-shadow: 0 0 0 2px color-mix(in srgb, var(--active-well-color) 30%, transparent); }
+  &--wasi      { background: var(--wasi-color); }
+  &--ownership { background: var(--ownership-color); }
+  &--aquifer   { background: var(--aquifer-color); }
+  &--active    { background: var(--active-well-color); border-radius: 50%; }
 }
 
 .map-legend__text {
@@ -443,18 +412,6 @@
   font-weight: 600;
   letter-spacing: 0.01em;
 }
-
-// ── Animations ──────────────────────────────────────────────────────────────────
-@keyframes email-btn-sheen {
-  0%, 15%    { transform: translateX(-110%); }
-  45%, 100%  { transform: translateX(110%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .email-btn__shimmer { animation: none; }
-}
-
-// ── Responsive ─────────────────────────────────────────────────────────────────
 
 @media (max-width: 640px) {
   :host { padding: 1rem 0.5rem 2rem; }

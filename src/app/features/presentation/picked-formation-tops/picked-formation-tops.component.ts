@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridOptions, GridReadyEvent, themeQuartz } from 'ag-grid-community';
-import { WellStore } from '@store/well.store';
-import { PickedFormationTops } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { PickedFormationTops } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
   selector: 'app-picked-formation-tops',

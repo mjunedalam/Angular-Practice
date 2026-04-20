@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { WellStore } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 @Component({
   selector: 'app-active-wwell-map',

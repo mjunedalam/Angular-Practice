@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
 import { DepthScaleComponent } from './depth-scale.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 describe('DepthScaleComponent', () => {
   let component: DepthScaleComponent;

@@ -5,7 +5,7 @@
  */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 @Component({
   selector: 'app-misc-pres-well-data',

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
 import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 @Component({
   selector: 'app-casing-info',
@@ -8,4 +9,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: './casing-info.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CasingInfoComponent {}
+export class CasingInfoComponent {
+  private readonly store = inject(WellStore);
+
+  protected readonly data = this.store.casingInfo;
+}

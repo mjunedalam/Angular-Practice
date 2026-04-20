@@ -1,22 +1,13 @@
-:host {
-  display: block;
+.ft-body {
+  padding: 0.3rem;
 }
 
-.active-wwell-card {
-  height: 100%;
-  padding: 1rem;
-  border: 1px solid var(--border, rgba(148, 163, 184, 0.2));
-  border-radius: 1rem;
-  background: var(--bg-card, #fff);
+.ft-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
 }
 
-.active-wwell-card__header {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary, #0f172a);
-}
-
-.active-wwell-card__body {
-  margin: 0.5rem 0 0;
-  color: var(--text-secondary, #475569);
+.ft-remarks {
+  grid-column: 1 / -1;
 }

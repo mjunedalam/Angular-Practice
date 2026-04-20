@@ -1,4 +1,4 @@
-import { WellActions, WellEvents } from '@store/well.actions';
+import { WellActions, WellEvents } from '@store/active-wwell/active-wwell.actions';
 
 describe('WellActions', () => {
   it('should have standard action types', () => {

@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
-import { WellStore } from '@store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { WellDoc } from 'src/app/core/models/well-design/well-docs.model';
 import { WellDocsStore } from './well-docs.store';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';

@@ -6,7 +6,7 @@ import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-di
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 describe('WellBoreViewComponent', () => {
   let component: WellBoreViewComponent;

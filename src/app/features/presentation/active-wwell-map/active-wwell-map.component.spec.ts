@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ActiveWwellMapComponent } from './active-wwell-map.component';
-import { WellStore } from 'src/app/core/store/well.store';
+import { WellStore } from '@store/active-wwell/active-wwell.store';
 
 describe('ActiveWwellMapComponent', () => {
   let component: ActiveWwellMapComponent;

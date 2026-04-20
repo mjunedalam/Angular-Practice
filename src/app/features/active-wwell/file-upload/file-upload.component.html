@@ -1,0 +1,33 @@
+<div class="border border-gray-300 overflow-hidden bg-white">
+  <div class="bg-yellow-100 font-bold p-2 border-b border-black text-sm uppercase tracking-wider well-header">
+    File Uploader List
+  </div>
+
+  <div class="p-2">
+    <label class="upload-dropzone">
+      <input type="file" multiple class="hidden" (change)="onFileChange($event)" />
+      <span class="upload-dropzone__icon">⭳</span>
+      <span class="upload-dropzone__title">Click to upload or drag and drop</span>
+      <span class="upload-dropzone__subtitle">PDF, image, or report attachments</span>
+    </label>
+
+    @if (files().length) {
+      <div class="mt-3 space-y-2">
+        @for (item of files(); track item.id) {
+          <div class="file-row">
+            <div>
+              <div class="file-row__name">{{ item.file.name }}</div>
+              <div class="file-row__meta">{{ fileSizeLabel(item.file.size) }}</div>
+            </div>
+            <div class="file-row__actions">
+              <button type="button" class="file-action" (click)="previewFile(item.file)">View</button>
+              <button type="button" class="file-action file-action--danger" (click)="removeFile(item.id)">Remove</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">No files selected.</div>
+    }
+  </div>
+</div>

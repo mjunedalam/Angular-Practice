@@ -1,4 +1,86 @@
-<section class="active-wwell-card">
-  <header class="active-wwell-card__header">WWell Test</header>
-  <p class="active-wwell-card__body">WWell test content will render here.</p>
-</section>
+<div class="aw-section">
+  <div class="well-header">Well Test ({{ isFlowTest() ? 'Flow Test' : 'Pump Test' }})</div>
+
+  @if (data(); as vm) {
+    <div class="wt-grid">
+      <div class="wt-field">
+        <span class="wt-label">Aquifer(Actual)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.aquiferActual" />
+      </div>
+      <div class="wt-field">
+        <span class="wt-label">Aquifer(Estimate)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.aquiferEstimate" />
+      </div>
+
+      <div class="wt-field">
+        <span class="wt-label">H2S(Actual)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.h2sActual" />
+      </div>
+      <div class="wt-field">
+        <span class="wt-label">H2S(Estimate)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.h2sEstimate" />
+      </div>
+
+      <div class="wt-field">
+        <span class="wt-label">Temperature(°C)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.temp" />
+      </div>
+      <div class="wt-field">
+        <span class="wt-label">TDS(PPM)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.tds" />
+      </div>
+
+      <div class="wt-field">
+        <span class="wt-label">RPM</span>
+        <input class="wt-input" type="text" readonly [value]="vm.rpm" />
+      </div>
+      <div class="wt-field">
+        <span class="wt-label">Total Pump(H)</span>
+        <input class="wt-input" type="text" readonly [value]="vm.duration" />
+      </div>
+
+      <div class="wt-field">
+        <span class="wt-label">Conducted By</span>
+        <input class="wt-input" type="text" readonly [value]="vm.conductedBy" />
+      </div>
+
+      @if (isFlowTest()) {
+        <div class="wt-field">
+          <span class="wt-label">Test Rate(GPM)</span>
+          <input class="wt-input" type="text" readonly [value]="vm.rate" />
+        </div>
+        <div class="wt-field">
+          <span class="wt-label">SIWHP</span>
+          <input class="wt-input" type="text" readonly [value]="vm.siwhp" />
+        </div>
+      } @else {
+        <div class="wt-field">
+          <span class="wt-label">Well Productivity(Actual)</span>
+          <input class="wt-input" type="text" readonly [value]="vm.productivityActual" />
+        </div>
+
+        <div class="wt-field">
+          <span class="wt-label">Pump Depth</span>
+          <input class="wt-input" type="text" readonly [value]="vm.depth" />
+        </div>
+        <div class="wt-field">
+          <span class="wt-label">Well Productivity(Estimate)</span>
+          <input class="wt-input" type="text" readonly [value]="vm.productivityEstimate" />
+        </div>
+
+        <div class="wt-field">
+          <span class="wt-label">SWL(ft)</span>
+          <input class="wt-input" type="text" readonly [value]="vm.swl" />
+        </div>
+        <div class="wt-field">
+          <span class="wt-label">Total Pump(H)</span>
+          <input class="wt-input" type="text" readonly [value]="vm.dwl" />
+        </div>
+      }
+    </div>
+  }
+
+  <div class="wt-footer">
+    <button mat-raised-button type="button" class="wt-update-btn">Update</button>
+  </div>
+</div>
