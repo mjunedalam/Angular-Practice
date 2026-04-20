@@ -20,9 +20,9 @@
 
   .ground-line   { stroke: #b94a12; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
   .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; fill: #b94a12; text-transform: uppercase; opacity: 0.85; }
-  .geo-axis      { stroke: var(--accent); stroke-width: 1.5; opacity: 0.3; }
+  .geo-axis      { stroke: #000; stroke-width: 1.5; opacity: 1; }
   .column-label  { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--accent); font-weight: 700; opacity: 0.9; }
-  .geo-tick      { stroke: var(--accent); stroke-width: 1.5; opacity: 0.65; }
+  .geo-tick      { stroke: #000; stroke-width: 1.5; opacity: 1; }
   .geo-depth     { font-size: 12px; font-weight: 600; fill: var(--text-secondary); text-anchor: end; opacity: 0.85; }
   .geo-code      { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
 
