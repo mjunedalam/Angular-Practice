@@ -1,11 +1,17 @@
 // ── Host layout ──────────────────────────────────────────────────────────────
+:host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
+
 .home {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 16px 14px;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: #ffffff;
   width: 100%;
 }

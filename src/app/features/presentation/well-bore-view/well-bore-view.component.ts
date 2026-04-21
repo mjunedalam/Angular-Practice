@@ -498,7 +498,7 @@ export class WellBoreViewComponent {
     const circColour = (pct: number): string => {
       const clamped = Math.max(0, Math.min(100, pct));
       if (clamped === 0) return '#e53e3e';
-      if (clamped === 100) return '#38a169';
+      if (clamped === 100) return '#16a34a';
       // orange (30) → yellow (55) for 1–99
       const t = (clamped - 1) / 98;
       const hue = 30 + t * 25;
@@ -528,9 +528,16 @@ export class WellBoreViewComponent {
         const col = circColour(seg.pct);
         const topPct = (seg.topPx / effectivePx) * 100;
         const botPct = (seg.botPx / effectivePx) * 100;
-        grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', col);
         const nextCol = idx + 1 < segs.length ? circColour(segs[idx + 1].pct) : col;
-        grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
+        if (seg.pct === 100) {
+          const midPct = (topPct + botPct) / 2;
+          grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', '#15803d');
+          grad.append('stop').attr('offset', `${midPct.toFixed(4)}%`).attr('stop-color', '#4ade80');
+          grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', '#15803d');
+        } else {
+          grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', col);
+          grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
+        }
         if (nextCol !== col) grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', nextCol);
       });
       shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', cappedEffectivePx).attr('fill', `url(#${gradId})`);
