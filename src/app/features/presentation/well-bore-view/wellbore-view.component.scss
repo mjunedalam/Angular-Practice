@@ -13,53 +13,50 @@
 
 
 :host ::ng-deep {
-  text {
-    font-family: 'DM Mono', 'Fira Code', 'Consolas', monospace;
-    font-weight: 500;
-  }
+
 
   .ground-line   { stroke: #b94a12; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
-  .ground-label  { font-size: 14px; font-weight: 700; fill: #b94a12; text-transform: uppercase; opacity: 0.9; }
+  .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; fill: #b94a12; text-transform: uppercase; opacity: 0.85; }
   .geo-axis      { stroke: #000; stroke-width: 1.5; opacity: 1; }
-  .column-label  { font-size: 13px; fill: var(--accent); font-weight: 800; opacity: 0.95; }
+  .column-label  { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--accent); font-weight: 700; opacity: 0.9; }
   .geo-tick      { stroke: #000; stroke-width: 1.5; opacity: 1; }
-  .geo-depth     { font-size: 13px; font-weight: 700; text-anchor: end; opacity: 0.9; }
-  .geo-code      {  font-size: 16px; font-weight: 800; letter-spacing: 0.05em; }
+  .geo-depth     { font-size: 18px; font-weight: 800;  text-anchor: end; }
+  .geo-code      { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
 
-  .geo-target-band  { fill: rgba(251,191,36,0.10); stroke: rgba(57, 90, 165, 0.5); stroke-width: 1; }
+  .geo-target-band  { fill: rgb(35 135 232 / 60%);  }
   .geo-tick--target { stroke: #d97706; stroke-width: 2.5; }
-  .geo-depth--target{ font-size: 13px; font-weight: 800; fill: #d97706; text-anchor: end; }
-  .geo-code--target { font-size: 16px; font-weight: 900; fill: #d97706; }
+  .geo-depth--target{ font-size: 12px; font-weight: 700; fill: #d97706; text-anchor: end; }
+  .geo-code--target { font-size: 14px; font-weight: 900; fill: #d97706; }
 
   .casing            { stroke-linecap: round; }
   .casing-label__line   { stroke: var(--text-muted); stroke-width: 1; opacity: 0.75; }
   .casing-label__arrow  { fill: var(--text-muted); opacity: 0.75; }
   .casing-label__primary {
-    font-size: 18px; font-weight: 800;
-     letter-spacing: 0.02em;
+     font-size: 15px; font-weight: 800;
+     
   }
   .casing-label__secondary {
-    font-size: 15px; font-weight: 700;
+    font-size: 14.5px; font-weight: 500;
      font-style: italic;
   }
   .casing-size-inner {
-    font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 700;
-    opacity: 0.75;
+    font-size: 17px; font-weight: 600;
+    opacity: 0.70;
   }
 
   .water-line  { stroke: #0ea5e9; stroke-width: 1.8; stroke-dasharray: 7,4; opacity: 0.8; }
   .water-arrow { fill: #0ea5e9; stroke: #0ea5e9; opacity: 0.8; }
-  .water-label { font-family: 'DM Sans', sans-serif; font-size: 14px; fill: var(--accent); font-weight: 700; }
+  .water-label {  font-size: 14.5px;  font-weight: 900; fill: #0ea5e9;}
 
   .open-hole        { stroke: var(--text-secondary); stroke-width: 1.6; fill: none; stroke-dasharray: 5,3; opacity: 0.55; }
   .oh-label-line    { stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
   .oh-label-arrow   { fill: var(--text-muted); opacity: 0.65; }
-  .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; fill: var(--text-secondary); opacity: 0.9; }
+  .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 900;  }
 
   .liner-screen     { stroke: var(--text-secondary); stroke-width: 1.8; fill: url(#gridPattern); opacity: 0.72; }
   .screen-hanger    { opacity: 0.78; }
   .screen-label-line{ stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
-  .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; fill: var(--text-muted); }
+  .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;  }
 
   .gravelHole { opacity: 0.65; }
 
@@ -86,10 +83,8 @@
   }
 
   .total-depth-main {
-    font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 800;
-    fill: var(--accent); letter-spacing: 0.05em; opacity: 0.95;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;
+    fill: var(--accent); letter-spacing: 0.05em; opacity: 0.9;
   }
-  .not-drilled-label, .not-drilled-footage {
-    font-family: 'DM Sans', sans-serif; letter-spacing: 0.04em;
-  }
+
 }
