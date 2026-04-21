@@ -497,10 +497,12 @@ export class WellBoreViewComponent {
     const points = data.mudCirculation;
     const circColour = (pct: number): string => {
       const clamped = Math.max(0, Math.min(100, pct));
-      const hue = (clamped / 100) * 120;
-      const sat = 85 - (clamped * 0.15);
-      const lgt = 45 + (clamped * 0.08);
-      return `hsl(${hue.toFixed(0)}, ${sat.toFixed(0)}%, ${lgt.toFixed(0)}%)`;
+      if (clamped === 0) return '#e53e3e';
+      if (clamped === 100) return '#38a169';
+      // orange (30) → yellow (55) for 1–99
+      const t = (clamped - 1) / 98;
+      const hue = 30 + t * 25;
+      return `hsl(${hue.toFixed(1)}, 90%, 50%)`;
     };
     const arrowG = this.rootG.append('g').attr('class', 'depth-arrow-group');
     const clipId = `arrow-clip-${Date.now()}`;
