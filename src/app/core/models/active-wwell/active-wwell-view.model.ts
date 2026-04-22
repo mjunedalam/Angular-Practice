@@ -14,6 +14,7 @@ export interface MiscWellData {
   readonly footage: number;
   readonly operationSummary: string;
   readonly next24HrOperation: string;
+  readonly rop: number | null;
 }
 
 export interface PickedFormationTops {

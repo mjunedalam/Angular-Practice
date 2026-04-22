@@ -1,137 +1,165 @@
 @let d = store.miscWellData();
 
 @if (d) {
-<div class="misc-card">
-  <div class="misc-grid">
-
-    <!-- ROW 1: Well Name | Targeted Aquifer -->
-    <div class="cell cell--well-name">
-      <span class="cell__label">Well Name</span>
-      <div class="cell__name">{{ d.wellName }}</div>
-      <div class="cell__sub">{{ d.targetDesc }}</div>
-    </div>
-
-    <div class="cell cell--aquifer">
-      <span class="cell__label cell__label--dark">Targeted<br>Aquifer</span>
-      <svg class="aquifer-drop" viewBox="0 0 45 45" fill="none">
-        <path d="M22.5 2C22.5 2 34 16.5 34 26.5C34 32.85 28.85 38 22.5 38C16.15 38 11 32.85 11 26.5C11 16.5 22.5 2 22.5 2Z"
-              fill="url(#dg)"/>
-        <path d="M22.5 35C27.2 35 31 31.2 31 26.5C31 20.5 22.5 11 22.5 11C22.5 11 14 20.5 14 26.5C14 31.2 17.8 35 22.5 35Z"
-              fill="white" fill-opacity="0.28"/>
-        <defs>
-          <linearGradient id="dg" x1="22.5" y1="2" x2="22.5" y2="38" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#38bdf8"/><stop offset="1" stop-color="#1d4ed8"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="aquifer-name">{{ d.targetedAquifer }}</div>
-    </div>
-
-    <!-- ROW 2: Current Status | Days -->
-    <div class="cell cell--status">
-      <div class="status-left">
-        <span class="cell__label cell__label--dark">Current Status</span>
-        <div class="status-value">On Target</div>
+  <div class="misc-card">
+    <div class="misc-grid">
+      <!-- ROW 1: Well Name | Targeted Aquifer -->
+      <div class="cell cell--well-name">
+        <span class="cell__label">Well Name</span>
+        <div class="cell__name">{{ d.wellName }}</div>
+        <div class="cell__sub">{{ d.targetDesc }}</div>
       </div>
-      <div class="status-gear">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
-        </svg>
+
+      <div class="cell cell--aquifer">
+        <span class="cell__label cell__label--dark">Targeted<br />Aquifer</span>
+        <img
+          class="size-8"
+          src="assets/images/agwa-logo.svg"
+          alt="AGWA"
+          style="width: 20px"
+        />
+        <div class="aquifer-name">{{ d.targetedAquifer }}</div>
+      </div>
+
+      <!-- ROW 2: Current Status | Days -->
+      <div class="cell cell--status">
+        <div class="status-left">
+          <span class="cell__label cell__label--dark">Current Status</span>
+          <div class="status-value">Test Status</div>
+        </div>
+        <div class="status-gear">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div class="cell cell--days">
+        <div class="days-cal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+        </div>
+        <div>
+          <div class="cell__label-light">Days</div>
+          <div class="days-value">
+            {{ d.daysSinceSpud | number: "1.2-2" }}/{{ d.targetDays }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: ROP | BI Supporting -->
+      <div class="cell cell--rop">
+        <div class="depth-labels">
+          <div class="rop-value">{{ d.rop | number }}</div>
+          <div class="cell__label-light">ROP</div>
+        </div>
+        <div class="feet-icon">
+          <mat-icon>speed</mat-icon>
+        </div>
+      </div>
+
+      <div class="cell cell--bi">
+        <div class="bi-num">BI{{ d.biNum }}</div>
+        <div class="bi-label">Supporting</div>
+        <div class="bi-well">Well {{ d.supportingWell }}</div>
+      </div>
+
+      <!-- ROW 4: Feet drilled | Previous Well -->
+      <div class="cell cell--feet">
+        <div class="feet-left">
+          <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
+          <div class="cell__label-light">Feet</div>
+        </div>
+        <div class="feet-icon">
+          <svg
+            viewBox="0 0 40 40"
+            fill="none"
+            stroke="white"
+            stroke-width="1.8"
+          >
+            <path
+              d="M20 5v15M13 13l7 7 7-7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5 25c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
+              opacity="0.6"
+            />
+            <path
+              d="M5 32c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
+              opacity="0.4"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div class="cell cell--prev">
+        <div class="cell__label-light">Previous Well</div>
+        <div class="well-name-val">{{ d.previousWell }}</div>
+      </div>
+
+      <!-- ROW 5: Current Depth | Next Well -->
+      <div class="cell cell--depth">
+        <div class="depth-labels">
+          <div class="cell__label-light">Current</div>
+          <div class="cell__label-light">Depth</div>
+        </div>
+        <div class="depth-value">{{ d.currentDepth | number }}</div>
+      </div>
+
+      <div class="cell cell--next">
+        <div class="cell__label-light">Next Well</div>
+        <div class="well-name-val">{{ d.nextWell }}</div>
+      </div>
+
+      <!-- ROW 6: Operation Summary (full width) -->
+      <div class="cell cell--op-summary">
+        <div class="op-header">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+          <span class="op-header__label">Operation Summary</span>
+        </div>
+        <div class="op-text">{{ d.operationSummary }}</div>
+      </div>
+
+      <!-- ROW 7: Next 24 Hr Operation (full width) -->
+      <div class="cell cell--next24">
+        <div class="op-header">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span class="op-header__label">Next 24 Hr Operation</span>
+        </div>
+        <div class="op-text">{{ d.next24HrOperation }}</div>
       </div>
     </div>
-
-    <div class="cell cell--days">
-      <div class="days-cal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-        </svg>
-      </div>
-      <div>
-        <div class="cell__label-light">Days</div>
-        <div class="days-value">{{ d.daysSinceSpud | number:'1.2-2' }}/{{ d.targetDays }}</div>
-      </div>
-    </div>
-
-    <!-- ROW 3: Gauge rings | BI Supporting -->
-    <div class="cell cell--gauges">
-      <div class="gauge">
-        <div class="gauge__label">Days since<br>Sup</div>
-        <div class="gauge__ring">{{ d.daysSinceSpud }}</div>
-      </div>
-      <div class="gauge">
-        <div class="gauge__label">Target<br>Days</div>
-        <div class="gauge__ring">{{ d.targetDays }}</div>
-      </div>
-    </div>
-
-    <div class="cell cell--bi">
-      <div class="bi-num">BI{{ d.biNum }}</div>
-      <div class="bi-label">Supporting</div>
-      <div class="bi-well">Well {{ d.supportingWell }}</div>
-    </div>
-
-    <!-- ROW 4: Feet drilled | Previous Well -->
-    <div class="cell cell--feet">
-      <div class="feet-left">
-        <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
-        <div class="cell__label-light">Feet</div>
-      </div>
-      <div class="feet-icon">
-        <svg viewBox="0 0 40 40" fill="none" stroke="white" stroke-width="1.8">
-          <path d="M20 5v15M13 13l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 25c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3" opacity="0.6"/>
-          <path d="M5 32c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3" opacity="0.4"/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="cell cell--prev">
-      <div class="cell__label-light">Previous Well</div>
-      <div class="well-name-val">{{ d.previousWell }}</div>
-    </div>
-
-    <!-- ROW 5: Current Depth | Next Well -->
-    <div class="cell cell--depth">
-      <div class="depth-labels">
-        <div class="cell__label-light">Current</div>
-        <div class="cell__label-light">Depth</div>
-      </div>
-      <div class="depth-value">{{ d.currentDepth | number }}</div>
-    </div>
-
-    <div class="cell cell--next">
-      <div class="cell__label-light">Next Well</div>
-      <div class="well-name-val">{{ d.nextWell }}</div>
-    </div>
-
-    <!-- ROW 6: Operation Summary (full width) -->
-    <div class="cell cell--op-summary">
-      <div class="op-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-        <span class="op-header__label">Operation Summary</span>
-      </div>
-      <div class="op-text">{{ d.operationSummary }}</div>
-    </div>
-
-    <!-- ROW 7: Next 24 Hr Operation (full width) -->
-    <div class="cell cell--next24">
-      <div class="op-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        <span class="op-header__label">Next 24 Hr Operation</span>
-      </div>
-      <div class="op-text">{{ d.next24HrOperation }}</div>
-    </div>
-
   </div>
-</div>
 }

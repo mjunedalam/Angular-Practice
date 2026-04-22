@@ -95,6 +95,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         footage: status?.wDpthChgDis ?? 0,
         operationSummary: d.DRLG_OP_SMRY?.[0]?.wOpRmk ?? FALLBACK_STR,
         next24HrOperation: status?.nxt24HrPlanRmk ?? FALLBACK_STR,
+        rop: d.ROP_DATA?.[0]?.rop ?? null,
     };
 }
 

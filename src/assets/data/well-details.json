@@ -4,679 +4,1126 @@
   "message": "Success",
   "data": [
     {
-      "RIG_ACTIVITY": [
-        {
-          "racMovTruckloadTot": 234,
-          "racMovPreRelsTruckloads": 1,
-          "racMovLegalRoadFlg": "Y",
-          "racMovWinchTruckCnt": 3,
-          "racMovFlatbedTruckCnt": 22,
-          "racMovCranesCnt": 3,
-          "racMovForkliftsCnt": 2,
-          "racMovAsphaltRoadDis": 1,
-          "racMovSkidRoadDis": 1,
-          "wRigMoveDis": 2,
-          "drlgOpTypCd": "REN",
-          "wDrlgTypeDesc": "RE-ENTRY",
-          "wWellTypeDesc": "PRODUCER",
-          "biNum": "60",
-          "biNumDesc": "DEVELOPMENT DRILLING AND WORKOVERS",
-          "drlgPlanWellDesc": "MK-1 Preset targeting Khuff-C reservoir",
-          "wellName2": "MNIF-195",
-          "wellName": "MNIF-195",
-          "spuddate": "07/10/2025@2230",
-          "wRigCd": "SINO25",
-          "wDrlgLocDesc": "MNIF-195",
-          "welltype": "MK-1 Preset targeting Khuff-C reservoir",
-          "wDrlgTrgtDay": 49,
-          "waterWell": "MNIF-811, ABHD-916",
-          "wDrlgClsfCd": "W",
-          "wDrlgClsfLabl": "6",
-          "wDrlgSftCntgcyFlg": "N",
-          "wDrlgEndDt": "07/22/2025",
-          "closeLpDrlgFg": "N",
-          "rigMainCampMvFlg": "N",
-          "racCrewCampDdLatCord": 0,
-          "racCrewCampDdLonCord": 0
-        }
-      ],
-      "WELL_MASTER": [
-        {
-          "well": "MNIF-195",
-          "offshore": "Onshore",
-          "utmNorth": 3062225.78,
-          "utmEast": 303693.18,
-          "lon": 49.0097925,
-          "lat": 27.6695644
-        }
-      ],
-      "RIG_IDENTIFICATION": [
-        {
-          "rigname": "SINO-25",
-          "rigStatus": 1,
-          "code": "SINO25",
-          "description": "SINO-25",
-          "rigShrtName": "SINO-25",
-          "rigLocCd": "2",
-          "cstCtrCd": "100782",
-          "opOrgnCd": "30027906",
-          "rigTypCd": "L3",
-          "rigCntrctName": "SINO-25",
-          "rigCntrctNum": "6600044347",
-          "rigCntrctPlStaDt": "2019-06-12T00:00:00",
-          "rigCntrctActlStaDt": "2019-06-12T00:00:00",
-          "rigCntrctExpirDt": "2029-06-11T00:00:00",
-          "rigEndSrvcDt": "2029-06-11T00:00:00",
-          "rigHeight": 34.5,
-          "rigHp": 2000,
-          "rigMaxDpthCap": 18000,
-          "drlgUnitTypCd": "RIG",
-          "rigEstMoveRate": 0.33,
-          "svcoCd": "SNO",
-          "sapVndrId": 10007145,
-          "opPlanFlg": "Y",
-          "wRigActStsCd": "A",
-          "drlgIncentPgmFlg": "Y",
-          "wRigAutoAdjFlg": "N",
-          "racExecBusRuleFlg": "N",
-          "rigRmk": " $$ Updated by script",
-          "epCrDataCd": "ZAHIMA0E",
-          "epCrDataDt": "2011-06-22T00:00:00",
-          "epLtDmoCd": "ALIAA1Q",
-          "epLtDataModDt": "2022-07-19T13:01:21",
-          "epTrigModCd": "RAC",
-          "epTrigModDt": "2013-11-20T00:00:00",
-          "drlgUnitDescription": "RIG"
-        }
-      ],
-      "CONTACT": [
-        {
-          "rigContNum": "+8821677712340",
-          "description": "THURAYA",
-          "rigContNumPdf": "+882167771\n2340",
-          "rigDescriptionPdf": "THURAYA"
-        },
-        {
-          "rigContNum": "379-5683",
-          "description": "RIG FORMAN VSAT",
-          "rigContNumPdf": "379-5683",
-          "rigDescriptionPdf": "RIG FORMAN\n VSAT"
-        },
-        {
-          "rigContNum": "013-379-5688",
-          "description": "OTHER VSAT",
-          "rigContNumPdf": "013-379-56\n88",
-          "rigDescriptionPdf": "OTHER VSAT\n"
-        },
-        {
-          "rigContNum": "379-5685",
-          "description": "CONTRACTOR/CLERK VSAT",
-          "rigContNumPdf": "379-5685",
-          "rigDescriptionPdf": "CONTRACTOR\n/CLERK VSA\nT"
-        },
-        {
-          "rigContNum": "379-5688",
-          "description": "CONTRACTOR/CLERK VSAT",
-          "rigContNumPdf": "379-5688",
-          "rigDescriptionPdf": "CONTRACTOR\n/CLERK VSA\nT"
-        }
-      ],
-      "DRLG_OP_STATUS": [
-        {
-          "wDrlgDlyCst2": 0,
-          "wMudDlyCst2": 0,
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wRigCd": "SINO25",
-          "wPrsntDpth": 2900,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "wDpthChgDis": 0,
-          "wDrlgEngName": "Abduljwaad, Suliman Mohammed Saud",
-          "wFmanName": "Abdulmohsen, Amar Saleh",
-          "wMudCircPc": "100",
-          "wPrevDpth": 15720,
-          "wSpudOprDay": 0,
-          "wOpRmk": "DRILL 22\" HOLE SECTION TO 2770' CP ( 50' INTO AHMADI FMN), CHC, WIPER TRIP, SPOT CSG GO PILL, GYRO, POOH, L/D BHA.",
-          "racNum": 155817,
-          "wDrlgSuptName": "Abada, Yassine",
-          "foremanRmk": "==========================================WELL BJECTIVE========================================\nUTMN-3098 PLANNED AS MK-1 PRESET TARGETING KHUFF-C RESERVOIR. DIRECTIONAL WORKS WILL BE DONE IN THE 8-3/8\" AND 5-7/8\" HOLE SECTION BELOW BASE JILH DOLOMITE TO 62 DEG INCLINATION AT PLANNED PRESET DEPTH OF +/- 13,412 FT MD/13,002 FT TVD (10\" TVD INTO KFCC).\n=============================================SAFETY========================= \nPROCEDURE TOPIC OF THE WEEK # 28 (06-12 JULY 25)\n1) PROCEDURE OF THE WEEK : RULES TO LIVE BY\n2) LESSON LEARNT OF THE WEEK (OPERATIONS / HSE ALERT):  ROUSTABOUT SLIP AND FALL FROM CATWALK\n3) WEEKLY FOCUS AREAS AUDIT CHECKLIST: MUD PUMPS, MUD PITS & TANKS AREA CHECKLIST\n ARAMCO LIFE SAVING RULE CAMPAIGN: RULE # 3.OBTAIN AUTHORIZATION BEFORE ENTERING A CONFINED SPACE\nSANAD 10 RULES TO LIVE BY RULE # 3.VERIFY ISOLATION BEFORE WORK BEGINS (LOCK OUT / TAG OUT)\nNGGDD SAFETY TOPIC:     3.   WORK AT HEIGHT SAFETY\nSTOP WORK  AUTHORITY\nWORKING IN OPEN SPACE ON THE RIG FLOOR\nMAN RIDING OPERATION SAFETY\nLIFTING OPERATIONS SAFETY\n\n================DRILLS==================\n*DRILLS : H2S DRILL.\n=======================ARAMCO PERSONNEL============================\n* ARAMCO CLERK TAHIR ZAMAN #8546104 ON LOCATION 05/29/25.\n* ARAMCO CLERK HAMAD AL MARRI #816338 ON LOCATION 07/09/2025.\n* ARAMCO FCT MOHAMMED BUSHEHAB #818198 ON LOCATION 07/02/2025, \n* ARAMCO PDP OSAMA AL-GHAMDI ID# 794801 OFF LOCATION 07/06/2025.\n* NGGDD HSE ADVISOR YDZEL JUDILLA #8346933 ON LOCATION FOR ERP-HALL YARD-4 MEETING 07/07/2025\n=======================RIG VISIT=============================\n* SANAD SUPERINTENDENT WILLIAM STUMP VISITED RIG ON 07/08/2025.\n* SHEHAB OTAIF, DE VISITED RIG FOR DWOP MEETING 07/08/2025\n================================SERVICE COMPANY PERSONNEL=========\n* 1 X EMEC MUD ENGINEER\n========================================\n* LP AUDIT TOTAL FINDINGS 4, CLOSED 4, OPEN 0.\n* HSE GAP ANALYSIS 96% CONDUCTED ON AUG 09, 2024\n* DOECD RHSEI AUDIT TOTAL FINDINGS 29, CLOSED FINDINGS 25, OPEN 01.\n* DOECD WCEI TOTAL FINDINGS 6, CLOSED ITEMS 6, OPEN 0.\n* 2ND QTR 3MCI AUDIT 61 TOTAL FINDINGS, 0 OPEN.\n* CONDUCTED CEHA ON 06/11/2025: 91%\n* CONDUCTED MMSR ON 06/11/2025: 94%\n* CONDUCTED HAZCOM JANUARY 8, 2024 , FINAL SCORE IS 92%\n=====================NEAR MISS & SLS===================\n* NONE.\n=================RIG SHORTAGE =======================\n*  \n======================RENTAL TOOLS======================.\n> NPS 12\" SHOCK SUB WITH 7-5/8\" REG CONN S/N 143-12168-02 ON LOCATION 07/08/2025 07:00 AM\n==================================COST OPTIMIZATION==========================\n* \n==================================SIMOPS OPERATION: SND-2001 & SITE-25==========================\n> ON 07/03/2025 HELD SIMOPS RISK MANAGEMENT MEETING WITH SAGWCOD & SITE-25 FOREMAN AND HSE ADVISORS, RIG SND-2001 SAUDI ARAMCO FOREMAN, NGGDD HSE ADVISOR, SND-2001 SAUDI ARAMCO DRILLING ENGINEER, FCT AND RIG SND-2001 RIG MANAGER, RSTC & KEY PERSONNEL & DISCUSSED SIMOPS OPERATIONS, RISK ASSESSMENT, SPECIFIC ERP, SITE-25 OPERATION'S DURATION TIME, H2S DETECTORS, DAILY COMMUNICATION PROTOCOL, COMBINED H2S DRILL &  EVACUATION DRILL AND SGA.\n\n>> ON 07/07/2025 HELD MEETING IN HALLIBURTON UN-MANNED EQUIPMENT YARD-4 AND DISCUSSED COMMUNICATION PROTOCOL, RESTRICTED AREA, 24 HRS IN CHARGES PERSONS CONTACTS AND ERP.\n\n===============================================================================\n* NEXT WELL: UTMN-3028",
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:00:57",
-          "wDrlgSuptLid": "ABADYX0A",
-          "wFmanEmpnum": 284725,
-          "wFmanEmpnum2": 177544,
-          "wFmanName2": "Abouelghait, Mahmoud Mohamed Hamed H",
-          "wFmanSvcoCd": "ARM",
-          "wFmanSvcoCd2": "ARM",
-          "wRer100ppm": 1200,
-          "wRer30ppm": 2400,
-          "nxt24HrPlanRmk": "POOH, L/D BHA, RUN & CMT 18-5/8\" CSG. djhgfyjgf bfhbfjrgfuirguirguirgfubhfjrgfurgfub ebfuirgfur befbkrfhr jefbbfrgh",
-          "wDrlgEngEmpnum": 767687,
-          "drlgEngDivOrgnCd": "30009927",
-          "drlgOpDivOrgnCd": "30041751",
-          "fuelEngConsVol": 24,
-          "foremanRmkPdf": "==========================================WELL BJECTIVE========================================\nUTMN-3098 PLANNED AS MK-1 PRESET TARGETING KHUFF-C RESERVOIR. DIRECTIONAL WORKS WILL BE DONE IN THE 8-3/8\" AND 5-7/8\" HOLE SECTION BELOW BASE JILH DOLOMITE TO 62 DEG INCLINATION AT PLANNED PRESET DEPTH OF +/- 13,412 FT MD/13,002 FT TVD (10\" TVD INTO KFCC).\n=============================================SAFETY========================= \nPROCEDURE TOPIC OF THE WEEK # 28 (06-12 JULY 25)\n1) PROCEDURE OF THE WEEK : RULES TO LIVE BY\n2) LESSON LEARNT OF THE WEEK (OPERATIONS / HSE ALERT):  ROUSTABOUT SLIP AND FALL FROM CATWALK\n3) WEEKLY FOCUS AREAS AUDIT CHECKLIST: MUD PUMPS, MUD PITS & TANKS AREA CHECKLIST\n ARAMCO LIFE SAVING RULE CAMPAIGN: RULE # 3.OBTAIN AUTHORIZATION BEFORE ENTERING A CONFINED SPACE\nSANAD 10 RULES TO LIVE BY RULE # 3.VERIFY ISOLATION BEFORE WORK BEGINS (LOCK OUT / TAG OUT)\nNGGDD SAFETY TOPIC:     3.   WORK AT HEIGHT SAFETY\nSTOP WORK  AUTHORITY\nWORKING IN OPEN SPACE ON THE RIG FLOOR\nMAN RIDING OPERATION SAFETY\nLIFTING OPERATIONS SAFETY\n\n================DRILLS==================\n*DRILLS : H2S DRILL.\n=======================ARAMCO PERSONNEL============================\n* ARAMCO CLERK TAHIR ZAMAN #8546104 ON LOCATION 05/29/25.\n* ARAMCO CLERK HAMAD AL MARRI #816338 ON LOCATION 07/09/2025.\n* ARAMCO FCT MOHAMMED BUSHEHAB #818198 ON LOCATION 07/02/2025, \n* ARAMCO PDP OSAMA AL-GHAMDI ID# 794801 OFF LOCATION 07/06/2025.\n* NGGDD HSE ADVISOR YDZEL JUDILLA #8346933 ON LOCATION FOR ERP-HALL YARD-4 MEETING 07/07/2025\n=======================RIG VISIT=============================\n* SANAD SUPERINTENDENT WILLIAM STUMP VISITED RIG ON 07/08/2025.\n* SHEHAB OTAIF, DE VISITED RIG FOR DWOP MEETING 07/08/2025\n================================SERVICE COMPANY PERSONNEL=========\n* 1 X EMEC MUD ENGINEER\n========================================\n* LP AUDIT TOTAL FINDINGS 4, CLOSED 4, OPEN 0.\n* HSE GAP ANALYSIS 96% CONDUCTED ON AUG 09, 2024\n* DOECD RHSEI AUDIT TOTAL FINDINGS 29, CLOSED FINDINGS 25, OPEN 01.\n* DOECD WCEI TOTAL FINDINGS 6, CLOSED ITEMS 6, OPEN 0.\n* 2ND QTR 3MCI AUDIT 61 TOTAL FINDINGS, 0 OPEN.\n* CONDUCTED CEHA ON 06/11/2025: 91%\n* CONDUCTED MMSR ON 06/11/2025: 94%\n* CONDUCTED HAZCOM JANUARY 8, 2024 , FINAL SCORE IS 92%\n=====================NEAR MISS & SLS===================\n* NONE.\n=================RIG SHORTAGE =======================\n*  \n======================RENTAL TOOLS======================.\n> NPS 12\" SHOCK SUB WITH 7-5/8\" REG CONN S/N 143-12168-02 ON LOCATION 07/08/2025 07:00 AM\n==================================COST OPTIMIZATION==========================\n* \n==================================SIMOPS OPERATION: SND-2001 & SITE-25==========================\n> ON 07/03/2025 HELD SIMOPS RISK MANAGEMENT MEETING WITH SAGWCOD & SITE-25 FOREMAN AND HSE ADVISORS, RIG SND-2001 SAUDI ARAMCO FOREMAN, NGGDD HSE ADVISOR, SND-2001 SAUDI ARAMCO DRILLING ENGINEER, FCT AND RIG SND-2001 RIG MANAGER, RSTC & KEY PERSONNEL & DISCUSSED SIMOPS OPERATIONS, RISK ASSESSMENT, SPECIFIC ERP, SITE-25 OPERATION'S DURATION TIME, H2S DETECTORS, DAILY COMMUNICATION PROTOCOL, COMBINED H2S DRILL &  EVACUATION DRILL AND SGA.\n\n>> ON 07/07/2025 HELD MEETING IN HALLIBURTON UN-MANNED EQUIPMENT YARD-4 AND DISCUSSED COMMUNICATION PROTOCOL, RESTRICTED AREA, 24 HRS IN CHARGES PERSONS CONTACTS AND ERP.\n\n===============================================================================\n* NEXT WELL: UTMN-3028",
-          "spuddays": 0,
-          "footage": 279,
-          "wFmanNid": "ABDUAS1C",
-          "wFmanNid2": "ABOUELMM",
-          "wDrlgEngNid": "ABDUSM0K"
-        }
-      ],
-      "DRLG_FM_TOPS": [
-        {
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "stLongCd": "ADR5",
-          "wStDmrkDpth": 1500,
-          "wStDmrkRmk": "TEST",
-          "epLtDataModDt": "2025-07-20T12:00:57",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:00:57",
-          "racNum": 155817,
-          "dftNum": 4719131
-        },
-        {
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "stLongCd": "2AQ2",
-          "wStDmrkDpth": 14900,
-          "wStDmrkRmk": "TEST",
-          "epLtDataModDt": "2025-07-20T12:00:57",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:00:57",
-          "racNum": 155817,
-          "dftNum": 4719132
-        }
-      ],
-      "DRLG_FD_TDAY": [
-        {
-          "footage": 0
-        }
-      ],
-      "ROP_DATA": [
-        {
-          "rop": 0
-        }
-      ],
-      "NEXT_2_WELL_ACTIVITY": [
-        {
-          "racNum": 155817,
-          "wGnrName": "MNIF-195",
-          "nextWellActivity": "MNIF-199",
-          "rigShrtName": "SINO-25",
-          "wDrlgStaDt": "2025/06/03",
-          "wDrlgEndDt": "2025/07/22",
-          "today": 0,
-          "wBatchNum": 4064137,
-          "canMove": 0,
-          "biNum": "60",
-          "epANum": 80665,
-          "nextLocation": 81322,
-          "nextBiNum": "60"
-        }
-      ],
-      "NEW_TARGET_DAYS": [
-        {
-          "targetDays": 49
-        }
-      ],
-      "DRLG_OP_SMRY": [
-        {
-          "toTm2": "0700",
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wOpCd": "HT",
-          "wEvntTime": "0500",
-          "wOpTimeCd": "N",
-          "wOpObjCd": "BHA",
-          "wHolSz": "6 1/8",
-          "wOpDur": 2,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "wDrlgOpDt": "2025-07-17T00:00:00",
-          "wOpRmk": "POOH 22\" ROTARY BHA AND L/DN, 9 X 6-5/8\" HWDP, 6 X 8-1/2\" DC, 13 X 9-1/2\" DC, 3 X REMERS, SS, BIT bfhd jfbgjbg gbjfgb jbgfgb fbgjfbgjfb bgjfbgjbjj jjj jbjbj jhbjbjbjbjbd",
-          "wOpRmkPdf": "POOH 22\" ROTARY BHA AND L/DN, 9 X 6-5/8\" HWDP, 6 X 8-1/2\" DC, 13 X 9-1/2\" DC, 3 X REMERS, SS, BIT",
-          "racNum": 155817,
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:04:55",
-          "holSecTypCd": "6 1/8",
-          "svcoCd": "RIG",
-          "wActvDrlgFlg": "N",
-          "dopNum": 20803992,
-          "wMajOpCd": "DRLG",
-          "lostTmFlg": "N",
-          "wHoleStaDpth": 16555,
-          "wHoleEndDpth": 16555,
-          "wDrlgOpDttm": "2025-07-17T05:00:00",
-          "toTm": "0700",
-          "dltsDffsNum": " ",
-          "ltDffType": " ",
-          "ltType": " "
-        },
-        {
-          "toTm2": "1030",
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wOpCd": "HT",
-          "wEvntTime": "0700",
-          "wOpTimeCd": "N",
-          "wOpObjCd": "PEL",
-          "wHolSz": "6 1/8",
-          "wOpDur": 3.5,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "wDrlgOpDt": "2025-07-17T00:00:00",
-          "wOpRmk": "PJSM: WITH NABORS & RIG UP 18 5/8' CASING RUN TOOLS POWER TONG, HYD CRT, SPIDER SLIP, SIDE DOOR ELEVATOR, PICK-UP MECHINE. INSPECT ALL EQUIPMENT AND COMPLETE INSPECTION SHEET, ALL CERTIFICATIONS CHECKED AND VERIFIED.",
-          "wOpRmkPdf": "PJSM: WITH NABORS & RIG UP 18 5/8' CASING RUN TOOLS POWER TONG, HYD CRT, SPIDER SLIP, SIDE DOOR ELEVATOR, PICK-UP MECHINE. INSPECT ALL EQUIPMENT AND COMPLETE INSPECTION SHEET, ALL CERTIFICATIONS CHECKED AND VERIFIED.",
-          "racNum": 155817,
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:04:55",
-          "holSecTypCd": "6 1/8",
-          "svcoCd": "RIG",
-          "wActvDrlgFlg": "N",
-          "dopNum": 20803993,
-          "wMajOpCd": "DRLG",
-          "lostTmFlg": "N",
-          "wHoleStaDpth": 16555,
-          "wHoleEndDpth": 16555,
-          "wDrlgOpDttm": "2025-07-17T07:00:00",
-          "toTm": "1030",
-          "dltsDffsNum": " ",
-          "ltDffType": " ",
-          "ltType": " "
-        },
-        {
-          "toTm2": "1300",
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wOpCd": "LDP",
-          "wEvntTime": "1030",
-          "wOpTimeCd": "N",
-          "wOpObjCd": "BHA",
-          "wHolSz": "6 1/8",
-          "wOpDur": 2.5,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "wDrlgOpDt": "2025-07-17T00:00:00",
-          "wOpRmk": "HPJSM FOR RUNNING 18-5/8\" CASING W/ NABORS, RIG CREW AND CRANE OPERATOR DISCUSSED HAZARD IDENTIFICATION -PINCH POINTS, LINE OF FIRE, HOLD BACK ROPE, TAG LINE USAGE, GOOD COMMUNICATION SIGNALS WITH CRANE OPERATOR. SWA AND 360 DRGREE MEETINGS WHICH EVERY CREW MEMBER EXPLAIN HIS ROLE.",
-          "wOpRmkPdf": "HPJSM FOR RUNNING 18-5/8\" CASING W/ NABORS, RIG CREW AND CRANE OPERATOR DISCUSSED HAZARD IDENTIFICATION -PINCH POINTS, LINE OF FIRE, HOLD BACK ROPE, TAG LINE USAGE, GOOD COMMUNICATION SIGNALS WITH CRANE OPERATOR. SWA AND 360 DRGREE MEETINGS WHICH EVERY CREW MEMBER EXPLAIN HIS ROLE.",
-          "racNum": 155817,
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:04:55",
-          "holSecTypCd": "6 1/8",
-          "wEvntStaDpth": 1,
-          "wEvntEndDpth": 1,
-          "svcoCd": "RIG",
-          "wActvDrlgFlg": "N",
-          "dopNum": 20803994,
-          "wMajOpCd": "DRLG",
-          "lostTmFlg": "N",
-          "wHoleStaDpth": 16555,
-          "wHoleEndDpth": 16555,
-          "wDrlgOpDttm": "2025-07-17T10:30:00",
-          "toTm": "1300",
-          "dltsDffsNum": " ",
-          "ltDffType": " ",
-          "ltType": " "
-        },
-        {
-          "toTm2": "0000",
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wOpCd": "LOG",
-          "wEvntTime": "1300",
-          "wOpTimeCd": "N",
-          "wOpObjCd": "CBL",
-          "wHolSz": "6 1/8",
-          "wOpDur": 11,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "wDrlgOpDt": "2025-07-17T00:00:00",
-          "wOpRmk": "P/U & M/U 18-5/8\" SHOE TRACK, CHECKED FLOAT SHOE AND FLOAT COLLAR ON V-DOOR SHOE TRACK, FILL AND CHECK SHOE TRACK ( OK )BAKER LOCK THE FIRST 5 JOINTS RIH.",
-          "wOpRmkPdf": "P/U & M/U 18-5/8\" SHOE TRACK, CHECKED FLOAT SHOE AND FLOAT COLLAR ON V-DOOR SHOE TRACK, FILL AND CHECK SHOE TRACK ( OK )BAKER LOCK THE FIRST 5 JOINTS RIH.",
-          "racNum": 155817,
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:04:55",
-          "holSecTypCd": "6 1/8",
-          "wEvntStaDpth": 0,
-          "wEvntEndDpth": 0,
-          "svcoCd": "AP5",
-          "wActvDrlgFlg": "N",
-          "dopNum": 20803995,
-          "wMajOpCd": "DRLG",
-          "lostTmFlg": "N",
-          "wHoleStaDpth": 16555,
-          "wHoleEndDpth": 16555,
-          "wDrlgOpDttm": "2025-07-17T13:00:00",
-          "toTm": "0000",
-          "dltsDffsNum": " ",
-          "ltDffType": " ",
-          "ltType": " "
-        },
-        {
-          "toTm2": "0459",
-          "epANum": 80665,
-          "wActDt": "2025-07-18T00:00:00",
-          "wOpCd": "PTST",
-          "wEvntTime": "0000",
-          "wOpTimeCd": "N",
-          "wOpObjCd": "MPMP",
-          "wHolSz": "6 1/8",
-          "wOpDur": 5,
-          "epLtDataModDt": "2025-07-20T12:04:55",
-          "epLtDmoCd": "PLACIDAI",
-          "ltrlName": "0",
-          "wDrlgOpDt": "2025-07-18T00:00:00",
-          "wOpRmk": "WASH DOWN LAST JOINT, CONFIRM TAG BTM.\n- 70/70 JOINTS.",
-          "wOpRmkPdf": "WASH DOWN LAST JOINT, CONFIRM TAG BTM.\n- 70/70 JOINTS.",
-          "racNum": 155817,
-          "epCrDataCd": "PLACIDAI",
-          "epCrDataDt": "2025-07-20T12:04:55",
-          "holSecTypCd": "6 1/8",
-          "wEvntStaDpth": 0,
-          "wEvntEndDpth": 0,
-          "svcoCd": "RIG",
-          "wActvDrlgFlg": "N",
-          "dopNum": 20803996,
-          "wMajOpCd": "DRLG",
-          "lostTmFlg": "N",
-          "wHoleStaDpth": 16555,
-          "wHoleEndDpth": 16555,
-          "wDrlgOpDttm": "2025-07-18T00:00:00",
-          "toTm": "0500",
-          "dltsDffsNum": " ",
-          "ltDffType": " ",
-          "ltType": " "
-        }
-      ],
-      "BITINFO": [],
-      "EXAD_GWD_IR_HEADER": [
-        {
-          "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
-          "mudRemarks": "Customize Mud Logging Services is required in this well from surface to TD.",
-          "loggingRemarks": ""
-        }
-      ],
-      "EXAD_GWD_IR_TOPS": [
-        {
-          "stLongCd": "AHMD",
-          "planTvdDepth": 2760,
-          "planSsDepth": -1815
-        },
-        {
-          "stLongCd": "ARUM",
-          "planTvdDepth": 1960,
-          "planSsDepth": -1015
-        },
-        {
-          "stLongCd": "LAMS",
-          "planTvdDepth": 2450,
-          "planSsDepth": -1505
-        },
-        {
-          "stLongCd": "WASI",
-          "planTvdDepth": 800,
-          "planSsDepth": 145
-        },
-        {
-          "stLongCd": "SFNY",
-          "planTvdDepth": 3055,
-          "planSsDepth": -2110
-        },
-        {
-          "stLongCd": "SHUB",
-          "planTvdDepth": 4000,
-          "planSsDepth": -2880
-        },
-        {
-          "stLongCd": "UMER",
-          "planTvdDepth": 880,
-          "planSsDepth": 65
-        }
-      ],
-      "EXAD_GWD_IR_CASING": [
-        {
-          "csgSize": "13 3/8",
-          "csgType": "Casing",
-          "csgDepth": 1980,
-          "csgRemarks": "+/- 20 ft into ARUM"
-        },
-        {
-          "csgSize": "18 5/8",
-          "csgType": "Casing",
-          "csgDepth": 820,
-          "csgRemarks": "+/- 20 into RUS"
-        },
-        {
-          "csgSize": "24",
-          "csgType": "Conductor",
-          "csgDepth": 100,
-          "csgRemarks": "test"
-        },
-        {
-          "csgSize": "10 3/4",
-          "csgType": "Casing",
-          "csgDepth": 2500,
-          "csgRemarks": "+/- 20 ft into LAMS"
-        },
-        {
-          "csgSize": "9 5/8",
-          "csgType": "Liner",
-          "csgDepth": 3075,
-          "csgRemarks": "+/- 20 ft of screen"
-        },
-        {
-          "csgType": "Gravel Pack",
-          "csgSize": 8.5,
-          "csgDepth": 2900,
-          "csgRemarks": "Wirewrap / Mesh"
-        }
-      ],
-      "EXAD_GWD_IR_HYDROGEOLOGY": [
-        {
-          "flowType": "N",
-          "estTargetAquifier": "WASI",
-          "estStaticWaterLevel": 110,
-          "estWaterQuality": 2800,
-          "estProductivity": 500,
-          "estH2s": 0
-        }
-      ],
-      "EXAD_GWD_IR_WATER": [
-        {
-          "offsetWaterWell": "ANDR_963",
-          "distance": 6.4,
-          "direction": "SW",
-          "aquifer": "WASI",
-          "td": 3600,
-          "flowRate": 770,
-          "rpm": 1500,
-          "staticWaterLevel": 108.4,
-          "specificCapacity": 5.64,
-          "drawDown": 136.58,
-          "fieldTds": 2030,
-          "h2s": 0,
-          "testDuration": 180
-        },
-        {
-          "offsetWaterWell": "ANDR_7654",
-          "distance": 8.4,
-          "direction": "SW",
-          "aquifer": "WASI",
-          "td": 6600,
-          "flowRate": 770,
-          "rpm": 1500,
-          "staticWaterLevel": 108.4,
-          "specificCapacity": 5.64,
-          "drawDown": 136.58,
-          "fieldTds": 2030,
-          "h2s": 0,
-          "testDuration": 180
-        }
-      ],
-      "EXAD_RCD_PREWAP": [
-        {
-          "surfaceElevation": 945,
-          "estTargetDepth": 5320,
-          "targetFormation": "WASI",
-          "supportedBusiness": "ANDR-814 REPLACEMENT"
-        }
-      ],
-      "WATER_WELL_TEST_OUTCOME": [
-        {
-          "wellName": "ANDR-978",
-          "testType": "flow",
-          "aquifer": "UMER",
-          "rpm": 1700,
-          "flowRate": 1000,
-          "temperature": 61,
-          "tds": 2900,
-          "producitivty": 4.37,
-          "h2s": 0
-        }
-      ],
-      "WWELL_MUD_CIRC": [
-        {
-          "W_PRSNT_DPTH": "105",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "105"
-        },
-        {
-          "W_PRSNT_DPTH": "120",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "15"
-        },
-        {
-          "W_PRSNT_DPTH": "210",
-          "W_MUD_CIRC_PC": "80",
-          "W_DPTH_CHG_DIS": "90"
-        },
-        {
-          "W_PRSNT_DPTH": "328",
-          "W_MUD_CIRC_PC": "90",
-          "W_DPTH_CHG_DIS": "118"
-        },
-        {
-          "W_PRSNT_DPTH": "468",
-          "W_MUD_CIRC_PC": "90",
-          "W_DPTH_CHG_DIS": "140"
-        },
-        {
-          "W_PRSNT_DPTH": "619",
-          "W_MUD_CIRC_PC": "95",
-          "W_DPTH_CHG_DIS": "151"
-        },
-        {
-          "W_PRSNT_DPTH": "744",
-          "W_MUD_CIRC_PC": "95",
-          "W_DPTH_CHG_DIS": "125"
-        },
-        {
-          "W_PRSNT_DPTH": "983",
-          "W_MUD_CIRC_PC": "90",
-          "W_DPTH_CHG_DIS": "239"
-        },
-        {
-          "W_PRSNT_DPTH": "1273",
-          "W_MUD_CIRC_PC": "95",
-          "W_DPTH_CHG_DIS": "290"
-        },
-        {
-          "W_PRSNT_DPTH": "1480",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "207"
-        },
-        {
-          "W_PRSNT_DPTH": "1550",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "70"
-        },
-        {
-          "W_PRSNT_DPTH": "1645",
-          "W_MUD_CIRC_PC": "0",
-          "W_DPTH_CHG_DIS": "95"
-        },
-        {
-          "W_PRSNT_DPTH": "1930",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "285"
-        },
-        {
-          "W_PRSNT_DPTH": "2020",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "90"
-        },
-        {
-          "W_PRSNT_DPTH": "2045",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "25"
-        },
-        {
-          "W_PRSNT_DPTH": "2276",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "231"
-        },
-        {
-          "W_PRSNT_DPTH": "2535",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "259"
-        },
-        {
-          "W_PRSNT_DPTH": "2735",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "200"
-        },
-        {
-          "W_PRSNT_DPTH": "2925",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "190"
-        },
-        {
-          "W_PRSNT_DPTH": "3164",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "239"
-        },
-        {
-          "W_PRSNT_DPTH": "3190",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "26"
-        },
-        {
-          "W_PRSNT_DPTH": "3487",
-          "W_MUD_CIRC_PC": "100",
-          "W_DPTH_CHG_DIS": "297"
-        },
-        {
-          "W_PRSNT_DPTH": "3765",
-          "W_MUD_CIRC_PC": "70",
-          "W_DPTH_CHG_DIS": "278"
-        },
-        {
-          "W_PRSNT_DPTH": "4115",
-          "W_MUD_CIRC_PC": "60",
-          "W_DPTH_CHG_DIS": "350"
-        },
-        {
-          "W_PRSNT_DPTH": "4355",
-          "W_MUD_CIRC_PC": "20",
-          "W_DPTH_CHG_DIS": "240"
-        },
-        {
-          "W_PRSNT_DPTH": "4539",
-          "W_MUD_CIRC_PC": "10",
-          "W_DPTH_CHG_DIS": "184"
-        }
-      ]
+        "RIG_ACTIVITY": [
+            {
+                "drlgOpTypCd": "NEW",
+                "wDrlgTypeDesc": "NEW WELL",
+                "wWellTypeDesc": "WATER SUPPLY",
+                "biNum": "1514",
+                "biNumDesc": "EXPLORATION UNCONVENTIONAL GAS (INCLUDING BI34)",
+                "wellName": "JLMN-843",
+                "spuddate": "04/13/2024@0500",
+                "wRigCd": "SP-105",
+                "wDrlgLocDesc": "80 KM AFTER ARAR BRIDGE TAKE RIGHT, SKID ROAD 50 KM.",
+                "welltype": "WATER SUPPLY",
+                "wDrlgTrgtDay": 50,
+                "wDrlgEndDt": "05/31/2024"
+            }
+        ],
+        "WELL_MASTER": [
+            {
+                "well": "JLMN-843",
+                "offshore": "Onshore",
+                "utmNorth": 3521012,
+                "utmEast": 594743,
+                "lon": 40.0010322,
+                "lat": 31.8203475
+            }
+        ],
+        "RIG_IDENTIFICATION": [
+            {
+                "rigname": "SP-105",
+                "code": "SP-105",
+                "rigHeight": 20
+            }
+        ],
+        "CONTACT": [
+            {
+                "rigContNum": "+8821677712248",
+                "description": "THURAYA"
+            },
+            {
+                "rigContNum": "5763184",
+                "description": "RIG FORMAN VSAT"
+            },
+            {
+                "rigContNum": "0135779621",
+                "description": "CONTRACTOR/CLERK VSAT"
+            }
+        ],
+        "DRLG_OP_STATUS": [
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "wPrsntDpth": 3190,
+                "wCsgBotDpth": 2020,
+                "wCsgOdSz": "13 3/8",
+                "wDpthChgDis": 26,
+                "wDrlgEngName": "Zia, Yassar Kamal",
+                "wFmanName": "Dhafeeri, Yousif Monazel",
+                "wMudCircPc": "100",
+                "wPrevDpth": 3164,
+                "wSpudOprDay": 25,
+                "wOpRmk": "DRILL 12-1/4\" HOLE TO CP, CHC, POOH TO 13-3/8\" CSG SHOE  PUMPING-OUT, CONT. POOH TO SURFACE ,RIH, CHC, REAMING. ",
+                "wDrlgSmryRmk": null,
+                "wDrlgSuptName": "Khaldi, Falah Ali",
+                "wLnrOdSz": null,
+                "wLnrBotDpth": null,
+                "nxt24HrPlanRmk": "REAMING TO BTM, CHC, WIPER TRIP, CHC, POOH TO SURFACE, RUN 9-5/8\" LINER. ",
+                "fuelTypCd": "DSEL",
+                "fuelDayRem": null,
+                "fuelShipStatus": null,
+                "fuelTrckOnJob": null,
+                "fuelTrckIdle": null,
+                "spuddays": 25,
+                "bopdate": "05/01/2024",
+                "footage": 26,
+                "targetDepth": 5020
+            }
+        ],
+        "DRLG_FM_TOPS": [
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JILH",
+                "wStDmrkDpth": 690,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "SUDR",
+                "wStDmrkDpth": 1010,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JUBH",
+                "wStDmrkDpth": 1220,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JAUF",
+                "wStDmrkDpth": 1995,
+                "wStDmrkRmk": null
+            }
+        ],
+        "DRLG_FD_TDAY": [
+            {
+                "footage": 26
+            }
+        ],
+        "ROP_DATA": [
+            {
+                "rop": 13
+            }
+        ],
+        "NEXT_2_WELL_ACTIVITY": [
+            {
+                "nextWellActivity": "MRUZ-801",
+                "nextLocation": 98892,
+                "nextBiNum": "3300"
+            }
+        ],
+        "NEW_TARGET_DAYS": [
+            {
+                "targetDays": 49
+            }
+        ],
+        "actualRm": 14,
+        "kpiRm": 14.34,
+        "rigMoveDays": -0.34,
+        "DRLG_OP_SMRY": [
+            {
+                "wOpCd": "D",
+                "wEvntTime": "0500",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "ROTARY DRILL 12-1/4\" HOLE W/ 88 PCF INHIBITED PHPA POLYMER MUD (100 % CIRC. RETURN).\n** WASH UP AND REAM DOWN THREE TIMES EVERY CONNECTION.\n** SWEEP HOLE W/ 30 BBL'S HVP EVERY CONNECTION.\n** INCREASED MUD WEIGHT GRADUALLY TO 90 PCF WHILE DRILLING .",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3164,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T05:00:00",
+                "toTm": "0700"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "0700",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "PUMP 2 X 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.\n- GOC CONFIRMED CSG POINT @ 3,190' RKB.\n- FLOW CHECK, OK.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T07:00:00",
+                "toTm": "0930"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "0930",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, POOH W/ 12-1/4\" BHA. TO 2790' RKB, HAD TIGHT HOLE @ THIS DEPTH, WORKED ON SAME W/ 30 KLB'S . NO PROGRESS.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T09:30:00",
+                "toTm": "1100"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1100",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & WORKED ON TIGHT HOLE WHILE PUMPING-OUT FROM 2790 ' TO 2667', WORKED ON SAME, TILL PASS FREELY.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T11:00:00",
+                "toTm": "1230"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1230",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH W/ 12-1/4\" BHA. TO 2473' RKB, HAD TIGHT HOLE @ THIS DEPTH, WORKED ON SAME W/ 30 KLB'S . NO PROGRESS.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T12:30:00",
+                "toTm": "1330"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & WORKED ON TIGHT HOLE WHILE PUMPING-OUT FROM 2473 ' TO 2020', WORKED ON SAME, TILL PASS FREELY.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T13:30:00",
+                "toTm": "1730"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "1730",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T17:30:00",
+                "toTm": "1830"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1830",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH OVER PULL -/+ 15KLB'S INSIDE 13-3/8 CSG. TO 1820'.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T18:30:00",
+                "toTm": "2000"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "2000",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T20:00:00",
+                "toTm": "2130"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "2130",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH WITH 12.25'' DRILLING BHA TO SURFACE, TO CHECK BIT & REAMERS FOUND BIT AND REAMER IS BALLING & CLEAN SAME.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T21:30:00",
+                "toTm": "2330"
+            },
+            {
+                "wOpCd": "TI",
+                "wEvntTime": "2330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, RIH W/ 12-1/4\" BHA TO 13-3/8\" CSG SHOE.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T23:30:00",
+                "toTm": "0130"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "0130",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "M/U KELLY & PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T01:30:00",
+                "toTm": "0230"
+            },
+            {
+                "wOpCd": "TI",
+                "wEvntTime": "0230",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. RIH W/12-1/4\" BHA TO 2777' RKB GOT OBSTRUCTION @ THIS DEPTH",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T02:30:00",
+                "toTm": "0330"
+            },
+            {
+                "wOpCd": "RW",
+                "wEvntTime": "0330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & REAMING DOWN 12-1/4\" HOLE W/ 90 PCF INHIBITED PHPA POLYMER MUD, (100% CIRC. RETRUN),FROM (2777' TO BTM......ONGOING AT REPORT TIME.\n** INCREASED MUD WEIGHT GRADUALLY TO 94 PCF TO STABILIZE THE HOLE.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T03:30:00",
+                "toTm": "0500"
+            }
+        ],
+        "EXAD_GWD_IR_HEADER": [
+            {
+                "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
+                "mudRemarks": "Customize Mudlogging Services are required in this well from surface to TD.",
+                "loggingRemarks": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8; liner shoe. Continue CN/GR to surface."
+            }
+        ],
+        "EXAD_GWD_IR_TOPS": [
+            {
+                "stLongCd": "JUBH",
+                "planTvdDepth": 1205,
+                "planSsDepth": 1272
+            },
+            {
+                "stLongCd": "JAUF",
+                "planTvdDepth": 2195,
+                "planSsDepth": 282
+            },
+            {
+                "stLongCd": "QASR",
+                "planTvdDepth": 3140,
+                "planSsDepth": -663
+            },
+            {
+                "stLongCd": "TWLF",
+                "planTvdDepth": 3410,
+                "planSsDepth": -933
+            }
+        ],
+        "EXAD_GWD_IR_CASING": [
+            {
+                "csgSize": "30",
+                "csgType": "Conductor",
+                "csgDepth": 100,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "24",
+                "csgType": "Casing",
+                "csgDepth": 700,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "18 5/8",
+                "csgType": "Casing",
+                "csgDepth": 1530,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "13 3/8",
+                "csgType": "Casing",
+                "csgDepth": 2220,
+                "csgRemarks": "+/ 25 ft into JAUF"
+            },
+            {
+                "csgSize": "9 5/8",
+                "csgType": "Liner",
+                "csgDepth": 3430,
+                "csgRemarks": "+/- 20 ft into TWLF"
+            }
+        ],
+        "EXAD_GWD_IR_HYDROGEOLOGY": [
+            {
+                "flowType": "N",
+                "estTargetAquifier": "TWLF",
+                "estStaticWaterLevel": 800,
+                "estWaterQuality": 4000,
+                "estProductivity": 500,
+                "estH2s": "NO"
+            }
+        ],
+        "EXAD_GWD_IR_WATER": [
+            {
+                "offsetWaterWell": "JLMN_822",
+                "distance": 15.4,
+                "direction": "SE",
+                "aquifer": "TWLF",
+                "td": 5230,
+                "flowRate": 929,
+                "rpm": 1900,
+                "staticWaterLevel": 680,
+                "specificCapacity": 14.8,
+                "drawDown": 62.6,
+                "fieldTds": 4600,
+                "h2s": 0,
+                "testDuration": 80
+            },
+            {
+                "offsetWaterWell": "JLMN_808",
+                "distance": 22.4,
+                "direction": "SW",
+                "aquifer": "TWLF",
+                "td": 4045,
+                "flowRate": 630,
+                "rpm": 1800,
+                "staticWaterLevel": 876.4,
+                "specificCapacity": 29.2,
+                "drawDown": 21.6,
+                "fieldTds": 1200,
+                "h2s": 1,
+                "testDuration": 60
+            }
+        ],
+        "EXAD_RCD_PREWAP": [
+            {
+                "surfaceElevation": 2477,
+                "estTargetDepth": 5000,
+                "targetFormation": "TWLF",
+                "supportedBusiness": "JLMN-90"
+            }
+        ],
+        "MUD_CIRC": [
+            {
+                "wPrsntDpth": 105,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 105
+            },
+            {
+                "wPrsntDpth": 120,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 15
+            },
+            {
+                "wPrsntDpth": 210,
+                "wMudCircPc": "80",
+                "wDpthChgDis": 90
+            },
+            {
+                "wPrsntDpth": 328,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 118
+            },
+            {
+                "wPrsntDpth": 468,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 140
+            },
+            {
+                "wPrsntDpth": 619,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 151
+            },
+            {
+                "wPrsntDpth": 744,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 125
+            },
+            {
+                "wPrsntDpth": 983,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 239
+            },
+            {
+                "wPrsntDpth": 1273,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 290
+            },
+            {
+                "wPrsntDpth": 1480,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 207
+            },
+            {
+                "wPrsntDpth": 1550,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 70
+            },
+            {
+                "wPrsntDpth": 1645,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 95
+            },
+            {
+                "wPrsntDpth": 1930,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 285
+            },
+            {
+                "wPrsntDpth": 2020,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 90
+            },
+            {
+                "wPrsntDpth": 2045,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 25
+            },
+            {
+                "wPrsntDpth": 2276,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 231
+            },
+            {
+                "wPrsntDpth": 2535,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 259
+            },
+            {
+                "wPrsntDpth": 2735,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 200
+            },
+            {
+                "wPrsntDpth": 2925,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 190
+            },
+            {
+                "wPrsntDpth": 3164,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 239
+            },
+            {
+                "wPrsntDpth": 3190,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 26
+            },
+            {
+                "wPrsntDpth": 3487,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 297
+            },
+            {
+                "wPrsntDpth": 3765,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 278
+            },
+            {
+                "wPrsntDpth": 4115,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 350
+            },
+            {
+                "wPrsntDpth": 4355,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 240
+            },
+            {
+                "wPrsntDpth": 4539,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 184
+            }
+        ]
+    },
+    {
+        "RIG_ACTIVITY": [
+            {
+                "drlgOpTypCd": "NEW",
+                "wDrlgTypeDesc": "NEW WELL",
+                "wWellTypeDesc": "WATER SUPPLY",
+                "biNum": "1514",
+                "biNumDesc": "EXPLORATION UNCONVENTIONAL GAS (INCLUDING BI34)",
+                "wellName": "JLMN-843",
+                "spuddate": "04/13/2024@0500",
+                "wRigCd": "SP-105",
+                "wDrlgLocDesc": "80 KM AFTER ARAR BRIDGE TAKE RIGHT, SKID ROAD 50 KM.",
+                "welltype": "WATER SUPPLY",
+                "wDrlgTrgtDay": 50,
+                "wDrlgEndDt": "05/31/2024"
+            }
+        ],
+        "WELL_MASTER": [
+            {
+                "well": "JLMN-843",
+                "offshore": "Onshore",
+                "utmNorth": 3521012,
+                "utmEast": 594743,
+                "lon": 40.0010322,
+                "lat": 31.8203475
+            }
+        ],
+        "RIG_IDENTIFICATION": [
+            {
+                "rigname": "SP-105",
+                "code": "SP-105",
+                "rigHeight": 20
+            }
+        ],
+        "CONTACT": [
+            {
+                "rigContNum": "+8821677712248",
+                "description": "THURAYA"
+            },
+            {
+                "rigContNum": "5763184",
+                "description": "RIG FORMAN VSAT"
+            },
+            {
+                "rigContNum": "0135779621",
+                "description": "CONTRACTOR/CLERK VSAT"
+            }
+        ],
+        "DRLG_OP_STATUS": [
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "wPrsntDpth": 3190,
+                "wCsgBotDpth": 2020,
+                "wCsgOdSz": "13 3/8",
+                "wDpthChgDis": 26,
+                "wDrlgEngName": "Zia, Yassar Kamal",
+                "wFmanName": "Dhafeeri, Yousif Monazel",
+                "wMudCircPc": "100",
+                "wPrevDpth": 3164,
+                "wSpudOprDay": 25,
+                "wOpRmk": "DRILL 12-1/4\" HOLE TO CP, CHC, POOH TO 13-3/8\" CSG SHOE  PUMPING-OUT, CONT. POOH TO SURFACE ,RIH, CHC, REAMING. ",
+                "wDrlgSmryRmk": null,
+                "wDrlgSuptName": "Khaldi, Falah Ali",
+                "wLnrOdSz": null,
+                "wLnrBotDpth": null,
+                "nxt24HrPlanRmk": "REAMING TO BTM, CHC, WIPER TRIP, CHC, POOH TO SURFACE, RUN 9-5/8\" LINER. ",
+                "fuelTypCd": "DSEL",
+                "fuelDayRem": null,
+                "fuelShipStatus": null,
+                "fuelTrckOnJob": null,
+                "fuelTrckIdle": null,
+                "spuddays": 25,
+                "bopdate": "05/01/2024",
+                "footage": 26,
+                "targetDepth": 5020
+            }
+        ],
+        "DRLG_FM_TOPS": [
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JILH",
+                "wStDmrkDpth": 690,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "SUDR",
+                "wStDmrkDpth": 1010,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JUBH",
+                "wStDmrkDpth": 1220,
+                "wStDmrkRmk": null
+            },
+            {
+                "epANum": 98415,
+                "wActDt": "2024-05-08T00:00:00",
+                "stLongCd": "JAUF",
+                "wStDmrkDpth": 1995,
+                "wStDmrkRmk": null
+            }
+        ],
+        "DRLG_FD_TDAY": [
+            {
+                "footage": 26
+            }
+        ],
+        "ROP_DATA": [
+            {
+                "rop": 13
+            }
+        ],
+        "NEXT_2_WELL_ACTIVITY": [
+            {
+                "nextWellActivity": "MRUZ-801",
+                "nextLocation": 98892,
+                "nextBiNum": "3300"
+            }
+        ],
+        "NEW_TARGET_DAYS": [
+            {
+                "targetDays": 49
+            }
+        ],
+        "actualRm": 14,
+        "kpiRm": 14.34,
+        "rigMoveDays": -0.34,
+        "DRLG_OP_SMRY": [
+            {
+                "wOpCd": "D",
+                "wEvntTime": "0500",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "ROTARY DRILL 12-1/4\" HOLE W/ 88 PCF INHIBITED PHPA POLYMER MUD (100 % CIRC. RETURN).\n** WASH UP AND REAM DOWN THREE TIMES EVERY CONNECTION.\n** SWEEP HOLE W/ 30 BBL'S HVP EVERY CONNECTION.\n** INCREASED MUD WEIGHT GRADUALLY TO 90 PCF WHILE DRILLING .",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3164,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T05:00:00",
+                "toTm": "0700"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "0700",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "PUMP 2 X 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.\n- GOC CONFIRMED CSG POINT @ 3,190' RKB.\n- FLOW CHECK, OK.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T07:00:00",
+                "toTm": "0930"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "0930",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, POOH W/ 12-1/4\" BHA. TO 2790' RKB, HAD TIGHT HOLE @ THIS DEPTH, WORKED ON SAME W/ 30 KLB'S . NO PROGRESS.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T09:30:00",
+                "toTm": "1100"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1100",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & WORKED ON TIGHT HOLE WHILE PUMPING-OUT FROM 2790 ' TO 2667', WORKED ON SAME, TILL PASS FREELY.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T11:00:00",
+                "toTm": "1230"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1230",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH W/ 12-1/4\" BHA. TO 2473' RKB, HAD TIGHT HOLE @ THIS DEPTH, WORKED ON SAME W/ 30 KLB'S . NO PROGRESS.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T12:30:00",
+                "toTm": "1330"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & WORKED ON TIGHT HOLE WHILE PUMPING-OUT FROM 2473 ' TO 2020', WORKED ON SAME, TILL PASS FREELY.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T13:30:00",
+                "toTm": "1730"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "1730",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T17:30:00",
+                "toTm": "1830"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "1830",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH OVER PULL -/+ 15KLB'S INSIDE 13-3/8 CSG. TO 1820'.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T18:30:00",
+                "toTm": "2000"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "2000",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T20:00:00",
+                "toTm": "2130"
+            },
+            {
+                "wOpCd": "TO",
+                "wEvntTime": "2130",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. POOH WITH 12.25'' DRILLING BHA TO SURFACE, TO CHECK BIT & REAMERS FOUND BIT AND REAMER IS BALLING & CLEAN SAME.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T21:30:00",
+                "toTm": "2330"
+            },
+            {
+                "wOpCd": "TI",
+                "wEvntTime": "2330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, RIH W/ 12-1/4\" BHA TO 13-3/8\" CSG SHOE.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-07T23:30:00",
+                "toTm": "0130"
+            },
+            {
+                "wOpCd": "CIRC",
+                "wEvntTime": "0130",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "M/U KELLY & PUMP 50 BBLS HI-VIS, CHC UNTIL SHAKER CLEAN.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T01:30:00",
+                "toTm": "0230"
+            },
+            {
+                "wOpCd": "TI",
+                "wEvntTime": "0230",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "CONT. RIH W/12-1/4\" BHA TO 2777' RKB GOT OBSTRUCTION @ THIS DEPTH",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T02:30:00",
+                "toTm": "0330"
+            },
+            {
+                "wOpCd": "RW",
+                "wEvntTime": "0330",
+                "wHolSz": "12 1/4",
+                "wOpRmk": "HPJSM, M/U KELLY & REAMING DOWN 12-1/4\" HOLE W/ 90 PCF INHIBITED PHPA POLYMER MUD, (100% CIRC. RETRUN),FROM (2777' TO BTM......ONGOING AT REPORT TIME.\n** INCREASED MUD WEIGHT GRADUALLY TO 94 PCF TO STABILIZE THE HOLE.",
+                "holSecTypCd": "12 1/4",
+                "wActvDrlgFlg": "N",
+                "wMajOpCd": "DRLG",
+                "wHoleStaDpth": 3190,
+                "wHoleEndDpth": 3190,
+                "wDrlgOpDttm": "2024-05-08T03:30:00",
+                "toTm": "0500"
+            }
+        ],
+        "EXAD_GWD_IR_HEADER": [
+            {
+                "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
+                "mudRemarks": "Customize Mudlogging Services are required in this well from surface to TD.",
+                "loggingRemarks": "Run ZDL/CN/GR logs from total depth to 100 ft above the 9-5/8; liner shoe. Continue CN/GR to surface."
+            }
+        ],
+        "EXAD_GWD_IR_TOPS": [
+            {
+                "stLongCd": "JUBH",
+                "planTvdDepth": 1205,
+                "planSsDepth": 1272
+            },
+            {
+                "stLongCd": "JAUF",
+                "planTvdDepth": 2195,
+                "planSsDepth": 282
+            },
+            {
+                "stLongCd": "QASR",
+                "planTvdDepth": 3140,
+                "planSsDepth": -663
+            },
+            {
+                "stLongCd": "TWLF",
+                "planTvdDepth": 3410,
+                "planSsDepth": -933
+            }
+        ],
+        "EXAD_GWD_IR_CASING": [
+            {
+                "csgSize": "30",
+                "csgType": "Conductor",
+                "csgDepth": 100,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "24",
+                "csgType": "Casing",
+                "csgDepth": 700,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "18 5/8",
+                "csgType": "Casing",
+                "csgDepth": 1530,
+                "csgRemarks": null
+            },
+            {
+                "csgSize": "13 3/8",
+                "csgType": "Casing",
+                "csgDepth": 2220,
+                "csgRemarks": "+/ 25 ft into JAUF"
+            },
+            {
+                "csgSize": "9 5/8",
+                "csgType": "Liner",
+                "csgDepth": 3430,
+                "csgRemarks": "+/- 20 ft into TWLF"
+            }
+        ],
+        "EXAD_GWD_IR_HYDROGEOLOGY": [
+            {
+                "flowType": "N",
+                "estTargetAquifier": "TWLF",
+                "estStaticWaterLevel": 800,
+                "estWaterQuality": 4000,
+                "estProductivity": 500,
+                "estH2s": "NO"
+            }
+        ],
+        "EXAD_GWD_IR_WATER": [
+            {
+                "offsetWaterWell": "JLMN_822",
+                "distance": 15.4,
+                "direction": "SE",
+                "aquifer": "TWLF",
+                "td": 5230,
+                "flowRate": 929,
+                "rpm": 1900,
+                "staticWaterLevel": 680,
+                "specificCapacity": 14.8,
+                "drawDown": 62.6,
+                "fieldTds": 4600,
+                "h2s": 0,
+                "testDuration": 80
+            },
+            {
+                "offsetWaterWell": "JLMN_808",
+                "distance": 22.4,
+                "direction": "SW",
+                "aquifer": "TWLF",
+                "td": 4045,
+                "flowRate": 630,
+                "rpm": 1800,
+                "staticWaterLevel": 876.4,
+                "specificCapacity": 29.2,
+                "drawDown": 21.6,
+                "fieldTds": 1200,
+                "h2s": 1,
+                "testDuration": 60
+            }
+        ],
+        "EXAD_RCD_PREWAP": [
+            {
+                "surfaceElevation": 2477,
+                "estTargetDepth": 5000,
+                "targetFormation": "TWLF",
+                "supportedBusiness": "JLMN-90"
+            }
+        ],
+        "MUD_CIRC": [
+            {
+                "wPrsntDpth": 105,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 105
+            },
+            {
+                "wPrsntDpth": 120,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 15
+            },
+            {
+                "wPrsntDpth": 210,
+                "wMudCircPc": "80",
+                "wDpthChgDis": 90
+            },
+            {
+                "wPrsntDpth": 328,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 118
+            },
+            {
+                "wPrsntDpth": 468,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 140
+            },
+            {
+                "wPrsntDpth": 619,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 151
+            },
+            {
+                "wPrsntDpth": 744,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 125
+            },
+            {
+                "wPrsntDpth": 983,
+                "wMudCircPc": "90",
+                "wDpthChgDis": 239
+            },
+            {
+                "wPrsntDpth": 1273,
+                "wMudCircPc": "95",
+                "wDpthChgDis": 290
+            },
+            {
+                "wPrsntDpth": 1480,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 207
+            },
+            {
+                "wPrsntDpth": 1550,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 70
+            },
+            {
+                "wPrsntDpth": 1645,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 95
+            },
+            {
+                "wPrsntDpth": 1930,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 285
+            },
+            {
+                "wPrsntDpth": 2020,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 90
+            },
+            {
+                "wPrsntDpth": 2045,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 25
+            },
+            {
+                "wPrsntDpth": 2276,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 231
+            },
+            {
+                "wPrsntDpth": 2535,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 259
+            },
+            {
+                "wPrsntDpth": 2735,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 200
+            },
+            {
+                "wPrsntDpth": 2925,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 190
+            },
+            {
+                "wPrsntDpth": 3164,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 239
+            },
+            {
+                "wPrsntDpth": 3190,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 26
+            },
+            {
+                "wPrsntDpth": 3487,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 297
+            },
+            {
+                "wPrsntDpth": 3765,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 278
+            },
+            {
+                "wPrsntDpth": 4115,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 350
+            },
+            {
+                "wPrsntDpth": 4355,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 240
+            },
+            {
+                "wPrsntDpth": 4539,
+                "wMudCircPc": "100",
+                "wDpthChgDis": 184
+            }
+        ]
     }
   ]
 }
