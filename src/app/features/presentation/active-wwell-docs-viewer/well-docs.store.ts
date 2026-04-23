@@ -6,9 +6,10 @@ import { pipe, switchMap, tap } from 'rxjs';
 
 import { WellDoc, WellDocsState } from '@models/well-design/well-docs.model';
 import { PresDocsService } from '@services/pres-docs.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { DUMMY_DOCS, initialWellDocsState } from './well-docs.state';
 import { selectCategories, selectDocsByCategory, selectTotalDocCount } from './well-docs.selectors';
-import { WellDocsActions, WellDocsEvents, LoadDocsPayload } from './well-docs.actions';
+import { WellDocsActions, WellDocsEvents, LoadDocsPayload, UploadDocsPayload } from './well-docs.actions';
 
 export const WellDocsStore = signalStore(
   { providedIn: 'root' },
@@ -21,7 +22,7 @@ export const WellDocsStore = signalStore(
     totalCount:     computed(() => selectTotalDocCount(docs())),
   })),
 
-  withMethods((store, svc = inject(PresDocsService)) => ({
+  withMethods((store, svc = inject(PresDocsService), notify = inject(NotificationService)) => ({
     loadDocs: rxMethod<LoadDocsPayload>(
       pipe(
         tap(() => patchState(store, { loading: true, error: null })),
@@ -36,6 +37,28 @@ export const WellDocsStore = signalStore(
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Failed to load documents';
                 patchState(store, { docs: DUMMY_DOCS, loading: false, error: msg });
+              },
+            }),
+          ),
+        ),
+      ),
+    ),
+
+    uploadDocs: rxMethod<UploadDocsPayload>(
+      pipe(
+        tap(() => patchState(store, { uploading: true, error: null })),
+        switchMap(({ files, epANum, date }) =>
+          svc.uploadDocs(files, epANum, date).pipe(
+            tapResponse({
+              next: () => {
+                notify.info('Documents uploaded successfully.');
+                svc.getDocs(epANum, date).subscribe(docs =>
+                  patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false }),
+                );
+              },
+              error: (err: unknown) => {
+                const msg = err instanceof Error ? err.message : 'Upload failed';
+                patchState(store, { uploading: false, error: msg });
               },
             }),
           ),

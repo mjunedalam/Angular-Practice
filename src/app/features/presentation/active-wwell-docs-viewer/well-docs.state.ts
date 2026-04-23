@@ -48,6 +48,7 @@ export const initialWellDocsState: WellDocsState = {
   docs: DUMMY_DOCS,
   selectedDoc: null,
   loading: false,
+  uploading: false,
   error: null,
   viewerOpen: false,
 };

@@ -2,14 +2,17 @@ import { WellDoc } from '@models/well-design/well-docs.model';
 
 export const WellDocsActions = {
   loadDocs:    '[Well Docs] Load Docs',
+  uploadDocs:  '[Well Docs] Upload Docs',
   openViewer:  '[Well Docs] Open Viewer',
   closeViewer: '[Well Docs] Close Viewer',
   clearDocs:   '[Well Docs] Clear Docs',
 } as const;
 
 export const WellDocsEvents = {
-  docsLoaded:     '[Well Docs] Docs Loaded',
-  docsLoadFailed: '[Well Docs] Docs Load Failed',
+  docsLoaded:       '[Well Docs] Docs Loaded',
+  docsLoadFailed:   '[Well Docs] Docs Load Failed',
+  docsUploaded:     '[Well Docs] Docs Uploaded',
+  docsUploadFailed: '[Well Docs] Docs Upload Failed',
 } as const;
 
 export interface LoadDocsPayload {
@@ -23,4 +26,10 @@ export interface DocsLoadedPayload {
 
 export interface DocsErrorPayload {
   error: string;
+}
+
+export interface UploadDocsPayload {
+  files: File[];
+  epANum: number;
+  date: string;
 }

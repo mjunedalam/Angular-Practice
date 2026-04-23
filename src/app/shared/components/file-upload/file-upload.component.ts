@@ -4,19 +4,25 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { WellDocsStore } from 'src/app/features/presentation/active-wwell-docs-viewer/well-docs.store';
+import { formatDateForInput } from 'src/app/shared/utils/date.util';
 import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-dialog.component';
 
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatProgressSpinnerModule],
   templateUrl: './file-upload.component.html',
   styleUrl: './file-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileUploadComponent {
   private readonly dialog = inject(MatDialog);
+  private readonly wellStore = inject(DrillingDataStore);
+  protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
 
@@ -49,6 +55,16 @@ export class FileUploadComponent {
 
   protected removeFile(id: string): void {
     this.files.update((items) => items.filter((item) => item.id !== id));
+  }
+
+  protected submitUpload(): void {
+    const epANum = this.wellStore.selectedEpANum();
+    const date = formatDateForInput(this.wellStore.selectedDate());
+    if (epANum == null || !this.files().length) return;
+
+    const rawFiles = this.files().map(item => item.file);
+    this.docsStore.uploadDocs({ files: rawFiles, epANum, date });
+    this.files.set([]);
   }
 
   protected fileSizeLabel(size: number): string {

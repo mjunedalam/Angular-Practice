@@ -32,13 +32,28 @@
               <button mat-icon-button class="action-btn action-btn--delete"
                       matTooltip="Remove"
                       (click)="removeFile(item.id)"
-                      aria-label="Remove file">
+                      aria-label="Remove file"
+                      [disabled]="docsStore.uploading()">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
           </li>
         }
       </ul>
+
+      <div class="upload-actions">
+        <button mat-flat-button color="primary" class="upload-submit-btn"
+                (click)="submitUpload()"
+                [disabled]="docsStore.uploading()">
+          @if (docsStore.uploading()) {
+            <mat-spinner diameter="18" class="upload-spinner"></mat-spinner>
+            <span>Uploading…</span>
+          } @else {
+            <mat-icon>upload</mat-icon>
+            <span>Upload Documents</span>
+          }
+        </button>
+      </div>
     } @else {
       <p class="empty-state">No files attached.</p>
     }

@@ -20,6 +20,7 @@ export interface WellDocsState {
   readonly docs: WellDoc[];
   readonly selectedDoc: WellDoc | null;
   readonly loading: boolean;
+  readonly uploading: boolean;
   readonly error: string | null;
   readonly viewerOpen: boolean;
 }

@@ -21,6 +21,28 @@ export class PresDocsService {
     }
   }
 
+  uploadDocs(files: File[], epANum: number, date: string): Observable<void> {
+    if (!this.apiUrl) {
+      this.notify.error('Well documents service unavailable.');
+      return new Observable(obs => { obs.next(); obs.complete(); });
+    }
+
+    const formData = new FormData();
+    formData.append('epANum', String(epANum));
+    formData.append('date', date);
+    files.forEach(f => formData.append('files', f, f.name));
+
+    return this.http
+      .post<void>(`${this.apiUrl}/well-pres-docs/upload`, formData)
+      .pipe(
+        timeout(CONNECTION_TIMEOUT_MS),
+        catchError(() => {
+          this.notify.error('Failed to upload documents.');
+          return new Observable<void>(obs => { obs.next(); obs.complete(); });
+        }),
+      );
+  }
+
   getDocs(epANum: number, date: string): Observable<WellDoc[]> {
     const params = new HttpParams()
       .set('epANum', epANum)
