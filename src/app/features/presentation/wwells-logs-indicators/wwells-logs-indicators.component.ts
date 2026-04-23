@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 @Component({
   selector: 'app-wwells-logs-indicators',
@@ -9,5 +9,5 @@ import { WellStore } from '@store/active-wwell/active-wwell.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellsLogsIndicatorsComponent {
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
 }

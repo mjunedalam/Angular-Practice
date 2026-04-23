@@ -21,8 +21,8 @@ import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import { MatCardModule } from '@angular/material/card';
 import { Subject, takeUntil } from 'rxjs';
-import { MorningReport } from 'src/app/core/models/morning-report/morning-report.model';
-import { MorningReportService } from 'src/app/core/services/morning-report.service';
+import { DrillingDataService } from 'src/app/core/services/drilling-data.service';
+import { IWellData } from '@models/well-design/well-data.model';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import {
   bottomPolygonTemplate,
@@ -67,7 +67,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject(PLATFORM_ID) private readonly platformId: object,
-    private readonly morningService: MorningReportService,
+    private readonly drillingDataService: DrillingDataService,
     private readonly extConfigService: ExternalConfigService,
     private readonly loader: LoaderService,
   ) {
@@ -105,39 +105,38 @@ export class WwellmapComponent implements OnInit, OnDestroy {
 
   private fetchMorningReports(): void {
     this.errorMessage.set(null);
-    this.morningService
-      .getMorningReportForKSA()
+    this.drillingDataService
+      .getDrillingData('')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data: MorningReport[]) => {
+        next: (data: IWellData[]) => {
           this.buildWWellSignal(data);
           this.initMap().catch((e) => {
             console.error('initMap error', e);
             this.resolveBootTask();
           });
         },
-        error: (err) => {
-          console.error('Failed to fetch morning report', err);
+        error: (err: unknown) => {
+          console.error('Failed to fetch well data', err);
           this.errorMessage.set('Unable to load well data.');
           this.resolveBootTask();
         },
       });
   }
 
-  private buildWWellSignal(data: MorningReport[]): void {
-    const safeNum = (s?: string | null): number => {
-      const n = Number.parseFloat(s ?? '');
-      return Number.isNaN(n) ? 0 : n;
-    };
-
+  private buildWWellSignal(data: IWellData[]): void {
     const wells: WWell[] = data
-      .map((r) => ({
-        wwellId: r.wGnrName ?? 'N/A',
-        lat: safeNum(r.racEstDdLatCord),
-        lng: safeNum(r.racEstDdLonCord),
-        location: r.trgtRsvrCd ?? 'N/A',
-        label: r.biNum ?? 'N/A',
-      }))
+      .map((r) => {
+        const wm = r.WELL_MASTER?.[0];
+        const ra = r.RIG_ACTIVITY?.[0];
+        return {
+          wwellId: wm?.well ?? ra?.wellName ?? 'N/A',
+          lat: wm?.lat ?? 0,
+          lng: wm?.lon ?? 0,
+          location: ra?.welltype ?? 'N/A',
+          label: ra?.biNum ?? 'N/A',
+        };
+      })
       .filter((w) => w.lat !== 0 && w.lng !== 0);
 
     this.wwells.set(wells);

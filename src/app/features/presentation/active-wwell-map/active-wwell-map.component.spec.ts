@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ActiveWwellMapComponent } from './active-wwell-map.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 describe('ActiveWwellMapComponent', () => {
   let component: ActiveWwellMapComponent;
   let fixture: ComponentFixture<ActiveWwellMapComponent>;
-  const mockWellStore = {};
+  const mockDrillingDataStore = {};
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ActiveWwellMapComponent],
-      providers: [{ provide: WellStore, useValue: mockWellStore }]
+      providers: [{ provide: DrillingDataStore, useValue: mockDrillingDataStore }]
     })
     .compileComponents();
 

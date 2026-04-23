@@ -39,7 +39,7 @@ export interface IWellData {
     EXAD_GWD_IR_WATER: IWaterIR[];
     EXAD_RCD_PREWAP: IPreWellData[];
     WATER_WELL_TEST_OUTCOME: IWaterWellTestOutcome[];
-    WWELL_MUD_CIRC?: IMudCirculation[];
+    MUD_CIRC?: IMudCirculation[];
     actualRm?: number;
     kpiRm?: number;
     rigMoveDays?: number;

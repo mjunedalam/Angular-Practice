@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
-import { formatDateForInput } from 'src/app/shared/utils/date.util';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { DepthScaleComponent } from './depth-scale/depth-scale.component';
@@ -42,7 +43,7 @@ const RIGHT_DEFAULT = 340; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 export class PresentationComponent implements OnInit {
   @ViewChild('freeLayoutDialog') private freeLayoutDialog?: TemplateRef<unknown>;
 
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -89,17 +90,11 @@ export class PresentationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.loadWellNames();
+    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
 
-    const params = this.route.snapshot.queryParamMap;
-    const rawEpANum = params.get('epANum');
-    const rawDate = params.get('date');
-
-    if (rawEpANum) {
-      const epANum = parseInt(rawEpANum, 10);
-      const date = rawDate ?? formatDateForInput(this.store.selectedDate());
-      this.store.selectWell({ epANum, date });
-    }
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyQueryParams(params));
 
     effect(() => {
       const epANum = this.store.selectedEpANum();
@@ -149,5 +144,38 @@ export class PresentationComponent implements OnInit {
       clearTimeout(this.loadingTimer);
       this.loadingTimer = null;
     }
+  }
+
+  private applyQueryParams(params: ParamMap, forceLoad = false): void {
+    const requestedDate = this.normalizeDateParam(params.get('date'));
+    const rawEpANum = params.get('epANum');
+    const epANum = rawEpANum ? Number.parseInt(rawEpANum, 10) : null;
+    const currentDate = formatDateForInput(this.store.selectedDate());
+    const currentEpANum = this.store.selectedEpANum();
+
+    if (!forceLoad && requestedDate === currentDate && (epANum ?? null) === currentEpANum) {
+      return;
+    }
+
+    this.store.setDate(requestedDate, { autoSelectFirst: true });
+
+    if (epANum != null && !Number.isNaN(epANum)) {
+      this.store.selectWell({ epANum, date: requestedDate });
+    }
+  }
+
+  private normalizeDateParam(value: string | null): string {
+    if (!value) {
+      return formatDateForInput(getTodayAtMidnight());
+    }
+
+    const parsed = parseDateFromInput(value);
+    const today = getTodayAtMidnight();
+
+    if (Number.isNaN(parsed.getTime()) || parsed > today) {
+      return formatDateForInput(today);
+    }
+
+    return value;
   }
 }

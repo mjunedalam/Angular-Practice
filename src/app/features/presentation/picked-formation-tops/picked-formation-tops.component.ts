@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridOptions, GridReadyEvent, themeQuartz } from 'ag-grid-community';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { PickedFormationTops } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
@@ -20,7 +20,7 @@ import { PickedFormationTops } from '@models/active-wwell/active-wwell-view.mode
   styleUrl: './picked-formation-tops.component.scss',
 })
 export class PickedFormationTopsComponent implements OnInit {
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   private readonly injector = inject(Injector);
   private gridApi: GridApi<PickedFormationTops> | null = null;
 

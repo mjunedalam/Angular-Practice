@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { WwellTestResultComponent } from './wwell-test-result.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
 import { signal, WritableSignal } from '@angular/core';
 
@@ -54,7 +54,7 @@ describe('WwellTestResultComponent', () => {
       imports: [WwellTestResultComponent],
       providers: [
         provideNoopAnimations(),
-        { provide: WellStore, useValue: mockStore }
+        { provide: DrillingDataStore, useValue: mockStore }
       ]
     }).compileComponents();
 

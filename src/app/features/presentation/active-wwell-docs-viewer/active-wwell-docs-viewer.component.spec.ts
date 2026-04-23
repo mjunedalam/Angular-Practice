@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { WellDocsStore } from './well-docs.store';
 import { signal } from '@angular/core';
 
-const mockWellStore = {
+const mockDrillingDataStore = {
   selectedEpANum: signal<number | null>(null),
   selectedDate: signal(new Date()),
   wellDetails: signal(null),
@@ -31,7 +31,7 @@ describe('ActiveWwellDocsViewerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ActiveWwellDocsViewerComponent],
       providers: [
-        { provide: WellStore, useValue: mockWellStore },
+        { provide: DrillingDataStore, useValue: mockDrillingDataStore },
         { provide: WellDocsStore, useValue: mockDocsStore },
       ],
     }).compileComponents();

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@guards/auth.guard';
 import { WellStore } from '@store/active-wwell/active-wwell.store';
-import { MorningReportStore } from '@store/morning-report/morning-report';
 import { EmailStore } from '@store/email/email.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 export const routes: Routes = [
   {
@@ -44,7 +44,7 @@ export const routes: Routes = [
           import('./features/presentation/presentation.component').then(
             (m) => m.PresentationComponent,
           ),
-        providers: [WellStore],
+        providers: [WellStore, DrillingDataStore],
       },
       {
         path: 'active-wwell',
@@ -52,7 +52,7 @@ export const routes: Routes = [
           import('./features/active-wwell/active-wwell-view/active-wwell-view.component').then(
             (m) => m.ActiveWwellViewComponent,
           ),
-        providers: [WellStore],
+        providers: [WellStore, DrillingDataStore],
       },
       {
         path: 'morning-report',
@@ -60,7 +60,7 @@ export const routes: Routes = [
           import('./features/morning-report/morning-report.component').then(
             (m) => m.MorningReportComponent,
           ),
-        providers: [MorningReportStore, EmailStore],
+        providers: [EmailStore, DrillingDataStore],
       },
     ],
   },

@@ -1,20 +1,31 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
+  effect,
   inject,
+  Injector,
   OnInit,
+  OnDestroy,
+  signal,
   ViewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
-import { MorningReportStore } from 'src/app/core/store/morning-report/morning-report';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { EmailService } from '@services/email/email.service';
+import { DEFAULT_NOTIFICATION_DURATION_MS } from '@shared/components/notification/notification.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
+
+const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
 
 @Component({
   selector: 'app-morningreport',
@@ -29,26 +40,74 @@ import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/
   styleUrl: './morning-report.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MorningReportComponent implements OnInit {
+export class MorningReportComponent implements OnInit, OnDestroy {
   @ViewChild('wwellMap') protected wwellMap!: WwellmapComponent;
 
-  protected readonly store = inject(MorningReportStore);
-  private authStore = inject(AuthStore);
-  private emailStore = inject(EmailStore);
-  private emailService = inject(EmailService);
+  protected readonly store = inject(DrillingDataStore);
+  private readonly authStore = inject(AuthStore);
+  private readonly emailStore = inject(EmailStore);
+  private readonly emailService = inject(EmailService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly morningReport = this.store.morningReport;
   protected readonly hasError = this.store.hasError;
   protected readonly errorMessage = this.store.errorMessage;
   protected readonly waterWelltestResult = this.store.waterWelltestResult;
   protected readonly statusCode = this.store.statusCode;
+  protected readonly pageMessage = computed(() => {
+    if (this.hasError() || this.store.isLoading()) {
+      return null;
+    }
+
+    return this.morningReport().length === 0
+      ? (this.hasDateQueryParam() ? 'Data is not available for this date' : 'Data is not available for the given date')
+      : null;
+  });
 
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected selectedDateString = this.maxDateString;
 
+  private readonly urlSyncReady = signal(false);
+  private readonly hasDateQueryParam = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (!this.urlSyncReady()) {
+        return;
+      }
+
+      const date = formatDateForInput(this.store.selectedDate());
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          date,
+          epANum: null,
+        },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }, { injector: this.injector });
+  }
+
   ngOnInit(): void {
-    this.store.loadMorningReportData(this.selectedDateString);
+    this.store.setNotificationDuration(MORNING_REPORT_NOTIFICATION_DURATION_MS);
+
+    this.applyDateFromQueryParams(this.route.snapshot.queryParamMap, true);
+    this.urlSyncReady.set(true);
+
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyDateFromQueryParams(params));
+
     this.store.loadWaterWellTestResults();
+  }
+
+  ngOnDestroy(): void {
+    this.store.setNotificationDuration(DEFAULT_NOTIFICATION_DURATION_MS);
   }
 
   protected onDateChange(value: string): void {
@@ -60,7 +119,9 @@ export class MorningReportComponent implements OnInit {
     }
 
     this.selectedDateString = value;
-    this.store.setDate(value);
+    this.hasDateQueryParam.set(true);
+    this.urlSyncReady.set(true);
+    this.store.setDate(value, { autoSelectFirst: true });
   }
 
   protected async sendEmail(): Promise<void> {
@@ -100,5 +161,35 @@ export class MorningReportComponent implements OnInit {
   private showError(message: string): void {
     this.store.setUiError(message);
     console.error(message);
+  }
+
+  private normalizeDateParam(value: string | null): string {
+    if (!value) {
+      return this.maxDateString;
+    }
+
+    const parsed = parseDateFromInput(value);
+
+    if (Number.isNaN(parsed.getTime()) || parsed > getTodayAtMidnight()) {
+      return this.maxDateString;
+    }
+
+    return value;
+  }
+
+  private applyDateFromQueryParams(params: ParamMap, forceLoad = false): void {
+    const requestedDate = this.normalizeDateParam(params.get('date'));
+    const currentDate = formatDateForInput(this.store.selectedDate());
+
+    this.selectedDateString = requestedDate;
+    this.hasDateQueryParam.set(params.has('date'));
+
+    if (!forceLoad && requestedDate === currentDate) {
+      return;
+    }
+
+    this.store.loadMorningReportData(requestedDate, {
+      autoSelectFirst: true,
+    });
   }
 }

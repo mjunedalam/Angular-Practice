@@ -15,6 +15,10 @@ export interface MiscWellData {
   readonly operationSummary: string;
   readonly next24HrOperation: string;
   readonly rop: number | null;
+  readonly actualRm: number | null;
+  readonly kpiRm: number | null;
+  readonly rigMoveDays: number | null;
+  readonly spudDate: string;
 }
 
 export interface PickedFormationTops {

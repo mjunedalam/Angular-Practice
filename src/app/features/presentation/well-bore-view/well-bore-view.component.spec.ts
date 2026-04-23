@@ -6,13 +6,13 @@ import { WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-di
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 describe('WellBoreViewComponent', () => {
   let component: WellBoreViewComponent;
   let fixture: ComponentFixture<WellBoreViewComponent>;
   let componentRef: ComponentRef<WellBoreViewComponent>;
-  const mockWellStore = {};
+  const mockDrillingDataStore = {};
 
   const mockDiagramData: WellboreDiagramData = {
     wellName: 'Test Well',
@@ -41,7 +41,7 @@ describe('WellBoreViewComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, WellBoreViewComponent],
-      providers: [{ provide: WellStore, useValue: mockWellStore }],
+      providers: [{ provide: DrillingDataStore, useValue: mockDrillingDataStore }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(WellBoreViewComponent);

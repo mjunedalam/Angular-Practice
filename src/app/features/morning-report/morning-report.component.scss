@@ -197,6 +197,17 @@
   color: var(--danger);
 }
 
+.report-empty {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent-muted) 72%, var(--report-bg));
+  color: var(--report-text);
+  text-align: center;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
 .report-section {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WellNameChipsComponent } from './well-name-chips.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { signal } from '@angular/core';
 
 interface WellChip {
@@ -48,7 +48,7 @@ describe('WellNameChipsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WellNameChipsComponent],
       providers: [
-        { provide: WellStore, useValue: mockStore }
+        { provide: DrillingDataStore, useValue: mockStore }
       ]
     }).compileComponents();
 

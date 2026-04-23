@@ -11,7 +11,7 @@ import { select } from 'd3-selection';
 import { easeLinear } from 'd3-ease';
 import 'd3-transition';
 
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { buildDepthTicks, createDepthScale, formatDepth } from 'src/app/shared/utils/wellbore-math.util';
 
@@ -23,7 +23,7 @@ import { buildDepthTicks, createDepthScale, formatDepth } from 'src/app/shared/u
   styleUrl: './depth-scale.component.scss',
 })
 export class DepthScaleComponent {
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   readonly totalDepth = input.required<number>();
   readonly animTrigger = input.required<number>();
 

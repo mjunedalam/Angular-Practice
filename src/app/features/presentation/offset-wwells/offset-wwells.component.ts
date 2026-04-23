@@ -6,7 +6,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 @Component({
   selector: 'app-offset-wwells',
@@ -17,7 +17,7 @@ import { WellStore } from '@store/active-wwell/active-wwell.store';
   styleUrl: './offset-wwells.component.scss',
 })
 export class OffsetWwellsComponent {
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   protected readonly activeValue = signal<string>('-1');
 
   protected onPanelOpen(index: string, container: HTMLElement): void {

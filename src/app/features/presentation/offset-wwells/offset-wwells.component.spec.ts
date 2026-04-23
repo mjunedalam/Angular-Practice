@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { OffsetWwellsComponent } from './offset-wwells.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { signal, WritableSignal } from '@angular/core';
 
 interface OffsetWell {
@@ -54,7 +54,7 @@ describe('OffsetWwellsComponent', () => {
       imports: [OffsetWwellsComponent],
       providers: [
         provideNoopAnimations(),
-        { provide: WellStore, useValue: mockStore }
+        { provide: DrillingDataStore, useValue: mockStore }
       ]
     }).compileComponents();
 

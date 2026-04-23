@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, injec
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 
 @Component({
@@ -21,7 +21,7 @@ import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/
   styleUrl:    './well-name-chips.component.scss',
 })
 export class WellNameChipsComponent {
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected readonly loaderVisible = signal(false);
@@ -85,7 +85,7 @@ export class WellNameChipsComponent {
     const date = parseDateFromInput(value);
     const today = getTodayAtMidnight();
     if (!Number.isNaN(date.getTime()) && date <= today) {
-      this.store.setSelectedDate(date);
+      this.store.setDate(formatDateForInput(date));
     }
   }
 

@@ -68,9 +68,9 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
         prewap: d.EXAD_RCD_PREWAP?.[0] ?? null,
         rigActivity: d.RIG_ACTIVITY?.[0] ?? null,
         currentDepth: d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ?? 0,
-        mudCirculation: (d.WWELL_MUD_CIRC ?? []).map(m => ({
-            depth: Number(m.W_PRSNT_DPTH),
-            pct: Number(m.W_MUD_CIRC_PC),
+        mudCirculation: (d.MUD_CIRC ?? []).map(m => ({
+            depth: m.wPrsntDpth,
+            pct: Number(m.wMudCircPc),
         })),
     };
 }
@@ -96,6 +96,10 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         operationSummary: d.DRLG_OP_SMRY?.[0]?.wOpRmk ?? FALLBACK_STR,
         next24HrOperation: status?.nxt24HrPlanRmk ?? FALLBACK_STR,
         rop: d.ROP_DATA?.[0]?.rop ?? null,
+        actualRm: d.actualRm ?? null,
+        kpiRm: d.kpiRm ?? null,
+        rigMoveDays: d.rigMoveDays ?? null,
+        spudDate: rig?.spuddate ?? FALLBACK_STR,
     };
 }
 

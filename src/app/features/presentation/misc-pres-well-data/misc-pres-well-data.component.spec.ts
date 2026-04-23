@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MiscPresWellDataComponent } from './misc-pres-well-data.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { signal, WritableSignal } from '@angular/core';
 
 interface MiscWellDataViewModel {
@@ -18,6 +18,7 @@ interface MiscWellDataViewModel {
   nextWell: string;
   operationSummary: string;
   next24HrOperation: string;
+  spudDate: string;
 }
 
 describe('MiscPresWellDataComponent', () => {
@@ -43,14 +44,15 @@ describe('MiscPresWellDataComponent', () => {
         currentDepth: 5000,
         nextWell: 'Next Well',
         operationSummary: 'Summary 1',
-        next24HrOperation: 'Next 24 1'
+        next24HrOperation: 'Next 24 1',
+        spudDate: '2024-01-15'
       }),
     };
 
     await TestBed.configureTestingModule({
       imports: [MiscPresWellDataComponent],
       providers: [
-        { provide: WellStore, useValue: mockStore }
+        { provide: DrillingDataStore, useValue: mockStore }
       ]
     }).compileComponents();
 

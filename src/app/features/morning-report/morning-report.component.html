@@ -46,14 +46,17 @@
   }
 
   <div id="report-content" class="report-content">
-    @if (hasError()) {
+    @if (pageMessage()) {
+      <div class="report-empty">
+        <p>{{ pageMessage() }}</p>
+      </div>
+    } @else if (hasError()) {
       <div class="report-error">
         <p>Error ({{ statusCode() }}): {{ errorMessage() }}</p>
       </div>
-    }
-
-    <!-- Water Well Test Results grid -->
-    @if (!hasError() && waterWelltestResult().length) {
+    } @else {
+      <!-- Water Well Test Results grid -->
+      @if (waterWelltestResult().length) {
       <section class="report-section">
         <div class="report-section__heading">
           <span class="report-section__title">Water Well Test Results</span>
@@ -91,12 +94,11 @@
           }
         </div>
       </section>
-    }
+      }
 
-    <!-- Daily Drilling Summary grid -->
-    @if (!hasError()) {
+      <!-- Daily Drilling Summary grid -->
       <div class="report-grid">
-        @for (report of morningReport(); track report.epANum; let i = $index) {
+        @for (report of morningReport(); track report.epANum) {
           <div class="report-card report-card--summary">
 
             <div class="card-header card-header--blue">
@@ -108,7 +110,7 @@
                 class="card-header__status-input"
                 placeholder="Rig status"
                 [ngModel]="report.rigStatus"
-                (ngModelChange)="store.updateRigStatus(i, $event)"
+                (ngModelChange)="store.updateRigStatus(report.epANum, $event)"
                 name="rigStatus"
               />
             </div>
@@ -157,31 +159,31 @@
           </div>
         }
       </div>
-    }
 
-    <!-- Map -->
-    <section class="report-map-section">
-      <div class="map-container">
-        <app-wwellmap #wwellMap></app-wwellmap>
-      </div>
-      <div class="map-legend">
-        <div class="map-legend__item">
-          <span class="map-legend__dot map-legend__dot--wasi"></span>
-          <span class="map-legend__text">WASI</span>
+      <!-- Map -->
+      <section class="report-map-section">
+        <div class="map-container">
+          <app-wwellmap #wwellMap></app-wwellmap>
         </div>
-        <div class="map-legend__item">
-          <span class="map-legend__dot map-legend__dot--ownership"></span>
-          <span class="map-legend__text">WELLS OWNERSHIP</span>
+        <div class="map-legend">
+          <div class="map-legend__item">
+            <span class="map-legend__dot map-legend__dot--wasi"></span>
+            <span class="map-legend__text">WASI</span>
+          </div>
+          <div class="map-legend__item">
+            <span class="map-legend__dot map-legend__dot--ownership"></span>
+            <span class="map-legend__text">WELLS OWNERSHIP</span>
+          </div>
+          <div class="map-legend__item">
+            <span class="map-legend__dot map-legend__dot--aquifer"></span>
+            <span class="map-legend__text">Target Aquifer</span>
+          </div>
+          <div class="map-legend__item">
+            <span class="map-legend__dot map-legend__dot--active"></span>
+            <span class="map-legend__text">Active Well</span>
+          </div>
         </div>
-        <div class="map-legend__item">
-          <span class="map-legend__dot map-legend__dot--aquifer"></span>
-          <span class="map-legend__text">Target Aquifer</span>
-        </div>
-        <div class="map-legend__item">
-          <span class="map-legend__dot map-legend__dot--active"></span>
-          <span class="map-legend__text">Active Well</span>
-        </div>
-      </div>
-    </section>
+      </section>
+    }
   </div>
 </div>

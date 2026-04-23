@@ -1,19 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   ElementRef,
   inject,
-  Injector,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { WellDoc } from 'src/app/core/models/well-design/well-docs.model';
 import { WellDocsStore } from './well-docs.store';
-import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-active-wwell-docs-viewer',
@@ -44,24 +41,11 @@ import { formatDateForInput } from 'src/app/shared/utils/date.util';
   ],
 })
 export class ActiveWwellDocsViewerComponent {
-  protected readonly wellStore = inject(WellStore);
+  protected readonly wellStore = inject(DrillingDataStore);
   protected readonly docsStore = inject(WellDocsStore);
-  private readonly injector = inject(Injector);
   private readonly el = inject(ElementRef<HTMLElement>);
 
   protected readonly collapsed = signal(true);
-
-  constructor() {
-    effect(() => {
-      const epANum = this.wellStore.selectedEpANum();
-      const date = formatDateForInput(this.wellStore.selectedDate());
-      const wellDetails = this.wellStore.wellDetails();
-      const wellName = (wellDetails as { WELL_MASTER?: Array<{ wGnrName?: string }> } | null)
-        ?.WELL_MASTER?.[0]?.wGnrName;
-      if (epANum == null || !wellName) return;
-      this.docsStore.loadDocs({ wellName, date });
-    }, { injector: this.injector });
-  }
 
   protected toggleCollapse(): void {
     this.collapsed.update(v => {

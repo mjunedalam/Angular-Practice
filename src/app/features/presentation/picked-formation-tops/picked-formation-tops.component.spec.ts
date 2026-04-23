@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { PickedFormationTopsComponent } from './picked-formation-tops.component';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { signal, WritableSignal } from '@angular/core';
 import { ColDef, GridReadyEvent } from 'ag-grid-community';
 
@@ -34,7 +34,7 @@ describe('PickedFormationTopsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [PickedFormationTopsComponent],
       providers: [
-        { provide: WellStore, useValue: mockStore }
+        { provide: DrillingDataStore, useValue: mockStore }
       ]
     }).compileComponents();
 

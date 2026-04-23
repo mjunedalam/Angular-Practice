@@ -3,10 +3,9 @@ import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
 import { IPreWellData } from 'src/app/shared/models/wwell/pre-well-data.model';
 import { IRigActivity } from 'src/app/shared/models/wwell/rig-activity.model';
-
 export interface MudCircPoint {
-  readonly depth: number;  // parsed from W_PRSNT_DPTH
-  readonly pct: number;    // parsed from W_MUD_CIRC_PC
+  readonly depth: number;  // parsed from wPrsntDpth
+  readonly pct: number;    // parsed from wMudCircPc
 }
 
 export interface WellboreDiagramData {
@@ -18,7 +17,7 @@ export interface WellboreDiagramData {
   readonly prewap: IPreWellData | null;
   readonly rigActivity: IRigActivity | null;
   readonly currentDepth: number;
-  readonly mudCirculation: MudCircPoint[];  // parsed mud circulation data
+  readonly mudCirculation: MudCircPoint[];
 }
 
 export interface DiagramLayout {
