@@ -169,14 +169,6 @@
         <span class="meta-label">File Size</span>
         <span class="meta-value">{{ formatSize(docsStore.selectedDoc()!.fileSize) }}</span>
       </div>
-      <div class="meta-item" *ngIf="docsStore.selectedDoc()?.pageCount">
-        <span class="meta-label">Pages</span>
-        <span class="meta-value">{{ docsStore.selectedDoc()?.pageCount }}</span>
-      </div>
-      <div class="meta-item" *ngIf="docsStore.selectedDoc()?.description">
-        <span class="meta-label">Description</span>
-        <span class="meta-value">{{ docsStore.selectedDoc()?.description }}</span>
-      </div>
     </div>
 
     <div class="viewer-preview">
