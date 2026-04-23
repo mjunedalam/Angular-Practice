@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 @Component({
   selector: 'app-wwell-test',
@@ -11,7 +11,7 @@ import { WellStore } from '@store/active-wwell/active-wwell.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellTestComponent {
-  private readonly store = inject(WellStore);
+  private readonly store = inject(DrillingDataStore);
 
   protected readonly data = this.store.wwellTest;
 

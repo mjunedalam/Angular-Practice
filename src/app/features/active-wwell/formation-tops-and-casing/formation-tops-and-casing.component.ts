@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 
 @Component({
   selector: 'app-formation-tops-and-casing',
@@ -10,7 +10,7 @@ import { WellStore } from '@store/active-wwell/active-wwell.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormationTopsAndCasingComponent {
-  private readonly store = inject(WellStore);
+  private readonly store = inject(DrillingDataStore);
 
   protected readonly data = this.store.formationInfo;
 }

@@ -53,7 +53,7 @@ export const routes: Routes = [
           import('./features/active-wwell/active-wwell-view/active-wwell-view.component').then(
             (m) => m.ActiveWwellViewComponent,
           ),
-        providers: [WellStore, DrillingDataStore],
+        providers: [DrillingDataStore],
       },
       {
         path: 'morning-report',

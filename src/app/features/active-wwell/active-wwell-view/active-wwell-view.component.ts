@@ -17,7 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { WellStore } from '@store/active-wwell/active-wwell.store';
+import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
 import { CasingInfoComponent } from '../casing-info/casing-info.component';
 import { DatabaseInfoComponent } from '../database-info/database-info.component';
@@ -72,7 +72,7 @@ export class ActiveWwellViewComponent implements OnInit {
   protected readonly ADD_NEW_SENTINEL = ADD_NEW_SENTINEL;
   protected readonly areas = AREAS;
 
-  protected readonly store = inject(WellStore);
+  protected readonly store = inject(DrillingDataStore);
   protected readonly uiStore = inject(ActiveWwellUiStore);
 
   private readonly route = inject(ActivatedRoute);
@@ -85,11 +85,11 @@ export class ActiveWwellViewComponent implements OnInit {
   protected readonly selectedArea = this.uiStore.selectedArea;
   protected readonly selectedStatus = computed(() => {
     const epANum = this.store.selectedEpANum();
-    return this.uiStore.statusForWell(epANum) ?? deriveStatusLabel(this.store.wellDetails());
+    return this.uiStore.statusForWell(epANum) ?? deriveStatusLabel(this.store.selectedWell());
   });
 
   protected readonly summaryStats = computed(() => {
-    const details = this.store.wellDetails();
+    const details = this.store.selectedWell();
     const latestFormation = selectLatestFormation(details);
 
     return {
@@ -105,7 +105,7 @@ export class ActiveWwellViewComponent implements OnInit {
   });
 
   protected readonly drillingRemarks = computed(() => {
-    const details = this.store.wellDetails();
+    const details = this.store.selectedWell();
     return details?.DRLG_OP_STATUS?.[0]?.wOpRmk ?? details?.DRLG_OP_SMRY?.[0]?.wOpRmk ?? '';
   });
 
@@ -133,7 +133,7 @@ export class ActiveWwellViewComponent implements OnInit {
 
     effect(() => {
       const epANum = this.store.selectedEpANum();
-      const details = this.store.wellDetails();
+      const details = this.store.selectedWell();
       const detailsEpANum = details?.DRLG_OP_STATUS?.[0]?.epANum ?? null;
 
       if (epANum == null || epANum !== detailsEpANum) {
@@ -149,25 +149,20 @@ export class ActiveWwellViewComponent implements OnInit {
 
     const params = this.route.snapshot.queryParamMap;
     const rawEpANum = params.get('epANum');
-    const rawDate = params.get('date');
 
     if (!rawEpANum) {
       return;
     }
 
     const epANum = Number.parseInt(rawEpANum, 10);
-    const date = rawDate ?? formatDateForInput(this.store.selectedDate());
 
     if (!Number.isNaN(epANum)) {
-      this.store.selectWell({ epANum, date });
+      this.store.selectWell({ epANum });
     }
   }
 
   protected onWellSelect(epANum: number): void {
-    this.store.selectWell({
-      epANum,
-      date: formatDateForInput(this.store.selectedDate()),
-    });
+    this.store.selectWell({ epANum });
   }
 
   protected onSelect(status: string): void {
