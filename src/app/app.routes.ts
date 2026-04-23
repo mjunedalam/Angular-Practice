@@ -3,6 +3,7 @@ import { authGuard } from '@guards/auth.guard';
 import { WellStore } from '@store/active-wwell/active-wwell.store';
 import { EmailStore } from '@store/email/email.store';
 import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { WellDocsStore } from './features/presentation/active-wwell-docs-viewer/well-docs.store';
 
 export const routes: Routes = [
   {
@@ -44,7 +45,7 @@ export const routes: Routes = [
           import('./features/presentation/presentation.component').then(
             (m) => m.PresentationComponent,
           ),
-        providers: [WellStore, DrillingDataStore],
+        providers: [WellStore, DrillingDataStore, WellDocsStore],
       },
       {
         path: 'active-wwell',

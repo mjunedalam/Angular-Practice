@@ -3,6 +3,7 @@ export interface AgwaConfig {
   dailyOperationServiceUrl?: string;
   dailyOperatioServicenUrl?: string;
   drillingEyeServiceUrl?: string;
+  presDocsServiceUrl?: string;
   emailServiceUrl: string;
   esriUrl: string;
   mapServerUrl: string;
