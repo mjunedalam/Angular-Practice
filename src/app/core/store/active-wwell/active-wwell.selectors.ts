@@ -100,6 +100,8 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         kpiRm: d.kpiRm ?? null,
         rigMoveDays: d.rigMoveDays ?? null,
         spudDate: rig?.spuddate ?? FALLBACK_STR,
+        rigName: d.RIG_IDENTIFICATION?.[0]?.rigname ?? FALLBACK_STR,
+        drlgSmryRmk: status?.wDrlgSmryRmk ?? null,
     };
 }
 

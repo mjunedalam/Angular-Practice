@@ -101,7 +101,7 @@ export function selectMorningReports(
 }
 
 export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
-    return data.flatMap(d => (d.WATER_WELL_TEST_OUTCOME ?? []).map(mapToWaterWellTestResult));
+    return data.flatMap(d => (d.EXAD_GWD_WELL_TESTS ?? []).map(mapToWaterWellTestResult));
 }
 
 export function selectDiagramData(d: IWellData | null): WellboreDiagramData | null {
@@ -130,7 +130,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         wellName: rig?.wellName ?? FALLBACK_STR,
         targetDesc: rig?.drlgPlanWellDesc ?? FALLBACK_STR,
         targetedAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? FALLBACK_STR,
-        currentStatus: FALLBACK_STR,
+        currentStatus: d.EXAD_GWD_DAILY_REMARKS?.[0].status ?? FALLBACK_STR,
         daysSinceSpud: status?.spuddays ?? 0,
         targetDays: d.NEW_TARGET_DAYS?.[0]?.targetDays ?? rig?.wDrlgTrgtDay ?? 0,
         biNum: rig?.biNum ?? FALLBACK_STR,
@@ -140,13 +140,31 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         currentDepth: status?.wPrsntDpth ?? 0,
         nextWell: d.NEXT_2_WELL_ACTIVITY?.[0]?.nextWellActivity ?? FALLBACK_STR,
         footage: status?.wDpthChgDis ?? 0,
-        operationSummary: d.DRLG_OP_SMRY?.[0]?.wOpRmk ?? FALLBACK_STR,
-        next24HrOperation: status?.nxt24HrPlanRmk ?? FALLBACK_STR,
+        operationSummary: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.opRmk ?? d?.DRLG_OP_SMRY?.[0]?.wOpRmk,
+
+        next24HrOperation: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.next24HrPlanRrmk ?? status?.nxt24HrPlanRmk,
+        drlgSmryRmk: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.drlgSmryRmk ?? status?.wDrlgSmryRmk ?? null,
         rop: d.ROP_DATA?.[0]?.rop ?? null,
         actualRm: d.actualRm ?? null,
         kpiRm: d.kpiRm ?? null,
-        rigMoveDays: d.rigMoveDays ?? null,
+        rigMoveDays: d?.rigMoveDays ?? null,
+        rigName: d.RIG_IDENTIFICATION?.[0].rigname ?? FALLBACK_STR,
         spudDate: rig?.spuddate ?? FALLBACK_STR,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     };
 }
 
@@ -161,7 +179,7 @@ export function selectPickedFormations(d: IWellData | null): PickedFormationTops
 export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
     if (!d) return [];
     return (d.EXAD_GWD_IR_WATER ?? []).map(ow => {
-        const test = (d.WATER_WELL_TEST_OUTCOME ?? []).find(t => t.wellName === ow.offsetWaterWell);
+        const test = (d.EXAD_GWD_WELL_TESTS ?? []).find(t => t.wellName === ow.offsetWaterWell);
         return {
             wellName: ow.offsetWaterWell,
             aquifer: ow.aquifer || test?.aquifer || 'WASI',
@@ -187,7 +205,7 @@ export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicator
 
 export function selectWellTestResults(d: IWellData | null): WellTestResult[] {
     if (!d) return [];
-    return (d.WATER_WELL_TEST_OUTCOME ?? []).map(t => ({
+    return (d.EXAD_GWD_WELL_TESTS ?? []).map(t => ({
         wellName: t.wellName ?? '',
         testType: t.testType ?? FALLBACK_STR,
         aquifer: t.aquifer ?? FALLBACK_STR,
@@ -224,7 +242,7 @@ export function findPlannedFormation(d: IWellData | null, formationCode: string 
 }
 
 export function selectPrimaryTestOutcome(d: IWellData | null): IWaterWellTestOutcome | null {
-    return d?.WATER_WELL_TEST_OUTCOME?.[0] ?? null;
+    return d?.EXAD_GWD_WELL_TESTS?.[0] ?? null;
 }
 
 export function selectPrimaryWaterReference(d: IWellData | null): IWaterIR | null {

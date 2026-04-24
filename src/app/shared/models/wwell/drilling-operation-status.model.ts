@@ -8,6 +8,7 @@ export interface IDrillingOperationStatus {
     wPrevDpth: number;
     wSpudOprDay: number;
     wOpRmk: string;
+    wDrlgSmryRmk?: string | null;
     nxt24HrPlanRmk: string;
     spuddays: number;
     footage: number;

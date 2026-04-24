@@ -19,6 +19,13 @@ import { IWaterWellTestOutcome } from 'src/app/shared/models/wwell/water-well-te
 import { IWellMaster } from 'src/app/shared/models/wwell/well-master.model';
 import { IMudCirculation } from '@models/well-design/mud-circulation.model';
 
+export interface IDailyRemarks {
+    status?: string | null;
+    opRmk?: string | null;
+    next24HrPlanRrmk?: string | null;
+    drlgSmryRmk?: string | null;
+}
+
 export interface IWellData {
     RIG_ACTIVITY: IRigActivity[];
     WELL_MASTER: IWellMaster[];
@@ -39,6 +46,8 @@ export interface IWellData {
     EXAD_GWD_IR_WATER: IWaterIR[];
     EXAD_RCD_PREWAP: IPreWellData[];
     WATER_WELL_TEST_OUTCOME: IWaterWellTestOutcome[];
+    EXAD_GWD_WELL_TESTS?: IWaterWellTestOutcome[];
+    EXAD_GWD_DAILY_REMARKS?: IDailyRemarks[];
     MUD_CIRC?: IMudCirculation[];
     actualRm?: number;
     kpiRm?: number;

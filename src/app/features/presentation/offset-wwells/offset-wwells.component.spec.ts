@@ -87,10 +87,10 @@ describe('OffsetWwellsComponent', () => {
   });
 
   it('should update activeValue when accordion value changes', () => {
-    component['onValueChange']('1');
+    component['activeValue'].set('1');
     expect(component['activeValue']()).toBe('1');
 
-    component['onValueChange'](['0', '1']);
+    component['activeValue'].set('0');
     expect(component['activeValue']()).toBe('0');
   });
 

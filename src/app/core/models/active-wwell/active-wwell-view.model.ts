@@ -19,6 +19,8 @@ export interface MiscWellData {
   readonly kpiRm: number | null;
   readonly rigMoveDays: number | null;
   readonly spudDate: string;
+  readonly rigName: string;
+  readonly drlgSmryRmk: string | null;
 }
 
 export interface PickedFormationTops {
