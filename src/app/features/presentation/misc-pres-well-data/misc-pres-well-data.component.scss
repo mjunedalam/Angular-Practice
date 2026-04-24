@@ -169,6 +169,14 @@
   flex-direction: row;
   align-items: center;
   gap: clamp(4px, 1.5cqi, 10px);
+
+  &.cell--kpi-positive {
+    background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
+  }
+
+  &.cell--kpi-negative {
+    background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  }
 }
 
 // ── Text helpers ───────────────────────────────────────────────────────────────

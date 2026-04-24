@@ -49,8 +49,10 @@
             <mat-spinner diameter="18" class="upload-spinner"></mat-spinner>
             <span>Uploading…</span>
           } @else {
-            <mat-icon>upload</mat-icon>
-            <span>Upload Documents</span>
+            <ng-container>
+              <mat-icon>upload</mat-icon>
+              <span>Upload Documents</span>
+            </ng-container>
           }
         </button>
       </div>

@@ -21,7 +21,7 @@ import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-d
 })
 export class FileUploadComponent {
   private readonly dialog = inject(MatDialog);
-  private readonly wellStore = inject(DrillingDataStore);
+  private readonly store = inject(DrillingDataStore);
   protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
@@ -58,8 +58,8 @@ export class FileUploadComponent {
   }
 
   protected submitUpload(): void {
-    const epANum = this.wellStore.selectedEpANum();
-    const date = formatDateForInput(this.wellStore.selectedDate());
+    const epANum = this.store.selectedEpANum();
+    const date = formatDateForInput(this.store.selectedDate());
     if (epANum == null || !this.files().length) return;
 
     const rawFiles = this.files().map(item => item.file);
