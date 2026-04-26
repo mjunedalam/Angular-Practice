@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer.component';
 import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
-import { WellDocsStore } from './well-docs.store';
+import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { signal } from '@angular/core';
 
 const mockDrillingDataStore = {

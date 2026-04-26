@@ -10,9 +10,9 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
-import { WellDoc } from 'src/app/core/models/well-design/well-docs.model';
+import { WellDoc } from '@models/well-design/well-docs.model';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
-import { WellDocsStore } from './well-docs.store';
+import { WellDocsStore } from '@store/well-docs/well-docs.store';
 
 @Component({
   selector: 'app-active-wwell-docs-viewer',

@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
 import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
-import { WellDocsStore } from 'src/app/features/presentation/active-wwell-docs-viewer/well-docs.store';
+import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
 import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-dialog.component';
 
