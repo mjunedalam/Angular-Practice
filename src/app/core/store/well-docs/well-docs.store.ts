@@ -37,6 +37,7 @@ export const WellDocsStore = signalStore(
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Failed to load documents';
                 patchState(store, { docs: DUMMY_DOCS, loading: false, error: msg });
+                notify.error(msg);
               },
             }),
           ),
@@ -52,13 +53,17 @@ export const WellDocsStore = signalStore(
             tapResponse({
               next: () => {
                 notify.info('Documents uploaded successfully.');
-                svc.getDocs(epANum, date).subscribe(docs =>
-                  patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false }),
-                );
+                svc.getDocs(epANum, date).subscribe({
+                  next: docs =>
+                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false }),
+                  error: () =>
+                    patchState(store, { uploading: false }),
+                });
               },
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Upload failed';
                 patchState(store, { uploading: false, error: msg });
+                notify.error(msg);
               },
             }),
           ),

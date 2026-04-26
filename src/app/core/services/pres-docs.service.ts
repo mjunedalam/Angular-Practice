@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, timeout } from 'rxjs';
+import { Observable, throwError, timeout } from 'rxjs';
 import { WellDoc } from '@models/well-design/well-docs.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
-import { NotificationService } from '@shared/components/notification/notification.service';
 
 const CONNECTION_TIMEOUT_MS = 5000;
 
@@ -11,7 +10,6 @@ const CONNECTION_TIMEOUT_MS = 5000;
 export class PresDocsService {
   private readonly http = inject(HttpClient);
   private readonly extConfigService = inject(ExternalConfigService);
-  private readonly notify = inject(NotificationService);
 
   private get apiUrl(): string {
     try {
@@ -23,8 +21,7 @@ export class PresDocsService {
 
   uploadDocs(files: File[], epANum: number, date: string): Observable<void> {
     if (!this.apiUrl) {
-      this.notify.error('Well documents service unavailable.');
-      return new Observable(obs => { obs.next(); obs.complete(); });
+      return throwError(() => new Error('Well documents service unavailable.'));
     }
 
     const formData = new FormData();
@@ -34,33 +31,20 @@ export class PresDocsService {
 
     return this.http
       .post<void>(`${this.apiUrl}/well-pres-docs/upload`, formData)
-      .pipe(
-        timeout(CONNECTION_TIMEOUT_MS),
-        catchError(() => {
-          this.notify.error('Failed to upload documents.');
-          return new Observable<void>(obs => { obs.next(); obs.complete(); });
-        }),
-      );
+      .pipe(timeout(CONNECTION_TIMEOUT_MS));
   }
 
   getDocs(epANum: number, date: string): Observable<WellDoc[]> {
+    if (!this.apiUrl) {
+      return throwError(() => new Error('Well documents service unavailable.'));
+    }
+
     const params = new HttpParams()
       .set('epANum', epANum)
       .set('date', date);
 
-    if (!this.apiUrl) {
-      this.notify.error('Well documents service unavailable.');
-      return new Observable(obs => obs.next([]));
-    }
-
     return this.http
       .get<WellDoc[]>(`${this.apiUrl}/well-pres-docs`, { params })
-      .pipe(
-        timeout(CONNECTION_TIMEOUT_MS),
-        catchError(() => {
-          this.notify.error('Failed to load well documents.');
-          return new Observable<WellDoc[]>(obs => obs.next([]));
-        }),
-      );
+      .pipe(timeout(CONNECTION_TIMEOUT_MS));
   }
 }
