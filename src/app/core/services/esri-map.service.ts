@@ -13,7 +13,7 @@ export class EsriMapService {
 
     async authenticateUserForMapAccess(popup = false) {
 
-        const portalUrl = `${this.extAppConfigService.settings.esriServiceUrl}`
+        const portalUrl = this.extAppConfigService.settings.esriUrl;
         esriConfig.portalUrl = portalUrl;
         const info = new OAuthInfo({
             appId: `${this.extAppConfigService.settings.appId}`,

@@ -35,10 +35,16 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@arcgis/core/assets",
+                "output": "assets"
               }
             ],
             "styles": [
               "node_modules/material-icons/iconfont/material-icons.css",
+              "node_modules/@arcgis/core/assets/esri/themes/light/main.css",
               "src/styles.scss"
             ],
             "scripts": []

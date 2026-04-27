@@ -46,10 +46,13 @@ export class FileUploadComponent {
   protected previewFile(file: File): void {
     this.dialog.open(FilePreviewDialogComponent, {
       data: file,
-      width: '760px',
-      height: '560px',
+      width: '60vw',
+      height: '70vh',
+      maxWidth: '98vw',
+      maxHeight: '98vh',
       panelClass: 'file-preview-panel',
       autoFocus: false,
+      enterAnimationDuration: '220ms',
     });
   }
 
@@ -63,6 +66,12 @@ export class FileUploadComponent {
     if (epANum == null || !this.files().length) return;
 
     const rawFiles = this.files().map(item => item.file);
+    console.log('[FileUpload] payload:', {
+      epANum,
+      date,
+      fileCount: rawFiles.length,
+      files: rawFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
+    });
     this.docsStore.uploadDocs({ files: rawFiles, epANum, date });
     this.files.set([]);
   }
@@ -76,12 +85,22 @@ export class FileUploadComponent {
   protected fileIcon(file: File): string {
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
     const mime = file.type.toLowerCase();
-
-    if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-      return 'image';
-    }
+    if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
     if (mime === 'application/pdf' || ext === 'pdf') return 'picture_as_pdf';
     if (['doc', 'docx'].includes(ext)) return 'article';
     return 'insert_drive_file';
+  }
+
+  protected fileTypeClass(file: File): string {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const mime = file.type.toLowerCase();
+    if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
+    if (mime === 'application/pdf' || ext === 'pdf') return 'pdf';
+    if (['doc', 'docx'].includes(ext)) return 'doc';
+    return 'other';
+  }
+
+  protected fileExt(file: File): string {
+    return file.name.split('.').pop()?.toUpperCase() ?? 'FILE';
   }
 }

@@ -51,8 +51,32 @@
           <div class="lt-orange active-wwell-status-panel">
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
               <mat-label>Status</mat-label>
-              <mat-select [ngModel]="selectedStatus()" (ngModelChange)="onSelect($event)">
-                @for (status of statusOptions(); track status) {
+              <mat-select
+                [ngModel]="selectedStatus()"
+                (ngModelChange)="onSelect($event)"
+                panelClass="status-select-panel"
+                (openedChange)="onStatusPanelToggle($event)"
+              >
+                <mat-option disabled class="status-search-opt">
+                  <div class="status-search-wrap">
+                    <mat-icon class="status-search-icon">search</mat-icon>
+                    <input
+                      class="status-search-input"
+                      placeholder="Search status…"
+                      autocomplete="off"
+                      [ngModel]="statusSearchQuery()"
+                      (ngModelChange)="statusSearchQuery.set($event)"
+                      (click)="$event.stopPropagation()"
+                      (keydown)="$event.key !== 'Escape' && $event.stopPropagation()"
+                    />
+                  </div>
+                </mat-option>
+
+                @if (filteredStatusOptions().length === 0) {
+                  <mat-option disabled class="status-no-results">No results</mat-option>
+                }
+
+                @for (status of filteredStatusOptions(); track status) {
                   <mat-option [value]="status">{{ status }}</mat-option>
                 }
                 <mat-option [value]="ADD_NEW_SENTINEL">

@@ -1,10 +1,16 @@
 {
     "tokenUrl": "assets/mock-token.txt",
-    "dailyOperatioServicenUrl": "http://localhost:8080",
+    "dailyOperationServiceUrl": "http://localhost:8080",
     "drillingEyeServiceUrl": "http://localhost:8080",
     "presDocsServiceUrl": "http://localhost:8080",
     "emailServiceUrl": "https://agwa-integrations-dev.apps.ocpb.enp.aramco.com.sa",
-    "esriUrl": "https://eccenterprisegis.enp.aramco.com.sa/arcgis",
     "mapServerUrl": "https://eccenterprisegislbsrvr.enp.aramco.com.sa:6443/arcgis/rest/services/EARTH/EARTH_Layers/MapServer",
-    "appId": "M0M4nfZyToqUlgQy"
+    "appId": "M0M4nfZyToqUlgQy",
+
+    "esriUrl": "https://eccenterprisegis.enp.aramco.com.sa/arcgis",
+    "webMapItemId": "c177620bd7744a22b6e7e0d98c33d18a",
+
+    "mockWebMapItemId": "e691172598f04ea8881cd2a4adaa45ba",
+
+    "useMockMap": false
 }

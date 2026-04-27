@@ -1,32 +1,105 @@
-<div class="preview-dialog">
-  <div class="preview-dialog__header">
-    <div class="preview-dialog__title-row">
-      <mat-icon class="preview-dialog__file-icon">insert_drive_file</mat-icon>
-      <span class="preview-dialog__title" [title]="fileName">{{ fileName }}</span>
-    </div>
-    <button mat-icon-button class="preview-dialog__close" (click)="close()" aria-label="Close preview">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+<div class="pd" #dialogEl
+     cdkDrag
+     cdkDragRootElement=".cdk-overlay-pane"
+     cdkDragBoundary="body"
+     [class]="'pd pd--' + previewType">
 
-  <div class="preview-dialog__body">
-    @switch (previewType) {
-      @case ('image') {
-        <img [src]="safeUrl" [alt]="fileName" class="preview-img" />
-      }
-      @case ('pdf') {
-        <iframe [src]="safeUrl" class="preview-frame" title="PDF Preview"></iframe>
-      }
-      @case ('unsupported') {
-        <div class="preview-unsupported">
-          <mat-icon class="preview-unsupported__icon">description</mat-icon>
-          <p class="preview-unsupported__text">Preview not available for this file type.</p>
-          <button mat-stroked-button class="preview-unsupported__download" (click)="download()">
-            <mat-icon>download</mat-icon>
-            Download File
+  <!-- ══ Top accent stripe (file-type colour) ══ -->
+  <div class="pd-accent-stripe"></div>
+
+  <!-- ══ Header / drag handle ══ -->
+  <header class="pd-header" cdkDragHandle>
+
+    <div class="pd-header__left">
+      <div class="pd-badge">
+        <mat-icon>{{ typeIcon }}</mat-icon>
+      </div>
+      <div class="pd-header__text">
+        <span class="pd-header__filename" [title]="fileName">{{ fileName }}</span>
+        <span class="pd-header__meta">{{ fileSize }}&ensp;·&ensp;{{ fileTypeLabel }}</span>
+      </div>
+    </div>
+
+    <div class="pd-header__right">
+
+      @if (previewType === 'image') {
+        <div class="pd-zoom">
+          <button type="button" class="pd-zoom__btn"
+                  (click)="zoomOut()" [disabled]="zoomLevel() <= 0.25"
+                  matTooltip="Zoom out">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <button type="button" class="pd-zoom__val" (click)="resetZoom()" matTooltip="Reset zoom">
+            {{ zoomPercent }}%
+          </button>
+          <button type="button" class="pd-zoom__btn"
+                  (click)="zoomIn()" [disabled]="zoomLevel() >= 3"
+                  matTooltip="Zoom in">
+            <mat-icon>add</mat-icon>
           </button>
         </div>
+        <div class="pd-rule"></div>
       }
+
+      <button type="button" class="pd-btn pd-btn--ghost" (click)="download()" matTooltip="Download file">
+        <mat-icon>file_download</mat-icon>
+        <span>Download</span>
+      </button>
+
+      <button type="button" class="pd-btn pd-btn--close" (click)="close()" aria-label="Close preview">
+        <mat-icon>close</mat-icon>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ══ Content ══ -->
+  <main class="pd-body">
+    @switch (previewType) {
+
+      @case ('image') {
+        <div class="pd-img-wrap">
+          <img [src]="safeUrl" [alt]="fileName" class="pd-img"
+               [style.transform]="'scale(' + zoomLevel() + ')'"/>
+        </div>
+      }
+
+      @case ('pdf') {
+        <iframe [src]="safeUrl" class="pd-pdf" title="PDF Preview"></iframe>
+      }
+
+      @case ('unsupported') {
+        <div class="pd-empty">
+          <div class="pd-empty__card">
+            <div class="pd-empty__icon"><mat-icon>insert_drive_file</mat-icon></div>
+            <p class="pd-empty__title">Preview not available</p>
+            <p class="pd-empty__body">
+              <strong>{{ fileTypeLabel }}</strong> files cannot be rendered in the browser.
+            </p>
+            <button type="button" class="pd-empty__dl" (click)="download()">
+              <mat-icon>download</mat-icon>
+              Download file
+            </button>
+          </div>
+        </div>
+      }
+
     }
-  </div>
+  </main>
+
+  <!-- ══ Status bar ══ -->
+  <footer class="pd-statusbar">
+    <span class="pd-statusbar__left">
+      <span class="pd-statusbar__type">{{ fileTypeLabel }}</span>
+      <span class="pd-statusbar__sep">·</span>
+      <span>{{ fileSize }}</span>
+      @if (previewType === 'image') {
+        <span class="pd-statusbar__sep">·</span>
+        <span>{{ zoomPercent }}%</span>
+      }
+    </span>
+    <span class="pd-statusbar__right">Drag header to move&ensp;·&ensp;Drag corner to resize</span>
+    <div class="pd-grip" (mousedown)="onResizeStart($event)" title="Drag to resize"></div>
+  </footer>
+
 </div>

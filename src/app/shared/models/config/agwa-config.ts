@@ -1,12 +1,16 @@
 export interface AgwaConfig {
   tokenUrl: string;
-  dailyOperationServiceUrl?: string;
-  dailyOperatioServicenUrl?: string;
+  dailyOperationServiceUrl: string;
   drillingEyeServiceUrl?: string;
   presDocsServiceUrl?: string;
   emailServiceUrl: string;
-  esriUrl: string;
   mapServerUrl: string;
   appId: string;
-  esriServiceUrl: string;
+
+  esriUrl: string;
+  webMapItemId: string;
+
+  mockWebMapItemId: string;
+
+  useMockMap: boolean;
 }

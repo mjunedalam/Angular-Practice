@@ -18,7 +18,7 @@ export class MorningReportService {
 
   private get apiUrl(): string {
     const s = this.extConfigService.settings;
-    return s.dailyOperationServiceUrl ?? s.dailyOperatioServicenUrl ?? '';
+    return s.dailyOperationServiceUrl ?? '';
   }
 
   private notifyFallback(): void {

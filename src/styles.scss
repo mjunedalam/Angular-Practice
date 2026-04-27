@@ -58,6 +58,20 @@ svg defs pattern#gridpattern path {
 background: linear-gradient(90deg, rgba(80, 132, 240, 1) 44%, rgba(121, 207, 241, 1) 86%);
 }
 
+/* ── File preview dialog — container overrides ──────────────────────────────── */
+.file-preview-panel .mat-mdc-dialog-surface {
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 24px 80px rgba(0, 0, 0, 0.75),
+    0 8px 30px rgba(0, 0, 0, 0.55),
+    0 2px 8px  rgba(0, 0, 0, 0.4) !important;
+  background: transparent !important;
+}
+
 .hover-card:hover{
   box-shadow: 4px 3px 9px 2px rgba(0,0,0,0.65);
 -webkit-box-shadow: 4px 3px 9px 2px rgba(0,0,0,0.65);

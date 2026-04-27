@@ -7,10 +7,16 @@ import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 
 export const MAP_BOUNDS = {
-  minLat: 20,
-  maxLat: 32,
-  minLng: 34,
-  maxLng: 56
+  minLat: 16.3,
+  maxLat: 32.2,
+  minLng: 34.5,
+  maxLng: 55.7,
+};
+
+export const KSA_EXTENT = {
+  xmin: 34.5, ymin: 16.3,
+  xmax: 55.7, ymax: 32.2,
+  spatialReference: { wkid: 4326 },
 };
 //Configruation for Central Asia
 // minLat: 24.65,
@@ -29,15 +35,14 @@ export const tilesMap = new Map<string, { color: number[]; biNum: string }>(
   tilesArray.map((tile) => [tile.biNum, tile]));
 
 export const MAP_CONFIG = {
-  center: [46.5980, 24.7886] as [number, number],
-  minZoom: 6,
-  maxZoom: 6
-}
-// Central Asia
-//center: [53.69, 32.43] as [number, number],
+  center:  [45.0, 24.5] as [number, number], // central KSA [lng, lat]
+  zoom:    6,   // comfortable first view — KSA fills the screen
+  minZoom: 5,   // zoom out to see the full peninsula
+  maxZoom: 14,  // street-level detail for individual wells
+};
 
 const baseUrl = window.location.origin;
-const iconUrl = `${baseUrl}/assets/oil-rig.svg`;
+const iconUrl = `${baseUrl}/assets/images/oil-rig-icon.png`;
 
 type ArcGISTextWeight = 'normal' | 'bold' | 'lighter' | 'bolder';
 

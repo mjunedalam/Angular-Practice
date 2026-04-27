@@ -6,6 +6,7 @@ import {
   computed,
   effect,
   inject,
+  signal,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -82,6 +83,13 @@ export class ActiveWwellViewComponent implements OnInit {
 
   protected readonly wells = computed(() => this.store.uniqueWellNames());
   protected readonly statusOptions = this.uiStore.statusOptions;
+  protected readonly statusSearchQuery = signal('');
+  protected readonly filteredStatusOptions = computed(() => {
+    const q = this.statusSearchQuery().trim().toLowerCase();
+    return q
+      ? this.statusOptions().filter(s => s.toLowerCase().includes(q))
+      : this.statusOptions();
+  });
   protected readonly selectedArea = this.uiStore.selectedArea;
   protected readonly selectedStatus = computed(() => {
     const epANum = this.store.selectedEpANum();
@@ -176,6 +184,10 @@ export class ActiveWwellViewComponent implements OnInit {
 
   protected onAreaChange(area: string): void {
     this.uiStore.setSelectedArea(area);
+  }
+
+  protected onStatusPanelToggle(opened: boolean): void {
+    if (!opened) this.statusSearchQuery.set('');
   }
 
   private openAddDialog(): void {
