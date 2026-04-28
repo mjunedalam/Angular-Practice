@@ -1,6 +1,12 @@
 <div class="active-wwell-page">
-  <div class="active-wwell-loading-slot" [class.active-wwell-loading-slot--active]="store.isDetailsLoading()">
-    <mat-progress-bar mode="indeterminate" class="active-wwell-loading-bar"></mat-progress-bar>
+  <div
+    class="active-wwell-loading-slot"
+    [class.active-wwell-loading-slot--active]="store.isDetailsLoading()"
+  >
+    <mat-progress-bar
+      mode="indeterminate"
+      class="active-wwell-loading-bar"
+    ></mat-progress-bar>
   </div>
 
   <div class="active-wwell-shell">
@@ -11,7 +17,9 @@
         @for (well of wells(); track well.epANum) {
           <mat-chip-option
             [selected]="store.selectedEpANum() === well.epANum"
-            [ngClass]="{ 'well-selected': store.selectedEpANum() === well.epANum }"
+            [ngClass]="{
+              'well-selected': store.selectedEpANum() === well.epANum,
+            }"
             (click)="onWellSelect(well.epANum)"
           >
             {{ well.wellName }}
@@ -27,6 +35,18 @@
     <div class="active-wwell-content">
       <div class="aw-page-header">
         <div class="well-header">Single Well Review</div>
+        <div class="aw-date-picker">
+          <label class="aw-date-label" for="aw-date-input">Date:</label>
+          <input
+            id="aw-date-input"
+            type="date"
+            class="aw-date-input"
+            [ngModel]="selectedDateString()"
+            [max]="maxDateString"
+            (ngModelChange)="onDateChange($event)"
+            aria-label="Select date for well data"
+          />
+        </div>
       </div>
 
       <div class="active-wwell-grid">
@@ -37,7 +57,11 @@
 
           <div class="aw-section">
             <div class="well-header">Drilling Remarks</div>
-            <textarea class="active-wwell-remarks" readonly [value]="drillingRemarks()"></textarea>
+            <textarea
+              class="active-wwell-remarks"
+              readonly
+              [value]="drillingRemarks()"
+            ></textarea>
           </div>
 
           <app-formation-tops-and-casing></app-formation-tops-and-casing>
@@ -49,7 +73,11 @@
           <app-file-upload></app-file-upload>
 
           <div class="lt-orange active-wwell-status-panel">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="active-wwell-select"
+            >
               <mat-label>Status</mat-label>
               <mat-select
                 [ngModel]="selectedStatus()"
@@ -67,13 +95,17 @@
                       [ngModel]="statusSearchQuery()"
                       (ngModelChange)="statusSearchQuery.set($event)"
                       (click)="$event.stopPropagation()"
-                      (keydown)="$event.key !== 'Escape' && $event.stopPropagation()"
+                      (keydown)="
+                        $event.key !== 'Escape' && $event.stopPropagation()
+                      "
                     />
                   </div>
                 </mat-option>
 
                 @if (filteredStatusOptions().length === 0) {
-                  <mat-option disabled class="status-no-results">No results</mat-option>
+                  <mat-option disabled class="status-no-results"
+                    >No results</mat-option
+                  >
                 }
 
                 @for (status of filteredStatusOptions(); track status) {
@@ -86,9 +118,16 @@
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="active-wwell-select"
+            >
               <mat-label>Area</mat-label>
-              <mat-select [ngModel]="selectedArea()" (ngModelChange)="onAreaChange($event)">
+              <mat-select
+                [ngModel]="selectedArea()"
+                (ngModelChange)="onAreaChange($event)"
+              >
                 @for (area of areas; track area.value) {
                   <mat-option [value]="area.value">{{ area.value }}</mat-option>
                 }
@@ -97,27 +136,37 @@
 
             <div class="active-wwell-stat-box">
               <mat-label>Formation Drilling</mat-label>
-              <div class="stat-value">{{ displayValue(summaryStats().formationDrilling) }}</div>
+              <div class="stat-value">
+                {{ displayValue(summaryStats().formationDrilling) }}
+              </div>
             </div>
 
             <div class="active-wwell-stat-box">
               <mat-label>Bit Size</mat-label>
-              <div class="stat-value">{{ displayValue(summaryStats().bitSize) }}</div>
+              <div class="stat-value">
+                {{ displayValue(summaryStats().bitSize) }}
+              </div>
             </div>
 
             <div class="active-wwell-stat-box">
               <mat-label>Circulation</mat-label>
-              <div class="stat-value">{{ displayValue(summaryStats().circulation) }}</div>
+              <div class="stat-value">
+                {{ displayValue(summaryStats().circulation) }}
+              </div>
             </div>
 
             <div class="active-wwell-stat-box">
               <mat-label>Mud Weight</mat-label>
-              <div class="stat-value">{{ displayValue(summaryStats().mudWeight) }}</div>
+              <div class="stat-value">
+                {{ displayValue(summaryStats().mudWeight) }}
+              </div>
             </div>
 
             <div class="active-wwell-stat-box avg-rop-box">
               <mat-label>Avg ROP</mat-label>
-              <div class="stat-value">{{ displayValue(summaryStats().avgRop) }}</div>
+              <div class="stat-value">
+                {{ displayValue(summaryStats().avgRop) }}
+              </div>
             </div>
           </div>
         </div>

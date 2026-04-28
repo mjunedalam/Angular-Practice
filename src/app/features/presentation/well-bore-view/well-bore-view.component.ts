@@ -21,7 +21,6 @@ import {
   buildCasingPath,
   buildOpenHolePath,
   buildGravelPackUPath,
-  buildPrePerfLiner,
   buildScreenHanger,
   casingGradientId,
   computeCasingHalfWidth,
@@ -120,7 +119,7 @@ export class WellBoreViewComponent {
     this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
     this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
     this.drawGravelPackDesign(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
-    this.drawPerforations(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
+    this.drawPrePerforatedLiner(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
     this.drawCasings(data.casings, casingCenterX, scale, t_casingsStart, t_gravelStart);
     this.drawCasingLabels(data.casings, casingCenterX, scale, t_labelsStart);
@@ -341,7 +340,7 @@ export class WellBoreViewComponent {
         const annulusCenter = screenHW + (annulusWidth / 2);
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx))
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx + 14, gravelBottomPx))
           .attr('stroke', 'url(#gravelpattern)')
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
@@ -418,7 +417,7 @@ export class WellBoreViewComponent {
         }
         this.rootG.append('text')
           .attr('class', 'casing-size-inner')
-          .attr('x', centerX).attr('y', shoePx - 9)
+          .attr('x', centerX).attr('y', shoePx)
           .attr('text-anchor', 'middle')
           .style('opacity', 0)
           .text(`${csg.csgSize}"`)
@@ -441,7 +440,7 @@ export class WellBoreViewComponent {
     const wg = this.rootG.append('g').attr('class', 'water-level').style('opacity', 0);
     wg.append('line').attr('class', 'water-line').attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx);
     wg.append('path').attr('class', 'water-arrow').attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
-    wg.append('text').attr('class', 'water-label').attr('x', lR - 350).attr('y', wPx + 4).text(label);
+    wg.append('text').attr('class', 'water-label').attr('x', lR - 420).attr('y', wPx + 4).text(label);
     wg.transition().delay(waterStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
   }
 
@@ -471,13 +470,13 @@ export class WellBoreViewComponent {
 
     if (shouldDrawOH) {
       this.rootG.append('path').attr('class', 'open-hole')
-        .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
+        .attr('d', buildOpenHolePath(centerX, ohHW, shoePx + 14, tdPx))
         .attr('clip-path', `url(#${clipId})`);
     }
 
     if (shouldDrawLS) {
       this.rootG.append('path').attr('class', 'liner-screen')
-        .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
+        .attr('d', buildOpenHolePath(centerX, screenHW, shoePx + 14, screenBottomPx))
         .attr('clip-path', `url(#${clipId})`);
     }
 
@@ -524,7 +523,7 @@ export class WellBoreViewComponent {
 
     this.rootG.append('path')
       .attr('class', 'gravelHole')
-      .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, tdPx))
+      .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx + 14, tdPx))
       .attr('stroke', 'url(#gravelpattern)')
       .attr('stroke-width', String(annulusWidth))
       .style('fill', 'none')
@@ -548,28 +547,25 @@ export class WellBoreViewComponent {
     }
   }
 
-  private drawPerforations(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohLabelStart: number): void {
+  private drawPrePerforatedLiner(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohLabelStart: number): void {
     if (data.wellDesign?.perfFlag !== 'Y') return;
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const linerHW = innerHW - 10;
+    const prePerfHW = innerHW;
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const topPx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);
 
-    const { walls, ticks, shoe } = buildPrePerfLiner(centerX, linerHW, topPx, tdPx);
-
     const clipId = 'dyn-perf-clip';
     const clipRect = this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
-      .attr('x', centerX - linerHW - 20).attr('y', topPx - 5)
-      .attr('width', (linerHW + 20) * 2).attr('height', 0);
+      .attr('x', centerX - prePerfHW - 20).attr('y', topPx - 5)
+      .attr('width', (prePerfHW + 20) * 2).attr('height', 0);
 
-    const perfG = this.rootG.append('g').attr('clip-path', `url(#${clipId})`);
-    perfG.append('path').attr('class', 'perf-wall').attr('d', walls);
-    perfG.append('path').attr('class', 'perf-tick').attr('d', ticks);
-    perfG.append('path').attr('class', 'perf-shoe').attr('d', shoe);
+    this.rootG.append('path').attr('class', 'perf-wall')
+      .attr('d', buildOpenHolePath(centerX, prePerfHW, topPx + 14, tdPx))
+      .attr('clip-path', `url(#${clipId})`);
 
     clipRect.transition()
       .delay(ohStart)
@@ -579,7 +575,7 @@ export class WellBoreViewComponent {
 
     if (data.wellDesign.perfRemarks) {
       const labelY = topPx + (tdPx - topPx) * 0.7;
-      const lEdge = centerX - linerHW;
+      const lEdge = centerX - prePerfHW;
       const lEnd = lEdge - 22;
       const lg = this.rootG.append('g').attr('class', 'perf-label').style('opacity', 0);
       lg.append('line').attr('class', 'oh-label-line').attr('x1', lEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);

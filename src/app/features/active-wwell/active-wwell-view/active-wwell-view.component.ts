@@ -19,7 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
-import { formatDateForInput } from 'src/app/shared/utils/date.util';
+import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { CasingInfoComponent } from '../casing-info/casing-info.component';
 import { DatabaseInfoComponent } from '../database-info/database-info.component';
 import { FormationTopsAndCasingComponent } from '../formation-tops-and-casing/formation-tops-and-casing.component';
@@ -117,6 +117,9 @@ export class ActiveWwellViewComponent implements OnInit {
     return details?.DRLG_OP_STATUS?.[0]?.wOpRmk ?? details?.DRLG_OP_SMRY?.[0]?.wOpRmk ?? '';
   });
 
+  protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
+  protected readonly selectedDateString = computed(() => formatDateForInput(this.store.selectedDate()));
+
   protected readonly displayValue = displayValue;
 
   constructor() {
@@ -166,6 +169,14 @@ export class ActiveWwellViewComponent implements OnInit {
 
     if (!Number.isNaN(epANum)) {
       this.store.selectWell({ epANum });
+    }
+  }
+
+  protected onDateChange(value: string): void {
+    const date = parseDateFromInput(value);
+    const today = getTodayAtMidnight();
+    if (!Number.isNaN(date.getTime()) && date <= today) {
+      this.store.setDate(formatDateForInput(date));
     }
   }
 

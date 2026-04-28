@@ -584,8 +584,8 @@
                     "ohRemarks": "8 1/2\" Open hole",
                     "gpFlag": null,
                     "gpRemarks": null,
-                    "perfFlag": "N",
-                    "perfRemarks": null,
+                    "perfFlag": "Y",
+                    "perfRemarks": "Perf Remarks",
                     "lsFlag": "Y",
                     "lsRemarks": "+/- 880 ft of screen"
                 }
