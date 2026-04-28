@@ -18,6 +18,7 @@ import { watch } from '@arcgis/core/core/reactiveUtils';
 import Point from '@arcgis/core/geometry/Point';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
 
@@ -191,7 +192,26 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
       }),
     });
 
-    this.selectedWellLayer.addMany([outerGlow, midRing, core]);
+    const wellName = this.store.wellHeaderData()?.wellName;
+    const graphics = [outerGlow, midRing, core];
+
+    if (wellName) {
+      const label = new Graphic({
+        geometry: point,
+        symbol: new TextSymbol({
+          text: wellName,
+          color: [15, 23, 42, 1],
+          haloColor: [255, 255, 255, 0.9],
+          haloSize: 2,
+          font: { size: 11, weight: 'bold', family: 'sans-serif' },
+          yoffset: 14,
+          horizontalAlignment: 'center',
+        }),
+      });
+      graphics.push(label);
+    }
+
+    this.selectedWellLayer.addMany(graphics);
     void this.focusWell(point);
   }
 
