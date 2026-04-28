@@ -3,6 +3,7 @@ import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
 import { IPreWellData } from 'src/app/shared/models/wwell/pre-well-data.model';
 import { IRigActivity } from 'src/app/shared/models/wwell/rig-activity.model';
+import { IWellDesign } from 'src/app/shared/models/wwell/well-design.model';
 export interface MudCircPoint {
   readonly depth: number;  // parsed from wPrsntDpth
   readonly pct: number;    // parsed from wMudCircPc
@@ -18,6 +19,7 @@ export interface WellboreDiagramData {
   readonly rigActivity: IRigActivity | null;
   readonly currentDepth: number;
   readonly mudCirculation: MudCircPoint[];
+  readonly wellDesign: IWellDesign | null;
 }
 
 export interface DiagramLayout {

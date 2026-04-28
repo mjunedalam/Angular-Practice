@@ -36,6 +36,7 @@ describe('WellBoreViewComponent', () => {
       { depth: 1000, pct: 100 },
       { depth: 5000, pct: 50 },
     ],
+    wellDesign: null,
   };
 
   beforeEach(async () => {

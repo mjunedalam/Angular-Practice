@@ -48,7 +48,7 @@
   .water-arrow { fill: #0ea5e9; stroke: #0ea5e9; opacity: 0.8; }
   .water-label {  font-size: 14.5px;  font-weight: 900; fill: #0ea5e9;}
 
-  .open-hole        { stroke: var(--text-secondary); stroke-width: 1.6; fill: none; stroke-dasharray: 5,3; opacity: 0.55; }
+  .open-hole        { stroke: #000; stroke-width: 3; fill: none; stroke-dasharray: 5,3; opacity: 1; }
   .oh-label-line    { stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
   .oh-label-arrow   { fill: var(--text-muted); opacity: 0.65; }
   .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 900;  }
@@ -58,7 +58,11 @@
   .screen-label-line{ stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
   .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;  }
 
-  .gravelHole { opacity: 0.65; }
+  .gravelHole { opacity: 1; }
+
+  .perf-wall { stroke: #000; stroke-width: 2.5; fill: none; stroke-dasharray: 5,9; opacity: 1; }
+  .perf-tick { stroke: #000; stroke-width: 2; fill: none; opacity: 1; }
+  .perf-shoe { stroke: #000; stroke-width: 2.5; fill: none; opacity: 1; }
 
   .depth-arrow-group {
     .mud-circ-seg {

@@ -571,7 +571,25 @@
                     "drlgSmryRmk": null
                 }
             ],
-            "EXAD_GWD_WELL_TESTS": []
+            "EXAD_GWD_WELL_TESTS": [],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29459,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 93 PSI )",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": null,
+                    "gpRemarks": null,
+                    "perfFlag": "N",
+                    "perfRemarks": null,
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 880 ft of screen"
+                }
+            ]
         },
         {
             "RIG_ACTIVITY": [
@@ -1141,7 +1159,25 @@
                     "drlgSmryRmk": null
                 }
             ],
-            "EXAD_GWD_WELL_TESTS": []
+            "EXAD_GWD_WELL_TESTS": [],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29459,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 93 PSI )",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": "Y",
+                    "gpRemarks": "Gravel Pack",
+                    "perfFlag": "N",
+                    "perfRemarks": null,
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 880 ft of screen"
+                }
+            ]
         },
         {
             "RIG_ACTIVITY": [
@@ -1701,6 +1737,24 @@
                     "wPrsntDpth": 4539,
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
+                }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29459,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 93 PSI )",
+                    "pumpLevelText": "Pump",
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": "Y",
+                    "gpRemarks": "Gravel pack Remarks",
+                    "perfFlag": "Y",
+                    "perfRemarks": "Perf Remarks",
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 880 ft of screen"
                 }
             ]
         },
@@ -2263,6 +2317,24 @@
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
                 }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29459,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 93 PSI )",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": null,
+                    "gpRemarks": null,
+                    "perfFlag": "N",
+                    "perfRemarks": null,
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 880 ft of screen"
+                }
             ]
         },
         {
@@ -2823,6 +2895,24 @@
                     "wPrsntDpth": 4539,
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
+                }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29460,
+                    "staticWaterLevel": "2",
+                    "staticWaterLevelText": "Static WL: 350 ft",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": "Y",
+                    "gpRemarks": "Gravel Pack 20/40 mesh",
+                    "perfFlag": "N",
+                    "perfRemarks": null,
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 920 ft of screen"
                 }
             ]
         },
@@ -3385,6 +3475,24 @@
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
                 }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29461,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 50 PSI )",
+                    "pumpLevelText": "Pump",
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": null,
+                    "gpRemarks": null,
+                    "perfFlag": "Y",
+                    "perfRemarks": "Perforated 4 shots/ft",
+                    "lsFlag": "N",
+                    "lsRemarks": null
+                }
             ]
         },
         {
@@ -3946,6 +4054,24 @@
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
                 }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29462,
+                    "staticWaterLevel": "3",
+                    "staticWaterLevelText": "Static WL: 480 ft",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "Y",
+                    "ohRemarks": "8 1/2\" Open hole",
+                    "gpFlag": "Y",
+                    "gpRemarks": "Gravel Pack Remarks",
+                    "perfFlag": "Y",
+                    "perfRemarks": "Perf Remarks",
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 880 ft of screen"
+                }
             ]
         },
         {
@@ -4506,6 +4632,24 @@
                     "wPrsntDpth": 4539,
                     "wMudCircPc": "100",
                     "wDpthChgDis": 184
+                }
+            ],
+            "EXAD_GWD_WELL_DESIGN": [
+                {
+                    "name": "ABHD_910",
+                    "prewapSeq": 29463,
+                    "staticWaterLevel": "1",
+                    "staticWaterLevelText": "flowing ( SIWHP: 80 PSI )",
+                    "pumpLevelText": null,
+                    "pumpLevel": null,
+                    "ohFlag": "N",
+                    "ohRemarks": null,
+                    "gpFlag": "N",
+                    "gpRemarks": null,
+                    "perfFlag": "N",
+                    "perfRemarks": null,
+                    "lsFlag": "Y",
+                    "lsRemarks": "+/- 750 ft of screen"
                 }
             ]
         }

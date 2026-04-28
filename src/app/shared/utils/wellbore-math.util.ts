@@ -165,6 +165,65 @@ export function openHoleHalfWidth(
   return innermostHalfWidth + margin;
 }
 
+/**
+ * Builds paired horizontal tick marks on both sides of the wellbore at regular
+ * intervals — the standard engineering symbol for casing perforations.
+ */
+export function buildPerforationsPath(
+  centerX: number,
+  halfWidth: number,
+  topPx: number,
+  bottomPx: number,
+  spacing = 10,
+  tickLength = 8,
+): string {
+  const paths: string[] = [];
+  for (let y = topPx + spacing; y <= bottomPx; y += spacing) {
+    paths.push(`M${centerX - halfWidth - tickLength},${y}L${centerX - halfWidth},${y}`);
+    paths.push(`M${centerX + halfWidth},${y}L${centerX + halfWidth + tickLength},${y}`);
+  }
+  return paths.join(' ');
+}
+
+export interface PrePerfLinerPaths {
+  /** Two dashed vertical lines — the liner body walls */
+  walls: string;
+  /** Horizontal tick lines extending outward — the perforations */
+  ticks: string;
+  /** Dashed horizontal line at the bottom — the liner shoe */
+  shoe: string;
+}
+
+/**
+ * Builds the three SVG path components for a pre-perforated liner symbol:
+ * dashed vertical walls, outward tick perforations, and a dashed bottom shoe.
+ */
+export function buildPrePerfLiner(
+  centerX: number,
+  halfWidth: number,
+  topPx: number,
+  bottomPx: number,
+  spacing = 14,
+  tickLength = 10,
+): PrePerfLinerPaths {
+  const lx = centerX - halfWidth;
+  const rx = centerX + halfWidth;
+
+  const walls = `M${lx},${topPx} L${lx},${bottomPx} M${rx},${topPx} L${rx},${bottomPx}`;
+
+  const tickPaths: string[] = [];
+  for (let y = topPx + spacing; y <= bottomPx - spacing / 2; y += spacing) {
+    tickPaths.push(`M${lx - tickLength},${y} L${lx},${y}`);
+    tickPaths.push(`M${rx},${y} L${rx + tickLength},${y}`);
+  }
+
+  return {
+    walls,
+    ticks: tickPaths.join(' '),
+    shoe: `M${lx},${bottomPx} L${rx},${bottomPx}`,
+  };
+}
+
 export function casingGradientId(csgType: string): string {
   if (csgType === 'Conductor') return 'conductorGradient';
   if (csgType === 'Liner')     return 'linerGradient';

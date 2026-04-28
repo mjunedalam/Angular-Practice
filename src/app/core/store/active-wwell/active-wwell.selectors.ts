@@ -72,6 +72,7 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
             depth: m.wPrsntDpth,
             pct: Number(m.wMudCircPc),
         })),
+        wellDesign: d.EXAD_GWD_WELL_DESIGN?.[0] ?? null,
     };
 }
 
