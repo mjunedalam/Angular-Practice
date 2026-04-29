@@ -51,4 +51,7 @@ export const initialWellDocsState: WellDocsState = {
   uploading: false,
   error: null,
   viewerOpen: false,
+  docNames: [],
+  listLoading: false,
+  listError: null,
 };

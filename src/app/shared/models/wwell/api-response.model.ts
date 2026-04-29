@@ -13,3 +13,21 @@ export interface WellDetailsResponse {
     readonly  message: string;
     readonly data: IWellData[]
 }
+
+export interface UploadDocResponse {
+    statusCode: number;
+    error: boolean;
+    message: string;
+    data: string;
+}
+
+export interface DocListData {
+    totalFiles: string[];
+}
+
+export interface DocListResponse {
+    statusCode: number;
+    error: boolean;
+    message: string | null;
+    data: DocListData;
+}

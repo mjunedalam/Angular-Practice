@@ -178,7 +178,16 @@
   text-overflow: ellipsis;
 }
 
-.view-btn {
+.doc-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.action-btn {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
@@ -186,13 +195,32 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  background: var(--accent-muted);
-  color: var(--accent);
-  opacity: 0;
-  transition: opacity 0.22s ease;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
 
-  svg { width: 15px; height: 15px; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; line-height: 16px; }
+
+  &--view {
+    background: var(--accent-muted);
+    color: var(--accent);
+    &:hover { background: var(--accent); color: #fff; }
+  }
+
+  &--download {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+    &:hover { background: #16a34a; color: #fff; }
+  }
+
+  &--loading {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.6;
+  }
 }
+
+.doc-row:hover .doc-row__actions { opacity: 1; }
 
 @keyframes badge-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -245,6 +273,12 @@
   border-bottom: 1px solid var(--border-sub);
   padding: 16px 20px;
   flex-shrink: 0;
+}
+
+.viewer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .viewer-header-meta {
@@ -376,11 +410,12 @@
   gap: 6px;
   background: #1e3a8a;
   color: #fff;
+  border: none;
   border-radius: 8px;
   padding: 8px 18px;
   font-size: 13px;
   font-weight: 600;
-  text-decoration: none;
+  cursor: pointer;
   transition: background 150ms;
 
   &:hover { background: #1e40af; }

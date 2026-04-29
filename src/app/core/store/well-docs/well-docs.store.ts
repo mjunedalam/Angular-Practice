@@ -5,6 +5,7 @@ import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
 
 import { WellDoc, WellDocsState } from '@models/well-design/well-docs.model';
+import { DocListResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
 import { PresDocsService } from '@services/pres-docs.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { DUMMY_DOCS, initialWellDocsState } from './well-docs.state';
@@ -51,7 +52,14 @@ export const WellDocsStore = signalStore(
         switchMap(({ files, epANum, date }) =>
           svc.uploadDocs(files, epANum, date).pipe(
             tapResponse({
-              next: () => {
+              next: (responses: UploadDocResponse[]) => {
+                const failed = responses.filter(r => r.error);
+                if (failed.length) {
+                  const msg = failed.map(r => r.message).join('; ');
+                  patchState(store, { uploading: false, error: msg });
+                  notify.error(msg);
+                  return;
+                }
                 notify.info('Documents uploaded successfully.');
                 svc.getDocs(epANum, date).subscribe({
                   next: docs =>
@@ -63,6 +71,31 @@ export const WellDocsStore = signalStore(
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Upload failed';
                 patchState(store, { uploading: false, error: msg });
+                notify.error(msg);
+              },
+            }),
+          ),
+        ),
+      ),
+    ),
+
+    loadDocList: rxMethod<LoadDocsPayload>(
+      pipe(
+        tap(() => patchState(store, { listLoading: true, listError: null })),
+        switchMap(({ epANum, date }) =>
+          svc.getDocList(epANum, date).pipe(
+            tapResponse({
+              next: (res: DocListResponse) => {
+                if (res.error) {
+                  patchState(store, { docNames: [], listLoading: false, listError: res.message ?? 'Failed to load documents' });
+                  notify.error(res.message ?? 'Failed to load documents');
+                  return;
+                }
+                patchState(store, { docNames: res.data.totalFiles, listLoading: false });
+              },
+              error: (err: unknown) => {
+                const msg = err instanceof Error ? err.message : 'Failed to load documents';
+                patchState(store, { docNames: [], listLoading: false, listError: msg });
                 notify.error(msg);
               },
             }),

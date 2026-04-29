@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, throwError, timeout } from 'rxjs';
+import { Observable, forkJoin, throwError, timeout } from 'rxjs';
 import { WellDoc } from '@models/well-design/well-docs.model';
+import { DocListResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -19,19 +20,25 @@ export class PresDocsService {
     }
   }
 
-  uploadDocs(files: File[], epANum: number, date: string): Observable<void> {
+  uploadDocs(files: File[], epANum: number, uploadDate: string): Observable<UploadDocResponse[]> {
     if (!this.apiUrl) {
       return throwError(() => new Error('Well documents service unavailable.'));
     }
 
-    const formData = new FormData();
-    formData.append('epANum', String(epANum));
-    formData.append('date', date);
-    files.forEach(f => formData.append('files', f, f.name));
+    const requests = files.map(file => {
+      const params = new HttpParams()
+        .set('epaNum', String(epANum))
+        .set('uploadDate', uploadDate);
 
-    return this.http
-      .post<void>(`${this.apiUrl}/well-pres-docs/upload`, formData)
-      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+      const formData = new FormData();
+      formData.append('wellFile', file, file.name);
+
+      return this.http
+        .post<UploadDocResponse>(`${this.apiUrl}/welldocuments/well-presentation-docs`, formData, { params })
+        .pipe(timeout(CONNECTION_TIMEOUT_MS));
+    });
+
+    return forkJoin(requests);
   }
 
   getDocs(epANum: number, date: string): Observable<WellDoc[]> {
@@ -45,6 +52,35 @@ export class PresDocsService {
 
     return this.http
       .get<WellDoc[]>(`${this.apiUrl}/well-pres-docs`, { params })
+      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+  }
+
+  getDocList(epaNum: number, uploadDate: string): Observable<DocListResponse> {
+    if (!this.apiUrl) {
+      return throwError(() => new Error('Well documents service unavailable.'));
+    }
+
+    const params = new HttpParams()
+      .set('epaNum', String(epaNum))
+      .set('uploadDate', uploadDate);
+
+    return this.http
+      .get<DocListResponse>(`${this.apiUrl}/welldocuments/well-presentation-docs-list`, { params })
+      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+  }
+
+  fetchDoc(docName: string, epaNum: number, uploadDate: string): Observable<Blob> {
+    if (!this.apiUrl) {
+      return throwError(() => new Error('Well documents service unavailable.'));
+    }
+
+    const params = new HttpParams()
+      .set('docName', docName)
+      .set('epaNum', String(epaNum))
+      .set('uploadDate', uploadDate);
+
+    return this.http
+      .get(`${this.apiUrl}/welldocuments/well-presentation-docs`, { params, responseType: 'blob' })
       .pipe(timeout(CONNECTION_TIMEOUT_MS));
   }
 }

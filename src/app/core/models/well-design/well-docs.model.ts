@@ -23,4 +23,7 @@ export interface WellDocsState {
   readonly uploading: boolean;
   readonly error: string | null;
   readonly viewerOpen: boolean;
+  readonly docNames: string[];
+  readonly listLoading: boolean;
+  readonly listError: string | null;
 }

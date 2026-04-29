@@ -54,6 +54,9 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   private mapView?: __esri.MapView;
   private selectedWellLayer?: GraphicsLayer;
   private bootTaskRegistered = false;
+  private pointerMoveHandle: { remove(): void } | null = null;
+  private tooltipEl: HTMLDivElement | null = null;
+  private hitTestPending = false;
 
   protected readonly errorMessage = signal<string | null>('Select a well to preview its location.');
   protected readonly mapReady = signal(false);
@@ -85,6 +88,9 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.pointerMoveHandle?.remove();
+    this.tooltipEl?.remove();
+    this.tooltipEl = null;
     this.mapView?.destroy();
     this.resolveBootTask();
   }
@@ -133,6 +139,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
       webMap.add(this.selectedWellLayer);
 
       this.mapReady.set(true);
+      this.registerHoverTooltip();
       await this.waitForMapRender();
       this.syncGlowGraphic(this.selectedWellCoords());
       this.resolveBootTask();
@@ -182,6 +189,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
       }),
     });
 
+    const header = this.store.wellHeaderData();
     const core = new Graphic({
       geometry: point,
       symbol: new SimpleMarkerSymbol({
@@ -190,10 +198,14 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
         color: [14, 165, 233, 1],
         outline: { color: [255, 255, 255, 0.9], width: 1.5 },
       }),
+      popupTemplate: header ? {
+        title: header.wellName,
+        content: `Field: ${header.field} &nbsp;·&nbsp; Depth: ${header.depth} &nbsp;·&nbsp; Ep#: ${header.epNum}<br>Lat: ${coords.lat.toFixed(5)} &nbsp; Lon: ${coords.lng.toFixed(5)}`,
+      } : undefined,
     });
 
-    const wellName = this.store.wellHeaderData()?.wellName;
     const graphics = [outerGlow, midRing, core];
+    const wellName = header?.wellName;
 
     if (wellName) {
       const label = new Graphic({
@@ -213,6 +225,44 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
 
     this.selectedWellLayer.addMany(graphics);
     void this.focusWell(point);
+  }
+
+  private registerHoverTooltip(): void {
+    if (!this.mapView || !this.mapViewEl) return;
+
+    const tip = document.createElement('div');
+    tip.className = 'wwell-map-tooltip';
+    this.mapViewEl.nativeElement.appendChild(tip);
+    this.tooltipEl = tip;
+
+    this.mapViewEl.nativeElement.addEventListener('mouseleave', () => {
+      this.tooltipEl?.classList.remove('wwell-map-tooltip--visible');
+    });
+
+    this.pointerMoveHandle = this.mapView.on('pointer-move', (event) => {
+      void this.onPointerMove(event);
+    });
+  }
+
+  private async onPointerMove(event: __esri.ViewPointerMoveEvent): Promise<void> {
+    if (!this.mapView || !this.selectedWellLayer || !this.tooltipEl || this.hitTestPending) return;
+
+    this.hitTestPending = true;
+    try {
+      const result = await this.mapView.hitTest(event, { include: [this.selectedWellLayer] });
+      const hit = result.results.some(r => r.type === 'graphic');
+
+      if (hit) {
+        this.tooltipEl.textContent = this.store.wellHeaderData()?.wellName ?? '';
+        this.tooltipEl.style.left = `${event.x + 14}px`;
+        this.tooltipEl.style.top = `${event.y - 10}px`;
+        this.tooltipEl.classList.add('wwell-map-tooltip--visible');
+      } else {
+        this.tooltipEl.classList.remove('wwell-map-tooltip--visible');
+      }
+    } finally {
+      this.hitTestPending = false;
+    }
   }
 
   private async focusWell(point: Point): Promise<void> {
