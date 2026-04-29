@@ -81,8 +81,10 @@ export class FilePreviewDialogComponent implements OnDestroy {
     const a = document.createElement('a');
     a.href = url;
     a.download = this.fileName;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   }
 
   protected onResizeStart(event: MouseEvent): void {
@@ -112,7 +114,8 @@ export class FilePreviewDialogComponent implements OnDestroy {
     const mime = file.type.toLowerCase();
     if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
     if (mime === 'application/pdf' || ext === 'pdf') return 'pdf';
-    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'].includes(ext)) return 'document';
+    // txt/csv render as plain text in iframe; office binaries cannot be rendered by the browser natively
+    if (['txt', 'csv'].includes(ext)) return 'document';
     return 'unsupported';
   }
 

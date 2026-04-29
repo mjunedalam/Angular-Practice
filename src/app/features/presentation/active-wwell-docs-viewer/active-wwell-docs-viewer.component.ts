@@ -79,7 +79,10 @@ export class ActiveWwellDocsViewerComponent {
     this.setLoading(this.viewLoading, docName, true);
     this.svc.fetchDoc(docName, context.epANum, context.date).subscribe({
       next: (blob) => {
-        const file = new File([blob], docName, { type: blob.type || this.guessMime(docName) });
+        const mime = blob.type && blob.type !== 'application/octet-stream'
+          ? blob.type
+          : this.guessMime(docName);
+        const file = new File([blob], docName, { type: mime });
         this.setLoading(this.viewLoading, docName, false);
         this.dialog.open(FilePreviewDialogComponent, {
           data: file,
