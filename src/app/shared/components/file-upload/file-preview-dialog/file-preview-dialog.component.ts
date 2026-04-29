@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
-type PreviewType = 'image' | 'pdf' | 'unsupported';
+type PreviewType = 'image' | 'pdf' | 'document' | 'unsupported';
 
 @Component({
   selector: 'app-file-preview-dialog',
@@ -49,6 +49,7 @@ export class FilePreviewDialogComponent implements OnDestroy {
       this.objectUrl = null;
       this.safeUrl = null;
     }
+
   }
 
   ngOnDestroy(): void {
@@ -111,6 +112,7 @@ export class FilePreviewDialogComponent implements OnDestroy {
     const mime = file.type.toLowerCase();
     if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
     if (mime === 'application/pdf' || ext === 'pdf') return 'pdf';
+    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'].includes(ext)) return 'document';
     return 'unsupported';
   }
 
@@ -119,6 +121,9 @@ export class FilePreviewDialogComponent implements OnDestroy {
     if (this.previewType === 'pdf') return 'picture_as_pdf';
     const ext = this.file.name.split('.').pop()?.toLowerCase() ?? '';
     if (['doc', 'docx'].includes(ext)) return 'article';
+    if (['xls', 'xlsx'].includes(ext)) return 'table_chart';
+    if (['ppt', 'pptx'].includes(ext)) return 'slideshow';
+    if (['txt', 'csv'].includes(ext)) return 'description';
     return 'insert_drive_file';
   }
 

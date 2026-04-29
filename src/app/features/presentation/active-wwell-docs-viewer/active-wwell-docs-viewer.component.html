@@ -64,82 +64,26 @@
           <mat-icon>{{ fileIcon(docName) }}</mat-icon>
         </div>
 
-        <div class="doc-row__title" [matTooltip]="docName">{{ docName }}</div>
+        <div class="doc-row__title">{{ docName }}</div>
 
         <div class="doc-row__actions">
           <button class="action-btn action-btn--view"
-                  [class.action-btn--loading]="isLoading(docName)"
-                  matTooltip="View"
+                  [class.action-btn--loading]="isViewLoading(docName)"
                   type="button"
                   (click)="viewDoc(docName)">
-            <mat-spinner *ngIf="isLoading(docName)" diameter="14"></mat-spinner>
-            <mat-icon *ngIf="!isLoading(docName)">visibility</mat-icon>
+            <mat-spinner *ngIf="isViewLoading(docName)" diameter="14"></mat-spinner>
+            <mat-icon *ngIf="!isViewLoading(docName)">visibility</mat-icon>
           </button>
 
           <button class="action-btn action-btn--download"
-                  [class.action-btn--loading]="isLoading(docName)"
-                  matTooltip="Download"
+                  [class.action-btn--loading]="isDownloadLoading(docName)"
                   type="button"
                   (click)="downloadDoc(docName)">
-            <mat-spinner *ngIf="isLoading(docName)" diameter="14"></mat-spinner>
-            <mat-icon *ngIf="!isLoading(docName)">download</mat-icon>
+            <mat-spinner *ngIf="isDownloadLoading(docName)" diameter="14"></mat-spinner>
+            <mat-icon *ngIf="!isDownloadLoading(docName)">download</mat-icon>
           </button>
         </div>
 
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Viewer overlay -->
-<div class="viewer-backdrop" *ngIf="viewerDocName()" (click)="closeViewer()">
-  <div class="viewer-panel" (click)="$event.stopPropagation()">
-
-    <div class="viewer-panel__header">
-      <div class="viewer-header-meta">
-        <div class="viewer-doc-icon" [attr.data-type]="fileTypeClass(viewerDocName()!)">
-          <mat-icon>{{ fileIcon(viewerDocName()!) }}</mat-icon>
-        </div>
-        <div class="viewer-title-block">
-          <h3 class="viewer-title">{{ viewerDocName() }}</h3>
-        </div>
-      </div>
-      <div class="viewer-header-actions">
-        <button class="action-btn action-btn--download"
-                matTooltip="Download"
-                type="button"
-                (click)="downloadDoc(viewerDocName()!)">
-          <mat-icon>download</mat-icon>
-        </button>
-        <button class="viewer-close" (click)="closeViewer()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="viewer-preview">
-      <iframe *ngIf="viewerDocType() === 'pdf'"
-              [src]="viewerBlobUrl()"
-              class="preview-frame"
-              title="Document preview"></iframe>
-      <img *ngIf="viewerDocType() === 'image'"
-           [src]="viewerBlobUrl()"
-           class="preview-image"
-           alt="Document preview" />
-      <div *ngIf="viewerDocType() === 'other'" class="preview-unsupported">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px;opacity:0.4">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-        <p>Preview not available for this file type.</p>
-        <button class="download-btn" type="button" (click)="downloadDoc(viewerDocName()!)">
-          <mat-icon style="font-size:16px;width:16px;height:16px">download</mat-icon>
-          Download File
-        </button>
       </div>
     </div>
 

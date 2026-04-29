@@ -68,6 +68,10 @@
         <iframe [src]="safeUrl" class="pd-pdf" title="PDF Preview"></iframe>
       }
 
+      @case ('document') {
+        <iframe [src]="safeUrl" class="pd-pdf" title="Document Preview"></iframe>
+      }
+
       @case ('unsupported') {
         <div class="pd-empty">
           <div class="pd-empty__card">

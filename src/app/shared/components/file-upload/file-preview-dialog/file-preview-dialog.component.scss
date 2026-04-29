@@ -10,9 +10,10 @@ $text-hi    : #f1f5f9;
 $text-mid   : #94a3b8;
 $text-lo    : #3d4e68;
 
-$accent-image : #38bdf8;
-$accent-pdf   : #f43f5e;
-$accent-other : #64748b;
+$accent-image    : #38bdf8;
+$accent-pdf      : #f43f5e;
+$accent-document : #a78bfa;
+$accent-other    : #64748b;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Keyframes
@@ -49,12 +50,14 @@ $accent-other : #64748b;
   animation: pd-in 280ms cubic-bezier(0.22,1,0.36,1) both;
 
   // ── accent stripe colour per file type ──────────────────────────────────
-  &--image .pd-accent-stripe { background: $accent-image; box-shadow: 0 0 18px rgba($accent-image, .55); }
-  &--pdf   .pd-accent-stripe { background: $accent-pdf;   box-shadow: 0 0 18px rgba($accent-pdf,   .55); }
+  &--image    .pd-accent-stripe { background: $accent-image;    box-shadow: 0 0 18px rgba($accent-image,    .55); }
+  &--pdf      .pd-accent-stripe { background: $accent-pdf;      box-shadow: 0 0 18px rgba($accent-pdf,      .55); }
+  &--document .pd-accent-stripe { background: $accent-document; box-shadow: 0 0 18px rgba($accent-document, .55); }
   &--unsupported .pd-accent-stripe { background: $accent-other; }
 
-  &--image .pd-badge { background: linear-gradient(135deg,#38bdf8,#0284c7); box-shadow: 0 4px 16px rgba(56,189,248,.4); }
-  &--pdf   .pd-badge { background: linear-gradient(135deg,#fb7185,#e11d48); box-shadow: 0 4px 16px rgba(244, 63, 94,.4); }
+  &--image    .pd-badge { background: linear-gradient(135deg,#38bdf8,#0284c7); box-shadow: 0 4px 16px rgba(56,189,248,.4); }
+  &--pdf      .pd-badge { background: linear-gradient(135deg,#fb7185,#e11d48); box-shadow: 0 4px 16px rgba(244, 63, 94,.4); }
+  &--document .pd-badge { background: linear-gradient(135deg,#a78bfa,#7c3aed); box-shadow: 0 4px 16px rgba(167,139,250,.4); }
   &--unsupported .pd-badge { background: linear-gradient(135deg,#475569,#334155); }
 }
 
