@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { deriveStatusLabel } from '../active-wwell.helpers';
 
@@ -12,7 +12,7 @@ import { deriveStatusLabel } from '../active-wwell.helpers';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellHeaderComponent {
-  private readonly store = inject(DrillingDataStore);
+  private readonly store = inject(ActiveWwellStore);
   private readonly uiStore = inject(ActiveWwellUiStore);
 
   protected readonly data = this.store.wellHeaderData;

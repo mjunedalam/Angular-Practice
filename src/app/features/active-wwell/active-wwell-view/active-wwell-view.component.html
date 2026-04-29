@@ -71,7 +71,7 @@
         </div>
 
         <div class="active-wwell-sidepanel">
-          <app-file-upload></app-file-upload>
+          <app-file-upload [epANum]="store.selectedEpANum()" [date]="selectedDateString()"></app-file-upload>
 
           <div class="lt-orange active-wwell-status-panel">
             <mat-form-field

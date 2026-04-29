@@ -6,8 +6,8 @@ import {
   effect,
   inject,
   Injector,
-  OnInit,
   OnDestroy,
+  OnInit,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -19,11 +19,11 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { EmailService } from '@services/email/email.service';
 import { DEFAULT_NOTIFICATION_DURATION_MS } from '@shared/components/notification/notification.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { MorningReportStore } from './store/morning-report.store';
 
 const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
 
@@ -43,7 +43,7 @@ const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
 export class MorningReportComponent implements OnInit, OnDestroy {
   @ViewChild('wwellMap') protected wwellMap!: WwellmapComponent;
 
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(MorningReportStore);
   private readonly authStore = inject(AuthStore);
   private readonly emailStore = inject(EmailStore);
   private readonly emailService = inject(EmailService);
@@ -55,7 +55,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   protected readonly morningReport = this.store.morningReport;
   protected readonly hasError = this.store.hasError;
   protected readonly errorMessage = this.store.errorMessage;
-  protected readonly waterWelltestResult = this.store.waterWelltestResult;
+  protected readonly waterWelltestResult = this.store.waterWellTestResult;
   protected readonly statusCode = this.store.statusCode;
   protected readonly pageMessage = computed(() => {
     if (this.hasError() || this.store.isLoading()) {
@@ -121,7 +121,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     this.selectedDateString = value;
     this.hasDateQueryParam.set(true);
     this.urlSyncReady.set(true);
-    this.store.setDate(value, { autoSelectFirst: true });
+    this.store.setDate(value);
   }
 
   protected async sendEmail(): Promise<void> {
@@ -143,12 +143,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
         waterWelltestResults,
       );
       this.emailStore.sendEmail(emailRequest);
-
-      // this.snackBar.open('Email sent successfully!', 'Dismiss', {
-      //   duration: 3000,
-      //   panelClass: ['bg-green-500', 'text-white']
-      // });
-
     } catch {
       this.showError('Failed to send email. Please try again.');
     }
@@ -160,7 +154,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
   private showError(message: string): void {
     this.store.setUiError(message);
-    console.error(message);
   }
 
   private normalizeDateParam(value: string | null): string {
@@ -188,8 +181,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.store.loadMorningReportData(requestedDate, {
-      autoSelectFirst: true,
-    });
+    this.store.loadMorningReportData(requestedDate);
   }
 }

@@ -9,7 +9,7 @@ import {
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { DecimalPipe, TitleCasePipe } from '@angular/common';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from '../store/presentation.store';
 import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
@@ -31,7 +31,7 @@ import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
 export class WwellTestResultComponent {
   @ViewChild('resultDialog') private resultDialog?: TemplateRef<unknown>;
 
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(PresentationStore);
   private readonly dialog = inject(MatDialog);
   private dialogRef?: MatDialogRef<unknown>;
 

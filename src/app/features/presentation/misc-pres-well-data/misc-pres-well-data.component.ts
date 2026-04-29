@@ -6,7 +6,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from '../store/presentation.store';
 
 @Component({
   selector: 'app-misc-pres-well-data',
@@ -17,12 +17,14 @@ import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MiscPresWellDataComponent {
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(PresentationStore);
 
   protected formatSpudDate(val: string): string {
     if (!val || val === 'N/A') return val || 'N/A';
-    const d = new Date(val);
-    return isNaN(d.getTime()) ? val : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    // strip time suffix like "@0500" before parsing
+    const datePart = val.split('@')[0].trim();
+    const d = new Date(datePart);
+    return isNaN(d.getTime()) ? datePart : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   protected rigMoveTone(value: number | null): 'positive' | 'negative' | 'neutral' {

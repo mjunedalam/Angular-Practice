@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { ActiveWwellStore } from '../store/active-wwell.store';
 
 @Component({
   selector: 'app-operation-summary',
@@ -10,7 +10,7 @@ import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationSummaryComponent {
-  private readonly store = inject(DrillingDataStore);
+  private readonly store = inject(ActiveWwellStore);
 
   protected readonly data = this.store.operationSummary;
 }

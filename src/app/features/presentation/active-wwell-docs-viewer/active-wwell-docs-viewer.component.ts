@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from '../store/presentation.store';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresDocsService } from '@services/pres-docs.service';
 import { FilePreviewDialogComponent } from '@shared/components/file-upload/file-preview-dialog/file-preview-dialog.component';
@@ -46,7 +46,7 @@ import { formatDateForInput } from 'src/app/shared/utils/date.util';
   ],
 })
 export class ActiveWwellDocsViewerComponent {
-  protected readonly wellStore = inject(DrillingDataStore);
+  protected readonly wellStore = inject(PresentationStore);
   protected readonly docsStore = inject(WellDocsStore);
   private readonly svc = inject(PresDocsService);
   private readonly dialog = inject(MatDialog);

@@ -81,7 +81,6 @@
 }
 
 .cell--aquifer {
-  align-self: start;
   background: var(--bg-card, #fff);
   display: flex;
   flex-direction: row;
@@ -156,9 +155,35 @@
 }
 
 .cell--next {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
   border: none;
   color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(6px, 1.8cqi, 12px);
+}
+
+.next-well__icon {
+  flex-shrink: 0;
+  width: clamp(28px, 8cqi, 40px);
+  height: clamp(28px, 8cqi, 40px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: clamp(16px, 4.2cqi, 22px);
+    height: clamp(16px, 4.2cqi, 22px);
+  }
+}
+
+.next-well__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .cell--next-kpi {
@@ -169,6 +194,7 @@
   flex-direction: row;
   align-items: center;
   gap: clamp(4px, 1.5cqi, 10px);
+  min-height: clamp(44px, 11cqi, 62px);
 
   &.cell--kpi-positive {
     background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
@@ -177,6 +203,48 @@
   &.cell--kpi-negative {
     background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
   }
+}
+
+.cell--hole-size {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  border: none;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(6px, 1.8cqi, 12px);
+  min-height: clamp(44px, 11cqi, 62px);
+}
+
+.hole-size__icon {
+  flex-shrink: 0;
+  width: clamp(26px, 7cqi, 38px);
+  height: clamp(26px, 7cqi, 38px);
+  border-radius: clamp(6px, 1.5cqi, 10px);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: clamp(14px, 3.5cqi, 22px);
+    height: clamp(14px, 3.5cqi, 22px);
+  }
+}
+
+.hole-size__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hole-size__value {
+  font-size: clamp(16px, 3.8cqi, 21px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
 // ── Text helpers ───────────────────────────────────────────────────────────────

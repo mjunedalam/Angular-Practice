@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { skip } from 'rxjs';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from './store/presentation.store';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -43,7 +44,7 @@ const RIGHT_DEFAULT = 340; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 export class PresentationComponent implements OnInit {
   @ViewChild('freeLayoutDialog') private freeLayoutDialog?: TemplateRef<unknown>;
 
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(PresentationStore);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -93,7 +94,7 @@ export class PresentationComponent implements OnInit {
     this.applyQueryParams(this.route.snapshot.queryParamMap, true);
 
     this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => this.applyQueryParams(params));
 
     effect(() => {
@@ -157,7 +158,7 @@ export class PresentationComponent implements OnInit {
       return;
     }
 
-    this.store.setDate(requestedDate, { autoSelectFirst: true });
+    this.store.initialize(requestedDate);
 
     if (epANum != null && !Number.isNaN(epANum)) {
       this.store.selectWell({ epANum, date: requestedDate });

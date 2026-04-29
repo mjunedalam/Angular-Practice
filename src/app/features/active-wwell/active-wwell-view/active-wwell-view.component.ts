@@ -18,7 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { ActiveWwellStore } from '../store/active-wwell.store';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { CasingInfoComponent } from '../casing-info/casing-info.component';
 import { DatabaseInfoComponent } from '../database-info/database-info.component';
@@ -31,7 +31,7 @@ import {
   ACTIVE_WWELL_FALLBACK,
   deriveStatusLabel,
 } from '../active-wwell.helpers';
-import { displayValue, selectLatestFormation } from '@store/active-wwell/active-wwell.selectors';
+import { displayValue, selectLatestFormation } from '../store/active-wwell.selectors';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
 import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
 
@@ -73,7 +73,7 @@ export class ActiveWwellViewComponent implements OnInit {
   protected readonly ADD_NEW_SENTINEL = ADD_NEW_SENTINEL;
   protected readonly areas = AREAS;
 
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(ActiveWwellStore);
   protected readonly uiStore = inject(ActiveWwellUiStore);
 
   private readonly route = inject(ActivatedRoute);

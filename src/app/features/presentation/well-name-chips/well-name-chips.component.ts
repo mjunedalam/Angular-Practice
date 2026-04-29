@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, injec
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from '../store/presentation.store';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 
 @Component({
@@ -21,7 +21,7 @@ import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/
   styleUrl:    './well-name-chips.component.scss',
 })
 export class WellNameChipsComponent {
-  protected readonly store = inject(DrillingDataStore);
+  protected readonly store = inject(PresentationStore);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected readonly loaderVisible = signal(false);

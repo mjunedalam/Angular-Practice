@@ -22,35 +22,30 @@ import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IWaterIR } from 'src/app/shared/models/wwell/water-ir.model';
 import { IWaterWellTestOutcome } from 'src/app/shared/models/wwell/water-well-test-outcome.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
 import { sortCasingsByDepthDesc } from 'src/app/shared/utils/wellbore-math.util';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
 export const PAGE_SIZE = 5;
 export const FALLBACK_STR = 'N/A';
 
-export function uniqueByEpANum(names: WellName[]): WellName[] {
-    const seen = new Set<number>();
-    return names.filter(w => {
-        if (seen.has(w.epANum)) return false;
-        seen.add(w.epANum);
-        return true;
-    });
+// ─── Well list / pagination ────────────────────────────────────────────────────
+
+export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
+    return wellList.map(entry => ({ wellName: entry.name, epANum: entry.epANum }));
 }
 
-export function selectTotalPages(unique: WellName[]): number {
-    return Math.ceil(unique.length / PAGE_SIZE);
+export function selectTotalPages(names: WellName[]): number {
+    return Math.ceil(names.length / PAGE_SIZE);
 }
 
-export function selectPagedWellNames(unique: WellName[], page: number): WellName[] {
-    return unique.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+export function selectPagedWellNames(names: WellName[], page: number): WellName[] {
+    return names.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 }
 
-export function selectPageIndexForEpANum(unique: WellName[], epANum: number | null, fallbackPage = 0): number {
-    if (epANum === null) {
-        return fallbackPage;
-    }
-
-    const index = unique.findIndex(well => well.epANum === epANum);
+export function selectPageIndexForEpANum(names: WellName[], epANum: number | null, fallbackPage = 0): number {
+    if (epANum === null) return fallbackPage;
+    const index = names.findIndex(w => w.epANum === epANum);
     return index === -1 ? fallbackPage : Math.floor(index / PAGE_SIZE);
 }
 
@@ -58,11 +53,11 @@ export function selectHasPrevPage(page: number): boolean {
     return page > 0;
 }
 
-export function selectHasNextPage(unique: WellName[], page: number): boolean {
-    return (page + 1) * PAGE_SIZE < unique.length;
+export function selectHasNextPage(names: WellName[], page: number): boolean {
+    return (page + 1) * PAGE_SIZE < names.length;
 }
 
-// ─── Well data selectors ───────────────────────────────────────────────────────
+// ─── Well data helpers ─────────────────────────────────────────────────────────
 
 export function selectWellEpANum(d: IWellData | null | undefined): number | null {
     const epANum = d?.DRLG_OP_STATUS?.[0]?.epANum ?? null;
@@ -73,36 +68,36 @@ export function selectTotalDepth(d: IWellData | null): number {
     return d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
 }
 
-export function selectWellNamesFromData(data: IWellData[]): WellName[] {
-    return data.map(d => ({
-        wellName: d.RIG_ACTIVITY?.[0]?.wellName ?? '',
-        epANum: selectWellEpANum(d) ?? 0,
-    }));
+export function selectPrimaryCasing(d: IWellData | null): ICasingIR | null {
+    const casings = [...(d?.EXAD_GWD_IR_CASING ?? [])].sort(
+        (l, r) => Number(r.csgDepth ?? 0) - Number(l.csgDepth ?? 0),
+    );
+    return casings[0] ?? null;
 }
 
-export function selectSelectedWell(data: IWellData[], epANum: number | null): IWellData | null {
-    if (epANum === null) {
-        return null;
-    }
-
-    return data.find(well => selectWellEpANum(well) === epANum) ?? null;
+export function selectLatestFormation(d: IWellData | null): IFormationTops | null {
+    const formations = d?.DRLG_FM_TOPS ?? [];
+    return formations.length ? formations[formations.length - 1] : null;
 }
 
-export function selectMorningReports(
-    data: IWellData[],
-    rigStatusOverrides: Record<number, string>,
-): MorningReport[] {
-    return data.map(d => {
-        const report = mapWellDataToMorningReport(d);
-        const overrideKey = Number.parseInt(report.epANum, 10);
-        const override = Number.isFinite(overrideKey) ? rigStatusOverrides[overrideKey] : undefined;
-        return override !== undefined ? { ...report, rigStatus: override } : report;
-    });
+export function findPlannedFormation(d: IWellData | null, formationCode: string | null | undefined): ITopsIR | null {
+    if (!formationCode) return null;
+    return d?.EXAD_GWD_IR_TOPS?.find(top => top.stLongCd === formationCode) ?? null;
 }
 
-export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
-    return data.flatMap(d => (d.EXAD_GWD_WELL_TESTS ?? []).map(mapToWaterWellTestResult));
+export function selectPrimaryTestOutcome(d: IWellData | null): IWaterWellTestOutcome | null {
+    return d?.EXAD_GWD_WELL_TESTS?.[0] ?? null;
 }
+
+export function selectPrimaryWaterReference(d: IWellData | null): IWaterIR | null {
+    return d?.EXAD_GWD_IR_WATER?.[0] ?? null;
+}
+
+export function displayValue(value: unknown, fallback = FALLBACK_STR): string {
+    return value === null || value === undefined || value === '' ? fallback : String(value);
+}
+
+// ─── Well data selectors ───────────────────────────────────────────────────────
 
 export function selectDiagramData(d: IWellData | null): WellboreDiagramData | null {
     if (!d) return null;
@@ -142,7 +137,6 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         nextWell: d.NEXT_2_WELL_ACTIVITY?.[0]?.nextWellActivity ?? FALLBACK_STR,
         footage: status?.wDpthChgDis ?? 0,
         operationSummary: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.opRmk ?? d?.DRLG_OP_SMRY?.[0]?.wOpRmk,
-
         next24HrOperation: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.next24HrPlanRrmk ?? status?.nxt24HrPlanRmk,
         drlgSmryRmk: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.drlgSmryRmk ?? status?.wDrlgSmryRmk ?? null,
         rop: d.ROP_DATA?.[0]?.rop ?? null,
@@ -151,21 +145,14 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         rigMoveDays: d?.rigMoveDays ?? null,
         rigName: d.RIG_IDENTIFICATION?.[0].rigname ?? FALLBACK_STR,
         spudDate: rig?.spuddate ?? FALLBACK_STR,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        holeSize: (() => {
+            const items = d.DRLG_OP_SMRY ?? [];
+            if (!items.length) return null;
+            const maxItem = items.reduce((best, cur) =>
+                cur.wHoleEndDpth > best.wHoleEndDpth ? cur : best
+            );
+            return maxItem.wHolSz ?? null;
+        })(),
     };
 }
 
@@ -217,37 +204,6 @@ export function selectWellTestResults(d: IWellData | null): WellTestResult[] {
         productivity: t.producitivty ?? 0,
         h2s: t.h2s ?? 0,
     }));
-}
-
-// ─── Primitive selectors ───────────────────────────────────────────────────────
-
-export function displayValue(value: unknown, fallback = FALLBACK_STR): string {
-    return value === null || value === undefined || value === '' ? fallback : String(value);
-}
-
-export function selectPrimaryCasing(d: IWellData | null): ICasingIR | null {
-    const casings = [...(d?.EXAD_GWD_IR_CASING ?? [])].sort(
-        (l, r) => Number(r.csgDepth ?? 0) - Number(l.csgDepth ?? 0),
-    );
-    return casings[0] ?? null;
-}
-
-export function selectLatestFormation(d: IWellData | null): IFormationTops | null {
-    const formations = d?.DRLG_FM_TOPS ?? [];
-    return formations.length ? formations[formations.length - 1] : null;
-}
-
-export function findPlannedFormation(d: IWellData | null, formationCode: string | null | undefined): ITopsIR | null {
-    if (!formationCode) return null;
-    return d?.EXAD_GWD_IR_TOPS?.find(top => top.stLongCd === formationCode) ?? null;
-}
-
-export function selectPrimaryTestOutcome(d: IWellData | null): IWaterWellTestOutcome | null {
-    return d?.EXAD_GWD_WELL_TESTS?.[0] ?? null;
-}
-
-export function selectPrimaryWaterReference(d: IWellData | null): IWaterIR | null {
-    return d?.EXAD_GWD_IR_WATER?.[0] ?? null;
 }
 
 // ─── View model selectors ──────────────────────────────────────────────────────
@@ -366,7 +322,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     };
 }
 
-// ─── Morning report / test result mappers ─────────────────────────────────────
+// ─── Morning report mappers ────────────────────────────────────────────────────
 
 export function mapWellDataToMorningReport(d: IWellData): MorningReport {
     const rig = d.RIG_ACTIVITY?.[0];
@@ -409,4 +365,20 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome): WaterWellTes
         testRate: String(o.flowRate ?? ''),
         wellProductivity: String(o.producitivty ?? ''),
     };
+}
+
+export function selectMorningReports(
+    data: IWellData[],
+    rigStatusOverrides: Record<number, string>,
+): MorningReport[] {
+    return data.map(d => {
+        const report = mapWellDataToMorningReport(d);
+        const overrideKey = Number.parseInt(report.epANum, 10);
+        const override = Number.isFinite(overrideKey) ? rigStatusOverrides[overrideKey] : undefined;
+        return override !== undefined ? { ...report, rigStatus: override } : report;
+    });
+}
+
+export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
+    return data.flatMap(d => (d.EXAD_GWD_WELL_TESTS ?? []).map(mapToWaterWellTestResult));
 }

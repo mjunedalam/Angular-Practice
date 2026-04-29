@@ -21,6 +21,7 @@ export interface MiscWellData {
   readonly spudDate: string;
   readonly rigName: string;
   readonly drlgSmryRmk: string | null;
+  readonly holeSize: string | null;
 }
 
 export interface PickedFormationTops {

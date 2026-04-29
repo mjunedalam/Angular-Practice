@@ -89,43 +89,37 @@
         <div class="bi-well">Well {{ d.supportingWell }}</div>
       </div>
 
-      <!-- ROW 4: Feet drilled | Previous Well -->
-      <div class="cell cell--feet">
-        <div class="feet-left">
-          <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
-          <div class="cell__label-light">Feet</div>
-        </div>
-        <div class="feet-icon">
-          <svg
-            viewBox="0 0 40 40"
-            fill="none"
-            stroke="white"
-            stroke-width="1.8"
-          >
-            <path
-              d="M20 5v15M13 13l7 7 7-7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5 25c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
-              opacity="0.6"
-            />
-            <path
-              d="M5 32c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
-              opacity="0.4"
-            />
-          </svg>
-        </div>
-      </div>
-
-      <div class="cell cell--prev">
-        <div class="cell__label-light">Previous Well</div>
-        <div class="well-name-val">{{ d.previousWell }}</div>
-      </div>
-
-      <!-- ROW 5: Current Depth + Rig Move | Next Well -->
+      <!-- ROW 4+5: (Feet + Depth stacked) | (Previous Well + Next Well stacked) -->
       <div class="stack-cell">
+        <div class="cell cell--feet">
+          <div class="feet-left">
+            <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
+            <div class="cell__label-light">Feet</div>
+          </div>
+          <div class="feet-icon">
+            <svg
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="white"
+              stroke-width="1.8"
+            >
+              <path
+                d="M20 5v15M13 13l7 7 7-7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5 25c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
+                opacity="0.6"
+              />
+              <path
+                d="M5 32c3.75 0 3.75 3 7.5 3s3.75-3 7.5-3 3.75 3 7.5 3 3.75-3 7.5-3"
+                opacity="0.4"
+              />
+            </svg>
+          </div>
+        </div>
+
         <div class="cell cell--depth">
           <div class="depth-labels">
             <div class="cell__label-light">Current</div>
@@ -133,44 +127,75 @@
           </div>
           <div class="depth-value">{{ d.currentDepth | number }}</div>
         </div>
+      </div>
 
-        <div class="cell cell--next-kpi">
-          <div class="next-kpi__icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              stroke-width="2"
-            >
-              <path d="M7 7h10" stroke-linecap="round" />
-              <path d="M7 12h6" stroke-linecap="round" />
-              <path
-                d="M17 12l3 3-3 3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path d="M17 17H7" stroke-linecap="round" />
+      <div class="stack-cell">
+        <div class="cell cell--prev">
+          <div class="cell__label-light">Previous Well</div>
+          <div class="well-name-val">{{ d.previousWell }}</div>
+        </div>
+
+        <div class="cell cell--next">
+          <div class="next-well__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <circle cx="12" cy="12" r="10" opacity="0.25" fill="white" stroke="none"/>
+              <path d="M5 12h14" stroke-linecap="round"/>
+              <path d="M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-
-          <div class="next-kpi__content">
-            <div class="cell__label-light">Rig Move</div>
-            <div class="next-kpi__stat">
-              <span class="next-kpi__stat-label">Actual / KPI</span>
-              <span class="next-kpi__stat-value">
-                <span
-                  [class.next-kpi__days--positive]="rigMoveTone(d.rigMoveDays) === 'positive'"
-                  [class.next-kpi__days--negative]="rigMoveTone(d.rigMoveDays) === 'negative'"
-                >{{ d.actualRm | number: "1.0-2" }}</span>/{{ d.kpiRm | number: "1.0-2" }}
-              </span>
-            </div>
+          <div class="next-well__body">
+            <div class="cell__label-light">Next Well</div>
+            <div class="well-name-val">{{ d.nextWell }}</div>
           </div>
         </div>
       </div>
 
-      <div class="cell cell--next">
-        <div class="cell__label-light">Next Well</div>
-        <div class="well-name-val">{{ d.nextWell }}</div>
+      <!-- ROW 5b: Rig Move KPI | Hole Size -->
+      <div class="cell cell--next-kpi">
+        <div class="next-kpi__icon">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2"
+          >
+            <path d="M7 7h10" stroke-linecap="round" />
+            <path d="M7 12h6" stroke-linecap="round" />
+            <path
+              d="M17 12l3 3-3 3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path d="M17 17H7" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="next-kpi__content">
+          <div class="cell__label-light">Rig Move</div>
+          <div class="next-kpi__stat">
+            <span class="next-kpi__stat-label">Actual / KPI</span>
+            <span class="next-kpi__stat-value">
+              <span
+                [class.next-kpi__days--positive]="rigMoveTone(d.rigMoveDays) === 'positive'"
+                [class.next-kpi__days--negative]="rigMoveTone(d.rigMoveDays) === 'negative'"
+              >{{ d.actualRm | number: "1.0-2" }}</span>/{{ d.kpiRm | number: "1.0-2" }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cell cell--hole-size">
+        <div class="hole-size__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <circle cx="12" cy="12" r="8" stroke-dasharray="4 2" />
+            <circle cx="12" cy="12" r="3" fill="white" opacity="0.3" stroke="none" />
+            <path d="M12 4v2M12 18v2M4 12h2M18 12h2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="hole-size__body">
+          <div class="cell__label-light">Hole Size</div>
+          <div class="hole-size__value">{{ d.holeSize ?? '—' }}"</div>
+        </div>
       </div>
 
       <!-- ROW 6: Operation Summary (full width) -->
@@ -226,10 +251,12 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
           </svg>
-          <span class="op-header__label">Next 24 Hr Operation</span>
+          <span class="op-header__label">Drilling Summary Remark</span>
         </div>
         <div class="op-text">{{ d.drlgSmryRmk }}</div>
       </div>

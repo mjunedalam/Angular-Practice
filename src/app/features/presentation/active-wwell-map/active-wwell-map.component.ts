@@ -22,7 +22,7 @@ import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
 
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
+import { PresentationStore } from '../store/presentation.store';
 import { LoaderService } from '@shared/components/global-loader/loader.service';
 import { EsriMapService } from '@core/services/esri-map.service';
 import { MAP_CONFIG, MAX_WIDTH } from 'src/app/shared/models/config/agwa-map.config';
@@ -47,7 +47,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   @ViewChild('presMapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
 
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly store = inject(DrillingDataStore);
+  private readonly store = inject(PresentationStore);
   private readonly loader = inject(LoaderService);
   private readonly esriAuth = inject(EsriMapService);
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,9 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
-import { DrillingDataStore } from '@store/drilling-data/drilling-data.store';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
-import { formatDateForInput } from 'src/app/shared/utils/date.util';
 import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-dialog.component';
 
 @Component({
@@ -20,8 +18,10 @@ import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-d
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileUploadComponent {
+  readonly epANum = input<number | null>(null);
+  readonly date = input<string>('');
+
   private readonly dialog = inject(MatDialog);
-  private readonly store = inject(DrillingDataStore);
   protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
@@ -61,9 +61,9 @@ export class FileUploadComponent {
   }
 
   protected submitUpload(): void {
-    const epANum = this.store.selectedEpANum();
-    const date = formatDateForInput(this.store.selectedDate());
-    if (epANum == null || !this.files().length) return;
+    const epANum = this.epANum();
+    const date = this.date();
+    if (epANum == null || !date || !this.files().length) return;
 
     const rawFiles = this.files().map(item => item.file);
     console.log('[FileUpload] payload:', {

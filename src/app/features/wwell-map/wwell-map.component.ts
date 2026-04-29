@@ -4,6 +4,7 @@ import {
   Component,
   effect,
   ElementRef,
+  inject,
   Inject,
   OnDestroy,
   OnInit,
@@ -20,9 +21,8 @@ import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import { MatCardModule } from '@angular/material/card';
-import { Subject, takeUntil } from 'rxjs';
 import { MorningReport } from 'src/app/core/models/morning-report/morning-report.model';
-import { MorningReportService } from 'src/app/core/services/morning-report.service';
+import { MorningReportStore } from '../morning-report/store/morning-report.store';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import {
   bottomPolygonTemplate,
@@ -57,6 +57,8 @@ const BOOT_TASK = 'arcgis-map';
 export class WwellmapComponent implements OnInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewEl?: ElementRef;
 
+  private readonly store = inject(MorningReportStore);
+
   private mapView?: __esri.MapView;
   private legendLayer?: GraphicsLayer;
   private stationaryWatchHandle?: __esri.WatchHandle;
@@ -67,15 +69,33 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private   readonly bubbleLayerReady = signal<GraphicsLayer | null>(null);
 
   private placedBubbles: { x: number; y: number; radius: number }[] = [];
-  private readonly destroy$ = new Subject<void>();
   private bootRegistered = false;
 
   constructor(
     @Inject(PLATFORM_ID) private readonly platformId: object,
-    private readonly morningService: MorningReportService,
     private readonly extConfig: ExternalConfigService,
     private readonly loader: LoaderService,
   ) {
+    effect(() => {
+      const data = this.store.morningReport();
+      if (!data.length || !isPlatformBrowser(this.platformId)) return;
+      this.buildWWells(data);
+      if (!this.mapReady()) {
+        this.initMap().catch((e) => {
+          console.error('[WwellMap] initMap error', e);
+          this.errorMessage.set('Map could not be initialized.');
+          this.resolveBoot();
+        });
+      }
+    });
+
+    effect(() => {
+      if (this.store.hasError() && !this.mapReady()) {
+        this.errorMessage.set('Unable to load well data.');
+        this.resolveBoot();
+      }
+    });
+
     effect(() => {
       this.wwells();
       if (!this.mapReady()) return;
@@ -95,12 +115,9 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     this.registerBoot();
-    this.fetchWells();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
     this.stationaryWatchHandle?.remove();
     this.mapView?.destroy();
     this.resolveBoot();
@@ -129,27 +146,6 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   }
 
   // ── Private ────────────────────────────────────────────────────────────────
-
-  private fetchWells(): void {
-    this.morningService
-      .getMorningReportForKSA()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: MorningReport[]) => {
-          this.buildWWells(data);
-          this.initMap().catch((e) => {
-            console.error('[WwellMap] initMap error', e);
-            this.errorMessage.set('Map could not be initialized.');
-            this.resolveBoot();
-          });
-        },
-        error: (err: unknown) => {
-          console.error('[WwellMap] fetch failed', err);
-          this.errorMessage.set('Unable to load well data.');
-          this.resolveBoot();
-        },
-      });
-  }
 
   private buildWWells(data: MorningReport[]): void {
     const safeNum = (s?: string | null): number => {
