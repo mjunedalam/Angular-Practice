@@ -5,13 +5,14 @@ import {
   computed,
   effect,
   ElementRef,
-  inject,
+  Inject,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
   signal,
   ViewChild,
 } from '@angular/core';
+import { inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import Graphic from '@arcgis/core/Graphic';
 import { watch } from '@arcgis/core/core/reactiveUtils';
@@ -21,6 +22,7 @@ import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
+import { Subject } from 'rxjs';
 
 import { PresentationStore } from '../store/presentation.store';
 import { LoaderService } from '@shared/components/global-loader/loader.service';
@@ -46,17 +48,13 @@ interface SelectedWellCoords {
 export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   @ViewChild('presMapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
 
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly store = inject(PresentationStore);
-  private readonly loader = inject(LoaderService);
-  private readonly esriAuth = inject(EsriMapService);
-
   private mapView?: __esri.MapView;
   private selectedWellLayer?: GraphicsLayer;
   private bootTaskRegistered = false;
   private pointerMoveHandle: { remove(): void } | null = null;
   private tooltipEl: HTMLDivElement | null = null;
   private hitTestPending = false;
+  private readonly destroy$ = new Subject<void>();
 
   protected readonly errorMessage = signal<string | null>('Select a well to preview its location.');
   protected readonly mapReady = signal(false);
@@ -73,7 +71,12 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
     return lat !== null && lng !== null ? { lat, lng } : null;
   });
 
-  constructor() {
+  constructor(
+    @Inject(PLATFORM_ID) private readonly platformId: object,
+    private readonly store: InstanceType<typeof PresentationStore>,
+    private readonly loader: LoaderService,
+    private readonly esriAuth: EsriMapService,
+  ) {
     effect(() => {
       const coords = this.selectedWellCoords();
       if (!this.mapReady()) return;
