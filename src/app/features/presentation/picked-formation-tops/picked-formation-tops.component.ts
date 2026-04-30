@@ -85,6 +85,7 @@ export class PickedFormationTopsComponent implements OnInit {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
+    domLayout: 'autoHeight',
     overlayNoRowsTemplate: '<span class="no-rows">No formations picked yet.</span>',
     defaultColDef: { sortable: true, resizable: false, suppressHeaderMenuButton: true },
   };

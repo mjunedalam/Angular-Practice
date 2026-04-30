@@ -59,6 +59,10 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   protected readonly errorMessage = signal<string | null>('Select a well to preview its location.');
   protected readonly mapReady = signal(false);
 
+  private readonly store = inject(PresentationStore);
+  private readonly loader = inject(LoaderService);
+  private readonly esriAuth = inject(EsriMapService);
+
   private readonly selectedWellCoords = computed<SelectedWellCoords | null>(() => {
     const header = this.store.wellHeaderData();
     const epANum = this.store.selectedEpANum();
@@ -71,12 +75,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
     return lat !== null && lng !== null ? { lat, lng } : null;
   });
 
-  constructor(
-    @Inject(PLATFORM_ID) private readonly platformId: object,
-    private readonly store: InstanceType<typeof PresentationStore>,
-    private readonly loader: LoaderService,
-    private readonly esriAuth: EsriMapService,
-  ) {
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {
     effect(() => {
       const coords = this.selectedWellCoords();
       if (!this.mapReady()) return;
