@@ -351,7 +351,7 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
         plLtrlEndDpth: prewap?.estTargetDepth ?? null,
         supportings: rig?.waterWell ?? '',
         wEvntTime: opSmry?.wEvntTime ?? '',
-        rigStatus: '',
+        rigStatus: d.EXAD_GWD_DAILY_REMARKS?.[0]?.status ?? 'NA',
     };
 }
 
