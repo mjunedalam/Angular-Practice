@@ -35,6 +35,11 @@ export interface DiagramLayout {
   readonly baseHalfWidth: number;
   readonly halfWidthIncrement: number;
   readonly shoeCurveOffset: number;
+  // ── Completion element half-widths (x extents from center) ───────────────
+  readonly openHoleHwMargin: number;   // open hole = innerHW + this
+  readonly linerScreenInset: number;   // liner screen = innerHW - this
+  readonly gravelAnnulusWidth: number; // gravel pack annulus stroke width
+  readonly prePerfGpBoost: number;     // pre-perf extra width when GP present
 }
 
 export const DIAGRAM_LAYOUT: DiagramLayout = {
@@ -58,9 +63,13 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   depthArrowX: 20,    // arrow centerX — spans x=10 to x=30, clear of geo labels
   geoLineX: 95,       // geo axis — depth labels end ~x=78, codes start ~x=113
   casingCenterX: 560, // bore structure center — plenty of gap after geo codes
-  baseHalfWidth: 58,
-  halfWidthIncrement: 20,
+  baseHalfWidth: 72,
+  halfWidthIncrement: 26,
   shoeCurveOffset: 12,
+  openHoleHwMargin: 25,
+  linerScreenInset: 20  ,
+  gravelAnnulusWidth: 12,
+  prePerfGpBoost: 8,
 };
 
 // ─── Animation mode ────────────────────────────────────────────────────────

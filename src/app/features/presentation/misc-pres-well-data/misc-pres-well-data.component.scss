@@ -316,13 +316,11 @@
   font-weight: 800;
   color: #1e3a8a;
   line-height: 1.35;
-  word-break: break-word;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
+  min-width: 0;
+  flex: 1;
 }
 
 // ── Status cell ────────────────────────────────────────────────────────────────

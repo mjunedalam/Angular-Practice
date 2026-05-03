@@ -196,7 +196,16 @@
   &--nav {
     min-width: 32px; padding: 8px 12px;
     font-size: 18px; color: var(--accent); font-weight: 800;
-    &:hover { background: var(--accent); color: #fff; }
+  }
+
+  &.chip--nav:hover,
+  &.chip--nav:focus {
+    background: #ffffff;
+    color: var(--accent);
+    border-color: var(--border);
+    box-shadow: none;
+
+    &::before { opacity: 0; }
   }
 
   &:focus-visible {

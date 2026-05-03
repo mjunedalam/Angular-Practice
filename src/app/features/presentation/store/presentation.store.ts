@@ -131,15 +131,15 @@ export const PresentationStore = signalStore(
                 tap(date => patchState(store, {
                     listLoading: true,
                     error: null,
-                    wellData: null,
                     selectedDate: parseDateFromInput(date),
+                    // Keep wellData and selectedEpANum alive so components stay stable during load
                 })),
                 switchMap(date =>
                     svc.getWellList(date).pipe(
                         tapResponse({
                             next: (wellList) => {
                                 if (!wellList.length) {
-                                    patchState(store, { wellList: [], listLoading: false, selectedEpANum: null });
+                                    patchState(store, { wellList: [], listLoading: false, selectedEpANum: null, wellData: null });
                                     notify.info('Data is not available for the given date');
                                     return;
                                 }

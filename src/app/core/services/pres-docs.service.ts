@@ -14,7 +14,7 @@ export class PresDocsService {
 
   private get apiUrl(): string {
     try {
-      return this.extConfigService.settings.presDocsServiceUrl ?? '';
+      return this.extConfigService.settings.dailyOperationServiceUrl ?? '';
     } catch {
       return '';
     }

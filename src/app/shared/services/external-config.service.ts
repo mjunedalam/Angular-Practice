@@ -14,18 +14,13 @@ export class ExternalConfigService {
 
   async loadConfig(): Promise<void> {
     const url = `${environment.externalConfigFileUrl}?t=${Date.now()}`;
-    try {
-      this.config = await lastValueFrom(this.http.get<AgwaConfig>(url));
-    } catch (err) {
-      console.error('Critical Error: Could not load App Config', err);
-      throw err;
-    }
+    this.config = await lastValueFrom(this.http.get<AgwaConfig>(url));
   }
 
   get settings(): AgwaConfig {
     if (!this.config) {
       throw new Error('AppConfig not loaded');
-}
+    }
     return this.config;
   }
 }

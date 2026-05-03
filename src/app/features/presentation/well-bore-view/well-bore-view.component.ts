@@ -84,9 +84,24 @@ export class WellBoreViewComponent {
 
   private redraw(data: WellboreDiagramData): void {
     if (!this.rootG) return;
-    
+
+    this.rootG.interrupt();
+
+    if (!this.rootG.selectAll('*').empty()) {
+      this.rootG.transition().duration(120).style('opacity', 0)
+        .end()
+        .then(() => this.buildDiagram(data))
+        .catch(() => { /* superseded by a subsequent redraw */ });
+      return;
+    }
+
+    this.buildDiagram(data);
+  }
+
+  private buildDiagram(data: WellboreDiagramData): void {
     this.rootG.selectAll('*').remove();
     this.defsEl.selectAll('.dyn-clip').remove();
+    this.rootG.style('opacity', 1);
 
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
     const scale = createDepthScale(data.totalDepth, drawingHeight);
@@ -123,9 +138,9 @@ export class WellBoreViewComponent {
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
 
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = openHoleHalfWidth(innerHW);
+    const ohHW = innerHW + openHoleHwMargin;
 
     this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart, ohHW);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
@@ -332,12 +347,12 @@ export class WellBoreViewComponent {
         const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
         const gravelBottomPx = scale(csg.csgDepth);
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
-        const screenHW = innerHW - 10;
-        const annulusWidth = 10;
+        const screenHW = innerHW - this.layout.linerScreenInset;
+        const annulusWidth = this.layout.gravelAnnulusWidth;
         const annulusCenter = screenHW + (annulusWidth / 2);
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx + 14, gravelBottomPx))
+          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx))
           .attr('stroke', 'url(#gravelpattern)')
           .attr('stroke-width', String(annulusWidth))
           .style('fill', 'none')
@@ -449,10 +464,10 @@ export class WellBoreViewComponent {
     const shouldDrawLS = !wellDesign || wellDesign.lsFlag === 'Y';
     if (!shouldDrawOH && !shouldDrawLS) return;
 
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = openHoleHalfWidth(innerHW);
-    const screenHW = innerHW - 10;
+    const ohHW = innerHW + openHoleHwMargin;
+    const screenHW = innerHW - linerScreenInset;
     const deepestSolid = data.casings.find((c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
     const shoePx = scale(deepestSolid.csgDepth);
@@ -467,13 +482,13 @@ export class WellBoreViewComponent {
 
     if (shouldDrawOH) {
       this.rootG.append('path').attr('class', 'open-hole')
-        .attr('d', buildOpenHolePath(centerX, ohHW, shoePx + 14, tdPx))
+        .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
         .attr('clip-path', `url(#${clipId})`);
     }
 
     if (shouldDrawLS) {
       this.rootG.append('path').attr('class', 'liner-screen')
-        .attr('d', buildOpenHolePath(centerX, screenHW, shoePx + 14, screenBottomPx))
+        .attr('d', buildOpenHolePath(centerX, screenHW, shoePx, screenBottomPx))
         .attr('clip-path', `url(#${clipId})`);
     }
 
@@ -504,10 +519,10 @@ export class WellBoreViewComponent {
     if (data.wellDesign?.gpFlag !== 'Y') return;
     if (!data.casings.length) return;
 
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gravelAnnulusWidth } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const screenHW = innerHW - 10;
-    const annulusWidth = 10;
+    const screenHW = innerHW - linerScreenInset;
+    const annulusWidth = gravelAnnulusWidth;
     const annulusCenter = screenHW + annulusWidth / 2;
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const startDepthPx = scale(deepestSolid.csgDepth);
@@ -520,7 +535,7 @@ export class WellBoreViewComponent {
 
     this.rootG.append('path')
       .attr('class', 'gravelHole')
-      .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx + 14, tdPx))
+      .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, tdPx))
       .attr('stroke', 'url(#gravelpattern)')
       .attr('stroke-width', String(annulusWidth))
       .style('fill', 'none')
@@ -548,9 +563,10 @@ export class WellBoreViewComponent {
     if (data.wellDesign?.perfFlag !== 'Y') return;
     if (!data.casings.length) return;
 
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, prePerfGpBoost } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const prePerfHW = innerHW;
+    const hasGP = data.wellDesign?.gpFlag === 'Y';
+    const prePerfHW = innerHW + (hasGP ? prePerfGpBoost : 0);
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const topPx = scale(deepestSolid.csgDepth);
     const tdPx = scale(data.totalDepth);
@@ -561,7 +577,7 @@ export class WellBoreViewComponent {
       .attr('width', (prePerfHW + 20) * 2).attr('height', 0);
 
     this.rootG.append('path').attr('class', 'perf-wall')
-      .attr('d', buildOpenHolePath(centerX, prePerfHW, topPx + 14, tdPx))
+      .attr('d', buildOpenHolePath(centerX, prePerfHW, topPx, tdPx))
       .attr('clip-path', `url(#${clipId})`);
 
     clipRect.transition()
@@ -584,9 +600,9 @@ export class WellBoreViewComponent {
 
   private drawScreenHanger(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, hangerStart: number): void {
     if (!data.casings.length) return;
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const screenHW = innerHW - 10;
+    const screenHW = innerHW - linerScreenInset;
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const shoePx = scale(deepestSolid.csgDepth);
     const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx + 6, screenHW);

@@ -32,7 +32,7 @@ export const FALLBACK_STR = 'N/A';
 // ─── Well list / pagination ────────────────────────────────────────────────────
 
 export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
-    return wellList.map(entry => ({ wellName: entry.name, epANum: entry.epANum }));
+    return wellList.map(entry => ({ wellName: entry.wellName, epANum: entry.epANum }));
 }
 
 export function selectTotalPages(names: WellName[]): number {
