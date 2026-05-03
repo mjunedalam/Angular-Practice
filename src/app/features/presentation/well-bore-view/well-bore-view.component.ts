@@ -695,8 +695,8 @@ export class WellBoreViewComponent {
     const currentDepth = data.currentDepth;
     const undrilledFt = estTargetDepth - currentDepth;
 
-    // Only draw if there is undrilled section remaining
-    if (undrilledFt <= 1) return;
+    // Only draw if drilling has started and there is undrilled section remaining
+    if (currentDepth <= 0 || undrilledFt <= 1) return;
 
     const topPx = scale(currentDepth);
     const bottomPx = scale(estTargetDepth);

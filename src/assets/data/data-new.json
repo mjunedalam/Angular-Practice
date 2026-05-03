@@ -1,0 +1,258 @@
+[
+    {
+      "REFERENCE": [
+        {
+          "irSeq": 3353,
+          "prewapSeq": 100530,
+          "epAnum": 97882
+        }
+      ],
+      "RIG_ACTIVITY": [
+        {
+          "drlgOpTypCd": "NEW",
+          "wDrlgTypeDesc": "NEW WELL",
+          "wWellTypeDesc": "PRODUCER",
+          "biNum": "MOB",
+          "biNumDesc": "MOBILIZATION",
+          "wellName": "*MOBILIZATION*",
+          "spuddate": "@",
+          "wRigCd": "ON-54",
+          "wDrlgLocDesc": "MHWZ-950",
+          "welltype": "WTR",
+          "wDrlgTrgtDay": 7,
+          "wDrlgEndDt": "05/10/2024"
+        }
+      ],
+      "WELL_MASTER": [
+        {
+          "well": "HABA-821",
+          "offshore": "Onshore",
+          "utmNorth": 2996562,
+          "utmEast": 710642,
+          "lon": 47.1241166,
+          "lat": 27.075004
+        }
+      ],
+      "RIG_IDENTIFICATION": [
+        {
+          "rigname": "AD-71",
+          "code": "ON-54",
+          "rigHeight": 37.2
+        }
+      ],
+      "CONTACT": [
+        {
+          "rigContNum": "0135767891",
+          "description": "RIG FORMAN VSAT"
+        },
+        {
+          "rigContNum": "0135767856",
+          "description": "CONTRACTOR/CLERK VSAT"
+        }
+      ],
+      "DRLG_OP_STATUS": [
+        {
+          "epANum": null,
+          "wActDt": "2024-05-05T00:00:00",
+          "wPrsntDpth": 0,
+          "wCsgBotDpth": null,
+          "wCsgOdSz": null,
+          "wDpthChgDis": null,
+          "wDrlgEngName": "Albakhurji, Abdullah Bassam",
+          "wFmanName": "Meshal, Mohammed Abdullah",
+          "wMudCircPc": null,
+          "wPrevDpth": 0,
+          "wSpudOprDay": 0,
+          "wOpRmk": "MOBILIZATION",
+          "wDrlgSmryRmk": null,
+          "wDrlgSuptName": "Yami, Fahad Mane",
+          "wLnrOdSz": null,
+          "wLnrBotDpth": null,
+          "nxt24HrPlanRmk": "MOBILIZATION",
+          "fuelTypCd": "DSEL",
+          "fuelDayRem": null,
+          "fuelShipStatus": null,
+          "fuelTrckOnJob": null,
+          "fuelTrckIdle": null,
+          "spuddays": 0,
+          "bopdate": null,
+          "footage": 0,
+          "targetDepth": null
+        }
+      ],
+      "DRLG_FM_TOPS": [],
+      "DRLG_FD_TDAY": [
+        {
+          "footage": null
+        }
+      ],
+      "ROP_DATA": [
+        {
+          "rop": 0
+        }
+      ],
+      "NEXT_2_WELL_ACTIVITY": [
+        {
+          "nextWellActivity": "MHWZ-950",
+          "nextLocation": 92179,
+          "nextBiNum": "1514"
+        }
+      ],
+      "NEW_TARGET_DAYS": [
+        {
+          "targetDays": null
+        }
+      ],
+      "actualRm": 0,
+      "kpiRm": 0,
+      "rigMoveDays": 0,
+      "DRLG_OP_SMRY": [
+        {
+          "wOpCd": "RU",
+          "wEvntTime": "0500",
+          "wHolSz": null,
+          "wOpRmk": "AD-71 RIG MOBILIZATION OPERATION\n\n> RIG UP OPERATIONS\n> R/U TDS & SERVICE LOOP.\n> BOP WINCHES/SUPERSACKS LOAD TESTING.DONE.\n> COMPLETE GROUNDING LOOP..ONGOING.\n> GLG INSPECTIO.\n> R/U WELL CONTROL EQUIPMENT.\n> KOOMEY UNIT RIG UP & COMMISIONING..ONGOING.\n> TESTING GDS & CASCADE SYSTEM.\n> R/U MUD TANK LINES.\n> ON JOB TRAINING FOR ALL RIG TEAMS.\n> WORK ON CLOSING ACTION TRACKER FINDINGS.",
+          "holSecTypCd": "PRE",
+          "wActvDrlgFlg": "N",
+          "wMajOpCd": "MAIN",
+          "wHoleStaDpth": null,
+          "wHoleEndDpth": null,
+          "wDrlgOpDttm": "2024-05-04T05:00:00",
+          "toTm": "0500"
+        }
+      ],
+      "EXAD_GWD_IR_HEADER": [
+        {
+          "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
+          "mudRemarks": null,
+          "loggingRemarks": "Not required"
+        }
+      ],
+      "EXAD_GWD_IR_TOPS": [
+        {
+          "stLongCd": "DMMM",
+          "planTvdDepth": 215,
+          "planSsDepth": 851
+        },
+        {
+          "stLongCd": "RUS",
+          "planTvdDepth": 395,
+          "planSsDepth": 671
+        },
+        {
+          "stLongCd": "UMER",
+          "planTvdDepth": 460,
+          "planSsDepth": 606
+        },
+        {
+          "stLongCd": "ARUM",
+          "planTvdDepth": 1625,
+          "planSsDepth": -559
+        }
+      ],
+      "EXAD_GWD_IR_CASING": [
+        {
+          "csgSize": "24",
+          "csgType": "Conductor",
+          "csgDepth": 100,
+          "csgRemarks": null
+        },
+        {
+          "csgSize": "18 5/8",
+          "csgType": "Casing",
+          "csgDepth": 250,
+          "csgRemarks": "20 ft into DMMM"
+        },
+        {
+          "csgSize": "13 3/8",
+          "csgType": "Casing",
+          "csgDepth": 970,
+          "csgRemarks": "340 ft into UMER"
+        }
+      ],
+      "EXAD_GWD_IR_HYDROGEOLOGY": [
+        {
+          "flowType": "N",
+          "estTargetAquifier": "UMER",
+          "estStaticWaterLevel": 240,
+          "estWaterQuality": 6000,
+          "estProductivity": 500,
+          "estH2s": "No"
+        }
+      ],
+      "EXAD_GWD_IR_WATER": [
+        {
+          "offsetWaterWell": "HABA_810",
+          "distance": 13.9,
+          "direction": "NW",
+          "aquifer": "UMER",
+          "td": 1600,
+          "flowRate": 700,
+          "rpm": 1600,
+          "staticWaterLevel": 287.3,
+          "specificCapacity": 2,
+          "drawDown": 350.3,
+          "fieldTds": 3910,
+          "h2s": 0,
+          "testDuration": 330
+        },
+        {
+          "offsetWaterWell": "HABA_816",
+          "distance": 14.7,
+          "direction": "W",
+          "aquifer": "UMER",
+          "td": 1580,
+          "flowRate": 930,
+          "rpm": 1700,
+          "staticWaterLevel": 232.8,
+          "specificCapacity": 30.3,
+          "drawDown": 30.7,
+          "fieldTds": 3270,
+          "h2s": 0,
+          "testDuration": 210
+        }
+      ],
+      "EXAD_RCD_PREWAP": [
+        {
+          "surfaceElevation": 1069,
+          "estTargetDepth": 1550,
+          "targetFormation": "UMER",
+          "supportedBusiness": "HABA-14"
+        }
+      ],
+      "MUD_CIRC": [
+        {
+          "wPrsntDpth": 120,
+          "wMudCircPc": "100",
+          "wDpthChgDis": 120
+        },
+        {
+          "wPrsntDpth": 250,
+          "wMudCircPc": "100",
+          "wDpthChgDis": 130
+        },
+        {
+          "wPrsntDpth": 450,
+          "wMudCircPc": "0",
+          "wDpthChgDis": 200
+        },
+        {
+          "wPrsntDpth": 970,
+          "wMudCircPc": "90",
+          "wDpthChgDis": 520
+        },
+        {
+          "wPrsntDpth": 1555,
+          "wMudCircPc": "0",
+          "wDpthChgDis": 585
+        },
+        {
+          "wPrsntDpth": 1585,
+          "wMudCircPc": "0",
+          "wDpthChgDis": 30
+        }
+      ],
+      "EXAD_GWD_WELL_TESTS": [],
+      "EXAD_GWD_DAILY_REMARKS": []
+    }
+  ]
