@@ -33,10 +33,11 @@ export class HomeComponent {
       color: '#3b82f6',
     },
     {
-      label: 'Maps',
-      route: 'maps',
+      label: 'Active Water Well Map',
+      route: 'active-wwell',
       iconPaths: [
-        'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m0 8V9m0 0L9 7',
+        'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',
+        'M12 11.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z',
       ],
       color: '#06b6d4',
     },

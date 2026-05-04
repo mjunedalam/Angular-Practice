@@ -199,6 +199,7 @@
       </div>
 
       <!-- ROW 6: Operation Summary (full width) -->
+      @if (d.operationSummary) {
       <div class="cell cell--op-summary">
         <div class="op-header">
           <svg
@@ -221,8 +222,10 @@
         </div>
         <div class="op-text">{{ d.operationSummary }}</div>
       </div>
+      }
 
       <!-- ROW 7: Next 24 Hr Operation (full width) -->
+      @if (d.next24HrOperation) {
       <div class="cell cell--next24">
         <div class="op-header">
           <svg
@@ -240,7 +243,10 @@
         </div>
         <div class="op-text">{{ d.next24HrOperation }}</div>
       </div>
+      }
+
       <!-- ROW 7: Drilling Summary Remark -->
+      @if (d.drlgSmryRmk) {
       <div class="cell cell--next24">
         <div class="op-header">
           <svg
@@ -260,6 +266,7 @@
         </div>
         <div class="op-text">{{ d.drlgSmryRmk }}</div>
       </div>
+      }
     </div>
   </div>
 }
