@@ -108,6 +108,7 @@
               </div>
               <input
                 class="card-header__status-input"
+                [class.card-header__status-input--na]="report.rigStatus === 'NA'"
                 placeholder="Rig status"
                 [ngModel]="report.rigStatus"
                 (ngModelChange)="store.updateRigStatus(report.epANum, $event)"

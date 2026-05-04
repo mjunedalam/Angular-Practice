@@ -13,7 +13,7 @@ import 'd3-transition';
 
 import { PresentationStore } from '../store/presentation.store';
 import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
-import { buildDepthTicks, createDepthScale, formatDepth } from 'src/app/shared/utils/wellbore-math.util';
+import { buildDepthTicks, createDepthScale, formatDepth, pickTickInterval } from 'src/app/shared/utils/wellbore-math.util';
 
 @Component({
   selector: 'app-depth-scale',
@@ -64,7 +64,7 @@ export class DepthScaleComponent {
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
-    const ticks = buildDepthTicks(totalDepth, 500);
+    const ticks = buildDepthTicks(totalDepth, pickTickInterval(totalDepth));
 
     g.append('text')
       .attr('class', 'axis-title')

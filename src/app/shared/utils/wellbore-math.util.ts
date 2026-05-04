@@ -8,6 +8,12 @@ export function createDepthScale(
   return scaleLinear().domain([0, totalDepth]).range([0, drawingHeight]);
 }
 
+export function pickTickInterval(totalDepth: number): number {
+  if (totalDepth <= 2000) return 100;
+  if (totalDepth <= 3000) return 200;
+  return 500;
+}
+
 export function buildDepthTicks(totalDepth: number, interval = 500): number[] {
   const ticks: number[] = [];
   for (let depth = 0; depth <= totalDepth; depth += interval) {
