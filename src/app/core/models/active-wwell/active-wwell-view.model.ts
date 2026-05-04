@@ -127,4 +127,5 @@ export interface WwellTestViewModel {
 export interface UploadFileItem {
   readonly file: File;
   readonly id: string;
+  readonly uploaded?: boolean;
 }

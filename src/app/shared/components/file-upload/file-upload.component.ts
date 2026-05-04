@@ -25,6 +25,7 @@ export class FileUploadComponent {
   protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
+  protected readonly uploadedFiles = signal<UploadFileItem[]>([]);
 
   protected onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement | null;
@@ -63,17 +64,16 @@ export class FileUploadComponent {
   protected submitUpload(): void {
     const epANum = this.epANum();
     const date = this.date();
-    if (epANum == null || !date || !this.files().length) return;
+    const pending = this.files();
+    if (epANum == null || !date || !pending.length) return;
 
-    const rawFiles = this.files().map(item => item.file);
-    console.log('[FileUpload] payload:', {
-      epANum,
-      date,
-      fileCount: rawFiles.length,
-      files: rawFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
-    });
-    this.docsStore.uploadDocs({ files: rawFiles, epANum, date });
+    this.docsStore.uploadDocs({ files: pending.map(i => i.file), epANum, date });
+    this.uploadedFiles.update(existing => [...existing, ...pending]);
     this.files.set([]);
+  }
+
+  protected removeUploaded(id: string): void {
+    this.uploadedFiles.update(items => items.filter(item => item.id !== id));
   }
 
   protected fileSizeLabel(size: number): string {

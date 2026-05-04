@@ -263,6 +263,36 @@
   &:hover { background: rgba(239, 68, 68, 0.08) !important; }
 }
 
+// ── Uploaded row state ────────────────────────────────────────────────────────
+.file-row--uploaded {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+
+  &:hover {
+    border-color: #86efac;
+    box-shadow: 0 1px 6px rgba(22, 163, 74, 0.1);
+  }
+
+  .file-row__name { color: #15803d; }
+}
+
+.file-row__type-icon--done {
+  color: #16a34a !important;
+}
+
+.file-uploaded-badge {
+  font-size: 0.56rem;
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
 // ── Upload footer ─────────────────────────────────────────────────────────────
 .upload-footer {
   display: flex;
@@ -298,6 +328,36 @@
 }
 
 .upload-spinner { display: inline-flex; }
+
+// ── Uploaded section ──────────────────────────────────────────────────────────
+.uploaded-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.1rem;
+}
+
+.uploaded-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #15803d;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uploaded-section__header-icon {
+  font-size: 0.85rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  line-height: 0.85rem;
+  overflow: visible;
+  color: #16a34a;
+}
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 .empty-state {
