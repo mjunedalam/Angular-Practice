@@ -20,7 +20,7 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
 import { EmailService } from '@services/email/email.service';
-import { DEFAULT_NOTIFICATION_DURATION_MS } from '@shared/components/notification/notification.service';
+import { DEFAULT_NOTIFICATION_DURATION_MS, NotificationService } from '@shared/components/notification/notification.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { MorningReportStore } from './store/morning-report.store';
@@ -47,6 +47,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   private readonly authStore = inject(AuthStore);
   private readonly emailStore = inject(EmailStore);
   private readonly emailService = inject(EmailService);
+  private readonly notificationService = inject(NotificationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
@@ -73,7 +74,25 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   private readonly urlSyncReady = signal(false);
   private readonly hasDateQueryParam = signal(false);
 
+  private emailSendInitiated = false;
+
   constructor() {
+    effect(() => {
+      if (this.emailStore.isSending()) {
+        this.emailSendInitiated = true;
+      }
+
+      if (!this.emailSendInitiated) return;
+
+      if (this.emailStore.isSent()) {
+        this.emailSendInitiated = false;
+        this.notificationService.info('Email sent successfully.');
+      } else if (this.emailStore.hasFailed()) {
+        this.emailSendInitiated = false;
+        this.notificationService.error(this.emailStore.error() ?? 'Failed to send email.');
+      }
+    }, { injector: this.injector });
+
     effect(() => {
       if (!this.urlSyncReady()) {
         return;

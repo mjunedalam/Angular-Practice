@@ -27,11 +27,15 @@ export const EmailStore = signalStore(
       patchState(store, { status: 'sending', error: null });
       emailService.sendEmail(request).
         subscribe({
-          next: () => {
-            patchState(store, { status: 'sent' });
+          next: (statusCode) => {
+            if (statusCode === 200) {
+              patchState(store, { status: 'sent' });
+            } else {
+              patchState(store, { status: 'failed', error: 'Unexpected response from server' });
+            }
           },
           error: () => {
-            patchState(store, { status: 'failed', error: 'Failed to send email' })
+            patchState(store, { status: 'failed', error: 'Failed to send email' });
           }
         });
     }

@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { EmailRequest } from 'src/app/shared/models/email/email-request.model';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MorningReport } from '@models/morning-report/morning-report.model';
 import { EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
@@ -16,9 +17,11 @@ export class EmailService {
   private apiUrl = `${this.extConfigService.settings.emailServiceUrl}` + "/send-email";
 
 
-  sendEmail(emailRequest: EmailRequest): Observable<void> {
+  sendEmail(emailRequest: EmailRequest): Observable<number> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<void>(this.apiUrl, emailRequest, { headers });
+    return this.http.post(this.apiUrl, emailRequest, { headers, responseType: 'text', observe: 'response' }).pipe(
+      map(res => res.status)
+    );
   }
 
   buildEmailRequest(
