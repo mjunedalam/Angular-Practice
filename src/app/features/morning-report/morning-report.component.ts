@@ -102,10 +102,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
       this.router.navigate([], {
         relativeTo: this.route,
-        queryParams: {
-          date,
-          epANum: null,
-        },
+        queryParams: { date },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });

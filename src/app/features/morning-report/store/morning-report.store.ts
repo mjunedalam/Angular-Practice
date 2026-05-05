@@ -2,7 +2,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { forkJoin, of, pipe, switchMap, tap } from 'rxjs';
+import { forkJoin, pipe, switchMap, tap } from 'rxjs';
 
 import { MorningReport } from '@models/morning-report/morning-report.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
@@ -11,7 +11,7 @@ import {
     DEFAULT_NOTIFICATION_DURATION_MS,
     NotificationService,
 } from '@shared/components/notification/notification.service';
-import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { parseDateFromInput } from 'src/app/shared/utils/date.util';
 import {
     selectMorningReports,
     selectWaterWellTestResultsFromData,
@@ -46,8 +46,14 @@ export const MorningReportStore = signalStore(
             pipe(
                 tap(date => patchState(store, {
                     listLoading: true,
+                    // Reset detailLoading so the spinner doesn't stick if a date change interrupts
+                    // an in-flight detail fetch (switchMap cancels the request but leaves the flag true).
+                    detailLoading: false,
                     error: null,
                     allWellsData: [],
+                    // Clear stale well options immediately so the UI doesn't show the previous
+                    // date's wells while the new list is loading.
+                    wellList: [],
                     selectedDate: parseDateFromInput(date),
                 })),
                 switchMap(date =>
@@ -62,9 +68,7 @@ export const MorningReportStore = signalStore(
 
                                 patchState(store, { wellList, listLoading: false, detailLoading: true });
 
-                                const detail$ = wellList.length
-                                    ? forkJoin(wellList.map(w => svc.getWellDetail(date, w.epANum)))
-                                    : of([]);
+                                const detail$ = forkJoin(wellList.map(w => svc.getWellDetail(date, w.epANum)));
 
                                 detail$.pipe(
                                     tapResponse({

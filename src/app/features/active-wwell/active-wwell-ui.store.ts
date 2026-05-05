@@ -8,6 +8,10 @@ export class ActiveWwellUiStore {
     'Inactive',
     'On Hold',
     'Completed',
+    'test2',
+    'test3',
+    'test4',
+    'test8'
   ]);
 
   readonly selectedArea = signal('RAK');

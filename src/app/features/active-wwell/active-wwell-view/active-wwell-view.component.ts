@@ -11,7 +11,8 @@ import {
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { skip } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -156,20 +157,37 @@ export class ActiveWwellViewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.loadWellNames();
+    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
 
-    const params = this.route.snapshot.queryParamMap;
+    // skip(1) avoids re-processing the snapshot URL that was already handled above.
+    // Subsequent emissions handle back/forward navigation and external URL changes.
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyQueryParams(params));
+  }
+
+  private applyQueryParams(params: ParamMap, forceLoad = false): void {
+    const requestedDate = this.normalizeDateParam(params.get('date'));
     const rawEpANum = params.get('epANum');
+    const epANum = rawEpANum ? Number.parseInt(rawEpANum, 10) : null;
+    const currentDate = formatDateForInput(this.store.selectedDate());
+    const currentEpANum = this.store.selectedEpANum();
 
-    if (!rawEpANum) {
+    if (!forceLoad && requestedDate === currentDate && (epANum ?? null) === currentEpANum) {
       return;
     }
 
-    const epANum = Number.parseInt(rawEpANum, 10);
+    // Pass epANum into loadWellNames so the correct well is selected once the list
+    // arrives asynchronously, instead of calling selectWell before the list exists.
+    this.store.loadWellNames(requestedDate, epANum != null && !Number.isNaN(epANum) ? epANum : undefined);
+  }
 
-    if (!Number.isNaN(epANum)) {
-      this.store.selectWell({ epANum });
-    }
+  private normalizeDateParam(value: string | null): string {
+    if (!value) return formatDateForInput(getTodayAtMidnight());
+    const parsed = parseDateFromInput(value);
+    const today = getTodayAtMidnight();
+    if (Number.isNaN(parsed.getTime()) || parsed > today) return formatDateForInput(today);
+    return value;
   }
 
   protected onDateChange(value: string): void {

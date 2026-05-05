@@ -158,11 +158,10 @@ export class PresentationComponent implements OnInit {
       return;
     }
 
-    this.store.initialize(requestedDate);
-
-    if (epANum != null && !Number.isNaN(epANum)) {
-      this.store.selectWell({ epANum, date: requestedDate });
-    }
+    this.store.initialize(
+      requestedDate,
+      epANum != null && !Number.isNaN(epANum) ? epANum : undefined,
+    );
   }
 
   private normalizeDateParam(value: string | null): string {

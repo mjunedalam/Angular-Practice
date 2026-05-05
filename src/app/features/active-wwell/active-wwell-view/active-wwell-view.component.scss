@@ -475,46 +475,42 @@
 }
 
 // ── Status search option ───────────────────────────────────────────────────────
-.status-select-panel {
+// These target CDK overlay content rendered outside the component DOM, so all
+// selectors must use ::ng-deep to bypass Angular's view encapsulation.
+
+::ng-deep .status-select-panel {
   padding-top: 0 !important;
-  overflow-y: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
-.status-search-opt {
+::ng-deep .status-search-opt {
   opacity: 1 !important;
   cursor: default !important;
-  padding: 0 !important;
-  height: auto !important;
-  min-height: unset !important;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: #fff;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: #fff !important;
   pointer-events: auto !important;
 
   &:hover {
     background: #fff !important;
   }
 
-  /* override Material's disabled-state overrides on inner content */
+  .mdc-list-item__content,
   .mdc-list-item__primary-text {
-    width: 100%;
     opacity: 1 !important;
-    color: #1f2937 !important;
+    overflow: visible !important;
+    white-space: normal !important;
     pointer-events: auto !important;
+    width: 100%;
   }
 
-  /* Material adds this class on disabled options */
   &.mdc-list-item--disabled {
     opacity: 1 !important;
     pointer-events: auto !important;
   }
 }
 
-.status-search-icon {
+::ng-deep .status-search-icon {
   font-size: 1rem;
   width: 1rem;
   height: 1rem;
@@ -524,7 +520,7 @@
   overflow: visible;
 }
 
-.status-search-input {
+::ng-deep .status-search-input {
   flex: 1;
   border: none;
   outline: none;
@@ -544,7 +540,7 @@
   }
 }
 
-.status-no-results {
+::ng-deep .status-no-results {
   font-size: 0.85rem !important;
   font-weight: 500 !important;
   color: #9ca3af !important;
@@ -552,9 +548,13 @@
   text-align: center;
   justify-content: center;
 }
-.status-search-wrap {
- position: relative;
-  z-index: 1;
+
+::ng-deep .status-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 11;
   background: #fff;
   padding: 8px;
   border-bottom: 1px solid #e5e7eb;

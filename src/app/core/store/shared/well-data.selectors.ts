@@ -255,11 +255,12 @@ export function selectDatabaseInfoViewModel(d: IWellData | null, date: Date): Da
 
 export function selectOperationSummaryViewModel(d: IWellData | null): OperationSummaryViewModel | null {
     if (!d) return null;
+    const remarks = d.EXAD_GWD_DAILY_REMARKS?.[0];
     const status = d.DRLG_OP_STATUS?.[0];
-    const opSummary = d.DRLG_OP_SMRY?.[0];
     return {
-        operation: status?.wOpRmk ?? opSummary?.wOpRmk ?? FALLBACK_STR,
-        nextOperation: status?.nxt24HrPlanRmk ?? FALLBACK_STR,
+        operation: remarks?.opRmk ?? status?.wOpRmk ?? FALLBACK_STR,
+        nextOperation: remarks?.next24HrPlanRrmk ?? status?.nxt24HrPlanRmk ?? FALLBACK_STR,
+        drillingRemarks: remarks?.drlgSmryRmk ?? status?.wDrlgSmryRmk ?? FALLBACK_STR,
     };
 }
 

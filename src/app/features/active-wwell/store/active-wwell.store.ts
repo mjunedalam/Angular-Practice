@@ -124,15 +124,15 @@ export const ActiveWwellStore = signalStore(
             ),
         );
 
-        const loadListAndAutoSelect = rxMethod<string>(
+        const loadListAndAutoSelect = rxMethod<{ date: string; epANumOverride: number | null }>(
             pipe(
-                tap(date => patchState(store, {
+                tap(({ date }) => patchState(store, {
                     listLoading: true,
                     error: null,
                     wellData: null,
                     selectedDate: parseDateFromInput(date),
                 })),
-                switchMap(date =>
+                switchMap(({ date, epANumOverride }) =>
                     svc.getWellList(date).pipe(
                         tapResponse({
                             next: (wellList) => {
@@ -143,13 +143,22 @@ export const ActiveWwellStore = signalStore(
                                 }
 
                                 const firstEntry = wellList[0];
+                                // Honour the requested epANum when it exists in the new list.
+                                // Without this, the async arrival of the list always overwrote
+                                // selectedEpANum with firstEntry, discarding the URL's well param.
+                                const targetEpANum = (epANumOverride !== null && wellList.some(w => w.epANum === epANumOverride))
+                                    ? epANumOverride
+                                    : firstEntry.epANum;
+                                const names = selectWellNamesFromList(wellList);
+                                const page = selectPageIndexForEpANum(names, targetEpANum, 0);
+
                                 patchState(store, {
                                     wellList,
                                     listLoading: false,
-                                    selectedEpANum: firstEntry.epANum,
-                                    wellNamesPage: 0,
+                                    selectedEpANum: targetEpANum,
+                                    wellNamesPage: page,
                                 });
-                                loadDetail({ date, epANum: firstEntry.epANum });
+                                loadDetail({ date, epANum: targetEpANum });
                             },
                             error: (err: Error) => {
                                 patchState(store, {
@@ -164,8 +173,11 @@ export const ActiveWwellStore = signalStore(
         );
 
         return {
-            loadWellNames(date?: string): void {
-                loadListAndAutoSelect(date ?? formatDateForInput(store.selectedDate()));
+            loadWellNames(date?: string, epANumOverride?: number): void {
+                loadListAndAutoSelect({
+                    date: date ?? formatDateForInput(store.selectedDate()),
+                    epANumOverride: epANumOverride ?? null,
+                });
             },
 
             selectWell(params: { epANum: number; date?: string }): void {
@@ -181,7 +193,8 @@ export const ActiveWwellStore = signalStore(
             },
 
             setDate(date: string): void {
-                loadListAndAutoSelect(date);
+                // Preserve the active well across date changes; falls back to first if not found.
+                loadListAndAutoSelect({ date, epANumOverride: store.selectedEpANum() });
             },
 
             nextPage(): void {

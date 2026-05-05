@@ -86,6 +86,7 @@ export interface DatabaseInfoViewModel {
 export interface OperationSummaryViewModel {
   readonly operation: string;
   readonly nextOperation: string;
+  readonly drillingRemarks: string;
 }
 
 export interface FormationInfoViewModel {
