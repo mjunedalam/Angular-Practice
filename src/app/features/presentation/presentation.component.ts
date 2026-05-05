@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, Injector, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { skip } from 'rxjs';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -48,7 +48,6 @@ export class PresentationComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly injector = inject(Injector);
   private readonly dialog = inject(MatDialog);
   private dialogRef?: MatDialogRef<unknown>;
 
@@ -87,16 +86,10 @@ export class PresentationComponent implements OnInit {
       }, remaining);
     });
 
-    this.destroyRef.onDestroy(() => this.clearLoadingTimer());
-  }
-
-  ngOnInit(): void {
-    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
-
-    this.route.queryParamMap
-      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => this.applyQueryParams(params));
-
+    // Sync store state back to URL. Must live in the constructor so it is registered
+    // before ngOnInit runs applyQueryParams — otherwise a selectedDate change from the
+    // tap (which fires synchronously inside initialize) can trigger this effect with a
+    // stale selectedEpANum, overwriting the URL before the HTTP response arrives.
     effect(() => {
       const epANum = this.store.selectedEpANum();
       const date = this.store.selectedDate();
@@ -107,7 +100,17 @@ export class PresentationComponent implements OnInit {
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
-    }, { injector: this.injector });
+    });
+
+    this.destroyRef.onDestroy(() => this.clearLoadingTimer());
+  }
+
+  ngOnInit(): void {
+    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
+
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyQueryParams(params));
   }
 
   protected openDraggableDialog(): void {

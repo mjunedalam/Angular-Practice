@@ -89,6 +89,16 @@ export class WellNameChipsComponent {
     }
   }
 
+  protected onNextPageClick(event: Event): void {
+    event.preventDefault();
+    this.store.nextPage();
+  }
+
+  protected onPrevPageClick(event: Event): void {
+    event.preventDefault();
+    this.store.prevPage();
+  }
+
   private clearLoaderTimer(): void {
     if (this.loaderTimer !== null) {
       clearTimeout(this.loaderTimer);

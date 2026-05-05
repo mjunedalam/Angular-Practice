@@ -128,30 +128,41 @@ export const PresentationStore = signalStore(
 
         const loadListAndAutoSelect = rxMethod<{ date: string; epANumOverride: number | null }>(
             pipe(
-                tap(({ date }) => patchState(store, {
-                    listLoading: true,
-                    error: null,
-                    selectedDate: parseDateFromInput(date),
-                    // Keep wellData and selectedEpANum alive so components stay stable during load
+            tap(({ date }) => patchState(store, {
+                listLoading: true,
+                error: null,
+                selectedDate: parseDateFromInput(date),
+                // Keep wellData and selectedEpANum alive so components stay stable during load
                 })),
                 switchMap(({ date, epANumOverride }) =>
                     svc.getWellList(date).pipe(
                         tapResponse({
                             next: (wellList) => {
+                                const names = selectWellNamesFromList(wellList);
+
                                 if (!wellList.length) {
                                     patchState(store, { wellList: [], listLoading: false, selectedEpANum: null, wellData: null });
                                     notify.info('Data is not available for the given date');
                                     return;
                                 }
 
-                                const firstEntry = wellList[0];
                                 // Honour the requested epANum when it exists in the new list.
                                 // Without this, the async arrival of the list always overwrote
                                 // selectedEpANum with firstEntry, discarding the URL's well param.
-                                const targetEpANum = (epANumOverride !== null && wellList.some(w => w.epANum === epANumOverride))
+                                const firstEntry = names[0];
+                                const targetEpANum = (epANumOverride !== null && names.some(w => w.epANum === epANumOverride))
                                     ? epANumOverride
-                                    : firstEntry.epANum;
-                                const names = selectWellNamesFromList(wellList);
+                                    : firstEntry?.epANum ?? null;
+                                if (targetEpANum === null) {
+                                    patchState(store, {
+                                        wellList: [],
+                                        listLoading: false,
+                                        selectedEpANum: null,
+                                        wellData: null,
+                                        error: 'No valid wells were returned for the selected date',
+                                    });
+                                    return;
+                                }
                                 const page = selectPageIndexForEpANum(names, targetEpANum, 0);
 
                                 patchState(store, {

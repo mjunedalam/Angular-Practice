@@ -20,14 +20,16 @@
 
       @if (store.hasPrevPage()) {
         <button
+          type="button"
           class="chip chip--nav"
           aria-label="Previous wells"
-          (click)="store.prevPage()"
+          (click)="onPrevPageClick($event)"
         >‹</button>
       }
 
       @for (well of store.pagedWellNames(); track well.epANum) {
         <button
+          type="button"
           class="chip"
           role="listitem"
           [ngClass]="{ 'chip--active': well.epANum === store.selectedEpANum() }"
@@ -41,9 +43,10 @@
 
       @if (store.hasNextPage()) {
         <button
+          type="button"
           class="chip chip--nav"
           aria-label="Next wells"
-          (click)="store.nextPage()"
+          (click)="onNextPageClick($event)"
         >›</button>
       }
 

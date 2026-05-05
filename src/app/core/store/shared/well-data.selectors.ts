@@ -29,10 +29,19 @@ import { formatDateForInput } from 'src/app/shared/utils/date.util';
 export const PAGE_SIZE = 5;
 export const FALLBACK_STR = 'N/A';
 
+function coercePositiveEpANum(value: number | string | null | undefined): number | null {
+    const numericValue = typeof value === 'string' ? Number.parseInt(value, 10) : value ?? null;
+    if (!Number.isFinite(numericValue) || numericValue === null || numericValue <= 0) return null;
+    return numericValue;
+}
+
 // ─── Well list / pagination ────────────────────────────────────────────────────
 
 export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
-    return wellList.map(entry => ({ wellName: entry.wellName, epANum: entry.epANum }));
+    return wellList.flatMap((entry) => {
+        const epANum = coercePositiveEpANum(entry.epANum);
+        return epANum === null ? [] : [{ wellName: entry.wellName, epANum }];
+    });
 }
 
 export function selectTotalPages(names: WellName[]): number {
