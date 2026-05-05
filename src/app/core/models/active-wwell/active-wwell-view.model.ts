@@ -46,6 +46,7 @@ export interface WellTestResult {
   readonly testType: string;
   readonly aquifer: string;
   readonly rpm: number;
+  readonly siwhp: number;
   readonly flowRate: number;
   readonly temperature: number;
   readonly tds: number;

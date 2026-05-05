@@ -51,7 +51,11 @@ export class LoaderService {
 
   setProgress(progress: number): void {
     if (this._mode() !== 'login') return;
-    this._progress.set(Math.max(0, Math.min(100, progress)));
+    const clamped = Math.max(0, Math.min(100, progress));
+    this._progress.set(clamped);
+    if (clamped >= LOGIN_PROGRESS_MAX) {
+      this.clearTimer();
+    }
   }
 
   completeLogin(): void {
@@ -106,7 +110,7 @@ export class LoaderService {
   }
 
   private completeBootIfReady(): void {
-    if (!this.appShellReady || this.bootCompleted) return;
+    if (!this.appShellReady || this.bootCompleted || this.bootTasks.size > 0) return;
     this.bootCompleted = true;
     this.pushBootProgress(100);
     window.__agwaBootLoader?.complete();

@@ -1,12 +1,19 @@
 
 export interface IWaterWellTestOutcome {
-    wellName: string;
-    testType?: string | null;
-    aquifer?: string | null;
+    wellName?: string | null;
+    rsvrCd?: string | null;
+    hydTestTypCd?: string | null;
+    testStaDt?: string | null;
+    temp?: number | null;
+    hydH2sCnc?: number | null;
+    wtrSaTdsCnc?: number | null;
     rpm?: number | null;
-    flowRate?: number | null;
-    temperature?: number | null;
-    tds?: number | null;
-    producitivty?: number | null;
-    h2s?: number | null;
+    siwhp?: number | null;
+    hydPmpDpth?: number | null;
+    hydProdRt?: number | null;
+    statWlvl?: number | null;
+    dyncWlvl?: number | null;
+    testerNetworkId?: string | null;
+    hydProduct?: number | null;
+    duration?: number | null;
 }

@@ -21,7 +21,7 @@ import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IWaterIR } from 'src/app/shared/models/wwell/water-ir.model';
 import { IWaterWellTestOutcome } from 'src/app/shared/models/wwell/water-well-test-outcome.model';
-import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { WaterWellTestResult, WellTestType } from 'src/app/shared/models/wwell/wwell-test-result.model';
 import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
 import { sortCasingsByDepthDesc } from 'src/app/shared/utils/wellbore-math.util';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
@@ -179,13 +179,13 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
         const test = (d.EXAD_GWD_WELL_TESTS ?? []).find(t => t.wellName === ow.offsetWaterWell);
         return {
             wellName: ow.offsetWaterWell,
-            aquifer: ow.aquifer || test?.aquifer || 'WASI',
-            tds: test?.tds ?? 0,
+            aquifer: ow.aquifer || test?.rsvrCd || 'WASI',
+            tds: test?.wtrSaTdsCnc ?? 0,
             rpm: ow.rpm ?? 0,
             h2s: ow.h2s ?? 0,
             distance: ow.distance ?? 0,
             productivity: ow.specificCapacity ?? 0,
-            rate: test?.flowRate ?? ow.flowRate ?? 0,
+            rate: test?.hydProdRt ?? ow.flowRate ?? 0,
         };
     });
 }
@@ -200,19 +200,28 @@ export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicator
     };
 }
 
+function resolveTestType(t: IWaterWellTestOutcome): WellTestType {
+    const code = (t.hydTestTypCd ?? '').toUpperCase().trim();
+    return code === 'FLOW' ? 'FLOW' : 'PUMP';
+}
+
 export function selectWellTestResults(d: IWellData | null): WellTestResult[] {
     if (!d) return [];
-    return (d.EXAD_GWD_WELL_TESTS ?? []).map(t => ({
-        wellName: t.wellName ?? '',
-        testType: t.testType ?? FALLBACK_STR,
-        aquifer: t.aquifer ?? FALLBACK_STR,
-        rpm: t.rpm ?? 0,
-        flowRate: t.flowRate ?? 0,
-        temperature: t.temperature ?? 0,
-        tds: t.tds ?? 0,
-        productivity: t.producitivty ?? 0,
-        h2s: t.h2s ?? 0,
-    }));
+    return (d.EXAD_GWD_WELL_TESTS ?? []).map(t => {
+        const testType = resolveTestType(t);
+        return {
+            wellName: t.wellName ?? '',
+            testType,
+            aquifer: t.rsvrCd ?? FALLBACK_STR,
+            rpm: testType === 'PUMP' ? (t.rpm ?? 0) : 0,
+            siwhp: testType === 'FLOW' ? (t.siwhp ?? 0) : 0,
+            flowRate: t.hydProdRt ?? 0,
+            temperature: t.temp ?? 0,
+            tds: t.wtrSaTdsCnc ?? 0,
+            productivity: t.hydProduct ?? 0,
+            h2s: t.hydH2sCnc ?? 0,
+        };
+    });
 }
 
 // ─── View model selectors ──────────────────────────────────────────────────────
@@ -312,23 +321,23 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     return {
         flowType: hydro?.flowType ?? 'N',
-        testType: testOutcome?.testType ?? FALLBACK_STR,
-        aquiferActual: testOutcome?.aquifer ?? water?.aquifer ?? FALLBACK_STR,
+        testType: testOutcome?.hydTestTypCd ?? FALLBACK_STR,
+        aquiferActual: testOutcome?.rsvrCd ?? water?.aquifer ?? FALLBACK_STR,
         aquiferEstimate: hydro?.estTargetAquifier ?? prewap?.targetFormation ?? FALLBACK_STR,
-        h2sActual: testOutcome?.h2s ?? water?.h2s ?? FALLBACK_STR,
+        h2sActual: testOutcome?.hydH2sCnc ?? water?.h2s ?? FALLBACK_STR,
         h2sEstimate: hydro?.estH2s ?? FALLBACK_STR,
-        temp: testOutcome?.temperature ?? FALLBACK_STR,
-        tds: testOutcome?.tds ?? water?.fieldTds ?? hydro?.estWaterQuality ?? FALLBACK_STR,
+        temp: testOutcome?.temp ?? FALLBACK_STR,
+        tds: testOutcome?.wtrSaTdsCnc ?? water?.fieldTds ?? hydro?.estWaterQuality ?? FALLBACK_STR,
         rpm: testOutcome?.rpm ?? water?.rpm ?? FALLBACK_STR,
-        duration: water?.testDuration ?? FALLBACK_STR,
+        duration: testOutcome?.duration ?? water?.testDuration ?? FALLBACK_STR,
         conductedBy: drillingEngineer ?? foreman ?? FALLBACK_STR,
-        rate: testOutcome?.flowRate ?? water?.flowRate ?? FALLBACK_STR,
-        siwhp: water?.staticWaterLevel ?? FALLBACK_STR,
+        rate: testOutcome?.hydProdRt ?? water?.flowRate ?? FALLBACK_STR,
+        siwhp: testOutcome?.siwhp ?? water?.staticWaterLevel ?? FALLBACK_STR,
         depth: prewap?.estTargetDepth ?? status?.wPrsntDpth ?? FALLBACK_STR,
-        productivityActual: testOutcome?.producitivty ?? water?.specificCapacity ?? FALLBACK_STR,
+        productivityActual: testOutcome?.hydProduct ?? water?.specificCapacity ?? FALLBACK_STR,
         productivityEstimate: hydro?.estProductivity ?? FALLBACK_STR,
-        swl: water?.staticWaterLevel ?? hydro?.estStaticWaterLevel ?? FALLBACK_STR,
-        dwl: water?.drawDown ?? FALLBACK_STR,
+        swl: testOutcome?.statWlvl ?? water?.staticWaterLevel ?? hydro?.estStaticWaterLevel ?? FALLBACK_STR,
+        dwl: testOutcome?.dyncWlvl ?? water?.drawDown ?? FALLBACK_STR,
     };
 }
 
@@ -365,15 +374,19 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
     };
 }
 
-export function mapToWaterWellTestResult(o: IWaterWellTestOutcome): WaterWellTestResult {
+export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellName: string): WaterWellTestResult {
+    const testType = resolveTestType(o);
     return {
-        wellName: o.wellName,
-        rPM: String(o.rpm ?? ''),
-        h2sPPM: String(o.h2s ?? ''),
-        temperature: String(o.temperature ?? ''),
-        trgtRsvrCd: o.aquifer ?? '',
-        testRate: String(o.flowRate ?? ''),
-        wellProductivity: String(o.producitivty ?? ''),
+        testType,
+        wellName: drillingWellName,
+        rPM: testType === 'PUMP' ? String(o.rpm ?? '') : '',
+        siwhp: testType === 'FLOW' ? String(o.siwhp ?? '') : '',
+        h2sPPM: String(o.hydH2sCnc ?? ''),
+        temperature: String(o.temp ?? ''),
+        trgtRsvrCd: o.rsvrCd ?? '',
+        testRate: String(o.hydProdRt ?? ''),
+        wellProductivity: String(o.hydProduct ?? ''),
+        tds: String(o.wtrSaTdsCnc ?? ''),
     };
 }
 
@@ -390,5 +403,8 @@ export function selectMorningReports(
 }
 
 export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
-    return data.flatMap(d => (d.EXAD_GWD_WELL_TESTS ?? []).map(mapToWaterWellTestResult));
+    return data.flatMap(d => {
+        const drillingWellName = d.WELL_MASTER?.[0]?.well ?? '';
+        return (d.EXAD_GWD_WELL_TESTS ?? []).map(o => mapToWaterWellTestResult(o, drillingWellName));
+    });
 }

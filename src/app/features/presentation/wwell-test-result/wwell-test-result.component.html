@@ -102,16 +102,30 @@
           <div class="metric__label">Flow Rate (GPM)</div>
         </div>
 
-        <div class="metric metric--highlight">
-          <div class="metric__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
+        @if (r.testType === 'PUMP') {
+          <div class="metric metric--highlight">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.rpm | number }}</div>
+            <div class="metric__label">RPM</div>
           </div>
-          <div class="metric__value">{{ r.rpm | number }}</div>
-          <div class="metric__label">RPM</div>
-        </div>
+        } @else {
+          <div class="metric metric--highlight">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <line x1="12" y1="2" x2="12" y2="22"/>
+                <path d="M5 10c2-2 5-3 7 0s5 2 7 0"/>
+                <path d="M5 14c2-2 5-3 7 0s5 2 7 0"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.siwhp | number }}</div>
+            <div class="metric__label">SIWHP (FT)</div>
+          </div>
+        }
 
         <div class="metric">
           <div class="metric__icon">
