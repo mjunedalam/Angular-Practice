@@ -135,7 +135,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         wellName: rig?.wellName ?? FALLBACK_STR,
         targetDesc: rig?.drlgPlanWellDesc ?? FALLBACK_STR,
         targetedAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? FALLBACK_STR,
-        currentStatus: d.EXAD_GWD_DAILY_REMARKS?.[0].status ?? FALLBACK_STR,
+        currentStatus: d.EXAD_GWD_DAILY_REMARKS?.[0]?.status ?? FALLBACK_STR,
         daysSinceSpud: status?.spuddays ?? 0,
         targetDays: d.NEW_TARGET_DAYS?.[0]?.targetDays ?? rig?.wDrlgTrgtDay ?? 0,
         biNum: rig?.biNum ?? FALLBACK_STR,
