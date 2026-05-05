@@ -460,8 +460,8 @@ export class WellBoreViewComponent {
     if (!data.casings.length) return;
 
     const { wellDesign } = data;
-    const shouldDrawOH = !wellDesign || wellDesign.ohFlag === 'Y';
-    const shouldDrawLS = !wellDesign || wellDesign.lsFlag === 'Y';
+    const shouldDrawOH = wellDesign?.ohFlag === 'Y';
+    const shouldDrawLS = wellDesign?.lsFlag === 'Y';
     if (!shouldDrawOH && !shouldDrawLS) return;
 
     const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin, linerScreenInset } = this.layout;
@@ -600,6 +600,7 @@ export class WellBoreViewComponent {
 
   private drawScreenHanger(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, hangerStart: number): void {
     if (!data.casings.length) return;
+    if (data.wellDesign?.lsFlag !== 'Y') return;
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - linerScreenInset;

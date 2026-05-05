@@ -88,7 +88,7 @@ export const WellDocsStore = signalStore(
               next: (res: DocListResponse) => {
                 if (res.error) {
                   patchState(store, { docNames: [], listLoading: false, listError: res.message ?? 'Failed to load documents' });
-                  notify.error(res.message ?? 'Failed to load documents');
+                  // notify.error(res.message ?? 'Failed to load documents');
                   return;
                 }
                 patchState(store, { docNames: res.data.totalFiles, listLoading: false });
@@ -96,7 +96,7 @@ export const WellDocsStore = signalStore(
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Failed to load documents';
                 patchState(store, { docNames: [], listLoading: false, listError: msg });
-                notify.error(msg);
+                // notify.error(msg);
               },
             }),
           ),
