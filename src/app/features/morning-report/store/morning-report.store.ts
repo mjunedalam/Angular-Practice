@@ -50,10 +50,8 @@ export const MorningReportStore = signalStore(
                     // an in-flight detail fetch (switchMap cancels the request but leaves the flag true).
                     detailLoading: false,
                     error: null,
-                    allWellsData: [],
-                    // Clear stale well options immediately so the UI doesn't show the previous
-                    // date's wells while the new list is loading.
-                    wellList: [],
+                    // Keep allWellsData/wellList intact so the old cards stay visible (dimmed)
+                    // while the new date loads — clearing them here caused a visible blink.
                     selectedDate: parseDateFromInput(date),
                 })),
                 switchMap(date =>
@@ -61,7 +59,7 @@ export const MorningReportStore = signalStore(
                         tapResponse({
                             next: (wellList) => {
                                 if (!wellList.length) {
-                                    patchState(store, { wellList: [], listLoading: false });
+                                    patchState(store, { wellList: [], allWellsData: [], listLoading: false });
                                     notify.info('Data is not available for the given date');
                                     return;
                                 }

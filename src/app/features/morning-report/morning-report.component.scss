@@ -187,6 +187,12 @@
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
+  transition: opacity 200ms ease;
+
+  &--loading {
+    opacity: 0.4;
+    pointer-events: none;
+  }
 }
 
 .report-error {

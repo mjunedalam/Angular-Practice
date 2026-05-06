@@ -70,13 +70,34 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected selectedDateString = this.maxDateString;
+  protected readonly loadingVisible = signal(false);
 
   private readonly urlSyncReady = signal(false);
   private readonly hasDateQueryParam = signal(false);
+  private loadingTimer: ReturnType<typeof setTimeout> | null = null;
+  private loadingShownAt = 0;
 
   private emailSendInitiated = false;
 
   constructor() {
+    effect(() => {
+      const isLoading = this.store.isLoading();
+      if (isLoading) {
+        this.clearLoadingTimer();
+        this.loadingShownAt = Date.now();
+        this.loadingVisible.set(true);
+        return;
+      }
+      if (!this.loadingVisible()) return;
+      const elapsed = Date.now() - this.loadingShownAt;
+      const remaining = Math.max(0, 380 - elapsed);
+      this.clearLoadingTimer();
+      this.loadingTimer = setTimeout(() => {
+        this.loadingVisible.set(false);
+        this.loadingTimer = null;
+      }, remaining);
+    }, { injector: this.injector });
+
     effect(() => {
       if (this.emailStore.isSending()) {
         this.emailSendInitiated = true;
@@ -124,6 +145,14 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.store.setNotificationDuration(DEFAULT_NOTIFICATION_DURATION_MS);
+    this.clearLoadingTimer();
+  }
+
+  private clearLoadingTimer(): void {
+    if (this.loadingTimer !== null) {
+      clearTimeout(this.loadingTimer);
+      this.loadingTimer = null;
+    }
   }
 
   protected onDateChange(value: string): void {
