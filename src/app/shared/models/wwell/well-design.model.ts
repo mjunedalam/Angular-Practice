@@ -1,10 +1,9 @@
 export interface IWellDesign {
   name: string | null;
   prewapSeq: number | null;
-  staticWaterLevel: string | null;
-  staticWaterLevelText: string | null;
-  pumpLevelText: string | null;
-  pumpLevel: string | null;
+  staWaterLvl: number | null;
+  swLvlTxt: string | null;
+  pumpLvl: number | null;
   ohFlag: string | null;
   ohRemarks: string | null;
   gpFlag: string | null;

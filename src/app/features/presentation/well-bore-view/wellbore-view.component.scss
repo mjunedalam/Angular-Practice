@@ -14,6 +14,22 @@
 
 :host ::ng-deep {
 
+  // ── Pump symbol ────────────────────────────────────────────────────────────
+  .pump-leader {
+    stroke: var(--text-muted, #94a3b8);
+    stroke-width: 1;
+    opacity: 0.75;
+  }
+
+  .pump-leader-arrow { fill: var(--text-muted, #94a3b8); }
+
+  .pump-label {
+    
+    font-size: 14px;
+    font-weight: 900;
+    fill: #1e293b;
+  }
+
 
   .ground-line   { stroke: #b94a12; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
   .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; fill: #b94a12; text-transform: uppercase; opacity: 0.85; }

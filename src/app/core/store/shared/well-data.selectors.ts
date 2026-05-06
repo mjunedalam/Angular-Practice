@@ -152,7 +152,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         actualRm: d.actualRm ?? null,
         kpiRm: d.kpiRm ?? null,
         rigMoveDays: d?.rigMoveDays ?? null,
-        rigName: d.RIG_IDENTIFICATION?.[0].rigname ?? FALLBACK_STR,
+        rigName: d.RIG_IDENTIFICATION?.[0]?.rigname ?? FALLBACK_STR,
         spudDate: rig?.spuddate ?? FALLBACK_STR,
         holeSize: (() => {
             const items = d.DRLG_OP_SMRY ?? [];

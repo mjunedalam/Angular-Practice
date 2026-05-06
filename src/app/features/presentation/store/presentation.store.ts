@@ -6,7 +6,7 @@ import { pipe, switchMap, tap } from 'rxjs';
 
 import { IWellData } from '@models/well-design/well-data.model';
 import { WellLogsIndicators } from '@models/well-design/well-logs-indicators.model';
-import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { WellboreAnimConfig, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import {
     CasingInfoViewModel,
     DatabaseInfoViewModel,
@@ -244,6 +244,10 @@ export const PresentationStore = signalStore(
             },
 
             loadWaterWellTestResults(): void { /* data comes from wellData */ },
+
+            setAnimConfig(config: WellboreAnimConfig): void {
+                patchState(store, { animConfig: config });
+            },
         };
     }),
 );

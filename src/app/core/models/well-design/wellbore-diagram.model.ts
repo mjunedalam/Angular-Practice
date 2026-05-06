@@ -116,6 +116,24 @@ export function computeOverlayDelay(casingCount: number): number {
   return animValue(lastCasingDone + 100); // 100ms breathing room
 }
 
+// ─── Wellbore animation config (user-configurable) ────────────────────────
+
+export type AnimSpeed    = 'slow' | 'normal' | 'fast';
+export type AnimLineStyle = 'draw' | 'fade';          // draw = dashoffset, fade = opacity
+export type AnimPopStyle  = 'elastic' | 'bounce' | 'fade';
+
+export interface WellboreAnimConfig {
+  speed:     AnimSpeed;
+  lineStyle: AnimLineStyle;
+  popStyle:  AnimPopStyle;
+}
+
+export const DEFAULT_ANIM_CONFIG: WellboreAnimConfig = {
+  speed:     'normal',
+  lineStyle: 'draw',
+  popStyle:  'elastic',
+};
+
 export const ANIM = {
   SCALE_DURATION: animValue(_BASE.SCALE_DURATION),
   TICK_BASE_DELAY: animValue(_BASE.TICK_BASE_DELAY),

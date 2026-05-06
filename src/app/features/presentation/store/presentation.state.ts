@@ -1,5 +1,6 @@
 import { IWellData } from '@models/well-design/well-data.model';
 import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
+import { DEFAULT_ANIM_CONFIG, WellboreAnimConfig } from '@models/well-design/wellbore-diagram.model';
 import { getTodayAtMidnight } from 'src/app/shared/utils/date.util';
 
 export interface PresentationState {
@@ -12,6 +13,7 @@ export interface PresentationState {
     readonly error: string | null;
     readonly animationTrigger: number;
     readonly wellNamesPage: number;
+    readonly animConfig: WellboreAnimConfig;
 }
 
 export const initialPresentationState: PresentationState = {
@@ -24,4 +26,5 @@ export const initialPresentationState: PresentationState = {
     error: null,
     animationTrigger: 0,
     wellNamesPage: 0,
+    animConfig: DEFAULT_ANIM_CONFIG,
 };

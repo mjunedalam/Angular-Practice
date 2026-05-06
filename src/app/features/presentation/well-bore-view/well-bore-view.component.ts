@@ -7,10 +7,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { select, Selection } from 'd3-selection';
-import { easeCubicInOut } from 'd3-ease';
+import { easeCubicInOut, easeBackOut, easeLinear, easeBounceOut } from 'd3-ease';
 import 'd3-transition';
 
-import { ANIM, computeOverlayDelay, DIAGRAM_LAYOUT, WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, WellboreAnimConfig, WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import {
@@ -30,6 +30,16 @@ type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
 type GSel = Selection<SVGGElement, unknown, null, undefined>;
 type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
 
+// Resolved animation params (derived from WellboreAnimConfig at draw time)
+type RA = {
+  lineDur:   number;
+  fadeDur:   number;
+  popDur:    number;
+  lineStyle: 'draw' | 'fade';
+  popStyle:  'elastic' | 'bounce' | 'fade';
+  popEase:   (t: number) => number;
+};
+
 @Component({
   selector: 'app-well-bore-view',
   standalone: true,
@@ -37,15 +47,18 @@ type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
   templateUrl: './wellbore-view.component.html',
   styleUrl: './wellbore-view.component.scss',
 })
+
 export class WellBoreViewComponent {
   readonly diagramData = input.required<WellboreDiagramData | null>();
   readonly animTrigger = input.required<number>();
+  readonly animConfig  = input<WellboreAnimConfig>(DEFAULT_ANIM_CONFIG);
 
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('wellboreSvg');
 
   private readonly layout = DIAGRAM_LAYOUT;
   private rootG!: GSel;
   private defsEl!: DefsSel;
+
 
   constructor() {
     effect(() => {
@@ -144,6 +157,7 @@ export class WellBoreViewComponent {
 
     this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart, ohHW);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
+    this.drawPump(data, casingCenterX, scale, t_labelsStart);
   }
 
   private addStaticDefs(defs: DefsSel): void {
@@ -380,6 +394,62 @@ export class WellBoreViewComponent {
     });
   }
 
+  // ── Animation helpers ────────────────────────────────────────────────────
+
+  private resolveAnim(): RA {
+    const cfg = this.animConfig();
+    const mult = cfg.speed === 'slow' ? 1.8 : cfg.speed === 'fast' ? 0.4 : 1.0;
+    const popEase = cfg.popStyle === 'bounce'  ? easeBounceOut
+                  : cfg.popStyle === 'elastic' ? easeBackOut
+                  : easeCubicInOut;
+    return {
+      lineDur:   Math.round(500 * mult),
+      fadeDur:   Math.round(300 * mult),
+      popDur:    Math.round(600 * mult),
+      lineStyle: cfg.lineStyle,
+      popStyle:  cfg.popStyle,
+      popEase,
+    };
+  }
+
+  /** Animate a label group: line draws (or fades), then arrow + text fade in. */
+  private animateLabel(group: GSel, delay: number, ra: RA): void {
+    const lineEl = group.select<SVGLineElement>('line');
+    if (ra.lineStyle === 'draw') {
+      const x1 = parseFloat(lineEl.attr('x1'));
+      const x2 = parseFloat(lineEl.attr('x2'));
+      lineEl
+        .attr('stroke-dasharray', Math.abs(x2 - x1))
+        .attr('stroke-dashoffset', Math.abs(x2 - x1))
+        .transition().delay(delay).duration(ra.lineDur).ease(easeLinear)
+        .attr('stroke-dashoffset', 0);
+      group.selectAll<SVGElement, unknown>('path, text')
+        .style('opacity', 0)
+        .transition().delay(delay + ra.lineDur).duration(ra.fadeDur).ease(easeCubicInOut)
+        .style('opacity', 1);
+    } else {
+      group.style('opacity', 0)
+        .transition().delay(delay).duration(ra.lineDur + ra.fadeDur).ease(easeCubicInOut)
+        .style('opacity', 1);
+    }
+  }
+
+  /** Animate a scale-pop element (pump icon, total-depth label). */
+  private applyPop(wrap: GSel, cx: number, cy: number, delay: number, ra: RA): void {
+    if (ra.popStyle === 'fade') {
+      wrap.attr('transform', `translate(${cx},${cy}) scale(1)`)
+        .style('opacity', 0)
+        .transition().delay(delay).duration(ra.popDur).ease(easeCubicInOut)
+        .style('opacity', 1);
+    } else {
+      wrap.attr('transform', `translate(${cx},${cy}) scale(0)`)
+        .transition().delay(delay).duration(ra.popDur).ease(ra.popEase)
+        .attr('transform', `translate(${cx},${cy}) scale(1)`);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   private drawCasingLabels(
     casings: ICasingIR[],
     centerX: number,
@@ -401,16 +471,18 @@ export class WellBoreViewComponent {
         : centerX + hw;
       const lEnd = rEdge + 22;
       const labelX = lEnd + 8;
-      const lg = this.rootG.append('g')
-        .attr('class', 'casing-label')
-        .style('opacity', 0);
+      const ra = this.resolveAnim();
+      const lg = this.rootG.append('g').attr('class', 'casing-label');
+
       lg.append('line')
         .attr('class', 'casing-label__line')
         .attr('x1', rEdge).attr('x2', lEnd)
         .attr('y1', labelYPx).attr('y2', labelYPx);
+
       lg.append('path')
         .attr('class', 'casing-label__arrow')
         .attr('d', buildArrowHeadRight(lEnd, labelYPx, 6));
+
       if (csg.csgType === 'Gravel Pack') {
         lg.append('text')
           .attr('class', 'casing-label__primary')
@@ -427,15 +499,18 @@ export class WellBoreViewComponent {
             .attr('x', labelX).attr('y', shoePx + 17)
             .text(`(${csg.csgRemarks})`);
         }
+        const innerDelay = labelsStart + (ra.lineStyle === 'draw' ? ra.lineDur : 0);
         this.rootG.append('text')
           .attr('class', 'casing-size-inner')
           .attr('x', centerX).attr('y', shoePx)
           .attr('text-anchor', 'middle')
           .style('opacity', 0)
           .text(`${csg.csgSize}"`)
-          .transition().delay(labelsStart).duration(250).style('opacity', 1);
+          .transition().delay(innerDelay).duration(ra.fadeDur).ease(easeCubicInOut)
+          .style('opacity', 1);
       }
-      lg.transition().delay(labelsStart).duration(300).ease(easeCubicInOut).style('opacity', 1);
+
+      this.animateLabel(lg, labelsStart, ra);
     });
   }
 
@@ -449,11 +524,22 @@ export class WellBoreViewComponent {
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
     const label = data.hydrogeology.flowType === 'Y' ? 'Flowing (SIWHP: 50 PSI)' : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
-    const wg = this.rootG.append('g').attr('class', 'water-level').style('opacity', 0);
-    wg.append('line').attr('class', 'water-line').attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx);
-    wg.append('path').attr('class', 'water-arrow').attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
-    wg.append('text').attr('class', 'water-label').attr('x', lR - 420).attr('y', wPx + 4).text(label);
-    wg.transition().delay(waterStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+    const ra = this.resolveAnim();
+    const wg = this.rootG.append('g').attr('class', 'water-level');
+
+    wg.append('line')
+      .attr('class', 'water-line')
+      .attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx);
+
+    wg.append('path')
+      .attr('class', 'water-arrow')
+      .attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
+
+    wg.append('text')
+      .attr('class', 'water-label')
+      .attr('x', lR - 420).attr('y', wPx + 4).text(label);
+
+    this.animateLabel(wg, waterStart, ra);
   }
 
   private drawOpenHoleAndScreen(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohDone: number, ohLabelStart: number): void {
@@ -497,21 +583,45 @@ export class WellBoreViewComponent {
     if (shouldDrawOH) {
       const ohLabel = wellDesign?.ohRemarks ?? '8 1/2" Open Hole';
       const ohLY = shoePx + (tdPx - shoePx) * 0.2;
-      const ohLG = this.rootG.append('g').attr('class', 'open-hole-label').style('opacity', 0);
-      ohLG.append('line').attr('class', 'oh-label-line').attr('x1', centerX - ohHW).attr('x2', centerX - ohHW - 28).attr('y1', ohLY).attr('y2', ohLY);
-      ohLG.append('path').attr('class', 'oh-label-arrow').attr('d', buildArrowHeadLeft(centerX - ohHW - 28, ohLY, 6));
-      ohLG.append('text').attr('class', 'open-hole-text').attr('x', centerX - ohHW - 34).attr('y', ohLY + 4).attr('text-anchor', 'end').text(ohLabel);
-      ohLG.transition().delay(ohLabelStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+      const ohRA = this.resolveAnim();
+      const ohLG = this.rootG.append('g').attr('class', 'open-hole-label');
+      const ohLineX1 = centerX - ohHW, ohLineX2 = centerX - ohHW - 28;
+
+      ohLG.append('line')
+        .attr('class', 'oh-label-line')
+        .attr('x1', ohLineX1).attr('x2', ohLineX2).attr('y1', ohLY).attr('y2', ohLY);
+
+      ohLG.append('path')
+        .attr('class', 'oh-label-arrow')
+        .attr('d', buildArrowHeadLeft(ohLineX2, ohLY, 6));
+
+      ohLG.append('text')
+        .attr('class', 'open-hole-text')
+        .attr('x', ohLineX2 - 6).attr('y', ohLY + 4).attr('text-anchor', 'end').text(ohLabel);
+
+      this.animateLabel(ohLG, ohLabelStart, ohRA);
     }
 
     if (shouldDrawLS) {
       const fallbackFt = liner ? liner.csgDepth - deepestSolid.csgDepth : data.totalDepth - deepestSolid.csgDepth;
       const screenLabel = wellDesign?.lsRemarks ?? (liner?.csgRemarks ?? `+/- ${fallbackFt.toLocaleString()} ft of Screen`);
-      const scrLG = this.rootG.append('g').attr('class', 'screen-label').style('opacity', 0);
-      scrLG.append('line').attr('class', 'screen-label-line').attr('x1', centerX + screenHW).attr('x2', centerX + screenHW + 28).attr('y1', screenBottomPx).attr('y2', screenBottomPx);
-      scrLG.append('path').attr('d', buildArrowHeadRight(centerX + screenHW + 28, screenBottomPx, 6));
-      scrLG.append('text').attr('class', 'screen-label-text').attr('x', centerX + screenHW + 34).attr('y', screenBottomPx + 4).text(screenLabel);
-      scrLG.transition().delay(ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+      const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+      const scrRA = this.resolveAnim();
+      const scrLG = this.rootG.append('g').attr('class', 'screen-label');
+      const scrX1 = centerX + screenHW, scrX2 = centerX + screenHW + 28;
+
+      scrLG.append('line')
+        .attr('class', 'screen-label-line')
+        .attr('x1', scrX1).attr('x2', scrX2).attr('y1', screenBottomPx).attr('y2', screenBottomPx);
+
+      scrLG.append('path')
+        .attr('d', buildArrowHeadRight(scrX2, screenBottomPx, 6));
+
+      scrLG.append('text')
+        .attr('class', 'screen-label-text')
+        .attr('x', scrX2 + 6).attr('y', screenBottomPx + 4).text(screenLabel);
+
+      this.animateLabel(scrLG, scrDelay, scrRA);
     }
   }
 
@@ -551,11 +661,20 @@ export class WellBoreViewComponent {
       const labelY = startDepthPx + (tdPx - startDepthPx) * 0.5;
       const rEdge = centerX + innerHW;
       const lEnd = rEdge + 22;
-      const lg = this.rootG.append('g').attr('class', 'gp-design-label').style('opacity', 0);
-      lg.append('line').attr('class', 'screen-label-line').attr('x1', rEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);
+      const gpRA = this.resolveAnim();
+      const lg = this.rootG.append('g').attr('class', 'gp-design-label');
+
+      lg.append('line')
+        .attr('class', 'screen-label-line')
+        .attr('x1', rEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);
+
       lg.append('path').attr('d', buildArrowHeadRight(lEnd, labelY, 6));
-      lg.append('text').attr('class', 'screen-label-text').attr('x', lEnd + 6).attr('y', labelY + 4).text(data.wellDesign.gpRemarks);
-      lg.transition().delay(ohLabelStart).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+
+      lg.append('text')
+        .attr('class', 'screen-label-text')
+        .attr('x', lEnd + 6).attr('y', labelY + 4).text(data.wellDesign.gpRemarks);
+
+      this.animateLabel(lg, ohLabelStart, gpRA);
     }
   }
 
@@ -590,11 +709,23 @@ export class WellBoreViewComponent {
       const labelY = topPx + (tdPx - topPx) * 0.7;
       const lEdge = centerX - prePerfHW;
       const lEnd = lEdge - 22;
-      const lg = this.rootG.append('g').attr('class', 'perf-label').style('opacity', 0);
-      lg.append('line').attr('class', 'oh-label-line').attr('x1', lEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);
-      lg.append('path').attr('class', 'oh-label-arrow').attr('d', buildArrowHeadLeft(lEnd, labelY, 6));
-      lg.append('text').attr('class', 'open-hole-text').attr('x', lEnd - 4).attr('y', labelY + 4).attr('text-anchor', 'end').text(data.wellDesign.perfRemarks);
-      lg.transition().delay(ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP).duration(ANIM.OVERLAY_FADE).ease(easeCubicInOut).style('opacity', 1);
+      const perfDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
+      const perfRA = this.resolveAnim();
+      const lg = this.rootG.append('g').attr('class', 'perf-label');
+
+      lg.append('line')
+        .attr('class', 'oh-label-line')
+        .attr('x1', lEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);
+
+      lg.append('path')
+        .attr('class', 'oh-label-arrow')
+        .attr('d', buildArrowHeadLeft(lEnd, labelY, 6));
+
+      lg.append('text')
+        .attr('class', 'open-hole-text')
+        .attr('x', lEnd - 4).attr('y', labelY + 4).attr('text-anchor', 'end').text(data.wellDesign.perfRemarks);
+
+      this.animateLabel(lg, perfDelay, perfRA);
     }
   }
 
@@ -751,8 +882,83 @@ export class WellBoreViewComponent {
   }
 
   private drawTotalDepthLabel(td: number, centerX: number, drawingHeight: number, start: number): void {
-    const g = this.rootG.append('g').attr('class', 'td-label').style('opacity', 0);
-    g.append('text').attr('class', 'total-depth-main').attr('x', centerX).attr('y', drawingHeight + 35).attr('text-anchor', 'middle').text(`TOTAL DEPTH: ${td.toLocaleString()} FT`);
-    g.transition().delay(start).duration(ANIM.OVERLAY_FADE).style('opacity', 1);
+    const ty = drawingHeight + 35;
+    const ra = this.resolveAnim();
+    const g = this.rootG.append('g').attr('class', 'td-label');
+    g.append('text')
+      .attr('class', 'total-depth-main')
+      .attr('x', 0).attr('y', 0)
+      .attr('text-anchor', 'middle')
+      .text(`TOTAL DEPTH: ${td.toLocaleString()} FT`);
+    this.applyPop(g, centerX, ty, start, ra);
+  }
+
+  private drawPump(
+    data: WellboreDiagramData,
+    centerX: number,
+    scale: ReturnType<typeof createDepthScale>,
+    start: number,
+  ): void {
+    const pumpLvl = data.wellDesign?.pumpLvl;
+    if (pumpLvl == null) return;
+
+    const cy = scale(pumpLvl);
+    const cx = centerX;
+
+    // Icon occupies a 100×100 viewBox; horizontal bar sits at y=52.
+    // Place so that y=52 aligns with cy, and x=50 aligns with cx.
+    const iconW = 100;
+    const iconH = 100;
+    const iconX  = cx - iconW / 2;
+
+    // Left arrowhead tip in parent coords = iconX + 30% of iconW ≈ cx − 20
+    const lTip = iconX + iconW * 0.30;
+    // Extend far left to clear the outermost casing (casings can reach ~90 units from center)
+    const lEnd   = lTip - 130;
+    const labelX = lEnd - 6;
+
+    const ra = this.resolveAnim();
+    const pumpG = this.rootG.append('g').attr('class', 'pump-group');
+
+    // ── 1. Icon: configurable pop animation ──────────────────────────────────
+    const iconWrap = pumpG.append('g') as GSel;
+    const icon = iconWrap.append('svg')
+      .attr('x', -iconW / 2)
+      .attr('y', -iconH * 0.52)
+      .attr('width', iconW)
+      .attr('height', iconH)
+      .attr('viewBox', '0 0 100 100')
+      .attr('overflow', 'visible');
+
+    const iconG = icon.append('g')
+      .attr('stroke', '#1e293b')
+      .attr('stroke-width', '3')
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-linejoin', 'round');
+
+    iconG.append('line').attr('x1', 35).attr('y1', 52).attr('x2', 65).attr('y2', 52);
+    iconG.append('polygon').attr('points', '30,52 36,48 36,56').attr('fill', '#1e293b').attr('stroke', 'none');
+    iconG.append('polygon').attr('points', '70,52 64,48 64,56').attr('fill', '#1e293b').attr('stroke', 'none');
+    iconG.append('line').attr('x1', 50).attr('y1', 40).attr('x2', 50).attr('y2', 52);
+    iconG.append('polygon').attr('points', '50,34 45,40 55,40').attr('fill', '#1e293b').attr('stroke', 'none');
+
+    this.applyPop(iconWrap, cx, cy, start, ra);
+
+    // ── 2 & 3. Leader + label: animateLabel handles both line and text ────────
+    const leaderG = pumpG.append('g').attr('class', 'pump-leader-group') as GSel;
+    leaderG.append('line')
+      .attr('class', 'pump-leader')
+      .attr('x1', lTip).attr('x2', lEnd)
+      .attr('y1', cy).attr('y2', cy);
+    leaderG.append('path')
+      .attr('class', 'pump-leader-arrow')
+      .attr('d', buildArrowHeadLeft(lEnd, cy, 6));
+    leaderG.append('text')
+      .attr('class', 'pump-label')
+      .attr('x', labelX).attr('y', cy + 4)
+      .attr('text-anchor', 'end')
+      .text(`PS @ ${pumpLvl}`);
+
+    this.animateLabel(leaderG, start + ra.popDur, ra);
   }
 }
