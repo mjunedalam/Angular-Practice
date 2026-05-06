@@ -32,12 +32,12 @@ type DefsSel = Selection<SVGDefsElement, unknown, null, undefined>;
 
 // Resolved animation params (derived from WellboreAnimConfig at draw time)
 type RA = {
-  lineDur:   number;
-  fadeDur:   number;
-  popDur:    number;
+  lineDur: number;
+  fadeDur: number;
+  popDur: number;
   lineStyle: 'draw' | 'fade';
-  popStyle:  'elastic' | 'bounce' | 'fade';
-  popEase:   (t: number) => number;
+  popStyle: 'elastic' | 'bounce' | 'fade';
+  popEase: (t: number) => number;
 };
 
 @Component({
@@ -51,7 +51,7 @@ type RA = {
 export class WellBoreViewComponent {
   readonly diagramData = input.required<WellboreDiagramData | null>();
   readonly animTrigger = input.required<number>();
-  readonly animConfig  = input<WellboreAnimConfig>(DEFAULT_ANIM_CONFIG);
+  readonly animConfig = input<WellboreAnimConfig>(DEFAULT_ANIM_CONFIG);
 
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('wellboreSvg');
 
@@ -399,15 +399,15 @@ export class WellBoreViewComponent {
   private resolveAnim(): RA {
     const cfg = this.animConfig();
     const mult = cfg.speed === 'slow' ? 1.8 : cfg.speed === 'fast' ? 0.4 : 1.0;
-    const popEase = cfg.popStyle === 'bounce'  ? easeBounceOut
-                  : cfg.popStyle === 'elastic' ? easeBackOut
-                  : easeCubicInOut;
+    const popEase = cfg.popStyle === 'bounce' ? easeBounceOut
+      : cfg.popStyle === 'elastic' ? easeBackOut
+        : easeCubicInOut;
     return {
-      lineDur:   Math.round(500 * mult),
-      fadeDur:   Math.round(300 * mult),
-      popDur:    Math.round(600 * mult),
+      lineDur: Math.round(500 * mult),
+      fadeDur: Math.round(300 * mult),
+      popDur: Math.round(600 * mult),
       lineStyle: cfg.lineStyle,
-      popStyle:  cfg.popStyle,
+      popStyle: cfg.popStyle,
       popEase,
     };
   }
@@ -469,7 +469,7 @@ export class WellBoreViewComponent {
       const rEdge = csg.csgType === 'Gravel Pack'
         ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
         : centerX + hw;
-      const lEnd = rEdge + 22;
+      const lEnd = rEdge + 26;
       const labelX = lEnd + 8;
       const ra = this.resolveAnim();
       const lg = this.rootG.append('g').attr('class', 'casing-label');
@@ -523,23 +523,61 @@ export class WellBoreViewComponent {
     const innerHW = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
+    const lineWidth = lR - lL;
     const label = data.hydrogeology.flowType === 'Y' ? 'Flowing (SIWHP: 50 PSI)' : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
     const ra = this.resolveAnim();
     const wg = this.rootG.append('g').attr('class', 'water-level');
 
+    // ── Line: expand symmetrically from center outward ───────────────────────
+    const clipId = `water-line-clip-${Date.now()}`;
+    this.defsEl.append('clipPath')
+      .attr('class', 'dyn-clip')
+      .attr('id', clipId)
+      .append('rect')
+      .attr('x', centerX).attr('y', wPx - 5)
+      .attr('width', 0).attr('height', 10)
+      .transition().delay(waterStart).duration(ra.lineDur).ease(easeCubicInOut)
+      .attr('x', lL).attr('width', lineWidth);
+
     wg.append('line')
       .attr('class', 'water-line')
-      .attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx);
+      .attr('x1', lL).attr('x2', lR).attr('y1', wPx).attr('y2', wPx)
+      .attr('clip-path', `url(#${clipId})`);
+
+    // ── Ripple rings: 3 expanding ellipses that fade like water surface ───────
+    const rippleRxMax = innerHW * 0.55;
+    [0, 1, 2].forEach(i => {
+      const rDelay = waterStart + i * Math.round(ra.lineDur * 0.35);
+      wg.append('ellipse')
+        .attr('class', 'water-ripple')
+        .attr('cx', centerX).attr('cy', wPx)
+        .attr('rx', 5).attr('ry', 2)
+        .attr('fill', 'none')
+        .attr('stroke', '#3CC3FF')
+        .attr('stroke-width', 1.5)
+        .style('opacity', 0.85)
+        .transition().delay(rDelay).duration(Math.round(ra.lineDur * 1.6)).ease(easeLinear)
+        .attr('rx', rippleRxMax).attr('ry', 9)
+        .style('opacity', 0);
+    });
+
+    // ── Arrow + label: fade in once line is drawn ────────────────────────────
+    const afterLine = waterStart + ra.lineDur;
 
     wg.append('path')
       .attr('class', 'water-arrow')
-      .attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`);
+      .attr('d', `M${lL} ${wPx - 5} L${lL - 10} ${wPx} L${lL} ${wPx + 5} Z`)
+      .style('opacity', 0)
+      .transition().delay(afterLine).duration(ra.fadeDur).ease(easeCubicInOut)
+      .style('opacity', 1);
 
     wg.append('text')
       .attr('class', 'water-label')
-      .attr('x', lR - 420).attr('y', wPx + 4).text(label);
-
-    this.animateLabel(wg, waterStart, ra);
+      .attr('x', lL - 22).attr('y', wPx + 4)
+      .attr('text-anchor', 'end').text(label)
+      .style('opacity', 0)
+      .transition().delay(afterLine).duration(ra.fadeDur).ease(easeCubicInOut)
+      .style('opacity', 1);
   }
 
   private drawOpenHoleAndScreen(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohDone: number, ohLabelStart: number): void {
@@ -585,7 +623,7 @@ export class WellBoreViewComponent {
       const ohLY = shoePx + (tdPx - shoePx) * 0.2;
       const ohRA = this.resolveAnim();
       const ohLG = this.rootG.append('g').attr('class', 'open-hole-label');
-      const ohLineX1 = centerX - ohHW, ohLineX2 = centerX - ohHW - 28;
+      const ohLineX1 = centerX - ohHW, ohLineX2 = centerX - ohHW - 33;
 
       ohLG.append('line')
         .attr('class', 'oh-label-line')
@@ -608,7 +646,7 @@ export class WellBoreViewComponent {
       const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
       const scrRA = this.resolveAnim();
       const scrLG = this.rootG.append('g').attr('class', 'screen-label');
-      const scrX1 = centerX + screenHW, scrX2 = centerX + screenHW + 28;
+      const scrX1 = centerX + screenHW, scrX2 = centerX + screenHW + 33;
 
       scrLG.append('line')
         .attr('class', 'screen-label-line')
@@ -660,7 +698,7 @@ export class WellBoreViewComponent {
     if (data.wellDesign.gpRemarks) {
       const labelY = startDepthPx + (tdPx - startDepthPx) * 0.5;
       const rEdge = centerX + innerHW;
-      const lEnd = rEdge + 22;
+      const lEnd = rEdge + 26;
       const gpRA = this.resolveAnim();
       const lg = this.rootG.append('g').attr('class', 'gp-design-label');
 
@@ -708,7 +746,7 @@ export class WellBoreViewComponent {
     if (data.wellDesign.perfRemarks) {
       const labelY = topPx + (tdPx - topPx) * 0.7;
       const lEdge = centerX - prePerfHW;
-      const lEnd = lEdge - 22;
+      const lEnd = lEdge - 26;
       const perfDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
       const perfRA = this.resolveAnim();
       const lg = this.rootG.append('g').attr('class', 'perf-label');
@@ -787,15 +825,7 @@ export class WellBoreViewComponent {
         const topPct = (seg.topPx / effectivePx) * 100;
         const botPct = (seg.botPx / effectivePx) * 100;
         const nextCol = idx + 1 < segs.length ? circColour(segs[idx + 1].pct) : col;
-        if (seg.pct === 100) {
-          const midPct = (topPct + botPct) / 2;
-          grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', '#15803d');
-          grad.append('stop').attr('offset', `${midPct.toFixed(4)}%`).attr('stop-color', '#4ade80');
-          grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', '#15803d');
-        } else {
-          grad.append('stop').attr('offset', `${topPct.toFixed(4)}%`).attr('stop-color', col);
-          grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
-        }
+        grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
         if (nextCol !== col) grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', nextCol);
       });
       shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', cappedEffectivePx).attr('fill', `url(#${gradId})`);
@@ -899,7 +929,7 @@ export class WellBoreViewComponent {
     scale: ReturnType<typeof createDepthScale>,
     start: number,
   ): void {
-    const pumpLvl = data.wellDesign?.pumpLvl;
+    const pumpLvl = data.wellDesign?.pumpLevel;
     if (pumpLvl == null) return;
 
     const cy = scale(pumpLvl);
@@ -909,12 +939,12 @@ export class WellBoreViewComponent {
     // Place so that y=52 aligns with cy, and x=50 aligns with cx.
     const iconW = 100;
     const iconH = 100;
-    const iconX  = cx - iconW / 2;
+    const iconX = cx - iconW / 2;
 
     // Left arrowhead tip in parent coords = iconX + 30% of iconW ≈ cx − 20
     const lTip = iconX + iconW * 0.30;
     // Extend far left to clear the outermost casing (casings can reach ~90 units from center)
-    const lEnd   = lTip - 130;
+    const lEnd = lTip - 130;
     const labelX = lEnd - 6;
 
     const ra = this.resolveAnim();
