@@ -77,8 +77,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   private loadingTimer: ReturnType<typeof setTimeout> | null = null;
   private loadingShownAt = 0;
 
-  private emailSendInitiated = false;
-
   constructor() {
     effect(() => {
       const isLoading = this.store.isLoading();
@@ -99,18 +97,12 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     }, { injector: this.injector });
 
     effect(() => {
-      if (this.emailStore.isSending()) {
-        this.emailSendInitiated = true;
-      }
-
-      if (!this.emailSendInitiated) return;
-
       if (this.emailStore.isSent()) {
-        this.emailSendInitiated = false;
         this.notificationService.info('Email sent successfully.');
+        this.emailStore.reset();
       } else if (this.emailStore.hasFailed()) {
-        this.emailSendInitiated = false;
         this.notificationService.error(this.emailStore.error() ?? 'Failed to send email.');
+        this.emailStore.reset();
       }
     }, { injector: this.injector });
 

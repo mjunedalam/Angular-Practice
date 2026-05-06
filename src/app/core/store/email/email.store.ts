@@ -38,6 +38,9 @@ export const EmailStore = signalStore(
             patchState(store, { status: 'failed', error: 'Failed to send email' });
           }
         });
-    }
+    },
+    reset() {
+      patchState(store, { status: 'idle', error: null });
+    },
   }))
 );
