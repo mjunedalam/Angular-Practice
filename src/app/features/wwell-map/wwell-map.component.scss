@@ -94,14 +94,9 @@
   bottom: 1rem;
   z-index: 2;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.45rem;
-  max-width: min(34rem, calc(100% - 2rem));
-  padding: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--map-border) 85%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--map-card-bg) 82%, transparent);
-  backdrop-filter: blur(10px);
+  background: transparent;
 }
 
 .wwell-map-legend__chip {

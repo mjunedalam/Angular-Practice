@@ -19,7 +19,6 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
-import { tilesArray } from 'src/app/shared/models/config/agwa-map.config';
 import { EmailService } from '@services/email/email.service';
 import { DEFAULT_NOTIFICATION_DURATION_MS, NotificationService } from '@shared/components/notification/notification.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
@@ -68,11 +67,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       ? (this.hasDateQueryParam() ? 'Data is not available for this date' : 'Data is not available for the given date')
       : null;
   });
-
-  protected readonly legendTiles = tilesArray.map(t => ({
-    biNum: t.biNum,
-    cssColor: `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
-  }));
 
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected selectedDateString = this.maxDateString;

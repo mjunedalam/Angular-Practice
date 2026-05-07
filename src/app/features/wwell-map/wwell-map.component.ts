@@ -36,6 +36,7 @@ import {
   MAP_CONFIG,
   MAX_WIDTH,
   STYLE,
+  tilesArray,
   tilesMap,
   topPolygonTemplate,
   WWell,
@@ -437,57 +438,19 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     this.downloadBase64(base64, 'water-wells-map.png');
   }
 
-  async captureMapAsBase64() {
-    if (!this.mapView || !this.legendLayer) return;
-
-    // Show the legend
-    this.legendLayer!.visible = true;
-
-    // Wait for the layer view to finish drawing
-    await this.waitForLegendRender();
-
-    // Capture screenshot
-    const base64 = await this.getScreenshotBase64();
-
-    // Hide the legend again (so the UI stays clean)
-    this.legendLayer!.visible = false;
-    return base64;
-
-  }
-
-  private async waitForLegendRender(): Promise<void> {
-    const layerView = await this.mapView!.whenLayerView(this.legendLayer!);
-    if (!layerView.updating) {
-      await new Promise(requestAnimationFrame);
-      return;
-    }
-
-    await new Promise<void>((resolve) => {
-      const handle = watch(() => layerView.updating,
-        (updating) => {
-          if (!updating) {
-            handle.remove();
-            requestAnimationFrame(() => resolve());
-          }
-        })
-    });
+  async captureMapAsBase64(): Promise<string | undefined> {
+    if (!this.mapView) return;
+    return this.getScreenshotBase64();
   }
 
   private async getScreenshotBase64(): Promise<string> {
-    const screenshot = await this.mapView!.takeScreenshot({
-      format: 'png',
-      quality: 1,
-    });
+    const screenshot = await this.mapView!.takeScreenshot({ format: 'png', quality: 1 });
     const [, rawBase64] = screenshot.dataUrl.split(',');
     if (!rawBase64) throw new Error('Failed to extract Base‑64 payload');
 
-    // Resize (optional)
     const img = new Image();
     img.src = `data:image/png;base64,${rawBase64}`;
-    await new Promise((res, rej) => {
-      img.onload = res;
-      img.onerror = rej;
-    });
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
 
     const scale = Math.min(1, MAX_WIDTH / img.width);
     const canvas = document.createElement('canvas');
@@ -496,12 +459,54 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    // Small pause to let the browser finish any pending paint
+    this.drawLegendChips(ctx, canvas.height);
+
     await new Promise((r) => setTimeout(r, 300));
 
-    const resizedDataUrl = canvas.toDataURL('image/jpeg', 1);
-    const [, resizedBase64] = resizedDataUrl.split(',');
+    const [, resizedBase64] = canvas.toDataURL('image/jpeg', 1).split(',');
     return resizedBase64;
+  }
+
+  private drawLegendChips(ctx: CanvasRenderingContext2D, canvasHeight: number): void {
+    const chips = [
+      { text: 'Wells Ownership', bg: '#cedf5f', textColor: '#35530a' },
+      ...tilesArray.map(t => ({
+        text: t.biNum,
+        bg: `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
+        textColor: '#fff',
+      })),
+      { text: 'Aquifier', bg: '#22b8e6', textColor: '#fff' },
+    ];
+
+    const fontSize = 13;
+    const px = 12;
+    const py = 5;
+    const gap = 7;
+    const chipH = fontSize + py * 2;
+    const bottomMargin = 14;
+    const leftMargin = 14;
+
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
+    let x = leftMargin;
+    const y = canvasHeight - bottomMargin - chipH;
+
+    for (const chip of chips) {
+      const tw = ctx.measureText(chip.text).width;
+      const cw = tw + px * 2;
+
+      ctx.fillStyle = chip.bg;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cw, chipH, chipH / 2);
+      ctx.fill();
+
+      ctx.fillStyle = chip.textColor;
+      ctx.fillText(chip.text, x + cw / 2, y + chipH / 2);
+
+      x += cw + gap;
+    }
   }
 
   private downloadBase64(base64: string | undefined, fileName: string): void {

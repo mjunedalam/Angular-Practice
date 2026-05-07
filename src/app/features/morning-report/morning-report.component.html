@@ -174,17 +174,6 @@
         <div class="map-container">
           <app-wwellmap #wwellMap ></app-wwellmap>
         </div>
-        <div class="map-legend">
-          <div class="map-legend__section-title">Wells Ownership</div>
-          <div class="map-legend__tiles">
-            @for (tile of legendTiles; track tile.biNum) {
-              <div class="map-legend__tile" [style.background-color]="tile.cssColor">
-                {{ tile.biNum }}
-              </div>
-            }
-          </div>
-          <div class="map-legend__aquifer">Target Aquifer</div>
-        </div>
       </section>
     }
   </div>
