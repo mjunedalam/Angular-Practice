@@ -27,17 +27,15 @@ ArcGIS is Esri's platform for working with geographic data. It has two main part
 
 Every item saved in an ArcGIS portal gets a **unique 32-character ID**:
 
-```
-c177620bd7744a22b6e7e0d98c33d18a   ← Aramco's internal WebMap
 e691172598f04ea8881cd2a4adaa45ba   ← Public test WebMap on arcgis.com
-```
+
 
 When you create a `WebMap` with this ID, the SDK fetches that saved configuration from the portal —
 all layers, styles, zoom extents, basemap — in one shot:
 
 ```ts
 const webMap = new WebMap({
-  portalItem: { id: 'c177620bd7744a22b6e7e0d98c33d18a' }
+  portalItem: { id: 'e691172598f04ea8881cd2a4adaa45ba' }
 });
 ```
 

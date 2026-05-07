@@ -5,8 +5,14 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { LoaderService } from './app/shared/components/global-loader/loader.service';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { wellDataValidator } from './app/shared/utils/well-data.validator';
+import { environment } from './environments/environment';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+if (!environment.production) {
+  wellDataValidator.enable();
+}
 
 declare global {
   interface Window {

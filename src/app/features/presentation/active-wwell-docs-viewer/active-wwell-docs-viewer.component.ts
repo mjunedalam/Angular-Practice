@@ -55,6 +55,7 @@ export class ActiveWwellDocsViewerComponent {
   protected readonly collapsed = signal(true);
   protected readonly viewLoading = signal<Set<string>>(new Set());
   protected readonly downloadLoading = signal<Set<string>>(new Set());
+  protected readonly deleteLoading = signal<Set<string>>(new Set());
 
   constructor() {
     effect(() => {
@@ -99,6 +100,17 @@ export class ActiveWwellDocsViewerComponent {
     });
   }
 
+  protected deleteSingleDoc(fileName: string): void {
+    const epANum = this.wellStore.selectedEpANum();
+    const uploadDate = formatDateForInput(this.wellStore.selectedDate());
+    if (epANum == null || !uploadDate || !fileName) return;
+    else {
+      this.setDeletionStatus(this.deleteLoading, fileName, true);
+      this.docsStore.removeSingleFile({ uploadDate, epANum, fileName });
+      this.setDeletionStatus(this.deleteLoading, fileName, false);
+    }
+  }
+
   protected downloadDoc(docName: string): void {
     const context = this.getContext();
     if (!context || this.isDownloadLoading(docName)) return;
@@ -128,6 +140,10 @@ export class ActiveWwellDocsViewerComponent {
     return this.downloadLoading().has(docName);
   }
 
+  protected isFileDeleting(docName: string): boolean {
+    return this.deleteLoading().has(docName);
+  }
+
   protected fileIcon(docName: string): string {
     const ext = docName.split('.').pop()?.toLowerCase() ?? '';
     if (ext === 'pdf') return 'picture_as_pdf';
@@ -155,7 +171,16 @@ export class ActiveWwellDocsViewerComponent {
   private setLoading(target: ReturnType<typeof signal<Set<string>>>, docName: string, loading: boolean): void {
     target.update((set: Set<string>) => {
       const next = new Set(set);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       loading ? next.add(docName) : next.delete(docName);
+      return next;
+    });
+  }
+
+  private setDeletionStatus(target: ReturnType<typeof signal<Set<string>>>, docName: string, isDeleting: boolean): void {
+    target.update((set: Set<string>) => {
+      const next = new Set(set);
+      isDeleting ? next.add(docName) : next.delete(docName);
       return next;
     });
   }

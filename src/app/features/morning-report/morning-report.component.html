@@ -175,22 +175,15 @@
           <app-wwellmap #wwellMap ></app-wwellmap>
         </div>
         <div class="map-legend">
-          <div class="map-legend__item">
-            <span class="map-legend__dot map-legend__dot--wasi"></span>
-            <span class="map-legend__text">WASI</span>
+          <div class="map-legend__section-title">Wells Ownership</div>
+          <div class="map-legend__tiles">
+            @for (tile of legendTiles; track tile.biNum) {
+              <div class="map-legend__tile" [style.background-color]="tile.cssColor">
+                {{ tile.biNum }}
+              </div>
+            }
           </div>
-          <div class="map-legend__item">
-            <span class="map-legend__dot map-legend__dot--ownership"></span>
-            <span class="map-legend__text">WELLS OWNERSHIP</span>
-          </div>
-          <div class="map-legend__item">
-            <span class="map-legend__dot map-legend__dot--aquifer"></span>
-            <span class="map-legend__text">Target Aquifer</span>
-          </div>
-          <div class="map-legend__item">
-            <span class="map-legend__dot map-legend__dot--active"></span>
-            <span class="map-legend__text">Active Well</span>
-          </div>
+          <div class="map-legend__aquifer">Target Aquifer</div>
         </div>
       </section>
     }

@@ -5,12 +5,12 @@ import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
 
 import { WellDoc, WellDocsState } from '@models/well-design/well-docs.model';
-import { DocListResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
+import { DocListResponse, DocRemoveResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
 import { PresDocsService } from '@services/pres-docs.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { DUMMY_DOCS, initialWellDocsState } from './well-docs.state';
 import { selectCategories, selectDocsByCategory, selectTotalDocCount } from './well-docs.selectors';
-import { WellDocsActions, WellDocsEvents, LoadDocsPayload, UploadDocsPayload } from './well-docs.actions';
+import { WellDocsActions, WellDocsEvents, LoadDocsPayload, UploadDocsPayload, RemoveDocPayload } from './well-docs.actions';
 
 export const WellDocsStore = signalStore(
   { providedIn: 'root' },
@@ -19,8 +19,8 @@ export const WellDocsStore = signalStore(
 
   withComputed(({ docs }) => ({
     docsByCategory: computed(() => selectDocsByCategory(docs())),
-    categories:     computed(() => selectCategories(docs())),
-    totalCount:     computed(() => selectTotalDocCount(docs())),
+    categories: computed(() => selectCategories(docs())),
+    totalCount: computed(() => selectTotalDocCount(docs())),
   })),
 
   withMethods((store, svc = inject(PresDocsService), notify = inject(NotificationService)) => ({
@@ -62,8 +62,10 @@ export const WellDocsStore = signalStore(
                 }
                 notify.info('Documents uploaded successfully.');
                 svc.getDocs(epANum, date).subscribe({
-                  next: docs =>
-                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false }),
+                  next: docs => {
+                    docs = [];
+                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false })
+                  },
                   error: () =>
                     patchState(store, { uploading: false }),
                 });
@@ -79,6 +81,37 @@ export const WellDocsStore = signalStore(
       ),
     ),
 
+    removeSingleFile: rxMethod<RemoveDocPayload>(
+      pipe(
+        tap(() => patchState(store, { deleting: true, error: null })),
+        switchMap(({ uploadDate, epANum, fileName }) =>
+          svc.removeSingleDoc(uploadDate, epANum, encodeURIComponent(fileName)).pipe(
+            tapResponse({
+              next: (response: DocRemoveResponse) => {
+                patchState(store, { deleting: false, error: response.message });
+                if (response.error) {
+                  notify.error(response.message);
+                  return;
+                }
+                notify.info(`Document ${fileName} removed successfully.`);
+                svc.getDocs(epANum, uploadDate).subscribe({
+                  next: docs =>
+                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, deleting: false }),
+                  error: () =>
+                    patchState(store, { deleting: false }),
+                });
+              },
+              error: (err: unknown) => {
+                const msg = err instanceof Error ? err.message : 'Upload failed';
+                patchState(store, { deleting: false, error: msg });
+                notify.error(msg);
+              },
+            }),
+          ),
+        ),
+      )
+    ),
+
     loadDocList: rxMethod<LoadDocsPayload>(
       pipe(
         tap(() => patchState(store, { listLoading: true, listError: null })),
@@ -88,7 +121,7 @@ export const WellDocsStore = signalStore(
               next: (res: DocListResponse) => {
                 if (res.error) {
                   patchState(store, { docNames: [], listLoading: false, listError: res.message ?? 'Failed to load documents' });
-                  // notify.error(res.message ?? 'Failed to load documents');
+                  //  notify.error(res.message ?? 'Failed to load documents');
                   return;
                 }
                 patchState(store, { docNames: res.data.totalFiles, listLoading: false });

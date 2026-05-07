@@ -5,6 +5,7 @@ import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
 
 import { IWellData } from '@models/well-design/well-data.model';
+import { validateWellData } from '../../../shared/utils/well-data.validator';
 import { WellLogsIndicators } from '@models/well-design/well-logs-indicators.model';
 import { WellboreAnimConfig, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import {
@@ -108,6 +109,7 @@ export const PresentationStore = signalStore(
                     svc.getWellDetail(date, epANum).pipe(
                         tapResponse({
                             next: (wellData: IWellData) => {
+                                validateWellData(wellData, String(store.selectedEpANum() ?? ''));
                                 patchState(store, {
                                     wellData,
                                     detailLoading: false,

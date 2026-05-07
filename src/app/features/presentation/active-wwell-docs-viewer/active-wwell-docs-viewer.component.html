@@ -82,6 +82,14 @@
             <mat-spinner *ngIf="isDownloadLoading(docName)" diameter="14"></mat-spinner>
             <mat-icon *ngIf="!isDownloadLoading(docName)">download</mat-icon>
           </button>
+
+          <button class="action-btn action-btn--delete"
+                  [class.action-btn--loading]="isFileDeleting(docName)"
+                  type="button"
+                  (click)="deleteSingleDoc(docName)">
+            <mat-spinner *ngIf="isFileDeleting(docName)" diameter="14"></mat-spinner>
+            <mat-icon *ngIf="!isFileDeleting(docName)">delete</mat-icon>
+          </button>
         </div>
 
       </div>

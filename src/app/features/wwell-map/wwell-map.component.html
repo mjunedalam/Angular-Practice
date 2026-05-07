@@ -12,6 +12,7 @@
   <div class="wwell-map-frame">
     <div #mapViewNode class="wwell-map-canvas"></div>
 
+    @if (mapReady()) {
     <div class="wwell-map-legend">
       <div class="wwell-map-legend__chip wwell-map-legend__chip--owner">
         Wells Ownership
@@ -28,5 +29,6 @@
         Aquifier
       </div>
     </div>
+    }
   </div>
 </mat-card>

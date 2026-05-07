@@ -35,10 +35,17 @@ export const tilesMap = new Map<string, { color: number[]; biNum: string }>(
   tilesArray.map((tile) => [tile.biNum, tile]));
 
 export const MAP_CONFIG = {
-  center:  [45.0, 24.5] as [number, number], // central KSA [lng, lat]
-  zoom:    6,   // comfortable first view — KSA fills the screen
-  minZoom: 5,   // zoom out to see the full peninsula
-  maxZoom: 14,  // street-level detail for individual wells
+  center:  [45.0, 24.5] as [number, number],
+  zoom:    6,
+  minZoom: 5,
+  maxZoom: 14,
+  defaultExtent: {
+    xmin: 33.819,
+    ymin: 12.894,
+    xmax: 58.702,
+    ymax: 32.699,
+    spatialReference: { wkid: 4326 },
+  },
 };
 
 const baseUrl = window.location.origin;

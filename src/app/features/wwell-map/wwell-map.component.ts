@@ -13,12 +13,15 @@ import {
 } from '@angular/core';
 import Graphic from '@arcgis/core/Graphic';
 import { watch as reactiveWatch, watch } from '@arcgis/core/core/reactiveUtils';
+import Extent from '@arcgis/core/geometry/Extent';
 import Point from '@arcgis/core/geometry/Point';
 import Polyline from '@arcgis/core/geometry/Polyline';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import MapImageLayer from '@arcgis/core/layers/MapImageLayer';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
+import Basemap from '@arcgis/core/Basemap';
+// import BasemapView from '@arcgis/core/BasemapView';
 import { MatCardModule } from '@angular/material/card';
 import { forkJoin, Subject, switchMap, takeUntil } from 'rxjs';
 import { IWellData } from '@models/well-design/well-data.model';
@@ -183,18 +186,31 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       this.resolveBootTask();
       return;
     }
-    const map = new MapMod({ basemap: 'topo-vector' });
+
+    const baseLayer = new MapImageLayer({
+      url: 'https://eccenterprisegislbsrvr.enp.aramco.com.sa:6443/arcgis/rest/services/Poliocea_AinAlAbd/MapServer'
+    })
+
+
+
+    const customBasemap = new Basemap({
+      baseLayers: [baseLayer],
+      title: 'Poliocea',
+      id: 'poliocea'
+    })
+
+    const map = new MapMod({ basemap: customBasemap });
     this.mapView = new MapViewMod({
       container: this.mapViewEl?.nativeElement,
       map,
       center: MAP_CONFIG.center,
-      zoom: 2,
-      constraints: { minZoom: MAP_CONFIG.minZoom, maxZoom: MAP_CONFIG.maxZoom }
+      //constraints: { minZoom: 2, maxZoom: 10 }
     });
 
     const mapServerUrl = `${this.extConfigService.settings.mapServerUrl}`
 
     await this.mapView.when();
+    await this.mapView.goTo(new Extent(MAP_CONFIG.defaultExtent), { animate: false });
     const view = this.mapView;
     if (!view) {
       this.resolveBootTask();
@@ -422,7 +438,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   }
 
   async captureMapAsBase64() {
-    if (!this.mapView) return;
+    if (!this.mapView || !this.legendLayer) return;
 
     // Show the legend
     this.legendLayer!.visible = true;

@@ -33,3 +33,9 @@ export interface UploadDocsPayload {
   epANum: number;
   date: string;
 }
+
+export interface RemoveDocPayload {
+  uploadDate: string,
+  epANum: number,
+  fileName: string
+}

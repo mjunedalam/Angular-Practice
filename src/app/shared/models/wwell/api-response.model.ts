@@ -31,3 +31,10 @@ export interface DocListResponse {
     message: string | null;
     data: DocListData;
 }
+
+export interface DocRemoveResponse {
+    statusCode: number;
+    error: boolean;
+    message: string;
+    data: string;
+}   
