@@ -283,25 +283,44 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private async drawWWellIcons(layer: GraphicsLayer): Promise<void> {
     layer.removeAll();
     const { default: Point } = await import('@arcgis/core/geometry/Point');
-    const { default: PictureMarkerSymbol } = await import('@arcgis/core/symbols/PictureMarkerSymbol');
+    const { default: SimpleMarkerSymbol } = await import('@arcgis/core/symbols/SimpleMarkerSymbol');
     const wells = this.wwells();
     for (const wwell of wells) {
       const point = new Point({ latitude: wwell.lat, longitude: wwell.lng });
-      const symbol = new PictureMarkerSymbol({
-        url: STYLE.markerIcon,
-        width: STYLE.markerSize,
-        height: STYLE.markerSize
+      const [r, g, b] = tilesMap.get(wwell.label)?.color ?? [200, 200, 200, 1];
+
+      const outerGlow = new Graphic({
+        geometry: point,
+        symbol: new SimpleMarkerSymbol({
+          style: 'circle',
+          size: 36,
+          color: [r, g, b, 0.08],
+          outline: { color: [r, g, b, 0.35], width: 2 },
+        }),
       });
-      layer.add(
-        new Graphic({
-          geometry: point,
-          symbol,
-          attributes: {
-            wwellId: wwell.wwellId,
-            Location: wwell.location
-          },
-        })
-      );
+
+      const midRing = new Graphic({
+        geometry: point,
+        symbol: new SimpleMarkerSymbol({
+          style: 'circle',
+          size: 20,
+          color: [r, g, b, 0.2],
+          outline: { color: [r, g, b, 0.75], width: 1.5 },
+        }),
+      });
+
+      const core = new Graphic({
+        geometry: point,
+        symbol: new SimpleMarkerSymbol({
+          style: 'circle',
+          size: 8,
+          color: [r, g, b, 1],
+          outline: { color: [255, 255, 255, 0.9], width: 1.5 },
+        }),
+        attributes: { wwellId: wwell.wwellId, Location: wwell.location },
+      });
+
+      layer.addMany([outerGlow, midRing, core]);
     }
   }
 
@@ -478,8 +497,8 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       { text: 'Aquifier', bg: '#22b8e6', textColor: '#fff' },
     ];
 
-    const fontSize = 13;
-    const px = 12;
+    const fontSize = 10;
+    const px = 1;
     const py = 5;
     const gap = 7;
     const chipH = fontSize + py * 2;

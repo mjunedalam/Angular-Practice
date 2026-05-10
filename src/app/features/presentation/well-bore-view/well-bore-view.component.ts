@@ -515,16 +515,24 @@ export class WellBoreViewComponent {
   }
 
   private drawWaterLevel(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, waterStart: number): void {
-    if (!data.hydrogeology) return;
+    const wd = data.wellDesign;
+    if (!wd) return;
+
+    const isFlowing = /flow/i.test(wd.swLvlTxt ?? '');
+    const waterDepth = isFlowing ? 0 : (wd.staWaterLvl ?? 0);
+    if (!isFlowing && !wd.staWaterLvl) return;
+
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
-    const wPx = scale(data.hydrogeology.estStaticWaterLevel);
+    const wPx = scale(waterDepth);
     const widestCsg = data.casings[data.casings.length - 1];
     const tier = widestCsg ? this.getCasingTier(widestCsg, data.casings) : 0;
     const innerHW = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
     const lineWidth = lR - lL;
-    const label = data.hydrogeology.flowType === 'Y' ? 'Flowing (SIWHP: 50 PSI)' : `Static WL: ${data.hydrogeology.estStaticWaterLevel.toLocaleString()} ft`;
+    const label = isFlowing
+      ? `Flowing — ${wd.swLvlTxt}`
+      : `Static WL: ${waterDepth.toLocaleString()} ft`;
     const ra = this.resolveAnim();
     const wg = this.rootG.append('g').attr('class', 'water-level');
 

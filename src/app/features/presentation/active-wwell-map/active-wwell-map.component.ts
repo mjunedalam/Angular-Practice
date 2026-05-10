@@ -5,14 +5,13 @@ import {
   computed,
   effect,
   ElementRef,
-  Inject,
+  inject,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
   signal,
   ViewChild,
 } from '@angular/core';
-import { inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import Graphic from '@arcgis/core/Graphic';
 import { watch } from '@arcgis/core/core/reactiveUtils';
@@ -22,7 +21,6 @@ import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
 import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
-import { Subject } from 'rxjs';
 
 import { PresentationStore } from '../store/presentation.store';
 import { LoaderService } from '@shared/components/global-loader/loader.service';
@@ -30,7 +28,7 @@ import { EsriMapService } from '@core/services/esri-map.service';
 import { MAP_CONFIG, MAX_WIDTH } from 'src/app/shared/models/config/agwa-map.config';
 
 const BOOT_TASK = 'arcgis-map';
-const SELECTED_WELL_ZOOM = 10;
+const SELECTED_WELL_ZOOM = 11;
 
 interface SelectedWellCoords {
   readonly lat: number;
@@ -48,20 +46,20 @@ interface SelectedWellCoords {
 export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   @ViewChild('presMapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
 
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly store = inject(PresentationStore);
+  private readonly loader = inject(LoaderService);
+  private readonly esriAuth = inject(EsriMapService);
+
   private mapView?: __esri.MapView;
   private selectedWellLayer?: GraphicsLayer;
   private bootTaskRegistered = false;
   private pointerMoveHandle: { remove(): void } | null = null;
   private tooltipEl: HTMLDivElement | null = null;
   private hitTestPending = false;
-  private readonly destroy$ = new Subject<void>();
 
   protected readonly errorMessage = signal<string | null>('Select a well to preview its location.');
   protected readonly mapReady = signal(false);
-
-  private readonly store = inject(PresentationStore);
-  private readonly loader = inject(LoaderService);
-  private readonly esriAuth = inject(EsriMapService);
 
   private readonly selectedWellCoords = computed<SelectedWellCoords | null>(() => {
     const header = this.store.wellHeaderData();
@@ -75,7 +73,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
     return lat !== null && lng !== null ? { lat, lng } : null;
   });
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {
+  constructor() {
     effect(() => {
       const coords = this.selectedWellCoords();
       if (!this.mapReady()) return;
@@ -131,7 +129,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
         container: this.mapViewEl?.nativeElement,
         map: webMap,
         center: MAP_CONFIG.center,
-        zoom: MAP_CONFIG.zoom,
+        zoom: 10,
         ui: { components: [] },
       });
 
@@ -270,7 +268,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   private async focusWell(point: Point): Promise<void> {
     if (!this.mapView) return;
     try {
-      await this.mapView.goTo({ target: point, zoom: SELECTED_WELL_ZOOM }, { animate: false });
+      await this.mapView.goTo({ target: point, zoom: SELECTED_WELL_ZOOM }, { animate: true });
     } catch {
       // ignore goTo interruptions during teardown
     }
