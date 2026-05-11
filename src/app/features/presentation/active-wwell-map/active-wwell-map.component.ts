@@ -26,6 +26,7 @@ import { PresentationStore } from '../store/presentation.store';
 import { LoaderService } from '@shared/components/global-loader/loader.service';
 import { EsriMapService } from '@core/services/esri-map.service';
 import { MAP_CONFIG, MAX_WIDTH } from 'src/app/shared/models/config/agwa-map.config';
+import { ExternalConfigService } from '@shared/services/external-config.service';
 
 const BOOT_TASK = 'arcgis-map';
 const SELECTED_WELL_ZOOM = 11;
@@ -50,6 +51,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
   private readonly store = inject(PresentationStore);
   private readonly loader = inject(LoaderService);
   private readonly esriAuth = inject(EsriMapService);
+  private readonly extConfigService = inject(ExternalConfigService);
 
   private mapView?: __esri.MapView;
   private selectedWellLayer?: GraphicsLayer;
@@ -122,7 +124,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
       await this.esriAuth.authenticateUserForMapAccess();
 
       const webMap = new WebMap({
-        portalItem: { id: 'c177620bd7744a22b6e7e0d98c33d18a' },
+        portalItem: { id: this.extConfigService.settings.presWebMapId },
       });
 
       this.mapView = new MapView({

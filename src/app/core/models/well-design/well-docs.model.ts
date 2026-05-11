@@ -21,6 +21,7 @@ export interface WellDocsState {
   readonly selectedDoc: WellDoc | null;
   readonly loading: boolean;
   readonly uploading: boolean;
+  readonly deleting: boolean;
   readonly error: string | null;
   readonly viewerOpen: boolean;
   readonly docNames: string[];

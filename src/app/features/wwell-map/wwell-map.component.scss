@@ -69,9 +69,12 @@
   margin-bottom: 1rem;
   padding: 0.8rem 1rem;
   border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
-  background: color-mix(in srgb, var(--danger) 10%, white);
-  color: var(--danger);
+
+  &--retrying {
+    border: 1px solid color-mix(in srgb, var(--primary, #1a73e8) 28%, transparent);
+    background: color-mix(in srgb, var(--primary, #1a73e8) 8%, white);
+    color: var(--primary, #1a73e8);
+  }
 }
 
 .wwell-map-frame {

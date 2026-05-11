@@ -6,5 +6,6 @@
     "mosaicLayerUrl": "https://gissrv.enp.aramco.com.sa:6443/arcgis/rest/services/CART/ASD_100K_MOSAIC/ImageServer",
     "appId": "M0M4nfZyToqUlgQy",
     "esriUrl": "https://eccenterprisegis.enp.aramco.com.sa/arcgis",
-    "webMapItemId": "c177620bd7744a22b6e7e0d98c33d18a"
+    "webMapItemId": "c177620bd7744a22b6e7e0d98c33d18a",
+    "morningReportWebMapId": ""
 }

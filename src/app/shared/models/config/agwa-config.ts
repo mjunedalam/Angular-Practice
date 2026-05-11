@@ -1,4 +1,5 @@
 export interface AgwaConfig {
+  presWebMapId: string | nullish;
   tokenUrl: string;
   dailyOperationServiceUrl: string;
   presDocsServiceUrl: string;
@@ -7,5 +8,4 @@ export interface AgwaConfig {
   mosaicLayerUrl: string;
   appId: string;
   esriUrl: string;
-  webMapItemId: string;
-}
+morningReportWebMapId: string;}

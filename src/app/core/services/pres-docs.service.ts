@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, throwError, timeout } from 'rxjs';
 import { WellDoc } from '@models/well-design/well-docs.model';
-import { DocListResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
+import { DocListResponse, DocRemoveResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 
 const CONNECTION_TIMEOUT_MS = 5000;
@@ -66,6 +66,21 @@ export class PresDocsService {
 
     return this.http
       .get<DocListResponse>(`${this.apiUrl}/welldocuments/well-presentation-docs-list`, { params })
+      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+  }
+
+  removeSingleDoc(uploadDate: string, epANum: number, fileName: string): Observable<DocRemoveResponse> {
+    if (!this.apiUrl) {
+      return throwError(() => new Error('Well documents service unavailable.'));
+    }
+
+    const params = new HttpParams()
+      .set('uploadDate', uploadDate)
+      .set('epaNum', String(epANum))
+      .set('docName', fileName);
+
+    return this.http
+      .delete<DocRemoveResponse>(`${this.apiUrl}/welldocuments/well-presentation-docs`, { params })
       .pipe(timeout(CONNECTION_TIMEOUT_MS));
   }
 

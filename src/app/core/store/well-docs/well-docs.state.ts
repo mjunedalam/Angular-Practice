@@ -49,6 +49,7 @@ export const initialWellDocsState: WellDocsState = {
   selectedDoc: null,
   loading: false,
   uploading: false,
+  deleting: false,
   error: null,
   viewerOpen: false,
   docNames: [],
