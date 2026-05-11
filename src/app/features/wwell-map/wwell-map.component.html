@@ -9,6 +9,13 @@
   <div class="wwell-map-frame">
     <div #mapViewNode class="wwell-map-canvas"></div>
 
+    @if (!mapReady()) {
+      <div class="map-loader">
+        <span class="map-loader__spinner"></span>
+        <span class="map-loader__label">Loading map…</span>
+      </div>
+    }
+
     @if (mapReady()) {
     <div class="wwell-map-legend">
       <div class="wwell-map-legend__chip wwell-map-legend__chip--owner">

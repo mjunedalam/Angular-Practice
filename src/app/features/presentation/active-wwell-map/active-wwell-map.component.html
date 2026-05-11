@@ -4,7 +4,14 @@
   <div class="blueprint-view">
     <div #presMapViewNode class="wwell-map-canvas"></div>
 
-    @if (errorMessage()) {
+    @if (!mapReady()) {
+      <div class="map-loader">
+        <span class="map-loader__spinner"></span>
+        <span class="map-loader__label">Loading map…</span>
+      </div>
+    }
+
+    @if (mapReady() && errorMessage()) {
       <div class="map-state">
         {{ errorMessage() }}
       </div>
