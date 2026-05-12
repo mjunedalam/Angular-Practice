@@ -4,12 +4,12 @@ export interface IWellDesign {
   staWaterLvl: number | null;
   swLvlTxt: string | null;
   pumpLevel: number | null;
-  ohFlag: string | null;
+  ohFlg: string | null;
   ohRemarks: string | null;
-  gpFlag: string | null;
+  gpFlg: string | null;
   gpRemarks: string | null;
-  perfFlag: string | null;
+  perfFlg: string | null;
   perfRemarks: string | null;
-  lsFlag: string | null;
+  lsFlg: string | null;
   lsRemarks: string | null;
 }

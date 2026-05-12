@@ -592,8 +592,8 @@ export class WellBoreViewComponent {
     if (!data.casings.length) return;
 
     const { wellDesign } = data;
-    const shouldDrawOH = wellDesign?.ohFlag === 'Y';
-    const shouldDrawLS = wellDesign?.lsFlag === 'Y';
+    const shouldDrawOH = wellDesign?.ohFlg === 'Y';
+    const shouldDrawLS = wellDesign?.lsFlg === 'Y';
     if (!shouldDrawOH && !shouldDrawLS) return;
 
     const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin, linerScreenInset } = this.layout;
@@ -672,7 +672,7 @@ export class WellBoreViewComponent {
   }
 
   private drawGravelPackDesign(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohLabelStart: number): void {
-    if (data.wellDesign?.gpFlag !== 'Y') return;
+    if (data.wellDesign?.gpFlg !== 'Y') return;
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gravelAnnulusWidth } = this.layout;
@@ -725,12 +725,12 @@ export class WellBoreViewComponent {
   }
 
   private drawPrePerforatedLiner(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohLabelStart: number): void {
-    if (data.wellDesign?.perfFlag !== 'Y') return;
+    if (data.wellDesign?.perfFlg !== 'Y') return;
     if (!data.casings.length) return;
 
     const { baseHalfWidth, halfWidthIncrement, prePerfGpBoost } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const hasGP = data.wellDesign?.gpFlag === 'Y';
+    const hasGP = data.wellDesign?.gpFlg === 'Y';
     const prePerfHW = innerHW + (hasGP ? prePerfGpBoost : 0);
     const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const topPx = scale(deepestSolid.csgDepth);
@@ -777,7 +777,7 @@ export class WellBoreViewComponent {
 
   private drawScreenHanger(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, hangerStart: number): void {
     if (!data.casings.length) return;
-    if (data.wellDesign?.lsFlag !== 'Y') return;
+    if (data.wellDesign?.lsFlg !== 'Y') return;
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - linerScreenInset;
@@ -896,7 +896,7 @@ export class WellBoreViewComponent {
       .attr('x', centerX)
       .attr('y', midY - 6)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#fbbf24') // yellow-400
+      .attr('fill', 'var(--text-primary)')
       .style('font-size', '16px')
       .style('font-weight', '800')
       .style('letter-spacing', '0.15em')
@@ -908,7 +908,7 @@ export class WellBoreViewComponent {
       .attr('x', centerX)
       .attr('y', midY + 14)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#fca5a5') // light red-300
+      .attr('fill', 'var(--text-secondary)')
       .style('font-size', '13px')
       .style('font-weight', '700')
       .text(`REMAINING: ${undrilledFt.toLocaleString()} FT`);
