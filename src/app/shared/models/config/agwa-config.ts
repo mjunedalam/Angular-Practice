@@ -8,4 +8,6 @@ export interface AgwaConfig {
   mosaicLayerUrl: string;
   appId: string;
   esriUrl: string;
-morningReportWebMapId: string;}
+morningReportWebMapId: string;
+  rolesUrl?: string;
+}

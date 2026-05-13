@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActiveWwellStore } from '../store/active-wwell.store';
+import { AuthStore } from '../../auth/store/auth.store';
+import { RbacStore } from '@store/rbac/rbac.store';
 
 @Component({
   selector: 'app-wwell-test',
@@ -11,7 +13,9 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellTestComponent {
-  private readonly store = inject(ActiveWwellStore);
+  private readonly store    = inject(ActiveWwellStore);
+  private readonly auth     = inject(AuthStore);
+  private readonly rbac     = inject(RbacStore);
 
   protected readonly data = this.store.wwellTest;
 
@@ -20,4 +24,8 @@ export class WwellTestComponent {
     if (!data) return false;
     return data.flowType === 'Y' || data.testType.toLowerCase() === 'flow';
   });
+
+  protected readonly canUpdate = computed(() =>
+    this.rbac.canUpdateRoute('active-wwell', this.auth.user()?.groups ?? []),
+  );
 }

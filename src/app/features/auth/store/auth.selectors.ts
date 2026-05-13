@@ -6,7 +6,7 @@ export interface AuthUser {
   readonly preferred_username?: string;
   readonly unique_name?: string;
   readonly exp?: number;
-  readonly roles?: string[];
+  readonly groups?: string[];
   readonly [key: string]: unknown;
 }
 

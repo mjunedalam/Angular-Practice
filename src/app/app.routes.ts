@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@guards/auth.guard';
+import { roleGuard } from '@guards/role.guard';
 import { EmailStore } from '@store/email/email.store';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresentationStore } from './features/presentation/store/presentation.store';
@@ -42,6 +43,8 @@ export const routes: Routes = [
       },
       {
         path: 'presentations',
+        data: { routeId: 'presentations' },
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./features/presentation/presentation.component').then(
             (m) => m.PresentationComponent,
@@ -50,6 +53,8 @@ export const routes: Routes = [
       },
       {
         path: 'active-wwell',
+        data: { routeId: 'active-wwell' },
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./features/active-wwell/active-wwell-view/active-wwell-view.component').then(
             (m) => m.ActiveWwellViewComponent,
@@ -58,6 +63,8 @@ export const routes: Routes = [
       },
       {
         path: 'morning-report',
+        data: { routeId: 'morning-report' },
+        canActivate: [roleGuard],
         loadComponent: () =>
           import('./features/morning-report/morning-report.component').then(
             (m) => m.MorningReportComponent,

@@ -1,26 +1,14 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, inject, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconRegistry } from '@angular/material/icon';
 import { routes } from './app.routes';
 import { ExternalConfigService } from '@shared/services/external-config.service';
 import { AuthStore } from './features/auth/store/auth.store';
-
-function initializeAppConfig(configService: ExternalConfigService): () => Promise<void> {
-  return () => configService.loadConfig();
-}
-
-function initializeAuth(): () => void {
-  const authStore = inject(AuthStore);
-  return () => authStore.autoLogin();
-}
-
-function initializeIcons(): () => void {
-  const iconRegistry = inject(MatIconRegistry);
-  return () => iconRegistry.setDefaultFontSetClass('material-icons');
-}
+import { RbacStore } from '@store/rbac/rbac.store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,24 +16,25 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch()),
     provideAnimationsAsync(),
-    importProvidersFrom(MatSnackBarModule),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeAppConfig,
-      deps: [ExternalConfigService],
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeAuth,
-      deps: [],
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeIcons,
-      deps: [],
-      multi: true,
-    },
+    importProvidersFrom(MatSnackBarModule, MatDialogModule),
+
+    // 1. Load external config, then RBAC roles (sequential so roleGuard
+    //    has settings.rolesUrl before any protected route activates).
+    provideAppInitializer(async () => {
+      const configService = inject(ExternalConfigService);
+      const rbacStore     = inject(RbacStore);
+      await configService.loadConfig();
+      await rbacStore.loadRoles(configService.settings.rolesUrl ?? 'assets/roles.json');
+    }),
+
+    // 2. Restore session from localStorage.
+    provideAppInitializer(() => {
+      inject(AuthStore).autoLogin();
+    }),
+
+    // 3. Configure Material icon font class.
+    provideAppInitializer(() => {
+      inject(MatIconRegistry).setDefaultFontSetClass('material-icons');
+    }),
   ],
 };

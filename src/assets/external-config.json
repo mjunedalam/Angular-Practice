@@ -7,5 +7,6 @@
     "appId": "M0M4nfZyToqUlgQy",
     "esriUrl": "https://eccenterprisegis.enp.aramco.com.sa/arcgis",
     "webMapItemId": "c177620bd7744a22b6e7e0d98c33d18a",
-    "morningReportWebMapId": ""
+    "morningReportWebMapId": "",
+    "rolesUrl": "assets/roles.json"
 }
