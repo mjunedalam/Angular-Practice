@@ -83,6 +83,28 @@ transition: 0.3s ease;
   word-wrap: break-word;
 }
 
+// ── Lock icon tooltip ─────────────────────────────────────────────────────────
+.mat-mdc-tooltip.sidenav-lock-tooltip .mdc-tooltip__surface {
+  background: linear-gradient(150deg, #dc2626 0%, #991b1b 100%) !important;
+  color: #ffffff !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.15px !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  max-width: 230px !important;
+  white-space: normal !important;
+  text-align: left !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    0 0 0 1px rgba(220, 38, 38, 0.35),
+    0 6px 24px rgba(153, 27, 27, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
 .wells-value{
   background: #87ceeb;
   border-color: #38bdf8;
