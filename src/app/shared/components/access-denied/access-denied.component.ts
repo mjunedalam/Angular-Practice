@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../../../features/auth/store/auth.store';
@@ -7,142 +8,100 @@ import { AuthStore } from '../../../features/auth/store/auth.store';
 export type DeniedReason = 'no-permission' | 'stale-session' | 'rbac-unavailable';
 
 export interface AccessDeniedData {
-  readonly routeId:  string;
+  readonly routeId:   string;
   readonly userRoles: string[];
-  readonly reason:   DeniedReason;
+  readonly reason:    DeniedReason;
   readonly rbacError?: string;
 }
+
+const CLOSE_DURATION_MS = 200;
 
 @Component({
   selector: 'app-access-denied',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
+  templateUrl: './access-denied.component.html',
+  styleUrl: './access-denied.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="denied-shell">
-      <mat-icon class="denied-icon">{{ icon }}</mat-icon>
-
-      <h2 mat-dialog-title>{{ title }}</h2>
-
-      <mat-dialog-content>
-        <p>{{ message }}</p>
-
-        @if (data.reason === 'no-permission' && data.userRoles.length) {
-          <p class="roles-row">
-            <span class="roles-label">
-              Your role{{ data.userRoles.length > 1 ? 's' : '' }}:
-            </span>
-            @for (role of data.userRoles; track role) {
-              <span class="role-chip">{{ role }}</span>
-            }
-          </p>
-        }
-
-        @if (data.reason === 'rbac-unavailable' && data.rbacError) {
-          <p class="error-detail">{{ data.rbacError }}</p>
-        }
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        @if (data.reason === 'stale-session') {
-          <button mat-flat-button color="primary" (click)="logout()">Log Out & Re-Login</button>
-        } @else {
-          <button mat-flat-button color="primary" (click)="close()">Got it</button>
-        }
-      </mat-dialog-actions>
-    </div>
-  `,
-  styles: [`
-    .denied-shell {
-      text-align: center;
-      padding: 8px 4px;
-    }
-
-    .denied-icon {
-      font-size: 52px;
-      width: 52px;
-      height: 52px;
-      color: #e53935;
-      margin-bottom: 4px;
-    }
-
-    h2[mat-dialog-title] { margin: 0 0 4px; }
-
-    mat-dialog-content { text-align: left; }
-
-    .roles-row {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 12px 0;
-    }
-
-    .roles-label {
-      font-size: 13px;
-      color: var(--mat-sys-on-surface-variant, #666);
-    }
-
-    .role-chip {
-      padding: 2px 10px;
-      border-radius: 12px;
-      background: var(--mat-sys-surface-variant, #e0e0e0);
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .error-detail {
-      font-size: 12px;
-      color: #e53935;
-      font-family: monospace;
-      background: #fce8e8;
-      padding: 6px 10px;
-      border-radius: 4px;
-      margin: 8px 0 0;
-      word-break: break-word;
-    }
-
-    .hint {
-      font-size: 13px;
-      color: var(--mat-sys-on-surface-variant, #666);
-      margin: 8px 0 0;
-    }
-  `],
+  animations: [
+    trigger('dialog', [
+      state('open',    style({ opacity: 1, transform: 'scale(1) translateY(0)' })),
+      state('closing', style({ opacity: 0, transform: 'scale(0.93) translateY(-10px)' })),
+      transition('void => open', [
+        style({ opacity: 0, transform: 'scale(0.86) translateY(-22px)' }),
+        animate(`320ms cubic-bezier(0.34, 1.56, 0.64, 1)`),
+      ]),
+      transition('open => closing', [
+        animate(`${CLOSE_DURATION_MS}ms cubic-bezier(0.4, 0, 1, 1)`),
+      ]),
+    ]),
+  ],
 })
 export class AccessDeniedComponent {
   protected readonly data      = inject<AccessDeniedData>(MAT_DIALOG_DATA);
   private   readonly dialogRef = inject(MatDialogRef<AccessDeniedComponent>);
   private   readonly authStore = inject(AuthStore);
 
+  protected readonly animState = signal<'open' | 'closing'>('open');
+
   protected get icon(): string {
-    return this.data.reason === 'rbac-unavailable' ? 'error_outline' : 'lock';
+    const icons: Record<DeniedReason, string> = {
+      'no-permission':    'lock',
+      'stale-session':    'schedule',
+      'rbac-unavailable': 'error_outline',
+    };
+    return icons[this.data.reason];
+  }
+
+  protected get iconClass(): string {
+    const classes: Record<DeniedReason, string> = {
+      'no-permission':    'icon-lock',
+      'stale-session':    'icon-session',
+      'rbac-unavailable': 'icon-error',
+    };
+    return classes[this.data.reason];
   }
 
   protected get title(): string {
-    switch (this.data.reason) {
-      case 'stale-session':    return 'Session Outdated';
-      case 'rbac-unavailable': return 'Configuration Error';
-      default:                 return 'Access Restricted';
-    }
+    const titles: Record<DeniedReason, string> = {
+      'no-permission':    'Access Restricted',
+      'stale-session':    'Session Outdated',
+      'rbac-unavailable': 'Configuration Error',
+    };
+    return titles[this.data.reason];
+  }
+
+  protected get subtitle(): string {
+    const subtitles: Record<DeniedReason, string> = {
+      'no-permission':    this.data.routeId,
+      'stale-session':    'Credentials need refresh',
+      'rbac-unavailable': 'RBAC could not be loaded',
+    };
+    return subtitles[this.data.reason];
   }
 
   protected get message(): string {
-    switch (this.data.reason) {
-      case 'stale-session':
-        return 'Your session does not contain group claims. Please log out and log back in to refresh your credentials.';
-      case 'rbac-unavailable':
-        return 'Role configuration could not be loaded. Contact your administrator.';
-      default:
-        return `You don't have permission to access ${this.data.routeId}. Contact your administrator to request access.`;
-    }
+    const messages: Record<DeniedReason, string> = {
+      'no-permission':
+        'You don\'t have the required permissions for this module. Contact your administrator to request access.',
+      'stale-session':
+        'Your session is missing group claims. Log out and re-authenticate to refresh your credentials.',
+      'rbac-unavailable':
+        'Role configuration failed to load. The administrator needs to check the RBAC configuration.',
+    };
+    return messages[this.data.reason];
+  }
+
+  protected dismiss(): void {
+    this.animState.set('closing');
+    setTimeout(() => this.dialogRef.close(), CLOSE_DURATION_MS);
   }
 
   protected logout(): void {
-    this.dialogRef.close();
-    this.authStore.logout();
-  }
-
-  protected close(): void {
-    this.dialogRef.close();
+    this.animState.set('closing');
+    setTimeout(() => {
+      this.dialogRef.close();
+      this.authStore.logout();
+    }, CLOSE_DURATION_MS);
   }
 }

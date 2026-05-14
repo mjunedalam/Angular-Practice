@@ -109,6 +109,14 @@ export class LoaderService {
     }
   }
 
+  /** Call from pages that have no app shell (e.g. login) to close the native bar. */
+  completeBoot(): void {
+    if (this.bootCompleted) return;
+    this.bootCompleted = true;
+    this.appShellReady = true;
+    window.__agwaBootLoader?.complete();
+  }
+
   private completeBootIfReady(): void {
     if (!this.appShellReady || this.bootCompleted || this.bootTasks.size > 0) return;
     this.bootCompleted = true;

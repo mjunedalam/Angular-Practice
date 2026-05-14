@@ -1,11 +1,12 @@
 // login.component.ts
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { LoginRequest } from 'src/app/features/auth/store/auth.selectors';
+import { LoaderService } from '@shared/components/global-loader/loader.service';
 
 interface LoginForm {
   username: FormControl<string>;
@@ -28,6 +29,7 @@ export class LoginComponent {
   protected readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly loader = inject(LoaderService);
   private readonly submitted = signal(false);
 
   protected readonly sessionExpiredMessage = signal<string | null>(null);
@@ -47,6 +49,9 @@ export class LoginComponent {
     if (this.route.snapshot.queryParamMap.get('reason') === 'session-expired') {
       this.sessionExpiredMessage.set('Your session has expired. Please log in again.');
     }
+
+    // No app shell on the login page — complete the native bar once the page renders.
+    afterNextRender(() => this.loader.completeBoot());
   }
 
   protected readonly loginForm = new FormGroup<LoginForm>({

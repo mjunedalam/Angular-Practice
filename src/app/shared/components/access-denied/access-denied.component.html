@@ -1,0 +1,41 @@
+<div class="denied-dialog" [@dialog]="animState()">
+  <div class="denied-header">
+    <mat-icon class="denied-icon" [class]="iconClass">{{ icon }}</mat-icon>
+    <div class="denied-titles">
+      <h3 class="denied-title">{{ title }}</h3>
+      <span class="denied-subtitle">{{ subtitle }}</span>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="dismiss()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="denied-body">
+    <p class="denied-message">{{ message }}</p>
+
+    @if (data.reason === 'no-permission' && data.userRoles.length) {
+      <div class="roles-row">
+        <span class="roles-label">Your roles</span>
+        <div class="chips">
+          @for (role of data.userRoles; track role) {
+            <span class="chip">{{ role }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (data.reason === 'rbac-unavailable' && data.rbacError) {
+      <code class="error-code">{{ data.rbacError }}</code>
+    }
+  </div>
+
+  <div class="denied-footer">
+    @if (data.reason === 'stale-session') {
+      <button mat-flat-button color="warn" (click)="logout()">
+        <mat-icon>logout</mat-icon> Re-authenticate
+      </button>
+    } @else {
+      <button mat-flat-button color="primary" (click)="dismiss()">Dismiss</button>
+    }
+  </div>
+</div>
