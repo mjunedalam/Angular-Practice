@@ -65,13 +65,6 @@
       >
         <div class="top-navbar__user-info">
           <span class="top-navbar__user-name">{{ auth.displayUsername() }}</span>
-          @if (userRoleLabels().length) {
-            <div class="top-navbar__roles">
-              @for (label of userRoleLabels(); track label) {
-                <span class="top-navbar__role-chip">{{ label }}</span>
-              }
-            </div>
-          }
         </div>
 
         <div class="top-navbar__avatar" aria-hidden="true">{{ userInitial() }}</div>
@@ -90,6 +83,13 @@
               <div class="top-navbar__profile-copy">
                 <span class="top-navbar__profile-label">Signed in as</span>
                 <strong class="top-navbar__profile-name">{{ auth.displayUsername() }}</strong>
+                @if (userRoleLabels().length) {
+                  <div class="top-navbar__profile-roles">
+                    @for (label of userRoleLabels(); track label) {
+                      <span class="top-navbar__profile-role-chip">{{ label }}</span>
+                    }
+                  </div>
+                }
               </div>
             </div>
 

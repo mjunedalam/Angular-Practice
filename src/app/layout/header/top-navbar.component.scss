@@ -341,6 +341,27 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   flex-shrink: 0;
 }
 
+.top-navbar__profile-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.top-navbar__profile-role-chip {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.10);
+  border: 1px solid rgba(14, 165, 233, 0.30);
+  border-radius: 5px;
+  padding: 2px 7px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
 .top-navbar__logout-btn {
   width: 100%;
   display: flex;
