@@ -205,6 +205,13 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
     line-height: 1.2;
   }
 
+  &__last-login {
+    font-size: 10px;
+    color: $nav-muted;
+    letter-spacing: 0.15px;
+    line-height: 1.2;
+  }
+
   &__roles {
     display: flex;
     gap: 4px;
@@ -325,6 +332,13 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.top-navbar__profile-last-login {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .top-navbar__profile-avatar {

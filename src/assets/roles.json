@@ -3,19 +3,19 @@
     {
       "name": "GWD_client",
       "label": "Client",
-      "routes": ["home", "morning-report" ,"active-wwell"],
+      "routes": ["home", "morning-report" ,"presentations","active-wwell"],
       "canUpdate": []
     },
     {
       "name": "GWD_member",
       "label": "Member",
-      "routes": ["home", "morning-report", "active-wwell"],
+      "routes": ["home", "morning-report", "active-wwell", "presentations"],
       "canUpdate": ["active-wwell"]
     },
     {
       "name": "GWD_admin",
       "label": "Administrator",
-      "routes": ["home", "morning-report", "active-wwell"],
+      "routes": ["home", "morning-report", "presentations", "active-wwell"],
       "canUpdate": ["active-wwell"]
     }
   ]

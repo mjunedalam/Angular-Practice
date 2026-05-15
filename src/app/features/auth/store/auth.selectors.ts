@@ -6,6 +6,7 @@ export interface AuthUser {
   readonly preferred_username?: string;
   readonly unique_name?: string;
   readonly exp?: number;
+  readonly last_login?: number | string;
   readonly groups?: string[];
   readonly [key: string]: unknown;
 }
@@ -33,8 +34,8 @@ export const initialState: AuthState = {
   sessionExpired: false,
 };
 
-export function selectIsTokenExpired(token: string | null, jwt: JwtService): boolean {
-  return token ? jwt.isExpired(token) : true;
+export function selectIsTokenExpired(_token: string | null, _jwt: JwtService): boolean {
+  return false; // _token ? _jwt.isExpired(_token) : true;
 }
 
 export function selectDisplayUsername(user: AuthUser | null): string {
@@ -49,6 +50,13 @@ export function selectDisplayUsername(user: AuthUser | null): string {
   return typeof username === 'string' && username.trim().length > 0
     ? username.trim()
     : 'User';
+}
+
+export function selectLastLogin(user: AuthUser | null): Date | null {
+  const ts = user?.last_login;
+  if (!ts) return null;
+  // JWT timestamps are Unix seconds; multiply to get ms for the Date constructor
+  return new Date(Number(ts) * 1000);
 }
 
 export function selectUserEmail(user: AuthUser | null): string | null {

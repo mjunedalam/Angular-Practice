@@ -34,6 +34,16 @@ export class TopNavbarComponent {
     return groups.map(g => defs.find(d => d.name === g)?.label ?? g);
   });
 
+  protected readonly lastLoginDisplay = computed(() => {
+    const d = this.auth.lastLogin();
+    if (!d) return null;
+    return d.toLocaleString('en-US', {
+      timeZone: 'Asia/Riyadh',
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  });
+
   readonly appTitle = 'Aramco Ground Water Application';
   readonly logoText = 'AGWA';
 
