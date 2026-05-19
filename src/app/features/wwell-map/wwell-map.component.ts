@@ -223,21 +223,11 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     for (const wwell of this.wwells()) {
       const point = new Point({ latitude: wwell.lat, longitude: wwell.lng });
       const [r, g, b] = tilesMap.get(wwell.label)?.color ?? [200, 200, 200, 1];
-      layer.addMany([
-        new Graphic({
-          geometry: point,
-          symbol: new SimpleMarkerSymbol({ style: 'circle', size: 36, color: [r, g, b, 0.08], outline: { color: [r, g, b, 0.35], width: 2 } }),
-        }),
-        new Graphic({
-          geometry: point,
-          symbol: new SimpleMarkerSymbol({ style: 'circle', size: 20, color: [r, g, b, 0.2], outline: { color: [r, g, b, 0.75], width: 1.5 } }),
-        }),
-        new Graphic({
-          geometry: point,
-          symbol: new SimpleMarkerSymbol({ style: 'circle', size: 8, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
-          attributes: { wwellId: wwell.wwellId, location: wwell.location },
-        }),
-      ]);
+      layer.add(new Graphic({
+        geometry: point,
+        symbol: new SimpleMarkerSymbol({ style: 'circle', size: 3, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
+        attributes: { wwellId: wwell.wwellId, location: wwell.location },
+      }));
     }
   }
 
