@@ -42,6 +42,8 @@ import {
     selectWaterWellTestResultsFromData,
     selectWellHeaderViewModel,
     selectWellLogsIndicators,
+    selectWellLogsRemarks,
+    WellLogsRemarks,
     selectWellNamesFromList,
     selectWellTestResults,
     selectWwellTestViewModel,
@@ -74,6 +76,7 @@ export const PresentationStore = signalStore(
             offsetWells: computed((): OffsetWaterWells[] => selectOffsetWells(wellData())),
             wellTestResults: computed((): WellTestResult[] => selectWellTestResults(wellData())),
             wellsLogsIndicators: computed((): WellLogsIndicators | null => selectWellLogsIndicators(wellData())),
+            wellsLogsRemarks: computed((): WellLogsRemarks | null => selectWellLogsRemarks(wellData())),
             waterWelltestResult: computed(() => selectWaterWellTestResultsFromData(wellData() ? [wellData()!] : [])),
             wellHeaderData: computed((): WellHeaderViewModel | null =>
                 selectWellHeaderViewModel(wellData(), selectedEpANum()),

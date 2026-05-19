@@ -42,6 +42,50 @@
   filter: none;
   transition: background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
   cursor: default;
+  position: relative;
+
+  &--has-tooltip {
+    cursor: help;
+  }
+
+  &__tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    padding: 10px 13px;
+    background: #0f172a;
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.55;
+    border-radius: 8px;
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.16s ease, visibility 0.16s ease;
+    z-index: 200;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #0f172a;
+    }
+  }
+
+  &:hover &__tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
 
   &--active {
     opacity: 1;

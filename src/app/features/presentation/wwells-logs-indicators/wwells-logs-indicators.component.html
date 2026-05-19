@@ -1,33 +1,42 @@
 <div class="log-panel">
-  
-
   <div class="log-strip">
-      @let data = store.wellsLogsIndicators();
-      <div
-        class="indicator-toggle"
-        [class.indicator-toggle--active]="data?.rcc"
-        [title]="data?.rcc ? 'RCC Data Available' : 'No RCC Data'"
-      >
-        <div class="indicator-toggle__light"></div>
-        <span class="indicator-toggle__label">RCC</span>
-      </div>
+    @let data = store.wellsLogsIndicators();
+    @let remarks = store.wellsLogsRemarks();
 
-      <div
-        class="indicator-toggle"
-        [class.indicator-toggle--active]="data?.mudLog"
-        [title]="data?.mudLog ? 'Mud Log Available' : 'No Mud Log Data'"
-      >
-        <div class="indicator-toggle__light"></div>
-        <span class="indicator-toggle__label">Mud Log</span>
-      </div>
+    <div
+      class="indicator-toggle"
+      [class.indicator-toggle--active]="data?.rcc"
+      [class.indicator-toggle--has-tooltip]="!!remarks?.dtRemarks"
+    >
+      <div class="indicator-toggle__light"></div>
+      <span class="indicator-toggle__label">RCC</span>
+      @if (remarks?.dtRemarks) {
+        <span class="indicator-toggle__tooltip">{{ remarks!.dtRemarks }}</span>
+      }
+    </div>
 
-      <div
-        class="indicator-toggle"
-        [class.indicator-toggle--active]="data?.logging"
-        [title]="data?.logging ? 'Logging Data Available' : 'No Logging Data'"
-      >
-        <div class="indicator-toggle__light"></div>
-        <span class="indicator-toggle__label">Logging</span>
-      </div>
+    <div
+      class="indicator-toggle"
+      [class.indicator-toggle--active]="data?.mudLog"
+      [class.indicator-toggle--has-tooltip]="!!remarks?.mudRemarks"
+    >
+      <div class="indicator-toggle__light"></div>
+      <span class="indicator-toggle__label">Mud Log</span>
+      @if (remarks?.mudRemarks) {
+        <span class="indicator-toggle__tooltip">{{ remarks!.mudRemarks }}</span>
+      }
+    </div>
+
+    <div
+      class="indicator-toggle"
+      [class.indicator-toggle--active]="data?.logging"
+      [class.indicator-toggle--has-tooltip]="!!remarks?.loggingRemarks"
+    >
+      <div class="indicator-toggle__light"></div>
+      <span class="indicator-toggle__label">Logging</span>
+      @if (remarks?.loggingRemarks) {
+        <span class="indicator-toggle__tooltip">{{ remarks!.loggingRemarks }}</span>
+      }
+    </div>
   </div>
 </div>

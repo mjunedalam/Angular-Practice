@@ -216,6 +216,23 @@ export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicator
     };
 }
 
+export interface WellLogsRemarks {
+    readonly dtRemarks: string | null;
+    readonly mudRemarks: string | null;
+    readonly loggingRemarks: string | null;
+}
+
+export function selectWellLogsRemarks(d: IWellData | null): WellLogsRemarks | null {
+    if (!d) return null;
+    const h: IHeaderIR | undefined = d.EXAD_GWD_IR_HEADER?.[0];
+    if (!h) return null;
+    return {
+        dtRemarks: h.dtRemarks?.trim() || null,
+        mudRemarks: h.mudRemarks?.trim() || null,
+        loggingRemarks: h.loggingRemarks?.trim() || null,
+    };
+}
+
 function resolveTestType(t: IWaterWellTestOutcome): WellTestType {
     const code = (t.hydTestTypCd ?? '').toUpperCase().trim();
     return code === 'FLOW' ? 'FLOW' : 'PUMP';
