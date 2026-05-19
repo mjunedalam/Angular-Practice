@@ -273,7 +273,14 @@ export const ActiveWwellStore = signalStore(
 
             setStatus(status:string):void{
                 patchState(store, {status})
-            }
+            },
+
+            refreshWellDetail(): void {
+                const epANum = store.selectedEpANum();
+                const date = formatDateForInput(store.selectedDate());
+                if (epANum == null) return;
+                loadDetail({ date, epANum });
+            },
 
         };
     }),
