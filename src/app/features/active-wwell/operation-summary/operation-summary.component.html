@@ -1,13 +1,14 @@
-<div class="aw-section">
-  <div class="well-header">Summary Of Operation</div>
-  <div class="ops-grid">
-    <div class="ops-label">Operation (retrieved from Drill Eye)</div>
-    <textarea class="ops-textarea" rows="4" readonly [value]="data()?.operation ?? 'N/A'"></textarea>
-
-    <div class="ops-label">Next Operation</div>
-    <textarea class="ops-textarea" rows="4" readonly [value]="data()?.nextOperation ?? 'N/A'"></textarea>
-
-    <div class="ops-label">Drilling Summary</div>
-    <textarea class="ops-textarea" rows="4" readonly [value]="data()?.drillingRemarks ?? 'N/A'"></textarea>
+<form [formGroup]="form">
+  <div class="aw-section">
+    <div class="well-header">Summary Of Operation</div>
+    <div class="ops-grid">
+      <div class="ops-label">Operation (retrieved from Drill Eye)</div>
+      <textarea class="ops-textarea" rows="4" formControlName="wOpRmk"></textarea>
+      <!-- <small class="red-color"
+        *ngIf="!form.get('operations').valid && form.get('operations').errors && form.get('operations').touched">Field
+        is required</small> -->
+      <div class="ops-label">Next Operation</div>
+      <textarea class="ops-textarea" rows="4" formControlName="nxt24HrPlanRmk"></textarea>
+    </div>
   </div>
-</div>
+</form>
