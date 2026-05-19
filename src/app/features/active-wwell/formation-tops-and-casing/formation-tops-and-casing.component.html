@@ -1,6 +1,6 @@
 <div class="aw-section">
   <div class="well-header">Formation Tops</div>
-  <div class="ft-body">
+  <!-- <div class="ft-body">
     <div class="ft-grid">
       <div class="aw-db-cell hover-card">
         <span class="aw-db-label">Formation</span>
@@ -23,5 +23,16 @@
         <span class="aw-db-value">{{ data()?.remarks ?? 'N/A' }}</span>
       </div>
     </div>
-  </div>
+  </div> -->
+  <ag-grid-angular
+    class="ag-theme-alpine"
+    style="width: 100%; height: 300px"
+    [rowData]="[data()]"
+    (gridReady)="onGridReady($event)"
+    [theme]="theme"
+    [columnDefs]="columnDefs"
+    [defaultColDef]="defaultColDef"
+    [tooltipShowDelay]="500"
+  >
+  </ag-grid-angular>
 </div>
