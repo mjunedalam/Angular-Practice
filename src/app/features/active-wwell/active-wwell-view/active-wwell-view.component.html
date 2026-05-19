@@ -1,198 +1,157 @@
-<div class="active-wwell-page">
-  <div
-    class="active-wwell-loading-slot"
-    [class.active-wwell-loading-slot--active]="store.isDetailsLoading()"
-  >
-    <mat-progress-bar
-      mode="indeterminate"
-      class="active-wwell-loading-bar"
-    ></mat-progress-bar>
-  </div>
-
-  <div class="active-wwell-shell">
-    <div class="active-wwell-sidebar">
-      <div class="well-header well-list">Wells List</div>
-
-      <mat-chip-listbox class="mat-mdc-chip-set-stacked">
-        @for (well of wells(); track well.epANum) {
-          <mat-chip-option
-            [selected]="store.selectedEpANum() === well.epANum"
-            [ngClass]="{
-              'well-selected': store.selectedEpANum() === well.epANum,
-            }"
-            (click)="onWellSelect(well.epANum)"
-          >
-            {{ well.wellName }}
-          </mat-chip-option>
-        }
-      </mat-chip-listbox>
-
-      <div class="active-wwell-sidebar__dept">
-        Wellsite &amp; Water Operation Department
-      </div>
+<form [formGroup]="form">
+  <div class="active-wwell-page">
+    <div class="active-wwell-loading-slot" [class.active-wwell-loading-slot--active]="store.isDetailsLoading()">
+      <mat-progress-bar mode="indeterminate" class="active-wwell-loading-bar"></mat-progress-bar>
     </div>
 
-    <div class="active-wwell-content">
-      <div class="aw-page-header">
-        <div class="aw-date-picker">
-          <label class="aw-date-label" for="aw-date-input">Date:</label>
-          <input
-            id="aw-date-input"
-            type="date"
-            class="aw-date-input"
-            [ngModel]="selectedDateString()"
-            [max]="maxDateString"
-            (ngModelChange)="onDateChange($event)"
-            aria-label="Select date for well data"
-          />
+    <div class="active-wwell-shell">
+      <div class="active-wwell-sidebar">
+        <div class="well-header well-list">Wells List</div>
+
+        <mat-chip-listbox class="mat-mdc-chip-set-stacked">
+          @for (well of wells(); track well.epANum) {
+          <mat-chip-option [selected]="store.selectedEpANum() === well.epANum" [ngClass]="{
+              'well-selected': store.selectedEpANum() === well.epANum,
+            }" (click)="onWellSelect(well.epANum)">
+            {{ well.wellName }}
+          </mat-chip-option>
+          }
+        </mat-chip-listbox>
+
+        <div class="active-wwell-sidebar__dept">
+          Wellsite &amp; Water Operation Department
         </div>
-        <div class="well-header">Single Water Well Review</div>
-        <div class="aw-header-spacer"></div>
       </div>
 
-      <div class="active-wwell-grid">
-        <div class="active-wwell-main">
-          <app-wwell-header></app-wwell-header>
-          <app-database-info></app-database-info>
-          <app-operation-summary></app-operation-summary>
-
-          <div class="aw-section">
-            <div class="well-header">Drilling Remarks</div>
-            <textarea
-              class="active-wwell-remarks"
-              readonly
-              [value]="drillingRemarks()"
-            ></textarea>
+      <div class="active-wwell-content">
+        <div class="aw-page-header">
+          <div class="date-picker-section">
+            <label class="date-picker-label" for="well-date-input">Date:</label>
+            <input id="well-date-input" type="date" class="date-picker-input" [ngModel]="selectedDateString()"
+             [ngModelOptions]="{standalone: true}"
+              [max]="maxDateString" (ngModelChange)="onDateInputChange($event)"
+              aria-label="Select date for well data" />
           </div>
-
-          <app-formation-tops-and-casing></app-formation-tops-and-casing>
-          <app-casing-info></app-casing-info>
-          <app-wwell-test></app-wwell-test>
+          <div class="well-header">Single Water Well Review</div>
+          <div class="aw-header-spacer"></div>
         </div>
 
-        <div class="active-wwell-sidepanel">
-          <app-file-upload [epANum]="store.selectedEpANum()" [date]="selectedDateString()"></app-file-upload>
+        <div class="active-wwell-grid">
+          <div class="active-wwell-main">
+            <app-wwell-header></app-wwell-header>
+            <app-database-info></app-database-info>
+            <app-operation-summary></app-operation-summary>
 
-          <div class="lt-orange active-wwell-status-panel">
-            <mat-form-field
-              appearance="outline"
-              subscriptSizing="dynamic"
-              class="active-wwell-select"
-            >
-              <mat-label>Status</mat-label>
-              <mat-select
-                [ngModel]="selectedStatus()"
-                (ngModelChange)="onSelect($event)"
-                panelClass="status-select-panel"
-                (openedChange)="onStatusPanelToggle($event)"
-              >
-                <mat-option disabled class="status-search-opt">
-                  <div class="status-search-wrap">
-                    <mat-icon class="status-search-icon">search</mat-icon>
-                    <input
-                      class="status-search-input"
-                      placeholder="Search status…"
-                      autocomplete="off"
-                      [ngModel]="statusSearchQuery()"
-                      (ngModelChange)="statusSearchQuery.set($event)"
-                      (click)="$event.stopPropagation()"
-                      (keydown)="
-                        $event.key !== 'Escape' && $event.stopPropagation()
-                      "
-                    />
-                  </div>
-                </mat-option>
-
-                @if (filteredStatusOptions().length === 0) {
-                  <mat-option disabled class="status-no-results"
-                    >No results</mat-option
-                  >
-                }
-
-                @for (status of filteredStatusOptions(); track status) {
-                  <mat-option [value]="status">{{ status }}</mat-option>
-                }
-                <mat-option [value]="ADD_NEW_SENTINEL">
-                  <mat-icon inline>add</mat-icon>
-                  Add new...
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field
-              appearance="outline"
-              subscriptSizing="dynamic"
-              class="active-wwell-select"
-            >
-              <mat-label>Area</mat-label>
-              <mat-select
-                [ngModel]="selectedArea()"
-                (ngModelChange)="onAreaChange($event)"
-              >
-                @for (area of areas; track area.value) {
-                  <mat-option [value]="area.value">{{ area.value }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <div class="active-wwell-stat-box">
-              <mat-label>Formation Drilling</mat-label>
-              <div class="stat-value">
-                {{ displayValue(summaryStats().formationDrilling) }}
-              </div>
+            <div class="aw-section">
+              <div class="well-header">Drilling Remarks</div>
+              <textarea class="active-wwell-remarks" formControlName="wDrlgSmryRmk"></textarea>
             </div>
 
-            <div class="active-wwell-stat-box">
+            <app-formation-tops-and-casing></app-formation-tops-and-casing>
+            <app-casing-info></app-casing-info>
+            <app-wwell-test></app-wwell-test>
+          </div>
+
+          <div class="active-wwell-sidepanel">
+            <app-file-upload [epANum]="store.selectedEpANum()" [date]="selectedDateString()"></app-file-upload>
+
+            <div class="lt-orange active-wwell-status-panel">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status" panelClass="status-select-panel">
+                  <mat-option disabled class="status-search-opt">
+                    <div class="status-search-wrap">
+                      <mat-icon class="status-search-icon">search</mat-icon>
+                      <input class="status-search-input" placeholder="Search status…" autocomplete="off"
+                        [ngModel]="statusSearchQuery()" (ngModelChange)="statusSearchQuery.set($event)"
+                        [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" (keydown)="
+                        $event.key !== 'Escape' && $event.stopPropagation()
+                      " />
+                    </div>
+                  </mat-option>
+
+                  @if (filteredStatusOptions().length === 0) {
+                  <mat-option disabled class="status-no-results">No results</mat-option>
+                  }
+
+                  @for (status of filteredStatusOptions(); track status) {
+                  <mat-option [value]="status">{{ status }}</mat-option>
+                  }
+                  <mat-option (click)="openDialog()">
+                    <mat-icon inline>add</mat-icon>
+                    Add new...
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
+                <mat-label>Area</mat-label>
+                <mat-select formControlName="area">
+                  @for (area of areas; track area.value) {
+                  <mat-option [value]="area.value">{{ area.value }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div class="active-wwell-stat-box">
+                <mat-label>Formation Drilling</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().formationDrilling) }}
+                </div>
+              </div>
+
+              <!-- <div class="active-wwell-stat-box">
               <mat-label>Bit Size</mat-label>
               <div class="stat-value">
                 {{ displayValue(summaryStats().bitSize) }}
               </div>
-            </div>
+            </div> -->
 
-            <div class="active-wwell-stat-box">
-              <mat-label>Circulation</mat-label>
-              <div class="stat-value">
-                {{ displayValue(summaryStats().circulation) }}
+              <div class="active-wwell-stat-box">
+                <mat-label>Circulation</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().circulation) }}
+                </div>
               </div>
-            </div>
 
-            <div class="active-wwell-stat-box">
+              <!-- <div class="active-wwell-stat-box">
               <mat-label>Mud Weight</mat-label>
               <div class="stat-value">
                 {{ displayValue(summaryStats().mudWeight) }}
               </div>
-            </div>
+            </div> -->
 
-            <div class="active-wwell-stat-box avg-rop-box">
-              <mat-label>Avg ROP</mat-label>
-              <div class="stat-value">
-                {{ displayValue(summaryStats().avgRop) }}
+              <div class="active-wwell-stat-box avg-rop-box">
+                <mat-label>Avg ROP</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().avgRop) }}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="active-wwell-footer">
-    <div class="footer-copy">Saudi Aramco Company General Use</div>
-    <div class="footer-legend">
-      <span class="footer-legend__title">Data Source Legend</span>
-      <div class="footer-legend__grid">
-        <div class="footer-legend__item">
-          <div class="legend-swatch legend-swatch--gray"></div>
-          Drill Eye
-        </div>
-        <div class="footer-legend__item">
-          <div class="legend-swatch legend-swatch--orange"></div>
-          GIS
-        </div>
-        <div class="footer-legend__item">
-          <div class="legend-swatch legend-swatch--blue"></div>
-          IR
+    <div class="active-wwell-footer">
+      <div class="footer-copy">Saudi Aramco Company General Use</div>
+      <div class="footer-legend">
+        <span class="footer-legend__title">Data Source Legend</span>
+        <div class="footer-legend__grid">
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--gray"></div>
+            Drill Eye
+          </div>
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--orange"></div>
+            GIS
+          </div>
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--blue"></div>
+            IR
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</form>
