@@ -26,6 +26,8 @@ export interface IDailyRemarks {
     opRmk?: string | null;
     next24HrPlanRrmk?: string | null;
     drlgSmryRmk?: string | null;
+    egdr_id?: number | null;
+    area?: string | null;
 }
 
 export interface IWellData {

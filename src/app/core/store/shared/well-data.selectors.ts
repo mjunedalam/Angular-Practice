@@ -40,7 +40,7 @@ function coercePositiveEpANum(value: number | string | null | undefined): number
 export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
     return wellList.flatMap((entry) => {
         const epANum = coercePositiveEpANum(entry.epANum);
-        return epANum === null ? [] : [{ wellName: entry.wellName, epANum }];
+        return epANum === null ? [] : [{ wellName: entry.wGnrName, epANum }];
     });
 }
 
@@ -77,11 +77,25 @@ export function selectTotalDepth(d: IWellData | null): number {
     return d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
 }
 
+export function selectStatus(d: IWellData | null): string {
+    return d?.EXAD_GWD_DAILY_REMARKS?.[0]?.status ?? "";
+}
+export function selectArea(d: IWellData | null): string {
+    return d?.EXAD_GWD_DAILY_REMARKS?.[0]?.area ?? "";
+}
+
 export function selectPrimaryCasing(d: IWellData | null): ICasingIR | null {
     const casings = [...(d?.EXAD_GWD_IR_CASING ?? [])].sort(
         (l, r) => Number(r.csgDepth ?? 0) - Number(l.csgDepth ?? 0),
     );
     return casings[0] ?? null;
+}
+
+export function selectCasing(d: IWellData | null): ICasingIR[] | null {
+    const casings = [...(d?.EXAD_GWD_IR_CASING ?? [])].sort(
+        (l, r) => Number(r.csgDepth ?? 0) - Number(l.csgDepth ?? 0),
+    );
+    return casings ?? null;
 }
 
 export function selectLatestFormation(d: IWellData | null): IFormationTops | null {
@@ -187,6 +201,7 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
             distance: ow.distance ?? 0,
             productivity: ow.specificCapacity ?? 0,
             rate: test?.hydProdRt ?? ow.flowRate ?? 0,
+            direction: ow?.direction ?? "NA",
         };
     });
 }
@@ -310,6 +325,28 @@ export function selectCasingInfoViewModel(d: IWellData | null): CasingInfoViewMo
     };
 }
 
+export function allCasingData(d: IWellData | null): CasingInfoViewModel[] | null {
+    if (!d) return null;
+    const casing = selectCasing(d);
+    const status = d.DRLG_OP_STATUS?.[0];
+
+    return casing!.map(cas => {
+        if (cas) { /* empty */ }
+        return {
+            csgType: cas?.csgType ?? FALLBACK_STR,
+            csgSize: cas?.csgSize ?? status?.wCsgOdSz ?? FALLBACK_STR,
+            csgDepth: cas?.csgDepth ?? FALLBACK_STR,
+            csgBotDpth: status?.wCsgBotDpth ?? FALLBACK_STR,
+        }
+    })
+    // return {
+    //     csgType: casing?.csgType ?? FALLBACK_STR,
+    //     csgSize: casing?.csgSize ?? status?.wCsgOdSz ?? FALLBACK_STR,
+    //     csgDepth: casing?.csgDepth ?? FALLBACK_STR,
+    //     csgBotDpth: status?.wCsgBotDpth ?? FALLBACK_STR,
+    // };
+}
+
 export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewModel | null {
     if (!d) return null;
     const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
@@ -321,24 +358,43 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const foreman = typeof statusRecord?.['wFmanName'] === 'string' ? statusRecord['wFmanName'] : null;
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     return {
+        // flowType: hydro?.flowType ?? 'N',
+        // testType: testOutcome?.hydTestTypCd ?? FALLBACK_STR,
+        // aquiferActual: testOutcome?.rsvrCd ?? water?.aquifer ?? FALLBACK_STR,
+        // aquiferEstimate: hydro?.estTargetAquifier ?? prewap?.targetFormation ?? FALLBACK_STR,
+        // h2sActual: testOutcome?.hydH2sCnc ?? water?.h2s ?? FALLBACK_STR,
+        // h2sEstimate: hydro?.estH2s ?? FALLBACK_STR,
+        // temp: testOutcome?.temp ?? FALLBACK_STR,
+        // tds: testOutcome?.wtrSaTdsCnc ?? water?.fieldTds ?? hydro?.estWaterQuality ?? FALLBACK_STR,
+        // rpm: testOutcome?.rpm ?? water?.rpm ?? FALLBACK_STR,
+        // duration: testOutcome?.duration ?? water?.testDuration ?? FALLBACK_STR,
+        // conductedBy: drillingEngineer ?? foreman ?? FALLBACK_STR,
+        // rate: testOutcome?.hydProdRt ?? water?.flowRate ?? FALLBACK_STR,
+        // siwhp: testOutcome?.siwhp ?? water?.staticWaterLevel ?? FALLBACK_STR,
+        // depth: prewap?.estTargetDepth ?? status?.wPrsntDpth ?? FALLBACK_STR,
+        // productivityActual: testOutcome?.hydProduct ?? water?.specificCapacity ?? FALLBACK_STR,
+        // productivityEstimate: hydro?.estProductivity ?? FALLBACK_STR,
+        // swl: testOutcome?.statWlvl ?? water?.staticWaterLevel ?? hydro?.estStaticWaterLevel ?? FALLBACK_STR,
+        // dwl: testOutcome?.dyncWlvl ?? water?.drawDown ?? FALLBACK_STR,
         flowType: hydro?.flowType ?? 'N',
-        testType: testOutcome?.hydTestTypCd ?? FALLBACK_STR,
-        aquiferActual: testOutcome?.rsvrCd ?? water?.aquifer ?? FALLBACK_STR,
-        aquiferEstimate: hydro?.estTargetAquifier ?? prewap?.targetFormation ?? FALLBACK_STR,
-        h2sActual: testOutcome?.hydH2sCnc ?? water?.h2s ?? FALLBACK_STR,
-        h2sEstimate: hydro?.estH2s ?? FALLBACK_STR,
-        temp: testOutcome?.temp ?? FALLBACK_STR,
-        tds: testOutcome?.wtrSaTdsCnc ?? water?.fieldTds ?? hydro?.estWaterQuality ?? FALLBACK_STR,
-        rpm: testOutcome?.rpm ?? water?.rpm ?? FALLBACK_STR,
-        duration: testOutcome?.duration ?? water?.testDuration ?? FALLBACK_STR,
-        conductedBy: drillingEngineer ?? foreman ?? FALLBACK_STR,
-        rate: testOutcome?.hydProdRt ?? water?.flowRate ?? FALLBACK_STR,
-        siwhp: testOutcome?.siwhp ?? water?.staticWaterLevel ?? FALLBACK_STR,
-        depth: prewap?.estTargetDepth ?? status?.wPrsntDpth ?? FALLBACK_STR,
-        productivityActual: testOutcome?.hydProduct ?? water?.specificCapacity ?? FALLBACK_STR,
-        productivityEstimate: hydro?.estProductivity ?? FALLBACK_STR,
-        swl: testOutcome?.statWlvl ?? water?.staticWaterLevel ?? hydro?.estStaticWaterLevel ?? FALLBACK_STR,
-        dwl: testOutcome?.dyncWlvl ?? water?.drawDown ?? FALLBACK_STR,
+        testType: testOutcome?.hydTestTypCd,
+        aquiferActual: testOutcome?.rsvrCd,
+        aquiferEstimate: hydro?.estTargetAquifier,
+        h2sActual: testOutcome?.hydH2sCnc,
+        h2sEstimate: hydro?.estH2s,
+        temp: testOutcome?.temp,
+        tds: testOutcome?.wtrSaTdsCnc,
+        rpm: testOutcome?.rpm,
+        duration: testOutcome?.duration,
+        conductedBy: testOutcome?.testerNetworkId,
+        rate: testOutcome?.hydProdRt,
+        siwhp: testOutcome?.siwhp,
+        depth: prewap?.estTargetDepth,
+        hydPmpDpth: testOutcome?.hydPmpDpth,
+        productivityActual: testOutcome?.hydProduct,
+        productivityEstimate: hydro?.estProductivity,
+        swl: testOutcome?.statWlvl,
+        dwl: testOutcome?.dyncWlvl,
     };
 }
 
@@ -369,7 +425,7 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
         wOpRmk: opSmry?.wOpRmk ?? status?.wOpRmk ?? '',
         foremanRmk: status?.nxt24HrPlanRmk ?? '',
         plLtrlEndDpth: prewap?.estTargetDepth ?? null,
-        supportings: rig?.waterWell ?? '',
+        supportings: d.EXAD_RCD_PREWAP?.[0]?.supportedBusiness ?? "Missing",
         wEvntTime: opSmry?.wEvntTime ?? '',
         rigStatus: d.EXAD_GWD_DAILY_REMARKS?.[0]?.status ?? 'NA',
     };

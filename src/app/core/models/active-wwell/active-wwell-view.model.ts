@@ -20,7 +20,7 @@ export interface MiscWellData {
   readonly rigMoveDays: number | null;
   readonly spudDate: string;
   readonly rigName: string;
-  readonly drlgSmryRmk: string | null;
+  readonly drlgSmryRmk?: string | null;
   readonly holeSize: string | null;
 }
 
@@ -37,6 +37,7 @@ export interface OffsetWaterWells {
   readonly rpm: number;
   readonly h2s: number;
   readonly distance: number;
+  readonly direction: string;
   readonly productivity: number;
   readonly rate: number;
 }
@@ -107,24 +108,27 @@ export interface CasingInfoViewModel {
 
 export interface WwellTestViewModel {
   readonly flowType: string;
-  readonly testType: string;
-  readonly aquiferActual: string;
+  readonly testType?: string | null;
+  readonly aquiferActual?: string | null;
   readonly aquiferEstimate: string;
-  readonly h2sActual: number | string;
+  readonly h2sActual?: number | string | null;
   readonly h2sEstimate: number | string;
-  readonly temp: number | string;
-  readonly tds: number | string;
-  readonly rpm: number | string;
-  readonly duration: number | string;
-  readonly conductedBy: string;
-  readonly rate: number | string;
-  readonly siwhp: number | string;
+  readonly temp?: number | string | null;
+  readonly tds?: number | string | null;
+  readonly rpm?: number | string | null;
+  readonly duration?: number | string | null;
+  readonly conductedBy?: string | null;
+  readonly rate?: number | string | null;
+  readonly siwhp?: number | string | null;
   readonly depth: number | string;
-  readonly productivityActual: number | string;
+  readonly productivityActual?: number | string | null;
   readonly productivityEstimate: number | string;
-  readonly swl: number | string;
-  readonly dwl: number | string;
+  readonly swl?: number | string | null;
+  readonly dwl?: number | string | null;
+  readonly hydPmpDpth?: number | null;
 }
+
+
 
 export interface UploadFileItem {
   readonly file: File;

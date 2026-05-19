@@ -1,4 +1,5 @@
 export interface WwellEntry {
-    readonly wellName: string;
+    wGnrName: string;
+    //readonly wellName: string;
     readonly epANum: number;
 }

@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { ActiveWwellFormService } from '../active-wwell-form.service';
+
 import { ActiveWwellStore } from '../store/active-wwell.store';
-import { ActiveWellViewService } from '@core/services/active-well-view.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { forkJoin } from 'rxjs';
 import { AuthStore } from '../../auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
 import { formatDateForInput } from '@shared/utils/date.util';
+import { ActiveWwellFormService } from '../active-wwell-form.service';
 
 @Component({
   selector: 'app-wwell-test',
@@ -39,7 +39,7 @@ export class WwellTestComponent {
 
   }
 
-  activeWellApiService = inject(ActiveWellViewService)
+  activeWellApiService: any = null; // TODO: inject when ActiveWellViewService is created
   notify = inject(NotificationService);
 
   createOrUpdateActiveWwell() {

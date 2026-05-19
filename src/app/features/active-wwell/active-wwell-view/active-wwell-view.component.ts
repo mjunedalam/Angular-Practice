@@ -10,9 +10,8 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { skip } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -32,16 +31,18 @@ import {
   ACTIVE_WWELL_FALLBACK,
   deriveStatusLabel,
 } from '../active-wwell.helpers';
-import { displayValue, selectLatestFormation } from '../store/active-wwell.selectors';
+import { displayValue, selectLatestFormation, selectOperationSummaryViewModel, selectWwellTestViewModel } from '../store/active-wwell.selectors';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
 import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
+import { ActiveWwellFormService } from '../active-wwell-form.service';
+import { skip, startWith } from 'rxjs';
 
 const AREAS = [
-  { value: 'RAK' },
-  { value: 'Central' },
-  { value: 'North West' },
-  { value: 'Jafurah' },
-  { value: 'GH' },
+  { value: 'Western Area' },
+  { value: 'Southern Area' },
+  { value: 'Northern Area' },
+  { value: 'Central Area' },
+
 ] as const;
 
 const ADD_NEW_SENTINEL = '__ADD_NEW__';
@@ -64,6 +65,7 @@ const ADD_NEW_SENTINEL = '__ADD_NEW__';
     FormationTopsAndCasingComponent,
     WwellTestComponent,
     FileUploadComponent,
+    ReactiveFormsModule
   ],
   templateUrl: './active-wwell-view.component.html',
   styleUrl: './active-wwell-view.component.scss',
@@ -124,9 +126,75 @@ export class ActiveWwellViewComponent implements OnInit {
   protected readonly displayValue = displayValue;
 
   constructor() {
+
+    effect(() => {
+      const wellData = this.store.wellData();
+
+      // this.form.reset();
+      // this.wellTestForm.reset();
+      if (wellData == null) return;
+
+      const wellTestData = selectWwellTestViewModel(wellData);
+
+      const exadGwdDailyRemarks = wellData?.EXAD_GWD_DAILY_REMARKS?.[0];
+      const drlgOpStatus = wellData?.DRLG_OP_STATUS?.[0];
+      let wDrlgSmryRmk: any = '';
+      let wOpRmk: any = '';
+      let nxt24HrPlanRmk: any = '';
+      if (exadGwdDailyRemarks?.drlgSmryRmk != null || exadGwdDailyRemarks?.opRmk != null || exadGwdDailyRemarks?.next24HrPlanRrmk != null) {
+        wDrlgSmryRmk = exadGwdDailyRemarks?.drlgSmryRmk;
+        wOpRmk = exadGwdDailyRemarks?.opRmk;
+        nxt24HrPlanRmk = exadGwdDailyRemarks?.next24HrPlanRrmk;
+      } else {
+        wDrlgSmryRmk = drlgOpStatus?.wDrlgSmryRmk;
+        wOpRmk = drlgOpStatus?.wOpRmk;
+        nxt24HrPlanRmk = drlgOpStatus?.nxt24HrPlanRmk;
+      }
+
+      //const formattedDate = formatDateForInput(this.store.selectedDate());
+
+      const status = this.store.status();
+      const area = this.store.area();
+      this.form.patchValue({
+        area: area,
+        epANum: this.store.selectedEpANum(),
+        status: status ?? deriveStatusLabel(this.store.selectedWell()),
+        wDrlgSmryRmk: wDrlgSmryRmk,
+        wOpRmk: wOpRmk,
+        nxt24HrPlanRmk: nxt24HrPlanRmk
+      })
+
+
+
+      this.wellTestForm.patchValue({
+        epANum: this.store.selectedEpANum(),
+        rsvrCd: wellTestData?.aquiferActual,
+        hydH2sCnc: wellTestData?.h2sActual,
+        temp: wellTestData?.temp,
+        hydTestTypCd: wellTestData?.flowType,
+        wtrSaTdsCnc: wellTestData?.tds,
+        rpm: wellTestData?.rpm,
+        duration: wellTestData?.duration,
+        testerNetworkId: wellTestData?.conductedBy,
+        testStaDt: this.selectedDateString,
+        hydProdRt: wellTestData?.rate,
+        siwhp: wellTestData?.siwhp,
+        hydProduct: wellTestData?.productivityActual,
+        hydPmpDpth: wellTestData?.hydPmpDpth,
+        statWlvl: wellTestData?.swl,
+        dyncWlvl: wellTestData?.dwl
+      }, {
+        emitEvent: false
+      })
+
+    })
+
+
+
+
     effect(() => {
       const epANum = this.store.selectedEpANum();
-      const selectedDate = this.store.selectedDate();
+      const date = this.store.selectedDate();
 
       if (epANum == null) {
         return;
@@ -136,11 +204,13 @@ export class ActiveWwellViewComponent implements OnInit {
         relativeTo: this.route,
         queryParams: {
           epANum,
-          date: formatDateForInput(selectedDate),
+          date: formatDateForInput(date),
         },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
+
+
     });
 
     effect(() => {
@@ -156,14 +226,13 @@ export class ActiveWwellViewComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
 
-    // skip(1) avoids re-processing the snapshot URL that was already handled above.
-    // Subsequent emissions handle back/forward navigation and external URL changes.
-    this.route.queryParamMap
-      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => this.applyQueryParams(params));
+  protected onDateInputChange(value: string): void {
+    const date = parseDateFromInput(value);
+    const today = getTodayAtMidnight();
+    if (!Number.isNaN(date.getTime()) && date <= today) {
+      this.store.setDate(formatDateForInput(date));
+    }
   }
 
   private applyQueryParams(params: ParamMap, forceLoad = false): void {
@@ -176,18 +245,44 @@ export class ActiveWwellViewComponent implements OnInit {
     if (!forceLoad && requestedDate === currentDate && (epANum ?? null) === currentEpANum) {
       return;
     }
-
-    // Pass epANum into loadWellNames so the correct well is selected once the list
-    // arrives asynchronously, instead of calling selectWell before the list exists.
-    this.store.loadWellNames(requestedDate, epANum != null && !Number.isNaN(epANum) ? epANum : undefined);
+    // this.form.get('wActDt').patchValue(requestedDate, { emitEvent: false })
+    // this.wellTestForm.get('testStaDt').patchValue(requestedDate, { emitEvent: false });
+    this.store.initialize(
+      requestedDate,
+      epANum != null && !Number.isNaN(epANum) ? epANum : undefined,
+    );
   }
 
+
   private normalizeDateParam(value: string | null): string {
-    if (!value) return formatDateForInput(getTodayAtMidnight());
+    if (!value) {
+      return formatDateForInput(getTodayAtMidnight());
+    }
+
     const parsed = parseDateFromInput(value);
     const today = getTodayAtMidnight();
-    if (Number.isNaN(parsed.getTime()) || parsed > today) return formatDateForInput(today);
+
+    if (Number.isNaN(parsed.getTime()) || parsed > today) {
+      return formatDateForInput(today);
+    }
+
     return value;
+  }
+
+  formService = inject(ActiveWwellFormService);
+  form: any = this.formService.drillingRemarksForm;
+  wellTestForm: any = this.formService.wellTestForm;
+  ngOnInit(): void {
+    this.form = this.formService.drillingRemarksForm;
+
+
+
+
+    this.applyQueryParams(this.route.snapshot.queryParamMap, true);
+
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyQueryParams(params));
   }
 
   protected onDateChange(value: string): void {
@@ -199,21 +294,15 @@ export class ActiveWwellViewComponent implements OnInit {
   }
 
   protected onWellSelect(epANum: number): void {
-    this.store.selectWell({ epANum });
+    this.store.selectWell({ epANum, date: this.selectedDateString() });
   }
 
-  protected onSelect(status: string): void {
-    if (status === ADD_NEW_SENTINEL) {
-      this.openAddDialog();
-      return;
-    }
 
-    this.uiStore.setStatusForWell(this.store.selectedEpANum(), status);
+
+  openDialog() {
+    this.openAddDialog();
   }
 
-  protected onAreaChange(area: string): void {
-    this.uiStore.setSelectedArea(area);
-  }
 
   protected onStatusPanelToggle(opened: boolean): void {
     if (!opened) this.statusSearchQuery.set('');
@@ -235,6 +324,7 @@ export class ActiveWwellViewComponent implements OnInit {
         }
 
         this.uiStore.setStatusForWell(this.store.selectedEpANum(), name);
+        this.form.get('status').patchValue(name);
       });
   }
 }
