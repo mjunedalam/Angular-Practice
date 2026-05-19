@@ -46,15 +46,31 @@ export class TopNavbarComponent {
 
   readonly appTitle = 'Aramco Ground Water Application';
   readonly logoText = 'AGWA';
+  protected readonly profileSubtitle = computed(() => this.auth.userEmail() ?? 'Ground Water Team');
+  protected readonly roleCountLabel = computed(() => {
+    const count = this.userRoleLabels().length;
+    return count === 1 ? '1 role assigned' : `${count} roles assigned`;
+  });
 
   @HostListener('document:click')
   protected closeUserMenu(): void {
+    if (this.menuOpen()) {
+      this.menuOpen.set(false);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected closeUserMenuOnEscape(): void {
     this.menuOpen.set(false);
   }
 
   protected toggleUserMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.menuOpen.update((open) => !open);
+  }
+
+  protected keepMenuOpen(event: MouseEvent): void {
+    event.stopPropagation();
   }
 
   protected logout(event?: MouseEvent): void {

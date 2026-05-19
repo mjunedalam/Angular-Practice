@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
-import { LoginRequest } from 'src/app/features/auth/store/auth.selectors';
 import { LoaderService } from '@shared/components/global-loader/loader.service';
 
 interface LoginForm {
@@ -83,14 +82,14 @@ export class LoginComponent {
       return;
     }
 
-    this.authStore.login(this.loginForm.getRawValue() as LoginRequest);
+    this.authStore.login();
   }
 
   protected togglePasswordVisibility(): void {
     this.hidePassword.update((hidden) => !hidden);
   }
 
-  protected isFieldInvalid(field: keyof LoginRequest): boolean {
+  protected isFieldInvalid(field: keyof LoginForm): boolean {
     const control = this.loginForm.controls[field];
     return control.invalid && (control.dirty || control.touched || this.submitted());
   }

@@ -1,5 +1,6 @@
 import { IBitInfo } from 'src/app/shared/models/wwell/bit-info.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
+import { IDrlgCsg } from 'src/app/shared/models/wwell/drlg-csg.model';
 import { IContact } from 'src/app/shared/models/wwell/contact.model';
 import { IDrillingFootage } from 'src/app/shared/models/wwell/drilling-footage.model';
 import { IDrillingOperationStatus } from 'src/app/shared/models/wwell/drilling-operation-status.model';
@@ -51,6 +52,7 @@ export interface IWellData {
     EXAD_GWD_WELL_DESIGN?: IWellDesign[];
     EXAD_GWD_DAILY_REMARKS?: IDailyRemarks[];
     MUD_CIRC?: IMudCirculation[];
+    DRLG_CSG?: IDrlgCsg[];
     actualRm?: number;
     kpiRm?: number;
     rigMoveDays?: number;

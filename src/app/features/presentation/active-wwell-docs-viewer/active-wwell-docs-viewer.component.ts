@@ -58,7 +58,16 @@ export class ActiveWwellDocsViewerComponent {
   protected readonly deleteLoading = signal<Set<string>>(new Set());
 
   constructor() {
+    // Collapse panel whenever well or date selection changes
     effect(() => {
+      this.wellStore.selectedEpANum();
+      this.wellStore.selectedDate();
+      this.collapsed.set(true);
+    }, { allowSignalWrites: true });
+
+    // Load docs only when panel is expanded
+    effect(() => {
+      if (this.collapsed()) return;
       const epANum = this.wellStore.selectedEpANum();
       const date = formatDateForInput(this.wellStore.selectedDate());
       if (epANum == null) return;

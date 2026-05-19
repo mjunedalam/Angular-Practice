@@ -12,11 +12,13 @@ import 'd3-transition';
 
 import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, WellboreAnimConfig, WellboreDiagramData } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
+import { IDrlgCsg } from 'src/app/shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import {
   buildArrowHeadLeft,
   buildArrowHeadRight,
   buildCasingPath,
+  buildLinerPath,
   buildOpenHolePath,
   buildGravelPackUPath,
   buildScreenHanger,
@@ -146,8 +148,8 @@ export class WellBoreViewComponent {
     this.drawGravelPackDesign(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawPrePerforatedLiner(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
-    this.drawCasings(data.casings, casingCenterX, scale, t_casingsStart, t_gravelStart);
-    this.drawCasingLabels(data.casings, casingCenterX, scale, t_labelsStart);
+    this.drawCasings(data.casings, data.drlgCasings, casingCenterX, scale, t_casingsStart, t_gravelStart);
+    this.drawCasingLabels(data.casings, data.drlgCasings, casingCenterX, scale, t_labelsStart);
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
 
@@ -162,22 +164,49 @@ export class WellBoreViewComponent {
 
   private addStaticDefs(defs: DefsSel): void {
     this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%', color: '#2d3748' },
-      { offset: '40%', color: '#c9d1d9' },
-      { offset: '60%', color: '#e6edf3' },
-      { offset: '100%', color: '#2d3748' },
+      { offset: '0%',   color: '#1a2130' },
+      { offset: '18%',  color: '#4a5568' },
+      { offset: '38%',  color: '#a0aec0' },
+      { offset: '50%',  color: '#e2e8f0' },
+      { offset: '62%',  color: '#a0aec0' },
+      { offset: '82%',  color: '#4a5568' },
+      { offset: '100%', color: '#1a2130' },
     ]);
     this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%', color: '#1a3a2a' },
-      { offset: '45%', color: '#3fb950' },
-      { offset: '55%', color: '#56d364' },
-      { offset: '100%', color: '#1a3a2a' },
+      { offset: '0%',   color: '#0d2b1a' },
+      { offset: '18%',  color: '#166534' },
+      { offset: '40%',  color: '#3fb950' },
+      { offset: '50%',  color: '#6ee7a0' },
+      { offset: '60%',  color: '#3fb950' },
+      { offset: '82%',  color: '#166534' },
+      { offset: '100%', color: '#0d2b1a' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%', color: '#2d3748' },
-      { offset: '40%', color: '#8b949e' },
-      { offset: '60%', color: '#c9d1d9' },
-      { offset: '100%', color: '#2d3748' },
+      { offset: '0%',   color: '#7b8fa8' },
+      { offset: '18%',  color: '#a8bcd0' },
+      { offset: '38%',  color: '#cdd9e5' },
+      { offset: '50%',  color: '#eef3f8' },
+      { offset: '62%',  color: '#cdd9e5' },
+      { offset: '82%',  color: '#a8bcd0' },
+      { offset: '100%', color: '#7b8fa8' },
+    ]);
+    this.addLinearGradient(defs, 'actualCasingGradient', [
+      { offset: '0%',   color: '#0d3b1f' },
+      { offset: '18%',  color: '#15803d' },
+      { offset: '38%',  color: '#22c55e' },
+      { offset: '50%',  color: '#6ee7a0' },
+      { offset: '62%',  color: '#22c55e' },
+      { offset: '82%',  color: '#15803d' },
+      { offset: '100%', color: '#0d3b1f' },
+    ]);
+    this.addLinearGradient(defs, 'actualLinerGradient', [
+      { offset: '0%',   color: '#0d3b1f' },
+      { offset: '18%',  color: '#166534' },
+      { offset: '38%',  color: '#16a34a' },
+      { offset: '50%',  color: '#4ade80' },
+      { offset: '62%',  color: '#16a34a' },
+      { offset: '82%',  color: '#166534' },
+      { offset: '100%', color: '#0d3b1f' },
     ]);
 
     const grid = defs.append('pattern')
@@ -241,6 +270,162 @@ export class WellBoreViewComponent {
     stops.forEach(({ offset, color }) =>
       g.append('stop').attr('offset', offset).attr('stop-color', color),
     );
+  }
+
+  /**
+   * Returns the actual bottom depth of the deepest non-Liner, non-GravelPack casing.
+   * Used both as the Liner's top and as the start of completion elements.
+   */
+  private resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+    const irNonLiner = casings.filter(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+    const deepest = irNonLiner[0]; // sorted desc → index 0 = deepest
+    if (!deepest) return drlgCasings[0]?.wCsgBotDpth ?? 0;
+    const actual = drlgCasings.find(d => d.wCsgOdSz === deepest.csgSize) ?? null;
+    return (actual !== null && actual.wCsgBotDpth > 0 ? actual.wCsgBotDpth : null) ?? deepest.csgDepth;
+  }
+
+  /** Top anchor for all completion elements.
+   *  Liner bottom (actual wLnrBotDepth > est csgDepth) when a Liner exists;
+   *  otherwise falls back to the deepest casing/conductor shoe. */
+  private resolveCompletionTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+    const liner = casings.find(c => c.csgType === 'Liner');
+    if (liner) {
+      const actualLnr = drlgCasings.find(d => d.wLnrOdSz === liner.csgSize) ?? null;
+      const actualDepth = (actualLnr?.wLnrBotDepth ?? 0) > 0 ? actualLnr!.wLnrBotDepth! : null;
+      return actualDepth ?? liner.csgDepth;
+    }
+    return this.resolveShoeDepth(casings, drlgCasings);
+  }
+
+  /** Pixel Y for the top of completion elements — flush with the completion top depth. */
+  private resolveCompletionTopPx(
+    casings: ICasingIR[],
+    drlgCasings: IDrlgCsg[],
+    scale: ReturnType<typeof createDepthScale>,
+  ): number {
+    return scale(this.resolveCompletionTopDepth(casings, drlgCasings));
+  }
+
+  private drawCasingsFromActual(
+    drlgCasings: IDrlgCsg[],
+    centerX: number,
+    scale: ReturnType<typeof createDepthScale>,
+    casingsStart: number,
+  ): void {
+    const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
+    const shoeDepth = drlgCasings[0]?.wCsgBotDpth ?? 0;
+
+    drlgCasings.forEach((actual, i) => {
+      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      const animOrder = drlgCasings.length - 1 - i;
+      const delay = animOrder * ANIM.CASING_STAGGER;
+
+      if (actual.wCsgBotDpth > 0) {
+        const bottomPx = scale(actual.wCsgBotDpth);
+        const clipId = `dyn-casing-clip-actual-${i}`;
+        const clipRadius = openHoleHalfWidth(hw) + 20;
+        const clipRect = this.defsEl.append('clipPath')
+          .attr('class', 'dyn-clip').attr('id', clipId).append('rect')
+          .attr('x', centerX - clipRadius - 15).attr('y', -5)
+          .attr('width', clipRadius * 2 + 30).attr('height', 0);
+
+        this.rootG.append('path')
+          .attr('class', 'casing')
+          .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
+          .attr('clip-path', `url(#${clipId})`)
+          .attr('fill', 'url(#linerGradient)')
+          .attr('stroke', '#1e293b').attr('stroke-width', '5')
+          .style('opacity', 0.65);
+
+        clipRect.transition()
+          .delay(casingsStart + delay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
+          .attr('height', bottomPx + shoeCurveOffset + 20);
+      }
+
+      if (actual.wLnrBotDepth != null && actual.wLnrBotDepth > 0) {
+        const linerTopPx = scale(shoeDepth);
+        const linerBottomPx = scale(actual.wLnrBotDepth);
+        const linerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+        const clipId = `dyn-casing-clip-liner-actual-${i}`;
+        const clipRadius = openHoleHalfWidth(linerHW) + 20;
+        const clipRect = this.defsEl.append('clipPath')
+          .attr('class', 'dyn-clip').attr('id', clipId).append('rect')
+          .attr('x', centerX - clipRadius - 15).attr('y', linerTopPx - 5)
+          .attr('width', clipRadius * 2 + 30).attr('height', 0);
+
+        this.rootG.append('path')
+          .attr('class', 'casing')
+          .attr('d', buildLinerPath(centerX, linerHW, linerTopPx, linerBottomPx))
+          .attr('clip-path', `url(#${clipId})`)
+          .attr('fill', 'url(#linerGradient)')
+          .attr('stroke', '#1e293b').attr('stroke-width', '5')
+          .style('opacity', 0.65);
+
+        clipRect.transition()
+          .delay(casingsStart).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)
+          .attr('height', linerBottomPx - linerTopPx + 20);
+      }
+    });
+  }
+
+  private drawCasingLabelsFromActual(
+    drlgCasings: IDrlgCsg[],
+    centerX: number,
+    scale: ReturnType<typeof createDepthScale>,
+    labelsStart: number,
+  ): void {
+    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const shoeDepth = drlgCasings[0]?.wCsgBotDpth ?? 0;
+
+    drlgCasings.forEach((actual, i) => {
+      const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
+      const ra = this.resolveAnim();
+
+      if (actual.wCsgBotDpth > 0) {
+        const shoePx = scale(actual.wCsgBotDpth);
+        const rEdge = centerX + hw;
+        const lEnd = rEdge + 26;
+        const labelX = lEnd + 8;
+        const lg = this.rootG.append('g').attr('class', 'casing-label');
+
+        lg.append('line').attr('class', 'casing-label__line')
+          .attr('x1', rEdge).attr('x2', lEnd).attr('y1', shoePx).attr('y2', shoePx);
+        lg.append('path').attr('class', 'casing-label__arrow')
+          .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
+        lg.append('text').attr('class', 'casing-label__primary')
+          .attr('x', labelX).attr('y', shoePx + 4)
+          .text(`${actual.wCsgOdSz}" Casing @ ${actual.wCsgBotDpth.toLocaleString()}`);
+
+        this.rootG.append('text').attr('class', 'casing-size-inner')
+          .attr('x', centerX).attr('y', shoePx).attr('text-anchor', 'middle')
+          .style('opacity', 0).text(`${actual.wCsgOdSz}"`)
+          .transition().delay(labelsStart + (ra.lineStyle === 'draw' ? ra.lineDur : 0))
+          .duration(ra.fadeDur).ease(easeCubicInOut).style('opacity', 1);
+
+        this.animateLabel(lg, labelsStart, ra);
+      }
+
+      if (actual.wLnrBotDepth != null && actual.wLnrBotDepth > 0 && actual.wLnrOdSz) {
+        const linerTopPx = scale(shoeDepth);
+        const shoePx = scale(actual.wLnrBotDepth);
+        const midY = linerTopPx + (shoePx - linerTopPx) * 0.5;
+        const linerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+        const rEdge = centerX + linerHW;
+        const lEnd = rEdge + 26;
+        const labelX = lEnd + 8;
+        const lg = this.rootG.append('g').attr('class', 'casing-label');
+
+        lg.append('line').attr('class', 'casing-label__line')
+          .attr('x1', rEdge).attr('x2', lEnd).attr('y1', midY).attr('y2', midY);
+        lg.append('path').attr('class', 'casing-label__arrow')
+          .attr('d', buildArrowHeadRight(lEnd, midY, 6));
+        lg.append('text').attr('class', 'casing-label__primary')
+          .attr('x', labelX).attr('y', midY + 4)
+          .text(`${actual.wLnrOdSz}" Liner @ ${actual.wLnrBotDepth.toLocaleString()}`);
+
+        this.animateLabel(lg, labelsStart, ra);
+      }
+    });
   }
 
   private getCasingTier(csg: ICasingIR, casings: ICasingIR[]): number {
@@ -328,17 +513,36 @@ export class WellBoreViewComponent {
 
   private drawCasings(
     casings: ICasingIR[],
+    drlgCasings: IDrlgCsg[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
     casingsStart: number,
     gravelStart: number,
   ): void {
+    if (casings.length === 0) {
+      this.drawCasingsFromActual(drlgCasings, centerX, scale, casingsStart);
+      return;
+    }
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
+    const shoeDepth = this.resolveShoeDepth(casings, drlgCasings);
+
     casings.forEach((csg, i) => {
-      if (csg.csgType === 'Liner') return;
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-      const bottomPx = scale(csg.csgDepth);
+
+      const isLiner = csg.csgType === 'Liner';
+      const actualCsg = isLiner ? null : (drlgCasings.find(d => d.wCsgOdSz === csg.csgSize) ?? null);
+      const actualLnr = isLiner ? (drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null) : null;
+      const hasActual = !isLiner && actualCsg !== null && actualCsg.wCsgBotDpth > 0;
+      const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
+      const actualDepth = hasActual ? actualCsg!.wCsgBotDpth
+        : hasActualLiner ? actualLnr!.wLnrBotDepth!
+        : null;
+      const displayDepth = actualDepth ?? csg.csgDepth;
+      const bottomPx = scale(displayDepth);
+      const linerTopPx = isLiner ? scale(shoeDepth) : 0;
+      const topPx = isLiner ? linerTopPx : 0;
+
       const clipId = `dyn-casing-clip-${i}`;
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
@@ -352,13 +556,12 @@ export class WellBoreViewComponent {
         .attr('id', clipId)
         .append('rect')
         .attr('x', centerX - clipRadius - 15)
-        .attr('y', -5)
+        .attr('y', isLiner ? topPx - 5 : -5)
         .attr('width', clipRadius * 2 + 30)
         .attr('height', 0);
 
       if (csg.csgType === 'Gravel Pack') {
-        const deepestSolid = casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
-        const startDepthPx = deepestSolid ? scale(deepestSolid.csgDepth) : 0;
+        const startDepthPx = scale(shoeDepth);
         const gravelBottomPx = scale(csg.csgDepth);
         const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
         const screenHW = innerHW - this.layout.linerScreenInset;
@@ -377,19 +580,28 @@ export class WellBoreViewComponent {
           .ease(easeCubicInOut)
           .attr('height', gravelBottomPx + 20);
       } else {
+        const fillGrad = hasActual
+          ? 'url(#actualCasingGradient)'
+          : `url(#${casingGradientId(csg.csgType)})`;
+
         this.rootG.append('path')
           .attr('class', 'casing')
-          .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
+          .attr('d', isLiner
+            ? buildLinerPath(centerX, hw, topPx, bottomPx)
+            : buildCasingPath(centerX, hw, topPx, bottomPx, shoeCurveOffset))
           .attr('clip-path', `url(#${clipId})`)
-          .attr('fill', `url(#${casingGradientId(csg.csgType)})`)
+          .attr('fill', fillGrad)
           .attr('stroke', '#1e293b')
           .attr('stroke-width', '5')
           .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
+
         clipRect.transition()
           .delay(casingsStart + delay)
           .duration(ANIM.CASING_DURATION)
           .ease(easeCubicInOut)
-          .attr('height', bottomPx + shoeCurveOffset + 20);
+          .attr('height', isLiner
+            ? (bottomPx - topPx + 20)
+            : (bottomPx + shoeCurveOffset + 20));
       }
     });
   }
@@ -452,20 +664,38 @@ export class WellBoreViewComponent {
 
   private drawCasingLabels(
     casings: ICasingIR[],
+    drlgCasings: IDrlgCsg[],
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
     labelsStart: number,
   ): void {
+    if (casings.length === 0) {
+      this.drawCasingLabelsFromActual(drlgCasings, centerX, scale, labelsStart);
+      return;
+    }
     const { baseHalfWidth, halfWidthIncrement } = this.layout;
+
     casings.forEach((csg) => {
-      if (csg.csgType === 'Liner') return;
       const tier = this.getCasingTier(csg, casings);
       const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
-      const shoePx = scale(csg.csgDepth);
-      let labelYPx = shoePx;
-      if (csg.csgType === 'Gravel Pack') {
-        labelYPx = scale(csg.csgDepth);
-      }
+
+      const isLiner = csg.csgType === 'Liner';
+      const actualCsg = isLiner ? null : (drlgCasings.find(d => d.wCsgOdSz === csg.csgSize) ?? null);
+      const actualLnr = isLiner ? (drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null) : null;
+      const hasActual = !isLiner && actualCsg !== null && actualCsg.wCsgBotDpth > 0;
+      const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
+      const actualDepth = hasActual ? actualCsg!.wCsgBotDpth
+        : hasActualLiner ? actualLnr!.wLnrBotDepth!
+        : null;
+      const actualSize = hasActual ? actualCsg!.wCsgOdSz
+        : hasActualLiner ? actualLnr!.wLnrOdSz!
+        : null;
+      const displayDepth = actualDepth ?? csg.csgDepth;
+      const displaySize = actualSize ?? csg.csgSize;
+
+      const shoePx = scale(displayDepth);
+      const labelYPx = csg.csgType === 'Gravel Pack' ? scale(csg.csgDepth) : shoePx;
+
       const rEdge = csg.csgType === 'Gravel Pack'
         ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
         : centerX + hw;
@@ -489,25 +719,41 @@ export class WellBoreViewComponent {
           .attr('x', labelX).attr('y', labelYPx + 4)
           .text(csg.csgRemarks || 'Gravel Pack');
       } else {
-        lg.append('text')
+        const primaryEl = lg.append('text')
           .attr('class', 'casing-label__primary')
-          .attr('x', labelX).attr('y', shoePx + 4)
-          .text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
-        if (csg.csgRemarks) {
+          .attr('x', labelX).attr('y', shoePx + 4);
+
+        const hasAnyActual = hasActual || hasActualLiner;
+        if (hasAnyActual) {
+          primaryEl
+            .attr('fill', '#22c55e')
+            .text(`${displaySize}" ${csg.csgType} @ ${displayDepth.toLocaleString()} ●`);
           lg.append('text')
             .attr('class', 'casing-label__secondary')
             .attr('x', labelX).attr('y', shoePx + 17)
-            .text(`(${csg.csgRemarks})`);
+            .text(`est: ${csg.csgSize}" @ ${csg.csgDepth.toLocaleString()} ft`);
+        } else {
+          primaryEl.text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
+          if (csg.csgRemarks) {
+            lg.append('text')
+              .attr('class', 'casing-label__secondary')
+              .attr('x', labelX).attr('y', shoePx + 17)
+              .text(`(${csg.csgRemarks})`);
+          }
         }
+
         const innerDelay = labelsStart + (ra.lineStyle === 'draw' ? ra.lineDur : 0);
         this.rootG.append('text')
           .attr('class', 'casing-size-inner')
           .attr('x', centerX).attr('y', shoePx)
           .attr('text-anchor', 'middle')
           .style('opacity', 0)
-          .text(`${csg.csgSize}"`)
+          .attr('fill', hasActual ? '#0f2d1a' : '')
+          .style('font-weight', hasActual ? '800' : 'normal')
+          .text(`${displaySize}"`)
           .transition().delay(innerDelay).duration(ra.fadeDur).ease(easeCubicInOut)
           .style('opacity', 1);
+
       }
 
       this.animateLabel(lg, labelsStart, ra);
@@ -600,9 +846,8 @@ export class WellBoreViewComponent {
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const ohHW = innerHW + openHoleHwMargin;
     const screenHW = innerHW - linerScreenInset;
-    const deepestSolid = data.casings.find((c: ICasingIR) => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
     const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
-    const shoePx = scale(deepestSolid.csgDepth);
+    const shoePx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
     // When flag-driven, always run to total depth; otherwise fall back to liner depth.
     const screenBottomPx = wellDesign ? tdPx : (liner ? scale(liner.csgDepth) : tdPx - 15);
@@ -649,7 +894,8 @@ export class WellBoreViewComponent {
     }
 
     if (shouldDrawLS) {
-      const fallbackFt = liner ? liner.csgDepth - deepestSolid.csgDepth : data.totalDepth - deepestSolid.csgDepth;
+      const _shoeDepth = this.resolveCompletionTopDepth(data.casings, data.drlgCasings);
+      const fallbackFt = liner ? liner.csgDepth - _shoeDepth : data.totalDepth - _shoeDepth;
       const screenLabel = wellDesign?.lsRemarks ?? (liner?.csgRemarks ?? `+/- ${fallbackFt.toLocaleString()} ft of Screen`);
       const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
       const scrRA = this.resolveAnim();
@@ -680,8 +926,7 @@ export class WellBoreViewComponent {
     const screenHW = innerHW - linerScreenInset;
     const annulusWidth = gravelAnnulusWidth;
     const annulusCenter = screenHW + annulusWidth / 2;
-    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const startDepthPx = scale(deepestSolid.csgDepth);
+    const startDepthPx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
 
     const clipId = 'dyn-gp-design-clip';
@@ -732,8 +977,7 @@ export class WellBoreViewComponent {
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const hasGP = data.wellDesign?.gpFlg === 'Y';
     const prePerfHW = innerHW + (hasGP ? prePerfGpBoost : 0);
-    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const topPx = scale(deepestSolid.csgDepth);
+    const topPx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
 
     const clipId = 'dyn-perf-clip';
@@ -781,9 +1025,8 @@ export class WellBoreViewComponent {
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - linerScreenInset;
-    const deepestSolid = data.casings.find(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack') || data.casings[0];
-    const shoePx = scale(deepestSolid.csgDepth);
-    const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx + 6, screenHW);
+    const shoePx = scale(this.resolveCompletionTopDepth(data.casings, data.drlgCasings));
+    const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx, screenHW);
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
     hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerLeft);
     hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerRight);
@@ -862,7 +1105,14 @@ export class WellBoreViewComponent {
 
   private drawNotDrilledZone(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, start: number, ohHW: number): void {
     const estTargetDepth = data.totalDepth;
-    const currentDepth = data.currentDepth;
+
+    // Effective drilled depth = max of reported current depth and deepest actual casing/liner installed
+    const deepestActual = data.drlgCasings.reduce((max, d) => {
+      const csgD = d.wCsgBotDpth > 0 ? d.wCsgBotDpth : 0;
+      const lnrD = (d.wLnrBotDepth ?? 0) > 0 ? d.wLnrBotDepth! : 0;
+      return Math.max(max, csgD, lnrD);
+    }, 0);
+    const currentDepth = Math.max(data.currentDepth, deepestActual);
     const undrilledFt = estTargetDepth - currentDepth;
 
     // Only draw if drilling has started and there is undrilled section remaining
@@ -879,39 +1129,47 @@ export class WellBoreViewComponent {
       .attr('class', 'not-drilled-zone')
       .style('opacity', 0);
 
-    // Dark semi-transparent soft red overlay for the entire section
+    // Hover tooltip
+    const ttipG = this.rootG.append('g')
+      .attr('class', 'not-drilled-tooltip')
+      .style('opacity', 0)
+      .style('pointer-events', 'none');
+
+    const ttipX = centerX + ohHW + 14;
+    const ttipY = topPx + height * 0.4;
+    ttipG.append('rect')
+      .attr('x', ttipX).attr('y', ttipY - 36)
+      .attr('width', 260).attr('height', 66)
+      .attr('rx', 8)
+      .attr('fill', '#1e293b')
+      .attr('fill-opacity', 0.82)
+      .attr('stroke', 'rgba(239,68,68,0.55)')
+      .attr('stroke-width', 1.5);
+    ttipG.append('text')
+      .attr('x', ttipX + 14).attr('y', ttipY - 10)
+      .attr('font-size', '14').attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-weight', '700').attr('fill', 'rgba(239,100,68,1)')
+      .attr('letter-spacing', '0.04em')
+      .text('NOT DRILLED');
+    ttipG.append('text')
+      .attr('x', ttipX + 14).attr('y', ttipY + 14)
+      .attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-weight', '500').attr('fill', '#cbd5e1')
+      .text(`Remaining: ${undrilledFt.toLocaleString()} ft`);
+
+    // Red overlay — no static labels; tooltip on hover
     ndg.append('rect')
       .attr('x', lx)
       .attr('y', topPx)
       .attr('width', width)
       .attr('height', height)
-      .attr('fill', 'rgba(239, 68, 68, 0.12)') // Soft light red
-      .attr('stroke', 'rgba(239, 68, 68, 0.3)') // Matching light red stroke
+      .attr('fill', 'rgba(239, 68, 68, 0.12)')
+      .attr('stroke', 'rgba(239, 68, 68, 0.3)')
       .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '8,4');
-
-    // Central "NOT DRILLED" label
-    ndg.append('text')
-      .attr('class', 'not-drilled-label')
-      .attr('x', centerX)
-      .attr('y', midY - 6)
-      .attr('text-anchor', 'middle')
-      .attr('fill', 'var(--text-primary)')
-      .style('font-size', '16px')
-      .style('font-weight', '800')
-      .style('letter-spacing', '0.15em')
-      .text('NOT DRILLED');
-
-    // Footage remaining label
-    ndg.append('text')
-      .attr('class', 'not-drilled-footage')
-      .attr('x', centerX)
-      .attr('y', midY + 14)
-      .attr('text-anchor', 'middle')
-      .attr('fill', 'var(--text-secondary)')
-      .style('font-size', '13px')
-      .style('font-weight', '700')
-      .text(`REMAINING: ${undrilledFt.toLocaleString()} FT`);
+      .attr('stroke-dasharray', '8,4')
+      .style('cursor', 'pointer')
+      .on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1))
+      .on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
 
     ndg.transition()
       .delay(start)

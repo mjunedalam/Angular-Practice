@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, forkJoin, throwError, timeout } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, catchError, forkJoin, of, throwError, timeout } from 'rxjs';
 import { WellDoc } from '@models/well-design/well-docs.model';
 import { DocListResponse, DocRemoveResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -52,7 +52,13 @@ export class PresDocsService {
 
     return this.http
       .get<WellDoc[]>(`${this.apiUrl}/well-pres-docs`, { params })
-      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+      .pipe(
+        timeout(CONNECTION_TIMEOUT_MS),
+        catchError((err: HttpErrorResponse) => {
+          if (err.status >= 400 && err.status < 500) return of([]);
+          return throwError(() => err);
+        }),
+      );
   }
 
   getDocList(epaNum: number, uploadDate: string): Observable<DocListResponse> {
@@ -64,9 +70,17 @@ export class PresDocsService {
       .set('epaNum', String(epaNum))
       .set('uploadDate', uploadDate);
 
+    const emptyList: DocListResponse = { statusCode: 200, error: false, message: null, data: { totalFiles: [] } };
+
     return this.http
       .get<DocListResponse>(`${this.apiUrl}/welldocuments/well-presentation-docs-list`, { params })
-      .pipe(timeout(CONNECTION_TIMEOUT_MS));
+      .pipe(
+        timeout(CONNECTION_TIMEOUT_MS),
+        catchError((err: HttpErrorResponse) => {
+          if (err.status >= 400 && err.status < 500) return of(emptyList);
+          return throwError(() => err);
+        }),
+      );
   }
 
   removeSingleDoc(uploadDate: string, epANum: number, fileName: string): Observable<DocRemoveResponse> {

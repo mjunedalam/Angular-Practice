@@ -94,11 +94,20 @@ export const WellDocsStore = signalStore(
                   return;
                 }
                 notify.info(`Document ${fileName} removed successfully.`);
-                svc.getDocs(epANum, uploadDate).subscribe({
-                  next: docs =>
-                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, deleting: false }),
-                  error: () =>
-                    patchState(store, { deleting: false }),
+                svc.getDocList(epANum, uploadDate).subscribe({
+                  next: (res: DocListResponse) => {
+                    if (res.error) {
+                      patchState(store, { docNames: [], listLoading: false, listError: res.message ?? 'Failed to load documents after deleting' });
+                      notify.error(res.message ?? 'Failed to load documents');
+                      return;
+                    }
+                    patchState(store, { docNames: res.data.totalFiles, listLoading: false });
+                  },
+                  error: (err: any) => {
+                    const msg = err instanceof Error ? err.message : 'Failed to load documents after deleting';
+                    patchState(store, { docNames: [], listLoading: false, listError: msg });
+                    notify.error(msg);
+                  }
                 });
               },
               error: (err: unknown) => {
@@ -150,5 +159,4 @@ export const WellDocsStore = signalStore(
     },
   })),
 );
-
 export { WellDocsActions, WellDocsEvents };

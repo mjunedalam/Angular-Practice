@@ -114,6 +114,7 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
         wellName: d.WELL_MASTER?.[0]?.well ?? '',
         totalDepth: d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0,
         casings: sortCasingsByDepthDesc(d.EXAD_GWD_IR_CASING ?? []),
+        drlgCasings: [...(d.DRLG_CSG ?? [])].sort((a, b) => b.wCsgBotDpth - a.wCsgBotDpth),
         geologicTops: [...(d.EXAD_GWD_IR_TOPS ?? [])].sort((a, b) => a.planTvdDepth - b.planTvdDepth),
         hydrogeology: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0] ?? null,
         prewap: d.EXAD_RCD_PREWAP?.[0] ?? null,

@@ -1,4 +1,5 @@
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
+import { IDrlgCsg } from 'src/app/shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IHydrogeologyIR } from 'src/app/shared/models/wwell/hydrogeology-ir.model';
 import { IPreWellData } from 'src/app/shared/models/wwell/pre-well-data.model';
@@ -13,6 +14,7 @@ export interface WellboreDiagramData {
   readonly wellName: string;
   readonly totalDepth: number;
   readonly casings: ICasingIR[];
+  readonly drlgCasings: IDrlgCsg[];
   readonly geologicTops: ITopsIR[];
   readonly hydrogeology: IHydrogeologyIR | null;
   readonly prewap: IPreWellData | null;

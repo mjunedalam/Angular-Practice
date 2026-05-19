@@ -47,6 +47,19 @@ export function buildCasingPath(
   return `M${left},${topPx} L${left},${bottomPx} S ${centerX} ${ctrl} ${right} ${bottomPx} L${right},${topPx} Z`;
 }
 
+/** Liner-specific path: open top (no Z → no top stroke) and flat bottom (no shoe curve).
+ *  Connects flush with the casing shoe above and completion widgets below. */
+export function buildLinerPath(
+  centerX: number,
+  halfWidth: number,
+  topPx: number,
+  bottomPx: number,
+): string {
+  const left  = centerX - halfWidth;
+  const right = centerX + halfWidth;
+  return `M${left},${topPx} L${left},${bottomPx} L${right},${bottomPx} L${right},${topPx}`;
+}
+
 export function buildOpenHolePath(
   centerX: number,
   halfWidth: number,
