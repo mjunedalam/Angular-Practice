@@ -1,28 +1,44 @@
-import { IWellData } from '@models/well-design/well-data.model';
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
-export const ACTIVE_WWELL_FALLBACK = 'N/A';
+@Injectable({
+    providedIn: "root"
+})
+export class ActiveWwellFormService {
 
-export function normalizeStatusName(value: string): string {
-  return value.trim().replace(/\s+/g, ' ');
-}
 
-export function deriveStatusLabel(details: IWellData | null): string {
-  const rigIdentification = details?.RIG_IDENTIFICATION?.[0] as Record<string, unknown> | undefined;
-  const rigStateCode = typeof rigIdentification?.['wRigActStsCd'] === 'string'
-    ? rigIdentification['wRigActStsCd']
-    : null;
+    drillingRemarksForm: FormGroup = this._fb.group({
+        epANum: [null, [Validators.required]],
+        wActDt: [null, [Validators.required]],
+        area: [null, [Validators.required]],
+        status: [null, [Validators.required]],
+        wOpRmk: [null, [Validators.required]],
+        nxt24HrPlanRmk: [null, [Validators.required]],
+        wDrlgSmryRmk: [null, [Validators.required]]
+    });
 
-  if (rigStateCode === 'A') {
-    return 'Active';
-  }
 
-  if (rigStateCode === 'I') {
-    return 'Inactive';
-  }
+    wellTestForm: FormGroup = this._fb.group({
+        epANum: [null, [Validators.required]],
+        rsvrCd: [null, [Validators.required]],
+        hydTestTypCd: ['STP1', [Validators.required]],
+        testStaDt: [null, [Validators.required]],
+        temp: [null, [Validators.required]],
+        hydH2sCnc: [null, [Validators.required]],
+        wtrSaTdsCnc: [null, [Validators.required]],
+        rpm: [null, [Validators.required]],
+        siwhp: [null, [Validators.required]],
+        hydPmpDpth: [null, [Validators.required]],
+        hydProdRt: [null, [Validators.required]],
+        statWlvl: [null, [Validators.required]],
+        dyncWlvl: [null, [Validators.required]],
+        testerNetworkId: [null, [Validators.required]],
+        hydProduct: [null, [Validators.required]],
+        duration: [null, [Validators.required]],
+    });;
 
-  if ((details?.DRLG_OP_STATUS?.[0]?.wPrsntDpth ?? 0) > 0) {
-    return 'Active';
-  }
+    constructor(private _fb: FormBuilder, private http: HttpClient) {
 
-  return ACTIVE_WWELL_FALLBACK;
+    }
 }
