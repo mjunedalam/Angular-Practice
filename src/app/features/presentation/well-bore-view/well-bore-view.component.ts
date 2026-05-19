@@ -147,9 +147,9 @@ export class WellBoreViewComponent {
     this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
     this.drawGravelPackDesign(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawPrePerforatedLiner(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
-    this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
     this.drawCasings(data.casings, data.drlgCasings, casingCenterX, scale, t_casingsStart, t_gravelStart);
     this.drawCasingLabels(data.casings, data.drlgCasings, casingCenterX, scale, t_labelsStart);
+    this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
 
@@ -582,7 +582,9 @@ export class WellBoreViewComponent {
       } else {
         const fillGrad = hasActual
           ? 'url(#actualCasingGradient)'
-          : `url(#${casingGradientId(csg.csgType)})`;
+          : hasActualLiner
+            ? 'url(#actualLinerGradient)'
+            : `url(#${casingGradientId(csg.csgType)})`;
 
         this.rootG.append('path')
           .attr('class', 'casing')
@@ -778,7 +780,7 @@ export class WellBoreViewComponent {
     const lineWidth = lR - lL;
     const label = isFlowing
       ? `Flowing — ${wd.swLvlTxt}`
-      : `Static WL: ${waterDepth.toLocaleString()} ft`;
+      : `Static WL: ${waterDepth.toLocaleString()} `;
     const ra = this.resolveAnim();
     const wg = this.rootG.append('g').attr('class', 'water-level');
 
@@ -834,7 +836,7 @@ export class WellBoreViewComponent {
       .style('opacity', 1);
   }
 
-  private drawOpenHoleAndScreen(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, ohDone: number, ohLabelStart: number): void {
+  private drawOpenHoleAndScreen(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, ohStart: number, _ohDone: number, ohLabelStart: number): void {
     if (!data.casings.length) return;
 
     const { wellDesign } = data;
@@ -1021,15 +1023,31 @@ export class WellBoreViewComponent {
 
   private drawScreenHanger(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, hangerStart: number): void {
     if (!data.casings.length) return;
-    if (data.wellDesign?.lsFlg !== 'Y') return;
+    const hasLiner = data.casings.some(c => c.csgType === 'Liner');
+    const hasLinerScreen = data.wellDesign?.lsFlg === 'Y';
+    if (!hasLiner && !hasLinerScreen) return;
+
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const screenHW = innerHW - linerScreenInset;
-    const shoePx = scale(this.resolveCompletionTopDepth(data.casings, data.drlgCasings));
-    const { left: hangerLeft, right: hangerRight } = buildScreenHanger(centerX, shoePx, screenHW);
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
-    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerLeft);
-    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#1e293b').attr('stroke-width', '1').attr('fill', '#1e293b').attr('d', hangerRight);
+
+    const addHanger = (yPx: number, hw: number): void => {
+      const { left, right } = buildScreenHanger(centerX, yPx, hw);
+      hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', left);
+      hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', right);
+    };
+
+    if (hasLiner) {
+      const liner = data.casings.find(c => c.csgType === 'Liner')!;
+      const linerHW = computeCasingHalfWidth(this.getCasingTier(liner, data.casings), baseHalfWidth, halfWidthIncrement);
+      addHanger(scale(this.resolveShoeDepth(data.casings, data.drlgCasings)), linerHW);
+    }
+
+    if (hasLinerScreen) {
+      addHanger(scale(this.resolveCompletionTopDepth(data.casings, data.drlgCasings)), screenHW);
+    }
+
     hangerG.transition().delay(hangerStart).duration(ANIM.HANGER_DURATION).ease(easeCubicInOut).style('opacity', 1);
   }
 
@@ -1073,7 +1091,6 @@ export class WellBoreViewComponent {
       }
       segs.forEach((seg, idx) => {
         const col = circColour(seg.pct);
-        const topPct = (seg.topPx / effectivePx) * 100;
         const botPct = (seg.botPx / effectivePx) * 100;
         const nextCol = idx + 1 < segs.length ? circColour(segs[idx + 1].pct) : col;
         grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
@@ -1123,7 +1140,6 @@ export class WellBoreViewComponent {
     const height = bottomPx - topPx;
     const width = ohHW * 2 + 160; // +80 units each side
     const lx = centerX - ohHW - 80;
-    const midY = topPx + height / 2;
 
     const ndg = this.rootG.append('g')
       .attr('class', 'not-drilled-zone')

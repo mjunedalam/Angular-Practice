@@ -2,7 +2,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, pipe, switchMap, tap } from 'rxjs';
 
 import { WellDoc, WellDocsState } from '@models/well-design/well-docs.model';
 import { DocListResponse, DocRemoveResponse, UploadDocResponse } from '@shared/models/wwell/api-response.model';
@@ -51,24 +51,25 @@ export const WellDocsStore = signalStore(
         tap(() => patchState(store, { uploading: true, error: null })),
         switchMap(({ files, epANum, date }) =>
           svc.uploadDocs(files, epANum, date).pipe(
+            switchMap((responses: UploadDocResponse[]) => {
+              const failed = responses.filter(r => r.error);
+              if (failed.length) {
+                const msg = failed.map(r => r.message).join('; ');
+                patchState(store, { uploading: false, error: msg });
+                notify.error(msg);
+                return EMPTY;
+              }
+              notify.info('Documents uploaded successfully.');
+              patchState(store, { uploading: false });
+              return svc.getDocList(epANum, date);
+            }),
             tapResponse({
-              next: (responses: UploadDocResponse[]) => {
-                const failed = responses.filter(r => r.error);
-                if (failed.length) {
-                  const msg = failed.map(r => r.message).join('; ');
-                  patchState(store, { uploading: false, error: msg });
-                  notify.error(msg);
+              next: (res: DocListResponse) => {
+                if (res.error) {
+                  patchState(store, { docNames: [], listError: res.message ?? 'Failed to load documents' });
                   return;
                 }
-                notify.info('Documents uploaded successfully.');
-                svc.getDocs(epANum, date).subscribe({
-                  next: docs => {
-                    docs = [];
-                    patchState(store, { docs: docs.length > 0 ? docs : DUMMY_DOCS, uploading: false })
-                  },
-                  error: () =>
-                    patchState(store, { uploading: false }),
-                });
+                patchState(store, { docNames: res.data.totalFiles, listLoading: false });
               },
               error: (err: unknown) => {
                 const msg = err instanceof Error ? err.message : 'Upload failed';
