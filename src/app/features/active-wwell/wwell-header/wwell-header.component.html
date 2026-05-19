@@ -1,54 +1,59 @@
-<div class="aw-section">
-  <div class="well-header">Well Header: {{ data()?.wellName ?? 'N/A' }}</div>
+@let d = store.wellHeaderData();
 
-  @if (data(); as wellHeader) {
+
+
+
+
+<div class="aw-section">
+  <div class="well-header">Well Header: {{ d?.wellName ?? 'N/A' }}</div>
+
+
     <div class="aw-grid--3">
       <div class="aw-cell">
         <span class="aw-label">Field</span>
-        <span class="aw-value">{{ wellHeader.field }}</span>
+        <span class="aw-value">{{ d?.field }}</span>
       </div>
 
       <div class="aw-cell">
         <span class="aw-label">Well</span>
-        <span class="aw-value">{{ wellHeader.wellName }}</span>
+        <span class="aw-value">{{ d?.wellName }}</span>
       </div>
 
       <div class="aw-cell aw-cell--gis">
         <span class="aw-label">Latitude (GIS)</span>
-        <span class="aw-value">{{ wellHeader.lat }}</span>
+        <span class="aw-value">{{ d?.lat }}</span>
       </div>
 
       <div class="aw-cell aw-cell--gis">
         <span class="aw-label">Longitude (GIS)</span>
-        <span class="aw-value">{{ wellHeader.lon }}</span>
+        <span class="aw-value">{{ d?.lon }}</span>
       </div>
 
       <div class="aw-cell aw-cell--ir">
         <span class="aw-label">Targeted Aquifer (IR)</span>
-        <span class="aw-value">{{ wellHeader.targetedAquifer }}</span>
+        <span class="aw-value">{{ d?.targetedAquifer }}</span>
       </div>
 
       <div class="aw-cell">
         <span class="aw-label">Target Depth</span>
-        <span class="aw-value">{{ wellHeader.depth }} ft</span>
+        <span class="aw-value">{{ d?.depth }} ft</span>
       </div>
 
       <div class="aw-cell">
         <span class="aw-label">EP Num</span>
-        <span class="aw-value">{{ wellHeader.epNum }}</span>
+        <span class="aw-value">{{ d?.epNum }}</span>
       </div>
 
       <div class="aw-cell">
         <span class="aw-label">Status</span>
-        <span class="aw-value"><span class="aw-status-badge">{{ currentStatus() }}</span></span>
+        <span class="aw-value"><span class="aw-status-badge">{{ drillingForm.get('status')?.value }}</span></span>
       </div>
 
       <div class="aw-cell">
         <span class="aw-label">BI</span>
-        <span class="aw-value">{{ wellHeader.biNum }}</span>
+        <span class="aw-value">{{ d?.biNum }}</span>
       </div>
     </div>
-  } @else {
-    <div class="wh-empty">Please select a well from the list to view details.</div>
-  }
+
 </div>
+
