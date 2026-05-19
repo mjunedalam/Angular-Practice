@@ -1,6 +1,7 @@
 import { IWellData } from '@models/well-design/well-data.model';
 import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
 import { getTodayAtMidnight } from 'src/app/shared/utils/date.util';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 export interface ActiveWwellState {
     readonly wellList: WwellEntry[];
@@ -12,6 +13,7 @@ export interface ActiveWwellState {
     readonly error: string | null;
     readonly animationTrigger: number;
     readonly wellNamesPage: number;
+    readonly status:string;
 }
 
 export const initialActiveWwellState: ActiveWwellState = {
@@ -24,4 +26,5 @@ export const initialActiveWwellState: ActiveWwellState = {
     error: null,
     animationTrigger: 0,
     wellNamesPage: 0,
+    status:""
 };
