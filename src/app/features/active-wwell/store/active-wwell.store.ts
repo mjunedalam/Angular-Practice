@@ -5,7 +5,6 @@ import { tapResponse } from '@ngrx/operators';
 import { EMPTY, pipe, switchMap, tap } from 'rxjs';
 
 import { IWellData } from '@models/well-design/well-data.model';
-import { validateWellData } from '../../../shared/utils/well-data.validator';
 import { WellLogsIndicators } from '@models/well-design/well-logs-indicators.model';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import {
@@ -25,6 +24,8 @@ import { DailyOperationService } from '@services/daily-operation.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import {
+    allCasingData,
+    selectArea,
     selectCasingInfoViewModel,
     selectDatabaseInfoViewModel,
     selectDiagramData,
@@ -37,6 +38,7 @@ import {
     selectPageIndexForEpANum,
     selectPagedWellNames,
     selectPickedFormations,
+    selectStatus,
     selectTotalDepth,
     selectTotalPages,
     selectWellHeaderViewModel,
@@ -55,6 +57,7 @@ export const ActiveWwellStore = signalStore(
         const wellNames = computed((): WellName[] => selectWellNamesFromList(wellList()));
 
         return {
+      
             wellNames,
             uniqueWellNames: wellNames,
             pagedWellNames: computed((): WellName[] => selectPagedWellNames(wellNames(), wellNamesPage())),
@@ -88,10 +91,15 @@ export const ActiveWwellStore = signalStore(
             casingInfo: computed((): CasingInfoViewModel | null =>
                 selectCasingInfoViewModel(wellData()),
             ),
+            allCasingData: computed((): CasingInfoViewModel[] | null =>
+                allCasingData(wellData()),
+            ),
             wwellTest: computed((): WwellTestViewModel | null =>
                 selectWwellTestViewModel(wellData()),
             ),
             totalDepth: computed((): number => selectTotalDepth(wellData())),
+            status:computed(():string => selectStatus(wellData())),
+            area:computed(():string=>selectArea(wellData()))
         };
     }),
 
@@ -107,9 +115,10 @@ export const ActiveWwellStore = signalStore(
                     svc.getWellDetail(date, epANum).pipe(
                         tapResponse({
                             next: (wellData: IWellData) => {
-                                validateWellData(wellData, String(store.selectedEpANum() ?? ''));
                                 patchState(store, {
                                     wellData,
+                                    // status: wellData.EXAD_GWD_DAILY_REMARKS?.[0].status,
+                                    // area: wellData.EXAD_GWD_DAILY_REMARKS?.[0].area,
                                     detailLoading: false,
                                     animationTrigger: store.animationTrigger() + 1,
                                 });
@@ -131,8 +140,8 @@ export const ActiveWwellStore = signalStore(
                 tap(({ date }) => patchState(store, {
                     listLoading: true,
                     error: null,
-                    wellData: null,
                     selectedDate: parseDateFromInput(date),
+                    // Keep wellData and selectedEpANum alive so components stay stable during load
                 })),
                 switchMap(({ date, epANumOverride }) =>
                     svc.getWellList(date).pipe(
@@ -141,7 +150,7 @@ export const ActiveWwellStore = signalStore(
                                 const names = selectWellNamesFromList(wellList);
 
                                 if (!wellList.length) {
-                                    patchState(store, { wellList: [], listLoading: false, selectedEpANum: null });
+                                    patchState(store, { wellList: [], listLoading: false, selectedEpANum: null, wellData: null });
                                     notify.info('Data is not available for the given date');
                                     return;
                                 }
@@ -158,6 +167,7 @@ export const ActiveWwellStore = signalStore(
                                         wellList: [],
                                         listLoading: false,
                                         selectedEpANum: null,
+                                        wellData: null,
                                         error: 'No valid wells were returned for the selected date',
                                     });
                                     return;
@@ -170,6 +180,7 @@ export const ActiveWwellStore = signalStore(
                                     selectedEpANum: targetEpANum,
                                     wellNamesPage: page,
                                 });
+                                console.log("Load List function in Store. I am calling loadDetail next")
                                 loadDetail({ date, epANum: targetEpANum });
                             },
                             error: (err: Error) => {
@@ -184,8 +195,20 @@ export const ActiveWwellStore = signalStore(
             ),
         );
 
+
+
         return {
+            initialize(date?: string, epANumOverride?: number): void {
+                console.log("Hi. I am initialize function")
+                loadListAndAutoSelect({
+                    date: date ?? formatDateForInput(store.selectedDate()),
+                    epANumOverride: epANumOverride ?? null,
+                });
+
+
+            },
             loadWellNames(date?: string, epANumOverride?: number): void {
+                console.log("Hi. I am loadWellNames function")
                 loadListAndAutoSelect({
                     date: date ?? formatDateForInput(store.selectedDate()),
                     epANumOverride: epANumOverride ?? null,
@@ -201,12 +224,16 @@ export const ActiveWwellStore = signalStore(
                 const page = selectPageIndexForEpANum(names, epANum, store.wellNamesPage());
 
                 patchState(store, { selectedEpANum: epANum, wellNamesPage: page });
+                console.log("Select Well function in Store. I am calling loadDetail next")
                 loadDetail({ date, epANum });
             },
 
-            setDate(date: string): void {
-                // Preserve the active well across date changes; falls back to first if not found.
-                loadListAndAutoSelect({ date, epANumOverride: store.selectedEpANum() });
+            setDate(date: string, options?: { autoSelectFirst?: boolean }): void {
+                console.log("[Store] setDate function")
+                // Preserve the active well across date changes so the same well stays
+                // selected if it exists in the new date's list; falls back to first if not.
+                const epANumOverride = options?.autoSelectFirst ? null : store.selectedEpANum();
+                loadListAndAutoSelect({ date, epANumOverride });
             },
 
             nextPage(): void {
@@ -218,6 +245,7 @@ export const ActiveWwellStore = signalStore(
                     ...(firstOnPage ? { selectedEpANum: firstOnPage.epANum } : {}),
                 });
                 if (firstOnPage) {
+                    console.log("Next Page function in Store. I am calling loadDetail next")
                     loadDetail({ date: formatDateForInput(store.selectedDate()), epANum: firstOnPage.epANum });
                 }
             },
@@ -230,6 +258,7 @@ export const ActiveWwellStore = signalStore(
                     ...(firstOnPage ? { selectedEpANum: firstOnPage.epANum } : {}),
                 });
                 if (firstOnPage) {
+                    console.log("Previous Page function in Store. I am calling loadDetail next")
                     loadDetail({ date: formatDateForInput(store.selectedDate()), epANum: firstOnPage.epANum });
                 }
             },
@@ -241,6 +270,11 @@ export const ActiveWwellStore = signalStore(
             loadWaterWellTestResults(): void {
                 return EMPTY as unknown as void;
             },
+
+            setStatus(status:string):void{
+                patchState(store, {status})
+            }
+
         };
     }),
 );
