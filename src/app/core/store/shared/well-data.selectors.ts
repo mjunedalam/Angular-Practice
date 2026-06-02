@@ -40,7 +40,7 @@ function coercePositiveEpANum(value: number | string | null | undefined): number
 export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
     return wellList.flatMap((entry) => {
         const epANum = coercePositiveEpANum(entry.epANum);
-        return epANum === null ? [] : [{ wellName: entry.wGnrName, epANum }];
+        return epANum === null ? [] : [{ wellName: entry.wellName, epANum }];
     });
 }
 
