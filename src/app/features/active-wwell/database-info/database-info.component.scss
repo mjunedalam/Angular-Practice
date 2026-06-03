@@ -1,26 +1,15 @@
-:host {
-  display: block;
-}
+:host { display: block; }
 
-.aw-section {
-  border-radius: 12px;
-  overflow: hidden;
-}
+.aw-section { border-radius: 10px; overflow: hidden; }
 
-.well-header {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
+.well-header { font-size: 11px; font-weight: 800; letter-spacing: 0.07em; }
 
-.di-body {
-  padding: 0.6rem;
-}
+.di-body { padding: 0.5rem; }
 
 .di-empty {
-  color: #9ca3af;
+  color: #94a3b8;
   font-style: italic;
-  font-size: 0.96rem;
+  font-size: 0.88rem;
   line-height: 1.6;
   padding: 0.75rem;
 }
@@ -28,50 +17,46 @@
 .aw-grid--8 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
-  margin-bottom: 0.55rem;
+  gap: 1px;
+  background: #e2e8f0;
+  margin-bottom: 1px;
 }
 
-.aw-grid--8:last-child {
-  margin-bottom: 0;
-}
+.aw-grid--8:last-child { margin-bottom: 0; }
 
 .aw-db-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
   min-width: 0;
-  padding: 0.8rem 0.9rem;
-  border-radius: 0.75rem;
+  padding: 0.5rem 0.65rem;
   background: #f8fafc;
-  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .aw-db-label {
-  font-size: 0.8rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.035em;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: #64748b;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .aw-db-value {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.45;
+  font-size: 0.88rem;
+  font-weight: 700;
   color: #0f172a;
   word-break: break-word;
+  line-height: 1.35;
 }
 
 @media (max-width: 1100px) {
-  .aw-grid--8 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .aw-grid--8 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
-  .aw-grid--8 {
-    grid-template-columns: 1fr;
-  }
+  .aw-grid--8 { grid-template-columns: 1fr; }
 }

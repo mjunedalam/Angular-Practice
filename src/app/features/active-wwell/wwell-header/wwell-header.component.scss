@@ -1,99 +1,59 @@
-:host {
-  display: block;
-}
+:host { display: block; }
 
-.aw-section {
-  border-radius: 12px;
-  overflow: hidden;
-}
+.aw-section { border-radius: 10px; overflow: hidden; }
 
-.well-header {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
+.well-header { font-size: 11px; font-weight: 800; letter-spacing: 0.07em; }
 
 .aw-grid--3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.55rem;
-  padding: 0.6rem;
+  gap: 1px;
+  background: #e2e8f0;
+  padding: 1px;
 }
 
 .aw-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
   min-width: 0;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
   background: #f8fafc;
 }
 
-.aw-cell--gis {
-  background: #fff6ea;
-}
+.aw-cell--gis { background: #fff7ed; }
 
 .aw-cell--ir {
-  background: #2563eb;
-}
-
-.wh-empty {
-  padding: 2.5rem;
-  text-align: center;
-  color: #9ca3af;
-  font-style: italic;
-  font-size: 0.96rem;
-  line-height: 1.6;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
 }
 
 .aw-label {
-  font-size: 0.82rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: #64748b;
+  line-height: 1.2;
 }
 
+.aw-cell--gis .aw-label { color: #c2410c; }
+.aw-cell--ir  .aw-label { color: rgba(255, 255, 255, 0.6); }
+
 .aw-value {
-  font-size: 1.02rem;
-  font-weight: 800;
-  line-height: 1.45;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
   color: #0f172a;
   word-break: break-word;
 }
 
-.aw-cell--ir .aw-label {
-  color: rgba(255, 255, 255, 0.82);
-}
+.aw-cell--ir .aw-value { color: #ffffff; }
 
-.aw-cell--ir .aw-value {
-  color: #ffffff;
-}
-
-.aw-status-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.08);
-  font-size: 0.84rem;
-  font-weight: 800;
-  line-height: 1.2;
-  padding: 0.22rem 0.7rem;
-}
-
-.aw-cell--status {
-  padding-bottom: 0.5rem;
-}
+.aw-cell--status { padding-bottom: 0.4rem; }
 
 .aw-status-select {
   width: 100%;
-
-  &.mat-mdc-form-field {
-    --mdc-outlined-text-field-container-height: 36px;
-  }
+  margin-top: 2px;
 
   ::ng-deep {
     .mat-mdc-text-field-wrapper {
@@ -101,34 +61,35 @@
       background: #fff;
     }
     .mat-mdc-form-field-infix {
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
       min-height: unset;
     }
     .mdc-notched-outline__leading,
     .mdc-notched-outline__trailing,
-    .mdc-notched-outline__notch {
-      border-color: rgba(15, 23, 42, 0.18);
-    }
+    .mdc-notched-outline__notch { border-color: #d1d5db; }
     .mat-mdc-select-value-text {
-      font-size: 0.88rem;
-      font-weight: 800;
+      font-size: 0.84rem;
+      font-weight: 700;
       color: #0f172a;
     }
-    .mat-mdc-select-arrow {
-      color: #64748b;
-    }
+    .mat-mdc-select-arrow { color: #94a3b8; }
+    .mat-mdc-form-field-subscript-wrapper { display: none; }
   }
+}
+
+.wh-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.88rem;
 }
 
 @media (max-width: 960px) {
-  .aw-grid--3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .aw-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
-  .aw-grid--3 {
-    grid-template-columns: 1fr;
-  }
+  .aw-grid--3 { grid-template-columns: 1fr; }
 }

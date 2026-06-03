@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   OnInit,
+  ViewChild,
   computed,
   effect,
   inject,
@@ -73,6 +75,8 @@ const ADD_NEW_SENTINEL = '__ADD_NEW__';
   providers: [ActiveWwellUiStore],
 })
 export class ActiveWwellViewComponent implements OnInit {
+  @ViewChild('nativeDateInput') private nativeDateInput?: ElementRef<HTMLInputElement>;
+
   protected readonly ADD_NEW_SENTINEL = ADD_NEW_SENTINEL;
   protected readonly areas = AREAS;
 
@@ -228,6 +232,41 @@ export class ActiveWwellViewComponent implements OnInit {
 
 
   protected onDateInputChange(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected onDateAutoFormat(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selStart = input.selectionStart ?? 0;
+    const rawVal = input.value;
+
+    const digits = rawVal.replace(/\D/g, '').slice(0, 8);
+
+    let formatted = digits;
+    if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
+    if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
+
+    const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
+    const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
+    const newCursor = Math.min(selStart + (newDashes - oldDashes), formatted.length);
+
+    input.value = formatted;
+    input.setSelectionRange(newCursor, newCursor);
+
+    if (digits.length === 8) {
+      this.commitDate(formatted);
+    }
+  }
+
+  protected onDateTextCommit(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected openNativePicker(): void {
+    this.nativeDateInput?.nativeElement.showPicker?.();
+  }
+
+  private commitDate(value: string): void {
     const date = parseDateFromInput(value);
     const today = getTodayAtMidnight();
     if (!Number.isNaN(date.getTime()) && date <= today) {
@@ -283,14 +322,6 @@ export class ActiveWwellViewComponent implements OnInit {
     this.route.queryParamMap
       .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => this.applyQueryParams(params));
-  }
-
-  protected onDateChange(value: string): void {
-    const date = parseDateFromInput(value);
-    const today = getTodayAtMidnight();
-    if (!Number.isNaN(date.getTime()) && date <= today) {
-      this.store.setDate(formatDateForInput(date));
-    }
   }
 
   protected onWellSelect(epANum: number): void {
