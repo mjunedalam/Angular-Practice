@@ -23,7 +23,8 @@ export class FormationTopsAndCasingComponent {
     { headerName: 'Formation', field: 'formation', tooltipField: 'formation' },
     { headerName: 'Prognosed', field: 'prognosed', tooltipField: 'prognosed' },
     { headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth', valueFormatter: this.blankIfInvalid },
-{ headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1 }
+    { headerName: 'Difference', field: 'difference', tooltipField: 'difference', minWidth: 90, valueFormatter: this.blankIfInvalid },
+    { headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1 },
   ];
 
   readonly theme = themeQuartz.withParams({
