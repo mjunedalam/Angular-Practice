@@ -14,14 +14,16 @@ import { ColDef, themeQuartz } from 'ag-grid-community';
 export class FormationTopsAndCasingComponent {
   private readonly store = inject(ActiveWwellStore);
 
-  protected readonly data = this.store.formationInfo;
+  protected readonly data = this.store.allFormationTops;
+
+  private readonly blankIfInvalid = ({ value }: { value: unknown }) =>
+    value !== null && value !== undefined && value !== '' && isFinite(Number(value)) ? String(value) : '';
 
   columnDefs: ColDef[] = [
     { headerName: 'Formation', field: 'formation', tooltipField: 'formation' },
     { headerName: 'Prognosed', field: 'prognosed', tooltipField: 'prognosed' },
-    { headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth' },
-    { headerName: 'Difference', field: 'difference', tooltipField: 'difference' },
-    { headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1 }
+    { headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth', valueFormatter: this.blankIfInvalid },
+{ headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1 }
   ];
 
   readonly theme = themeQuartz.withParams({
@@ -44,31 +46,7 @@ export class FormationTopsAndCasingComponent {
     cellHorizontalPaddingScale: 1.5,
   });
 
-  rowData = [
-    {
-      formation: 'Sandstone',
-      prognosed: '1500',
-      actualDepth: '1523',
-      difference: '+23',
-      remarks: 'Good quality'
-    },
-    {
-      formation: 'Shale',
-      prognosed: '2000',
-      actualDepth: '1995',
-      difference: '-5',
-      remarks: 'High pressure'
-    },
-    {
-      formation: 'Limestone',
-      prognosed: '2500',
-      actualDepth: null,
-      difference: null,
-      remarks: null
-    }
-  ];
-
-  defaultColDef: ColDef = {
+defaultColDef: ColDef = {
     sortable: true,
     filter: false,
     resizable: true,

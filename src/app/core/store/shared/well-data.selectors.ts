@@ -330,6 +330,32 @@ export function selectFormationInfoViewModel(d: IWellData | null): FormationInfo
     };
 }
 
+function safeNum(v: unknown): number | null {
+    if (v === null || v === undefined) return null;
+    const n = Number(v);
+    return isFinite(n) ? n : null;
+}
+
+export function selectAllFormationTops(d: IWellData | null): FormationInfoViewModel[] {
+    if (!d) return [];
+    const plannedTops = d.EXAD_GWD_IR_TOPS ?? [];
+    const actualTopsMap = new Map<string, IFormationTops>(
+        (d.DRLG_FM_TOPS ?? []).map(fm => [fm.stLongCd, fm])
+    );
+    return plannedTops.map(top => {
+        const actual = actualTopsMap.get(top.stLongCd) ?? null;
+        const actualDepth = safeNum(actual?.wStDmrkDpth);
+        const plannedDepth = safeNum(top.planTvdDepth);
+        return {
+            formation: top.stLongCd ?? FALLBACK_STR,
+            prognosed: plannedDepth ?? FALLBACK_STR,
+            actualDepth: actualDepth ?? '',
+            difference: actualDepth !== null && plannedDepth !== null ? actualDepth - plannedDepth : '',
+            remarks: actual?.wStDmrkRmk ?? FALLBACK_STR,
+        };
+    });
+}
+
 export function selectCasingInfoViewModel(d: IWellData | null): CasingInfoViewModel | null {
     if (!d) return null;
     const casing = selectPrimaryCasing(d);

@@ -25,6 +25,7 @@ import { DailyOperationService } from '@services/daily-operation.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import {
+    selectAllFormationTops,
     selectCasingInfoViewModel,
     selectDatabaseInfoViewModel,
     selectDiagramData,
@@ -97,6 +98,7 @@ export const PresentationStore = signalStore(
                 selectWwellTestViewModel(wellData()),
             ),
             totalDepth: computed((): number => selectTotalDepth(wellData())),
+            allFormationTops: computed((): FormationInfoViewModel[] => selectAllFormationTops(wellData())),
         };
     }),
 

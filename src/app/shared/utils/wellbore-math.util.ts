@@ -250,6 +250,20 @@ export function casingGradientId(csgType: string): string {
 }
 
 /**
+ * Parses a fractional inch size string to a decimal number.
+ * Handles formats like "8 1/2", "12 1/4", "9 5/8", "8.5", "6".
+ * Returns null if the value cannot be parsed.
+ */
+export function parseInchSize(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const m = value.match(/(\d+(?:\.\d+)?)\s*(?:(\d+)\/(\d+))?/);
+  if (!m) return null;
+  const whole = parseFloat(m[1]);
+  if (m[2] && m[3]) return whole + parseInt(m[2]) / parseInt(m[3]);
+  return whole;
+}
+
+/**
  * Builds the two hanger bracket paths for a liner screen top.
  *
  * Shape matches the standard wellbore convention:

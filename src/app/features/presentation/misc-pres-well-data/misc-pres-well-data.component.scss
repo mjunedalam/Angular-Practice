@@ -38,14 +38,14 @@
 // ── Cell color variants ────────────────────────────────────────────────────────
 
 .cell--well-name {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   min-height: clamp(52px, 13cqi, 72px);
 }
 
 .cell--spud {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -80,7 +80,7 @@
 }
 
 .cell--aquifer {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -91,7 +91,7 @@
 }
 
 .cell--status {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -102,7 +102,7 @@
 }
 
 .cell--days {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -122,7 +122,7 @@
 }
 
 .cell--bi {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   align-items: center;
@@ -132,7 +132,7 @@
 }
 
 .cell--feet {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -142,13 +142,13 @@
 }
 
 .cell--prev {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
 }
 
 .cell--depth {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -158,7 +158,7 @@
 }
 
 .cell--next {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -190,7 +190,7 @@
 }
 
 .cell--next-kpi {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -200,16 +200,16 @@
   min-height: clamp(44px, 11cqi, 62px);
 
   &.cell--kpi-positive {
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   }
 
   &.cell--kpi-negative {
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   }
 }
 
 .cell--hole-size {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;
@@ -239,6 +239,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+
+  .cell__label-light {
+    white-space: normal;
+    line-height: 1.2;
+  }
 }
 
 .hole-size__value {
@@ -581,7 +586,7 @@
 
 // ── ROP cell ───────────────────────────────────────────────────────────────────
 .cell--rop {
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
   display: flex;

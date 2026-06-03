@@ -1,15 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   inject,
-  Injector,
-  OnInit,
 } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridApi, GridOptions, GridReadyEvent, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
+
 import { PresentationStore } from '../store/presentation.store';
-import { PickedFormationTops } from '@models/active-wwell/active-wwell-view.model';
+import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
   selector: 'app-picked-formation-tops',
@@ -19,29 +17,13 @@ import { PickedFormationTops } from '@models/active-wwell/active-wwell-view.mode
   templateUrl: './picked-formation-tops.component.html',
   styleUrl: './picked-formation-tops.component.scss',
 })
-export class PickedFormationTopsComponent implements OnInit {
+export class PickedFormationTopsComponent {
   protected readonly store = inject(PresentationStore);
-  private readonly injector = inject(Injector);
-  private gridApi: GridApi<PickedFormationTops> | null = null;
 
-  ngOnInit(): void {
-    effect(() => {
-
-      const rows = this.store.pickedFormations();
-      const isLoaded = this.store.isLoaded();
-
-      if (this.gridApi && isLoaded) {
-        this.gridApi.setGridOption('rowData', rows);
-      }
-    }, { injector: this.injector });
-  }
-
-  onGridReady(event: GridReadyEvent<PickedFormationTops>): void {
-    this.gridApi = event.api;
-    if (this.store.isLoaded()) {
-      this.gridApi.setGridOption('rowData', this.store.pickedFormations());
-    }
-  }
+  private readonly blankIfInvalid = ({ value }: { value: unknown }) =>
+    value !== null && value !== undefined && value !== '' && isFinite(Number(value))
+      ? String(value)
+      : '';
 
   readonly theme = themeQuartz.withParams({
     accentColor: '#2563eb',
@@ -63,30 +45,22 @@ export class PickedFormationTopsComponent implements OnInit {
     cellHorizontalPaddingScale: 1.5,
   });
 
-  readonly columnDefs: ColDef<PickedFormationTops>[] = [
+  readonly columnDefs: ColDef<FormationInfoViewModel>[] = [
+    { headerName: 'Formation', field: 'formation', tooltipField: 'formation', flex: 1.2, minWidth: 70 },
+    { headerName: 'Prognosed', field: 'prognosed', tooltipField: 'prognosed', flex: 1, minWidth: 70 },
     {
-      field: 'formation', headerName: 'Formation', flex: 1, minWidth: 90,
-      headerClass: 'header--center', cellClass: 'cell--center cell--formation',
+      headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth', flex: 1.2, minWidth: 80,
+      valueFormatter: this.blankIfInvalid,
     },
-    {
-      field: 'depth', headerName: 'Depth', flex: 1, minWidth: 80,
-      headerClass: 'header--center', cellClass: 'cell--center cell--depth',
-      valueFormatter: ({ value }) => value != null ? value.toLocaleString() : '—',
-    },
-    {
-      field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 120,
-      headerClass: 'header--center', cellClass: 'cell--center cell--remarks',
-      valueGetter: (params) => params.data?.remarks?.toUpperCase() || '',
-      tooltipField: 'remarks',
-    },
+    { headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1.5, minWidth: 80 },
   ];
 
-  readonly gridOptions: GridOptions<PickedFormationTops> = {
+  readonly gridOptions: GridOptions<FormationInfoViewModel> = {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
     domLayout: 'autoHeight',
-    overlayNoRowsTemplate: '<span class="no-rows">No formations picked yet.</span>',
-    defaultColDef: { sortable: true, resizable: false, suppressHeaderMenuButton: true },
+    defaultColDef: { sortable: true, resizable: true, suppressHeaderMenuButton: true },
+    overlayNoRowsTemplate: '<span class="no-rows">No formation tops available.</span>',
   };
 }

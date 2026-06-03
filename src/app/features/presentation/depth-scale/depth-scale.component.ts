@@ -43,8 +43,6 @@ export class DepthScaleComponent {
     });
   }
 
-
-
   private drawScale(totalDepth: number, element: SVGSVGElement): void {
     const { depthScaleWidth, svgHeight, marginTop, drawingHeight, depthAxisX } = this.layout;
     const tickHalfLength = 10;
@@ -66,14 +64,15 @@ export class DepthScaleComponent {
     const scale = createDepthScale(totalDepth, drawingHeight);
     const ticks = buildDepthTicks(totalDepth, pickTickInterval(totalDepth));
 
+    const titleX = depthScaleWidth / 2;
     g.append('text')
       .attr('class', 'axis-title')
-      .attr('x', depthAxisX)
-      .attr('y', -34)
+      .attr('x', titleX)
+      .attr('y', -36)
       .attr('text-anchor', 'middle')
       .call((t) => {
-        t.append('tspan').attr('x', depthAxisX).attr('dy', 0).text('Depth');
-        t.append('tspan').attr('x', depthAxisX).attr('dy', 16).text('(ft bgl)');
+        t.append('tspan').attr('x', titleX).attr('dy', 0).text('Depth');
+        t.append('tspan').attr('x', titleX).attr('dy', 14).text('(ft bgl)');
       });
 
     const scaleTipY = scale(totalDepth); // === drawingHeight

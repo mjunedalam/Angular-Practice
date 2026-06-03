@@ -37,7 +37,8 @@
   .column-label  { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--accent); font-weight: 700; opacity: 0.9; }
   .geo-tick      { stroke: #000; stroke-width: 1.5; opacity: 1; }
   .geo-depth     { font-size: 18px; font-weight: 800;  text-anchor: end; }
-  .geo-code      { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
+  .geo-code         { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
+  .geo-code--actual { fill: #16a34a; }
 
   .geo-target-band  { fill: rgb(35 135 232 / 60%);  }
   .geo-tick--target { stroke: #d97706; stroke-width: 2.5; }

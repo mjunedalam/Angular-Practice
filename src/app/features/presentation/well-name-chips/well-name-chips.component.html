@@ -3,15 +3,36 @@
     <!-- Date picker section — positioned on the left -->
     <div class="date-picker-section">
       <label class="date-picker-label" for="well-date-input">Date:</label>
-      <input
-        id="well-date-input"
-        type="date"
-        class="date-picker-input"
-        [ngModel]="selectedDateString()"
-        [max]="maxDateString"
-        (ngModelChange)="onDateInputChange($event)"
-        aria-label="Select date for well data"
-      />
+      <div class="date-input-wrapper">
+        <input
+          id="well-date-input"
+          type="text"
+          class="date-picker-input"
+          [value]="selectedDateString()"
+          placeholder="YYYY-MM-DD"
+          maxlength="10"
+          (input)="onDateAutoFormat($event)"
+          (blur)="onDateTextCommit($any($event.target).value)"
+          (keydown.enter)="onDateTextCommit($any($event.target).value); $any($event.target).blur()"
+          aria-label="Select date for well data"
+        />
+        <button type="button" class="date-cal-btn" (click)="openNativePicker()" aria-label="Open calendar picker">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </button>
+        <input
+          #nativeDateInput
+          type="date"
+          class="date-native-hidden"
+          [value]="selectedDateString()"
+          [max]="maxDateString"
+          (change)="onDateInputChange($any($event.target).value)"
+          tabindex="-1"
+          aria-hidden="true"
+        />
+      </div>
     </div>
 
     <!-- Well name chips and navigation — centered -->

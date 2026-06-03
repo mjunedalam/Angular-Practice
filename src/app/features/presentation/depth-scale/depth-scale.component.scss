@@ -12,6 +12,7 @@
   border-bottom-left-radius: 18px;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 
@@ -20,22 +21,19 @@
 
 
   .axis-title {
-   
-    font-size: 15px; font-weight: 900;
+    font-size: 11px; font-weight: 900;
     fill: #000;
-    letter-spacing: 0.06em; text-transform: uppercase;
+    letter-spacing: 0.04em; text-transform: uppercase;
   }
   .axis-line  { stroke: #000; stroke-width: 2; fill: none; opacity: 1; }
   .axis-arrow { fill: #000; opacity: 1; }
   .tick-line  { stroke: #000; stroke-width: 1.8; stroke-linecap: round; opacity: 1; }
   .tick-label {
-   
-    font-weight: 900;
+    font-size: 10px; font-weight: 900;
     fill: #000; text-anchor: end;
   }
   .total-depth-label {
-   
-    font-size: 16px; font-weight: 900;
-    fill: #000; letter-spacing: 0.05em;
+    font-size: 11px; font-weight: 900;
+    fill: #000; letter-spacing: 0.04em;
   }
 }

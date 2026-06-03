@@ -14,6 +14,7 @@ import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, Wellbor
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from 'src/app/shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
+import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
 import {
   buildArrowHeadLeft,
   buildArrowHeadRight,
@@ -26,6 +27,7 @@ import {
   computeCasingHalfWidth,
   createDepthScale,
   openHoleHalfWidth,
+  parseInchSize,
 } from 'src/app/shared/utils/wellbore-math.util';
 
 type SvgSel = Selection<SVGSVGElement, unknown, null, undefined>;
@@ -54,6 +56,7 @@ export class WellBoreViewComponent {
   readonly diagramData = input.required<WellboreDiagramData | null>();
   readonly animTrigger = input.required<number>();
   readonly animConfig = input<WellboreAnimConfig>(DEFAULT_ANIM_CONFIG);
+  readonly formationTops = input<FormationInfoViewModel[]>([]);
 
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('wellboreSvg');
 
@@ -143,7 +146,7 @@ export class WellBoreViewComponent {
 
     // ── Draw ───────────────────────────────────────────────────────────────
     this.drawStaticChrome(geoLineX, casingCenterX);
-    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer);
+    this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer, this.formationTops());
     this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
     this.drawGravelPackDesign(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawPrePerforatedLiner(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
@@ -153,9 +156,7 @@ export class WellBoreViewComponent {
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
 
-    const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin } = this.layout;
-    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = innerHW + openHoleHwMargin;
+    const ohHW = this.resolveOhHalfWidth(data);
 
     this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart, ohHW);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
@@ -467,11 +468,25 @@ export class WellBoreViewComponent {
     geoLineX: number,
     scale: ReturnType<typeof createDepthScale>,
     targetAquifer: string | null,
+    formationTops: FormationInfoViewModel[] = [],
   ): void {
+    const actualMap = new Map(
+      formationTops
+        .filter(f => {
+          const n = Number(f.actualDepth);
+          return f.actualDepth !== null && f.actualDepth !== undefined &&
+                 f.actualDepth !== '' && isFinite(n) && n > 0;
+        })
+        .map(f => [f.formation, Number(f.actualDepth)])
+    );
+
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
     sorted.forEach((top, idx) => {
       const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
-      const yPx = scale(top.planTvdDepth);
+      const actualDepth = actualMap.get(top.stLongCd);
+      const hasActual = actualDepth !== undefined;
+      const yPx = scale(hasActual ? actualDepth! : top.planTvdDepth);
+
       const g = this.rootG.append('g')
         .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
         .attr('transform', `translate(0,${yPx})`)
@@ -496,10 +511,10 @@ export class WellBoreViewComponent {
         .attr('class', 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
-        .text(top.planTvdDepth.toLocaleString());
+        .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString());
 
       g.append('text')
-        .attr('class', 'geo-code')
+        .attr('class', hasActual ? 'geo-code geo-code--actual' : 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
         .text(top.stLongCd);
@@ -606,6 +621,30 @@ export class WellBoreViewComponent {
             : (bottomPx + shoeCurveOffset + 20));
       }
     });
+  }
+
+  /**
+   * Computes the open hole half-width in SVG pixels.
+   * When ohFlg='Y' and ohRemarks contains a parseable diameter smaller than the
+   * innermost casing OD, the hole is scaled narrower proportionally.
+   */
+  private resolveOhHalfWidth(data: WellboreDiagramData): number {
+    const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin } = this.layout;
+    const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+
+    if (data.wellDesign?.ohFlg !== 'Y') return innerHW + openHoleHwMargin;
+
+    const structuralCasings = data.casings.filter(
+      c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
+    );
+    const innermostOD = parseInchSize(structuralCasings[0]?.csgSize ?? null);
+    const ohDiameter = parseInchSize(data.wellDesign.ohRemarks);
+
+    if (ohDiameter !== null && innermostOD !== null && innermostOD > 0 && ohDiameter < innermostOD) {
+      return innerHW * (ohDiameter / innermostOD);
+    }
+
+    return innerHW + openHoleHwMargin;
   }
 
   // ── Animation helpers ────────────────────────────────────────────────────
@@ -778,9 +817,10 @@ export class WellBoreViewComponent {
     const lR = centerX + innerHW + 10;
     const lL = centerX - innerHW - 10;
     const lineWidth = lR - lL;
+    const rawTxt = wd.swLvlTxt ?? '';
     const label = isFlowing
-      ? `Flowing — ${wd.swLvlTxt}`
-      : `Static WL: ${waterDepth.toLocaleString()} `;
+      ? (/^flowing/i.test(rawTxt) ? rawTxt : `Flowing — ${rawTxt}`)
+      : (/^static\s*wl/i.test(rawTxt) ? rawTxt : `Static WL: ${waterDepth.toLocaleString()}`);
     const ra = this.resolveAnim();
     const wg = this.rootG.append('g').attr('class', 'water-level');
 
@@ -827,9 +867,10 @@ export class WellBoreViewComponent {
       .transition().delay(afterLine).duration(ra.fadeDur).ease(easeCubicInOut)
       .style('opacity', 1);
 
+    const labelY = Math.max(wPx + 4, 16);
     wg.append('text')
       .attr('class', 'water-label')
-      .attr('x', lL - 22).attr('y', wPx + 4)
+      .attr('x', lL - 22).attr('y', labelY)
       .attr('text-anchor', 'end').text(label)
       .style('opacity', 0)
       .transition().delay(afterLine).duration(ra.fadeDur).ease(easeCubicInOut)
@@ -844,9 +885,9 @@ export class WellBoreViewComponent {
     const shouldDrawLS = wellDesign?.lsFlg === 'Y';
     if (!shouldDrawOH && !shouldDrawLS) return;
 
-    const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin, linerScreenInset } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const ohHW = innerHW + openHoleHwMargin;
+    const ohHW = this.resolveOhHalfWidth(data);
     const screenHW = innerHW - linerScreenInset;
     const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
     const shoePx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
@@ -1122,14 +1163,7 @@ export class WellBoreViewComponent {
 
   private drawNotDrilledZone(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, start: number, ohHW: number): void {
     const estTargetDepth = data.totalDepth;
-
-    // Effective drilled depth = max of reported current depth and deepest actual casing/liner installed
-    const deepestActual = data.drlgCasings.reduce((max, d) => {
-      const csgD = d.wCsgBotDpth > 0 ? d.wCsgBotDpth : 0;
-      const lnrD = (d.wLnrBotDepth ?? 0) > 0 ? d.wLnrBotDepth! : 0;
-      return Math.max(max, csgD, lnrD);
-    }, 0);
-    const currentDepth = Math.max(data.currentDepth, deepestActual);
+    const currentDepth = data.currentDepth;
     const undrilledFt = estTargetDepth - currentDepth;
 
     // Only draw if drilling has started and there is undrilled section remaining

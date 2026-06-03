@@ -25,6 +25,7 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { formatDateForInput, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import {
     allCasingData,
+    selectAllFormationTops,
     selectArea,
     selectCasingInfoViewModel,
     selectDatabaseInfoViewModel,
@@ -87,6 +88,9 @@ export const ActiveWwellStore = signalStore(
             ),
             formationInfo: computed((): FormationInfoViewModel | null =>
                 selectFormationInfoViewModel(wellData()),
+            ),
+            allFormationTops: computed((): FormationInfoViewModel[] =>
+                selectAllFormationTops(wellData()),
             ),
             casingInfo: computed((): CasingInfoViewModel | null =>
                 selectCasingInfoViewModel(wellData()),

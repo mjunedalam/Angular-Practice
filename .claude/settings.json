@@ -1,10 +1,19 @@
 {
-  "model": "sonnet",
   "env": {
     "MAX_THINKING_TOKENS": "10000",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
   },
-    "skills": {
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} sh -c 'cd /tmp && jar xf \"{}\" io/smallrye/jwt/config/JWTAuthContextInfoProvider.class && javap -private /tmp/io/smallrye/jwt/config/JWTAuthContextInfoProvider.class 2>/dev/null | grep -i \"grace\\\\|skew\\\\|expir\\\\|clock\"')",
+      "Bash(node -e ' *)"
+    ],
+    "additionalDirectories": [
+      "/Users/junedalam/Downloads/code-with-quarkus 3/src/main/java/com/aramco/easd/dailyoperations/resources"
+    ]
+  },
+  "model": "sonnet",
+  "skills": {
     "allowed": [
       "frontend-patterns",
       "frontend-design",

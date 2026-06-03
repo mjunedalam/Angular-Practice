@@ -17,7 +17,7 @@ import { WwellsLogsIndicatorsComponent } from './wwells-logs-indicators/wwells-l
 import { WwellTestResultComponent } from './wwell-test-result/wwell-test-result.component';
 import { ActiveWwellDocsViewerComponent } from './active-wwell-docs-viewer/active-wwell-docs-viewer.component';
 
-const LEFT_DEFAULT = 320; const LEFT_MIN = 220; const LEFT_MAX = 520;
+const LEFT_DEFAULT = 390; const LEFT_MIN = 280; const LEFT_MAX = 580;
 const RIGHT_DEFAULT = 340; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
 
 @Component({
