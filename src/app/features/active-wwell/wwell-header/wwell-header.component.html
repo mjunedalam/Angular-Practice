@@ -44,9 +44,31 @@
         <span class="aw-value">{{ d?.epNum }}</span>
       </div>
 
-      <div class="aw-cell">
+      <div class="aw-cell aw-cell--status" [formGroup]="drillingForm">
         <span class="aw-label">Status</span>
-        <span class="aw-value"><span class="aw-status-badge">{{ drillingForm.get('status')?.value }}</span></span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="aw-status-select">
+          <mat-select formControlName="status" panelClass="status-select-panel"
+            (openedChange)="onStatusPanelToggle($event)">
+            <mat-option disabled class="status-search-opt">
+              <div class="status-search-wrap">
+                <mat-icon class="status-search-icon">search</mat-icon>
+                <input class="status-search-input" placeholder="Search status…" autocomplete="off"
+                  [ngModel]="statusSearchQuery()" (ngModelChange)="statusSearchQuery.set($event)"
+                  [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()"
+                  (keydown)="$event.key !== 'Escape' && $event.stopPropagation()" />
+              </div>
+            </mat-option>
+            @if (filteredStatusOptions().length === 0) {
+              <mat-option disabled class="status-no-results">No results</mat-option>
+            }
+            @for (status of filteredStatusOptions(); track status) {
+              <mat-option [value]="status">{{ status }}</mat-option>
+            }
+            <mat-option (click)="openAddStatusDialog()">
+              <mat-icon inline>add</mat-icon> Add new...
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="aw-cell">

@@ -84,6 +84,43 @@
   padding: 0.22rem 0.7rem;
 }
 
+.aw-cell--status {
+  padding-bottom: 0.5rem;
+}
+
+.aw-status-select {
+  width: 100%;
+
+  &.mat-mdc-form-field {
+    --mdc-outlined-text-field-container-height: 36px;
+  }
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      padding: 0 8px;
+      background: #fff;
+    }
+    .mat-mdc-form-field-infix {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: unset;
+    }
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch {
+      border-color: rgba(15, 23, 42, 0.18);
+    }
+    .mat-mdc-select-value-text {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .mat-mdc-select-arrow {
+      color: #64748b;
+    }
+  }
+}
+
 @media (max-width: 960px) {
   .aw-grid--3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -56,35 +56,7 @@
             <app-file-upload [epANum]="store.selectedEpANum()" [date]="selectedDateString()"></app-file-upload>
 
             <div class="lt-orange active-wwell-status-panel">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
-                <mat-label>Status</mat-label>
-                <mat-select formControlName="status" panelClass="status-select-panel">
-                  <mat-option disabled class="status-search-opt">
-                    <div class="status-search-wrap">
-                      <mat-icon class="status-search-icon">search</mat-icon>
-                      <input class="status-search-input" placeholder="Search status…" autocomplete="off"
-                        [ngModel]="statusSearchQuery()" (ngModelChange)="statusSearchQuery.set($event)"
-                        [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" (keydown)="
-                        $event.key !== 'Escape' && $event.stopPropagation()
-                      " />
-                    </div>
-                  </mat-option>
-
-                  @if (filteredStatusOptions().length === 0) {
-                  <mat-option disabled class="status-no-results">No results</mat-option>
-                  }
-
-                  @for (status of filteredStatusOptions(); track status) {
-                  <mat-option [value]="status">{{ status }}</mat-option>
-                  }
-                  <mat-option (click)="openDialog()">
-                    <mat-icon inline>add</mat-icon>
-                    Add new...
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
+<mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
                 <mat-label>Area</mat-label>
                 <mat-select formControlName="area">
                   @for (area of areas; track area.value) {
