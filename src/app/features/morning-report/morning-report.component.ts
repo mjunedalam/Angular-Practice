@@ -4,6 +4,7 @@ import {
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   Injector,
   OnDestroy,
@@ -42,6 +43,7 @@ const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
 })
 export class MorningReportComponent implements OnInit, OnDestroy {
   @ViewChild('wwellMap') protected wwellMap!: WwellmapComponent;
+  @ViewChild('nativeDateInput') private nativeDateInput?: ElementRef<HTMLInputElement>;
 
   protected readonly store = inject(MorningReportStore);
   private readonly authStore = inject(AuthStore);
@@ -147,7 +149,42 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onDateChange(value: string): void {
+  protected onDateInputChange(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected onDateAutoFormat(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selStart = input.selectionStart ?? 0;
+    const rawVal = input.value;
+
+    const digits = rawVal.replace(/\D/g, '').slice(0, 8);
+
+    let formatted = digits;
+    if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
+    if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
+
+    const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
+    const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
+    const newCursor = Math.min(selStart + (newDashes - oldDashes), formatted.length);
+
+    input.value = formatted;
+    input.setSelectionRange(newCursor, newCursor);
+
+    if (digits.length === 8) {
+      this.commitDate(formatted);
+    }
+  }
+
+  protected onDateTextCommit(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected openNativePicker(): void {
+    this.nativeDateInput?.nativeElement.showPicker?.();
+  }
+
+  private commitDate(value: string): void {
     if (!value) return;
 
     const selectedDate = parseDateFromInput(value);

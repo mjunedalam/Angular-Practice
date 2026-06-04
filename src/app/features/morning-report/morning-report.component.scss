@@ -83,8 +83,14 @@
   letter-spacing: 0.5px;
 }
 
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .date-picker-input {
-  padding: 6px 12px;
+  padding: 6px 34px 6px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-inner);
   background: var(--bg-card);
@@ -92,9 +98,12 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-  min-width: 140px;
+  cursor: text;
+  outline: none;
+  min-width: 122px;
+  width: 122px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   appearance: none;
 
   &:hover {
@@ -104,19 +113,49 @@
   }
 
   &:focus {
-    outline: none;
     border-color: var(--accent);
     background: var(--accent-muted);
     box-shadow: 0 0 0 3px var(--accent-muted);
   }
+}
 
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.9;
-    width: 24px;
-    height: 24px;
-    filter: brightness(0.6);
-  }
+.date-cal-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  svg { width: 13px; height: 13px; }
+
+  &:hover { color: var(--accent); background: var(--accent-muted); }
+}
+
+.date-native-hidden {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 28px;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .report-loading-bar {
