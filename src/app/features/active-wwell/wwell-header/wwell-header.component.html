@@ -8,11 +8,11 @@
     <div class="aw-cell">
       <span class="aw-label">Field</span>
       <span class="aw-value">
-        @if (d?.fieldAr) {
-          <span [innerHTML]="d!.fieldAr" class="aw-value-ar"></span>
-          <span class="aw-value-sep"> — </span>
-        }
         {{ d?.field ?? '—' }}
+        @if (d?.fieldAr) {
+          <span class="aw-value-sep"> — </span>
+          <span [innerHTML]="d!.fieldAr" class="aw-value-ar"></span>
+        }
       </span>
     </div>
 

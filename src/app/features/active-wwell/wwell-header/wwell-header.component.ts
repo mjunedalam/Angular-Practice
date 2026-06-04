@@ -12,6 +12,7 @@ import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog
 @Component({
   selector: 'app-wwell-header',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatSelectModule, MatIconModule],
   templateUrl: './wwell-header.component.html',
   styleUrl: './wwell-header.component.scss'

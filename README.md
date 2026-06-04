@@ -211,7 +211,8 @@ Rows are produced in two passes:
 
 | Field Name | API Object | Exact Mapping | Business Logic |
 |---|---|---|---|
-| Field | `EXAD_RCD_PREWAP[0]` / `RIG_ACTIVITY[0]` | `prewap?.supportedBusiness ?? rig?.wDrlgLocDesc ?? rig?.welltype ?? FALLBACK_STR` | Business area / field name; prewap first, then rig location, then rig well type |
+| Field (EN) | `PRIMARY_HOLEID[0]` / `RIG_ACTIVITY[0]` | `primaryHole?.wPrimHidName ?? rig?.wDrlgLocDesc ?? FALLBACK_STR` | Primary hole field name (English); falls back to rig location description |
+| Field (AR) | `PRIMARY_HOLEID[0]` | `primaryHole?.w_prim_hid_ar_name_html ?? null` | Arabic HTML for the field name; rendered with `[innerHTML]` after English label when present |
 | Well Name | `RIG_ACTIVITY[0]` / `WELL_MASTER[0]` | `rig?.wellName ?? master?.well ?? FALLBACK_STR` | Rig activity well name takes priority over GIS master well |
 | Latitude | `WELL_MASTER[0]` | `master?.lat ?? FALLBACK_STR` | GIS coordinate — badge labeled "GIS" in UI |
 | Longitude | `WELL_MASTER[0]` | `master?.lon ?? FALLBACK_STR` | GIS coordinate — badge labeled "GIS" in UI |
