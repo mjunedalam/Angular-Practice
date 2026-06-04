@@ -394,11 +394,6 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     if (!d) return null;
     const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
     const testOutcome = selectPrimaryTestOutcome(d);
-    const water = selectPrimaryWaterReference(d);
-    const status = d.DRLG_OP_STATUS?.[0];
-    const statusRecord = status as unknown as Record<string, unknown> | undefined;
-    const drillingEngineer = typeof statusRecord?.['wDrlgEngName'] === 'string' ? statusRecord['wDrlgEngName'] : null;
-    const foreman = typeof statusRecord?.['wFmanName'] === 'string' ? statusRecord['wFmanName'] : null;
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     return {
         // flowType: hydro?.flowType ?? 'N',
@@ -465,7 +460,7 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
         wStDmrkDpth: String(lastTop?.wStDmrkDpth ?? ''),
         wPrsntDpth: status?.wPrsntDpth ?? null,
         wDpthChgDis: status?.wDpthChgDis ?? null,
-        wOpRmk: opSmry?.wOpRmk ?? status?.wOpRmk ?? '',
+        wOpRmk: d?.EXAD_GWD_DAILY_REMARKS?.[0]?.opRmk ?? d?.DRLG_OP_SMRY?.[0]?.wOpRmk,
         foremanRmk: status?.nxt24HrPlanRmk ?? '',
         plLtrlEndDpth: prewap?.estTargetDepth ?? null,
         supportings: d.EXAD_RCD_PREWAP?.[0]?.supportedBusiness ?? "Missing",

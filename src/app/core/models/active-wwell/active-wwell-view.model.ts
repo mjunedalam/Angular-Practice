@@ -96,7 +96,7 @@ export interface FormationInfoViewModel {
   readonly prognosed: number | string;
   readonly actualDepth: number | string;
   readonly difference: number | string;
-  readonly remarks: string;
+  readonly remarks: string | null;
 }
 
 export interface CasingInfoViewModel {

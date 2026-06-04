@@ -116,16 +116,16 @@ export class DepthScaleComponent {
         .style('opacity', 1);
     });
 
-    g.append('text')
-      .attr('class', 'total-depth-label')
-      .attr('x', depthAxisX)
-      .attr('y', drawingHeight + 32)
-      .attr('text-anchor', 'middle')
-      .style('opacity', 0)
-      .text(formatDepth(totalDepth))
-      .transition()
-      .delay(ANIM.SCALE_DURATION + 200)
-      .duration(300)
-      .style('opacity', 1);
+    // g.append('text')
+    //   .attr('class', 'total-depth-label')
+    //   .attr('x', depthAxisX)
+    //   .attr('y', drawingHeight + 32)
+    //   .attr('text-anchor', 'middle')
+    //   .style('opacity', 0)
+    //   .text(formatDepth(totalDepth))
+    //   .transition()
+    //   .delay(ANIM.SCALE_DURATION + 200)
+    //   .duration(300)
+    //   .style('opacity', 1);
   }
 }

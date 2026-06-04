@@ -145,18 +145,18 @@ export class WellBoreViewComponent {
     const t_tdLabelStart = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
 
     // ── Draw ───────────────────────────────────────────────────────────────
+    const ohHW = this.resolveOhHalfWidth(data);
+
     this.drawStaticChrome(geoLineX, casingCenterX);
     this.drawGeologicTops(data.geologicTops, geoLineX, scale, targetAquifer, this.formationTops());
     this.drawOpenHoleAndScreen(data, casingCenterX, scale, t_ohStart, t_ohDone, t_ohLabelStart);
     this.drawGravelPackDesign(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
     this.drawPrePerforatedLiner(data, casingCenterX, scale, t_ohStart, t_ohLabelStart);
-    this.drawCasings(data.casings, data.drlgCasings, casingCenterX, scale, t_casingsStart, t_gravelStart);
-    this.drawCasingLabels(data.casings, data.drlgCasings, casingCenterX, scale, t_labelsStart);
+    this.drawCasings(data.casings, data.drlgCasings, casingCenterX, scale, t_casingsStart, t_gravelStart, ohHW);
+    this.drawCasingLabels(data.casings, data.drlgCasings, casingCenterX, scale, t_labelsStart, ohHW);
     this.drawScreenHanger(data, casingCenterX, scale, t_hangerStart);
     this.drawWaterLevel(data, casingCenterX, scale, t_waterStart);
     this.drawDrillArrow(data, scale, t_drillStart, t_casingsDone);
-
-    const ohHW = this.resolveOhHalfWidth(data);
 
     this.drawNotDrilledZone(data, casingCenterX, scale, t_notDrilledStart, ohHW);
     this.drawTotalDepthLabel(data.totalDepth, casingCenterX, drawingHeight, t_tdLabelStart);
@@ -165,48 +165,48 @@ export class WellBoreViewComponent {
 
   private addStaticDefs(defs: DefsSel): void {
     this.addLinearGradient(defs, 'mainGradient', [
-      { offset: '0%',   color: '#1a2130' },
-      { offset: '18%',  color: '#4a5568' },
-      { offset: '38%',  color: '#a0aec0' },
-      { offset: '50%',  color: '#e2e8f0' },
-      { offset: '62%',  color: '#a0aec0' },
-      { offset: '82%',  color: '#4a5568' },
+      { offset: '0%', color: '#1a2130' },
+      { offset: '18%', color: '#4a5568' },
+      { offset: '38%', color: '#a0aec0' },
+      { offset: '50%', color: '#e2e8f0' },
+      { offset: '62%', color: '#a0aec0' },
+      { offset: '82%', color: '#4a5568' },
       { offset: '100%', color: '#1a2130' },
     ]);
     this.addLinearGradient(defs, 'conductorGradient', [
-      { offset: '0%',   color: '#0d2b1a' },
-      { offset: '18%',  color: '#166534' },
-      { offset: '40%',  color: '#3fb950' },
-      { offset: '50%',  color: '#6ee7a0' },
-      { offset: '60%',  color: '#3fb950' },
-      { offset: '82%',  color: '#166534' },
+      { offset: '0%', color: '#0d2b1a' },
+      { offset: '18%', color: '#166534' },
+      { offset: '40%', color: '#3fb950' },
+      { offset: '50%', color: '#6ee7a0' },
+      { offset: '60%', color: '#3fb950' },
+      { offset: '82%', color: '#166534' },
       { offset: '100%', color: '#0d2b1a' },
     ]);
     this.addLinearGradient(defs, 'linerGradient', [
-      { offset: '0%',   color: '#7b8fa8' },
-      { offset: '18%',  color: '#a8bcd0' },
-      { offset: '38%',  color: '#cdd9e5' },
-      { offset: '50%',  color: '#eef3f8' },
-      { offset: '62%',  color: '#cdd9e5' },
-      { offset: '82%',  color: '#a8bcd0' },
+      { offset: '0%', color: '#7b8fa8' },
+      { offset: '18%', color: '#a8bcd0' },
+      { offset: '38%', color: '#cdd9e5' },
+      { offset: '50%', color: '#eef3f8' },
+      { offset: '62%', color: '#cdd9e5' },
+      { offset: '82%', color: '#a8bcd0' },
       { offset: '100%', color: '#7b8fa8' },
     ]);
     this.addLinearGradient(defs, 'actualCasingGradient', [
-      { offset: '0%',   color: '#0d3b1f' },
-      { offset: '18%',  color: '#15803d' },
-      { offset: '38%',  color: '#22c55e' },
-      { offset: '50%',  color: '#6ee7a0' },
-      { offset: '62%',  color: '#22c55e' },
-      { offset: '82%',  color: '#15803d' },
+      { offset: '0%', color: '#0d3b1f' },
+      { offset: '18%', color: '#15803d' },
+      { offset: '38%', color: '#22c55e' },
+      { offset: '50%', color: '#6ee7a0' },
+      { offset: '62%', color: '#22c55e' },
+      { offset: '82%', color: '#15803d' },
       { offset: '100%', color: '#0d3b1f' },
     ]);
     this.addLinearGradient(defs, 'actualLinerGradient', [
-      { offset: '0%',   color: '#0d3b1f' },
-      { offset: '18%',  color: '#166534' },
-      { offset: '38%',  color: '#16a34a' },
-      { offset: '50%',  color: '#4ade80' },
-      { offset: '62%',  color: '#16a34a' },
-      { offset: '82%',  color: '#166534' },
+      { offset: '0%', color: '#0d3b1f' },
+      { offset: '18%', color: '#166534' },
+      { offset: '38%', color: '#16a34a' },
+      { offset: '50%', color: '#4ade80' },
+      { offset: '62%', color: '#16a34a' },
+      { offset: '82%', color: '#166534' },
       { offset: '100%', color: '#0d3b1f' },
     ]);
 
@@ -475,9 +475,15 @@ export class WellBoreViewComponent {
         .filter(f => {
           const n = Number(f.actualDepth);
           return f.actualDepth !== null && f.actualDepth !== undefined &&
-                 f.actualDepth !== '' && isFinite(n) && n > 0;
+            f.actualDepth !== '' && isFinite(n) && n > 0;
         })
         .map(f => [f.formation, Number(f.actualDepth)])
+    );
+
+    const remarksMap = new Map(
+      formationTops
+        .filter(f => f.remarks?.trim())
+        .map(f => [f.formation, f.remarks!.trim()])
     );
 
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
@@ -486,6 +492,7 @@ export class WellBoreViewComponent {
       const actualDepth = actualMap.get(top.stLongCd);
       const hasActual = actualDepth !== undefined;
       const yPx = scale(hasActual ? actualDepth! : top.planTvdDepth);
+      const remark = remarksMap.get(top.stLongCd);
 
       const g = this.rootG.append('g')
         .attr('class', isTarget ? 'geo-top geo-top--target' : 'geo-top')
@@ -513,11 +520,132 @@ export class WellBoreViewComponent {
         .attr('dy', '0.35em')
         .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString());
 
-      g.append('text')
+      const nameEl = g.append('text')
         .attr('class', hasActual ? 'geo-code geo-code--actual' : 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
         .text(top.stLongCd);
+
+      if (remark) {
+        // Colors match the geo-code: green for actual depth, blue for planned
+        const accent = hasActual ? '#22c55e' : '#3b82f6';
+        const accentDim = hasActual ? 'rgba(34,197,94,0.55)' : 'rgba(59,130,246,0.55)';
+        const accentFaint = hasActual ? 'rgba(34,197,94,0.09)' : 'rgba(37,99,235,0.09)';
+        const accentText = hasActual ? '#86efac' : '#93c5fd';
+        const headerBg = hasActual ? 'rgba(20,83,45,0.50)' : 'rgba(30,58,138,0.50)';
+
+        const rx = 8;
+        const ttipW = 228;
+        const headerH = 28;
+        const arrowH = 8;
+        const ttipX = geoLineX + 18;
+
+        // Up to 2 lines of content
+        const maxLine = 30;
+        const line1 = remark.slice(0, maxLine);
+        const rawLine2 = remark.length > maxLine ? remark.slice(maxLine, maxLine + 28) : null;
+        const line2 = rawLine2 ? (remark.length > maxLine + 28 ? rawLine2 + '…' : rawLine2) : null;
+        const contentH = line2 ? 52 : 36;
+        const ttipH = headerH + contentH;
+        const ttipTopY = yPx - ttipH - arrowH - 4;
+        const arrowBaseY = ttipTopY + ttipH;
+        const arrowCx = ttipX + ttipW / 2; // centered arrow
+
+        const ttipG = this.rootG.append('g')
+          .attr('class', 'geo-remark-tooltip')
+          .style('opacity', 0)
+          .style('pointer-events', 'none');
+
+        // Soft glow halo
+        ttipG.append('rect')
+          .attr('x', ttipX - 5).attr('y', ttipTopY - 5)
+          .attr('width', ttipW + 10).attr('height', ttipH + 10)
+          .attr('rx', rx + 5)
+          .attr('fill', accentFaint);
+
+        // Card body
+        ttipG.append('rect')
+          .attr('x', ttipX).attr('y', ttipTopY)
+          .attr('width', ttipW).attr('height', ttipH)
+          .attr('rx', rx)
+          .attr('fill', '#0c1526')
+          .attr('stroke', accentDim)
+          .attr('stroke-width', 1.5);
+
+        // Header strip — rounded top only via path
+        const hx = ttipX, hy = ttipTopY, hw = ttipW, hh = headerH;
+        ttipG.append('path')
+          .attr('d', `M${hx + rx},${hy} Q${hx},${hy} ${hx},${hy + rx} L${hx},${hy + hh} L${hx + hw},${hy + hh} L${hx + hw},${hy + rx} Q${hx + hw},${hy} ${hx + hw - rx},${hy} Z`)
+          .attr('fill', headerBg);
+
+        // Divider
+        ttipG.append('line')
+          .attr('x1', ttipX + 10).attr('x2', ttipX + ttipW - 10)
+          .attr('y1', ttipTopY + headerH).attr('y2', ttipTopY + headerH)
+          .attr('stroke', accentDim).attr('stroke-width', 0.8).attr('opacity', 0.5);
+
+        // Info icon
+        const iconCx = ttipX + 14;
+        const iconCy = ttipTopY + headerH / 2;
+        ttipG.append('circle')
+          .attr('cx', iconCx).attr('cy', iconCy).attr('r', 6.5)
+          .attr('fill', 'rgba(0,0,0,0.25)')
+          .attr('stroke', accent).attr('stroke-width', 1.2);
+        ttipG.append('text')
+          .attr('x', iconCx).attr('y', iconCy + 3.5)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '800').attr('fill', accent)
+          .text('i');
+
+        // Header label
+        ttipG.append('text')
+          .attr('x', iconCx + 11).attr('y', ttipTopY + headerH / 2 + 4)
+          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '800').attr('fill', accentText)
+          .attr('letter-spacing', '0.10em')
+          .text('REMARK');
+
+        // Content line 1
+        ttipG.append('text')
+          .attr('x', ttipX + 12).attr('y', ttipTopY + headerH + 20)
+          .attr('font-size', '11').attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '400').attr('fill', '#e2e8f0')
+          .text(line1);
+
+        if (line2) {
+          ttipG.append('text')
+            .attr('x', ttipX + 12).attr('y', ttipTopY + headerH + 38)
+            .attr('font-size', '11').attr('font-family', 'DM Sans, sans-serif')
+            .attr('font-weight', '400').attr('fill', '#94a3b8')
+            .text(line2);
+        }
+
+        // Arrow — single path: card bottom gap fill + triangle, no seam hacks
+        const aw = 10;
+        // Erase card border at arrow base with a thin fill rect
+        ttipG.append('rect')
+          .attr('x', arrowCx - aw / 2 + 1).attr('y', arrowBaseY - 1)
+          .attr('width', aw - 2).attr('height', 2)
+          .attr('fill', '#0c1526');
+        // Triangle
+        ttipG.append('path')
+          .attr('d', `M${arrowCx - aw / 2},${arrowBaseY} L${arrowCx + aw / 2},${arrowBaseY} L${arrowCx},${arrowBaseY + arrowH} Z`)
+          .attr('fill', '#0c1526')
+          .attr('stroke', accentDim)
+          .attr('stroke-width', 1.2)
+          .attr('stroke-linejoin', 'round');
+        // Seal the triangle base against the card bottom (fill over the interior stroke)
+        ttipG.append('rect')
+          .attr('x', arrowCx - aw / 2 + 1.5).attr('y', arrowBaseY - 0.5)
+          .attr('width', aw - 3).attr('height', 1.5)
+          .attr('fill', '#0c1526');
+
+        nameEl
+          .style('cursor', 'help')
+          .on('mouseenter', () => ttipG.transition().duration(150).style('opacity', 1))
+          .on('mouseleave', () => ttipG.transition().duration(150).style('opacity', 0));
+      }
 
       g.transition()
         .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
@@ -533,6 +661,7 @@ export class WellBoreViewComponent {
     scale: ReturnType<typeof createDepthScale>,
     casingsStart: number,
     gravelStart: number,
+    ohHW: number,
   ): void {
     if (casings.length === 0) {
       this.drawCasingsFromActual(drlgCasings, centerX, scale, casingsStart);
@@ -540,6 +669,7 @@ export class WellBoreViewComponent {
     }
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = this.layout;
     const shoeDepth = this.resolveShoeDepth(casings, drlgCasings);
+    const completionTopPx = scale(this.resolveCompletionTopDepth(casings, drlgCasings));
 
     casings.forEach((csg, i) => {
       const tier = this.getCasingTier(csg, casings);
@@ -552,7 +682,7 @@ export class WellBoreViewComponent {
       const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
       const actualDepth = hasActual ? actualCsg!.wCsgBotDpth
         : hasActualLiner ? actualLnr!.wLnrBotDepth!
-        : null;
+          : null;
       const displayDepth = actualDepth ?? csg.csgDepth;
       const bottomPx = scale(displayDepth);
       const linerTopPx = isLiner ? scale(shoeDepth) : 0;
@@ -561,39 +691,42 @@ export class WellBoreViewComponent {
       const clipId = `dyn-casing-clip-${i}`;
       const animOrder = casings.length - 1 - i;
       const delay = animOrder * ANIM.CASING_STAGGER;
-      const clipRadius = csg.csgType === 'Gravel Pack'
-        ? (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10) + 20
-        : openHoleHalfWidth(hw) + 20;
+      const isGP = csg.csgType === 'Gravel Pack';
+
+      // Hoist GP annulus bounds so clip rect can use gpOuterEdge
+      const gpInnerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
+      const gpLsHW = Math.min(gpInnerHW, ohHW) - this.layout.linerScreenInset;
+      const gpMaxOuter = ohHW - this.layout.gpScreenGap;              // gap on the OH side
+      const gpAnnulusWidth = Math.max(0, (gpMaxOuter - gpLsHW) * this.layout.gpFillRatio);
+      const gpOuterEdge = gpLsHW + gpAnnulusWidth;
+      const gpAnnulusCenter = gpLsHW + gpAnnulusWidth / 2;
+
+      const clipRadius = isGP ? gpOuterEdge : openHoleHalfWidth(hw) + 20;
 
       const clipRect = this.defsEl
         .append('clipPath')
         .attr('class', 'dyn-clip')
         .attr('id', clipId)
         .append('rect')
-        .attr('x', centerX - clipRadius - 15)
-        .attr('y', isLiner ? topPx - 5 : -5)
-        .attr('width', clipRadius * 2 + 30)
+        .attr('x', centerX - clipRadius - (isGP ? 0 : 15))
+        .attr('y', isLiner ? topPx - 5 : isGP ? completionTopPx : -5)
+        .attr('width', clipRadius * 2 + (isGP ? 0 : 30))
         .attr('height', 0);
 
-      if (csg.csgType === 'Gravel Pack') {
-        const startDepthPx = scale(shoeDepth);
+      if (isGP) {
         const gravelBottomPx = scale(csg.csgDepth);
-        const innerHW = computeCasingHalfWidth(0, this.layout.baseHalfWidth, this.layout.halfWidthIncrement);
-        const screenHW = innerHW - this.layout.linerScreenInset;
-        const annulusWidth = this.layout.gravelAnnulusWidth;
-        const annulusCenter = screenHW + (annulusWidth / 2);
         this.rootG.append('path')
           .attr('class', 'gravelHole')
-          .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, gravelBottomPx))
+          .attr('d', buildGravelPackUPath(centerX, gpAnnulusCenter, completionTopPx, gravelBottomPx))
           .attr('stroke', 'url(#gravelpattern)')
-          .attr('stroke-width', String(annulusWidth))
+          .attr('stroke-width', String(gpAnnulusWidth))
           .style('fill', 'none')
           .attr('clip-path', `url(#${clipId})`);
         clipRect.transition()
           .delay(gravelStart)
           .duration(ANIM.GRAVEL_DURATION)
           .ease(easeCubicInOut)
-          .attr('height', gravelBottomPx + 20);
+          .attr('height', gravelBottomPx - completionTopPx);
       } else {
         const fillGrad = hasActual
           ? 'url(#actualCasingGradient)'
@@ -709,12 +842,20 @@ export class WellBoreViewComponent {
     centerX: number,
     scale: ReturnType<typeof createDepthScale>,
     labelsStart: number,
+    ohHW: number,
   ): void {
     if (casings.length === 0) {
       this.drawCasingLabelsFromActual(drlgCasings, centerX, scale, labelsStart);
       return;
     }
-    const { baseHalfWidth, halfWidthIncrement } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap, gpFillRatio } = this.layout;
+
+    // Pre-compute GP outer edge so the label arrow tracks the actual fill boundary
+    const gpLabelInnerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
+    const gpLabelLsHW = Math.min(gpLabelInnerHW, ohHW) - linerScreenInset;
+    const gpLabelMaxOuter = ohHW - gpScreenGap;
+    const gpLabelAnnulus = Math.max(0, (gpLabelMaxOuter - gpLabelLsHW) * gpFillRatio);
+    const gpLabelOuterEdge = gpLabelLsHW + gpLabelAnnulus;
 
     casings.forEach((csg) => {
       const tier = this.getCasingTier(csg, casings);
@@ -727,10 +868,10 @@ export class WellBoreViewComponent {
       const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
       const actualDepth = hasActual ? actualCsg!.wCsgBotDpth
         : hasActualLiner ? actualLnr!.wLnrBotDepth!
-        : null;
+          : null;
       const actualSize = hasActual ? actualCsg!.wCsgOdSz
         : hasActualLiner ? actualLnr!.wLnrOdSz!
-        : null;
+          : null;
       const displayDepth = actualDepth ?? csg.csgDepth;
       const displaySize = actualSize ?? csg.csgSize;
 
@@ -738,7 +879,7 @@ export class WellBoreViewComponent {
       const labelYPx = csg.csgType === 'Gravel Pack' ? scale(csg.csgDepth) : shoePx;
 
       const rEdge = csg.csgType === 'Gravel Pack'
-        ? centerX + (computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement) - 10)
+        ? centerX + gpLabelOuterEdge
         : centerX + hw;
       const lEnd = rEdge + 26;
       const labelX = lEnd + 8;
@@ -888,12 +1029,18 @@ export class WellBoreViewComponent {
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
     const ohHW = this.resolveOhHalfWidth(data);
-    const screenHW = innerHW - linerScreenInset;
+    const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
     const liner = data.casings.find((c: ICasingIR) => c.csgType === 'Liner');
+    const gpCasing = data.casings.find((c: ICasingIR) => c.csgType === 'Gravel Pack');
     const shoePx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
-    // When flag-driven, always run to total depth; otherwise fall back to liner depth.
-    const screenBottomPx = wellDesign ? tdPx : (liner ? scale(liner.csgDepth) : tdPx - 15);
+    // Screen bottom is bounded by GP bottom minus gpScreenGap so it sits visually inside GP
+    const { gpScreenGap } = this.layout;
+    const hasGP = wellDesign?.gpFlg === 'Y' || !!gpCasing;
+    const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), tdPx) : tdPx;
+    const screenBottomPx = wellDesign
+      ? (shouldDrawLS && hasGP ? gpBottomPx - gpScreenGap : tdPx)
+      : (liner ? scale(liner.csgDepth) : tdPx - 15);
 
     const clipHW = shouldDrawOH ? ohHW : screenHW;
     const clipId = 'dyn-oh-clip';
@@ -912,7 +1059,7 @@ export class WellBoreViewComponent {
         .attr('clip-path', `url(#${clipId})`);
     }
 
-    clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', tdPx - shoePx + 20);
+    clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', tdPx - shoePx + 5);
 
     if (shouldDrawOH) {
       const ohLabel = wellDesign?.ohRemarks ?? '8 1/2" Open Hole';
@@ -964,18 +1111,21 @@ export class WellBoreViewComponent {
     if (data.wellDesign?.gpFlg !== 'Y') return;
     if (!data.casings.length) return;
 
-    const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gravelAnnulusWidth } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap, gpFillRatio } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const screenHW = innerHW - linerScreenInset;
-    const annulusWidth = gravelAnnulusWidth;
-    const annulusCenter = screenHW + annulusWidth / 2;
+    const ohHW = this.resolveOhHalfWidth(data);
+    const lsHW = Math.min(innerHW, ohHW) - linerScreenInset;
+    const gpMaxOuter = ohHW - gpScreenGap;                              // gap is on the OH side
+    const annulusWidth = Math.max(0, (gpMaxOuter - lsHW) * gpFillRatio); // fill from screen outward
+    const gpOuterEdge = lsHW + annulusWidth;                             // actual outer edge (≤ gpMaxOuter)
+    const annulusCenter = lsHW + annulusWidth / 2;
     const startDepthPx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
 
     const clipId = 'dyn-gp-design-clip';
     const clipRect = this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
-      .attr('x', centerX - annulusCenter - 15).attr('y', startDepthPx - 5)
-      .attr('width', (annulusCenter + 15) * 2).attr('height', 0);
+      .attr('x', centerX - gpOuterEdge).attr('y', startDepthPx)
+      .attr('width', gpOuterEdge * 2).attr('height', 0);
 
     this.rootG.append('path')
       .attr('class', 'gravelHole')
@@ -989,11 +1139,11 @@ export class WellBoreViewComponent {
       .delay(ohStart)
       .duration(ANIM.GRAVEL_DURATION)
       .ease(easeCubicInOut)
-      .attr('height', tdPx - startDepthPx + 20);
+      .attr('height', tdPx - startDepthPx);
 
     if (data.wellDesign.gpRemarks) {
       const labelY = startDepthPx + (tdPx - startDepthPx) * 0.5;
-      const rEdge = centerX + innerHW;
+      const rEdge = centerX + gpOuterEdge;
       const lEnd = rEdge + 26;
       const gpRA = this.resolveAnim();
       const lg = this.rootG.append('g').attr('class', 'gp-design-label');
@@ -1016,17 +1166,18 @@ export class WellBoreViewComponent {
     if (data.wellDesign?.perfFlg !== 'Y') return;
     if (!data.casings.length) return;
 
-    const { baseHalfWidth, halfWidthIncrement, prePerfGpBoost } = this.layout;
+    const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const hasGP = data.wellDesign?.gpFlg === 'Y';
-    const prePerfHW = innerHW + (hasGP ? prePerfGpBoost : 0);
+    const ohHW = this.resolveOhHalfWidth(data);
+    // Always inside OH and inside GP when either is present
+    const prePerfHW = Math.min(innerHW, ohHW) - linerScreenInset;
     const topPx = this.resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
     const tdPx = scale(data.totalDepth);
 
     const clipId = 'dyn-perf-clip';
     const clipRect = this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
-      .attr('x', centerX - prePerfHW - 20).attr('y', topPx - 5)
-      .attr('width', (prePerfHW + 20) * 2).attr('height', 0);
+      .attr('x', centerX - prePerfHW - 15).attr('y', topPx - 5)
+      .attr('width', (prePerfHW + 15) * 2).attr('height', 0);
 
     this.rootG.append('path').attr('class', 'perf-wall')
       .attr('d', buildOpenHolePath(centerX, prePerfHW, topPx, tdPx))
@@ -1070,7 +1221,8 @@ export class WellBoreViewComponent {
 
     const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = this.layout;
     const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
-    const screenHW = innerHW - linerScreenInset;
+    const ohHW = this.resolveOhHalfWidth(data);
+    const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
     const hangerG = this.rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
 
     const addHanger = (yPx: number, hw: number): void => {
@@ -1217,7 +1369,7 @@ export class WellBoreViewComponent {
       .attr('stroke', 'rgba(239, 68, 68, 0.3)')
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '8,4')
-      .style('cursor', 'pointer')
+      .style('cursor', 'help')
       .on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1))
       .on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
 

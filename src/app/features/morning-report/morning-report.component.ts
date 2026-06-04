@@ -155,6 +155,8 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (value === this.selectedDateString) return;
+
     this.selectedDateString = value;
     this.hasDateQueryParam.set(true);
     this.urlSyncReady.set(true);

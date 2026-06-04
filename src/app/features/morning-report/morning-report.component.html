@@ -13,6 +13,7 @@
         type="date"
         class="date-picker-input"
         [ngModel]="selectedDateString"
+        (focus)="$any($event.target).select()"
         (ngModelChange)="onDateChange($event)"
         [max]="maxDateString"
         aria-label="Select report date"

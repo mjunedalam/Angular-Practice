@@ -52,7 +52,6 @@ export class PickedFormationTopsComponent {
       headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth', flex: 1.2, minWidth: 80,
       valueFormatter: this.blankIfInvalid,
     },
-    { headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1.5, minWidth: 80 },
   ];
 
   readonly gridOptions: GridOptions<FormationInfoViewModel> = {
@@ -60,6 +59,7 @@ export class PickedFormationTopsComponent {
     suppressMovableColumns: true,
     suppressCellFocus: true,
     domLayout: 'autoHeight',
+    tooltipShowDelay: 300,
     defaultColDef: { sortable: true, resizable: true, suppressHeaderMenuButton: true },
     overlayNoRowsTemplate: '<span class="no-rows">No formation tops available.</span>',
   };

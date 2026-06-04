@@ -1,95 +1,152 @@
 <form [formGroup]="form">
   <div class="aw-section">
-    <div class="well-header">Well Test ({{ isFlowTest() ? 'Flow Test' : 'Pump Test' }})</div>
 
-
-    <div class="wt-grid">
-      <div class="wt-field">
-        <span class="wt-label">Aquifer(Actual)</span>
-        <input class="wt-input" type="text" formControlName="rsvrCd" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">Aquifer(IR)</span>
-        <input class="wt-input gray-input" type="text" readonly [value]="data()?.aquiferEstimate" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">H2S(Actual)</span>
-        <input class="wt-input" type="text" formControlName="hydH2sCnc" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">H2S(IR)</span>
-        <input class="wt-input gray-input" type="text" readonly [value]="data()?.h2sEstimate" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">Temperature(°C)</span>
-        <input class="wt-input" type="text" formControlName="temp" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">TDS(PPM)</span>
-        <input class="wt-input" type="text" formControlName="wtrSaTdsCnc" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">RPM</span>
-        <input class="wt-input" type="text" formControlName="rpm" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">Duration</span>
-        <input class="wt-input" type="text" formControlName="duration" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">Conducted By</span>
-        <input class="wt-input" type="text" formControlName="testerNetworkId" />
-      </div>
-
-      @if (isFlowTest()) {
-      <div class="wt-field">
-        <span class="wt-label">Test Rate(GPM)</span>
-        <input class="wt-input" type="text" formControlName="hydProdRt" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">SIWHP</span>
-        <input class="wt-input" type="text" formControlName="siwhp" />
-      </div>
-      } @else {
-      <div class="wt-field">
-        <span class="wt-label">Well Productivity(Actual)</span>
-        <input class="wt-input" type="text" formControlName="hydProduct" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">Pump Depth</span>
-        <input class="wt-input" type="text" formControlName="hydPmpDpth" />
-      </div>
-      <div class="wt-field">
-        <span class="wt-label">Well Productivity(IR)</span>
-        <input class="wt-input gray-input" type="text" readonly [value]="data()?.productivityEstimate" />
-      </div>
-
-      <div class="wt-field">
-        <span class="wt-label">SWL(ft)</span>
-        <input class="wt-input" type="text" formControlName="statWlvl" />
-      </div>
-      <!-- <div class="wt-field">
-        <span class="wt-label">Total Pump(H)</span>
-        <input class="wt-input" type="text" [value]="vm.dwl" formControlName="hydPmpDpth" />
-      </div> -->
-      <div class="wt-field">
-        <span class="wt-label">DWL(ft)</span>
-        <input class="wt-input" type="text" formControlName="dyncWlvl" />
-      </div>
-      }
+    <div class="wt-header-row">
+      <div class="wt-title">Well Test</div>
+      <div class="wt-flow-badge">{{ isFlowTest() ? 'Flow Test / Natural Flow' : 'Pump Test / Natural Flow' }}</div>
+      <div class="wt-expected-date-label">Expected test date</div>
     </div>
 
+    <div class="wt-body">
 
-    <div class="wt-footer" style="justify-content: space-around;">
+      <div class="wt-column">
+
+        <div class="wt-row">
+          <span class="wt-label">Aquifer</span>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wt-aquifer-select">
+            <mat-select formControlName="rsvrCd">
+              @for (opt of aquiferOptions; track opt) {
+                <mat-option [value]="opt">{{ opt }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly [value]="data()?.aquiferEstimate ?? ''" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">Test duration (h)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="duration" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        @if (isFlowTest()) {
+        <div class="wt-row">
+          <span class="wt-label">Test rate (GPM)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="hydProdRt" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+        } @else {
+        <div class="wt-row">
+          <span class="wt-label">RPM</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="rpm" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+        }
+
+        <div class="wt-row">
+          <span class="wt-label">Temperature (°C)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="temp" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">TDS (PPM)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="wtrSaTdsCnc" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">H2S (PPM)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="hydH2sCnc" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly [value]="data()?.h2sEstimate ?? ''" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wt-column">
+
+        @if (!isFlowTest()) {
+        <div class="wt-row">
+          <span class="wt-label">Pump depth (ft)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="hydPmpDpth" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">SWL (ft)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="statWlvl" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">DWL (ft)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="dyncWlvl" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+
+        <div class="wt-row">
+          <span class="wt-label">Well productivity (GPM/FT)</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="hydProduct" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly [value]="data()?.productivityEstimate ?? ''" />
+          </div>
+        </div>
+        } @else {
+        <div class="wt-row">
+          <span class="wt-label">SIWHP</span>
+          <input class="wt-actual" type="text" inputmode="decimal" formControlName="siwhp" (keypress)="onlyNumbers($event)" />
+          <div class="wt-ir-cell">
+            <span class="wt-ir-badge">IR</span>
+            <input class="wt-ir-input" type="text" readonly value="" />
+          </div>
+        </div>
+        }
+
+        <div class="wt-row wt-row--conducted">
+          <span class="wt-label">Conducted by</span>
+          <input class="wt-actual wt-actual--no-ir" type="text" formControlName="testerNetworkId" />
+        </div>
+
+      </div>
+    </div>
+
+    <div class="wt-footer">
       @if (canUpdate()) {
       <button mat-raised-button type="button" class="wt-update-btn"
         (click)="createOrUpdateActiveWwell()">UPDATE</button>
       }
     </div>
+
   </div>
 </form>

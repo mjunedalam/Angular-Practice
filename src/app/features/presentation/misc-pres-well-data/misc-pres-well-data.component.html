@@ -96,7 +96,7 @@
         <div class="cell cell--feet">
           <div class="feet-left">
             <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
-            <div class="cell__label-light">Feet</div>
+            <div class="cell__label-light" style="font-size: 0.65rem; text-transform: none">footage (ft.)</div>
           </div>
           <div class="feet-icon">
             <svg
@@ -132,11 +132,6 @@
       </div>
 
       <div class="stack-cell">
-        <div class="cell cell--prev">
-          <div class="cell__label-light">Previous Well</div>
-          <div class="well-name-val">{{ d.previousWell }}</div>
-        </div>
-
         <div class="cell cell--next">
           <div class="next-well__icon">
             <svg

@@ -122,7 +122,10 @@ export class WellNameChipsComponent {
     const date = parseDateFromInput(value);
     const today = getTodayAtMidnight();
     if (!Number.isNaN(date.getTime()) && date <= today) {
-      this.store.setDate(formatDateForInput(date));
+      const newStr = formatDateForInput(date);
+      if (newStr !== this.selectedDateString()) {
+        this.store.setDate(newStr);
+      }
     }
   }
 

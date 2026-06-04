@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWellViewService } from '@core/services/active-well-view.service';
@@ -13,7 +15,7 @@ import { formatDateForInput } from '@shared/utils/date.util';
 @Component({
   selector: 'app-wwell-test',
   standalone: true,
-  imports: [MatButtonModule, ReactiveFormsModule, FormsModule],
+  imports: [MatButtonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, FormsModule],
   templateUrl: './wwell-test.component.html',
   styleUrl: './wwell-test.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,4 +82,15 @@ export class WwellTestComponent {
   protected readonly canUpdate = computed(() =>
     this.rbac.canUpdateRoute('active-wwell', this.auth.user()?.groups ?? []),
   );
+
+  protected readonly aquiferOptions = [
+    'WASI', 'SHUQ', 'WAJID', 'JAUF', 'TABUK', 'KHUFF',
+  ] as const;
+
+  protected onlyNumbers(event: KeyboardEvent): void {
+    const allowed = /[\d.\-]/.test(event.key) || [
+      'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'
+    ].includes(event.key);
+    if (!allowed) event.preventDefault();
+  }
 }

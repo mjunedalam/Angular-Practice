@@ -40,8 +40,9 @@ export interface DiagramLayout {
   // ── Completion element half-widths (x extents from center) ───────────────
   readonly openHoleHwMargin: number;   // open hole = innerHW + this
   readonly linerScreenInset: number;   // liner screen = innerHW - this
-  readonly gravelAnnulusWidth: number; // gravel pack annulus stroke width
-  readonly prePerfGpBoost: number;     // pre-perf extra width when GP present
+  // ── Gravel pack fill control ────────────────────────────────────────────
+  readonly gpScreenGap: number;        // px gap between screen outer wall and GP inner fill edge
+  readonly gpFillRatio: number;        // 0.0–1.0: fraction of available annulus (after gpScreenGap) that GP fills
 }
 
 export const DIAGRAM_LAYOUT: DiagramLayout = {
@@ -69,9 +70,9 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   halfWidthIncrement: 26,
   shoeCurveOffset: 12,
   openHoleHwMargin: 25,
-  linerScreenInset: 20  ,
-  gravelAnnulusWidth: 12,
-  prePerfGpBoost: 8,
+  linerScreenInset: 20,
+  gpScreenGap: 3,       // 4px gap so screen is visually inside GP
+  gpFillRatio: 1.0,     // fill full annulus by default; reduce to 0.5 etc. to narrow the GP band
 };
 
 // ─── Animation mode ────────────────────────────────────────────────────────
