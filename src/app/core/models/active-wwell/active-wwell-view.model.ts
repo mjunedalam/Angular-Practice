@@ -57,6 +57,7 @@ export interface WellTestResult {
 
 export interface WellHeaderViewModel {
   readonly field: string;
+  readonly fieldAr: string | null;
   readonly wellName: string;
   readonly lat: number | string;
   readonly lon: number | string;
@@ -97,6 +98,7 @@ export interface FormationInfoViewModel {
   readonly actualDepth: number | string;
   readonly difference: number | string;
   readonly remarks: string | null;
+  readonly isDrlgOnly: boolean;
 }
 
 export interface CasingInfoViewModel {

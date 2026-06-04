@@ -652,6 +652,44 @@ export class WellBoreViewComponent {
         .duration(220)
         .style('opacity', 1);
     });
+
+    // Render DRLG_FM_TOPS entries not in EXAD_GWD_IR_TOPS in green
+    const drlgOnlyTops = formationTops.filter(f => f.isDrlgOnly);
+    drlgOnlyTops.forEach((top, idx) => {
+      const actualDepth = Number(top.actualDepth);
+      if (!isFinite(actualDepth) || actualDepth <= 0) return;
+      const yPx = scale(actualDepth);
+
+      const g = this.rootG.append('g')
+        .attr('class', 'geo-top geo-top--drlg-only')
+        .attr('transform', `translate(0,${yPx})`)
+        .style('opacity', 0);
+
+      g.append('line')
+        .attr('class', 'geo-tick')
+        .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
+        .attr('y1', 0).attr('y2', 0)
+        .attr('stroke', '#22c55e');
+
+      g.append('text')
+        .attr('class', 'geo-depth')
+        .attr('x', geoLineX - 17)
+        .attr('dy', '0.35em')
+        .attr('fill', '#22c55e')
+        .text(actualDepth.toLocaleString());
+
+      g.append('text')
+        .attr('class', 'geo-code geo-code--actual')
+        .attr('x', geoLineX + 18)
+        .attr('dy', '0.35em')
+        .attr('fill', '#22c55e')
+        .text(top.formation);
+
+      g.transition()
+        .delay(ANIM.GEO_DELAY + (sorted.length + idx) * ANIM.GEO_STAGGER)
+        .duration(220)
+        .style('opacity', 1);
+    });
   }
 
   private drawCasings(

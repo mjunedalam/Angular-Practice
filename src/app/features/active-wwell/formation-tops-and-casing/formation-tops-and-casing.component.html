@@ -25,14 +25,11 @@
     </div>
   </div> -->
   <ag-grid-angular
-    class="ag-theme-alpine"
-    style="width: 100%; height: 300px"
+    style="width: 100%;"
     [rowData]="data()"
-    (gridReady)="onGridReady($event)"
     [theme]="theme"
     [columnDefs]="columnDefs"
-    [defaultColDef]="defaultColDef"
-    [tooltipShowDelay]="500"
+    [gridOptions]="gridOptions"
   >
   </ag-grid-angular>
 </div>

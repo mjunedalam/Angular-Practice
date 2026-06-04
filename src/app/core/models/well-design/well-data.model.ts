@@ -30,6 +30,12 @@ export interface IDailyRemarks {
     area?: string | null;
 }
 
+export interface IPrimaryHoleId {
+    wPrimHid: string;
+    wPrimHidName: string;
+    w_prim_hid_ar_name_html?: string;
+}
+
 export interface IWellData {
     RIG_ACTIVITY: IRigActivity[];
     WELL_MASTER: IWellMaster[];
@@ -58,4 +64,5 @@ export interface IWellData {
     actualRm?: number;
     kpiRm?: number;
     rigMoveDays?: number;
+    PRIMARY_HOLEID?: IPrimaryHoleId[];
 }

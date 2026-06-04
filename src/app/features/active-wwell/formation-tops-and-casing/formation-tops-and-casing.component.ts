@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridOptions, RowClassParams, themeQuartz } from 'ag-grid-community';
+import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
+
 
 @Component({
   selector: 'app-formation-tops-and-casing',
@@ -21,7 +23,7 @@ export class FormationTopsAndCasingComponent {
 
   columnDefs: ColDef[] = [
     { headerName: 'Formation', field: 'formation', tooltipField: 'formation' },
-    { headerName: 'Prognosed', field: 'prognosed', tooltipField: 'prognosed' },
+    { headerName: 'Prognosed', field: 'prognosed', tooltipField: 'prognosed', valueFormatter: this.blankIfInvalid },
     { headerName: 'Actual Depth (ft)', field: 'actualDepth', tooltipField: 'actualDepth', valueFormatter: this.blankIfInvalid },
     { headerName: 'Difference', field: 'difference', tooltipField: 'difference', minWidth: 90, valueFormatter: this.blankIfInvalid },
     { headerName: 'Remarks', field: 'remarks', tooltipField: 'remarks', flex: 1 },
@@ -47,15 +49,25 @@ export class FormationTopsAndCasingComponent {
     cellHorizontalPaddingScale: 1.5,
   });
 
-defaultColDef: ColDef = {
+  defaultColDef: ColDef = {
     sortable: true,
     filter: false,
     resizable: true,
-    minWidth: 120
+    minWidth: 120,
   };
 
-  onGridReady(params: any) {
-    params.api.sizeColumnsToFit();
-  }
+  readonly gridOptions: GridOptions<FormationInfoViewModel> = {
+    animateRows: true,
+    suppressMovableColumns: true,
+    suppressCellFocus: true,
+    domLayout: 'autoHeight',
+    tooltipShowDelay: 300,
+    defaultColDef: this.defaultColDef,
+    overlayNoRowsTemplate: '<span class="no-rows">No formation tops available.</span>',
+    getRowStyle: (params: RowClassParams<FormationInfoViewModel>) =>
+      params.data?.isDrlgOnly ? { color: '#16a34a', fontWeight: '600' } : undefined,
+    onGridReady: (params) => params.api.sizeColumnsToFit(),
+  };
+
 
 }

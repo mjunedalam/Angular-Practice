@@ -7,7 +7,13 @@
 
     <div class="aw-cell">
       <span class="aw-label">Field</span>
-      <span class="aw-value">{{ d?.field ?? '—' }}</span>
+      <span class="aw-value">
+        @if (d?.fieldAr) {
+          <span [innerHTML]="d!.fieldAr" class="aw-value-ar"></span>
+          <span class="aw-value-sep"> — </span>
+        }
+        {{ d?.field ?? '—' }}
+      </span>
     </div>
 
     <div class="aw-cell">
@@ -15,6 +21,12 @@
       <span class="aw-value">{{ d?.wellName ?? '—' }}</span>
     </div>
 
+    <div class="aw-cell">
+      <span class="aw-label">EP Num</span>
+      <span class="aw-value">{{ d?.epNum ?? '—' }}</span>
+    </div>
+
+    <!-- GIS cells grouped on the same row -->
     <div class="aw-cell aw-cell--gis">
       <div class="aw-cell-top">
         <span class="aw-label">Latitude</span>
@@ -42,11 +54,6 @@
     <div class="aw-cell">
       <span class="aw-label">Target Depth</span>
       <span class="aw-value">{{ d?.depth ? (d?.depth + ' ft') : '—' }}</span>
-    </div>
-
-    <div class="aw-cell">
-      <span class="aw-label">EP Num</span>
-      <span class="aw-value">{{ d?.epNum ?? '—' }}</span>
     </div>
 
     <div class="aw-cell aw-cell--status" [formGroup]="drillingForm">

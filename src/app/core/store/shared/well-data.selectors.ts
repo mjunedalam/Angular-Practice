@@ -266,8 +266,10 @@ export function selectWellHeaderViewModel(d: IWellData | null, epANum: number | 
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
     const status = d.DRLG_OP_STATUS?.[0];
+    const primaryHole = d.PRIMARY_HOLEID?.[0] ?? null;
     return {
-        field: prewap?.supportedBusiness ?? rig?.wDrlgLocDesc ?? rig?.welltype ?? FALLBACK_STR,
+        field: primaryHole?.wPrimHidName ?? prewap?.supportedBusiness ?? rig?.wDrlgLocDesc ?? rig?.welltype ?? FALLBACK_STR,
+        fieldAr: primaryHole?.w_prim_hid_ar_name_html ?? null,
         wellName: rig?.wellName ?? master?.well ?? FALLBACK_STR,
         lat: master?.lat ?? FALLBACK_STR,
         lon: master?.lon ?? FALLBACK_STR,
@@ -327,6 +329,7 @@ export function selectFormationInfoViewModel(d: IWellData | null): FormationInfo
         actualDepth: actualDepth ?? FALLBACK_STR,
         difference: actualDepth !== null && plannedDepth !== null ? actualDepth - plannedDepth : FALLBACK_STR,
         remarks: latest?.wStDmrkRmk ?? FALLBACK_STR,
+        isDrlgOnly: false,
     };
 }
 
@@ -342,18 +345,39 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
     const actualTopsMap = new Map<string, IFormationTops>(
         (d.DRLG_FM_TOPS ?? []).map(fm => [fm.stLongCd, fm])
     );
-    return plannedTops.map(top => {
+    const plannedCodes = new Set(plannedTops.map(t => t.stLongCd));
+
+    const fromPlanned: FormationInfoViewModel[] = plannedTops.map(top => {
         const actual = actualTopsMap.get(top.stLongCd) ?? null;
         const actualDepth = safeNum(actual?.wStDmrkDpth);
         const plannedDepth = safeNum(top.planTvdDepth);
+        const validPlanned = plannedDepth !== null && plannedDepth > 0 ? plannedDepth : null;
         return {
             formation: top.stLongCd ?? FALLBACK_STR,
-            prognosed: plannedDepth ?? FALLBACK_STR,
+            prognosed: validPlanned ?? '',
             actualDepth: actualDepth ?? '',
-            difference: actualDepth !== null && plannedDepth !== null ? actualDepth - plannedDepth : '',
+            difference: actualDepth !== null && validPlanned !== null ? actualDepth - validPlanned : '',
             remarks: actual?.wStDmrkRmk ?? FALLBACK_STR,
+            isDrlgOnly: false,
         };
     });
+
+    // Include DRLG_FM_TOPS entries not present in EXAD_GWD_IR_TOPS (drilled but not planned)
+    const fromDrlgOnly: FormationInfoViewModel[] = (d.DRLG_FM_TOPS ?? [])
+        .filter(fm => !plannedCodes.has(fm.stLongCd))
+        .map(fm => {
+            const actualDepth = safeNum(fm.wStDmrkDpth);
+            return {
+                formation: fm.stLongCd ?? FALLBACK_STR,
+                prognosed: '',
+                actualDepth: actualDepth ?? '',
+                difference: '',
+                remarks: fm.wStDmrkRmk ?? FALLBACK_STR,
+                isDrlgOnly: true,
+            };
+        });
+
+    return [...fromPlanned, ...fromDrlgOnly];
 }
 
 export function selectCasingInfoViewModel(d: IWellData | null): CasingInfoViewModel | null {
