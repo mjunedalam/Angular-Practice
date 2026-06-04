@@ -128,6 +128,35 @@ The geological axis is rendered inside the wellbore SVG at `geoLineX = 95 px`.
 
 ---
 
+### 1.7 Picked Formation Tops (`PickedFormationTopsComponent`)
+
+**Selector:** `selectAllFormationTops(d: IWellData | null)`  
+**Store signal:** `store.allFormationTops()`  
+**Rendered as:** AG Grid table (3 visible columns)
+
+#### Merge strategy
+
+Rows are produced in two passes:
+
+1. **Planned tops** — every entry in `EXAD_GWD_IR_TOPS[]` is emitted once. If a matching `DRLG_FM_TOPS` record exists (matched by `stLongCd`), its actual-depth and remarks fields are merged in. `isDrlgOnly = false`.
+2. **Drilled-only tops** — `DRLG_FM_TOPS` entries whose `stLongCd` does not appear in `EXAD_GWD_IR_TOPS[]` are appended. `isDrlgOnly = true` → row rendered in green bold.
+
+| Column Header | `FormationInfoViewModel` field | Source API Object | Exact Mapping | Business Logic |
+|---|---|---|---|---|
+| Formation | `formation` | `EXAD_GWD_IR_TOPS[n]` / `DRLG_FM_TOPS[n]` | `top.stLongCd ?? 'N/A'` | Formation code; key used to join planned ↔ actual |
+| Prognosed | `prognosed` | `EXAD_GWD_IR_TOPS[n]` | `top.planTvdDepth` (if `> 0`, else `''`) | Planned TVD depth; blank for drilled-only rows |
+| Actual Depth (ft) | `actualDepth` | `DRLG_FM_TOPS[n]` | `fm.wStDmrkDpth` (matched by `stLongCd`) | Blank when not yet drilled; `blankIfInvalid` formatter hides `0` / `null` |
+
+#### Hidden / computed fields (not rendered as columns)
+
+| Field | Source | Mapping | Used by |
+|---|---|---|---|
+| `difference` | Computed | `actualDepth − prognosed` (blank if either missing) | Not displayed in grid; available for future use |
+| `remarks` | `DRLG_FM_TOPS[n].wStDmrkRmk` | `fm.wStDmrkRmk ?? 'N/A'` | Passed as `[formationTops]` input to `WellBoreViewComponent`; shown as hover tooltip on geo-axis labels |
+| `isDrlgOnly` | Computed | `true` when `stLongCd` absent from `EXAD_GWD_IR_TOPS[]` | Controls green row style (`color: #16a34a, fontWeight: 600`) and green tick/label colour in wellbore SVG |
+
+---
+
 ## 2. Active Water Well Screen
 
 ### 2.1 Database Info (`DatabaseInfoComponent`)
@@ -190,7 +219,7 @@ The geological axis is rendered inside the wellbore SVG at `geoLineX = 95 px`.
 | Target Depth (ft) | `EXAD_RCD_PREWAP[0]` / `DRLG_OP_STATUS[0]` | `prewap?.estTargetDepth ?? status?.targetDepth ?? FALLBACK_STR` | Displayed as `{depth} ft` |
 | EP Num | `DRLG_OP_STATUS[0]` | `status?.epANum ?? epANum ?? FALLBACK_STR` | Drilling status EP number; falls back to store's selected EP number |
 | Status | `EXAD_GWD_DAILY_REMARKS[0]` | `d.EXAD_GWD_DAILY_REMARKS?.[0].status ?? ""` via `selectStatus()` | Editable via `mat-select`; initial value loaded from daily remarks |
-| BI Number | `RIG_ACTIVITY[0]` | `rig?.biNum ?? FALLBACK_STR` | Budget item number |
+| BI | `EXAD_RCD_PREWAP[0]` | `prewap?.supportedBusiness ?? 'Missing'` | Supported business / BI label; previously `rig?.biNum` |
 
 ---
 

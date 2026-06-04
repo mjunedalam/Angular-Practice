@@ -276,7 +276,7 @@ export function selectWellHeaderViewModel(d: IWellData | null, epANum: number | 
         targetedAquifer: hydro?.estTargetAquifier ?? prewap?.targetFormation ?? FALLBACK_STR,
         depth: prewap?.estTargetDepth ?? status?.targetDepth ?? FALLBACK_STR,
         epNum: status?.epANum ?? epANum ?? FALLBACK_STR,
-        biNum: rig?.biNum ?? FALLBACK_STR,
+        biNum: prewap?.supportedBusiness ?? FALLBACK_STR
     };
 }
 
