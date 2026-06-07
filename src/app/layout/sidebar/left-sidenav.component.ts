@@ -9,6 +9,7 @@ import {
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthStore } from '../../features/auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { BuildInfoService } from '@shared/services/build-info.service';
 
 export interface NavItem {
   id: string;
@@ -30,6 +31,12 @@ export interface NavItem {
 export class LeftSidenavComponent {
   private readonly authStore = inject(AuthStore);
   private readonly rbacStore = inject(RbacStore);
+  private readonly buildInfoService = inject(BuildInfoService);
+
+  protected readonly buildInfo = this.buildInfoService.info;
+  protected readonly shortHash = this.buildInfoService.shortHash;
+  protected readonly buildInfoTooltip =
+    `${this.buildInfo.branch} · ${this.shortHash} · v${this.buildInfo.version} · ${this.buildInfo.env}`;
 
   readonly collapsed    = input<boolean>(false);
   readonly activeRoute  = input<string>('home');

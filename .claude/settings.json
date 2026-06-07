@@ -8,10 +8,12 @@
       "Bash(xargs -I{} sh -c 'cd /tmp && jar xf \"{}\" io/smallrye/jwt/config/JWTAuthContextInfoProvider.class && javap -private /tmp/io/smallrye/jwt/config/JWTAuthContextInfoProvider.class 2>/dev/null | grep -i \"grace\\\\|skew\\\\|expir\\\\|clock\"')",
       "Bash(node -e ' *)",
       "Bash(grep -rn \"'[A-Z]\\\\{3,8\\\\}'\" /Users/junedalam/angular-with-ngrx/Angular-Practice/src/app/ --include=\"*.ts\")",
-      "Bash(git -C /Users/junedalam/angular-with-ngrx/Angular-Practice diff --name-only)"
+      "Bash(git -C /Users/junedalam/angular-with-ngrx/Angular-Practice diff --name-only)",
+      "Read(//Users/junedalam/Openshift-Pipeline/frontend/**)"
     ],
     "additionalDirectories": [
-      "/Users/junedalam/Downloads/code-with-quarkus 3/src/main/java/com/aramco/easd/dailyoperations/resources"
+      "/Users/junedalam/Downloads/code-with-quarkus 3/src/main/java/com/aramco/easd/dailyoperations/resources",
+      "/Users/junedalam/Openshift-Pipeline/frontend/build"
     ]
   },
   "model": "sonnet",

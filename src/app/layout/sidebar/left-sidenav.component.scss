@@ -267,4 +267,56 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     transition: opacity $transition, width $transition;
     text-transform: uppercase;
   }
+
+  // ── Build info (branch / hash / version / env) ─────────────────────────
+  &__build-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  &__build-branch {
+    font-size: 11px;
+    font-weight: 600;
+    color: $nav-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__build-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    color: $nav-muted;
+    white-space: nowrap;
+  }
+
+  &__build-hash {
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    letter-spacing: 0.4px;
+  }
+
+  &__build-dot {
+    opacity: 0.5;
+  }
+
+  &__build-env {
+    margin-left: 2px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.14);
+
+    &--prod {
+      color: #fb923c;
+      background: rgba(251, 146, 60, 0.16);
+    }
+  }
 }

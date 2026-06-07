@@ -62,7 +62,12 @@
 
   <!-- Bottom: Water drop decoration -->
   <div class="sidenav__footer">
-    <div class="sidenav__water-logo">
+    <div
+      class="sidenav__water-logo"
+      [matTooltip]="collapsed() ? buildInfoTooltip : ''"
+      matTooltipPosition="after"
+      [matTooltipShowDelay]="180"
+    >
       <svg viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="20" cy="30" rx="13" ry="16" fill="url(#sideDropGrad)" opacity="0.85"/>
         <ellipse cx="20" cy="30" rx="7" ry="10" fill="rgba(255,255,255,0.18)"/>
@@ -77,7 +82,19 @@
       </svg>
     </div>
     @if (!collapsed()) {
-      <span class="sidenav__footer-text">AGWA v2.4</span>
+      <div class="sidenav__build-info">
+        <span class="sidenav__footer-text">AGWA</span>
+        <span class="sidenav__build-branch" [title]="buildInfo.branch">{{ buildInfo.branch }}</span>
+        <span class="sidenav__build-row">
+          <span class="sidenav__build-hash">{{ shortHash }}</span>
+          <span class="sidenav__build-dot">&middot;</span>
+          <span class="sidenav__build-version">v{{ buildInfo.version }}</span>
+          <span
+            class="sidenav__build-env"
+            [class.sidenav__build-env--prod]="buildInfo.env === 'PROD'"
+          >{{ buildInfo.env }}</span>
+        </span>
+      </div>
     }
   </div>
 
