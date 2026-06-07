@@ -9,7 +9,8 @@
       "Bash(node -e ' *)",
       "Bash(grep -rn \"'[A-Z]\\\\{3,8\\\\}'\" /Users/junedalam/angular-with-ngrx/Angular-Practice/src/app/ --include=\"*.ts\")",
       "Bash(git -C /Users/junedalam/angular-with-ngrx/Angular-Practice diff --name-only)",
-      "Read(//Users/junedalam/Openshift-Pipeline/frontend/**)"
+      "Read(//Users/junedalam/Openshift-Pipeline/frontend/**)",
+      "Bash(node scripts/sync-local-build-info.js)"
     ],
     "additionalDirectories": [
       "/Users/junedalam/Downloads/code-with-quarkus 3/src/main/java/com/aramco/easd/dailyoperations/resources",
