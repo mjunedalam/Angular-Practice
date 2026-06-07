@@ -23,7 +23,7 @@ import { EmailStore } from 'src/app/core/store/email/email.store';
 import { EmailService } from '@services/email/email.service';
 import { DEFAULT_NOTIFICATION_DURATION_MS, NotificationService } from '@shared/components/notification/notification.service';
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
-import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidnight, parseDateFromInput, validateDateInput } from 'src/app/shared/utils/date.util';
 import { MorningReportStore } from './store/morning-report.store';
 
 const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
@@ -158,15 +158,31 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     const selStart = input.selectionStart ?? 0;
     const rawVal = input.value;
 
-    const digits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const rawDigits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const endsWithHyphen = rawVal.trimEnd().endsWith('-');
+
+    const paddedDigits = (endsWithHyphen && rawDigits.length === 5)
+      ? rawDigits.slice(0, 4) + '0' + rawDigits[4]
+      : rawDigits;
+
+    const { digits, isFuture } = blockFutureDigits(clampDateDigits(paddedDigits));
+
+    if (isFuture) {
+      this.notificationService.error('Future dates are not allowed');
+    }
 
     let formatted = digits;
     if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
     if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
 
+    const trailingHyphen = endsWithHyphen && !isFuture && (digits.length === 4 || digits.length === 6);
+    if (trailingHyphen) formatted += '-';
+
     const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
     const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
-    const newCursor = Math.min(selStart + (newDashes - oldDashes), formatted.length);
+    const newCursor = trailingHyphen
+      ? formatted.length
+      : Math.min(selStart + (newDashes - oldDashes), formatted.length);
 
     input.value = formatted;
     input.setSelectionRange(newCursor, newCursor);
@@ -185,19 +201,26 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   }
 
   private commitDate(value: string): void {
-    if (!value) return;
+    let digits = clampDateDigits(value.trim().replace(/\D/g, '').slice(0, 8));
 
-    const selectedDate = parseDateFromInput(value);
-    if (Number.isNaN(selectedDate.getTime()) || selectedDate > getTodayAtMidnight()) {
-      return;
-    }
+    if (digits.length < 6) return;
 
-    if (value === this.selectedDateString) return;
+    if (digits.length === 6) digits += '01';
+    else if (digits.length === 7) digits = digits.slice(0, 6) + '0' + digits[6];
 
-    this.selectedDateString = value;
+    const normalized = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+
+    const error = validateDateInput(normalized);
+    if (error === 'invalid') { this.notificationService.error('Invalid date — use YYYY-MM-DD format'); return; }
+    if (error === 'future')  { this.notificationService.error('Future dates are not allowed'); return; }
+
+    const newStr = formatDateForInput(parseDateFromInput(normalized));
+    if (newStr === this.selectedDateString) return;
+
+    this.selectedDateString = newStr;
     this.hasDateQueryParam.set(true);
     this.urlSyncReady.set(true);
-    this.store.setDate(value);
+    this.store.setDate(newStr);
   }
 
   protected async sendEmail(): Promise<void> {

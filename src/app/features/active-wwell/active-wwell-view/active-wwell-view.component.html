@@ -1,7 +1,7 @@
   <form [formGroup]="form">
     <div class="active-wwell-page">
-      <div class="active-wwell-loading-slot" [class.active-wwell-loading-slot--active]="store.isDetailsLoading()">
-        <mat-progress-bar mode="indeterminate" class="active-wwell-loading-bar"></mat-progress-bar>
+      <div class="active-wwell-loading-slot" [class.active-wwell-loading-slot--active]="store.isLoading()">
+        <div class="active-wwell-loading-bar"></div>
       </div>
 
       <div class="active-wwell-shell">

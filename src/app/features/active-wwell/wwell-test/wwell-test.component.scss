@@ -1,42 +1,62 @@
+// ── Update loading bar ────────────────────────────────────────────────────────
+.wt-loading-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 35%, #38bdf8 65%, #2563eb 100%);
+  background-size: 250% 100%;
+  animation: wt-bar-shimmer 1.4s linear infinite;
+}
+
+@keyframes wt-bar-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -150% 0; }
+}
+
 // ── Header row ────────────────────────────────────────────────────────────────
 .wt-header-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
-  background: #e2e8f0;
-  border-bottom: 2px solid #bfdbfe;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
 }
 
 .wt-title {
-  background: #1e3a8a;
+  background: transparent;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 6px 14px;
-  border-right: 1px solid #1e40af;
+  letter-spacing: 0.07em;
+  padding: 9px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
 }
 
 .wt-flow-badge {
-  background: #3b82f6;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 9px 14px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .wt-expected-date-label {
-  background: #cbd5e1;
-  color: #475569;
+  background: rgba(0, 0, 0, 0.14);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 6px 12px;
+  font-weight: 600;
+  padding: 9px 14px;
   text-align: right;
   white-space: nowrap;
-  border-left: 1px solid #b0bec8;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 // ── Body ──────────────────────────────────────────────────────────────────────
@@ -62,6 +82,9 @@
   align-items: stretch;
   border-bottom: 1px solid #e2e8f0;
   min-height: 2rem;
+  transition: background 0.12s ease;
+
+  &:hover { background: #f8fafc; }
 
   &--conducted {
     grid-template-columns: 9rem 1fr;
@@ -70,14 +93,14 @@
 
 // ── Label ─────────────────────────────────────────────────────────────────────
 .wt-label {
-  background: #1e3a8a;
-  color: #fff;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: rgba(255, 255, 255, 0.95);
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 0.38rem 0.5rem;
-  border-right: 1px solid #1e40af;
+  padding: 0.42rem 0.6rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   line-height: 1.3;
@@ -147,7 +170,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
   color: #fff;
   font-size: 0.65rem;
   font-weight: 800;
@@ -159,8 +182,8 @@
 
 .wt-ir-input {
   flex: 1;
-  background: #cbd5e1;
-  color: #475569;
+  background: #f1f5f9;
+  color: #64748b;
   border: none;
   padding: 0.35rem 0.4rem;
   font-size: 0.82rem;
@@ -174,18 +197,26 @@
 // ── Footer ────────────────────────────────────────────────────────────────────
 .wt-footer {
   display: flex;
-  justify-content: center;
-  padding: 0.5rem 0.55rem;
+  justify-content: flex-end;
+  padding: 0.6rem 0.85rem;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
 }
 
 .wt-update-btn {
-  background-color: #2563eb !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
   color: #fff !important;
   font-weight: 700 !important;
-  min-height: 1.9rem;
+  min-height: 2rem;
   font-size: 0.88rem !important;
   line-height: 1;
-  padding: 0 1.5rem !important;
+  padding: 0 1.75rem !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28) !important;
+  transition: box-shadow 0.18s ease, transform 0.18s ease !important;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4) !important;
+    transform: translateY(-1px);
+  }
 }

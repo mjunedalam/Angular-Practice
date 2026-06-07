@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +26,7 @@ export class WwellTestComponent {
   private readonly rbac = inject(RbacStore);
 
   protected readonly data = this.store.wwellTest;
+  protected readonly isUpdating = signal(false);
 
   protected readonly isFlowTest = computed(() => {
     const data = this.data();
@@ -45,16 +46,18 @@ export class WwellTestComponent {
   notify = inject(NotificationService);
 
   createOrUpdateActiveWwell() {
-
+    this.isUpdating.set(true);
     forkJoin({
       drillingRemarksResponse: this.createOrUpdateDrillingRemarks(),
       wellTestResponse: this.createOrUpdateWellTest()
     }).subscribe({
       next: () => {
+        this.isUpdating.set(false);
         this.notify.info('Active water well details updated successfully');
         this.store.refreshWellDetail();
       },
       error: () => {
+        this.isUpdating.set(false);
         this.notify.error('Error updating active water well details');
       }
     });

@@ -1,6 +1,10 @@
 <form [formGroup]="form">
   <div class="aw-section">
 
+    @if (isUpdating()) {
+      <div class="wt-loading-bar"></div>
+    }
+
     <div class="wt-header-row">
       <div class="wt-title">Well Test</div>
       <div class="wt-flow-badge">{{ isFlowTest() ? 'Flow Test / Natural Flow' : 'Pump Test / Natural Flow' }}</div>
@@ -144,7 +148,10 @@
     <div class="wt-footer">
       @if (canUpdate()) {
       <button mat-raised-button type="button" class="wt-update-btn"
-        (click)="createOrUpdateActiveWwell()">UPDATE</button>
+        [disabled]="isUpdating()"
+        (click)="createOrUpdateActiveWwell()">
+        {{ isUpdating() ? 'UPDATING...' : 'UPDATE' }}
+      </button>
       }
     </div>
 

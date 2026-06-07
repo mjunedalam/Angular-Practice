@@ -21,7 +21,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { ActiveWwellStore } from '../store/active-wwell.store';
-import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { NotificationService } from '@shared/components/notification/notification.service';
+import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidnight, parseDateFromInput, validateDateInput } from 'src/app/shared/utils/date.util';
 import { CasingInfoComponent } from '../casing-info/casing-info.component';
 import { DatabaseInfoComponent } from '../database-info/database-info.component';
 import { FormationTopsAndCasingComponent } from '../formation-tops-and-casing/formation-tops-and-casing.component';
@@ -87,6 +88,7 @@ export class ActiveWwellViewComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
+  private readonly notify = inject(NotificationService);
 
   protected readonly wells = computed(() => this.store.uniqueWellNames());
   protected readonly statusOptions = this.uiStore.statusOptions;
@@ -240,15 +242,33 @@ export class ActiveWwellViewComponent implements OnInit {
     const selStart = input.selectionStart ?? 0;
     const rawVal = input.value;
 
-    const digits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const rawDigits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const endsWithHyphen = rawVal.trimEnd().endsWith('-');
+
+    // Auto-pad single month digit when user types '-' to jump to day segment (e.g. "2026-2-" → "202602")
+    const paddedDigits = (endsWithHyphen && rawDigits.length === 5)
+      ? rawDigits.slice(0, 4) + '0' + rawDigits[4]
+      : rawDigits;
+
+    const { digits, isFuture } = blockFutureDigits(clampDateDigits(paddedDigits));
+
+    if (isFuture) {
+      this.notify.error('Future dates are not allowed');
+    }
 
     let formatted = digits;
     if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
     if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
 
+    // Preserve trailing hyphen at valid segment boundary (after YYYY or MM)
+    const trailingHyphen = endsWithHyphen && !isFuture && (digits.length === 4 || digits.length === 6);
+    if (trailingHyphen) formatted += '-';
+
     const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
     const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
-    const newCursor = Math.min(selStart + (newDashes - oldDashes), formatted.length);
+    const newCursor = trailingHyphen
+      ? formatted.length
+      : Math.min(selStart + (newDashes - oldDashes), formatted.length);
 
     input.value = formatted;
     input.setSelectionRange(newCursor, newCursor);
@@ -267,13 +287,23 @@ export class ActiveWwellViewComponent implements OnInit {
   }
 
   private commitDate(value: string): void {
-    const date = parseDateFromInput(value);
-    const today = getTodayAtMidnight();
-    if (!Number.isNaN(date.getTime()) && date <= today) {
-      const newStr = formatDateForInput(date);
-      if (newStr !== this.selectedDateString()) {
-        this.store.setDate(newStr);
-      }
+    let digits = clampDateDigits(value.trim().replace(/\D/g, '').slice(0, 8));
+
+    if (digits.length < 6) return;
+
+    // Auto-pad incomplete day on Enter/blur
+    if (digits.length === 6) digits += '01';
+    else if (digits.length === 7) digits = digits.slice(0, 6) + '0' + digits[6];
+
+    const normalized = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+
+    const error = validateDateInput(normalized);
+    if (error === 'invalid') { this.notify.error('Invalid date — use YYYY-MM-DD format'); return; }
+    if (error === 'future')  { this.notify.error('Future dates are not allowed'); return; }
+
+    const newStr = formatDateForInput(parseDateFromInput(normalized));
+    if (newStr !== this.selectedDateString()) {
+      this.store.setDate(newStr);
     }
   }
 

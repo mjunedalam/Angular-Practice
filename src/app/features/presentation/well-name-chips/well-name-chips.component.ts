@@ -1,16 +1,10 @@
-/**
- * WellNameChipsComponent — SMART
- * Injects WellStore — reads pagedWellNames, selectedEpANum, pagination signals.
- * Calls store.selectWell(), store.nextPage(), store.prevPage() directly.
- * Includes date picker for loading well data from specific dates.
- * Zero @Input / @Output needed.
- */
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, Signal, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { PresentationStore } from '../store/presentation.store';
-import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
+import { NotificationService } from '@shared/components/notification/notification.service';
+import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidnight, parseDateFromInput, validateDateInput } from 'src/app/shared/utils/date.util';
 
 @Component({
   selector: 'app-well-name-chips',
@@ -25,6 +19,7 @@ export class WellNameChipsComponent {
 
   protected readonly store = inject(PresentationStore);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly notify = inject(NotificationService);
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected readonly loaderVisible = signal(false);
 
@@ -92,15 +87,31 @@ export class WellNameChipsComponent {
     const selStart = input.selectionStart ?? 0;
     const rawVal = input.value;
 
-    const digits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const rawDigits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const endsWithHyphen = rawVal.trimEnd().endsWith('-');
+
+    const paddedDigits = (endsWithHyphen && rawDigits.length === 5)
+      ? rawDigits.slice(0, 4) + '0' + rawDigits[4]
+      : rawDigits;
+
+    const { digits, isFuture } = blockFutureDigits(clampDateDigits(paddedDigits));
+
+    if (isFuture) {
+      this.notify.error('Future dates are not allowed');
+    }
 
     let formatted = digits;
     if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
     if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
 
+    const trailingHyphen = endsWithHyphen && !isFuture && (digits.length === 4 || digits.length === 6);
+    if (trailingHyphen) formatted += '-';
+
     const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
     const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
-    const newCursor = Math.min(selStart + (newDashes - oldDashes), formatted.length);
+    const newCursor = trailingHyphen
+      ? formatted.length
+      : Math.min(selStart + (newDashes - oldDashes), formatted.length);
 
     input.value = formatted;
     input.setSelectionRange(newCursor, newCursor);
@@ -119,13 +130,22 @@ export class WellNameChipsComponent {
   }
 
   private commitDate(value: string): void {
-    const date = parseDateFromInput(value);
-    const today = getTodayAtMidnight();
-    if (!Number.isNaN(date.getTime()) && date <= today) {
-      const newStr = formatDateForInput(date);
-      if (newStr !== this.selectedDateString()) {
-        this.store.setDate(newStr);
-      }
+    let digits = clampDateDigits(value.trim().replace(/\D/g, '').slice(0, 8));
+
+    if (digits.length < 6) return;
+
+    if (digits.length === 6) digits += '01';
+    else if (digits.length === 7) digits = digits.slice(0, 6) + '0' + digits[6];
+
+    const normalized = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+
+    const error = validateDateInput(normalized);
+    if (error === 'invalid') { this.notify.error('Invalid date — use YYYY-MM-DD format'); return; }
+    if (error === 'future')  { this.notify.error('Future dates are not allowed'); return; }
+
+    const newStr = formatDateForInput(parseDateFromInput(normalized));
+    if (newStr !== this.selectedDateString()) {
+      this.store.setDate(newStr);
     }
   }
 
