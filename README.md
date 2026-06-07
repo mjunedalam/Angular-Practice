@@ -211,7 +211,7 @@ Rows are produced in two passes:
 
 | Field Name | API Object | Exact Mapping | Business Logic |
 |---|---|---|---|
-| Field (EN) | `PRIMARY_HOLEID[0]` / `RIG_ACTIVITY[0]` | `primaryHole?.wPrimHidName ?? rig?.wDrlgLocDesc ?? FALLBACK_STR` | Primary hole field name (English); falls back to rig location description |
+| Field (EN) | `PRIMARY_HOLEID[0]` | `primaryHole?.wPrimHidName ?? FALLBACK_STR` | Primary hole field name (English); no rig fallback |
 | Field (AR) | `PRIMARY_HOLEID[0]` | `primaryHole?.w_prim_hid_ar_name_html ?? null` | Arabic HTML for the field name; rendered with `[innerHTML]` after English label when present |
 | Well Name | `RIG_ACTIVITY[0]` / `WELL_MASTER[0]` | `rig?.wellName ?? master?.well ?? FALLBACK_STR` | Rig activity well name takes priority over GIS master well |
 | Latitude | `WELL_MASTER[0]` | `master?.lat ?? FALLBACK_STR` | GIS coordinate — badge labeled "GIS" in UI |
@@ -220,7 +220,7 @@ Rows are produced in two passes:
 | Target Depth (ft) | `EXAD_RCD_PREWAP[0]` / `DRLG_OP_STATUS[0]` | `prewap?.estTargetDepth ?? status?.targetDepth ?? FALLBACK_STR` | Displayed as `{depth} ft` |
 | EP Num | `DRLG_OP_STATUS[0]` | `status?.epANum ?? epANum ?? FALLBACK_STR` | Drilling status EP number; falls back to store's selected EP number |
 | Status | `EXAD_GWD_DAILY_REMARKS[0]` | `d.EXAD_GWD_DAILY_REMARKS?.[0].status ?? ""` via `selectStatus()` | Editable via `mat-select`; initial value loaded from daily remarks |
-| BI | `EXAD_RCD_PREWAP[0]` | `prewap?.supportedBusiness ?? 'Missing'` | Supported business / BI label; previously `rig?.biNum` |
+| BI | `EXAD_RCD_PREWAP[0]` | `prewap?.supportedBusiness ?? FALLBACK_STR` | Supported business / BI label (`'N/A'` fallback); previously `rig?.biNum` |
 
 ---
 

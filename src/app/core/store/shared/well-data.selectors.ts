@@ -268,7 +268,7 @@ export function selectWellHeaderViewModel(d: IWellData | null, epANum: number | 
     const status = d.DRLG_OP_STATUS?.[0];
     const primaryHole = d.PRIMARY_HOLEID?.[0] ?? null;
     return {
-        field: primaryHole?.wPrimHidName ?? rig?.wDrlgLocDesc ?? FALLBACK_STR,
+        field: primaryHole?.wPrimHidName ?? FALLBACK_STR,
         fieldAr: primaryHole?.w_prim_hid_ar_name_html ?? null,
         wellName: rig?.wellName ?? master?.well ?? FALLBACK_STR,
         lat: master?.lat ?? FALLBACK_STR,
