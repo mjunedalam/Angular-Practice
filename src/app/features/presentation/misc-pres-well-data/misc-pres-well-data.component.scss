@@ -662,3 +662,14 @@
   line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+
+// Full text, no truncation — scrolls internally once it exceeds max-height
+.op-text--expandable {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+  text-overflow: unset;
+  max-height: clamp(90px, 22cqi, 200px);
+  overflow-y: auto;
+}
