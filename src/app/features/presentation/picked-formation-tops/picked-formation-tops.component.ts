@@ -4,7 +4,7 @@ import {
   inject,
 } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridOptions, RowClassParams, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
 
 import { PresentationStore } from '../store/presentation.store';
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
@@ -62,7 +62,5 @@ export class PickedFormationTopsComponent {
     tooltipShowDelay: 300,
     defaultColDef: { sortable: true, resizable: true, suppressHeaderMenuButton: true },
     overlayNoRowsTemplate: '<span class="no-rows">No formation tops available.</span>',
-    getRowStyle: (params: RowClassParams<FormationInfoViewModel>) =>
-      params.data?.isDrlgOnly ? { color: '#16a34a', fontWeight: '600' } : undefined,
   };
 }

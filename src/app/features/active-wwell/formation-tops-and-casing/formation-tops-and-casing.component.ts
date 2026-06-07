@@ -64,8 +64,8 @@ export class FormationTopsAndCasingComponent {
     tooltipShowDelay: 300,
     defaultColDef: this.defaultColDef,
     overlayNoRowsTemplate: '<span class="no-rows">No formation tops available.</span>',
-    getRowStyle: (params: RowClassParams<FormationInfoViewModel>) =>
-      params.data?.isDrlgOnly ? { color: '#16a34a', fontWeight: '600' } : undefined,
+    // getRowStyle: (params: RowClassParams<FormationInfoViewModel>) =>
+    //   params.data?.isDrlgOnly ? { color: '#16a34a', fontWeight: '600' } : undefined,
     onGridReady: (params) => params.api.sizeColumnsToFit(),
   };
 

@@ -675,7 +675,6 @@ export class WellBoreViewComponent {
         .attr('class', 'geo-depth')
         .attr('x', geoLineX - 17)
         .attr('dy', '0.35em')
-        .attr('fill', '#22c55e')
         .text(actualDepth.toLocaleString());
 
       g.append('text')
