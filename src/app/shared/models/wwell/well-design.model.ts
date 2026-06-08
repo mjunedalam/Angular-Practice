@@ -8,8 +8,8 @@ export interface IWellDesign {
   ohRemarks: string | null;
   gpFlg: string | null;
   gpRemarks: string | null;
-  perfFlg: string | null;
-  perfRemarks: string | null;
+  perforatedFlg: string | null;
+  perforatedRemarks: string | null;
   lsFlg: string | null;
   lsRemarks: string | null;
 }
