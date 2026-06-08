@@ -87,7 +87,7 @@ export class WwellTestComponent {
   );
 
   protected readonly aquiferOptions = [
-    'WASI', 'SHUQ', 'WAJID', 'JAUF', 'TABUK', 'KHUFF',
+    'ARUM', 'SAQA', 'UMER', 'WASI', 'SHRA', 'ALAT', 'KHOB', 'MNJQ', 'NOGN',
   ] as const;
 
   protected onlyNumbers(event: KeyboardEvent): void {

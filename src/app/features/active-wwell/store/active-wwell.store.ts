@@ -58,7 +58,7 @@ export const ActiveWwellStore = signalStore(
         const wellNames = computed((): WellName[] => selectWellNamesFromList(wellList()));
 
         return {
-      
+
             wellNames,
             uniqueWellNames: wellNames,
             pagedWellNames: computed((): WellName[] => selectPagedWellNames(wellNames(), wellNamesPage())),
@@ -102,8 +102,8 @@ export const ActiveWwellStore = signalStore(
                 selectWwellTestViewModel(wellData()),
             ),
             totalDepth: computed((): number => selectTotalDepth(wellData())),
-            status:computed(():string => selectStatus(wellData())),
-            area:computed(():string=>selectArea(wellData()))
+            status: computed((): string => selectStatus(wellData())),
+            area: computed((): string => selectArea(wellData()))
         };
     }),
 
@@ -275,8 +275,8 @@ export const ActiveWwellStore = signalStore(
                 return EMPTY as unknown as void;
             },
 
-            setStatus(status:string):void{
-                patchState(store, {status})
+            setStatus(status: string): void {
+                patchState(store, { status })
             },
 
             refreshWellDetail(): void {
@@ -289,5 +289,4 @@ export const ActiveWwellStore = signalStore(
         };
     }),
 );
-
 export type ActiveWwellStoreType = InstanceType<typeof ActiveWwellStore>;

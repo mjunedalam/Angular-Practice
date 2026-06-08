@@ -1,160 +1,193 @@
-  <form [formGroup]="form">
-    <div class="active-wwell-page">
-      <div class="active-wwell-loading-slot" [class.active-wwell-loading-slot--active]="store.isLoading()">
-        <div class="active-wwell-loading-bar"></div>
-      </div>
+<form [formGroup]="form">
+  <div class="active-wwell-page">
+    <div
+      class="active-wwell-loading-slot"
+      [class.active-wwell-loading-slot--active]="store.isLoading()"
+    >
+      <div class="active-wwell-loading-bar"></div>
+    </div>
 
-      <div class="active-wwell-shell">
-        <div class="active-wwell-sidebar">
-          <div class="well-header well-list">Wells List</div>
+    <div class="active-wwell-shell">
+      <div class="active-wwell-sidebar">
+        <div class="well-header well-list">Wells List</div>
 
-          <div class="well-chip-list" role="listbox" aria-label="Wells">
-            @for (well of wells(); track well.epANum) {
-              <button
-                type="button"
-                role="option"
-                class="well-chip-item"
-                [class.well-chip-item--active]="store.selectedEpANum() === well.epANum"
-                [attr.aria-selected]="store.selectedEpANum() === well.epANum"
-                (click)="onWellSelect(well.epANum)">
-                {{ well.wellName }}
-              </button>
-            }
-          </div>
-
-          <div class="active-wwell-sidebar__dept">
-            Wellsite &amp; Water Operation Department
-          </div>
+        <div class="well-chip-list" role="listbox" aria-label="Wells">
+          @for (well of wells(); track well.epANum) {
+            <button
+              type="button"
+              role="option"
+              class="well-chip-item"
+              [class.well-chip-item--active]="
+                store.selectedEpANum() === well.epANum
+              "
+              [attr.aria-selected]="store.selectedEpANum() === well.epANum"
+              (click)="onWellSelect(well.epANum)"
+            >
+              {{ well.wellName }}
+            </button>
+          }
         </div>
 
-        <div class="active-wwell-content">
-          <div class="aw-page-header">
-            <div class="date-picker-section">
-              <label class="date-picker-label" for="well-date-input">Date:</label>
-              <div class="date-input-wrapper">
-                <input
-                  id="well-date-input"
-                  type="text"
-                  class="date-picker-input"
-                  [value]="selectedDateString()"
-                  placeholder="YYYY-MM-DD"
-                  maxlength="10"
-                  (focus)="$any($event.target).select()"
-                  (input)="onDateAutoFormat($event)"
-                  (blur)="onDateTextCommit($any($event.target).value)"
-                  (keydown.enter)="onDateTextCommit($any($event.target).value); $any($event.target).blur()"
-                  aria-label="Select date for well data"
-                />
-                <button type="button" class="date-cal-btn" (click)="openNativePicker()" aria-label="Open calendar picker">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <path d="M16 2v4M8 2v4M3 10h18"/>
-                  </svg>
-                </button>
-                <input
-                  #nativeDateInput
-                  type="date"
-                  class="date-native-hidden"
-                  [value]="selectedDateString()"
-                  [max]="maxDateString"
-                  (change)="onDateInputChange($any($event.target).value)"
-                  tabindex="-1"
-                  aria-hidden="true"
-                />
-              </div>
+        <div class="active-wwell-sidebar__dept">
+          Wellsite &amp; Water Operation Department
+        </div>
+      </div>
+
+      <div class="active-wwell-content">
+        <div class="aw-page-header">
+          <div class="date-picker-section">
+            <label class="date-picker-label" for="well-date-input">Date:</label>
+            <div class="date-input-wrapper">
+              <input
+                id="well-date-input"
+                type="text"
+                class="date-picker-input"
+                [value]="selectedDateString()"
+                placeholder="YYYY-MM-DD"
+                maxlength="10"
+                (focus)="$any($event.target).select()"
+                (input)="onDateAutoFormat($event)"
+                (blur)="onDateTextCommit($any($event.target).value)"
+                (keydown.enter)="
+                  onDateTextCommit($any($event.target).value);
+                  $any($event.target).blur()
+                "
+                aria-label="Select date for well data"
+              />
+              <button
+                type="button"
+                class="date-cal-btn"
+                (click)="openNativePicker()"
+                aria-label="Open calendar picker"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </button>
+              <input
+                #nativeDateInput
+                type="date"
+                class="date-native-hidden"
+                [value]="selectedDateString()"
+                [max]="maxDateString"
+                (change)="onDateInputChange($any($event.target).value)"
+                tabindex="-1"
+                aria-hidden="true"
+              />
             </div>
-            <div class="well-header">Single Water Well Review</div>
-            <div class="aw-header-spacer"></div>
+          </div>
+          <div class="well-header">Single Water Well Review</div>
+          <div class="aw-header-spacer"></div>
+        </div>
+
+        <div class="active-wwell-grid">
+          <div class="active-wwell-main">
+            <app-wwell-header></app-wwell-header>
+            <app-database-info></app-database-info>
+            <app-operation-summary></app-operation-summary>
+
+            <div class="aw-section">
+              <div class="well-header">Drilling Remarks</div>
+              <textarea
+                class="active-wwell-remarks"
+                formControlName="wDrlgSmryRmk"
+              ></textarea>
+            </div>
+
+            <app-formation-tops-and-casing></app-formation-tops-and-casing>
+            <app-casing-info></app-casing-info>
+            <app-wwell-test></app-wwell-test>
           </div>
 
-          <div class="active-wwell-grid">
-            <div class="active-wwell-main">
-              <app-wwell-header></app-wwell-header>
-              <app-database-info></app-database-info>
-              <app-operation-summary></app-operation-summary>
+          <div class="active-wwell-sidepanel">
+            <app-file-upload
+              [epANum]="store.selectedEpANum()"
+              [date]="selectedDateString()"
+            ></app-file-upload>
 
-              <div class="aw-section">
-                <div class="well-header">Drilling Remarks</div>
-                <textarea class="active-wwell-remarks" formControlName="wDrlgSmryRmk"></textarea>
+            <div class="lt-orange active-wwell-status-panel">
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="active-wwell-select"
+              >
+                <mat-label>Area</mat-label>
+                <mat-select formControlName="area">
+                  @for (area of areas; track area.value) {
+                    <mat-option [value]="area.value">{{
+                      area.value
+                    }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div class="active-wwell-stat-box">
+                <mat-label>Formation Drilling</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().formationDrilling) }}
+                </div>
               </div>
 
-              <app-formation-tops-and-casing></app-formation-tops-and-casing>
-              <app-casing-info></app-casing-info>
-              <app-wwell-test></app-wwell-test>
-            </div>
-
-            <div class="active-wwell-sidepanel">
-              <app-file-upload [epANum]="store.selectedEpANum()" [date]="selectedDateString()"></app-file-upload>
-
-              <div class="lt-orange active-wwell-status-panel">
-  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="active-wwell-select">
-                  <mat-label>Area</mat-label>
-                  <mat-select formControlName="area">
-                    @for (area of areas; track area.value) {
-                    <mat-option [value]="area.value">{{ area.value }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-
-                <div class="active-wwell-stat-box">
-                  <mat-label>Formation Drilling</mat-label>
-                  <div class="stat-value">
-                    {{ displayValue(summaryStats().formationDrilling) }}
-                  </div>
-                </div>
-
-                <!-- <div class="active-wwell-stat-box">
+              <!-- <div class="active-wwell-stat-box">
                 <mat-label>Bit Size</mat-label>
                 <div class="stat-value">
                   {{ displayValue(summaryStats().bitSize) }}
                 </div>
               </div> -->
 
-                <div class="active-wwell-stat-box">
-                  <mat-label>Circulation</mat-label>
-                  <div class="stat-value">
-                    {{ displayValue(summaryStats().circulation) }}
-                  </div>
+              <div class="active-wwell-stat-box">
+                <mat-label>Circulation</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().circulation) }}
                 </div>
+              </div>
 
-                <!-- <div class="active-wwell-stat-box">
+              <!-- <div class="active-wwell-stat-box">
                 <mat-label>Mud Weight</mat-label>
                 <div class="stat-value">
                   {{ displayValue(summaryStats().mudWeight) }}
                 </div>
               </div> -->
 
-                <div class="active-wwell-stat-box avg-rop-box">
-                  <mat-label>Avg ROP</mat-label>
-                  <div class="stat-value">
-                    {{ displayValue(summaryStats().avgRop) }}
-                  </div>
+              <div class="active-wwell-stat-box avg-rop-box">
+                <mat-label>Avg ROP</mat-label>
+                <div class="stat-value">
+                  {{ displayValue(summaryStats().avgRop) }}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="active-wwell-footer">
-        <div class="footer-copy">Saudi Aramco Company General Use</div>
-        <div class="footer-legend">
-          <span class="footer-legend__title">Data Source Legend</span>
-          <div class="footer-legend__grid">
-            <div class="footer-legend__item">
-              <div class="legend-swatch legend-swatch--gray"></div>
-              Drill Eye
-            </div>
-            <div class="footer-legend__item">
-              <div class="legend-swatch legend-swatch--orange"></div>
-              GIS
-            </div>
-            <div class="footer-legend__item">
-              <div class="legend-swatch legend-swatch--blue"></div>
-              IR
-            </div>
+    <div class="active-wwell-footer">
+      <div class="footer-copy"></div>
+      <div class="footer-legend">
+        <span class="footer-legend__title">Data Source Legend</span>
+        <div class="footer-legend__grid">
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--gray"></div>
+            Drill Eye
+          </div>
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--orange"></div>
+            GIS
+          </div>
+          <div class="footer-legend__item">
+            <div class="legend-swatch legend-swatch--blue"></div>
+            IR
           </div>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</form>

@@ -10,9 +10,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -34,11 +33,11 @@ import {
   ACTIVE_WWELL_FALLBACK,
   deriveStatusLabel,
 } from '../active-wwell.helpers';
-import { displayValue, selectLatestFormation, selectOperationSummaryViewModel, selectWwellTestViewModel } from '../store/active-wwell.selectors';
+import { displayValue, selectLatestFormation, selectWwellTestViewModel } from '../store/active-wwell.selectors';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
 import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
-import { skip, startWith } from 'rxjs';
+import { skip } from 'rxjs';
 
 const AREAS = [
   { value: 'Western Area' },
@@ -54,7 +53,6 @@ const ADD_NEW_SENTINEL = '__ADD_NEW__';
   selector: 'app-active-wwell-view',
   standalone: true,
   imports: [
-    NgClass,
     FormsModule,
     MatChipsModule,
     MatFormFieldModule,
@@ -299,7 +297,7 @@ export class ActiveWwellViewComponent implements OnInit {
 
     const error = validateDateInput(normalized);
     if (error === 'invalid') { this.notify.error('Invalid date — use YYYY-MM-DD format'); return; }
-    if (error === 'future')  { this.notify.error('Future dates are not allowed'); return; }
+    if (error === 'future') { this.notify.error('Future dates are not allowed'); return; }
 
     const newStr = formatDateForInput(parseDateFromInput(normalized));
     if (newStr !== this.selectedDateString()) {
