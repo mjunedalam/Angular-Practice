@@ -487,11 +487,160 @@ export class WellBoreViewComponent {
     );
 
     const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
+    const hoverLayer = this.rootG.append('g').attr('class', 'geo-hover-targets');
+    const tooltipLayer = this.rootG.append('g')
+      .attr('class', 'geo-remark-tooltip')
+      .style('opacity', 0)
+      .style('pointer-events', 'none');
+
+    const hideTooltip = (): void => {
+      tooltipLayer.interrupt().transition().duration(120).style('opacity', 0);
+    };
+
+    const showTooltip = (
+      yPx: number,
+      formation: string,
+      depth: number,
+      remark: string,
+      hasActual: boolean,
+    ): void => {
+      const tooltipW = 260;
+      const lineHeight = 15;
+      const lines = this.wrapGeoRemark(remark, 32, 3);
+      const tooltipH = 54 + lines.length * lineHeight;
+      const tooltipX = geoLineX + 48;
+      const tooltipY = Math.max(4, Math.min(yPx - tooltipH / 2, this.layout.drawingHeight - tooltipH - 4));
+      const rowAnchorX = geoLineX + 18;
+      const connectorY = Math.max(tooltipY + 22, Math.min(yPx, tooltipY + tooltipH - 18));
+      const accent = hasActual ? '#16a34a' : '#2563eb';
+      const mutedAccent = hasActual ? 'rgba(22,163,74,0.2)' : 'rgba(37,99,235,0.18)';
+
+      tooltipLayer.selectAll('*').remove();
+      tooltipLayer.raise();
+
+      tooltipLayer.append('path')
+        .attr('d', `M${rowAnchorX},${yPx} H${tooltipX - 14} Q${tooltipX - 7},${yPx} ${tooltipX - 7},${connectorY} H${tooltipX}`)
+        .attr('stroke', accent)
+        .attr('stroke-width', 1.6)
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-linejoin', 'round')
+        .attr('opacity', 0.76)
+        .attr('fill', 'none');
+
+      tooltipLayer.append('circle')
+        .attr('cx', rowAnchorX)
+        .attr('cy', yPx)
+        .attr('r', 3.2)
+        .attr('fill', '#ffffff')
+        .attr('stroke', accent)
+        .attr('stroke-width', 1.6);
+
+      tooltipLayer.append('rect')
+        .attr('x', tooltipX)
+        .attr('y', tooltipY)
+        .attr('width', tooltipW)
+        .attr('height', tooltipH)
+        .attr('rx', 10)
+        .attr('fill', '#ffffff')
+        .attr('stroke', accent)
+        .attr('stroke-width', 1.4)
+        .attr('filter', 'drop-shadow(0 8px 14px rgba(15,23,42,0.18))');
+
+      tooltipLayer.append('rect')
+        .attr('x', tooltipX)
+        .attr('y', tooltipY)
+        .attr('width', 5)
+        .attr('height', tooltipH)
+        .attr('rx', 2)
+        .attr('fill', accent);
+
+      tooltipLayer.append('rect')
+        .attr('x', tooltipX + 14)
+        .attr('y', tooltipY + 12)
+        .attr('width', hasActual ? 62 : 70)
+        .attr('height', 22)
+        .attr('rx', 11)
+        .attr('fill', mutedAccent);
+
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + (hasActual ? 45 : 49))
+        .attr('y', tooltipY + 27)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '10')
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-weight', '900')
+        .attr('fill', accent)
+        .text(hasActual ? 'ACTUAL' : 'PLANNED');
+
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + 90)
+        .attr('y', tooltipY + 27)
+        .attr('font-size', '15')
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-weight', '900')
+        .attr('fill', '#0f172a')
+        .text(formation);
+
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + tooltipW - 16)
+        .attr('y', tooltipY + 27)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '12')
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-weight', '800')
+        .attr('fill', '#64748b')
+        .text(`${depth.toLocaleString()} ft`);
+
+      tooltipLayer.append('line')
+        .attr('x1', tooltipX + 14)
+        .attr('x2', tooltipX + tooltipW - 14)
+        .attr('y1', tooltipY + 43)
+        .attr('y2', tooltipY + 43)
+        .attr('stroke', '#e2e8f0');
+
+      lines.forEach((line, lineIdx) => {
+        tooltipLayer.append('text')
+          .attr('x', tooltipX + 16)
+          .attr('y', tooltipY + 63 + lineIdx * lineHeight)
+          .attr('font-size', '12')
+          .attr('font-family', 'DM Sans, sans-serif')
+          .attr('font-weight', '600')
+          .attr('fill', lineIdx === lines.length - 1 && remark.length > lines.join(' ').length ? '#64748b' : '#334155')
+          .text(line);
+      });
+
+      tooltipLayer.interrupt().style('opacity', 0).transition().duration(120).style('opacity', 1);
+    };
+
+    const addHoverTarget = (
+      yPx: number,
+      formation: string,
+      depth: number,
+      remark: string | undefined,
+      hasActual: boolean,
+    ): void => {
+      const tooltipRemark = remark?.trim() || 'No remarks available';
+
+      hoverLayer.append('rect')
+        .attr('class', 'geo-hover-row')
+        .attr('x', geoLineX - 88)
+        .attr('y', yPx - 15)
+        .attr('width', 130)
+        .attr('height', 30)
+        .attr('rx', 5)
+        .attr('fill', 'transparent')
+        .style('pointer-events', 'all')
+        .style('cursor', 'help')
+        .on('mouseenter', () => showTooltip(yPx, formation, depth, tooltipRemark, hasActual))
+        .on('mouseleave', hideTooltip);
+    };
+
     sorted.forEach((top, idx) => {
       const isTarget = !!targetAquifer && top.stLongCd === targetAquifer;
       const actualDepth = actualMap.get(top.stLongCd);
       const hasActual = actualDepth !== undefined;
-      const yPx = scale(hasActual ? actualDepth! : top.planTvdDepth);
+      const depth = hasActual ? actualDepth! : top.planTvdDepth;
+      const yPx = scale(depth);
       const remark = remarksMap.get(top.stLongCd);
 
       const g = this.rootG.append('g')
@@ -520,132 +669,14 @@ export class WellBoreViewComponent {
         .attr('dy', '0.35em')
         .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString());
 
-      const nameEl = g.append('text')
+      g.append('text')
         .attr('class', hasActual ? 'geo-code geo-code--actual' : 'geo-code')
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
+        .style('pointer-events', 'none')
         .text(top.stLongCd);
 
-      if (remark) {
-        // Colors match the geo-code: green for actual depth, blue for planned
-        const accent = hasActual ? '#22c55e' : '#3b82f6';
-        const accentDim = hasActual ? 'rgba(34,197,94,0.55)' : 'rgba(59,130,246,0.55)';
-        const accentFaint = hasActual ? 'rgba(34,197,94,0.09)' : 'rgba(37,99,235,0.09)';
-        const accentText = hasActual ? '#86efac' : '#93c5fd';
-        const headerBg = hasActual ? 'rgba(20,83,45,0.50)' : 'rgba(30,58,138,0.50)';
-
-        const rx = 8;
-        const ttipW = 228;
-        const headerH = 28;
-        const arrowH = 8;
-        const ttipX = geoLineX + 18;
-
-        // Up to 2 lines of content
-        const maxLine = 30;
-        const line1 = remark.slice(0, maxLine);
-        const rawLine2 = remark.length > maxLine ? remark.slice(maxLine, maxLine + 28) : null;
-        const line2 = rawLine2 ? (remark.length > maxLine + 28 ? rawLine2 + '…' : rawLine2) : null;
-        const contentH = line2 ? 52 : 36;
-        const ttipH = headerH + contentH;
-        const ttipTopY = yPx - ttipH - arrowH - 4;
-        const arrowBaseY = ttipTopY + ttipH;
-        const arrowCx = ttipX + ttipW / 2; // centered arrow
-
-        const ttipG = this.rootG.append('g')
-          .attr('class', 'geo-remark-tooltip')
-          .style('opacity', 0)
-          .style('pointer-events', 'none');
-
-        // Soft glow halo
-        ttipG.append('rect')
-          .attr('x', ttipX - 5).attr('y', ttipTopY - 5)
-          .attr('width', ttipW + 10).attr('height', ttipH + 10)
-          .attr('rx', rx + 5)
-          .attr('fill', accentFaint);
-
-        // Card body
-        ttipG.append('rect')
-          .attr('x', ttipX).attr('y', ttipTopY)
-          .attr('width', ttipW).attr('height', ttipH)
-          .attr('rx', rx)
-          .attr('fill', '#0c1526')
-          .attr('stroke', accentDim)
-          .attr('stroke-width', 1.5);
-
-        // Header strip — rounded top only via path
-        const hx = ttipX, hy = ttipTopY, hw = ttipW, hh = headerH;
-        ttipG.append('path')
-          .attr('d', `M${hx + rx},${hy} Q${hx},${hy} ${hx},${hy + rx} L${hx},${hy + hh} L${hx + hw},${hy + hh} L${hx + hw},${hy + rx} Q${hx + hw},${hy} ${hx + hw - rx},${hy} Z`)
-          .attr('fill', headerBg);
-
-        // Divider
-        ttipG.append('line')
-          .attr('x1', ttipX + 10).attr('x2', ttipX + ttipW - 10)
-          .attr('y1', ttipTopY + headerH).attr('y2', ttipTopY + headerH)
-          .attr('stroke', accentDim).attr('stroke-width', 0.8).attr('opacity', 0.5);
-
-        // Info icon
-        const iconCx = ttipX + 14;
-        const iconCy = ttipTopY + headerH / 2;
-        ttipG.append('circle')
-          .attr('cx', iconCx).attr('cy', iconCy).attr('r', 6.5)
-          .attr('fill', 'rgba(0,0,0,0.25)')
-          .attr('stroke', accent).attr('stroke-width', 1.2);
-        ttipG.append('text')
-          .attr('x', iconCx).attr('y', iconCy + 3.5)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '800').attr('fill', accent)
-          .text('i');
-
-        // Header label
-        ttipG.append('text')
-          .attr('x', iconCx + 11).attr('y', ttipTopY + headerH / 2 + 4)
-          .attr('font-size', '8.5').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '800').attr('fill', accentText)
-          .attr('letter-spacing', '0.10em')
-          .text('REMARK');
-
-        // Content line 1
-        ttipG.append('text')
-          .attr('x', ttipX + 12).attr('y', ttipTopY + headerH + 20)
-          .attr('font-size', '11').attr('font-family', 'DM Sans, sans-serif')
-          .attr('font-weight', '400').attr('fill', '#e2e8f0')
-          .text(line1);
-
-        if (line2) {
-          ttipG.append('text')
-            .attr('x', ttipX + 12).attr('y', ttipTopY + headerH + 38)
-            .attr('font-size', '11').attr('font-family', 'DM Sans, sans-serif')
-            .attr('font-weight', '400').attr('fill', '#94a3b8')
-            .text(line2);
-        }
-
-        // Arrow — single path: card bottom gap fill + triangle, no seam hacks
-        const aw = 10;
-        // Erase card border at arrow base with a thin fill rect
-        ttipG.append('rect')
-          .attr('x', arrowCx - aw / 2 + 1).attr('y', arrowBaseY - 1)
-          .attr('width', aw - 2).attr('height', 2)
-          .attr('fill', '#0c1526');
-        // Triangle
-        ttipG.append('path')
-          .attr('d', `M${arrowCx - aw / 2},${arrowBaseY} L${arrowCx + aw / 2},${arrowBaseY} L${arrowCx},${arrowBaseY + arrowH} Z`)
-          .attr('fill', '#0c1526')
-          .attr('stroke', accentDim)
-          .attr('stroke-width', 1.2)
-          .attr('stroke-linejoin', 'round');
-        // Seal the triangle base against the card bottom (fill over the interior stroke)
-        ttipG.append('rect')
-          .attr('x', arrowCx - aw / 2 + 1.5).attr('y', arrowBaseY - 0.5)
-          .attr('width', aw - 3).attr('height', 1.5)
-          .attr('fill', '#0c1526');
-
-        nameEl
-          .style('cursor', 'help')
-          .on('mouseenter', () => ttipG.transition().duration(150).style('opacity', 1))
-          .on('mouseleave', () => ttipG.transition().duration(150).style('opacity', 0));
-      }
+      addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual);
 
       g.transition()
         .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
@@ -682,13 +713,48 @@ export class WellBoreViewComponent {
         .attr('x', geoLineX + 18)
         .attr('dy', '0.35em')
         .attr('fill', '#22c55e')
+        .style('pointer-events', 'none')
         .text(top.formation);
+
+      addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true);
 
       g.transition()
         .delay(ANIM.GEO_DELAY + (sorted.length + idx) * ANIM.GEO_STAGGER)
         .duration(220)
         .style('opacity', 1);
     });
+
+    hoverLayer.raise();
+    tooltipLayer.raise();
+  }
+
+  private wrapGeoRemark(value: string, maxLineLength: number, maxLines: number): string[] {
+    const words = value.trim().split(/\s+/);
+    const lines: string[] = [];
+    let current = '';
+
+    for (const word of words) {
+      const next = current ? `${current} ${word}` : word;
+
+      if (next.length <= maxLineLength) {
+        current = next;
+        continue;
+      }
+
+      if (current) lines.push(current);
+      current = word;
+
+      if (lines.length === maxLines) break;
+    }
+
+    if (current && lines.length < maxLines) lines.push(current);
+
+    const rendered = lines.join(' ');
+    if (value.length > rendered.length && lines.length > 0) {
+      lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\.+$/, '')}...`;
+    }
+
+    return lines.length ? lines : ['No remarks available'];
   }
 
   private drawCasings(

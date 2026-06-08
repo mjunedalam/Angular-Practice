@@ -40,6 +40,22 @@
   .geo-code         { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
   .geo-code--actual { fill: #16a34a; }
 
+  .geo-depth,
+  .geo-code {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .geo-hover-row {
+    transition: fill 0.12s ease;
+
+    &:hover { fill: rgba(37, 99, 235, 0.06); }
+  }
+
+  .geo-remark-tooltip {
+    text { user-select: none; }
+  }
+
   .geo-target-band  { fill: rgb(35 135 232 / 60%);  }
   .geo-tick--target { stroke: #d97706; stroke-width: 2.5; }
   .geo-depth--target{ font-size: 12px; font-weight: 700; fill: #d97706; text-anchor: end; }
