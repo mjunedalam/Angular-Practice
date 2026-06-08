@@ -48,6 +48,7 @@ const AREAS = [
 ] as const;
 
 const ADD_NEW_SENTINEL = '__ADD_NEW__';
+const WELL_PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-active-wwell-view',
@@ -88,7 +89,29 @@ export class ActiveWwellViewComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notify = inject(NotificationService);
 
+  protected readonly loadingVisible = signal(false);
+  protected readonly visibleWellPage = signal(0);
   protected readonly wells = computed(() => this.store.uniqueWellNames());
+  protected readonly totalWellPages = computed(() =>
+    Math.max(1, Math.ceil(this.wells().length / WELL_PAGE_SIZE)),
+  );
+  protected readonly visibleWells = computed(() => {
+    const wells = this.wells();
+    const start = this.visibleWellPage() * WELL_PAGE_SIZE;
+
+    return wells.slice(start, start + WELL_PAGE_SIZE);
+  });
+  protected readonly hasPrevWells = computed(() => this.visibleWellPage() > 0);
+  protected readonly hasNextWells = computed(() => this.visibleWellPage() < this.totalWellPages() - 1);
+  protected readonly wellListLabel = computed(() => {
+    const total = this.wells().length;
+    if (total === 0) return '';
+
+    const start = this.visibleWellPage() * WELL_PAGE_SIZE + 1;
+    const end = Math.min(start + this.visibleWells().length - 1, total);
+
+    return `${start}-${end} of ${total}`;
+  });
   protected readonly statusOptions = this.uiStore.statusOptions;
   protected readonly statusSearchQuery = signal('');
   protected readonly filteredStatusOptions = computed(() => {
@@ -129,7 +152,43 @@ export class ActiveWwellViewComponent implements OnInit {
 
   protected readonly displayValue = displayValue;
 
+  private loadingTimer: ReturnType<typeof setTimeout> | null = null;
+  private loadingShownAt = 0;
+
   constructor() {
+    effect(() => {
+      const isLoading = this.store.isLoading();
+
+      if (isLoading) {
+        this.clearLoadingTimer();
+        this.loadingShownAt = Date.now();
+        this.loadingVisible.set(true);
+        return;
+      }
+
+      if (!this.loadingVisible()) {
+        return;
+      }
+
+      const elapsed = Date.now() - this.loadingShownAt;
+      const remaining = Math.max(0, 380 - elapsed);
+
+      this.clearLoadingTimer();
+      this.loadingTimer = setTimeout(() => {
+        this.loadingVisible.set(false);
+        this.loadingTimer = null;
+      }, remaining);
+    });
+
+    this.destroyRef.onDestroy(() => this.clearLoadingTimer());
+
+    effect(() => {
+      const wells = this.wells();
+      const selectedEpANum = this.store.selectedEpANum();
+      const selectedIndex = wells.findIndex(well => well.epANum === selectedEpANum);
+
+      this.visibleWellPage.set(selectedIndex >= 0 ? Math.floor(selectedIndex / WELL_PAGE_SIZE) : 0);
+    });
 
     effect(() => {
       const wellData = this.store.wellData();
@@ -301,6 +360,7 @@ export class ActiveWwellViewComponent implements OnInit {
 
     const newStr = formatDateForInput(parseDateFromInput(normalized));
     if (newStr !== this.selectedDateString()) {
+      this.resetVisibleWellPage();
       this.store.setDate(newStr);
     }
   }
@@ -314,6 +374,9 @@ export class ActiveWwellViewComponent implements OnInit {
 
     if (!forceLoad && requestedDate === currentDate && (epANum ?? null) === currentEpANum) {
       return;
+    }
+    if (forceLoad || requestedDate !== currentDate) {
+      this.resetVisibleWellPage();
     }
     // this.form.get('wActDt').patchValue(requestedDate, { emitEvent: false })
     // this.wellTestForm.get('testStaDt').patchValue(requestedDate, { emitEvent: false });
@@ -359,6 +422,14 @@ export class ActiveWwellViewComponent implements OnInit {
     this.store.selectWell({ epANum, date: this.selectedDateString() });
   }
 
+  protected onPrevWellsPage(): void {
+    this.selectWellsPage(this.visibleWellPage() - 1);
+  }
+
+  protected onNextWellsPage(): void {
+    this.selectWellsPage(this.visibleWellPage() + 1);
+  }
+
 
 
   openDialog() {
@@ -388,5 +459,28 @@ export class ActiveWwellViewComponent implements OnInit {
         this.uiStore.setStatusForWell(this.store.selectedEpANum(), name);
         this.form.get('status').patchValue(name);
       });
+  }
+
+  private resetVisibleWellPage(): void {
+    this.visibleWellPage.set(0);
+  }
+
+  private selectWellsPage(page: number): void {
+    const maxPage = this.totalWellPages() - 1;
+    const nextPage = Math.min(Math.max(0, page), maxPage);
+    const firstWell = this.wells()[nextPage * WELL_PAGE_SIZE];
+
+    this.visibleWellPage.set(nextPage);
+
+    if (firstWell != null) {
+      this.onWellSelect(firstWell.epANum);
+    }
+  }
+
+  private clearLoadingTimer(): void {
+    if (this.loadingTimer !== null) {
+      clearTimeout(this.loadingTimer);
+      this.loadingTimer = null;
+    }
   }
 }

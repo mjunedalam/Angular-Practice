@@ -2,9 +2,9 @@
   <div class="active-wwell-page">
     <div
       class="active-wwell-loading-slot"
-      [class.active-wwell-loading-slot--active]="store.isLoading()"
+      [class.active-wwell-loading-slot--active]="loadingVisible()"
     >
-      <div class="active-wwell-loading-bar"></div>
+      <mat-progress-bar mode="indeterminate" class="active-wwell-loading-bar" />
     </div>
 
     <div class="active-wwell-shell">
@@ -12,7 +12,7 @@
         <div class="well-header well-list">Wells List</div>
 
         <div class="well-chip-list" role="listbox" aria-label="Wells">
-          @for (well of wells(); track well.epANum) {
+          @for (well of visibleWells(); track well.epANum) {
             <button
               type="button"
               role="option"
@@ -27,6 +27,30 @@
             </button>
           }
         </div>
+
+        @if (wells().length > 0) {
+          <div class="well-list-actions">
+            <span class="well-list-count">{{ wellListLabel() }}</span>
+            <div class="well-list-pager">
+              <button
+                type="button"
+                class="well-page-btn"
+                [disabled]="!hasPrevWells()"
+                (click)="onPrevWellsPage()"
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                class="well-page-btn well-page-btn--primary"
+                [disabled]="!hasNextWells()"
+                (click)="onNextWellsPage()"
+              >
+                Next 10
+              </button>
+            </div>
+          </div>
+        }
 
         <div class="active-wwell-sidebar__dept">
           Wellsite &amp; Water Operation Department
