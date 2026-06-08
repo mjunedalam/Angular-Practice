@@ -48,7 +48,7 @@ const AREAS = [
 ] as const;
 
 const ADD_NEW_SENTINEL = '__ADD_NEW__';
-const WELL_PAGE_SIZE = 10;
+const WELL_PAGE_SIZE = 15;
 
 @Component({
   selector: 'app-active-wwell-view',
@@ -103,6 +103,7 @@ export class ActiveWwellViewComponent implements OnInit {
   });
   protected readonly hasPrevWells = computed(() => this.visibleWellPage() > 0);
   protected readonly hasNextWells = computed(() => this.visibleWellPage() < this.totalWellPages() - 1);
+  protected readonly showWellPager = computed(() => this.wells().length > WELL_PAGE_SIZE);
   protected readonly wellListLabel = computed(() => {
     const total = this.wells().length;
     if (total === 0) return '';
