@@ -66,6 +66,10 @@
   }
 }
 
+.aw-db-cell--span-2 {
+  grid-column: span 2;
+}
+
 .aw-db-label {
   font-size: 0.63rem;
   font-weight: 700;
@@ -101,4 +105,6 @@
 
 @media (max-width: 640px) {
   .di-grid { grid-template-columns: 1fr; }
+
+  .aw-db-cell--span-2 { grid-column: auto; }
 }

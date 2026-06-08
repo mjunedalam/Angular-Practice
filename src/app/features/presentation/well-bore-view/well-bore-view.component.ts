@@ -1287,8 +1287,8 @@ export class WellBoreViewComponent {
     const headH = 14;
     const headHW = 9;
     const duration = t_casingsDone - drillStart;
-    const totalPx = scale(data.totalDepth);
-    const currPx = scale(data.currentDepth);
+    const currentDepth = Math.max(0, Math.min(data.currentDepth, data.totalDepth));
+    const currPx = scale(currentDepth);
     const points = data.mudCirculation;
     const circColour = (pct: number): string => {
       const clamped = Math.max(0, Math.min(100, pct));
@@ -1303,12 +1303,11 @@ export class WellBoreViewComponent {
     const clipId = `arrow-clip-${Date.now()}`;
     this.defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
       .attr('x', arrowCx - headHW - 4).attr('y', -4).attr('width', (headHW + 4) * 2).attr('height', 0)
-      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut).attr('height', totalPx + 4);
+      .transition().delay(drillStart).duration(duration).ease(easeCubicInOut).attr('height', currPx + 4);
     const shaftG = arrowG.append('g').attr('clip-path', `url(#${clipId})`);
-    const maxCircDepth = points.length ? Math.max(...points.map(p => p.depth)) : 0;
-    const effectiveDepth = Math.max(data.currentDepth, maxCircDepth);
+    const effectiveDepth = currentDepth;
     const effectivePx = scale(effectiveDepth);
-    const shaftMaxPx = totalPx - headH;
+    const shaftMaxPx = Math.max(0, currPx - headH);
     const cappedEffectivePx = Math.min(effectivePx, shaftMaxPx);
     if (points.length && effectivePx > 0) {
       const gradId = `circ-grad-${Date.now()}`;
@@ -1316,7 +1315,7 @@ export class WellBoreViewComponent {
       const segs: { topPx: number; botPx: number; pct: number; topDepth: number; botDepth: number }[] = [];
       for (let i = 0; i < points.length; i++) {
         const topDepth = i === 0 ? 0 : points[i - 1].depth;
-        const botDepth = points[i].depth;
+        const botDepth = Math.min(points[i].depth, effectiveDepth);
         if (topDepth < botDepth) segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth });
       }
       segs.forEach((seg, idx) => {
@@ -1343,11 +1342,8 @@ export class WellBoreViewComponent {
     } else {
       shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', Math.min(currPx, shaftMaxPx)).attr('fill', 'var(--accent)');
     }
-    if (cappedEffectivePx < shaftMaxPx) {
-      shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', cappedEffectivePx).attr('width', shaftHW * 2).attr('height', shaftMaxPx - cappedEffectivePx).attr('fill', '#1e293b');
-    }
     const headG = shaftG.append('g').attr('class', 'depth-arrow-head-g');
-    headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${totalPx - headH} L${arrowCx},${totalPx} L${arrowCx + headHW},${totalPx - headH} Z`);
+    headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${currPx - headH} L${arrowCx},${currPx} L${arrowCx + headHW},${currPx - headH} Z`);
   }
 
   private drawNotDrilledZone(data: WellboreDiagramData, centerX: number, scale: ReturnType<typeof createDepthScale>, start: number, ohHW: number): void {

@@ -3,92 +3,80 @@
 
   <div class="di-body">
     @if (data(); as data) {
-
       <div class="di-grid">
-
         <div class="di-sep"><span class="di-sep-label">Dates</span></div>
 
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Date</span>
           <span class="aw-db-value">{{ data.date }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Spud date</span>
           <span class="aw-db-value">{{ data.spudDate }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell aw-db-cell--span-2">
           <span class="aw-db-label">Target Date</span>
           <span class="aw-db-value">{{ data.targetDate }}</span>
-        </div>
-        <div class="aw-db-cell ">
-          <span class="aw-db-label">Release Date</span>
-          <span class="aw-db-value">{{ data.releaseDate }}</span>
         </div>
 
         <div class="di-sep"><span class="di-sep-label">Timeline</span></div>
 
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Well TD date</span>
           <span class="aw-db-value">{{ data.wellTdDate }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Days since spud</span>
           <span class="aw-db-value">{{ data.daysSinceSpud }}</span>
         </div>
-        <div class="aw-db-cell ">
-          <span class="aw-db-label">Spud days</span>
-          <span class="aw-db-value">{{ data.spudDays }}</span>
-        </div>
-        <div class="aw-db-cell ">
+
+        <div class="aw-db-cell aw-db-cell--span-2">
           <span class="aw-db-label">Footage FT.</span>
           <span class="aw-db-value">{{ data.footage }}</span>
         </div>
 
         <div class="di-sep"><span class="di-sep-label">Depth</span></div>
 
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell aw-db-cell--span-2">
           <span class="aw-db-label">5 AM depth FT</span>
           <span class="aw-db-value">{{ data.fiveAmDepth }}</span>
         </div>
-        <div class="aw-db-cell ">
-          <span class="aw-db-label">Pre 5 AM depth FT</span>
+        <div class="aw-db-cell aw-db-cell--span-2">
+          <span class="aw-db-label">Prevous depth(ft.)</span>
           <span class="aw-db-value">{{ data.preFiveAmDepth }}</span>
         </div>
-        <div class="aw-db-cell ">
-          <span class="aw-db-label">S AM depth FT</span>
-          <span class="aw-db-value">{{ data.samDepth }}</span>
-        </div>
-        <div class="aw-db-cell ">
-          <span class="aw-db-label">S AM depth FT</span>
-          <span class="aw-db-value">{{ data.secondarySamDepth }}</span>
+
+        <div class="di-sep">
+          <span class="di-sep-label">Casing &amp; Rig</span>
         </div>
 
-        <div class="di-sep"><span class="di-sep-label">Casing &amp; Rig</span></div>
-
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Last casing size</span>
           <span class="aw-db-value">{{ data.lastCasingSize }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Last casing depth</span>
           <span class="aw-db-value">{{ data.lastCasingDepth }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Rig</span>
           <span class="aw-db-value">{{ data.rig }}</span>
         </div>
-        <div class="aw-db-cell ">
+        <div class="aw-db-cell">
           <span class="aw-db-label">Rig Move KPI</span>
           <span class="aw-db-value">
-            <span [ngClass]="{
-              'aw-db-value--positive': rigMoveTone(rigMoveDays()) === 'positive',
-              'aw-db-value--negative': rigMoveTone(rigMoveDays()) === 'negative'
-            }">{{ actualRm() | number: '1.0-2' }}</span>/{{ kpiRm() | number: '1.0-2' }}
+            <span
+              [ngClass]="{
+                'aw-db-value--positive':
+                  rigMoveTone(rigMoveDays()) === 'positive',
+                'aw-db-value--negative':
+                  rigMoveTone(rigMoveDays()) === 'negative',
+              }"
+              >{{ actualRm() | number: "1.0-2" }}</span
+            >/{{ kpiRm() | number: "1.0-2" }}
           </span>
         </div>
-
       </div>
-
     } @else {
       <p class="di-empty">No database information available.</p>
     }
