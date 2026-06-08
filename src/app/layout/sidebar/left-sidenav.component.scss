@@ -241,12 +241,18 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   // ── Footer ─────────────────────────────────────────────────────────────
   &__footer {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 18px 18px;
     border-top: 1px solid $nav-border;
     flex-shrink: 0;
     background: rgba(14, 165, 233, 0.03);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   &__water-logo {
@@ -268,55 +274,106 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     text-transform: uppercase;
   }
 
-  // ── Build info (branch / hash / version / env) ─────────────────────────
-  &__build-info {
+  // ── Build info (terminal-style) ─────────────────────────────────────────
+  &__build-card {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
+    min-width: 0;
+    padding: 10px 13px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    cursor: default;
+  }
+
+  &__build-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     min-width: 0;
   }
 
-  &__build-branch {
-    font-size: 11px;
-    font-weight: 600;
-    color: $nav-text;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  &__build-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    stroke: #38bdf8;
+    opacity: 0.75;
   }
 
-  &__build-row {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10.5px;
-    color: $nav-muted;
+  &__build-ref {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 11.5px;
+    letter-spacing: 0.2px;
+  }
+
+  &__build-branch {
+    font-weight: 700;
+    color: $nav-text;
+  }
+
+  &__build-at {
+    color: $nav-muted;
+    opacity: 0.5;
+    margin: 0 0.5px;
   }
 
   &__build-hash {
-    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
-    letter-spacing: 0.4px;
+    color: #38bdf8;
+    opacity: 0.85;
   }
 
-  &__build-dot {
-    opacity: 0.5;
+  &__build-status {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.7);
+
+    &--prod {
+      background: #fb923c;
+      box-shadow: 0 0 6px rgba(251, 146, 60, 0.7);
+    }
+  }
+
+  &__build-sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 19px;
+    font-size: 10px;
+    font-style: italic;
+    color: $nav-muted;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &__build-version {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__build-dash {
+    opacity: 0.4;
+    font-style: normal;
   }
 
   &__build-env {
-    margin-left: 2px;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.14);
+    color: rgba(56, 189, 248, 0.75);
 
     &--prod {
-      color: #fb923c;
-      background: rgba(251, 146, 60, 0.16);
+      color: rgba(251, 146, 60, 0.85);
     }
   }
 }

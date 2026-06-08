@@ -16,7 +16,14 @@
       "Bash(ng build:*)",
       "Bash(/Users/junedalam/angular-with-ngrx/Angular-Practice/node_modules/.bin/tsc --noEmit)",
       "Bash(tsc --noEmit --project /Users/junedalam/angular-with-ngrx/Angular-Practice/tsconfig.json)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); keys=[k for k in d.keys\\(\\) if 'MUD' in k.upper\\(\\) or 'CIRC' in k.upper\\(\\)]; print\\(keys\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); keys=[k for k in d.keys\\(\\) if 'MUD' in k.upper\\(\\) or 'CIRC' in k.upper\\(\\)]; print\\(keys\\)\")",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"require\\('playwright'\\); console.log\\('ok'\\)\")",
+      "Bash(node aw_screenshot.js)",
+      "Bash(npx playwright *)"
     ]
   }
 }

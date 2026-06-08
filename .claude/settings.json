@@ -10,7 +10,18 @@
       "Bash(grep -rn \"'[A-Z]\\\\{3,8\\\\}'\" /Users/junedalam/angular-with-ngrx/Angular-Practice/src/app/ --include=\"*.ts\")",
       "Bash(git -C /Users/junedalam/angular-with-ngrx/Angular-Practice diff --name-only)",
       "Read(//Users/junedalam/Openshift-Pipeline/frontend/**)",
-      "Bash(node scripts/sync-local-build-info.js)"
+      "Bash(node scripts/sync-local-build-info.js)",
+      "Bash(lsof -nP -iTCP -sTCP:LISTEN)",
+      "Bash(grep -n '$nav-h\\\\|$topbar-h\\\\|height:' /Users/junedalam/angular-with-ngrx/Angular-Practice/src/app/layout/header/top-navbar.component.scss)",
+      "Bash(grep -n '$topbar-h\\\\|height:' /Users/junedalam/angular-with-ngrx/Angular-Practice/src/app/layout/layout.component.scss)",
+      "Bash(lsof -i :4200 -sTCP:LISTEN -t)",
+      "Read(//Users/junedalam/.claude/skills/**)",
+      "Read(//Users/junedalam/.claude/**)",
+      "Bash(osascript -e 'tell application \"Google Chrome\" to activate' -e 'tell application \"Google Chrome\" to open location \"http://localhost:4200/main/active-wwell\"')",
+      "Bash(screencapture -x /tmp/active-wwell-expanded.png)",
+      "Bash(screencapture -x -D 1 /tmp/test1.png)",
+      "Bash(system_profiler SPDisplaysDataType)",
+      "Bash(curl -s http://localhost:4200/main/active-wwell -o /dev/null -w \"HTTP %{http_code}\\\\n\")"
     ],
     "additionalDirectories": [
       "/Users/junedalam/Downloads/code-with-quarkus 3/src/main/java/com/aramco/easd/dailyoperations/resources",

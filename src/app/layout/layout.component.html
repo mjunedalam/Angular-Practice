@@ -19,7 +19,7 @@
     />
 
     <!-- ④ Main content area ─────────────────────────────────── -->
-    <main class="dashboard__content">
+    <main class="dashboard__content" [class.dashboard__content--scroll-locked]="activeRoute() === 'active-wwell'">
       <router-outlet />
     </main>
 

@@ -1,4 +1,4 @@
-$topbar-h: 56px;
+$topbar-h: 62px;
 
 :host {
   display: block;
@@ -35,6 +35,8 @@ $topbar-h: 56px;
     overflow-y: auto;
     background: var(--bg-content);   // ← was hardcoded #0f3460
     position: relative;
+    min-width: 0;
+    min-height: 0;
 
     &::before {
       content: '';
@@ -43,6 +45,10 @@ $topbar-h: 56px;
       width: 400px; height: 400px;
       background: radial-gradient(circle, var(--accent-muted) 0%, transparent 70%);
       pointer-events: none;
+    }
+
+    &--scroll-locked {
+      overflow: hidden;
     }
   }
 }

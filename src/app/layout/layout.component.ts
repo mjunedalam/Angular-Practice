@@ -26,12 +26,13 @@ export class LayoutComponent {
   protected readonly activeRoute      = signal<string>('home');
 
   constructor() {
+    this.activeRoute.set(this.routeSegment(this.router.url));
+
     // Keep active nav item in sync with browser URL
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
-        const segment = e.urlAfterRedirects.split('/').filter(Boolean)[1] ?? 'home';
-        this.activeRoute.set(segment);
+        this.activeRoute.set(this.routeSegment(e.urlAfterRedirects));
       });
 
     // Fire after the first full render cycle — child ngOnInit calls (which register
@@ -47,5 +48,9 @@ export class LayoutComponent {
   protected onNavItemClick(id: string): void {
     this.activeRoute.set(id);
     this.router.navigate(['main', id]);
+  }
+
+  private routeSegment(url: string): string {
+    return url.split('?')[0].split('/').filter(Boolean)[1] ?? 'home';
   }
 }
