@@ -20,7 +20,7 @@ export class CasingInfoComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Casing Type', field: 'csgType' },
     { headerName: 'Casing Size', field: 'csgSize' },
-    { headerName: 'Casing Depth', field: 'csgDepth' }
+    { headerName: 'Casing Bottom Depth', field: 'csgDepth' }
   ];
 
   readonly theme = themeQuartz.withParams({
