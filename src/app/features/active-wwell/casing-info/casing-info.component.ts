@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
 import { ColDef, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -15,7 +15,11 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
 export class CasingInfoComponent {
   private readonly store = inject(ActiveWwellStore);
 
-  protected readonly data = this.store.allCasingData;
+  protected readonly data = computed(() =>
+    [...(this.store.allCasingData() ?? [])].sort(
+      (left, right) => Number(left.csgDepth ?? 0) - Number(right.csgDepth ?? 0),
+    ),
+  );
 
   columnDefs: ColDef[] = [
     { headerName: 'Casing Type', field: 'csgType' },
