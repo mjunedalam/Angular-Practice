@@ -28,6 +28,7 @@ import { formatDateForInput } from 'src/app/shared/utils/date.util';
 
 export const PAGE_SIZE = 5;
 export const FALLBACK_STR = 'N/A';
+const DISPLAY_DEPTH_PADDING_FT = 500;
 
 function coercePositiveEpANum(value: number | string | null | undefined): number | null {
     const numericValue = typeof value === 'string' ? Number.parseInt(value, 10) : value ?? null;
@@ -75,6 +76,18 @@ export function selectWellEpANum(d: IWellData | null | undefined): number | null
 
 export function selectTotalDepth(d: IWellData | null): number {
     return d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
+}
+
+export function selectDisplayDepth(d: IWellData | null): number {
+    const totalDepth = selectTotalDepth(d);
+    const plannedDepths = (d?.EXAD_GWD_IR_TOPS ?? [])
+        .map(top => safeNum(top.planTvdDepth))
+        .filter((depth): depth is number => depth !== null && depth > 0);
+    const actualDepths = (d?.DRLG_FM_TOPS ?? [])
+        .map(top => safeNum(top.wStDmrkDpth))
+        .filter((depth): depth is number => depth !== null && depth > 0);
+
+    return Math.max(totalDepth, ...plannedDepths, ...actualDepths) + DISPLAY_DEPTH_PADDING_FT;
 }
 
 export function selectStatus(d: IWellData | null): string {
@@ -127,6 +140,7 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
     return {
         wellName: d.WELL_MASTER?.[0]?.well ?? '',
         totalDepth: d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0,
+        displayDepth: selectDisplayDepth(d),
         casings: sortCasingsByDepthDesc(d.EXAD_GWD_IR_CASING ?? []),
         drlgCasings: [...(d.DRLG_CSG ?? [])].sort((a, b) => b.wCsgBotDpth - a.wCsgBotDpth),
         geologicTops: [...(d.EXAD_GWD_IR_TOPS ?? [])].sort((a, b) => a.planTvdDepth - b.planTvdDepth),
@@ -154,7 +168,7 @@ export function selectMiscWellData(d: IWellData | null): MiscWellData | null {
         daysSinceSpud: status?.spuddays ?? 0,
         targetDays: d.NEW_TARGET_DAYS?.[0]?.targetDays ?? rig?.wDrlgTrgtDay ?? 0,
         biNum: rig?.biNum ?? FALLBACK_STR,
-        supportingWell: rig?.waterWell ?? FALLBACK_STR,
+        supportings: d.EXAD_RCD_PREWAP?.[0]?.supportedBusiness ?? FALLBACK_STR,
         feetDrilledToday: d.DRLG_FD_TDAY?.[0]?.footage ?? status?.footage ?? 0,
         previousWell: FALLBACK_STR,
         currentDepth: status?.wPrsntDpth ?? 0,
@@ -470,7 +484,7 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const opSmry = d.DRLG_OP_SMRY?.[0];
     const tops = d.DRLG_FM_TOPS ?? [];
-    const lastTop = tops[tops.length - 1];
+const lastTop = tops[tops.length - 1];
 
     return {
         epANum: String(status?.epANum ?? ''),

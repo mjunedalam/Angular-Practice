@@ -103,7 +103,8 @@ export class WellBoreViewComponent {
     this.rootG.style('opacity', 1);
 
     const { drawingHeight, geoLineX, casingCenterX } = this.layout;
-    const scale = createDepthScale(data.totalDepth, drawingHeight);
+    const displayDepth = Math.max(data.totalDepth, data.displayDepth);
+    const scale = createDepthScale(displayDepth, drawingHeight);
     const targetAquifer = data.hydrogeology?.estTargetAquifier ?? null;
 
     // ── Build a strict sequential timeline ─────────────────────────────────
@@ -213,7 +214,7 @@ export class WellBoreViewComponent {
       rootG: this.rootG,
       totalDepth: data.totalDepth,
       centerX: casingCenterX,
-      drawingHeight,
+      yPx: scale(data.totalDepth),
       start: t_tdLabelStart,
       animation: resolveAnimation(this.animConfig()),
     });

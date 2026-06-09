@@ -29,6 +29,7 @@ import {
     selectCasingInfoViewModel,
     selectDatabaseInfoViewModel,
     selectDiagramData,
+    selectDisplayDepth,
     selectFormationInfoViewModel,
     selectHasNextPage,
     selectHasPrevPage,
@@ -98,6 +99,7 @@ export const PresentationStore = signalStore(
                 selectWwellTestViewModel(wellData()),
             ),
             totalDepth: computed((): number => selectTotalDepth(wellData())),
+            displayDepth: computed((): number => selectDisplayDepth(wellData())),
             allFormationTops: computed((): FormationInfoViewModel[] => selectAllFormationTops(wellData())),
         };
     }),

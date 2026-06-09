@@ -24,9 +24,10 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
   height: 100%;
   background: var(--bg-sidenav);
   border-right: 1px solid $nav-border;
-  overflow: hidden;
+  overflow: visible;
   transition: width $transition;
   position: relative;
+  z-index: 30;
 
   // Subtle right-edge glow
   &::after {
@@ -247,21 +248,36 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
     border-top: 1px solid $nav-border;
     flex-shrink: 0;
     background: rgba(14, 165, 233, 0.03);
+    overflow: visible;
   }
 
   &__brand {
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+    overflow: visible;
   }
 
   &__water-logo {
+    position: relative;
     width: 28px;
     height: 34px;
     flex-shrink: 0;
     filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.6));
+    outline: none;
+    z-index: 60;
 
     svg { width: 100%; height: 100%; }
+
+    &:hover,
+    &:focus-visible {
+      .sidenav__build-popover {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+        pointer-events: auto;
+      }
+    }
   }
 
   &__footer-text {
@@ -374,6 +390,83 @@ $nav-hover-bg: rgba(14, 165, 233, 0.10);
 
     &--prod {
       color: rgba(251, 146, 60, 0.85);
+    }
+  }
+
+  &__build-popover {
+    position: absolute;
+    left: calc(100% + 16px);
+    bottom: -2px;
+    z-index: 50;
+    width: 190px;
+    padding: 9px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 11px;
+    background:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98)),
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 42%);
+    box-shadow:
+      0 18px 38px rgba(2, 6, 23, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    filter: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-6px, 0) scale(0.97);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      bottom: 12px;
+      width: 10px;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.98);
+      border-left: 1px solid rgba(148, 163, 184, 0.22);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+      transform: rotate(45deg);
+    }
+  }
+
+  &__build-popover-title {
+    margin-bottom: 7px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    color: #7dd3fc;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  &__build-popover-row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+    padding: 2px 0;
+    font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+
+    span {
+      color: rgba(203, 213, 225, 0.62);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    strong {
+      min-width: 0;
+      overflow: hidden;
+      color: rgba(255, 255, 255, 0.94);
+      font-size: 10.5px;
+      font-weight: 800;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }

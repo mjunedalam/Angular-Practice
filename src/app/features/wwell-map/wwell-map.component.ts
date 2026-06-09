@@ -60,6 +60,9 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private placedBubbles: { x: number; y: number; radius: number }[] = [];
   private bootTaskRegistered = false;
   private mapRetryTimeoutId?: ReturnType<typeof setTimeout>;
+  private defaultSnapshotTimeoutId?: ReturnType<typeof setTimeout>;
+  private defaultMapSnapshotBase64: string | null = null;
+  private defaultSnapshotInFlight: Promise<string | undefined> | null = null;
   private intersectionObserver?: IntersectionObserver;
   private isDestroyed = false;
 
@@ -107,6 +110,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.isDestroyed = true;
     clearTimeout(this.mapRetryTimeoutId);
+    this.clearDefaultSnapshotTimer();
     this.intersectionObserver?.disconnect();
     this.stationaryWatchHandle?.remove();
     this.mapView?.destroy();
@@ -148,6 +152,9 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private async initMap(): Promise<void> {
     this.mapView?.destroy();
     this.mapView = undefined;
+    this.defaultMapSnapshotBase64 = null;
+    this.defaultSnapshotInFlight = null;
+    this.clearDefaultSnapshotTimer();
     this.mapReady.set(false);
     this.bubbleLayerReady.set(null);
 
@@ -195,6 +202,8 @@ export class WwellmapComponent implements OnInit, OnDestroy {
         if (isStationary && this.bubbleLayer) this.layoutBubbles(this.bubbleLayer);
       },
     );
+
+    this.scheduleDefaultMapSnapshot();
   }
 
   private buildWWellSignal(data: IWellData[]): void {
@@ -214,7 +223,9 @@ export class WwellmapComponent implements OnInit, OnDestroy {
         label: rig?.biNum ?? 'N/A',
       }];
     });
+    this.defaultMapSnapshotBase64 = null;
     this.wwells.set(wells);
+    this.scheduleDefaultMapSnapshot();
   }
 
   private async drawWWellIcons(layer: GraphicsLayer): Promise<void> {
@@ -229,6 +240,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
         attributes: { wwellId: wwell.wwellId, location: wwell.location },
       }));
     }
+    this.scheduleDefaultMapSnapshot();
   }
 
   private geoDegreesPerPixel(view: __esri.MapView): { x: number; y: number } {
@@ -333,6 +345,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       graphics.push(wwellIdLabel, locationLabel);
     }
     layer.addMany(graphics);
+    this.scheduleDefaultMapSnapshot();
   }
 
   private async waitForMapRender(): Promise<void> {
@@ -355,6 +368,86 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     if (!this.mapView) return;
     await this.waitForMapRender();
     return this.getScreenshotBase64();
+  }
+
+  async captureDefaultMapAsBase64(): Promise<string | undefined> {
+    if (this.defaultMapSnapshotBase64) {
+      return this.defaultMapSnapshotBase64;
+    }
+
+    if (this.defaultSnapshotInFlight) {
+      return this.defaultSnapshotInFlight;
+    }
+
+    this.defaultSnapshotInFlight = this.captureDefaultMapSnapshot();
+
+    try {
+      this.defaultMapSnapshotBase64 = await this.defaultSnapshotInFlight ?? null;
+      return this.defaultMapSnapshotBase64 ?? undefined;
+    } finally {
+      this.defaultSnapshotInFlight = null;
+    }
+  }
+
+  private scheduleDefaultMapSnapshot(): void {
+    if (
+      this.isDestroyed ||
+      !this.mapReady() ||
+      !this.mapView ||
+      !this.wwellLayer ||
+      !this.bubbleLayer ||
+      this.defaultMapSnapshotBase64 ||
+      this.defaultSnapshotInFlight
+    ) {
+      return;
+    }
+
+    this.clearDefaultSnapshotTimer();
+    this.defaultSnapshotTimeoutId = setTimeout(() => {
+      void this.captureDefaultMapAsBase64().catch(error => {
+        console.warn('[WwellMap] Default map snapshot failed', error);
+      });
+    }, 500);
+  }
+
+  private clearDefaultSnapshotTimer(): void {
+    if (this.defaultSnapshotTimeoutId === undefined) return;
+    clearTimeout(this.defaultSnapshotTimeoutId);
+    this.defaultSnapshotTimeoutId = undefined;
+  }
+
+  private async captureDefaultMapSnapshot(): Promise<string | undefined> {
+    if (!this.mapView) return;
+
+    this.clearDefaultSnapshotTimer();
+    const previousViewpoint = this.mapView.viewpoint?.clone() ?? null;
+
+    await this.goToDefaultView(false);
+    await this.waitForMapRender();
+
+    if (this.bubbleLayer) {
+      this.layoutBubbles(this.bubbleLayer);
+      await this.waitForMapRender();
+    }
+
+    const base64 = await this.getScreenshotBase64();
+
+    if (!this.isDestroyed && previousViewpoint && this.mapView) {
+      await this.mapView.goTo(previousViewpoint, { animate: false });
+      await this.waitForMapRender();
+      if (this.bubbleLayer) this.layoutBubbles(this.bubbleLayer);
+    }
+
+    return base64;
+  }
+
+  private async goToDefaultView(animate: boolean): Promise<void> {
+    if (!this.mapView) return;
+
+    await this.mapView.goTo(
+      { center: MAP_CONFIG.center, zoom: this.INITIAL_ZOOM },
+      { animate },
+    );
   }
 
   private async getScreenshotBase64(): Promise<string> {

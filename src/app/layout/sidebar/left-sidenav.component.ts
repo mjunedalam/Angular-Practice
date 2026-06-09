@@ -35,8 +35,6 @@ export class LeftSidenavComponent {
 
   protected readonly buildInfo = this.buildInfoService.info;
   protected readonly shortHash = this.buildInfoService.shortHash;
-  protected readonly buildInfoTooltip =
-    `${this.buildInfo.branch} · ${this.shortHash} · v${this.buildInfo.version} · ${this.buildInfo.env}`;
 
   readonly collapsed    = input<boolean>(false);
   readonly activeRoute  = input<string>('home');

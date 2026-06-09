@@ -13,6 +13,7 @@ export interface MudCircPoint {
 export interface WellboreDiagramData {
   readonly wellName: string;
   readonly totalDepth: number;
+  readonly displayDepth: number;
   readonly casings: ICasingIR[];
   readonly drlgCasings: IDrlgCsg[];
   readonly geologicTops: ITopsIR[];

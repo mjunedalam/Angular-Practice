@@ -8,12 +8,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { select } from 'd3-selection';
-import { easeLinear } from 'd3-ease';
+import { easeBackOut, easeCubicOut } from 'd3-ease';
 import 'd3-transition';
 
 import { PresentationStore } from '../store/presentation.store';
 import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
-import { buildDepthTicks, createDepthScale, formatDepth, pickTickInterval } from 'src/app/shared/utils/wellbore-math.util';
+import { buildDepthTicks, createDepthScale, pickTickInterval } from 'src/app/shared/utils/wellbore-math.util';
 
 @Component({
   selector: 'app-depth-scale',
@@ -68,12 +68,19 @@ export class DepthScaleComponent {
     g.append('text')
       .attr('class', 'axis-title')
       .attr('x', titleX)
-      .attr('y', -36)
+      .attr('y', -42)
       .attr('text-anchor', 'middle')
+      .style('opacity', 0)
       .call((t) => {
         t.append('tspan').attr('x', titleX).attr('dy', 0).text('Depth');
         t.append('tspan').attr('x', titleX).attr('dy', 14).text('(ft bgl)');
-      });
+      })
+      .transition()
+      .delay(80)
+      .duration(360)
+      .ease(easeCubicOut)
+      .attr('y', -36)
+      .style('opacity', 1);
 
     const scaleTipY = scale(totalDepth); // === drawingHeight
     const lineLen = scaleTipY;
@@ -86,7 +93,7 @@ export class DepthScaleComponent {
       .attr('stroke-dashoffset', lineLen)
       .transition()
       .duration(ANIM.SCALE_DURATION)
-      .ease(easeLinear)
+      .ease(easeCubicOut)
       .attr('stroke-dashoffset', 0);
 
     ticks.forEach((depth: number) => {
@@ -95,24 +102,38 @@ export class DepthScaleComponent {
 
       const tick = g.append('g')
         .attr('class', 'tick')
-        .attr('transform', `translate(0,${yPx})`)
-        .style('opacity', 0);
+        .attr('transform', `translate(0,${yPx - 4})`)
+        .style('opacity', 0.01);
 
       tick.append('line')
         .attr('class', 'tick-line')
-        .attr('x1', tickLeftX).attr('x2', tickRightX)
-        .attr('y1', 0).attr('y2', 0);
+        .attr('x1', depthAxisX).attr('x2', depthAxisX)
+        .attr('y1', 0).attr('y2', 0)
+        .transition()
+        .delay(delay)
+        .duration(280)
+        .ease(easeBackOut.overshoot(1.4))
+        .attr('x1', tickLeftX).attr('x2', tickRightX);
 
       tick.append('text')
         .attr('class', 'tick-label')
-        .attr('x', tickLabelX)
+        .attr('x', tickLabelX + 8)
         .attr('y', 0)
         .attr('dominant-baseline', 'middle')
-        .text(depth === 0 ? '0' : depth.toLocaleString());
+        .style('opacity', 0)
+        .text(depth === 0 ? '0' : depth.toLocaleString())
+        .transition()
+        .delay(delay + 110)
+        .duration(260)
+        .ease(easeCubicOut)
+        .attr('x', tickLabelX)
+        .style('opacity', 1);
 
       tick.transition()
         .delay(delay)
-        .duration(200)
+        .duration(240)
+        .ease(easeCubicOut)
+        .attr('transform', `translate(0,${yPx})`)
         .style('opacity', 1);
     });
 

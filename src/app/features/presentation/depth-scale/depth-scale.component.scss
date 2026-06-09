@@ -31,6 +31,10 @@
   .tick-label {
     font-size: 10px; font-weight: 900;
     fill: #000; text-anchor: end;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 2px;
+    stroke-linejoin: round;
   }
   .total-depth-label {
     font-size: 11px; font-weight: 900;

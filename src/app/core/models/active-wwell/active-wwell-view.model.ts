@@ -6,7 +6,7 @@ export interface MiscWellData {
   readonly daysSinceSpud: number;
   readonly targetDays: number;
   readonly biNum: string;
-  readonly supportingWell: string;
+  readonly supportings: string;
   readonly feetDrilledToday: number;
   readonly previousWell: string;
   readonly currentDepth: number;

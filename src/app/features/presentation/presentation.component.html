@@ -50,7 +50,7 @@
         <div class="diagram-card" [class.diagram-card--loading]="loadingVisible()">
 
           <div class="diagram-scroll-area">
-            <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+            <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
             <app-well-bore-view
               [diagramData]="store.diagramData()"
               [animTrigger]="store.animationTrigger()"
@@ -104,11 +104,12 @@
         </div>
       } @else {
         <div class="modal-diagram" [class.modal-diagram--loading]="loadingVisible()">
-          <app-depth-scale [totalDepth]="store.totalDepth()" [animTrigger]="store.animationTrigger()" />
+          <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
           <app-well-bore-view
             [diagramData]="store.diagramData()"
             [animTrigger]="store.animationTrigger()"
-            [animConfig]="store.animConfig()" />
+            [animConfig]="store.animConfig()"
+            [formationTops]="store.allFormationTops()" />
         </div>
         <app-wwells-logs-indicators />
       }

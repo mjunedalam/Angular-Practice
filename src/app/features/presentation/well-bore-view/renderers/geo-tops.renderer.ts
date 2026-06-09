@@ -1,5 +1,6 @@
 import { Selection } from 'd3-selection';
 import { ScaleLinear } from 'd3-scale';
+import { easeBackOut, easeCubicOut } from 'd3-ease';
 import 'd3-transition';
 
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
@@ -8,6 +9,9 @@ import { ITopsIR } from '@shared/models/wwell/tops-ir.model';
 
 type GSel = Selection<SVGGElement, unknown, null, undefined>;
 type DepthScale = ScaleLinear<number, number>;
+type LineSel = Selection<SVGLineElement, unknown, null, undefined>;
+type RectSel = Selection<SVGRectElement, unknown, null, undefined>;
+type TextSel = Selection<SVGTextElement, unknown, null, undefined>;
 
 export interface RenderGeoTopsOptions {
   readonly rootG: GSel;
@@ -207,39 +211,39 @@ export function renderGeoTops({
       .style('opacity', 0);
 
     if (isTarget) {
-      g.append('rect')
+      const band = g.append('rect')
         .attr('class', 'geo-target-band')
-        .attr('x', geoLineX - 75)
-        .attr('width', 150)
+        .attr('x', geoLineX)
+        .attr('width', 0)
         .attr('height', 25)
         .attr('y', -14)
-        .attr('rx', 3);
+        .attr('rx', 3) as RectSel;
+
+      animateGeoBand(band, geoLineX, ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER);
     }
 
-    g.append('line')
+    const tick = g.append('line')
       .attr('class', 'geo-tick')
-      .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
-      .attr('y1', 0).attr('y2', 0);
+      .attr('x1', geoLineX).attr('x2', geoLineX)
+      .attr('y1', 0).attr('y2', 0) as LineSel;
 
-    g.append('text')
+    const depthText = g.append('text')
       .attr('class', 'geo-depth')
-      .attr('x', geoLineX - 17)
+      .attr('x', geoLineX - 7)
       .attr('dy', '0.35em')
-      .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString());
+      .style('opacity', 0)
+      .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString()) as TextSel;
 
-    g.append('text')
+    const codeText = g.append('text')
       .attr('class', hasActual ? 'geo-code geo-code--actual' : 'geo-code')
-      .attr('x', geoLineX + 18)
+      .attr('x', geoLineX + 7)
       .attr('dy', '0.35em')
+      .style('opacity', 0)
       .style('pointer-events', 'none')
-      .text(top.stLongCd);
+      .text(top.stLongCd) as TextSel;
 
     addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual);
-
-    g.transition()
-      .delay(ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER)
-      .duration(220)
-      .style('opacity', 1);
+    animateGeoRow(g, tick, depthText, codeText, geoLineX, ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER);
   });
 
   const drlgOnlyTops = formationTops.filter(f => f.isDrlgOnly);
@@ -253,36 +257,86 @@ export function renderGeoTops({
       .attr('transform', `translate(0,${yPx})`)
       .style('opacity', 0);
 
-    g.append('line')
+    const tick = g.append('line')
       .attr('class', 'geo-tick')
-      .attr('x1', geoLineX - 14).attr('x2', geoLineX + 14)
+      .attr('x1', geoLineX).attr('x2', geoLineX)
       .attr('y1', 0).attr('y2', 0)
-      .attr('stroke', '#22c55e');
+      .attr('stroke', '#22c55e') as LineSel;
 
-    g.append('text')
+    const depthText = g.append('text')
       .attr('class', 'geo-depth')
-      .attr('x', geoLineX - 17)
+      .attr('x', geoLineX - 7)
       .attr('dy', '0.35em')
-      .text(actualDepth.toLocaleString());
+      .style('opacity', 0)
+      .text(actualDepth.toLocaleString()) as TextSel;
 
-    g.append('text')
+    const codeText = g.append('text')
       .attr('class', 'geo-code geo-code--actual')
-      .attr('x', geoLineX + 18)
+      .attr('x', geoLineX + 7)
       .attr('dy', '0.35em')
       .attr('fill', '#22c55e')
+      .style('opacity', 0)
       .style('pointer-events', 'none')
-      .text(top.formation);
+      .text(top.formation) as TextSel;
 
     addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true);
-
-    g.transition()
-      .delay(ANIM.GEO_DELAY + (sorted.length + idx) * ANIM.GEO_STAGGER)
-      .duration(220)
-      .style('opacity', 1);
+    animateGeoRow(
+      g,
+      tick,
+      depthText,
+      codeText,
+      geoLineX,
+      ANIM.GEO_DELAY + (sorted.length + idx) * ANIM.GEO_STAGGER,
+    );
   });
 
   hoverLayer.raise();
   tooltipLayer.raise();
+}
+
+function animateGeoBand(band: RectSel, geoLineX: number, delay: number): void {
+  band.transition()
+    .delay(delay)
+    .duration(360)
+    .ease(easeCubicOut)
+    .attr('x', geoLineX - 75)
+    .attr('width', 150);
+}
+
+function animateGeoRow(
+  group: GSel,
+  tick: LineSel,
+  depthText: TextSel,
+  codeText: TextSel,
+  geoLineX: number,
+  delay: number,
+): void {
+  group.transition()
+    .delay(delay)
+    .duration(220)
+    .ease(easeCubicOut)
+    .style('opacity', 1);
+
+  tick.transition()
+    .delay(delay)
+    .duration(300)
+    .ease(easeBackOut.overshoot(1.35))
+    .attr('x1', geoLineX - 14)
+    .attr('x2', geoLineX + 14);
+
+  depthText.transition()
+    .delay(delay + 120)
+    .duration(280)
+    .ease(easeCubicOut)
+    .attr('x', geoLineX - 17)
+    .style('opacity', 1);
+
+  codeText.transition()
+    .delay(delay + 160)
+    .duration(300)
+    .ease(easeCubicOut)
+    .attr('x', geoLineX + 18)
+    .style('opacity', 1);
 }
 
 function wrapGeoRemark(value: string, maxLineLength: number, maxLines: number): string[] {

@@ -7,7 +7,7 @@ export interface RenderTotalDepthLabelOptions {
   readonly rootG: GSel;
   readonly totalDepth: number;
   readonly centerX: number;
-  readonly drawingHeight: number;
+  readonly yPx: number;
   readonly start: number;
   readonly animation: ResolvedAnimation;
 }
@@ -25,11 +25,11 @@ export function renderTotalDepthLabel({
   rootG,
   totalDepth,
   centerX,
-  drawingHeight,
+  yPx,
   start,
   animation,
 }: RenderTotalDepthLabelOptions): void {
-  const ty = drawingHeight + 35;
+  const ty = yPx + 35;
   const g = rootG.append('g').attr('class', 'td-label');
   g.append('text')
     .attr('class', 'total-depth-main')

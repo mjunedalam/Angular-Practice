@@ -233,7 +233,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       }
 
       const morningReport = this.morningReport();
-      const mapData = await this.wwellMap.captureMapAsBase64();
+      const mapData = await this.wwellMap.captureDefaultMapAsBase64();
       const waterWelltestResults = this.waterWelltestResult();
       const emailRequest = this.emailService.buildEmailRequest(
         morningReport,
