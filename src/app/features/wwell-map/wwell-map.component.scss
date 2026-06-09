@@ -129,14 +129,10 @@
 }
 
 .wwell-map-legend {
-  position: absolute;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 2;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 0.45rem;
-  background: transparent;
+  padding: 0.6rem 0 0.25rem;
 }
 
 .wwell-map-legend__chip {
