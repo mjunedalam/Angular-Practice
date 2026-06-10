@@ -23,7 +23,9 @@
       "Bash(npm install *)",
       "Bash(node -e \"require\\('playwright'\\); console.log\\('ok'\\)\")",
       "Bash(node aw_screenshot.js)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(curl -fsSL https://openclaw.ai/install.sh)",
+      "Bash(bash)"
     ]
   }
 }

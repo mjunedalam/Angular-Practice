@@ -14,6 +14,7 @@ interface QuickListItem {
   route: string;
   routeId?: string;
   iconPaths: string[];
+  iconImage?: string;
   color: string;
 }
 
@@ -36,7 +37,8 @@ export class HomeComponent {
       route: 'morning-report',
       routeId: 'morning-report',
       iconPaths: [
-        'M9 17v-2m3 2v-4m3 4v-6M5 20h14a2 2 0 002-2V8l-5-5H5a2 2 0 00-2 2v13a2 2 0 002 2z',
+        'M5 4h14a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3z',
+        'M2 7l10 7 10-7',
       ],
       color: '#3b82f6',
     },
@@ -48,6 +50,7 @@ export class HomeComponent {
         'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',
         'M12 11.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z',
       ],
+      iconImage: 'assets/images/oil-rig-icon.png',
       color: '#06b6d4',
     },
     {

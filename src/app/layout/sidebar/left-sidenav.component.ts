@@ -15,6 +15,7 @@ export interface NavItem {
   id: string;
   label: string;
   icon: string;
+  iconImage?: string;
   routeId?: string;
   badge?: string | number;
   active?: boolean;
@@ -51,13 +52,14 @@ export class LeftSidenavComponent {
       id: 'morning-report',
       label: 'Reports',
       routeId: 'morning-report',
-      icon: 'M9 17v-2m3 2v-4m3 4v-6M5 20h14a2 2 0 002-2V8l-5-5H5a2 2 0 00-2 2v13a2 2 0 002 2z',
+      icon: 'M5 4h14a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3zM2 7l10 7 10-7',
     },
     {
       id: 'active-wwell',
       label: 'Active Water Well',
       routeId: 'active-wwell',
       icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+      iconImage: 'assets/images/oil-rig-icon.png',
     },
     {
       id: 'presentations',

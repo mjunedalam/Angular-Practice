@@ -15,16 +15,24 @@
         >
           <!-- Icon -->
           <span class="sidenav__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              @for (pathD of item.icon.split(' M '); track $index) {
-                @if ($index === 0) {
-                  <path [attr.d]="pathD" />
-                } @else {
-                  <path [attr.d]="'M ' + pathD" />
+            @if (item.iconImage) {
+              <span
+                class="sidenav__icon-img"
+                [style.-webkit-mask-image]="'url(' + item.iconImage + ')'"
+                [style.mask-image]="'url(' + item.iconImage + ')'"
+              ></span>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                @for (pathD of item.icon.split(' M '); track $index) {
+                  @if ($index === 0) {
+                    <path [attr.d]="pathD" />
+                  } @else {
+                    <path [attr.d]="'M ' + pathD" />
+                  }
                 }
-              }
-            </svg>
+              </svg>
+            }
           </span>
 
           <!-- Label (hidden when collapsed) -->

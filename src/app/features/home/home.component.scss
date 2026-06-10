@@ -84,6 +84,13 @@
       width: 22px;
       height: 22px;
     }
+
+    &-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
   }
 
   &:hover &__icon {
