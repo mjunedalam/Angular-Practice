@@ -43,7 +43,7 @@ export class HomeComponent {
       color: '#3b82f6',
     },
     {
-      label: 'Active Water Well Map',
+      label: 'Active Water Well',
       route: 'active-wwell',
       routeId: 'active-wwell',
       iconPaths: [

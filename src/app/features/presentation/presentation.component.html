@@ -1,8 +1,10 @@
-<div class="presentation">
+<div class="presentation" [class.presentation--fullscreen]="isFullscreen()">
 
   <!-- ── Chip bar ────────────────────────────────────────────────────────────── -->
   <div class="presentation__toolbar">
-    <app-well-name-chips class="toolbar__chips" />
+    <app-well-name-chips class="toolbar__chips"
+      [isFullscreen]="isFullscreen()"
+      (toggleFullscreen)="toggleFullscreen()" />
   </div>
 
   @if (store.error()) {

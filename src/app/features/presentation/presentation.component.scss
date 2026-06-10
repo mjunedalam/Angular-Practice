@@ -16,12 +16,24 @@
   overflow: hidden;
   gap: 2px;
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(230, 236, 241, 0.86) 100%);
+
+  // In-app focus mode — covers the entire viewport, hiding the app's
+  // sidebar/header. Combined with the native Fullscreen API on :host.
+  &--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    height: 100vh;
+    padding: 10px;
+    background: linear-gradient(180deg, #eef2f5 0%, #e7edf2 100%);
+  }
 }
 
 // ── Toolbar row ────────────────────────────────────────────────────────────────
 .presentation__toolbar {
   display: flex;
   align-items: center;
+  gap: 10px;
   flex-shrink: 0;
 
   .toolbar__chips {

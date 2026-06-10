@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, input, output, Signal, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -22,6 +22,9 @@ export class WellNameChipsComponent {
   private readonly notify = inject(NotificationService);
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected readonly loaderVisible = signal(false);
+
+  readonly isFullscreen = input(false);
+  readonly toggleFullscreen = output<void>();
 
   private loaderTimer: ReturnType<typeof setTimeout> | null = null;
   private loaderShownAt = 0;

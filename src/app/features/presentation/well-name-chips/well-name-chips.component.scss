@@ -148,6 +148,44 @@
   }
 }
 
+// ── Fullscreen toggle — right side ───────────────────────────────────────────
+.fullscreen-toggle-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  justify-self: end;
+  grid-column: 3;
+}
+
+.fullscreen-toggle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-muted);
+    transform: scale(1.05);
+  }
+}
+
 @media (max-width: 1100px) {
   .well-chips-container {
     grid-template-columns: 1fr;
@@ -155,7 +193,8 @@
   }
 
   .date-picker-section,
-  .chip-strip {
+  .chip-strip,
+  .fullscreen-toggle-section {
     grid-column: auto;
     justify-self: center;
   }

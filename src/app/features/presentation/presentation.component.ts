@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { skip } from 'rxjs';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -49,11 +49,13 @@ export class PresentationComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private dialogRef?: MatDialogRef<unknown>;
 
   /** false = fixed three-column (default), true = free draggable modal */
   protected readonly draggableMode = signal(false);
   protected readonly loadingVisible = signal(false);
+  protected readonly isFullscreen = signal(false);
 
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
@@ -133,6 +135,30 @@ export class PresentationComponent implements OnInit {
 
   protected closeDraggableDialog(): void {
     this.dialogRef?.close();
+  }
+
+  protected async toggleFullscreen(): Promise<void> {
+    if (this.isFullscreen()) {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      this.isFullscreen.set(false);
+      return;
+    }
+
+    try {
+      await this.elementRef.nativeElement.requestFullscreen();
+    } catch {
+      // Browser fullscreen unavailable — fall back to in-app overlay only.
+    }
+    this.isFullscreen.set(true);
+  }
+
+  @HostListener('document:fullscreenchange')
+  protected onFullscreenChange(): void {
+    if (!document.fullscreenElement) {
+      this.isFullscreen.set(false);
+    }
   }
 
   protected onLeftDrag(delta: number): void {

@@ -342,7 +342,7 @@ export function selectFormationInfoViewModel(d: IWellData | null): FormationInfo
         prognosed: plannedDepth ?? FALLBACK_STR,
         actualDepth: actualDepth ?? FALLBACK_STR,
         difference: actualDepth !== null && plannedDepth !== null ? actualDepth - plannedDepth : FALLBACK_STR,
-        remarks: latest?.wStDmrkRmk ?? FALLBACK_STR,
+        remarks: latest?.wStDmrkRmk ?? '',
         isDrlgOnly: false,
     };
 }
@@ -371,7 +371,7 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
             prognosed: validPlanned ?? '',
             actualDepth: actualDepth ?? '',
             difference: actualDepth !== null && validPlanned !== null ? actualDepth - validPlanned : '',
-            remarks: actual?.wStDmrkRmk ?? FALLBACK_STR,
+            remarks: actual?.wStDmrkRmk ?? '',
             isDrlgOnly: false,
         };
     });
@@ -386,7 +386,7 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
                 prognosed: '',
                 actualDepth: actualDepth ?? '',
                 difference: '',
-                remarks: fm.wStDmrkRmk ?? FALLBACK_STR,
+                remarks: fm.wStDmrkRmk ?? '',
                 isDrlgOnly: true,
             };
         });

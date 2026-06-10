@@ -183,7 +183,7 @@ export function renderGeoTops({
     hasActual: boolean,
     isTarget: boolean,
   ): void => {
-    const tooltipRemark = remark?.trim() || 'No remarks available';
+    const tooltipRemark = remark?.trim() ?? '';
 
     hoverLayer.append('rect')
       .attr('class', 'geo-hover-row')
@@ -367,5 +367,5 @@ function wrapGeoRemark(value: string, maxLineLength: number, maxLines: number): 
     lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\.+$/, '')}...`;
   }
 
-  return lines.length ? lines : ['No remarks available'];
+  return lines;
 }
