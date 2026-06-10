@@ -42,6 +42,15 @@ import { ExternalConfigService } from '@shared/services/external-config.service'
 
 const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 
+// Mirrors `.wwell-map-legend__chip--*` colors in wwell-map.component.scss
+// so the email's baked-in legend matches the legend shown outside the map.
+const LEGEND_CHIP_COLORS: Record<string, string> = {
+  '3300': '#84cc16',
+  '58': '#c084fc',
+  '1514': '#f87171',
+  '60': '#60a5fa',
+};
+
 @Component({
   selector: 'app-wwellmap',
   standalone: true,
@@ -460,40 +469,57 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
 
     const scale = Math.min(1, MAX_WIDTH / img.width);
+    const mapWidth = img.width * scale;
+    const mapHeight = img.height * scale;
+
+    const { chipH } = this.getLegendMetrics(mapWidth);
+    const legendBarPadding = Math.round(chipH * 0.6);
+    const legendBarHeight = chipH + legendBarPadding * 2;
+
     const canvas = document.createElement('canvas');
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
+    canvas.width = mapWidth;
+    canvas.height = mapHeight + legendBarHeight;
     const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    this.drawLegendChips(ctx, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, mapWidth, mapHeight);
+
+    // Legend bar lives below the map screenshot, mirroring the
+    // `.wwell-map-legend` row that sits outside `.wwell-map-frame` in the UI.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, mapHeight, canvas.width, legendBarHeight);
+    this.drawLegendChips(ctx, canvas.width, mapHeight, legendBarHeight);
     await new Promise((r) => setTimeout(r, 300));
 
     return canvas.toDataURL('image/jpeg', 1).split(',')[1];
   }
 
-  private drawLegendChips(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number): void {
-    const chips = [
-      { text: 'Wells Ownership', bg: '#cedf5f', textColor: '#35530a' },
-      ...tilesArray.map(t => ({
-        text: t.biNum,
-        bg: `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
-        textColor: '#fff',
-      })),
-      { text: 'Aquifer', bg: '#22b8e6', textColor: '#fff' },
-    ];
-
+  private getLegendMetrics(canvasWidth: number): { fontSize: number; px: number; py: number; gap: number; chipH: number } {
     const fontSize = Math.max(13, Math.round(canvasWidth * 0.013));
     const px = Math.round(fontSize * 0.75);
     const py = Math.round(fontSize * 0.45);
     const gap = Math.round(fontSize * 0.6);
     const chipH = fontSize + py * 2;
+    return { fontSize, px, py, gap, chipH };
+  }
+
+  private drawLegendChips(ctx: CanvasRenderingContext2D, canvasWidth: number, mapHeight: number, legendBarHeight: number): void {
+    const chips = [
+      { text: 'Wells Ownership', bg: '#cedf5f', textColor: '#35530a' },
+      ...tilesArray.map(t => ({
+        text: t.biNum,
+        bg: LEGEND_CHIP_COLORS[t.biNum] ?? `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
+        textColor: '#fff',
+      })),
+      { text: 'Aquifier', bg: '#22b8e6', textColor: '#fff' },
+    ];
+
+    const { fontSize, px, gap, chipH } = this.getLegendMetrics(canvasWidth);
 
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
 
     let x = Math.round(canvasWidth * 0.01);
-    const y = canvasHeight - Math.round(canvasHeight * 0.02) - chipH;
+    const y = mapHeight + (legendBarHeight - chipH) / 2;
 
     for (const chip of chips) {
       const cw = Math.max(chipH * 2, ctx.measureText(chip.text).width + px * 2);
