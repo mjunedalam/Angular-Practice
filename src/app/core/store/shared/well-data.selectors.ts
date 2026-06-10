@@ -18,6 +18,7 @@ import {
 import { IFormationTops } from 'src/app/shared/models/wwell/formation-tops.model';
 import { IHeaderIR } from 'src/app/shared/models/wwell/header-ir.model';
 import { ICasingIR } from 'src/app/shared/models/wwell/casing-ir.model';
+import { IDrlgCsg } from 'src/app/shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from 'src/app/shared/models/wwell/tops-ir.model';
 import { IWaterIR } from 'src/app/shared/models/wwell/water-ir.model';
 import { IWaterWellTestOutcome } from 'src/app/shared/models/wwell/water-well-test-outcome.model';
@@ -406,26 +407,32 @@ export function selectCasingInfoViewModel(d: IWellData | null): CasingInfoViewMo
     };
 }
 
+function resolveActualCasingDepth(cas: ICasingIR, drlgCasings: IDrlgCsg[]): number | null {
+    const isLiner = cas.csgType === 'Liner';
+    const actualCsg = isLiner ? null : (drlgCasings.find(dc => dc.wCsgOdSz === cas.csgSize) ?? null);
+    const actualLnr = isLiner ? (drlgCasings.find(dc => dc.wLnrOdSz === cas.csgSize) ?? null) : null;
+    const hasActual = !isLiner && actualCsg !== null && actualCsg.wCsgBotDpth > 0;
+    const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
+
+    if (hasActual) return actualCsg!.wCsgBotDpth;
+    if (hasActualLiner) return actualLnr!.wLnrBotDepth!;
+    return null;
+}
+
 export function allCasingData(d: IWellData | null): CasingInfoViewModel[] | null {
     if (!d) return null;
     const casing = selectCasing(d);
     const status = d.DRLG_OP_STATUS?.[0];
+    const drlgCasings = d.DRLG_CSG ?? [];
 
     return casing!.map(cas => {
-        if (cas) { /* empty */ }
         return {
             csgType: cas?.csgType ?? FALLBACK_STR,
             csgSize: cas?.csgSize ?? status?.wCsgOdSz ?? FALLBACK_STR,
             csgDepth: cas?.csgDepth ?? FALLBACK_STR,
-            csgBotDpth: status?.wCsgBotDpth ?? FALLBACK_STR,
+            csgBotDpth: (cas ? resolveActualCasingDepth(cas, drlgCasings) : null) ?? '',
         }
     })
-    // return {
-    //     csgType: casing?.csgType ?? FALLBACK_STR,
-    //     csgSize: casing?.csgSize ?? status?.wCsgOdSz ?? FALLBACK_STR,
-    //     csgDepth: casing?.csgDepth ?? FALLBACK_STR,
-    //     csgBotDpth: status?.wCsgBotDpth ?? FALLBACK_STR,
-    // };
 }
 
 export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewModel | null {

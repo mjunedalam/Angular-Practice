@@ -21,10 +21,14 @@ export class CasingInfoComponent {
     ),
   );
 
+  private readonly blankIfInvalid = ({ value }: { value: unknown }) =>
+    value !== null && value !== undefined && value !== '' && isFinite(Number(value)) ? String(value) : '';
+
   columnDefs: ColDef[] = [
     { headerName: 'Casing Type', field: 'csgType' },
     { headerName: 'Casing Size', field: 'csgSize' },
-    { headerName: 'Casing Bottom Depth', field: 'csgDepth' }
+    { headerName: 'Prognosed Depth', field: 'csgDepth', valueFormatter: this.blankIfInvalid },
+    { headerName: 'Actual Depth', field: 'csgBotDpth', valueFormatter: this.blankIfInvalid },
   ];
 
   readonly theme = themeQuartz.withParams({
