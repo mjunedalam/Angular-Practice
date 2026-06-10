@@ -1,8 +1,10 @@
-<nav class="sidenav" [class.sidenav--collapsed]="collapsed()" aria-label="Main navigation">
-
+<nav
+  class="sidenav"
+  [class.sidenav--collapsed]="collapsed()"
+  aria-label="Main navigation"
+>
   <!-- Nav Items -->
   <ul class="sidenav__list" role="list">
-
     @for (item of navItems; track item.id) {
       <li class="sidenav__item">
         <button
@@ -22,9 +24,15 @@
                 [style.mask-image]="'url(' + item.iconImage + ')'"
               ></span>
             } @else {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                @for (pathD of item.icon.split(' M '); track $index) {
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                @for (pathD of item.icon.split(" M "); track $index) {
                   @if ($index === 0) {
                     <path [attr.d]="pathD" />
                   } @else {
@@ -50,10 +58,16 @@
               [matTooltipShowDelay]="180"
               aria-label="Access restricted"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0110 0v4"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
               </svg>
             </span>
           }
@@ -65,12 +79,10 @@
         </button>
       </li>
     }
-
   </ul>
 
   <!-- Bottom: Brand + build info -->
   <div class="sidenav__footer">
-
     <!-- Brand row: water drop + wordmark -->
     <div class="sidenav__brand">
       <div
@@ -78,18 +90,7 @@
         tabindex="0"
         aria-label="Build information"
       >
-        <svg viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="20" cy="30" rx="13" ry="16" fill="url(#sideDropGrad)" opacity="0.85"/>
-          <ellipse cx="20" cy="30" rx="7" ry="10" fill="rgba(255,255,255,0.18)"/>
-          <path d="M20 6 C20 6 28 18 28 28" stroke="rgba(255,255,255,0.5)"
-                stroke-width="2" stroke-linecap="round"/>
-          <defs>
-            <linearGradient id="sideDropGrad" x1="20" y1="14" x2="20" y2="46" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#0369a1"/>
-            </linearGradient>
-          </defs>
-        </svg>
+        <img class="size-8" src="assets/images/agwa-logo.svg" alt="AGWA" />
         @if (collapsed()) {
           <div class="sidenav__build-popover" role="tooltip">
             <div class="sidenav__build-popover-title">Build Info</div>
@@ -114,22 +115,32 @@
       </div>
       @if (!collapsed()) {
         <span class="sidenav__footer-text">AGWA</span>
+        <span class="sidenav__build-version">v{{ buildInfo.version }}</span>
       }
     </div>
 
     <!-- Build info card -->
-    @if (!collapsed()) {
+    <!-- @if (!collapsed()) {
       <div class="sidenav__build-card">
         <div class="sidenav__build-line">
-          <svg class="sidenav__build-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="6" y1="3" x2="6" y2="15"/>
-            <circle cx="18" cy="6" r="2.5"/>
-            <circle cx="6" cy="18" r="2.5"/>
-            <path d="M18 8.5a8.5 8.5 0 0 1-8.5 8.5"/>
+          <svg
+            class="sidenav__build-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="6" y1="3" x2="6" y2="15" />
+            <circle cx="18" cy="6" r="2.5" />
+            <circle cx="6" cy="18" r="2.5" />
+            <path d="M18 8.5a8.5 8.5 0 0 1-8.5 8.5" />
           </svg>
           <span class="sidenav__build-ref" [title]="buildInfo.branch">
-            <span class="sidenav__build-branch">{{ buildInfo.branch }}</span><span class="sidenav__build-at">&#64;</span><span class="sidenav__build-hash">{{ shortHash }}</span>
+            <span class="sidenav__build-branch">{{ buildInfo.branch }}</span
+            ><span class="sidenav__build-at">&#64;</span
+            ><span class="sidenav__build-hash">{{ shortHash }}</span>
           </span>
           <span
             class="sidenav__build-status"
@@ -143,10 +154,10 @@
           <span
             class="sidenav__build-env"
             [class.sidenav__build-env--prod]="buildInfo.env === 'PROD'"
-          >{{ buildInfo.env }}</span>
+            >{{ buildInfo.env }}</span
+          >
         </div>
       </div>
-    }
+    } -->
   </div>
-
 </nav>
