@@ -25,7 +25,8 @@
       "Bash(node aw_screenshot.js)",
       "Bash(npx playwright *)",
       "Bash(curl -fsSL https://openclaw.ai/install.sh)",
-      "Bash(bash)"
+      "Bash(bash)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

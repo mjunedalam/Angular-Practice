@@ -392,7 +392,15 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
             };
         });
 
-    return [...fromPlanned, ...fromDrlgOnly];
+    // Order by depth (actual depth where drilled, otherwise planned depth) to match the Geo Axis,
+    // where planned and drilled-only tops are positioned on a single shared depth axis.
+    const effectiveDepth = (item: FormationInfoViewModel): number => {
+        const actual = safeNum(item.actualDepth);
+        if (actual !== null && actual > 0) return actual;
+        return safeNum(item.prognosed) ?? Number.POSITIVE_INFINITY;
+    };
+
+    return [...fromPlanned, ...fromDrlgOnly].sort((a, b) => effectiveDepth(a) - effectiveDepth(b));
 }
 
 export function selectCasingInfoViewModel(d: IWellData | null): CasingInfoViewModel | null {
