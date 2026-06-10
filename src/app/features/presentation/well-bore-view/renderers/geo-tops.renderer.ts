@@ -65,6 +65,7 @@ export function renderGeoTops({
     depth: number,
     remark: string,
     hasActual: boolean,
+    isTarget: boolean,
   ): void => {
     const tooltipW = 260;
     const lineHeight = 15;
@@ -132,7 +133,7 @@ export function renderGeoTops({
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', accent)
-      .text(hasActual ? 'ACTUAL' : 'PLANNED');
+      .text(hasActual ? 'ACTUAL' : isTarget ? 'TARGET' : 'PLANNED');
 
     tooltipLayer.append('text')
       .attr('x', tooltipX + 90)
@@ -180,6 +181,7 @@ export function renderGeoTops({
     depth: number,
     remark: string | undefined,
     hasActual: boolean,
+    isTarget: boolean,
   ): void => {
     const tooltipRemark = remark?.trim() || 'No remarks available';
 
@@ -193,7 +195,7 @@ export function renderGeoTops({
       .attr('fill', 'transparent')
       .style('pointer-events', 'all')
       .style('cursor', 'help')
-      .on('mouseenter', () => showTooltip(yPx, formation, depth, tooltipRemark, hasActual))
+      .on('mouseenter', () => showTooltip(yPx, formation, depth, tooltipRemark, hasActual, isTarget))
       .on('mouseleave', hideTooltip);
   };
 
@@ -242,7 +244,7 @@ export function renderGeoTops({
       .style('pointer-events', 'none')
       .text(top.stLongCd) as TextSel;
 
-    addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual);
+    addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual, isTarget);
     animateGeoRow(g, tick, depthText, codeText, geoLineX, ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER);
   });
 
@@ -279,7 +281,7 @@ export function renderGeoTops({
       .style('pointer-events', 'none')
       .text(top.formation) as TextSel;
 
-    addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true);
+    addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true, false);
     animateGeoRow(
       g,
       tick,
