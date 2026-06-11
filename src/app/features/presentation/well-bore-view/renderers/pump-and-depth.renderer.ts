@@ -47,7 +47,7 @@ export function renderPump({
   start,
   animation,
 }: RenderPumpOptions): void {
-  const pumpLvl = data.wellDesign?.pumpLevel;
+  const pumpLvl = data.wellDesign?.pumpLvl;
   if (pumpLvl == null) return;
 
   const cy = scale(pumpLvl);

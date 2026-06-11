@@ -172,7 +172,7 @@
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
-              <input class="wt-ir-input" type="text" readonly value="" />
+              <input class="wt-ir-input" type="text" readonly [value]="data()?.pumpDepthEstimate ?? ''" />
             </div>
           </div>
 

@@ -31,7 +31,7 @@ const EXPECTED_KEYS: KnownKeys = {
   EXAD_RCD_PREWAP: ['estTargetDepth', 'targetFormation', 'supportedBusiness'],
   WATER_WELL_TEST_OUTCOME: [],
   EXAD_GWD_WELL_TESTS: ['wellName', 'rsvrCd', 'hydTestTypCd', 'temp', 'hydH2sCnc', 'wtrSaTdsCnc', 'rpm', 'siwhp', 'hydProdRt', 'statWlvl', 'dyncWlvl', 'hydProduct', 'duration'],
-  EXAD_GWD_WELL_DESIGN: ['name', 'prewapSeq', 'staWaterLvl', 'swLvlTxt', 'pumpLevel', 'ohFlag', 'ohRemarks', 'gpFlag', 'gpRemarks', 'perforatedFlg', 'perforatedRemarks', 'lsFlag', 'lsRemarks'],
+  EXAD_GWD_WELL_DESIGN: ['name', 'prewapSeq', 'staWaterLvl', 'swLvlTxt', 'pumpLvl', 'ohFlag', 'ohRemarks', 'gpFlag', 'gpRemarks', 'perforatedFlg', 'perforatedRemarks', 'lsFlag', 'lsRemarks'],
   EXAD_GWD_DAILY_REMARKS: ['status', 'opRmk', 'next24HrPlanRrmk', 'drlgSmryRmk'],
   MUD_CIRC: ['wPrsntDpth', 'wMudCircPc', 'wDpthChgDis'],
 };

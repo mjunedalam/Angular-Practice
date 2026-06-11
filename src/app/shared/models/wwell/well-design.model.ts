@@ -3,7 +3,7 @@ export interface IWellDesign {
   prewapSeq: number | null;
   staWaterLvl: number | null;
   swLvlTxt: string | null;
-  pumpLevel: number | null;
+  pumpLvl: number | null;
   ohFlg: string | null;
   ohRemarks: string | null;
   gpFlg: string | null;

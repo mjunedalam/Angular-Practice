@@ -229,7 +229,7 @@ Rows are produced in two passes:
 **Selector:** `selectWwellTestViewModel(d: IWellData)`  
 **Store signal:** `store.wwellTest()`  
 **Form controls in:** `wellTestForm`  
-**Source:** `EXAD_GWD_WELL_TESTS[0]` (primary test outcome)
+**Source:** `EXAD_GWD_WELL_TESTS[0]` (primary test outcome); `EXAD_GWD_WELL_DESIGN[0]` for Pump Depth IR estimate
 
 | Field Name | API Object | Exact Mapping | Business Logic |
 |---|---|---|---|
@@ -242,7 +242,8 @@ Rows are produced in two passes:
 | TDS (PPM) | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.wtrSaTdsCnc` | Always shown |
 | H2S (PPM) — Actual | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.hydH2sCnc` | Editable; always shown |
 | H2S (PPM) — Estimate | `EXAD_GWD_IR_HYDROGEOLOGY[0]` | `hydro?.estH2s` | Read-only IR field |
-| Pump Depth (ft) | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.hydPmpDpth` | Pump test only |
+| Pump Depth (ft) — Actual | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.hydPmpDpth` | Pump test only; editable (`formControlName="hydPmpDpth"`) |
+| Pump Depth (ft) — Estimate | `EXAD_GWD_WELL_DESIGN[0]` | `wellDesign?.pumpLvl` | Read-only IR field shown alongside editable actual |
 | SWL — Static Water Level (ft) | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.statWlvl` | Pump test only |
 | DWL — Dynamic Water Level (ft) | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.dyncWlvl` | Pump test only |
 | Well Productivity (GPM/FT) — Actual | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.hydProduct` | Pump test only; IR estimate from `hydro?.estProductivity` shown read-only |

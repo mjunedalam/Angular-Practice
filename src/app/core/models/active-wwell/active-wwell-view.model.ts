@@ -131,6 +131,7 @@ export interface WwellTestViewModel {
   readonly swlEstimate?: number | string | null;
   readonly dwl?: number | string | null;
   readonly hydPmpDpth?: number | null;
+  readonly pumpDepthEstimate?: number | string | null;
 }
 
 

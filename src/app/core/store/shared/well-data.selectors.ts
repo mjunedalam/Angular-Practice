@@ -442,6 +442,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
     const testOutcome = selectPrimaryTestOutcome(d);
     const prewap = d.EXAD_RCD_PREWAP?.[0];
+    const wellDesign = d.EXAD_GWD_WELL_DESIGN?.[0];
     return {
   
         flowType: hydro?.flowType ?? 'N',
@@ -466,6 +467,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
         swl: testOutcome?.statWlvl,
         swlEstimate: hydro?.estStaticWaterLevel,
         dwl: testOutcome?.dyncWlvl,
+        pumpDepthEstimate: wellDesign?.pumpLvl,
     };
 }
 
