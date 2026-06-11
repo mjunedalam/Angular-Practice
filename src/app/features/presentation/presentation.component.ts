@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { skip } from 'rxjs';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { PresentationStore } from './store/presentation.store';
@@ -50,6 +51,7 @@ export class PresentationComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly overlayContainer = inject(OverlayContainer);
   private dialogRef?: MatDialogRef<unknown>;
 
   /** false = fixed three-column (default), true = free draggable modal */
@@ -143,11 +145,13 @@ export class PresentationComponent implements OnInit {
         await document.exitFullscreen();
       }
       this.isFullscreen.set(false);
+      this.restoreOverlayContainer();
       return;
     }
 
     try {
       await this.elementRef.nativeElement.requestFullscreen();
+      this.moveOverlayContainerToFullscreen();
     } catch {
       // Browser fullscreen unavailable — fall back to in-app overlay only.
     }
@@ -156,9 +160,14 @@ export class PresentationComponent implements OnInit {
 
   @HostListener('document:fullscreenchange')
   protected onFullscreenChange(): void {
-    if (!document.fullscreenElement) {
-      this.isFullscreen.set(false);
+    if (document.fullscreenElement) {
+      this.isFullscreen.set(true);
+      this.moveOverlayContainerToFullscreen();
+      return;
     }
+
+    this.isFullscreen.set(false);
+    this.restoreOverlayContainer();
   }
 
   protected onLeftDrag(delta: number): void {
@@ -173,6 +182,23 @@ export class PresentationComponent implements OnInit {
     if (this.loadingTimer !== null) {
       clearTimeout(this.loadingTimer);
       this.loadingTimer = null;
+    }
+  }
+
+  private moveOverlayContainerToFullscreen(): void {
+    const fullscreenElement = document.fullscreenElement;
+    if (!fullscreenElement) return;
+
+    const overlayElement = this.overlayContainer.getContainerElement();
+    if (!fullscreenElement.contains(overlayElement)) {
+      fullscreenElement.appendChild(overlayElement);
+    }
+  }
+
+  private restoreOverlayContainer(): void {
+    const overlayElement = this.overlayContainer.getContainerElement();
+    if (overlayElement.parentElement && overlayElement.parentElement !== document.body) {
+      document.body.appendChild(overlayElement);
     }
   }
 
