@@ -53,8 +53,9 @@ export class WwellTestResultComponent {
     this.dialogRef = this.dialog.open(this.resultDialog, {
       autoFocus: false,
       panelClass: 'well-result-dialog',
-      width: '520px',
-      maxWidth: '92vw',
+      width: '760px',
+      maxWidth: '96vw',
+      maxHeight: '96vh',
     });
     this.dialogRef.afterClosed().subscribe(() => this.onDialogHide());
   }
