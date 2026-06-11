@@ -331,12 +331,8 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       rows: this.testRows(vm).map(([left, right]) => ({
         leftLabel: left.label,
         leftValue: this.metricText(left.value),
-        ...(right
-          ? {
-            rightLabel: right.label,
-            rightValue: this.metricText(right.value),
-          }
-          : {}),
+        rightLabel: right?.label ?? '',
+        rightValue: right ? this.metricText(right.value) : '',
       })),
     };
   }
