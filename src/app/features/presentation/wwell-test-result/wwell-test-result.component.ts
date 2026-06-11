@@ -1,21 +1,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
   TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { DecimalPipe, TitleCasePipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { trigger, transition, animate, style } from '@angular/animations';
 import { PresentationStore } from '../store/presentation.store';
-import { WellTestResult } from '@models/active-wwell/active-wwell-view.model';
+import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model';
 
 @Component({
   selector: 'app-wwell-test-result',
   standalone: true,
-  imports: [DecimalPipe, TitleCasePipe, MatDialogModule],
+  imports: [DecimalPipe, MatDialogModule],
   templateUrl: './wwell-test-result.component.html',
   styleUrl: './wwell-test-result.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,10 +36,16 @@ export class WwellTestResultComponent {
   private readonly dialog = inject(MatDialog);
   private dialogRef?: MatDialogRef<unknown>;
 
-  protected readonly selectedResult = signal<WellTestResult | null>(null);
+  protected readonly selectedResult = signal<WwellTestViewModel | null>(null);
   protected readonly dialogVisible = signal(false);
 
-  protected openDialog(result: WellTestResult): void {
+  protected readonly isFlowTest = computed(() => {
+    const data = this.store.wwellTest();
+    if (!data) return false;
+    return data.flowType === 'Y' || data.testType?.toLowerCase() === 'flow';
+  });
+
+  protected openDialog(result: WwellTestViewModel): void {
     this.selectedResult.set(result);
     this.dialogVisible.set(true);
     if (!this.resultDialog) return;

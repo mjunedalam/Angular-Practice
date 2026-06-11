@@ -9,12 +9,12 @@
       </div>
       <span>Well Test Results</span>
     </div>
-    <div class="results-header__badge">{{ store.wellTestResults().length }}</div>
+    <div class="results-header__badge">{{ store.wwellTest() ? 1 : 0 }}</div>
   </div>
 
   <!-- ── List of results ── -->
   <div class="results-list">
-    @for (result of store.wellTestResults(); track result.wellName; let i = $index) {
+    @if (store.wwellTest(); as result) {
       <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
         <div class="result-tab__left">
           <div class="well-indicator">
@@ -23,14 +23,14 @@
             </svg>
           </div>
           <div class="well-details">
-            <div class="name">{{ result.wellName }}</div>
-            <div class="aquifer">{{ result.aquifer }} Aquifer</div>
+            <div class="name">{{ store.wellHeaderData()?.wellName }}</div>
+            <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
           </div>
         </div>
 
         <div class="result-tab__right">
           <div class="main-stat">
-            <span class="val">{{ result.flowRate | number }}</span>
+            <span class="val">{{ result.rate | number }}</span>
             <span class="unit">GPM</span>
           </div>
           <div class="view-btn">
@@ -40,9 +40,7 @@
           </div>
         </div>
       </button>
-    }
-
-    @if (store.wellTestResults().length === 0) {
+    } @else {
       <div class="results-empty">No test records available.</div>
     }
   </div>
@@ -75,8 +73,8 @@
           </svg>
         </div>
         <div>
-          <div class="dialog__well-name">{{ r.wellName }}</div>
-          <div class="dialog__subtitle">{{ r.testType | titlecase }} Test · {{ r.aquifer }} Aquifer</div>
+          <div class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</div>
+          <div class="dialog__subtitle">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }} · {{ r.aquiferActual }} Aquifer</div>
         </div>
         </div>
         <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close test result dialog">
@@ -98,11 +96,11 @@
               <polyline points="15 7 18 4 21 7"/>
             </svg>
           </div>
-          <div class="metric__value">{{ r.flowRate | number }}</div>
-          <div class="metric__label">Flow Rate (GPM)</div>
+          <div class="metric__value">{{ r.rate | number }}</div>
+          <div class="metric__label">Test Rate (GPM)</div>
         </div>
 
-        @if (r.testType === 'PUMP') {
+        @if (!isFlowTest()) {
           <div class="metric metric--highlight">
             <div class="metric__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -123,9 +121,19 @@
               </svg>
             </div>
             <div class="metric__value">{{ r.siwhp | number }}</div>
-            <div class="metric__label">SIWHP (FT)</div>
+            <div class="metric__label">SIWHP (PSI)</div>
           </div>
         }
+
+        <div class="metric">
+          <div class="metric__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 2h12M6 22h12M6 2c0 5 4 6 6 8 2-2 6-3 6-8M6 22c0-5 4-6 6-8 2 2 6 3 6 8"/>
+            </svg>
+          </div>
+          <div class="metric__value">{{ r.duration | number }}</div>
+          <div class="metric__label">Duration (H)</div>
+        </div>
 
         <div class="metric">
           <div class="metric__icon">
@@ -144,22 +152,59 @@
               <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
             </svg>
           </div>
-          <div class="metric__value">{{ r.temperature | number:'1.0-1' }}°C</div>
+          <div class="metric__value">{{ r.temp | number:'1.0-1' }}&deg;C</div>
           <div class="metric__label">Temperature</div>
         </div>
 
-        <div class="metric">
-          <div class="metric__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+        @if (!isFlowTest()) {
+          <div class="metric">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <line x1="12" y1="2" x2="12" y2="14"/>
+                <polyline points="6 10 12 16 18 10"/>
+                <line x1="3" y1="20" x2="21" y2="20"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.hydPmpDpth | number }}</div>
+            <div class="metric__label">Pump Depth (FT)</div>
           </div>
-          <div class="metric__value">{{ r.productivity | number:'1.2-2' }}</div>
-          <div class="metric__label">Productivity (GPM/FT)</div>
-        </div>
 
-        <div class="metric" [class.metric--warn]="r.h2s > 0">
+          <div class="metric">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 12c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+                <path d="M2 18c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.swl | number }}</div>
+            <div class="metric__label">SWL (FT)</div>
+          </div>
+
+          <div class="metric">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+                <line x1="12" y1="2" x2="12" y2="10"/>
+                <polyline points="9 7 12 10 15 7"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.dwl | number }}</div>
+            <div class="metric__label">DWL (FT)</div>
+          </div>
+
+          <div class="metric">
+            <div class="metric__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div class="metric__value">{{ r.productivityActual | number:'1.2-2' }}</div>
+            <div class="metric__label">Productivity (GPM/FT)</div>
+          </div>
+        }
+
+        <div class="metric">
           <div class="metric__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
@@ -167,19 +212,16 @@
               <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
           </div>
-          <div class="metric__value">{{ r.h2s | number }}</div>
-          <div class="metric__label">H₂S (PPM)</div>
+          <div class="metric__value">{{ r.h2sActual | number }}</div>
+          <div class="metric__label">H&#8322;S (PPM)</div>
         </div>
 
       </div>
 
       <!-- Summary tags row -->
       <div class="dialog__summary-row">
-        <span class="summary-tag summary-tag--aquifer">{{ r.aquifer }}</span>
-        <span class="summary-tag">{{ (r.testType | titlecase) + ' Test' }}</span>
-        @if (r.h2s > 0) {
-          <span class="summary-tag summary-tag--warn">H₂S Detected</span>
-        }
+        <span class="summary-tag summary-tag--aquifer">{{ r.aquiferActual }}</span>
+        <span class="summary-tag">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
       </div>
     </mat-dialog-content>
   }

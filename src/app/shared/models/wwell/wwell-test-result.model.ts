@@ -5,10 +5,15 @@ export interface WaterWellTestResult {
   readonly wellName: string;
   readonly rPM: string;
   readonly siwhp: string;
+  readonly pumpDepth: string;
+  readonly swl: string;
+  readonly dwl: string;
   readonly h2sPPM: string;
   readonly temperature: string;
   readonly trgtRsvrCd: string;
+  readonly duration: string;
   readonly testRate: string;
   readonly wellProductivity: string;
   readonly tds: string;
+  readonly conductedBy: string;
 }

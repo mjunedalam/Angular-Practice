@@ -29,13 +29,10 @@ export class EsriMapService {
             return credentials;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-            try {
-                const credential = await esriId.getCredential(url);
-                return credential;
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (popupError) {
-                return Promise.reject(new Error("Popup authentication failed or was canceled."));
-            }
+            // Commented to prevent redirecting local report pages to ArcGIS OAuth authorize URL.
+            // const credential = await esriId.getCredential(url);
+            // return credential;
+            return null;
         }
     }
 
