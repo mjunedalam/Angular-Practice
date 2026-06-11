@@ -1,0 +1,2756 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>AI ML Agentic AI Enterprise eBook</title>
+  <style>
+    @page { size: A4; margin: 16mm 15mm; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: #132033;
+      background: #edf4fb;
+      line-height: 1.45;
+    }
+    a { color: #2367a5; text-decoration: none; }
+    .cover {
+      min-height: 100vh;
+      padding: 64px 52px;
+      color: white;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(92, 190, 255, .35), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(255, 188, 96, .22), transparent 24%),
+        linear-gradient(135deg, #071a33 0%, #0a3159 48%, #123f64 100%);
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover:after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 50%;
+      right: -180px;
+      bottom: -210px;
+    }
+    .cover-kicker {
+      display: inline-block;
+      padding: 7px 13px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      color: #cfe8ff;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .cover h1 {
+      max-width: 760px;
+      margin: 42px 0 20px;
+      color: #ffffff;
+      font-size: 54px;
+      line-height: 1.03;
+      letter-spacing: -.05em;
+      text-shadow: 0 10px 34px rgba(0, 0, 0, .22);
+    }
+    .cover p {
+      max-width: 720px;
+      color: #d7ecff;
+      font-size: 18px;
+    }
+    .cover-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 56px;
+    }
+    .cover-card {
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 18px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(12px);
+    }
+    .cover-card b { display: block; font-size: 26px; }
+    .cover-card span { color: #b8d7f3; font-size: 12px; }
+    .page {
+      min-height: 100vh;
+      padding: 26px 0 18px;
+      page-break-after: always;
+    }
+    .eyebrow {
+      color: #BA7517;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0 0 16px;
+      color: #09264a;
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: -.035em;
+    }
+    h2 {
+      margin: 22px 0 12px;
+      color: #0b315d;
+      font-size: 21px;
+    }
+    h3 { margin: 0 0 4px; color: #0b315d; font-size: 17px; }
+    h4 { margin: 0 0 7px; color: #42526b; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+    .lead {
+      max-width: 840px;
+      color: #42526b;
+      font-size: 15px;
+      margin: 0 0 18px;
+    }
+    .toc-list {
+      columns: 2;
+      column-gap: 44px;
+      padding-left: 22px;
+      font-size: 15px;
+    }
+    .toc-list li {
+      break-inside: avoid;
+      margin: 0 0 12px;
+      padding-left: 6px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .stat {
+      padding: 18px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid #cfe0ef;
+      box-shadow: 0 12px 30px rgba(16, 49, 84, .08);
+    }
+    .stat span { display: block; color: #0b6dad; font-size: 34px; font-weight: 800; }
+    .stat label { color: #52657a; font-size: 12px; }
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 16px 0 26px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid #d8e5f0;
+      color: #42526b;
+      font-size: 12px;
+      text-transform: capitalize;
+    }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .callout {
+      padding: 18px 20px;
+      border-left: 5px solid #1D9E75;
+      background: white;
+      border-radius: 14px;
+      color: #30445d;
+      box-shadow: 0 10px 24px rgba(16, 49, 84, .06);
+    }
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 14px;
+      padding: 16px;
+      background: white;
+      border: 1px solid #d8e5f0;
+      border-radius: 18px;
+      page-break-inside: avoid;
+    }
+    .timeline-index {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: white;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1D9E75, #378ADD);
+    }
+    .timeline-date {
+      color: #BA7517;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .timeline-row p { margin: 0; color: #52657a; }
+    .track-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .topic-card {
+      background: white;
+      border-radius: 20px;
+      padding: 18px;
+      border: 1px solid #d7e5f2;
+      box-shadow: 0 10px 26px rgba(16, 49, 84, .07);
+      page-break-inside: auto;
+      break-inside: auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .topic-card:before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: #378ADD;
+    }
+    .topic-card.beginner:before { background: #1D9E75; }
+    .topic-card.intermediate:before { background: #7F77DD; }
+    .topic-card.advanced:before { background: #D85A30; }
+    .topic-card.enterprise:before { background: #BA7517; }
+    .topic-head {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 13px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .icon-wrap {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      font-size: 24px;
+    }
+    .module-number {
+      color: #7a8aa0;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 3px;
+    }
+    .topic-head p { margin: 0; color: #52657a; font-size: 13px; }
+    .badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+    .duration {
+      display: inline-block;
+      margin-bottom: 13px;
+      color: #445b75;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .columns {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 20px;
+      margin: 8px 0 14px;
+    }
+    .granular-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0 14px;
+    }
+    .granular-grid > div {
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: #fbfdff;
+      border: 1px solid #dce9f4;
+    }
+    .breakdown-box {
+      margin: 10px 0 14px;
+      padding: 12px;
+      border-radius: 15px;
+      background: #f8fbfe;
+      border: 1px solid #dce9f4;
+    }
+    .breakdown-item {
+      display: grid;
+      grid-template-columns: 1fr 1.45fr;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px solid #e6eef6;
+    }
+    .breakdown-item:first-of-type { border-top: 0; }
+    .breakdown-item strong {
+      color: #0b315d;
+      font-size: 12px;
+    }
+    .breakdown-item div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .breakdown-item span {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid #d6e5f2;
+      color: #42526b;
+      font-size: 10.5px;
+    }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 4px; color: #2d3d50; }
+    .tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tags span {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #eef5fb;
+      color: #34506d;
+      font-size: 11px;
+      border: 1px solid #d8e5f0;
+    }
+    .project-box {
+      padding: 13px 15px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #f7fbff, #eef6ff);
+      border: 1px solid #cfe0ef;
+    }
+    .project-label {
+      color: #BA7517;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 4px;
+    }
+    .project-box p { margin: 5px 0 0; color: #42526b; font-size: 12.5px; }
+    .enterprise-note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: #fffaf2;
+      border: 1px solid #f1d7ac;
+      color: #4b3a21;
+      font-size: 12.5px;
+    }
+    .enterprise-note strong { color: #8a540f; }
+    .mega-hero {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 18px;
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #e6f1fb, #eeedfe);
+      border: 1px solid #cadff2;
+      margin: 20px 0;
+    }
+    .mega-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 19px;
+      background: #0b315d;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 30px;
+    }
+    .mega-hero p { margin: 0; color: #334961; }
+    .layers, .milestones, .check-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .layers div, .milestones div, .check, .assessment-grid div, .score-box div {
+      padding: 13px 15px;
+      border-radius: 15px;
+      background: white;
+      border: 1px solid #d8e5f0;
+      page-break-inside: avoid;
+    }
+    .layers strong, .milestones b, .assessment-grid strong {
+      display: block;
+      color: #0b315d;
+      margin-bottom: 3px;
+    }
+    .layers span, .milestones span, .assessment-grid span { color: #52657a; }
+    .assessment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 16px 0 20px;
+    }
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 12px 0 18px;
+    }
+    .score-box b {
+      display: block;
+      color: #0b6dad;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .score-box span { color: #52657a; font-size: 11px; }
+    .repo-tree {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #0b1f36;
+      color: #d9edff;
+      font-size: 10.5px;
+      line-height: 1.34;
+      overflow: hidden;
+    }
+    .done-list li { margin-bottom: 8px; }
+    .refs li {
+      margin: 0 0 13px;
+      color: #30445d;
+      overflow-wrap: anywhere;
+    }
+    @media print {
+      body { background: white; }
+      .page { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="cover-kicker">AI Learning eBook</div>
+    <h1>AI, ML, Deep Learning, Agentic AI & Enterprise Engineering</h1>
+    <p>A project-first roadmap from beginner foundations to production-grade enterprise AI systems, generated from your roadmap and expanded with missing real-world engineering layers.</p>
+    <div class="cover-grid">
+      <div class="cover-card"><b>7</b><span>Tracks</span></div>
+      <div class="cover-card"><b>28</b><span>Modules</span></div>
+      <div class="cover-card"><b>30+</b><span>Projects</span></div>
+      <div class="cover-card"><b>1</b><span>Final platform</span></div>
+    </div>
+  </section>
+  
+    <section class="page toc">
+      <div class="eyebrow">Index</div>
+      <h1>Table of Contents</h1>
+      <ol class="toc-list">
+        <li><a href="#executive-map">Executive Learning Map</a></li>
+        <li><a href="#timeline">Recommended Timeline</a></li>
+        <li><a href="#foundation">Foundation</a></li><li><a href="#machine-learning">Machine Learning</a></li><li><a href="#deep-learning">Deep Learning</a></li><li><a href="#llms-transformers">LLMs &amp; Transformers</a></li><li><a href="#agentic-ai">Agentic AI</a></li><li><a href="#enterprise-mlops">Enterprise &amp; MLOps</a></li><li><a href="#missing-enterprise-foundations-added">Missing Enterprise Foundations Added</a></li>
+        <li><a href="#mega-project">Final eBook Project: AutoResearch AI</a></li>
+        <li><a href="#assessment">Assessment Framework</a></li>
+        <li><a href="#artifact-template">Project Artifact Template</a></li>
+        <li><a href="#portfolio">Portfolio Checklist</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </section>
+  
+  
+    <section class="page" id="executive-map">
+      <div class="eyebrow">Overview</div>
+      <h1>Beginner to Enterprise AI Engineer Path</h1>
+      <p class="lead">This eBook converts the interactive roadmap into a printable, project-first curriculum. Every major topic has a project, and the final project combines data engineering, ML, DL, LLMs, RAG, agents, MLOps, observability and governance.</p>
+      <div class="stat-grid">
+        <div class="stat"><span>7</span><label>Learning Tracks</label></div>
+        <div class="stat"><span>28</span><label>Project Modules</label></div>
+        <div class="stat"><span>12-18 months</span><label>Suggested Duration</label></div>
+        <div class="stat"><span>1</span><label>Enterprise Capstone</label></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#1D9E75"></i>beginner</span><span><i style="background:#7F77DD"></i>intermediate</span><span><i style="background:#D85A30"></i>advanced</span><span><i style="background:#BA7517"></i>enterprise</span><span><i style="background:#378ADD"></i>capstone</span>
+      </div>
+      <div class="callout">
+        <strong>How to use this eBook:</strong> finish each module by shipping the capstone project, not by only watching videos. Keep each project in GitHub with README, screenshots, metrics, and a short architecture note.
+      </div>
+    </section>
+  
+  
+    <section class="page" id="timeline">
+      <div class="eyebrow">Roadmap</div>
+      <h1>Recommended Timeline</h1>
+      <p class="lead">Use this as a serious beginner-to-enterprise plan. At 10-12 focused hours per week, expect 12-18 months. At 20+ hours per week, a disciplined learner can compress it to 8-10 months.</p>
+      <div class="timeline">
+        
+          <div class="timeline-row">
+            <div class="timeline-index">1</div>
+            <div>
+              <div class="timeline-date">Months 1-2</div>
+              <h3>Python, Math, NumPy, pandas, SQL</h3>
+              <p>Foundation</p>
+            </div>
+          </div>
+        
+          <div class="timeline-row">
+            <div class="timeline-index">2</div>
+            <div>
+              <div class="timeline-date">Months 3-4</div>
+              <h3>Classical ML, statistics, sklearn pipelines</h3>
+              <p>Machine Learning</p>
+            </div>
+          </div>
+        
+          <div class="timeline-row">
+            <div class="timeline-index">3</div>
+            <div>
+              <div class="timeline-date">Months 5-7</div>
+              <h3>PyTorch, computer vision, NLP, deep learning</h3>
+              <p>Deep Learning</p>
+            </div>
+          </div>
+        
+          <div class="timeline-row">
+            <div class="timeline-index">4</div>
+            <div>
+              <div class="timeline-date">Months 8-10</div>
+              <h3>Transformers, LLMs, RAG, fine-tuning, evals</h3>
+              <p>LLMs & Transformers</p>
+            </div>
+          </div>
+        
+          <div class="timeline-row">
+            <div class="timeline-index">5</div>
+            <div>
+              <div class="timeline-date">Months 11-12</div>
+              <h3>Agents, multi-agent systems, tool use, memory</h3>
+              <p>Agentic AI</p>
+            </div>
+          </div>
+        
+          <div class="timeline-row">
+            <div class="timeline-index">6</div>
+            <div>
+              <div class="timeline-date">Months 13-18</div>
+              <h3>MLOps, LLMOps, cloud, governance, final platform</h3>
+              <p>Enterprise</p>
+            </div>
+          </div>
+        
+      </div>
+    </section>
+  
+  
+      <section class="page track" id="foundation">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Foundation</h1>
+        <div class="track-grid">
+    <article class="topic-card beginner">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#E1F5EE; color:#1D9E75">🐍</div>
+        <div>
+          <div class="module-number">Module 1</div>
+          <h3>Python for AI</h3>
+          <p>Core programming &amp; data libraries</p>
+        </div>
+        <span class="badge" style="background:#E1F5EE; color:#1D9E75">beginner</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Variables, loops, functions, OOP</li><li>List/dict comprehensions</li><li>File I/O &amp; error handling</li><li>Virtual environments &amp; pip</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>NumPy</span><span>Pandas</span><span>Matplotlib</span><span>Seaborn</span><span>Jupyter</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Variables, loops, functions, OOP</strong>
+            <div><span>variables and primitive types</span><span>if/else and loop control</span><span>function parameters and return values</span><span>classes, objects and simple inheritance</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>List/dict comprehensions</strong>
+            <div><span>list comprehensions</span><span>dict/set comprehensions</span><span>filtering and mapping patterns</span><span>readability vs cleverness tradeoffs</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>File I/O &amp; error handling</strong>
+            <div><span>read/write text and CSV files</span><span>path handling</span><span>try/except/finally</span><span>custom error messages and logging</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Virtual environments &amp; pip</strong>
+            <div><span>venv creation</span><span>requirements files</span><span>dependency pinning</span><span>project isolation</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Write clean Python modules instead of only notebooks</li><li>Use virtual environments and package dependencies safely</li><li>Read/write data files and handle errors predictably</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Refactor a notebook into a CLI script</li><li>Add logging and exception handling to a data loader</li><li>Write pytest tests for 5 utility functions</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle sales data</li><li>CSV/JSON files from data.gov</li><li>synthetic messy customer data</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>CLI runs from a fresh environment</li><li>Code has functions, tests, and README</li><li>Outputs are reproducible from raw input</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Exploratory Sales Dashboard</strong>
+        <p>Load a real CSV dataset (Kaggle), clean with Pandas, analyze trends, and produce a full Matplotlib/Seaborn report with 10+ charts and automated insights.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Start using professional habits early: README, reproducible environment, testable scripts, and clear folder structure.
+      </div>
+    </article>
+  
+    <article class="topic-card beginner">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#E1F5EE; color:#1D9E75">➕</div>
+        <div>
+          <div class="module-number">Module 2</div>
+          <h3>Math for AI</h3>
+          <p>Linear algebra, calculus &amp; stats</p>
+        </div>
+        <span class="badge" style="background:#E1F5EE; color:#1D9E75">beginner</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Vectors, matrices, dot products</li><li>Derivatives &amp; gradients</li><li>Probability &amp; Bayes' theorem</li><li>Descriptive &amp; inferential statistics</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>NumPy</span><span>SciPy</span><span>SymPy</span><span>Statsmodels</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Vectors, matrices, dot products</strong>
+            <div><span>vector notation</span><span>matrix multiplication</span><span>dot product geometry</span><span>cosine similarity</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Derivatives &amp; gradients</strong>
+            <div><span>slope intuition</span><span>partial derivatives</span><span>chain rule</span><span>gradient descent updates</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Probability &amp; Bayes' theorem</strong>
+            <div><span>events and conditional probability</span><span>Bayes rule</span><span>distributions</span><span>uncertainty in predictions</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Descriptive &amp; inferential statistics</strong>
+            <div><span>mean/median/std</span><span>sampling</span><span>confidence intervals</span><span>hypothesis tests</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Explain dot product, gradients, probability and loss functions intuitively</li><li>Implement gradient descent from scratch</li><li>Connect math notation to working NumPy code</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Visualize vector projections</li><li>Derive and code MSE gradient</li><li>Simulate Bayes rule with synthetic data</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>synthetic regression data</li><li>Iris numeric features</li><li>Boston/California housing style data</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Loss decreases correctly</li><li>Manual implementation matches sklearn within tolerance</li><li>Math derivation is included in project notes</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>From-Scratch Linear Regression</strong>
+        <p>Implement gradient descent by hand with NumPy. Verify results match Scikit-learn. Plot loss curves, visualize decision boundary, and write a mathematical derivation doc.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Start using professional habits early: README, reproducible environment, testable scripts, and clear folder structure.
+      </div>
+    </article>
+  
+    <article class="topic-card beginner">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#E1F5EE; color:#1D9E75">📊</div>
+        <div>
+          <div class="module-number">Module 3</div>
+          <h3>Data Science &amp; Pandas</h3>
+          <p>EDA, wrangling, pipelines</p>
+        </div>
+        <span class="badge" style="background:#E1F5EE; color:#1D9E75">beginner</span>
+      </div>
+      <div class="duration">Duration: 3–4 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>DataFrame operations (merge, groupby, pivot)</li><li>Handling missing values &amp; outliers</li><li>Feature engineering basics</li><li>Train/test splits &amp; cross-validation</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Pandas</span><span>Scikit-learn</span><span>Missingno</span><span>Pandas-Profiling</span><span>Plotly</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>DataFrame operations (merge, groupby, pivot)</strong>
+            <div><span>select/filter/sort</span><span>groupby aggregations</span><span>joins and keys</span><span>pivot tables</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Handling missing values &amp; outliers</strong>
+            <div><span>missingness patterns</span><span>imputation strategies</span><span>IQR/z-score checks</span><span>outlier impact on models</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Feature engineering basics</strong>
+            <div><span>numeric transformations</span><span>categorical encoding</span><span>date/time features</span><span>leakage checks</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Train/test splits &amp; cross-validation</strong>
+            <div><span>holdout split</span><span>stratified split</span><span>k-fold CV</span><span>time-aware validation</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Clean messy tables and detect data quality issues</li><li>Use groupby, merge, pivot and time series operations</li><li>Create features without leakage</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Profile missingness and outliers</li><li>Join 3 related tables</li><li>Create train/test split after leakage review</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Airbnb listings</li><li>Titanic</li><li>NYC taxi samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Data quality report exists</li><li>Feature logic is documented</li><li>Charts answer real business questions</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>End-to-End EDA Report</strong>
+        <p>Using a messy real-world dataset (e.g. Titanic, Airbnb), perform full cleaning, outlier removal, feature creation, and auto-generate a Pandas Profiling HTML report with key findings.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Start using professional habits early: README, reproducible environment, testable scripts, and clear folder structure.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="machine-learning">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Machine Learning</h1>
+        <div class="track-grid">
+    <article class="topic-card beginner">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#E1F5EE; color:#1D9E75">🤖</div>
+        <div>
+          <div class="module-number">Module 4</div>
+          <h3>ML Fundamentals</h3>
+          <p>Supervised &amp; unsupervised learning</p>
+        </div>
+        <span class="badge" style="background:#E1F5EE; color:#1D9E75">beginner</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Linear &amp; logistic regression</li><li>Decision trees &amp; random forests</li><li>K-means &amp; DBSCAN clustering</li><li>Model evaluation: accuracy, F1, AUC</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Scikit-learn</span><span>Pandas</span><span>NumPy</span><span>Matplotlib</span><span>Imbalanced-learn</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Linear &amp; logistic regression</strong>
+            <div><span>linear model assumptions</span><span>loss functions</span><span>classification threshold</span><span>regularization</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Decision trees &amp; random forests</strong>
+            <div><span>tree splits</span><span>overfitting</span><span>bagging</span><span>feature importance</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>K-means &amp; DBSCAN clustering</strong>
+            <div><span>distance metrics</span><span>choosing k</span><span>density-based clusters</span><span>cluster validation</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Model evaluation: accuracy, F1, AUC</strong>
+            <div><span>confusion matrix</span><span>precision/recall</span><span>ROC-AUC</span><span>business metric selection</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Train baseline models and compare them fairly</li><li>Choose metrics based on business risk</li><li>Use train/validation/test splits correctly</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build regression and classification baselines</li><li>Compare confusion matrix vs ROC-AUC vs F1</li><li>Save and reload model with joblib</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Telco churn</li><li>credit risk</li><li>Titanic</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Baseline and tuned model compared</li><li>Leakage checklist completed</li><li>Model has a simple demo UI or API</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Customer Churn Predictor</strong>
+        <p>Full pipeline: load telco churn data → EDA → feature engineering → train 5 Scikit-learn models → compare ROC curves → export best model with joblib. Include a Streamlit demo UI.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Start using professional habits early: README, reproducible environment, testable scripts, and clear folder structure.
+      </div>
+    </article>
+  
+    <article class="topic-card intermediate">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#EEEDFE; color:#7F77DD">⚙️</div>
+        <div>
+          <div class="module-number">Module 5</div>
+          <h3>Advanced ML &amp; Tuning</h3>
+          <p>Ensembles, pipelines &amp; optimization</p>
+        </div>
+        <span class="badge" style="background:#EEEDFE; color:#7F77DD">intermediate</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>XGBoost, LightGBM, CatBoost</li><li>Hyperparameter tuning with Optuna</li><li>Scikit-learn Pipeline &amp; ColumnTransformer</li><li>SHAP &amp; LIME explainability</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>XGBoost</span><span>LightGBM</span><span>Optuna</span><span>SHAP</span><span>Scikit-learn</span><span>Feature-engine</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>XGBoost, LightGBM, CatBoost</strong>
+            <div><span>boosting intuition</span><span>tree depth and learning rate</span><span>categorical handling</span><span>overfitting controls</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Hyperparameter tuning with Optuna</strong>
+            <div><span>search spaces</span><span>objective functions</span><span>pruning</span><span>study tracking</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Scikit-learn Pipeline &amp; ColumnTransformer</strong>
+            <div><span>preprocessing pipelines</span><span>numeric/categorical branches</span><span>fit vs transform</span><span>serialization</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>SHAP &amp; LIME explainability</strong>
+            <div><span>global explanations</span><span>local explanations</span><span>feature attribution limits</span><span>stakeholder reporting</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Build robust sklearn pipelines</li><li>Tune models without overfitting validation data</li><li>Explain model behavior with SHAP/LIME</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Create ColumnTransformer pipeline</li><li>Run Optuna study</li><li>Generate SHAP plots for top features</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle House Prices</li><li>Home Credit</li><li>insurance claim severity</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Search space is justified</li><li>Leaderboard/holdout improvement shown</li><li>Explanation report is understandable</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>House Price Ensemble</strong>
+        <p>Kaggle House Prices dataset. Stack XGBoost + LightGBM + Ridge using Scikit-learn VotingRegressor. Tune with Optuna (200 trials). Generate a full SHAP explanation report. Achieve top-20% leaderboard score.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Move from notebooks to repeatable pipelines with validation, metrics, and versioned artifacts.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🔬</div>
+        <div>
+          <div class="module-number">Module 6</div>
+          <h3>ML Theory &amp; Research</h3>
+          <p>Statistics, Bayesian &amp; causality</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>PAC learning &amp; VC dimension</li><li>Kernel methods &amp; SVMs</li><li>Gaussian processes</li><li>Causal inference &amp; do-calculus</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Scikit-learn</span><span>GPy</span><span>DoWhy</span><span>PyMC</span><span>Statsmodels</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>PAC learning &amp; VC dimension</strong>
+            <div><span>core concept: PAC learning &amp; VC dimension</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Kernel methods &amp; SVMs</strong>
+            <div><span>core concept: Kernel methods &amp; SVMs</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Gaussian processes</strong>
+            <div><span>core concept: Gaussian processes</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Causal inference &amp; do-calculus</strong>
+            <div><span>core concept: Causal inference &amp; do-calculus</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply ML Theory &amp; Research concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal ML Theory &amp; Research prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>domain-specific corpora</li><li>research paper datasets</li><li>synthetic evaluation sets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Causal Impact Study</strong>
+        <p>Use DoWhy to model a treatment effect (A/B test or observational study). Compare naive correlation vs causal estimate. Validate with placebo tests and refutation methods. Write a research-style report.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="deep-learning">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Deep Learning</h1>
+        <div class="track-grid">
+    <article class="topic-card intermediate">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#EEEDFE; color:#7F77DD">🧠</div>
+        <div>
+          <div class="module-number">Module 7</div>
+          <h3>Deep Learning Basics</h3>
+          <p>Neural nets, backprop &amp; PyTorch</p>
+        </div>
+        <span class="badge" style="background:#EEEDFE; color:#7F77DD">intermediate</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Perceptrons &amp; multilayer networks</li><li>Backpropagation step-by-step</li><li>Batch norm, dropout, weight init</li><li>Learning rate schedulers</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PyTorch</span><span>TorchMetrics</span><span>TensorBoard</span><span>Torchvision</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Perceptrons &amp; multilayer networks</strong>
+            <div><span>neurons and activations</span><span>layers</span><span>forward pass</span><span>capacity and nonlinearity</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Backpropagation step-by-step</strong>
+            <div><span>computational graphs</span><span>loss gradients</span><span>autograd</span><span>manual gradient checks</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Batch norm, dropout, weight init</strong>
+            <div><span>stabilizing training</span><span>regularization</span><span>initialization schemes</span><span>train vs eval mode</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Learning rate schedulers</strong>
+            <div><span>LR choice</span><span>warmup</span><span>step/cosine schedules</span><span>early stopping</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Build PyTorch datasets, dataloaders and training loops</li><li>Diagnose overfitting and underfitting</li><li>Use checkpoints and TensorBoard</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Implement MLP then CNN</li><li>Add dropout/batch norm comparison</li><li>Resume training from checkpoint</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>MNIST</li><li>Fashion-MNIST</li><li>CIFAR-10</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Training is reproducible</li><li>Curves and confusion matrix are included</li><li>Model export path is tested</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>MNIST to CIFAR-10 Classifier</strong>
+        <p>Build a custom CNN in PyTorch from scratch. Train on CIFAR-10, track loss/accuracy in TensorBoard, implement early stopping, achieve &gt;90% val accuracy, and export to TorchScript.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Move from notebooks to repeatable pipelines with validation, metrics, and versioned artifacts.
+      </div>
+    </article>
+  
+    <article class="topic-card intermediate">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#EEEDFE; color:#7F77DD">🖼️</div>
+        <div>
+          <div class="module-number">Module 8</div>
+          <h3>Computer Vision</h3>
+          <p>CNNs, detection &amp; segmentation</p>
+        </div>
+        <span class="badge" style="background:#EEEDFE; color:#7F77DD">intermediate</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>ResNet, EfficientNet, ViT</li><li>Transfer learning &amp; fine-tuning</li><li>Object detection: YOLO, DETR</li><li>Albumentations augmentation</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PyTorch</span><span>Torchvision</span><span>Ultralytics (YOLO)</span><span>Albumentations</span><span>OpenCV</span><span>Timm</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>ResNet, EfficientNet, ViT</strong>
+            <div><span>residual connections</span><span>compound scaling</span><span>patch embeddings</span><span>model selection</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Transfer learning &amp; fine-tuning</strong>
+            <div><span>frozen backbone</span><span>classifier heads</span><span>layer unfreezing</span><span>data augmentation</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Object detection: YOLO, DETR</strong>
+            <div><span>bounding boxes</span><span>IoU</span><span>mAP</span><span>real-time inference tradeoffs</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Albumentations augmentation</strong>
+            <div><span>image transforms</span><span>label-safe transforms</span><span>augmentation policies</span><span>validation without augmentation</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Computer Vision concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Computer Vision prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle competitions</li><li>OpenML datasets</li><li>Hugging Face Datasets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Real-Time Object Detection App</strong>
+        <p>Fine-tune YOLOv8 on a custom dataset (annotate with Label Studio). Build a FastAPI endpoint that accepts images and returns bounding boxes. Wrap in a Gradio UI with live webcam support.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Move from notebooks to repeatable pipelines with validation, metrics, and versioned artifacts.
+      </div>
+    </article>
+  
+    <article class="topic-card intermediate">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#EEEDFE; color:#7F77DD">💬</div>
+        <div>
+          <div class="module-number">Module 9</div>
+          <h3>NLP &amp; Sequence Models</h3>
+          <p>Embeddings, RNNs &amp; attention</p>
+        </div>
+        <span class="badge" style="background:#EEEDFE; color:#7F77DD">intermediate</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Word2Vec, GloVe, FastText</li><li>LSTM &amp; GRU architectures</li><li>Attention mechanism internals</li><li>Tokenization: BPE, WordPiece</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PyTorch</span><span>HuggingFace Transformers</span><span>NLTK</span><span>SpaCy</span><span>Gensim</span><span>Datasets (HF)</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Word2Vec, GloVe, FastText</strong>
+            <div><span>distributional semantics</span><span>embedding training</span><span>subword embeddings</span><span>similarity search</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>LSTM &amp; GRU architectures</strong>
+            <div><span>sequence state</span><span>gates</span><span>vanishing gradients</span><span>sequence classification</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Attention mechanism internals</strong>
+            <div><span>query/key/value</span><span>attention weights</span><span>masking</span><span>interpretation limits</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Tokenization: BPE, WordPiece</strong>
+            <div><span>subword vocabulary</span><span>unknown tokens</span><span>token length</span><span>cost implications</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply NLP &amp; Sequence Models concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal NLP &amp; Sequence Models prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle competitions</li><li>OpenML datasets</li><li>Hugging Face Datasets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Sentiment Analysis API</strong>
+        <p>Fine-tune BERT on a domain-specific dataset (e.g. financial news). Expose via FastAPI. Evaluate with macro-F1, confusion matrix, error analysis. Compare against LSTM baseline. Deploy to HuggingFace Spaces.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Move from notebooks to repeatable pipelines with validation, metrics, and versioned artifacts.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="llms-transformers">
+        <div class="eyebrow">Learning Track</div>
+        <h1>LLMs &amp; Transformers</h1>
+        <div class="track-grid">
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">⚡</div>
+        <div>
+          <div class="module-number">Module 10</div>
+          <h3>Transformer Architecture</h3>
+          <p>Self-attention, scaling laws</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Scaled dot-product attention</li><li>Multi-head attention &amp; FFN</li><li>Positional encodings: RoPE, ALiBi</li><li>GPT vs BERT vs T5 tradeoffs</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PyTorch</span><span>HuggingFace Transformers</span><span>Einops</span><span>Flash-Attention</span><span>Tiktoken</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Scaled dot-product attention</strong>
+            <div><span>Q/K/V matrices</span><span>scaling factor</span><span>softmax weights</span><span>attention masking</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Multi-head attention &amp; FFN</strong>
+            <div><span>parallel attention heads</span><span>projection layers</span><span>feed-forward blocks</span><span>residual + layer norm</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Positional encodings: RoPE, ALiBi</strong>
+            <div><span>why position matters</span><span>absolute vs relative position</span><span>RoPE intuition</span><span>long-context tradeoffs</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>GPT vs BERT vs T5 tradeoffs</strong>
+            <div><span>decoder-only</span><span>encoder-only</span><span>encoder-decoder</span><span>task fit</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Transformer Architecture concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Transformer Architecture prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>domain-specific corpora</li><li>research paper datasets</li><li>synthetic evaluation sets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Mini-GPT from Scratch</strong>
+        <p>Implement a character-level GPT (Karpathy-style) in PyTorch. Train on Shakespeare or code corpus. Visualize attention weights with BertViz. Add top-k/top-p sampling. Document every architectural decision.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">✂️</div>
+        <div>
+          <div class="module-number">Module 11</div>
+          <h3>Fine-tuning &amp; Optimization</h3>
+          <p>LoRA, PEFT, quantization</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>LoRA &amp; QLoRA fine-tuning</li><li>GPTQ &amp; GGUF quantization</li><li>Knowledge distillation</li><li>Inference optimization (vLLM, TGI)</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PEFT</span><span>TRL</span><span>BitsAndBytes</span><span>vLLM</span><span>LitGPT</span><span>AutoGPTQ</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>LoRA &amp; QLoRA fine-tuning</strong>
+            <div><span>adapter concept</span><span>rank and alpha</span><span>quantized training</span><span>merge vs serve adapters</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>GPTQ &amp; GGUF quantization</strong>
+            <div><span>weight quantization</span><span>quality vs memory</span><span>local inference formats</span><span>hardware constraints</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Knowledge distillation</strong>
+            <div><span>teacher/student models</span><span>soft labels</span><span>compression</span><span>evaluation</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Inference optimization (vLLM, TGI)</strong>
+            <div><span>batching</span><span>KV cache</span><span>throughput vs latency</span><span>serving metrics</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Fine-tuning &amp; Optimization concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Fine-tuning &amp; Optimization prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>domain-specific corpora</li><li>research paper datasets</li><li>synthetic evaluation sets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Domain-Specific LLM Assistant</strong>
+        <p>QLoRA fine-tune Llama 3 or Mistral on a custom dataset (medical Q&amp;A, legal docs, or code). Evaluate with ROUGE, BLEU, and human preference scores. Serve with vLLM. Compare base vs fine-tuned with MMLU subset.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🎯</div>
+        <div>
+          <div class="module-number">Module 12</div>
+          <h3>Prompt Engineering &amp; RAG</h3>
+          <p>CoT, RAG, evals, structured output</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 2–4 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Zero-shot, few-shot, chain-of-thought</li><li>RAG: chunking, retrieval, reranking</li><li>Structured outputs &amp; tool calling</li><li>LLM eval frameworks (RAGAS, DeepEval)</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>LangChain</span><span>LlamaIndex</span><span>FAISS</span><span>ChromaDB</span><span>Cohere Rerank</span><span>RAGAS</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Zero-shot, few-shot, chain-of-thought</strong>
+            <div><span>instruction clarity</span><span>examples</span><span>reasoning prompts</span><span>when not to expose reasoning</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>RAG: chunking, retrieval, reranking</strong>
+            <div><span>chunk size</span><span>metadata</span><span>embedding retrieval</span><span>cross-encoder rerankers</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Structured outputs &amp; tool calling</strong>
+            <div><span>JSON schemas</span><span>function definitions</span><span>validation</span><span>retry on invalid output</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>LLM eval frameworks (RAGAS, DeepEval)</strong>
+            <div><span>faithfulness</span><span>answer relevance</span><span>context precision</span><span>regression tests</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Design prompts with structured outputs</li><li>Build retrieval pipelines with chunking and reranking</li><li>Evaluate answer faithfulness and retrieval quality</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Compare chunk sizes</li><li>Add metadata filters</li><li>Create 50-question eval set</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>company handbook PDFs</li><li>research papers</li><li>product documentation</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Answers include citations</li><li>Faithfulness and relevance are measured</li><li>Failure cases are documented</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>RAG Knowledge Base Q&amp;A</strong>
+        <p>Ingest a 100+ page PDF corpus (e.g. company docs, research papers). Build a hybrid BM25 + dense retrieval pipeline. Add a reranker. Evaluate faithfulness and answer relevance with RAGAS. Deploy as a chat UI.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="agentic-ai">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Agentic AI</h1>
+        <div class="track-grid">
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🕵️</div>
+        <div>
+          <div class="module-number">Module 13</div>
+          <h3>AI Agents</h3>
+          <p>Tool use, planning &amp; memory</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>ReAct &amp; Reflexion patterns</li><li>Function / tool calling APIs</li><li>Short-term vs long-term memory</li><li>LangGraph stateful agents</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>LangChain</span><span>LangGraph</span><span>OpenAI</span><span>Anthropic SDK</span><span>Mem0</span><span>Tavily</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>ReAct &amp; Reflexion patterns</strong>
+            <div><span>reason-act-observe loop</span><span>reflection</span><span>bounded iterations</span><span>failure recovery</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Function / tool calling APIs</strong>
+            <div><span>tool schema design</span><span>input validation</span><span>tool result handling</span><span>security boundaries</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Short-term vs long-term memory</strong>
+            <div><span>conversation state</span><span>summaries</span><span>vector memory</span><span>forgetting policies</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>LangGraph stateful agents</strong>
+            <div><span>state schema</span><span>nodes and edges</span><span>conditional routing</span><span>checkpointing</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Design controlled tool-using workflows</li><li>Separate planning, acting, memory and approval</li><li>Avoid unsafe autonomous loops</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a calculator/search/file tool</li><li>Add human approval before write actions</li><li>Trace every tool call</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>web research tasks</li><li>local documents</li><li>mock CRM/ticket data</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Agent has bounded steps</li><li>Tool inputs/outputs are validated</li><li>Trace shows why each action happened</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Autonomous Research Agent</strong>
+        <p>Build a ReAct agent that accepts a research question, searches the web (Tavily), reads pages, stores findings in a vector memory (Mem0), and produces a structured markdown report. Add human-in-the-loop approval step.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🤝</div>
+        <div>
+          <div class="module-number">Module 14</div>
+          <h3>Multi-Agent Systems</h3>
+          <p>Orchestration &amp; collaboration</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Agent roles &amp; specialization</li><li>AutoGen / CrewAI patterns</li><li>Inter-agent messaging</li><li>Supervisor + worker hierarchies</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>CrewAI</span><span>AutoGen</span><span>LangGraph</span><span>Pydantic AI</span><span>Redis (message queue)</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Agent roles &amp; specialization</strong>
+            <div><span>planner role</span><span>researcher role</span><span>critic role</span><span>handoffs</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>AutoGen / CrewAI patterns</strong>
+            <div><span>multi-agent conversations</span><span>supervisor patterns</span><span>task delegation</span><span>termination rules</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Inter-agent messaging</strong>
+            <div><span>message contracts</span><span>shared state</span><span>conflict handling</span><span>traceability</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Supervisor + worker hierarchies</strong>
+            <div><span>orchestrator design</span><span>worker tools</span><span>approval gates</span><span>fallback routes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Multi-Agent Systems concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Multi-Agent Systems prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>domain-specific corpora</li><li>research paper datasets</li><li>synthetic evaluation sets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>AI Startup Analysis Team</strong>
+        <p>CrewAI team of 4 agents: Market Researcher, Financial Analyst, Technical Reviewer, Report Writer. Given a startup name, they collaboratively produce a 5-page VC-style due diligence report with sourced data.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">🏗️</div>
+        <div>
+          <div class="module-number">Module 15</div>
+          <h3>Agentic Architecture</h3>
+          <p>Production pipelines at scale</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Stateful agent design with LangGraph</li><li>Human-in-the-loop patterns</li><li>Fault tolerance &amp; retry strategies</li><li>Observability with LangSmith</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>LangSmith</span><span>LangGraph</span><span>Celery</span><span>Redis</span><span>OpenTelemetry</span><span>Sentry</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Stateful agent design with LangGraph</strong>
+            <div><span>core concept: Stateful agent design with LangGraph</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Human-in-the-loop patterns</strong>
+            <div><span>core concept: Human-in-the-loop patterns</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Fault tolerance &amp; retry strategies</strong>
+            <div><span>core concept: Fault tolerance &amp; retry strategies</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Observability with LangSmith</strong>
+            <div><span>core concept: Observability with LangSmith</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Agentic Architecture concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Agentic Architecture prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Production Agent with Observability</strong>
+        <p>Harden the research agent: add LangSmith tracing, retry logic, fallback LLM providers, rate-limit handling, structured logging. Deploy as a scalable Celery worker. Monitor latency and token costs in a Grafana dashboard.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="enterprise-mlops">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Enterprise &amp; MLOps</h1>
+        <div class="track-grid">
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🚀</div>
+        <div>
+          <div class="module-number">Module 16</div>
+          <h3>MLOps</h3>
+          <p>Deployment, monitoring &amp; CI/CD</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 6–8 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>MLflow experiment tracking</li><li>Model packaging with FastAPI + Docker</li><li>DVC for data versioning</li><li>GitHub Actions ML pipeline</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>MLflow</span><span>DVC</span><span>FastAPI</span><span>Docker</span><span>Pytest</span><span>Great Expectations</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>MLflow experiment tracking</strong>
+            <div><span>runs and params</span><span>metrics and artifacts</span><span>model registry</span><span>comparison</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Model packaging with FastAPI + Docker</strong>
+            <div><span>predict endpoint</span><span>schema validation</span><span>container build</span><span>health checks</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>DVC for data versioning</strong>
+            <div><span>data remotes</span><span>pipeline stages</span><span>reproducibility</span><span>large-file workflow</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>GitHub Actions ML pipeline</strong>
+            <div><span>test jobs</span><span>lint/type checks</span><span>build image</span><span>deployment gates</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Package models behind APIs</li><li>Track experiments and register artifacts</li><li>Automate testing and deployment checks</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Create FastAPI predict endpoint</li><li>Track model in MLflow</li><li>Build Docker image and CI test</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>any prior ML project dataset</li><li>drifted synthetic data</li><li>batch scoring sample</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>API has health and prediction tests</li><li>Model version is logged</li><li>Rollback plan exists</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Automated ML Pipeline</strong>
+        <p>Full MLOps pipeline: DVC-versioned data → Scikit-learn/PyTorch model → MLflow tracking → Docker image → FastAPI endpoint → GitHub Actions CI that runs tests and auto-deploys on main merge. Add data validation with Great Expectations.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">☁️</div>
+        <div>
+          <div class="module-number">Module 17</div>
+          <h3>Cloud AI Platforms</h3>
+          <p>AWS, GCP, Azure ML services</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: 4–6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>SageMaker training jobs &amp; endpoints</li><li>Vertex AI Pipelines</li><li>Azure ML + promptflow</li><li>Cost optimization &amp; spot instances</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>boto3</span><span>SageMaker SDK</span><span>Vertex AI SDK</span><span>Terraform</span><span>Pulumi</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>SageMaker training jobs &amp; endpoints</strong>
+            <div><span>core concept: SageMaker training jobs &amp; endpoints</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Vertex AI Pipelines</strong>
+            <div><span>core concept: Vertex AI Pipelines</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Azure ML + promptflow</strong>
+            <div><span>core concept: Azure ML + promptflow</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Cost optimization &amp; spot instances</strong>
+            <div><span>core concept: Cost optimization &amp; spot instances</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Cloud AI Platforms concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Cloud AI Platforms prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>SageMaker End-to-End Deploy</strong>
+        <p>Train an XGBoost model on SageMaker, register in Model Registry, deploy as a real-time endpoint with auto-scaling, set up CloudWatch alarms for drift, and provision all infrastructure with Terraform.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">🔒</div>
+        <div>
+          <div class="module-number">Module 18</div>
+          <h3>AI Safety &amp; Governance</h3>
+          <p>Responsible AI, fairness, compliance</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Bias auditing: Fairlearn, AIF360</li><li>Explainability: SHAP, LIME</li><li>EU AI Act &amp; model cards</li><li>Red-teaming &amp; adversarial prompts</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Fairlearn</span><span>AIF360</span><span>SHAP</span><span>Alibi</span><span>Guardrails AI</span><span>Garak</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Bias auditing: Fairlearn, AIF360</strong>
+            <div><span>sensitive attributes</span><span>group metrics</span><span>mitigation</span><span>audit reporting</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Explainability: SHAP, LIME</strong>
+            <div><span>model-agnostic explanations</span><span>tree explanations</span><span>local examples</span><span>limitations</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>EU AI Act &amp; model cards</strong>
+            <div><span>risk classification</span><span>model documentation</span><span>intended use</span><span>limitations</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Red-teaming &amp; adversarial prompts</strong>
+            <div><span>attack prompts</span><span>jailbreak tests</span><span>policy checks</span><span>mitigation backlog</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply AI Safety &amp; Governance concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal AI Safety &amp; Governance prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Model Fairness Audit Report</strong>
+        <p>Take a production-grade model (loan approval, hiring), run a full Fairlearn + SHAP audit across demographic groups, identify disparate impact, apply mitigation (reweighing, threshold adjustment), and publish a model card.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">⚖️</div>
+        <div>
+          <div class="module-number">Module 19</div>
+          <h3>LLMOps</h3>
+          <p>Running LLMs in production</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Prompt versioning with PromptLayer</li><li>A/B testing LLM responses</li><li>Guardrails &amp; content filtering</li><li>Token cost &amp; latency SLAs</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PromptLayer</span><span>LangSmith</span><span>Guardrails AI</span><span>Helicone</span><span>Langfuse</span><span>OpenCost</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Prompt versioning with PromptLayer</strong>
+            <div><span>prompt IDs</span><span>version history</span><span>rollback</span><span>experiment comparison</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>A/B testing LLM responses</strong>
+            <div><span>variant design</span><span>quality metrics</span><span>human preference</span><span>statistical confidence</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Guardrails &amp; content filtering</strong>
+            <div><span>input validation</span><span>output validation</span><span>policy filters</span><span>safe fallback</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Token cost &amp; latency SLAs</strong>
+            <div><span>token accounting</span><span>latency budgets</span><span>provider routing</span><span>cost dashboards</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply LLMOps concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal LLMOps prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>LLM Gateway with Analytics</strong>
+        <p>Build an LLM proxy gateway (using LiteLLM) that routes to multiple providers, logs every request to Langfuse, enforces guardrails, tracks cost per team with OpenCost, and exposes a Grafana dashboard. A/B test two prompt versions automatically.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+      <section class="page track" id="missing-enterprise-foundations-added">
+        <div class="eyebrow">Learning Track</div>
+        <h1>Missing Enterprise Foundations Added</h1>
+        <div class="track-grid">
+    <article class="topic-card beginner">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#E1F5EE; color:#1D9E75">🧮</div>
+        <div>
+          <div class="module-number">Module 20</div>
+          <h3>NumPy, SciPy &amp; Scientific Computing</h3>
+          <p>Array thinking, vectorization, numerical stability</p>
+        </div>
+        <span class="badge" style="background:#E1F5EE; color:#1D9E75">beginner</span>
+      </div>
+      <div class="duration">Duration: 2-3 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Broadcasting, vectorization, memory layout</li><li>Numerical precision and floating point traps</li><li>SciPy optimization, sparse matrices, signal/stat modules</li><li>Reusable notebook-to-package workflow</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>NumPy</span><span>SciPy</span><span>Jupyter</span><span>pytest</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Broadcasting, vectorization, memory layout</strong>
+            <div><span>core concept: Broadcasting, vectorization, memory layout</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Numerical precision and floating point traps</strong>
+            <div><span>core concept: Numerical precision and floating point traps</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>SciPy optimization, sparse matrices, signal/stat modules</strong>
+            <div><span>core concept: SciPy optimization, sparse matrices, signal/stat modules</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Reusable notebook-to-package workflow</strong>
+            <div><span>core concept: Reusable notebook-to-package workflow</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply NumPy, SciPy &amp; Scientific Computing concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal NumPy, SciPy &amp; Scientific Computing prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle beginner datasets</li><li>UCI Machine Learning Repository</li><li>public CSV exports</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Scientific Computing Lab</strong>
+        <p>Implement vectorized distance search, sparse matrix operations, and an optimization routine; benchmark loop vs vectorized implementations and publish a performance note.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Start using professional habits early: README, reproducible environment, testable scripts, and clear folder structure.
+      </div>
+    </article>
+  
+    <article class="topic-card intermediate">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#EEEDFE; color:#7F77DD">🗄️</div>
+        <div>
+          <div class="module-number">Module 21</div>
+          <h3>SQL &amp; Data Engineering for AI</h3>
+          <p>Reliable data pipelines before model pipelines</p>
+        </div>
+        <span class="badge" style="background:#EEEDFE; color:#7F77DD">intermediate</span>
+      </div>
+      <div class="duration">Duration: 4-6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>SQL joins, windows, CTEs, indexing basics</li><li>Batch pipelines, orchestration, data contracts</li><li>Feature stores and offline/online consistency</li><li>Data validation, lineage, and schema evolution</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>PostgreSQL</span><span>DuckDB</span><span>Airflow</span><span>dbt</span><span>Great Expectations</span><span>Feast</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>SQL joins, windows, CTEs, indexing basics</strong>
+            <div><span>core concept: SQL joins, windows, CTEs, indexing basics</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Batch pipelines, orchestration, data contracts</strong>
+            <div><span>core concept: Batch pipelines, orchestration, data contracts</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Feature stores and offline/online consistency</strong>
+            <div><span>core concept: Feature stores and offline/online consistency</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Data validation, lineage, and schema evolution</strong>
+            <div><span>core concept: Data validation, lineage, and schema evolution</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply SQL &amp; Data Engineering for AI concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal SQL &amp; Data Engineering for AI prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>Kaggle competitions</li><li>OpenML datasets</li><li>Hugging Face Datasets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Production Feature Pipeline</strong>
+        <p>Build a SQL + Python feature pipeline with validation gates, reproducible snapshots, and a feature table consumed by both sklearn training and FastAPI inference.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Move from notebooks to repeatable pipelines with validation, metrics, and versioned artifacts.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🧪</div>
+        <div>
+          <div class="module-number">Module 22</div>
+          <h3>AI Evaluation &amp; Testing</h3>
+          <p>Regression tests for models, prompts, RAG and agents</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 3-4 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Golden datasets and offline evals</li><li>Prompt regression tests and adversarial cases</li><li>RAG faithfulness, answer relevance, retrieval recall</li><li>Agent trajectory evaluation and tool-call correctness</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>OpenAI Evals</span><span>DeepEval</span><span>RAGAS</span><span>pytest</span><span>LangSmith</span><span>MLflow</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Golden datasets and offline evals</strong>
+            <div><span>core concept: Golden datasets and offline evals</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Prompt regression tests and adversarial cases</strong>
+            <div><span>core concept: Prompt regression tests and adversarial cases</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>RAG faithfulness, answer relevance, retrieval recall</strong>
+            <div><span>core concept: RAG faithfulness, answer relevance, retrieval recall</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Agent trajectory evaluation and tool-call correctness</strong>
+            <div><span>core concept: Agent trajectory evaluation and tool-call correctness</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Build eval sets for ML, RAG and agents</li><li>Create quality gates for deployment</li><li>Track regressions over time</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Write prompt regression tests</li><li>Score RAG faithfulness</li><li>Evaluate agent tool-call accuracy</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>golden Q&amp;A pairs</li><li>adversarial prompts</li><li>known-bad retrieval examples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>CI can fail on eval regression</li><li>Metrics have thresholds</li><li>Human review notes are captured</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>AI Quality Gate</strong>
+        <p>Create an automated eval suite that blocks deployment when model quality, hallucination rate, latency, or cost exceeds defined thresholds.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">🔭</div>
+        <div>
+          <div class="module-number">Module 23</div>
+          <h3>Observability &amp; Reliability</h3>
+          <p>Operate AI systems with traces, alerts and runbooks</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: 3-4 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Structured logs, traces, metrics and audit events</li><li>Latency, cost, token usage and error budgets</li><li>Data drift, model drift and feedback loops</li><li>Incident response and rollback playbooks</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>OpenTelemetry</span><span>Prometheus</span><span>Grafana</span><span>Sentry</span><span>Langfuse</span><span>Helicone</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Structured logs, traces, metrics and audit events</strong>
+            <div><span>core concept: Structured logs, traces, metrics and audit events</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Latency, cost, token usage and error budgets</strong>
+            <div><span>core concept: Latency, cost, token usage and error budgets</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Data drift, model drift and feedback loops</strong>
+            <div><span>core concept: Data drift, model drift and feedback loops</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Incident response and rollback playbooks</strong>
+            <div><span>core concept: Incident response and rollback playbooks</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Observability &amp; Reliability concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Observability &amp; Reliability prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>AI Observability Dashboard</strong>
+        <p>Instrument an LLM/RAG API with traces, token/cost tracking, quality scores, error alerts, and a runbook for degraded retrieval or model outages.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">🔌</div>
+        <div>
+          <div class="module-number">Module 24</div>
+          <h3>MCP, Tools &amp; Integration Protocols</h3>
+          <p>Connect agents safely to enterprise tools</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: 2-3 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Tool schemas, authentication, authorization</li><li>Model Context Protocol server concepts</li><li>Connector safety, least privilege, approval gates</li><li>Tool result validation and sandboxing</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>MCP</span><span>FastAPI</span><span>Pydantic</span><span>OAuth2</span><span>OpenAPI</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Tool schemas, authentication, authorization</strong>
+            <div><span>core concept: Tool schemas, authentication, authorization</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Model Context Protocol server concepts</strong>
+            <div><span>core concept: Model Context Protocol server concepts</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Connector safety, least privilege, approval gates</strong>
+            <div><span>core concept: Connector safety, least privilege, approval gates</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Tool result validation and sandboxing</strong>
+            <div><span>core concept: Tool result validation and sandboxing</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply MCP, Tools &amp; Integration Protocols concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal MCP, Tools &amp; Integration Protocols prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Secure Tool Server</strong>
+        <p>Build a small MCP-style tool server that exposes read-only database/document tools with auth, input validation, logging, and human approval for sensitive actions.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card advanced">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAECE7; color:#D85A30">🎙️</div>
+        <div>
+          <div class="module-number">Module 25</div>
+          <h3>Multimodal AI</h3>
+          <p>Vision, documents, audio and speech with LLMs</p>
+        </div>
+        <span class="badge" style="background:#FAECE7; color:#D85A30">advanced</span>
+      </div>
+      <div class="duration">Duration: 4-6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Vision-language models and document understanding</li><li>OCR, layout extraction and multimodal retrieval</li><li>Speech-to-text, text-to-speech and voice agents</li><li>Evaluation for image, document and audio outputs</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>OpenAI Vision/Audio</span><span>Whisper</span><span>Tesseract</span><span>LayoutLM</span><span>CLIP</span><span>Pydub</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Vision-language models and document understanding</strong>
+            <div><span>core concept: Vision-language models and document understanding</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>OCR, layout extraction and multimodal retrieval</strong>
+            <div><span>core concept: OCR, layout extraction and multimodal retrieval</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Speech-to-text, text-to-speech and voice agents</strong>
+            <div><span>core concept: Speech-to-text, text-to-speech and voice agents</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Evaluation for image, document and audio outputs</strong>
+            <div><span>core concept: Evaluation for image, document and audio outputs</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Multimodal AI concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Multimodal AI prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>domain-specific corpora</li><li>research paper datasets</li><li>synthetic evaluation sets</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Multimodal Document Analyst</strong>
+        <p>Ingest PDFs with charts/images, extract text and layout, answer questions with citations, and optionally generate an audio briefing.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Add evaluation, error analysis, failure-mode documentation, and explicit tradeoff decisions.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">🛡️</div>
+        <div>
+          <div class="module-number">Module 26</div>
+          <h3>Security, Privacy &amp; Compliance</h3>
+          <p>Production controls for sensitive AI workloads</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>PII detection, masking and retention policies</li><li>Prompt injection and data exfiltration defenses</li><li>Secrets management and workload identity</li><li>Auditability, access control and compliance review</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Presidio</span><span>Vault</span><span>OPA</span><span>Guardrails AI</span><span>Garak</span><span>OWASP LLM Top 10</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>PII detection, masking and retention policies</strong>
+            <div><span>core concept: PII detection, masking and retention policies</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Prompt injection and data exfiltration defenses</strong>
+            <div><span>core concept: Prompt injection and data exfiltration defenses</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Secrets management and workload identity</strong>
+            <div><span>core concept: Secrets management and workload identity</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Auditability, access control and compliance review</strong>
+            <div><span>core concept: Auditability, access control and compliance review</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Identify sensitive data paths</li><li>Mitigate prompt injection and data exfiltration</li><li>Create audit-ready controls</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Run PII detection/redaction</li><li>Create prompt-injection test suite</li><li>Add allowlisted tool permissions</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>synthetic PII records</li><li>OWASP-style attack prompts</li><li>mock internal documents</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Threat model is written</li><li>PII never appears in logs</li><li>Security tests are repeatable</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Secure RAG Review</strong>
+        <p>Threat-model a RAG system, add PII redaction, prompt-injection tests, allowlisted tools, audit logs, and a compliance-ready risk report.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">☸️</div>
+        <div>
+          <div class="module-number">Module 27</div>
+          <h3>Kubernetes &amp; Platform Engineering</h3>
+          <p>Scale APIs, workers and model services</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: 4-6 weeks</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Containers, images, registries and runtime limits</li><li>Kubernetes deployments, services, jobs and autoscaling</li><li>GPU scheduling, queue workers and async inference</li><li>Blue/green and canary deployments</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>Docker</span><span>Kubernetes</span><span>Helm</span><span>KServe</span><span>Ray Serve</span><span>Argo Workflows</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Containers, images, registries and runtime limits</strong>
+            <div><span>core concept: Containers, images, registries and runtime limits</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Kubernetes deployments, services, jobs and autoscaling</strong>
+            <div><span>core concept: Kubernetes deployments, services, jobs and autoscaling</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>GPU scheduling, queue workers and async inference</strong>
+            <div><span>core concept: GPU scheduling, queue workers and async inference</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Blue/green and canary deployments</strong>
+            <div><span>core concept: Blue/green and canary deployments</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply Kubernetes &amp; Platform Engineering concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal Kubernetes &amp; Platform Engineering prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Scalable AI Service</strong>
+        <p>Deploy a RAG or model inference API with separate worker queues, autoscaling, health checks, canary rollout, and dashboarded SLOs.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  
+    <article class="topic-card enterprise">
+      <div class="topic-head">
+        <div class="icon-wrap" style="background:#FAEEDA; color:#BA7517">📦</div>
+        <div>
+          <div class="module-number">Module 28</div>
+          <h3>AI Product &amp; Portfolio</h3>
+          <p>Turn technical projects into business outcomes</p>
+        </div>
+        <span class="badge" style="background:#FAEEDA; color:#BA7517">enterprise</span>
+      </div>
+      <div class="duration">Duration: Ongoing</div>
+      <div class="columns">
+        <div>
+          <h4>What to learn</h4>
+          <ul><li>Problem framing and success metrics</li><li>Cost, latency, quality and risk tradeoffs</li><li>User feedback loops and human workflow design</li><li>Portfolio storytelling, READMEs, model cards and demos</li></ul>
+        </div>
+        <div>
+          <h4>Libraries & tools</h4>
+          <div class="tags"><span>ADR</span><span>Model Cards</span><span>PRDs</span><span>User Journey Maps</span></div>
+        </div>
+      </div>
+      <div class="breakdown-box">
+        <h4>Granular learning breakdown</h4>
+        
+          <div class="breakdown-item">
+            <strong>Problem framing and success metrics</strong>
+            <div><span>core concept: Problem framing and success metrics</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Cost, latency, quality and risk tradeoffs</strong>
+            <div><span>core concept: Cost, latency, quality and risk tradeoffs</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>User feedback loops and human workflow design</strong>
+            <div><span>core concept: User feedback loops and human workflow design</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+          <div class="breakdown-item">
+            <strong>Portfolio storytelling, READMEs, model cards and demos</strong>
+            <div><span>core concept: Portfolio storytelling, READMEs, model cards and demos</span><span>small implementation exercise</span><span>common failure mode</span><span>mini-checkpoint and notes</span></div>
+          </div>
+        
+      </div>
+      <div class="granular-grid">
+        <div>
+          <h4>Learning outcomes</h4>
+          <ul><li>Apply AI Product &amp; Portfolio concepts in a working project</li><li>Explain the key design choices and tradeoffs</li><li>Convert experiments into a reproducible artifact</li></ul>
+        </div>
+        <div>
+          <h4>Hands-on labs</h4>
+          <ul><li>Build a minimal AI Product &amp; Portfolio prototype</li><li>Add tests, metrics, and error analysis</li><li>Refactor the work into a reusable project structure</li></ul>
+        </div>
+        <div>
+          <h4>Datasets / practice inputs</h4>
+          <ul><li>internal-style mock data</li><li>privacy-safe sampled data</li><li>production logs and telemetry samples</li></ul>
+        </div>
+        <div>
+          <h4>Success rubric</h4>
+          <ul><li>Project runs from a clean setup</li><li>Metrics and failure cases are documented</li><li>README explains assumptions, limitations, and next steps</li></ul>
+        </div>
+      </div>
+      <div class="project-box">
+        <div class="project-label">Module Project</div>
+        <strong>Enterprise AI Case Study</strong>
+        <p>Write a polished case study for your final platform: business problem, architecture, metrics, risks, tradeoffs, screenshots, and roadmap.</p>
+      </div>
+      <div class="enterprise-note">
+        <strong>Enterprise habit:</strong> Design for auditability, security, reliability, cost control, monitoring, and operational ownership.
+      </div>
+    </article>
+  </div>
+      </section>
+    
+  
+    <section class="page mega" id="mega-project">
+      <div class="eyebrow">Final Project</div>
+      <h1>AutoResearch AI — Enterprise Agentic Intelligence Platform</h1>
+      <p class="lead">A production-grade multi-agent system that researches, analyzes, writes reports, and deploys insights end-to-end.</p>
+      <div class="mega-hero">
+        <div class="mega-icon">🌐</div>
+        <div>
+          <h2>What it does</h2>
+          <p>A user submits a research query. The platform creates a plan, retrieves documents through RAG, analyzes structured data with ML models, writes a report with an LLM, reviews it with a critic agent, and serves results through a FastAPI dashboard with streaming and traceability.</p>
+        </div>
+      </div>
+      <h2>Architecture Layers</h2>
+      <div class="layers">
+        <div><strong>UI Layer</strong><span>Streamlit or React dashboard, FastAPI REST, WebSocket streaming.</span></div>
+        <div><strong>Agent Layer</strong><span>LangGraph state machine, planner, researcher, analyst, writer, critic.</span></div>
+        <div><strong>RAG Layer</strong><span>FAISS or vector DB, hybrid retrieval, reranking, citations.</span></div>
+        <div><strong>ML Layer</strong><span>pandas, sklearn analytics, PyTorch sentiment/classifier model.</span></div>
+        <div><strong>LLM Layer</strong><span>Structured outputs, prompt versions, optional LoRA-tuned writer.</span></div>
+        <div><strong>Ops Layer</strong><span>MLflow, Docker, CI/CD, observability, evals, guardrails.</span></div>
+      </div>
+      <h2>12-Week Build Plan</h2>
+      <div class="milestones">
+        <div><b>Weeks 1-2</b><span>Data ingestion, EDA, document parser, vector index.</span></div>
+        <div><b>Weeks 3-4</b><span>sklearn analytics model and PyTorch classifier.</span></div>
+        <div><b>Weeks 5-6</b><span>RAG pipeline, prompt design, structured outputs, eval set.</span></div>
+        <div><b>Weeks 7-8</b><span>Multi-agent orchestration, tools, memory, human approval.</span></div>
+        <div><b>Weeks 9-10</b><span>FastAPI backend, dashboard, streaming, auth assumptions.</span></div>
+        <div><b>Weeks 11-12</b><span>Docker, CI/CD, MLflow, monitoring, safety review, final demo.</span></div>
+      </div>
+      <h2>Definition of Done</h2>
+      <ul class="done-list">
+        <li>Answers include citations, uncertainty notes and tool traces.</li>
+        <li>At least three tools are used: retrieval, SQL/data, ML inference or calculator.</li>
+        <li>Model, prompt and data versions are logged for every run.</li>
+        <li>Offline evals test retrieval quality, answer quality, safety and cost.</li>
+        <li>README includes architecture, setup, risks, screenshots, and runbook.</li>
+      </ul>
+    </section>
+  
+  
+    <section class="page" id="assessment">
+      <div class="eyebrow">Assessment</div>
+      <h1>How to Judge Progress</h1>
+      <p class="lead">Do not mark a module complete because you watched a course. Mark it complete when the project survives this review checklist.</p>
+      <div class="assessment-grid">
+        
+          <div>
+            <strong>Concept mastery</strong>
+            <span>Can explain the idea without notes, derive or sketch the mechanism, and identify where it fails.</span>
+          </div>
+        
+          <div>
+            <strong>Implementation</strong>
+            <span>Can build the core workflow from scratch or with standard libraries and keep it reproducible.</span>
+          </div>
+        
+          <div>
+            <strong>Evaluation</strong>
+            <span>Defines the right metrics, creates test/eval examples, analyzes errors, and compares baselines.</span>
+          </div>
+        
+          <div>
+            <strong>Engineering quality</strong>
+            <span>Uses clean structure, tests, configuration, logging, versioning and automation.</span>
+          </div>
+        
+          <div>
+            <strong>Enterprise readiness</strong>
+            <span>Documents security, privacy, observability, cost, rollback and governance assumptions.</span>
+          </div>
+        
+      </div>
+      <h2>Scoring Rule</h2>
+      <div class="score-box">
+        <div><b>0</b><span>Not attempted</span></div>
+        <div><b>1</b><span>Followed tutorial only</span></div>
+        <div><b>2</b><span>Built independently with gaps</span></div>
+        <div><b>3</b><span>Reproducible, evaluated, documented</span></div>
+        <div><b>4</b><span>Production-minded, tested, observable</span></div>
+      </div>
+      <div class="callout"><strong>Promotion rule:</strong> move to the next major track only when your average score is at least 3 across concept, implementation and evaluation.</div>
+    </section>
+  
+  
+    <section class="page" id="artifact-template">
+      <div class="eyebrow">Portfolio Standard</div>
+      <h1>Project Artifact Template</h1>
+      <p class="lead">Use this same artifact structure for every module. It makes your portfolio feel like real engineering work, not a folder of disconnected notebooks.</p>
+      <div class="layers">
+        <div><strong>README</strong><span>Problem, dataset, setup, run commands, screenshots, architecture, metrics and limitations.</span></div><div><strong>Source code</strong><span>src package, notebooks only for exploration, tests, configs, Makefile or task runner.</span></div><div><strong>Data notes</strong><span>Data source, schema, cleaning rules, leakage review, privacy considerations.</span></div><div><strong>Evaluation</strong><span>Baseline, metrics, failure cases, confusion matrix or qualitative examples.</span></div><div><strong>Deployment</strong><span>API or app, Dockerfile, environment variables, health check and rollback note.</span></div><div><strong>Governance</strong><span>Model card, risk register, cost estimate, monitoring plan and owner/runbook.</span></div>
+      </div>
+      <h2>Recommended Repository Layout</h2>
+      <pre class="repo-tree">project-name/
+  README.md
+  pyproject.toml or requirements.txt
+  data/README.md
+  notebooks/01_exploration.ipynb
+  src/
+  tests/
+  configs/
+  scripts/
+  app/ or api/
+  reports/
+  model_card.md
+  risk_register.md</pre>
+    </section>
+  
+  
+    <section class="page" id="portfolio">
+      <div class="eyebrow">Checklist</div>
+      <h1>Enterprise Portfolio Checklist</h1>
+      <div class="check-grid">
+        <div class="check">✓ Every project has a README, setup command, screenshots and metrics.</div><div class="check">✓ Every ML project has baseline, validation strategy and error analysis.</div><div class="check">✓ Every LLM/RAG project has eval examples and failure cases.</div><div class="check">✓ Every deployed service has tests, logs, health check and rollback notes.</div><div class="check">✓ Every enterprise project has security, privacy and governance assumptions.</div><div class="check">✓ The final capstone has an architecture diagram, model card and runbook.</div>
+      </div>
+    </section>
+  
+  
+    <section class="page" id="references">
+      <div class="eyebrow">References</div>
+      <h1>Official References</h1>
+      <p class="lead">Use official documentation for syntax, APIs and current platform behavior. Libraries move quickly; verify versions before starting each project.</p>
+      <ol class="refs"><li><strong>Python Tutorial</strong><br><a href="https://docs.python.org/3/tutorial/">https://docs.python.org/3/tutorial/</a></li><li><strong>pandas Getting Started</strong><br><a href="https://pandas.pydata.org/docs/getting_started/index.html">https://pandas.pydata.org/docs/getting_started/index.html</a></li><li><strong>scikit-learn User Guide</strong><br><a href="https://scikit-learn.org/stable/user_guide.html">https://scikit-learn.org/stable/user_guide.html</a></li><li><strong>PyTorch Tutorials</strong><br><a href="https://docs.pytorch.org/tutorials/">https://docs.pytorch.org/tutorials/</a></li><li><strong>Hugging Face Transformers</strong><br><a href="https://huggingface.co/docs/transformers/index">https://huggingface.co/docs/transformers/index</a></li><li><strong>LangChain / LangGraph Docs</strong><br><a href="https://docs.langchain.com/">https://docs.langchain.com/</a></li><li><strong>OpenAI Agents, Retrieval, Evals, Safety</strong><br><a href="https://platform.openai.com/docs/">https://platform.openai.com/docs/</a></li><li><strong>MLflow Documentation</strong><br><a href="https://mlflow.org/docs/latest/index.html">https://mlflow.org/docs/latest/index.html</a></li></ol>
+    </section>
+  
+</body>
+</html>

@@ -1,0 +1,1169 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>AI ML Engineering Syllabus</title>
+  <style>
+    @page { size: A4; margin: 15mm 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: #14243a;
+      background: #f3f7fb;
+      line-height: 1.5;
+    }
+    a { color: #1267a8; text-decoration: none; }
+    .cover {
+      min-height: 100vh;
+      padding: 70px 58px;
+      page-break-after: always;
+      color: #fff;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(39, 169, 138, .35), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(244, 154, 64, .25), transparent 26%),
+        linear-gradient(135deg, #061a32 0%, #092f55 52%, #0e4d6c 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .cover:after {
+      content: "";
+      position: absolute;
+      right: -180px;
+      bottom: -220px;
+      width: 560px;
+      height: 560px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .cover-kicker {
+      display: inline-block;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.35);
+      color: #d8efff;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .cover h1 {
+      max-width: 760px;
+      margin: 44px 0 12px;
+      color: #ffffff !important;
+      font-size: 58px;
+      line-height: 1.02;
+      letter-spacing: -.055em;
+    }
+    .cover h2 {
+      margin: 0 0 28px;
+      color: #d8efff;
+      font-size: 28px;
+      font-weight: 500;
+    }
+    .cover p {
+      max-width: 760px;
+      color: #d7e9f9;
+      font-size: 16px;
+    }
+    .cover-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 52px;
+      max-width: 760px;
+    }
+    .cover-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .cover-card b { display: block; font-size: 30px; }
+    .cover-card span { color: #c9e3f7; font-size: 12px; }
+    .toc-page {
+      min-height: 100vh;
+      padding: 20px 0 10px;
+      page-break-after: always;
+    }
+    .eyebrow, .module-kicker, .project-kicker {
+      color: #b96b12;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .module-kicker, .project-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .inline-icon {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vertical-align: -3px;
+    }
+    h1, h2, h3 {
+      color: #08284c;
+      letter-spacing: -.035em;
+      line-height: 1.12;
+    }
+    .toc-page h1 {
+      font-size: 34px;
+      margin: 0 0 8px;
+    }
+    .toc-subtitle {
+      margin: 0 0 16px;
+      color: #51677d;
+      max-width: 790px;
+    }
+    .toc-band {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      align-items: stretch;
+      margin: 15px 0 18px;
+    }
+    .toc-band-card {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #08284c 0%, #0e5a75 100%);
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(8, 40, 76, .14);
+    }
+    .toc-band-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .toc-band-card span {
+      display: block;
+      color: #d8efff;
+      font-size: 12px;
+    }
+    .toc-band-note {
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid #d8e7f2;
+      background: #ffffff;
+      color: #4f6680;
+      font-size: 12px;
+      box-shadow: 0 8px 22px rgba(12, 46, 80, .05);
+    }
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .toc-card {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 13px;
+      align-items: start;
+      min-height: 78px;
+      padding: 13px 15px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid #cfe1ee;
+      box-shadow: 0 8px 22px rgba(12, 46, 80, .055);
+      break-inside: avoid;
+    }
+    .toc-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: #0d6b8d;
+      background: linear-gradient(135deg, #e9f8f3 0%, #eaf3ff 100%);
+      border: 1px solid #cae3ef;
+    }
+    .toc-icon-svg {
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .toc-content strong {
+      display: block;
+      color: #b96b12;
+      font-size: 10.5px;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .toc-content em {
+      display: block;
+      color: #092f55;
+      font-style: normal;
+      font-weight: 800;
+      font-size: 14.2px;
+      line-height: 1.25;
+    }
+    .toc-content small {
+      display: block;
+      color: #60758a;
+      font-size: 11.3px;
+      margin-top: 5px;
+      line-height: 1.25;
+    }
+    .module {
+      padding: 26px 0 18px;
+      page-break-after: always;
+    }
+    .module h2 {
+      font-size: 29px;
+      margin: 0 0 12px;
+      padding-bottom: 11px;
+      border-bottom: 2px solid #d5e5f2;
+    }
+    p {
+      margin: 8px 0 10px;
+      color: #334b65;
+      font-size: 13.2px;
+    }
+    p strong {
+      color: #092f55;
+    }
+    ul {
+      margin: 8px 0 14px;
+      padding: 13px 18px 13px 30px;
+      background: #fff;
+      border: 1px solid #d9e6f1;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(12, 46, 80, .045);
+    }
+    li {
+      margin: 4px 0;
+      color: #253a51;
+      font-size: 12.8px;
+    }
+    .sprint-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #08284c;
+      background: linear-gradient(135deg, #eef7ff 0%, #f6fbff 100%);
+      border: 1px solid #cfe3f2;
+      font-size: 13.2px;
+      page-break-after: avoid;
+    }
+    .sprint-heading .inline-icon {
+      color: #0d6b8d;
+      width: 15px;
+      height: 15px;
+    }
+    .labs {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 13px 15px;
+      border-left: 4px solid #1d9e75;
+      border-radius: 13px;
+      background: #f4fcf8;
+      color: #254a3d;
+    }
+    .project-card {
+      margin: 18px 0 4px;
+      padding: 17px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eef7ff 0%, #f8fbff 100%);
+      border: 1px solid #c6dff2;
+      box-shadow: 0 12px 28px rgba(12, 46, 80, .07);
+      page-break-inside: avoid;
+    }
+    .project-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+    .project-card p {
+      color: #314961;
+      font-size: 13px;
+    }
+    .deliverables {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: #fffaf0;
+      border: 1px solid #eccd91;
+      color: #4c3a1f;
+    }
+    hr {
+      border: 0;
+      height: 1px;
+      background: #d7e5f2;
+      margin: 18px 0;
+    }
+    pre {
+      padding: 14px;
+      border-radius: 14px;
+      background: #0b1e34;
+      color: #d9efff;
+      overflow: hidden;
+      font-size: 11px;
+    }
+    .footer-note {
+      color: #6b7d90;
+      font-size: 11px;
+      margin-top: 24px;
+    }
+    @media print {
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="cover-kicker">Complete Syllabus</div>
+    <h1>AI & ML Engineering</h1>
+    <h2>Complete Syllabus</h2>
+    <p>16 modules, 75 skill sprints, and a project-first path from Linux shell and Python fundamentals to enterprise LLM platforms, MLOps, LLMOps, RAG, agents, multimodal AI and product-ready delivery.</p>
+    <div class="cover-grid">
+      <div class="cover-card"><b>16</b><span>Modules</span></div>
+      <div class="cover-card"><b>75</b><span>Skill Sprints</span></div>
+      <div class="cover-card"><b>16</b><span>Projects</span></div>
+      <div class="cover-card"><b>1</b><span>Enterprise path</span></div>
+    </div>
+  </section>
+  <section class="toc-page">
+    <div class="eyebrow">Table of Contents</div>
+    <h1>Foundation to Core ML</h1>
+    <p class="toc-subtitle">Start with the engineering base, then move into the math, data, and classical ML skills that make the advanced AI chapters easier to learn.</p>
+    <div class="toc-band">
+      <div class="toc-band-card">
+        <strong>Chapters 01-08</strong>
+        <span>Engineering fundamentals, Python, math, data work, Scikit-learn, PyTorch, and computer vision.</span>
+      </div>
+      <div class="toc-band-note">Each chapter ends with a build milestone so the learning path stays practical instead of becoming theory-only.</div>
+    </div>
+    <div class="toc-grid">
+    <a class="toc-card" href="#module-1-engineering-bedrock-git-linux-http">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 15l7-7m-5 0h5v5"/><path d="M6 21h12"/><path d="M9 18h6"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 01</strong>
+        <em>Engineering Bedrock: Git, Linux &amp; HTTP</em>
+        <small>Build milestone: Publishable CLI Utility</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-2-python-for-ai-engineering">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h6v4H9z"/><path d="M8 10h8a4 4 0 0 1 0 8H8a4 4 0 0 1 0-8z"/><path d="M12 6V3"/><path d="M12 21v-3"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 02</strong>
+        <em>Python for AI Engineering</em>
+        <small>Build milestone: Data Pipeline CLI</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-3-math-for-machine-learning">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5"/><path d="M7 17h10"/><path d="M7 17V7"/><path d="M15 9l4 10"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 03</strong>
+        <em>Math for Machine Learning</em>
+        <small>Build milestone: From-Scratch Regression Suite</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-4-scientific-python-numpy-pandas-visualization">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 04</strong>
+        <em>Scientific Python: NumPy, Pandas &amp; Visualization</em>
+        <small>Build milestone: Exploratory Analytics Report</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-5-sql-data-engineering-for-ml">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 05</strong>
+        <em>SQL &amp; Data Engineering for ML</em>
+        <small>Build milestone: Production Feature Pipeline</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-6-classical-machine-learning-with-scikit-learn">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11a5 5 0 0 1 10 0v4a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3z"/><path d="M9 13h.01"/><path d="M15 13h.01"/><path d="M10 17h4"/><path d="M12 6V3"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 06</strong>
+        <em>Classical Machine Learning with Scikit-learn</em>
+        <small>Build milestone: Churn &amp; Forecast Duo</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-7-deep-learning-foundations-with-pytorch-framework-landscape">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><path d="M7 8l10 10"/><path d="M17 8L7 18"/><circle cx="12" cy="12" r="8"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 07</strong>
+        <em>Deep Learning Foundations with PyTorch (+ Framework Landscape)</em>
+        <small>Build milestone: CIFAR-10 from Scratch</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-8-computer-vision-cnns">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="6" width="14" height="12" rx="2"/><path d="M8 15l3-3 2 2 3-4 3 5"/><circle cx="9" cy="9" r="1"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 08</strong>
+        <em>Computer Vision &amp; CNNs</em>
+        <small>Build milestone: Real-Time Detector Service</small>
+      </span>
+    </a>
+  </div>
+  </section>
+  <section class="toc-page">
+    <div class="eyebrow">Table of Contents</div>
+    <h1>Advanced AI to Enterprise Delivery</h1>
+    <p class="toc-subtitle">Continue into language models, agents, production ML, platform engineering, evaluation, observability, and the final capstone path.</p>
+    <div class="toc-band">
+      <div class="toc-band-card">
+        <strong>Chapters 09-16</strong>
+        <span>NLP, reinforcement learning, LLMs, RAG, agents, MLOps, LLMOps, multimodal AI, and enterprise delivery.</span>
+      </div>
+      <div class="toc-band-note">Use this second half as the enterprise-readiness track: every chapter connects modeling skill with production thinking.</div>
+    </div>
+    <div class="toc-grid">
+    <a class="toc-card" href="#module-9-nlp-sequence-models">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12v8H9l-3 3z"/><path d="M9 10h6"/><path d="M9 13h4"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 09</strong>
+        <em>NLP &amp; Sequence Models</em>
+        <small>Build milestone: Domain Sentiment API</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-10-reinforcement-learning">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8l2 7-3 2-3-3-3 3-3-2z"/><path d="M9 11h.01"/><path d="M15 11h.01"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 10</strong>
+        <em>Reinforcement Learning</em>
+        <small>Build milestone: Bandit-Routed Prompt Optimizer</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-11-transformers-large-language-models">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 11</strong>
+        <em>Transformers &amp; Large Language Models</em>
+        <small>Build milestone: Mini-GPT + Domain Assistant (pair)</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-12-prompt-engineering-rag-llm-evaluation">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 5V2"/><path d="M19 12h3"/><path d="M12 19v3"/><path d="M5 12H2"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 12</strong>
+        <em>Prompt Engineering, RAG &amp; LLM Evaluation</em>
+        <small>Build milestone: Evaluated Knowledge Assistant</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-13-agentic-ai-agents-mcp-multi-agent-systems">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18v-6a5 5 0 0 1 10 0v6"/><path d="M5 18h14"/><path d="M9 10h6"/><path d="M10 14h.01"/><path d="M14 14h.01"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 13</strong>
+        <em>Agentic AI: Agents, MCP &amp; Multi-Agent Systems</em>
+        <small>Build milestone: Governed Research Agent</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-14-mlops-shipping-models-to-production">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 14</strong>
+        <em>MLOps: Shipping Models to Production</em>
+        <small>Build milestone: Automated ML Pipeline</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-15-llmops-observability-platform-engineering">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16"/><path d="M7 18V9l5-4 5 4v9"/><path d="M10 18v-5h4v5"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 15</strong>
+        <em>LLMOps, Observability &amp; Platform Engineering</em>
+        <small>Build milestone: Enterprise LLM Gateway Platform</small>
+      </span>
+    </a>
+  
+
+    <a class="toc-card" href="#module-16-multimodal-ai-product-thinking-career-finishing">
+      <span class="toc-icon"><svg class="toc-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span>
+      <span class="toc-content">
+        <strong>Chapter 16</strong>
+        <em>Multimodal AI, Product Thinking &amp; Career Finishing</em>
+        <small>Build milestone: Multimodal Document Analyst + Capstone Case Study</small>
+      </span>
+    </a>
+  </div>
+  </section>
+  <p><strong>16 Modules · 75 Skill Sprints · Project-First</strong></p>
+<p>Coverage: Python · Math for ML · NumPy/Pandas · SQL · Scikit-learn &amp; Classical ML · Deep Learning &amp; PyTorch (+ TensorFlow/Keras, JAX, Lightning) · CNN/Computer Vision · NLP · Reinforcement Learning · Transformers &amp; LLMs · RAG · Vector Databases · Agentic AI · MLOps · LLMOps &amp; Platform · Multimodal &amp; AI Product.</p>
+<hr />
+<section class="module" id="module-1-engineering-bedrock-git-linux-http"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 1 — Engineering Bedrock: Git, Linux &amp; HTTP</h2>
+<p><strong>Duration:</strong> 2–3 weeks · <strong>Prerequisite:</strong> none</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 1.1 — Linux &amp; the Command Line</strong></div>
+<ul>
+<li>Filesystem navigation, permissions (chmod/chown), symlinks</li>
+<li>Process management: ps, top/htop, kill, signals, exit codes</li>
+<li>Text power tools: grep, sed, awk, cut, sort, uniq, pipes &amp; redirection</li>
+<li>Environment variables, PATH, .bashrc, shell scripting basics (loops, conditionals)</li>
+<li>SSH keys, scp/rsync, tmux for long-running training jobs</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 1.2 — Git &amp; GitHub for ML Work</strong></div>
+<ul>
+<li>init/clone/add/commit/push/pull, the staging-area mental model</li>
+<li>Branching: feature branches, trunk-based; merge vs rebase; conflict resolution</li>
+<li>.gitignore for ML (data/, models/, .env, checkpoints); Git LFS; never commit secrets</li>
+<li>Pull requests, code review etiquette, conventional commits, tagging model versions</li>
+<li>GitHub Actions intro: run pytest on every push</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 1.3 — HTTP, REST &amp; APIs</strong></div>
+<ul>
+<li>Request anatomy: verbs, headers, body, query params; status code families (422 vs 500)</li>
+<li>JSON serialization, content types, pagination, idempotency</li>
+<li>Auth: API keys, Bearer tokens, OAuth2 conceptually</li>
+<li>curl &amp; Postman fluency; rate limits and retries</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> shell script that watches a training log and alerts on failure · simulate and resolve a merge conflict · consume a public REST API with retry-on-429 handling.</p>
+<div class="project-card" id="module-project-publishable-cli-utility"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Publishable CLI Utility</h3>
+<p>Build and publish a small CLI tool to GitHub with branch-protected main, CI badge, and a README a stranger can run in 5 minutes.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> public repo · passing CI · tagged v1.0 release.</p>
+</div>
+<hr />
+<section class="module" id="module-2-python-for-ai-engineering"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 2 — Python for AI Engineering</h2>
+<p><strong>Duration:</strong> 4–6 weeks · <strong>Prerequisite:</strong> Module 1</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 2.1 — Core Language</strong></div>
+<ul>
+<li>Variables, types, mutability; truthiness; f-strings</li>
+<li>Control flow; enumerate, zip, range patterns</li>
+<li>Functions: positional/keyword/default args, *args/**kwargs, closures, type hints</li>
+<li>Comprehensions (list/dict/set), generators &amp; yield, lazy iteration for big data</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 2.2 — OOP &amp; Pythonic Design</strong></div>
+<ul>
+<li>Classes, __init__, instance vs class attributes; inheritance &amp; composition</li>
+<li>Dunder methods (__repr__, __len__, __getitem__ — why PyTorch Datasets use them)</li>
+<li>Dataclasses &amp; Pydantic models; ABCs and protocols; when NOT to use OOP</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 2.3 — Robust Code</strong></div>
+<ul>
+<li>File I/O: text, CSV, JSON, pathlib; context managers</li>
+<li>Exceptions: try/except/else/finally, custom exceptions, fail-fast philosophy</li>
+<li>Logging module (levels, handlers, structured logs) — print() is not logging</li>
+<li>Concurrency: threading vs multiprocessing vs asyncio; GIL implications; async/await basics (needed for FastAPI &amp; agents)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 2.4 — Professional Tooling</strong></div>
+<ul>
+<li>venv/conda/uv; requirements.txt vs pyproject.toml; dependency pinning</li>
+<li>pytest: fixtures, parametrize, coverage; testing numeric code with tolerances</li>
+<li>Linting &amp; formatting: ruff/black; pre-commit hooks; mypy basics</li>
+<li>Project layout: src/ packages; notebooks for exploration only</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> refactor a messy notebook into a tested package · typed config loader with Pydantic · async scraper for 50 URLs vs sync timing.</p>
+<div class="project-card" id="module-project-data-pipeline-cli"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Data Pipeline CLI</h3>
+<p>Ingest messy CSVs → clean → validate → report, with logging, tests, and typed config; runs from a fresh venv.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> repo with src/ layout · ≥80% test coverage on utilities · README + sample output report.</p>
+</div>
+<hr />
+<section class="module" id="module-3-math-for-machine-learning"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 3 — Math for Machine Learning</h2>
+<p><strong>Duration:</strong> 6–8 weeks (run in parallel with Module 4) · <strong>Prerequisite:</strong> none</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 3.1 — Linear Algebra</strong></div>
+<ul>
+<li>Vectors: norms, dot product geometry, cosine similarity (the embedding workhorse)</li>
+<li>Matrices: multiplication as transformation, transpose, inverse, rank</li>
+<li>Special matrices: identity, diagonal, orthogonal; projections</li>
+<li>Eigenvalues/eigenvectors; SVD — and its payoff in PCA and LoRA intuition</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 3.2 — Calculus &amp; Optimization</strong></div>
+<ul>
+<li>Derivatives as sensitivity; partial derivatives; gradient as steepest ascent</li>
+<li>Chain rule — the soul of backpropagation; computational graphs by hand</li>
+<li>Gradient descent: batch/mini-batch/stochastic; learning-rate dynamics; momentum, RMSProp, Adam intuition</li>
+<li>Convexity, local vs global minima, saddle points; Lagrange idea at a glance</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 3.3 — Probability</strong></div>
+<ul>
+<li>Random variables; Bernoulli, Binomial, Gaussian, Poisson, Exponential</li>
+<li>Conditional probability, Bayes' theorem with diagnostic examples</li>
+<li>Expectation, variance, covariance &amp; correlation</li>
+<li>Maximum likelihood — why MSE and cross-entropy are MLE in disguise</li>
+<li>Entropy, cross-entropy, KL divergence (losses + RLHF's KL penalty + drift detection)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 3.4 — Statistics</strong></div>
+<ul>
+<li>Descriptive stats; sampling distributions, Central Limit Theorem</li>
+<li>Confidence intervals; hypothesis testing, p-values, multiple-comparison trap</li>
+<li>A/B testing mechanics: power, minimum detectable effect</li>
+<li>Bootstrap &amp; permutation tests</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> gradient descent from scratch matching sklearn · eigenvectors of a covariance matrix → derive PCA · Bayes simulation with synthetic disease testing · bootstrap a metric confidence interval.</p>
+<div class="project-card" id="module-project-from-scratch-regression-suite"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — From-Scratch Regression Suite</h3>
+<p>Linear + logistic regression in pure NumPy with loss curves and a written derivation document.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> sklearn-parity test in CI (within tolerance) · derivation PDF/markdown · loss-curve plots.</p>
+</div>
+<hr />
+<section class="module" id="module-4-scientific-python-numpy-pandas-visualization"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 4 — Scientific Python: NumPy, Pandas &amp; Visualization</h2>
+<p><strong>Duration:</strong> 4–5 weeks · <strong>Prerequisite:</strong> Module 2</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 4.1 — NumPy Deep Skill</strong></div>
+<ul>
+<li>ndarray model: shape, dtype, strides; views vs copies</li>
+<li>Broadcasting rules; axis semantics; fancy indexing &amp; boolean masks</li>
+<li>Vectorization patterns; einsum; seeding for reproducibility</li>
+<li>Numerical stability: float traps, log-sum-exp, np.isclose</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 4.2 — Pandas Mastery</strong></div>
+<ul>
+<li>Series/DataFrame internals; loc vs iloc; index discipline</li>
+<li>merge/join (fan-out detection), groupby-agg-transform, pivot/melt</li>
+<li>Time-series ops: resample, rolling, shift; timezone handling</li>
+<li>Missing-data strategies; categorical dtype; memory optimization; method chaining</li>
+<li>When pandas runs out: chunking, Polars/DuckDB awareness</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 4.3 — Visualization &amp; EDA</strong></div>
+<ul>
+<li>Matplotlib anatomy (figure/axes), Seaborn statistical plots, Plotly interactivity</li>
+<li>The EDA loop: distributions → relationships → anomalies → hypotheses</li>
+<li>Chart honesty: scales, baselines, when a table beats a chart</li>
+<li>Automated profiling (ydata-profiling) and its limits</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> beat a loop with broadcasting (measure 100×) · 3-table join with a planted fan-out bug to find · full EDA answering 5 business questions.</p>
+<div class="project-card" id="module-project-exploratory-analytics-report"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Exploratory Analytics Report</h3>
+<p>Messy real dataset (Airbnb/NYC taxi) → cleaning log → feature ideas → 10+ honest charts → insights memo.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> reproducible notebook + script version · data-quality report · 1-page insights memo.</p>
+</div>
+<hr />
+<section class="module" id="module-5-sql-data-engineering-for-ml"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 5 — SQL &amp; Data Engineering for ML</h2>
+<p><strong>Duration:</strong> 4–6 weeks · <strong>Prerequisite:</strong> Module 4</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 5.1 — SQL Fluency</strong></div>
+<ul>
+<li>SELECT/WHERE/ORDER/LIMIT; aggregates, GROUP BY/HAVING</li>
+<li>Joins: inner/left/full/anti; key cardinality and fan-out</li>
+<li>Window functions: ROW_NUMBER, RANK, LAG/LEAD, rolling sums</li>
+<li>CTEs, subqueries, EXPLAIN basics, when indexes help</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 5.2 — Pipelines &amp; Orchestration</strong></div>
+<ul>
+<li>Idempotency, incremental loads, backfills</li>
+<li>cron+make → Airflow DAGs; retries &amp; SLAs; dbt models and tests</li>
+<li>Data contracts: schema + freshness + ownership</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 5.3 — ML-Specific Data Engineering</strong></div>
+<ul>
+<li>Point-in-time correctness (anti-leakage); training/serving skew</li>
+<li>Feature-store concepts (Feast): offline vs online, TTLs</li>
+<li>Validation gates with Great Expectations; lineage; schema evolution</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> rewrite a pandas pipeline in DuckDB SQL · build leaky vs point-in-time-correct features and measure the fake gain · add a validation gate that fails on injected bad data.</p>
+<div class="project-card" id="module-project-production-feature-pipeline"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Production Feature Pipeline</h3>
+<p>One feature table feeding both sklearn training and a FastAPI inference path, with validation gates and reproducible snapshots.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> pipeline repo with dbt/SQL models · failing-gate demo recording or log · snapshot reproducible by ID.</p>
+</div>
+<hr />
+<section class="module" id="module-6-classical-machine-learning-with-scikit-learn"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 6 — Classical Machine Learning with Scikit-learn</h2>
+<p><strong>Duration:</strong> 8–10 weeks · <strong>Prerequisite:</strong> Modules 3–5</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.1 — The Supervised Core</strong></div>
+<ul>
+<li>Linear regression: assumptions, residual analysis, Ridge/Lasso/ElasticNet</li>
+<li>Logistic regression: log-odds, decision thresholds, class weights</li>
+<li>k-NN, Naive Bayes, SVMs (margin intuition, kernels)</li>
+<li>Decision trees: splits, impurity, overfitting; Random Forests: bagging, OOB, feature-importance caveats</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.2 — Gradient Boosting (the tabular king)</strong></div>
+<ul>
+<li>Boosting vs bagging; XGBoost vs LightGBM vs CatBoost</li>
+<li>Key knobs: depth, learning rate, estimators, subsampling, early stopping</li>
+<li>Categorical handling; monotonic constraints; imbalanced data (weights, SMOTE caution, threshold tuning)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.3 — Unsupervised Learning</strong></div>
+<ul>
+<li>K-means (choosing k, limits), DBSCAN/HDBSCAN, hierarchical clustering</li>
+<li>PCA in practice; t-SNE/UMAP for visualization (and their lies)</li>
+<li>Anomaly detection: Isolation Forest, one-class SVM</li>
+<li>Cluster validation: silhouette, stability, business sanity checks</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.4 — Evaluation &amp; Validation (most interview-tested unit)</strong></div>
+<ul>
+<li>Train/val/test discipline; stratification; k-fold; time-series splits; grouped splits</li>
+<li>Classification: confusion matrix, precision/recall/F1, ROC-AUC vs PR-AUC, calibration &amp; Brier score</li>
+<li>Regression: MAE vs RMSE vs MAPE; quantile loss</li>
+<li>Leakage taxonomy: target, temporal, group, preprocessing leakage; cost-sensitive metric selection</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.5 — Pipelines, Tuning &amp; Explainability</strong></div>
+<ul>
+<li>Pipeline &amp; ColumnTransformer; custom transformers; fit/transform discipline; joblib serialization &amp; version pinning</li>
+<li>Hyperparameter search: grid → random → Optuna (TPE, pruning); nested-CV honesty</li>
+<li>SHAP (global &amp; local), permutation importance, partial dependence; stakeholder-safe explanation</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.6 — Time Series &amp; Recommenders</strong></div>
+<ul>
+<li>TS: stationarity, decomposition, lag/rolling features, backtesting, naive &amp; seasonal-naive baselines, SARIMA awareness, gradient-boosted TS, Prophet caveats</li>
+<li>RecSys: implicit vs explicit feedback, collaborative filtering, matrix factorization (ALS), precision@k &amp; NDCG, cold start, popularity bias</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 6.7 — Responsible ML, Fairness &amp; Model Risk</strong></div>
+<ul>
+<li>Bias sources: sampling, labeling, proxy features, historical bias, evaluation blind spots</li>
+<li>Fairness metrics: demographic parity, equalized odds, subgroup performance, calibration by segment</li>
+<li>Model risk documents: assumptions, intended use, limitations, monitoring plan, rollback criteria</li>
+<li>Privacy basics: anonymization limits, differential privacy awareness, secure feature handling</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> churn baseline → boosted → calibrated comparison · leakage audit on a provided leaky notebook · Optuna study with pruning · SHAP report for non-technical readers · sales backtest with proper TS splits · subgroup fairness audit with remediation notes.</p>
+<div class="project-card" id="module-project-churn-forecast-duo"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Churn &amp; Forecast Duo</h3>
+<p>(a) Churn classifier: 5-model comparison, calibration curve, SHAP report, Streamlit demo. (b) Demand forecaster: backtesting framework beating naive and seasonal-naive baselines.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> two repos (or monorepo) · completed leakage checklists · metric comparison tables · live Streamlit demo link.</p>
+</div>
+<hr />
+<section class="module" id="module-7-deep-learning-foundations-with-pytorch-framework-landscape"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 7 — Deep Learning Foundations with PyTorch (+ Framework Landscape)</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Modules 3, 6</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 7.1 — Neural Network Mechanics</strong></div>
+<ul>
+<li>Perceptron → MLP; activations (ReLU family, sigmoid/tanh, GELU); universal approximation intuition</li>
+<li>Forward pass as matrix ops; loss surfaces; backpropagation step-by-step on paper</li>
+<li>Weight initialization (Xavier/He); vanishing/exploding gradients</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 7.2 — PyTorch Core</strong></div>
+<ul>
+<li>Tensors, autograd, computational graph; requires_grad, no_grad, detach</li>
+<li>nn.Module anatomy; Dataset/DataLoader (workers, pinned memory, collate_fn)</li>
+<li>The canonical loop: zero_grad → forward → loss → backward → step</li>
+<li>Device management (CPU/GPU/MPS); mixed precision (autocast/GradScaler); gradient clipping &amp; accumulation</li>
+<li>Saving/loading: state_dict, checkpoints with optimizer state; TorchScript/ONNX export</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 7.3 — Training Craft</strong></div>
+<ul>
+<li>Overfit-one-batch sanity test; diagnosing under/overfitting from curves</li>
+<li>Regularization: dropout, weight decay, label smoothing, early stopping, augmentation-as-regularizer</li>
+<li>BatchNorm/LayerNorm (and train vs eval mode bugs)</li>
+<li>LR schedules: step, cosine, warmup, one-cycle; TensorBoard/W&amp;B tracking</li>
+<li>Debugging playbook: NaN losses, dead ReLUs, shape errors, dataloader bottlenecks</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 7.4 — Framework Landscape</strong></div>
+<ul>
+<li>PyTorch Lightning: organized code, less boilerplate, multi-GPU (DDP concept)</li>
+<li>TensorFlow/Keras: reading &amp; porting Keras code, SavedModel, where TF survives in industry (TFLite/TF-Serving)</li>
+<li>JAX: jit/grad/vmap functional style — awareness level</li>
+<li>Hugging Face ecosystem as the de facto layer: transformers, datasets, accelerate</li>
+<li>Strategy: PyTorch as home base; read the others fluently</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 7.5 — Modern Deep Learning Architectures</strong></div>
+<ul>
+<li>Autoencoders and VAEs: compression, anomaly detection, latent spaces</li>
+<li>GANs: generator/discriminator training, mode collapse, when GANs still matter</li>
+<li>Diffusion models: denoising objective, U-Net backbone, schedulers, guidance, text-to-image intuition</li>
+<li>Self-supervised learning: contrastive learning, masked modeling, representation reuse</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> overfit one batch deliberately · MLP→CNN on Fashion-MNIST with ablations (no BN, no dropout, bad init) · resume training from checkpoint · port a small Keras model to PyTorch · train a tiny autoencoder and compare reconstruction errors.</p>
+<div class="project-card" id="module-project-cifar-10-from-scratch"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — CIFAR-10 from Scratch</h3>
+<p>Custom CNN achieving ≥90% validation accuracy with full experiment tracking, early stopping, and mixed precision.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> training repo with config-driven runs · TensorBoard/W&amp;B screenshots · ONNX export + parity test · model card.</p>
+</div>
+<hr />
+<section class="module" id="module-8-computer-vision-cnns"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 8 — Computer Vision &amp; CNNs</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Module 7</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.1 — Convolution Fundamentals</strong></div>
+<ul>
+<li>Convolution as learned filters; kernels, stride, padding, receptive fields; pooling; parameter counting</li>
+<li>Feature hierarchies: edges → textures → parts → objects; visualizing filters &amp; feature maps</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.2 — Architectures</strong></div>
+<ul>
+<li>LeNet → AlexNet → VGG (depth); ResNet (skip connections — why they fixed deep training)</li>
+<li>EfficientNet (compound scaling); MobileNet (depthwise separable, edge deployment)</li>
+<li>Vision Transformers: patches as tokens, ViT vs CNN inductive bias; timm library</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.3 — Transfer Learning &amp; Augmentation</strong></div>
+<ul>
+<li>Frozen backbone → head training → progressive unfreezing; discriminative learning rates</li>
+<li>Albumentations pipelines; label-safe transforms; test-time augmentation; when augmentation hurts</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.4 — Detection &amp; Segmentation</strong></div>
+<ul>
+<li>Detection: bounding boxes, anchors vs anchor-free, IoU, NMS, mAP@50 vs mAP@50:95; YOLO family; DETR idea</li>
+<li>Segmentation: semantic vs instance; U-Net; Dice/IoU evaluation</li>
+<li>Annotation workflow (Label Studio); dataset-quality auditing; hard-negative mining</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.5 — CV in Production</strong></div>
+<ul>
+<li>Latency/accuracy tradeoffs; quantization &amp; pruning awareness; ONNX Runtime/TensorRT concept</li>
+<li>Video &amp; webcam streams (OpenCV); drift in visual data (lighting, cameras, seasons)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 8.6 — Document AI, OCR &amp; Visual Retrieval</strong></div>
+<ul>
+<li>OCR pipelines: layout detection, table extraction, reading order, confidence thresholds</li>
+<li>Document understanding: forms, invoices, reports, scanned PDFs, page-level citation requirements</li>
+<li>Visual search: CLIP embeddings, image-vector retrieval, duplicate and near-duplicate detection</li>
+<li>CV quality assurance: labeling drift, annotator agreement, visual regression tests</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> filter visualization · fine-tune 2 backbones → accuracy-vs-latency table · annotate 200 images and train detection · corrupt val images to simulate drift · build OCR extraction for 20 scanned pages and audit failures.</p>
+<div class="project-card" id="module-project-real-time-detector-service"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Real-Time Detector Service</h3>
+<p>Fine-tuned YOLO on a custom annotated dataset → FastAPI endpoint (&lt;200 ms) → Gradio webcam demo.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> annotated dataset + labeling notes · mAP report · deployed demo · error analysis grouped by failure category.</p>
+</div>
+<hr />
+<section class="module" id="module-9-nlp-sequence-models"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 9 — NLP &amp; Sequence Models</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Module 7</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 9.1 — Text Representation &amp; Embeddings</strong></div>
+<ul>
+<li>Preprocessing reality check (what to normalize, what to keep); BoW &amp; TF-IDF (still strong baselines)</li>
+<li>Word2Vec (CBOW/skip-gram, negative sampling), GloVe, FastText subwords</li>
+<li>Embeddings deep dive (the bridge to RAG): cosine vs dot vs Euclidean, normalization effects, dimensionality tradeoffs, sentence embeddings (SBERT idea), ANN indexes (HNSW/IVF) at concept level</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 9.2 — Sequence Models</strong></div>
+<ul>
+<li>RNN mechanics &amp; vanishing gradient; LSTM/GRU gates</li>
+<li>Seq2seq encoder-decoder; the bottleneck problem → attention as the fix</li>
+<li>Attention internals: Q/K/V, weights, masking — pre-transformer framing</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 9.3 — Tokenization</strong></div>
+<ul>
+<li>BPE, WordPiece, SentencePiece; vocab-size tradeoffs</li>
+<li>Token-length cost math; multilingual &amp; code tokenization quirks; OOV behavior</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 9.4 — Applied NLP with Hugging Face</strong></div>
+<ul>
+<li>pipeline → AutoModel/AutoTokenizer; fine-tuning BERT-class models with Trainer</li>
+<li>Tasks: classification, NER, QA, summarization; macro vs micro F1; error-taxonomy practice</li>
+<li>spaCy for fast production NLP; HF Hub &amp; Spaces publishing</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> TF-IDF + logistic regression baseline first, then beat it with BERT and quantify the cost of the gap · semantic search over 10k docs with sentence embeddings + FAISS · tokenize the same text with 3 tokenizers and compare counts/costs.</p>
+<div class="project-card" id="module-project-domain-sentiment-api"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Domain Sentiment API</h3>
+<p>Fine-tuned transformer vs LSTM vs TF-IDF baselines on a domain dataset (e.g., financial news), deployed to HF Spaces.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> macro-F1 + confusion matrix · 50-error taxonomy document · public Space demo · baseline-comparison table.</p>
+</div>
+<hr />
+<section class="module" id="module-10-reinforcement-learning"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 10 — Reinforcement Learning</h2>
+<p><strong>Duration:</strong> 5–6 weeks · <strong>Prerequisite:</strong> Modules 3, 7</p>
+<p>*Why: RL is the engine behind RLHF/DPO (LLM alignment), bandit-based routing/recommendation, and agentic decision-making.*</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 10.1 — Foundations: Bandits &amp; MDPs</strong></div>
+<ul>
+<li>Multi-armed bandits: ε-greedy, UCB, Thompson sampling — real use: A/B testing &amp; prompt/model routing</li>
+<li>MDP formalism: states, actions, rewards, transitions, discount γ</li>
+<li>Policies, value functions V/Q, Bellman equations; exploration vs exploitation</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 10.2 — Classical Solution Methods</strong></div>
+<ul>
+<li>Dynamic programming: policy/value iteration on gridworlds</li>
+<li>Monte Carlo methods; TD learning; SARSA vs Q-learning (on- vs off-policy)</li>
+<li>Tabular Q-learning hands-on: FrozenLake/Taxi with Gymnasium</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 10.3 — Deep RL</strong></div>
+<ul>
+<li>DQN: replay buffer, target networks, why naive deep Q diverges; Double/Dueling DQN ideas</li>
+<li>Policy gradients: REINFORCE, variance problem, baselines</li>
+<li>Actor-critic → A2C → PPO (clipped objective — the industry workhorse)</li>
+<li>Practical reality: reward hacking, sample inefficiency, seed sensitivity, when RL is the wrong tool</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 10.4 — RL for LLMs (the bridge)</strong></div>
+<ul>
+<li>RLHF pipeline: SFT → reward model from preferences → PPO with KL penalty</li>
+<li>DPO/ORPO: preference optimization without an explicit RL loop — why it's replacing classic RLHF</li>
+<li>Reward hacking in LLMs (sycophancy, verbosity); RLAIF awareness; bandits for prompt/model selection in production</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 10.5 — RL for Agents, Routing &amp; Decision Systems</strong></div>
+<ul>
+<li>Contextual bandits for prompt, model, retriever, and tool routing</li>
+<li>Offline RL awareness: logged-policy bias, counterfactual evaluation, why production RL is risky</li>
+<li>Reward design for agentic workflows: task success, cost, latency, safety, human override rate</li>
+<li>Simulation-first rollout: replay logs, shadow mode, guardrails before online learning</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> Thompson-sampling A/B simulator vs fixed split (measure regret) · tabular Q-learning on FrozenLake with learning curve · DQN on CartPole · PPO on LunarLander with Stable-Baselines3, then read SB3's clipped-loss source · tiny DPO fine-tune on preference pairs with TRL · replay-based router evaluation before live traffic.</p>
+<div class="project-card" id="module-project-bandit-routed-prompt-optimizer"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Bandit-Routed Prompt Optimizer</h3>
+<p>A production-flavored router that picks among 3 prompts/models per request via Thompson sampling, logging regret over time.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> simulator + live-router code · regret curves · report quantifying lift vs the worst arm · short note on where this maps to A/B testing.</p>
+</div>
+<hr />
+<section class="module" id="module-11-transformers-large-language-models"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 11 — Transformers &amp; Large Language Models</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Module 9 (Module 10.4 helpful)</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 11.1 — Architecture from Scratch</strong></div>
+<ul>
+<li>Scaled dot-product attention: Q/K/V, the √d factor, causal masking</li>
+<li>Multi-head attention, FFN blocks, residuals + LayerNorm (pre vs post)</li>
+<li>Positional information: sinusoidal, learned, RoPE, ALiBi; context-length tradeoffs</li>
+<li>Decoder-only vs encoder-only vs encoder-decoder (GPT/BERT/T5); KV-cache memory math</li>
+<li>Scaling-laws intuition; emergent-ability debate awareness</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 11.2 — Working with LLMs</strong></div>
+<ul>
+<li>Sampling: greedy, temperature, top-k, top-p, repetition penalties — effects on output quality</li>
+<li>Context-window management; system vs user roles; structured output (JSON mode, function calling)</li>
+<li>API ecosystems (OpenAI/Anthropic/open-weights); local inference: llama.cpp, GGUF, Ollama</li>
+<li>Token economics: cost modeling per feature, latency budgets, streaming</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 11.3 — Fine-tuning &amp; Alignment</strong></div>
+<ul>
+<li>Full FT vs PEFT; LoRA mechanics (the low-rank/SVD payoff): rank, alpha, target modules; QLoRA</li>
+<li>SFT data quality &gt; quantity; chat templates; instruction-data curation</li>
+<li>Alignment (connects to 10.4): RLHF, DPO with TRL; evaluating tuned models (held-out evals, MMLU-style, human preference)</li>
+<li>Quantization: GPTQ/AWQ/GGUF; measuring INT4 vs FP16 quality drop on YOUR eval set</li>
+<li>Distillation concept; when fine-tuning is the wrong answer (often — try RAG/prompting first)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 11.4 — Inference &amp; Serving</strong></div>
+<ul>
+<li>vLLM: PagedAttention, continuous batching; TGI awareness</li>
+<li>Throughput vs latency; speculative decoding concept; cost per 1k requests</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 11.5 — LLM Systems Internals</strong></div>
+<ul>
+<li>KV cache sizing, prefill vs decode latency, batching tradeoffs, context-window cost curves</li>
+<li>Quantization choices: weight-only vs activation-aware, quality gates per task, hardware fit</li>
+<li>Long-context behavior: lost-in-the-middle, retrieval vs long context, prompt packing</li>
+<li>Serving patterns: streaming, cancellation, timeouts, backpressure, graceful degradation</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> implement single-head attention and match nn.MultiheadAttention within tolerance · character-level mini-GPT (Karpathy-style), watch loss vs sample quality · LoRA-tune a 7B on 1k domain examples and eval vs base · quantize and measure the drop · serve with vLLM and load-test · benchmark prefill/decode latency at 4 context lengths.</p>
+<div class="project-card" id="module-project-mini-gpt-domain-assistant-pair"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Mini-GPT + Domain Assistant (pair)</h3>
+<p>(a) From-scratch GPT with attention visualizations and one ablation (remove positional encoding, document the damage). (b) QLoRA domain assistant (medical/legal/code Q&amp;A) served on vLLM.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> mini-GPT repo with generated samples · ablation write-up · before/after eval table for the tuned model · vLLM serving config + load-test numbers.</p>
+</div>
+<hr />
+<section class="module" id="module-12-prompt-engineering-rag-llm-evaluation"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 12 — Prompt Engineering, RAG &amp; LLM Evaluation</h2>
+<p><strong>Duration:</strong> 4–6 weeks · <strong>Prerequisite:</strong> Module 11 (Skill Sprints 11.1–11.2)</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 12.1 — Prompt Engineering as Engineering</strong></div>
+<ul>
+<li>Zero/few-shot; chain-of-thought and when NOT to expose reasoning; system/role design</li>
+<li>Structured outputs: JSON schemas, validation, retry-on-invalid loops</li>
+<li>Prompt versioning &amp; regression testing (prompts are code); injection-aware prompt design</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 12.2 — RAG Pipeline, End to End</strong></div>
+<ul>
+<li>Ingestion: parsing PDFs/HTML, cleaning, metadata extraction</li>
+<li>Chunking: fixed/recursive/semantic/structural; size &amp; overlap experiments</li>
+<li>Embedding-model selection (MTEB awareness); vector stores: FAISS vs managed (pgvector/Chroma/cloud)</li>
+<li>Retrieval: dense, BM25, hybrid + reciprocal rank fusion; metadata filtering; query rewriting/expansion (HyDE idea)</li>
+<li>Reranking: cross-encoders, when the latency is worth it</li>
+<li>Generation: grounding instructions, citation formats, "I don't know" behavior; awareness of parent-document, GraphRAG, agentic RAG</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 12.3 — Vector Databases &amp; Retrieval Infrastructure</strong></div>
+<ul>
+<li>Vector index internals: flat search, HNSW, IVF, PQ, recall/latency/memory tradeoffs</li>
+<li>Stores to understand: FAISS, pgvector, Qdrant, Milvus, Weaviate, Pinecone, Chroma</li>
+<li>Production concerns: namespaces, metadata filters, ACL-aware retrieval, deletes, re-indexing, backups</li>
+<li>Embedding lifecycle: model migration, dimension changes, drift checks, dual-write re-embedding rollout</li>
+<li>Retrieval debugging: nearest-neighbor inspection, query rewriting logs, recall@k, source coverage gaps</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 12.4 — Advanced RAG Patterns</strong></div>
+<ul>
+<li>Parent-child retrieval, multi-vector retrieval, contextual compression, query decomposition</li>
+<li>GraphRAG and knowledge graphs: entity extraction, relation edges, graph traversal with citations</li>
+<li>Multimodal RAG: images, tables, charts, layout chunks, OCR confidence in retrieval ranking</li>
+<li>Long-context RAG: when to retrieve, when to pack, and how to prevent context poisoning</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 12.5 — LLM &amp; RAG Evaluation (the differentiator skill)</strong></div>
+<ul>
+<li>Golden sets: 50+ Q/A with sources, including adversarial &amp; unanswerable questions</li>
+<li>RAGAS metrics: faithfulness, answer relevance, context precision/recall — and their blind spots</li>
+<li>LLM-as-judge: judge prompts, biases (position/length/self-preference), calibration against human labels</li>
+<li>Regression harness in CI; cost &amp; latency as first-class metrics; failure taxonomies</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> chunk-size ablation (3 sizes × hybrid on/off → metric table) · compare pgvector vs Qdrant/FAISS on recall and latency · add a reranker, measure delta vs latency cost · build the 50-question golden set · wire RAGAS into pytest so a regression fails CI.</p>
+<div class="project-card" id="module-project-evaluated-knowledge-assistant"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Evaluated Knowledge Assistant</h3>
+<p>100+ page corpus → hybrid retrieval + reranker → cited answers → chat UI, with evaluation as a first-class feature.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> golden eval set · RAGAS score dashboard · CI quality gate (demonstrated failing on a planted regression) · documented failure cases.</p>
+</div>
+<hr />
+<section class="module" id="module-13-agentic-ai-agents-mcp-multi-agent-systems"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 13 — Agentic AI: Agents, MCP &amp; Multi-Agent Systems</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Module 12</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 13.1 — Single-Agent Foundations</strong></div>
+<ul>
+<li>Workflow vs agent: routing, chaining, parallelization vs autonomous loops — choose the simplest that works</li>
+<li>ReAct loop (reason→act→observe); Reflexion/self-critique; bounded iterations by construction</li>
+<li>Tool design: narrow Pydantic schemas, validation both directions, idempotency for writes, least privilege</li>
+<li>Memory: conversation state, summarization, vector memory, forgetting policies</li>
+<li>LangGraph: typed state, nodes/edges, conditional routing, checkpointing, human-interrupt points</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 13.2 — MCP &amp; Tool Protocols</strong></div>
+<ul>
+<li>MCP primitives: tools, resources, prompts; server lifecycle; stdio vs HTTP transports</li>
+<li>Building an MCP server with auth, scopes, allowlists; approval gates for sensitive actions</li>
+<li>Treating tool results as untrusted input; sandboxing; audit-logging every call</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 13.3 — Multi-Agent Systems</strong></div>
+<ul>
+<li>When multi-agent actually helps (and the honest costs: latency × N, error compounding)</li>
+<li>Patterns: supervisor/worker, planner-executor-critic, debate; handoffs &amp; message contracts</li>
+<li>Frameworks: LangGraph-native vs CrewAI vs AutoGen — try each once, commit to one</li>
+<li>Termination guarantees, conflict resolution, shared-state discipline</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 13.4 — Agent Reliability &amp; Safety</strong></div>
+<ul>
+<li>Trajectory evaluation: tool-call correctness, step efficiency, goal-completion rates</li>
+<li>Prompt-injection attack surface of agents; write-action approval; rollback for agent mistakes</li>
+<li>Tracing every step (LangSmith/Langfuse); cost ceilings per run; fallback model routing</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 13.5 — Production Agent Architecture</strong></div>
+<ul>
+<li>Durable execution: checkpoints, resumable runs, retries, queues, idempotent tool calls</li>
+<li>State design: short-term state, long-term memory, task ledger, audit trail, user-visible history</li>
+<li>Agent-to-system integration: APIs, databases, files, MCP tools, RBAC, approval workflows</li>
+<li>Reliability patterns: planner/executor separation, deterministic validators, timeouts, compensating actions</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> calculator/search/file tools with full validation · human approval before any write action · injection test where a poisoned document tries to trigger a tool — and fails · trajectory-eval harness scoring 20 recorded runs · resumable agent run with checkpoint restore.</p>
+<div class="project-card" id="module-project-governed-research-agent"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Governed Research Agent</h3>
+<p>ReAct agent with web search + vector memory + your own MCP tool server, human-in-the-loop approvals, and bounded steps.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> full traces for 10 sample runs · trajectory-eval report · injection-test results · $/run dashboard.</p>
+</div>
+<hr />
+<section class="module" id="module-14-mlops-shipping-models-to-production"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 14 — MLOps: Shipping Models to Production</h2>
+<p><strong>Duration:</strong> 6–8 weeks · <strong>Prerequisite:</strong> Modules 6–7, 1</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 14.1 — Packaging &amp; Serving</strong></div>
+<ul>
+<li>FastAPI model service: Pydantic request/response schemas, validation, health/readiness endpoints, async where it matters</li>
+<li>Docker: multi-stage builds, slim images, non-root, env-based config; docker-compose for local stacks</li>
+<li>Batch vs realtime vs streaming scoring — a decision framework</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 14.2 — Experiment &amp; Artifact Management</strong></div>
+<ul>
+<li>MLflow: runs, params, metrics, artifacts, model registry with stages</li>
+<li>Reproducibility = code + data + config + environment versions</li>
+<li>DVC for data versioning; dataset snapshots tied to model versions</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 14.3 — CI/CD for ML</strong></div>
+<ul>
+<li>GitHub Actions: lint/type/test → build → integration test → deploy gates</li>
+<li>Data validation in the pipeline (Great Expectations); model-quality gates (minimum metric vs champion)</li>
+<li>Canary/shadow deployment for models; rollback drills (actually practice one)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 14.4 — Post-Deployment</strong></div>
+<ul>
+<li>Monitoring: input drift (PSI/KL), prediction drift, delayed-label strategies, proxy metrics</li>
+<li>Retraining triggers &amp; automation; champion/challenger; feedback-capture loops</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 14.5 — Feature Stores, Online Serving &amp; Governance</strong></div>
+<ul>
+<li>Offline vs online feature stores, point-in-time joins, TTLs, freshness SLAs, backfill safety</li>
+<li>Online inference architecture: feature lookup, model service, cache, timeout budgets, fallbacks</li>
+<li>Model governance: approval gates, model cards, risk tiers, reproducibility evidence, audit trails</li>
+<li>Shadow, canary, blue-green, A/B, rollback, and champion/challenger release patterns</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> containerized FastAPI service with health checks + tests · MLflow-track 10 runs and promote one through registry stages · CI that blocks deploy on a deliberately bad model · drift detector that flags a shifted batch · online feature lookup with stale-feature fallback.</p>
+<div class="project-card" id="module-project-automated-ml-pipeline"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Automated ML Pipeline</h3>
+<p>DVC-versioned data → training → MLflow registry → Docker → FastAPI → CI with data &amp; model quality gates → drift monitoring.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> end-to-end repo · CI run showing a blocked bad deploy · drift-alert demo · rollback executed once on purpose and documented.</p>
+</div>
+<hr />
+<section class="module" id="module-15-llmops-observability-platform-engineering"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 15 — LLMOps, Observability &amp; Platform Engineering</h2>
+<p><strong>Duration:</strong> 8–10 weeks · <strong>Prerequisite:</strong> Modules 12–14</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.1 — LLM Gateway Patterns</strong></div>
+<ul>
+<li>Multi-provider routing (LiteLLM-style); fallbacks &amp; retries with jitter; circuit breakers</li>
+<li>Semantic caching (embedding-similarity hits — the biggest cost lever); rate limiting; per-team auth &amp; cost attribution</li>
+<li>Prompt management: versioned prompts, environments, A/B tests with statistical guardrails; bandit routing (← Module 10)</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.2 — Observability for AI Systems</strong></div>
+<ul>
+<li>OpenTelemetry traces across API → retriever → LLM → tools; correlation IDs everywhere</li>
+<li>Langfuse/LangSmith: per-step latency &amp; token cost, run tagging, sampling at volume</li>
+<li>RED metrics + AI-specific: tokens/request, cost/route, quality-score trends, cache hit rate</li>
+<li>SLOs &amp; error budgets; burn-rate alerts; dashboards answering "up? good? what cost?"</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.3 — Guardrails, Security &amp; Compliance</strong></div>
+<ul>
+<li>Input rails: injection detection, PII redaction (Presidio), topic filters</li>
+<li>Output rails: secret/URL scanning, schema enforcement, safe fallbacks</li>
+<li>Secrets management (Vault/cloud), workload identity, key rotation</li>
+<li>OWASP LLM Top 10 mapped to your stack; red-team suites (Garak) in CI; audit trails; EU AI Act risk-tier awareness</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.4 — Cloud &amp; Kubernetes for AI</strong></div>
+<ul>
+<li>One cloud deeply: managed training, managed/serverless endpoints, model registry, IAM, cost tagging &amp; budget alarms; Terraform for all of it</li>
+<li>K8s: Deployments/Services/Ingress, probes (and the model-load liveness trap), HPA on queue depth, GPU node pools &amp; taints</li>
+<li>Async inference with queue workers (Celery/Ray); KServe/Ray Serve; blue-green &amp; canary with auto-rollback</li>
+<li>FinOps for AI: $/1k requests, GPU utilization, spot + checkpoint training</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.5 — Incident Engineering</strong></div>
+<ul>
+<li>Runbooks per failure class: provider outage, retrieval degraded, cost spike, quality regression</li>
+<li>Rollback rehearsals; blameless postmortems; on-call design for AI systems</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.6 — LLM Release, Evaluation &amp; Governance</strong></div>
+<ul>
+<li>Prompt/model/retriever release gates: offline eval, canary eval, human review, rollback criteria</li>
+<li>Quality dimensions: correctness, groundedness, toxicity, privacy, refusal quality, tool-call accuracy</li>
+<li>Dataset governance: golden set ownership, adversarial cases, freshness, red-team scenario tracking</li>
+<li>Compliance posture: data retention, audit logs, consent, PII handling, model/vendor risk register</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 15.7 — LLM Cost, Capacity &amp; Performance Engineering</strong></div>
+<ul>
+<li>Capacity planning: token throughput, queue depth, concurrency, context-length mix, peak traffic</li>
+<li>Cost controls: semantic cache, response cache, model routing, prompt compression, max-token budgets</li>
+<li>Performance controls: streaming UX, speculative decoding awareness, async jobs, cancellation, backpressure</li>
+<li>Business telemetry: cost per workflow, quality per dollar, latency SLO, cache hit rate, route profitability</li>
+</ul>
+<p class="labs"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5l-4 8a4 4 0 0 0 3.6 5h6.8a4 4 0 0 0 3.6-5l-4-8V3"/><path d="M8 3h8"/><path d="M7 16h10"/></svg><strong>Labs:</strong> minimal LiteLLM gateway with fallback + semantic cache, measure cost savings on a replay log · trace a full RAG request end-to-end in Langfuse · run Garak against your own endpoint and fix top findings · kill the primary provider during a load test, watch fallback + alert fire · canary a prompt change with auto-rollback on planted regression · build a cost-per-workflow dashboard.</p>
+<div class="project-card" id="module-project-enterprise-llm-gateway-platform"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Enterprise LLM Gateway Platform</h3>
+<p>Multi-provider router + per-team auth &amp; cost attribution + semantic cache + guardrails + versioned prompts + eval-gated CI + K8s autoscaling.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> gateway repo with Terraform · Grafana SLO board screenshots · chaos-drill recording/notes (provider kill) · three written runbooks.</p>
+</div>
+<hr />
+<section class="module" id="module-16-multimodal-ai-product-thinking-career-finishing"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>MODULE 16 — Multimodal AI, Product Thinking &amp; Career Finishing</h2>
+<p><strong>Duration:</strong> 3–4 weeks core + ongoing · <strong>Prerequisite:</strong> Module 12</p>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 16.1 — Multimodal AI</strong></div>
+<ul>
+<li>VLM prompting for images &amp; documents; OCR strategy (Tesseract vs cloud vs VLM-as-OCR); layout-aware extraction</li>
+<li>CLIP-style image embeddings &amp; multimodal retrieval</li>
+<li>Speech loop: VAD → Whisper STT → LLM → TTS; latency engineering for voice agents</li>
+<li>Evaluation: labeled extraction sets, WER/CER, human spot-audits</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 16.2 — AI Product Thinking</strong></div>
+<ul>
+<li>Problem framing: user, baseline-without-AI, success metric in money/time, kill criteria</li>
+<li>Cost–latency–quality triangle; build/buy/fine-tune memos; regex-beats-LLM honesty</li>
+<li>Feedback loops: corrections → growing eval sets → retraining/refresh triggers; human escalation design</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 16.3 — Portfolio &amp; Interviews</strong></div>
+<ul>
+<li>Repo standard: README, ADRs, model card, risk register, ≤3-minute demo video</li>
+<li>ML system-design interviews: clarify → metrics → data → model → serving → monitoring; 10 drilled scenarios</li>
+<li>STAR narratives from your own projects; a maintained mistakes.md as interview ammunition</li>
+</ul>
+<div class="sprint-heading"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></svg><strong>Skill Sprint 16.4 — Enterprise Capstone Integration</strong></div>
+<ul>
+<li>Reference architecture: data pipeline → model/RAG/agent service → gateway → observability → governance</li>
+<li>System design artifacts: C4 diagram, sequence diagram, threat model, cost model, rollback runbook</li>
+<li>Product readiness: user journey, acceptance criteria, evaluation dashboard, incident-response plan</li>
+<li>Executive narrative: business problem, measurable value, risks, controls, and next iteration</li>
+</ul>
+<div class="project-card" id="module-project-multimodal-document-analyst-capstone-case-study"><div class="project-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg>Build Milestone</div><h3>Module Project — Multimodal Document Analyst + Capstone Case Study</h3>
+<p>(a) Ingest PDFs with charts/images, extract text + layout, answer questions with page-level citations, optional audio briefing. (b) A polished case study of your strongest end-to-end system.</p>
+<p class="deliverables"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l5-14 4 7 7 4z"/><path d="M10 12l4 4"/><path d="M11 5l8-2-2 8"/></svg><strong>Deliverables:</strong> extraction accuracy measured on 50 labeled fields · cited-answer demo · one-page exec summary + architecture diagram + metrics table + risk register · cost model · release checklist.</p>
+</div>
+<hr />
+<section class="module" id="syllabus-wide-rules"><div class="module-kicker"><svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/></svg>Learning Chapter</div><h2>Syllabus-Wide Rules</h2>
+<p>1. <strong>Project-or-it-didn't-happen</strong> — a module closes when its project repo passes the stranger-run test (someone else executes your README successfully).</p>
+<p>2. <strong>One tool per category</strong> — PyTorch, one cloud, one orchestrator, one observability stack. Depth over logos.</p>
+<p>3. <strong>Gate before advancing</strong> — the previous module's project deliverables must exist, and one older project must still run from a clean machine.</p>
+<p>4. <strong>mistakes.md</strong> — one running failure catalog across all modules.</p>
+<p>5. <strong>Weekly rhythm</strong> — 50% learn / 35% build / 15% document.</p>
+<hr />
+<p>*16 Modules · 75 Skill Sprints · 16 Projects · From Linux shell to enterprise LLM platform.*</p>
+</section>
+
+</body>
+</html>

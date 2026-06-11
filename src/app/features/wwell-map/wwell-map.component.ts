@@ -72,6 +72,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private defaultSnapshotTimeoutId?: ReturnType<typeof setTimeout>;
   private defaultMapSnapshotBase64: string | null = null;
   private defaultSnapshotInFlight: Promise<string | undefined> | null = null;
+  private wwellIconsRenderTask: Promise<void> = Promise.resolve();
   private intersectionObserver?: IntersectionObserver;
   private isDestroyed = false;
 
@@ -98,7 +99,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     effect(() => {
       this.wwells();
       if (!this.mapReady() || !this.wwellLayer) return;
-      this.drawWWellIcons(this.wwellLayer).catch(e =>
+      this.wwellIconsRenderTask = this.drawWWellIcons(this.wwellLayer).catch(e =>
         console.error('[WwellMap] drawWWellIcons failed', e)
       );
     });
@@ -376,6 +377,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   async captureMapAsBase64(): Promise<string | undefined> {
     if (!this.mapView) return;
     await this.waitForMapRender();
+    await this.wwellIconsRenderTask;
     return this.getScreenshotBase64();
   }
 
@@ -433,6 +435,12 @@ export class WwellmapComponent implements OnInit, OnDestroy {
 
     await this.goToDefaultView(false);
     await this.waitForMapRender();
+
+    // drawWWellIcons() is async (dynamic import); ensure well markers
+    // are fully rendered before screenshotting, or the layer can be
+    // mid-redraw (cleared, not yet repopulated) and the snapshot will
+    // show the base map without any well icons.
+    await this.wwellIconsRenderTask;
 
     if (this.bubbleLayer) {
       this.layoutBubbles(this.bubbleLayer);

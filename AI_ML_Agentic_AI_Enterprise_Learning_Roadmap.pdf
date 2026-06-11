@@ -1,0 +1,601 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Length 1880 >>
+stream
+0 w
+0.050 0.160 0.340 rg
+0.050 0.160 0.340 RG
+0.00 0.00 612.00 792.00 re B
+1 w
+0.080 0.230 0.440 rg
+0.350 0.650 0.920 RG
+48.00 560.00 516.00 128.00 re B
+BT /F2 26 Tf 1.000 1.000 1.000 rg 70.00 650.00 Td (AI, ML, Deep Learning) Tj ET
+BT /F2 24 Tf 1.000 1.000 1.000 rg 70.00 616.00 Td (Agentic AI & Enterprise Roadmap) Tj ET
+BT /F1 13 Tf 0.760 0.900 1.000 rg 70.00 585.00 Td (Beginner -> Advanced -> Enterprise) Tj ET
+BT /F2 12 Tf 1.000 1.000 1.000 rg 70.00 522.00 Td (12-month practical timeline with projects in every module) Tj ET
+BT /F1 9.5 Tf 0.860 0.930 1.000 rg 70.00 500.00 Td (Includes Python, Math, pandas, scikit-learn, PyTorch, LLMs, RAG, agents, MLOps and governance) Tj ET
+0.8 w
+0.090 0.280 0.520 rg
+0.300 0.540 0.780 RG
+70.00 422.00 472.00 34.00 re B
+BT /F2 10 Tf 0.760 0.900 1.000 rg 84.00 439.00 Td (Pace) Tj ET
+BT /F1 9.5 Tf 1.000 1.000 1.000 rg 160.00 439.00 Td (10-12 hours/week; compress to 6 months at 20+ hours/week) Tj ET
+0.8 w
+0.090 0.280 0.520 rg
+0.300 0.540 0.780 RG
+70.00 374.00 472.00 34.00 re B
+BT /F2 10 Tf 0.760 0.900 1.000 rg 84.00 391.00 Td (Outcome) Tj ET
+BT /F1 9.5 Tf 1.000 1.000 1.000 rg 160.00 391.00 Td (Portfolio strong enough for applied ML/AI engineer conversations) Tj ET
+0.8 w
+0.090 0.280 0.520 rg
+0.300 0.540 0.780 RG
+70.00 326.00 472.00 34.00 re B
+BT /F2 10 Tf 0.760 0.900 1.000 rg 84.00 343.00 Td (Style) Tj ET
+BT /F1 9.5 Tf 1.000 1.000 1.000 rg 160.00 343.00 Td (Every module ships a working project, not just notes) Tj ET
+0.8 w
+0.090 0.280 0.520 rg
+0.300 0.540 0.780 RG
+70.00 278.00 472.00 34.00 re B
+BT /F2 10 Tf 0.760 0.900 1.000 rg 84.00 295.00 Td (Final build) Tj ET
+BT /F1 9.5 Tf 1.000 1.000 1.000 rg 160.00 295.00 Td (One enterprise-grade AI system combining all major technologies) Tj ET
+BT /F1 8.5 Tf 0.720 0.840 0.940 rg 70.00 96.00 Td (Generated locally by Codex | Updated with current official ecosystem references) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Length 6186 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Roadmap Overview) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+BT /F1 9.5 Tf 0.120 0.120 0.120 rg 48.00 708.00 Td (Use this as a practical path from fundamentals to production. The sequence is intentional:) Tj ET
+BT /F1 9.5 Tf 0.120 0.120 0.120 rg 48.00 695.00 Td (Python and math first, then data and classical ML, then deep learning, LLM systems, agents, and) Tj ET
+BT /F1 9.5 Tf 0.120 0.120 0.120 rg 48.00 682.00 Td (finally enterprise operations.) Tj ET
+0 w
+0.220 0.550 0.820 rg
+0.220 0.550 0.820 RG
+48.00 631.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 641.00 Td (1) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 631.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 645.00 Td (Weeks 1-4) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 645.00 Td (Python + tooling) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 634.00 Td (Syntax, functions, files, OOP basics, venv, Git, notebooks, clean code.) Tj ET
+0 w
+0.180 0.670 0.550 rg
+0.180 0.670 0.550 RG
+48.00 589.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 599.00 Td (2) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 589.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 603.00 Td (Weeks 5-8) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 603.00 Td (Math for ML) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 592.00 Td (Linear algebra, calculus intuition, probability, statistics, optimization.) Tj ET
+0 w
+0.950 0.630 0.250 rg
+0.950 0.630 0.250 RG
+48.00 547.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 557.00 Td (3) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 547.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 561.00 Td (Weeks 9-12) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 561.00 Td (Data stack) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 550.00 Td (NumPy, pandas, visualization, SQL, EDA, feature quality.) Tj ET
+0 w
+0.780 0.390 0.520 rg
+0.780 0.390 0.520 RG
+48.00 505.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 515.00 Td (4) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 505.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 519.00 Td (Weeks 13-20) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 519.00 Td (Classical ML) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 508.00 Td (Supervised/unsupervised ML, sklearn pipelines, validation, metrics.) Tj ET
+0 w
+0.220 0.550 0.820 rg
+0.220 0.550 0.820 RG
+48.00 463.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 473.00 Td (5) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 463.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 477.00 Td (Weeks 21-30) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 477.00 Td (Deep learning) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 466.00 Td (PyTorch tensors, autograd, training loops, CNNs, sequence models, tuning.) Tj ET
+0 w
+0.180 0.670 0.550 rg
+0.180 0.670 0.550 RG
+48.00 421.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 431.00 Td (6) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 421.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 435.00 Td (Weeks 31-38) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 435.00 Td (LLMs + RAG) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 424.00 Td (Transformers, embeddings, vector search, prompt engineering, evals, safety.) Tj ET
+0 w
+0.950 0.630 0.250 rg
+0.950 0.630 0.250 RG
+48.00 379.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 389.00 Td (7) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 379.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 393.00 Td (Weeks 39-46) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 393.00 Td (Agentic AI) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 382.00 Td (Tool use, memory, orchestration, LangChain/LangGraph/OpenAI Agents, MCP basics.) Tj ET
+0 w
+0.780 0.390 0.520 rg
+0.780 0.390 0.520 RG
+48.00 337.00 48.00 28.00 re B
+BT /F2 12 Tf 1.000 1.000 1.000 rg 65.00 347.00 Td (8) Tj ET
+0.7 w
+0.960 0.980 1.000 rg
+0.780 0.840 0.900 RG
+106.00 337.00 458.00 28.00 re B
+BT /F2 8.8 Tf 0.120 0.220 0.340 rg 118.00 351.00 Td (Weeks 47-52) Tj ET
+BT /F2 9.4 Tf 0.050 0.160 0.340 rg 198.00 351.00 Td (Enterprise AI) Tj ET
+BT /F1 7.8 Tf 0.180 0.180 0.180 rg 198.00 340.00 Td (MLOps/LLMOps, MLflow, FastAPI, Docker, CI/CD, monitoring, governance, capstone.) Tj ET
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 317.00 Td (Module Timeline With Projects) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 309.00 m 564.00 309.00 l S
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 204.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 273.00 Td (1. Module 1: Python Engineering Foundations \(2 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 258.00 Td (Learn: Python syntax, functions, modules, exceptions, typing, file I/O, virtual) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 247.00 Td (environments, Git, pytest basics.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 236.00 Td (Project: CLI data-cleaning utility that reads messy CSV/JSON, validates schema, logs) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 225.00 Td (errors, and writes clean output.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 214.00 Td (Exit: write small packages, use type hints, run tests, and explain code structure.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 115.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 184.00 Td (2. Module 2: Math For AI/ML \(3 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 169.00 Td (Learn: vectors/matrices, dot products, derivatives, gradients, probability) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 158.00 Td (distributions, Bayes rule, loss functions.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 147.00 Td (Project: implement linear regression and logistic regression from scratch using only) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 136.00 Td (Python/NumPy.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 125.00 Td (Exit: understand why gradient descent, regularization, and metrics work.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Length 2259 >>
+stream
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 663.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 732.00 Td (3. Module 3: NumPy, pandas, Visualization, SQL \(3 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 717.00 Td (Learn: arrays, DataFrames, joins, groupby, time series, missing data, plotting, basic) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 706.00 Td (SQL joins/windows.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 695.00 Td (Project: end-to-end exploratory data analysis report with data quality checks and) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 684.00 Td (business recommendations.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 673.00 Td (Exit: turn raw tabular data into reliable features and clear insights.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 585.00 516.00 76.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 643.00 Td (4. Module 4: Statistics + Experimentation \(2 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 628.00 Td (Learn: sampling, confidence intervals, hypothesis tests, A/B tests, leakage, bias,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 617.00 Td (correlation vs causation.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 606.00 Td (Project: design and analyze an A/B experiment with simulated product metrics.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 595.00 Td (Exit: avoid common statistical traps in model and product decisions.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 496.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 565.00 Td (5. Module 5: Classical Machine Learning With scikit-learn \(5 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 550.00 Td (Learn: regression, classification, clustering, preprocessing, pipelines, cross-) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 539.00 Td (validation, grid/random search.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 528.00 Td (Project: customer churn or credit-risk model with sklearn Pipeline, model card, and) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 517.00 Td (reproducible notebook.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 506.00 Td (Exit: choose metrics, compare baselines, prevent leakage, and serialize a model.) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Length 3170 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Module Timeline With Projects) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 640.00 516.00 76.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 698.00 Td (6. Module 6: Feature Engineering + Model Interpretation \(3 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 683.00 Td (Learn: categorical encoding, scaling, imbalance, text features, SHAP/permutation) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 672.00 Td (importance, fairness checks.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 661.00 Td (Project: interpretable fraud or anomaly model with feature importance dashboard.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 650.00 Td (Exit: explain model behavior to technical and non-technical stakeholders.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 551.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 620.00 Td (7. Module 7: PyTorch Deep Learning Foundations \(5 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 605.00 Td (Learn: tensors, autograd, datasets/dataloaders, training loops, optimizers, schedulers,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 594.00 Td (GPU basics.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 583.00 Td (Project: image classifier or tabular neural net with custom training loop,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 572.00 Td (checkpointing, and metrics.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 561.00 Td (Exit: debug loss curves, overfitting, underfitting, device issues, and batch pipelines.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 462.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 531.00 Td (8. Module 8: Computer Vision + NLP Deep Learning \(5 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 516.00 Td (Learn: CNNs, transfer learning, tokenization, embeddings, sequence models, attention) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 505.00 Td (intuition.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 494.00 Td (Project: document/image classifier plus text sentiment/topic classifier using pretrained) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 483.00 Td (backbones.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 472.00 Td (Exit: use transfer learning pragmatically instead of training large models from scratch.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 373.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 442.00 Td (9. Module 9: Transformers + LLM Foundations \(4 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 427.00 Td (Learn: transformer architecture, tokenization, embeddings, inference, generation) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 416.00 Td (controls, prompt design.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 405.00 Td (Project: LLM-powered document summarizer with structured outputs and regression test) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 394.00 Td (prompts.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 383.00 Td (Exit: know when to use prompting, RAG, fine-tuning, or classical ML.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 2423 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Module Timeline With Projects) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 629.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 698.00 Td (10. Module 10: Retrieval-Augmented Generation \(4 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 683.00 Td (Learn: chunking, embeddings, vector DBs, hybrid retrieval, reranking, citations,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 672.00 Td (hallucination controls.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 661.00 Td (Project: private knowledge-base Q&A bot with source citations, eval dataset, and failure) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 650.00 Td (analysis.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 639.00 Td (Exit: build RAG systems that can be measured and improved.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 540.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 609.00 Td (11. Module 11: Fine-tuning + Evaluation \(3 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 594.00 Td (Learn: supervised fine-tuning concepts, LoRA/PEFT, preference data, eval design, red) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 583.00 Td (teaming, safety checks.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 572.00 Td (Project: fine-tune or adapter-train a small open model for a domain task and compare) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 561.00 Td (against prompting/RAG.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 550.00 Td (Exit: justify customization with evidence, cost, latency, and risk tradeoffs.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 451.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 520.00 Td (12. Module 12: Agentic AI \(4 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 505.00 Td (Learn: tools/function calling, planning, memory, multi-step workflows, human-in-the-) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 494.00 Td (loop, guardrails.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 483.00 Td (Project: research assistant agent that searches, reads files, calls tools, writes a) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 472.00 Td (report, and logs traces.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 461.00 Td (Exit: design agents as controlled workflows, not magic loops.) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Length 1669 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Module Timeline With Projects) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 629.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 698.00 Td (13. Module 13: MLOps + LLMOps \(4 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 683.00 Td (Learn: experiment tracking, model registry, data/version control, MLflow, CI/CD, Docker,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 672.00 Td (FastAPI, monitoring.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 661.00 Td (Project: deploy a model API with tracking, tests, containerization, rollback plan, and) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 650.00 Td (drift dashboard.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 639.00 Td (Exit: move from notebook to repeatable, observable production system.) Tj ET
+0.8 w
+0.930 0.970 1.000 rg
+0.700 0.800 0.900 RG
+48.00 540.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 609.00 Td (14. Module 14: Enterprise AI Architecture \(4 weeks\)) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 594.00 Td (Learn: security, IAM, secrets, data privacy, audit logs, governance, cost controls,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 583.00 Td (SLAs, incident response.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 572.00 Td (Project: architecture decision record and risk register for an enterprise AI) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 561.00 Td (application.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 550.00 Td (Exit: discuss AI systems like an engineer accountable for production outcomes.) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Length 3961 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Skill Checklists) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 708.00 Td (Core Technical Checklist) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 683.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 690.00 Td (Python package structure, type hints, logging, testing, environment management.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 668.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 675.00 Td (Math intuition for gradients, probability, statistics, matrix operations,) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 664.00 Td (optimization.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 642.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 649.00 Td (pandas/SQL data preparation, joins, time series, missing values, text cleaning,) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 638.00 Td (plotting.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 616.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 623.00 Td (scikit-learn pipelines, cross-validation, model selection, metrics, model persistence.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 601.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 608.00 Td (PyTorch training loops, datasets, dataloaders, GPU/device handling, checkpointing.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 586.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 593.00 Td (Transformers, embeddings, RAG, prompt design, structured output, citations,) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 582.00 Td (hallucination controls.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 560.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 567.00 Td (Agent tool calling, state, memory, workflow orchestration, human approval,) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 556.00 Td (observability.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 534.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 541.00 Td (MLOps/LLMOps: MLflow, CI/CD, model registry, deployment, monitoring, cost controls.) Tj ET
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 526.00 Td (Topics Often Missed But Needed For Enterprise) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 501.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 508.00 Td (SQL and data modeling: AI engineers spend more time on data correctness than model) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 497.00 Td (code.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 475.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 482.00 Td (Software engineering: APIs, tests, Docker, Git workflows, code review, clean) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 471.00 Td (architecture.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 449.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 456.00 Td (Security: secrets management, least privilege, audit logging, prompt-injection) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 445.00 Td (defenses.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 423.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 430.00 Td (Evaluation: offline eval sets, golden examples, regression tests, human review, red) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 419.00 Td (teaming.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 397.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 404.00 Td (Observability: traces, latency, token/cost tracking, drift, quality dashboards,) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 393.00 Td (incident playbooks.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 371.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 378.00 Td (Governance: model cards, data lineage, approval gates, privacy review, compliance) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 367.00 Td (sign-off.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 345.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 352.00 Td (Product thinking: user workflows, success metrics, failure modes, escalation paths.) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Length 4720 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Final Enterprise Capstone) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+BT /F1 9.5 Tf 0.120 0.120 0.120 rg 48.00 708.00 Td (Build one integrated system that demonstrates real-world AI engineering rather than isolated) Tj ET
+BT /F1 9.5 Tf 0.120 0.120 0.120 rg 48.00 695.00 Td (notebooks.) Tj ET
+0.8 w
+0.950 0.980 0.940 rg
+0.700 0.800 0.900 RG
+48.00 522.00 516.00 164.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 668.00 Td (Capstone: Enterprise AI Decision Assistant) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 653.00 Td (Problem: Enterprise AI Decision Assistant for a business domain such as operations,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 642.00 Td (finance, maintenance, HR, or energy.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 631.00 Td (Data: structured tables, PDFs/docs, logs, and optional image/text data.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 620.00 Td (ML: pandas feature pipelines, sklearn baseline, PyTorch deep model where justified.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 609.00 Td (LLM/RAG: document ingestion, embeddings, vector search, citation-backed answers,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 598.00 Td (structured JSON outputs.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 587.00 Td (Agent: tool-calling workflow that can retrieve docs, query SQL, run model inference,) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 576.00 Td (summarize evidence, and ask for human approval.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 565.00 Td (MLOps/LLMOps: MLflow tracking, eval suite, prompt/model versioning, Dockerized FastAPI) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 554.00 Td (service, CI tests, monitoring plan.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 543.00 Td (Enterprise controls: authentication assumptions, secrets handling, PII policy, rate) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 532.00 Td (limits, fallback behavior, audit logs, model card, runbook.) Tj ET
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 512.00 Td (Suggested Architecture) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 494.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 494.00 Td (Frontend or notebook demo -> FastAPI backend -> Auth/session layer -> Agent) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 482.00 Td (orchestrator.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 467.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 467.00 Td (Agent tools -> SQL query tool, document retriever, ML inference endpoint, calculator,) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 455.00 Td (report writer.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 440.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 440.00 Td (Data layer -> PostgreSQL or SQLite, object storage folder, vector database, feature) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 428.00 Td (pipeline.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 413.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 413.00 Td (Model layer -> sklearn baseline, optional PyTorch model, LLM API/open model, embedding) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 401.00 Td (model.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 386.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 386.00 Td (Ops layer -> MLflow tracking, eval suite, Docker, CI tests, logs/traces, cost dashboard.) Tj ET
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 371.00 Td (Final Demo Requirements) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 346.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 353.00 Td (A user asks a business question and gets an answer with citations, model outputs, and) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 342.00 Td (clear confidence/risk notes.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 320.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 327.00 Td (The system calls at least three tools: retrieval, SQL/data, and ML inference or) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 316.00 Td (calculator.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 294.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 301.00 Td (Every answer is logged with prompt/model version, latency, token/cost estimate, and) Tj ET
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 290.00 Td (evaluation outcome.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 268.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 275.00 Td (There is a fallback path when retrieval is weak or the model is uncertain.) Tj ET
+0.7 w
+0.200 0.200 0.200 RG
+50.00 253.00 7.00 7.00 re S
+BT /F1 8.8 Tf 0.120 0.120 0.120 rg 66.00 260.00 Td (A short README explains setup, architecture, risks, and how to operate the system.) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Length 3976 >>
+stream
+BT /F2 18 Tf 0.050 0.160 0.340 rg 48.00 742.00 Td (Weekly Operating Model) Tj ET
+1.5 w
+0.180 0.450 0.760 RG
+48.00 734.00 m 564.00 734.00 l S
+0.8 w
+1.000 0.980 0.920 rg
+0.700 0.800 0.900 RG
+48.00 629.00 516.00 87.00 re B
+BT /F2 11 Tf 0.040 0.220 0.380 rg 60.00 698.00 Td (Recommended Weekly Rhythm) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 683.00 Td (2 hours theory: math, algorithms, system design, or papers/docs.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 672.00 Td (3 hours implementation: code the concept from scratch or with core libraries.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 661.00 Td (3 hours project work: make a portfolio artifact that runs end-to-end.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 650.00 Td (1 hour testing/evaluation: add metrics, tests, error analysis, or eval examples.) Tj ET
+BT /F1 8.6 Tf 0.140 0.140 0.140 rg 62.00 639.00 Td (1 hour writing: README, model card, architecture notes, lessons learned.) Tj ET
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 619.00 Td (Portfolio Milestones) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 601.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 601.00 Td (Month 1: Python CLI package with tests.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 586.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 586.00 Td (Month 2: math-from-scratch ML notebook.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 571.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 571.00 Td (Month 3: polished EDA/data quality report.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 556.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 556.00 Td (Month 5: sklearn production-style pipeline.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 541.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 541.00 Td (Month 7: PyTorch deep learning project.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 526.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 526.00 Td (Month 9: RAG app with citations and evals.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 511.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 511.00 Td (Month 10: tool-using agent with traces.) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 496.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 496.00 Td (Month 12: enterprise capstone with deployment and governance artifacts.) Tj ET
+BT /F2 12 Tf 0.100 0.280 0.460 rg 48.00 481.00 Td (Reference Sources Used) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 463.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 463.00 Td (Python Tutorial: https://docs.python.org/3/tutorial/) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 448.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 448.00 Td (pandas Getting Started: https://pandas.pydata.org/docs/getting_started/index.html) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 433.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 433.00 Td (scikit-learn User Guide: https://scikit-learn.org/stable/user_guide.html) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 418.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 418.00 Td (PyTorch Tutorials: https://docs.pytorch.org/tutorials/) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 403.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 403.00 Td (Hugging Face Transformers: https://huggingface.co/docs/transformers/index) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 388.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 388.00 Td (LangChain / LangGraph docs: https://docs.langchain.com/oss/python/langchain/overview) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 373.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 373.00 Td (OpenAI Agents / Evals / Retrieval / Safety docs: https://platform.openai.com/docs/) Tj ET
+BT /F2 9.5 Tf 0.180 0.450 0.760 rg 52.00 358.00 Td (-) Tj ET
+BT /F1 9.2 Tf 0.120 0.120 0.120 rg 66.00 358.00 Td (MLflow documentation: https://mlflow.org/docs/latest/index.html) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 4 0 R >>
+endobj
+14 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 5 0 R >>
+endobj
+15 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 6 0 R >>
+endobj
+16 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 7 0 R >>
+endobj
+17 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 8 0 R >>
+endobj
+18 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 9 0 R >>
+endobj
+19 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 10 0 R >>
+endobj
+20 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 11 0 R >>
+endobj
+21 0 obj
+<< /Type /Page /Parent 22 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 12 0 R >>
+endobj
+22 0 obj
+<< /Type /Pages /Kids [13 0 R 14 0 R 15 0 R 16 0 R 17 0 R 18 0 R 19 0 R 20 0 R 21 0 R] /Count 9 >>
+endobj
+23 0 obj
+<< /Type /Catalog /Pages 22 0 R >>
+endobj
+xref
+0 24
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000000228 00000 n 
+0000002160 00000 n 
+0000008398 00000 n 
+0000010709 00000 n 
+0000013931 00000 n 
+0000016406 00000 n 
+0000018127 00000 n 
+0000022141 00000 n 
+0000026914 00000 n 
+0000030943 00000 n 
+0000031091 00000 n 
+0000031239 00000 n 
+0000031387 00000 n 
+0000031535 00000 n 
+0000031683 00000 n 
+0000031831 00000 n 
+0000031980 00000 n 
+0000032129 00000 n 
+0000032278 00000 n 
+0000032393 00000 n 
+trailer
+<< /Size 24 /Root 23 0 R >>
+startxref
+32444
+%%EOF
