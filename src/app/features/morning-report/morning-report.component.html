@@ -78,46 +78,37 @@
       </div>
     } @else {
       <!-- Water Well Test Results grid -->
-      @if (waterWelltestResult().length) {
+      @if (wwellTestViewModels().length) {
       <section class="report-section">
         <div class="report-section__heading">
           <span class="report-section__title">Water Well Test Results</span>
         </div>
         <div class="report-grid">
-          @for (result of waterWelltestResult(); track result.wellName) {
+          @for (vm of wwellTestViewModels(); track vm.wellName) {
             <div class="report-card report-card--test">
               <div class="card-header card-header--green">
-                <span class="card-header__name">{{ result.wellName || 'Unknown' }}</span>
+                <span class="card-header__name">{{ vm.wellName || 'Unknown' }}</span>
                 <span class="card-header__badge">Test Result</span>
               </div>
               <table class="card-table">
                 <tbody>
+                  @for (row of testRows(vm); track row[0].label) {
                   <tr>
-                    <td class="card-table__label">Aquifer</td>
-                    <td class="card-table__value" [class.missing]="!result.trgtRsvrCd">{{ result.trgtRsvrCd || 'Missing' }}</td>
-                    <td class="card-table__label">Test Rate (GPM)</td>
-                    <td class="card-table__value" [class.missing]="!result.testRate">{{ result.testRate || 'Missing' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="card-table__label">{{ result.testType === 'FLOW' ? 'SIWHP (PSI)' : 'RPM' }}</td>
-                    <td class="card-table__value" [class.missing]="result.testType === 'FLOW' ? !result.siwhp : !result.rPM">
-                      {{ result.testType === 'FLOW' ? (result.siwhp || 'Missing') : (result.rPM || 'Missing') }}
+                    <td class="card-table__label">{{ row[0].label }}</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(row[0].value)">
+                      {{ hasMetricValue(row[0].value) ? row[0].value : 'Missing' }}
                     </td>
-                    <td class="card-table__label">H2S (PPM)</td>
-                    <td class="card-table__value" [class.missing]="!result.h2sPPM">{{ result.h2sPPM || 'Missing' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="card-table__label">Temperature (°C)</td>
-                    <td class="card-table__value" [class.missing]="!result.temperature">{{ result.temperature || 'Missing' }}</td>
-                    <td class="card-table__label">Well Productivity (GPM/ft)</td>
-                    <td class="card-table__value" [class.missing]="!result.wellProductivity">{{ result.wellProductivity || 'Missing' }}</td>
-                  </tr>
-                  <tr>
-                    <td class="card-table__label">TDS (PPM)</td>
-                    <td class="card-table__value" [class.missing]="!result.tds">{{ result.tds || 'Missing' }}</td>
+                    @if (row[1]) {
+                    <td class="card-table__label">{{ row[1].label }}</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(row[1].value)">
+                      {{ hasMetricValue(row[1].value) ? row[1].value : 'Missing' }}
+                    </td>
+                    } @else {
                     <td class="card-table__label"></td>
                     <td class="card-table__value"></td>
+                    }
                   </tr>
+                  }
                 </tbody>
               </table>
             </div>

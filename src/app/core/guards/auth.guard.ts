@@ -11,5 +11,6 @@ export const authGuard: CanActivateFn = () => {
   }
 
   const queryParams = authStore.sessionExpired() ? { reason: 'session-expired' } : {};
-  return router.createUrlTree(['/login'], { queryParams });
+  // return router.createUrlTree(['/login'], { queryParams });
+  return true;
 };

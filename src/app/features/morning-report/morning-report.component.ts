@@ -25,8 +25,19 @@ import { DEFAULT_NOTIFICATION_DURATION_MS, NotificationService } from '@shared/c
 import { WwellmapComponent } from '../wwell-map/wwell-map.component';
 import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidnight, parseDateFromInput, validateDateInput } from 'src/app/shared/utils/date.util';
 import { MorningReportStore } from './store/morning-report.store';
+import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model';
+import { WaterWellTestEmailResult } from '@shared/models/wwell/wwell-test-result.model';
 
 const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
+
+type WwellTestReportViewModel = WwellTestViewModel & { readonly wellName: string };
+
+interface TestMetricCell {
+  readonly label: string;
+  readonly value: number | string | null | undefined;
+}
+
+type TestMetricRow = readonly [TestMetricCell, TestMetricCell?];
 
 @Component({
   selector: 'app-morningreport',
@@ -59,6 +70,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   protected readonly hasError = this.store.hasError;
   protected readonly errorMessage = this.store.errorMessage;
   protected readonly waterWelltestResult = this.store.waterWellTestResult;
+  protected readonly wwellTestViewModels = this.store.wwellTestViewModels;
   protected readonly statusCode = this.store.statusCode;
   protected readonly pageMessage = computed(() => {
     if (this.hasError() || this.store.isLoading()) {
@@ -234,7 +246,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
       const morningReport = this.morningReport();
       const mapData = await this.wwellMap.captureDefaultMapAsBase64();
-      const waterWelltestResults = this.waterWelltestResult();
+      const waterWelltestResults = this.wwellTestViewModels().map((vm) => this.toEmailWaterTestResult(vm));
       const emailRequest = this.emailService.buildEmailRequest(
         morningReport,
         mapData ?? '',
@@ -249,6 +261,88 @@ export class MorningReportComponent implements OnInit, OnDestroy {
 
   protected downloadReport(): void {
     this.wwellMap.saveMapImage();
+  }
+
+  protected testRows(vm: WwellTestReportViewModel): readonly TestMetricRow[] {
+    const isFlow = vm.flowType === 'Y' || vm.testType?.toLowerCase() === 'flow';
+
+    if (isFlow) {
+      const cells: TestMetricCell[] = [
+        { label: 'Aquifer', value: vm.aquiferActual },
+        { label: 'Test Duration (h)', value: vm.duration },
+      ];
+      cells.push(
+        { label: 'Test Rate (GPM)', value: vm.rate },
+        { label: 'SIWHP (psi)', value: vm.siwhp },
+        { label: 'Temperature (°C)', value: vm.temp },
+        { label: 'TDS (PPM)', value: vm.tds },
+        { label: 'H2S (PPM)', value: vm.h2sActual },
+      );
+      return this.toMetricRows(cells);
+    }
+
+    return [
+      [{ label: 'Aquifer', value: vm.aquiferActual }, { label: 'Test Rate (GPM)', value: vm.rate }],
+      [{ label: 'RPM', value: vm.rpm }, { label: 'H2S (PPM)', value: vm.h2sActual }],
+      [{ label: 'Temperature (°C)', value: vm.temp }, { label: 'Well Productivity (GPM/FT)', value: vm.productivityActual }],
+      [{ label: 'TDS (PPM)', value: vm.tds }],
+    ];
+  }
+
+  private toMetricRows(cells: readonly TestMetricCell[]): readonly TestMetricRow[] {
+    const rows: TestMetricRow[] = [];
+    for (let i = 0; i < cells.length; i += 2) {
+      const next = cells[i + 1];
+      if (!next && rows.length > 0) {
+        rows[rows.length - 1] = [rows[rows.length - 1][0], cells[i]];
+        break;
+      }
+      rows.push([cells[i], next]);
+    }
+    return rows;
+  }
+
+  protected hasMetricValue(value: number | string | null | undefined): boolean {
+    return value !== null && value !== undefined && String(value).trim() !== '';
+  }
+
+  private testTypeLabel(vm: WwellTestReportViewModel): 'FLOW' | 'PUMP' {
+    return vm.flowType === 'Y' || vm.testType?.toLowerCase() === 'flow' ? 'FLOW' : 'PUMP';
+  }
+
+  private toEmailWaterTestResult(vm: WwellTestReportViewModel): WaterWellTestEmailResult {
+    const testType = this.testTypeLabel(vm);
+    return {
+      testType,
+      wellName: vm.wellName,
+      rPM: testType === 'PUMP' ? this.metricText(vm.rpm) : '',
+      siwhp: testType === 'FLOW' ? this.metricText(vm.siwhp) : '',
+      pumpDepth: testType === 'PUMP' ? this.metricText(vm.hydPmpDpth) : '',
+      swl: testType === 'PUMP' ? this.metricText(vm.swl) : '',
+      dwl: testType === 'PUMP' ? this.metricText(vm.dwl) : '',
+      h2sPPM: this.metricText(vm.h2sActual),
+      temperature: this.metricText(vm.temp),
+      trgtRsvrCd: this.metricText(vm.aquiferActual),
+      duration: this.metricText(vm.duration),
+      testRate: this.metricText(vm.rate),
+      wellProductivity: testType === 'PUMP' ? this.metricText(vm.productivityActual) : '',
+      tds: this.metricText(vm.tds),
+      conductedBy: '',
+      rows: this.testRows(vm).map(([left, right]) => ({
+        leftLabel: left.label,
+        leftValue: this.metricText(left.value),
+        ...(right
+          ? {
+            rightLabel: right.label,
+            rightValue: this.metricText(right.value),
+          }
+          : {}),
+      })),
+    };
+  }
+
+  private metricText(value: number | string | null | undefined): string {
+    return this.hasMetricValue(value) ? String(value) : 'Missing';
   }
 
   private showError(message: string): void {

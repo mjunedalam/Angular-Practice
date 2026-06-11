@@ -374,7 +374,6 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
         };
     });
 
-    // Include DRLG_FM_TOPS entries not present in EXAD_GWD_IR_TOPS (drilled but not planned)
     const fromDrlgOnly: FormationInfoViewModel[] = (d.DRLG_FM_TOPS ?? [])
         .filter(fm => !plannedCodes.has(fm.stLongCd))
         .map(fm => {
@@ -389,8 +388,6 @@ export function selectAllFormationTops(d: IWellData | null): FormationInfoViewMo
             };
         });
 
-    // Order by depth (actual depth where drilled, otherwise planned depth) to match the Geo Axis,
-    // where planned and drilled-only tops are positioned on a single shared depth axis.
     const effectiveDepth = (item: FormationInfoViewModel): number => {
         const actual = safeNum(item.actualDepth);
         if (actual !== null && actual > 0) return actual;
@@ -472,8 +469,6 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     };
 }
 
-// ─── Morning report mappers ────────────────────────────────────────────────────
-
 export function mapWellDataToMorningReport(d: IWellData): MorningReport {
     const rig = d.RIG_ACTIVITY?.[0];
     const status = d.DRLG_OP_STATUS?.[0];
@@ -512,12 +507,17 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellN
         wellName: drillingWellName,
         rPM: testType === 'PUMP' ? String(o.rpm ?? '') : '',
         siwhp: testType === 'FLOW' ? String(o.siwhp ?? '') : '',
+        pumpDepth: testType === 'PUMP' ? String(o.hydPmpDpth ?? '') : '',
+        swl: testType === 'PUMP' ? String(o.statWlvl ?? '') : '',
+        dwl: testType === 'PUMP' ? String(o.dyncWlvl ?? '') : '',
         h2sPPM: String(o.hydH2sCnc ?? ''),
         temperature: String(o.temp ?? ''),
         trgtRsvrCd: o.rsvrCd ?? '',
+        duration: String(o.duration ?? ''),
         testRate: String(o.hydProdRt ?? ''),
-        wellProductivity: String(o.hydProduct ?? ''),
+        wellProductivity: testType === 'PUMP' ? String(o.hydProduct ?? '') : '',
         tds: String(o.wtrSaTdsCnc ?? ''),
+        conductedBy: o.testerNetworkId ?? '',
     };
 }
 
@@ -535,7 +535,19 @@ export function selectMorningReports(
 
 export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
     return data.flatMap(d => {
-        const drillingWellName = d.WELL_MASTER?.[0]?.well ?? '';
+        const drillingWellName = d.RIG_ACTIVITY?.[0]?.wellName ?? d.WELL_MASTER?.[0]?.well ?? '';
         return (d.EXAD_GWD_WELL_TESTS ?? []).map(o => mapToWaterWellTestResult(o, drillingWellName));
+    });
+}
+
+export function selectWwellTestViewModels(
+    data: IWellData[],
+): ReadonlyArray<WwellTestViewModel & { readonly wellName: string }> {
+    return data.flatMap(d => {
+        if (!selectPrimaryTestOutcome(d)) return [];
+        const vm = selectWwellTestViewModel(d);
+        if (!vm) return [];
+        const wellName = d.RIG_ACTIVITY?.[0]?.wellName ?? d.WELL_MASTER?.[0]?.well ?? '';
+        return [{ wellName, ...vm }];
     });
 }

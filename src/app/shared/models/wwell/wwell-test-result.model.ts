@@ -17,3 +17,14 @@ export interface WaterWellTestResult {
   readonly tds: string;
   readonly conductedBy: string;
 }
+
+export interface WaterWellTestEmailRow {
+  readonly leftLabel: string;
+  readonly leftValue: string;
+  readonly rightLabel?: string;
+  readonly rightValue?: string;
+}
+
+export interface WaterWellTestEmailResult extends WaterWellTestResult {
+  readonly rows: readonly WaterWellTestEmailRow[];
+}

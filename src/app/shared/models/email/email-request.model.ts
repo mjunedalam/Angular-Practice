@@ -1,5 +1,5 @@
 import { MorningReport } from "src/app/core/models/morning-report/morning-report.model";
-import { WaterWellTestResult } from "../wwell/wwell-test-result.model";
+import { WaterWellTestEmailResult } from "../wwell/wwell-test-result.model";
 
 export interface EmailRequest {
   subject: string;
@@ -11,7 +11,7 @@ export interface EmailRequest {
   templateData: {
     morningReport: MorningReport[];
     mapImageData: string;
-    waterWellTestResults?: WaterWellTestResult[];
+    waterWellTestResults?: WaterWellTestEmailResult[];
   };
   generatePdf: boolean;
   templateName: string;

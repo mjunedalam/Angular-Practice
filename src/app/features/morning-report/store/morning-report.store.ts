@@ -6,6 +6,7 @@ import { forkJoin, pipe, switchMap, tap } from 'rxjs';
 
 import { MorningReport } from '@models/morning-report/morning-report.model';
 import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model';
 import { DailyOperationService } from '@services/daily-operation.service';
 import {
     DEFAULT_NOTIFICATION_DURATION_MS,
@@ -15,6 +16,7 @@ import { parseDateFromInput } from 'src/app/shared/utils/date.util';
 import {
     selectMorningReports,
     selectWaterWellTestResultsFromData,
+    selectWwellTestViewModels,
 } from 'src/app/core/store/shared/well-data.selectors';
 import { updateRigStatusOverrides } from 'src/app/core/store/shared/well-data.state';
 import { MorningReportStoreState, initialMorningReportState } from './morning-report.state';
@@ -28,6 +30,9 @@ export const MorningReportStore = signalStore(
         ),
         waterWellTestResult: computed((): WaterWellTestResult[] =>
             selectWaterWellTestResultsFromData(allWellsData()),
+        ),
+        wwellTestViewModels: computed((): ReadonlyArray<WwellTestViewModel & { readonly wellName: string }> =>
+            selectWwellTestViewModels(allWellsData()),
         ),
         isLoading: computed(() => listLoading() || detailLoading()),
         hasError: computed(() => error() !== null),

@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MorningReport } from '@models/morning-report/morning-report.model';
 import { EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
-import { WaterWellTestResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
+import { WaterWellTestEmailResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class EmailService {
     reports: MorningReport[],
     mapImageData: string,
     recipientEmail: string,
-    waterWellTestResults?: WaterWellTestResult[],
+    waterWellTestResults?: WaterWellTestEmailResult[],
   ): EmailRequest {
     return {
       subject: EMAIL_SUBJECT,
