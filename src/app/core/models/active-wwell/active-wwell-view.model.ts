@@ -117,15 +117,18 @@ export interface WwellTestViewModel {
   readonly h2sEstimate: number | string;
   readonly temp?: number | string | null;
   readonly tds?: number | string | null;
+  readonly tdsEstimate?: number | string | null;
   readonly rpm?: number | string | null;
   readonly duration?: number | string | null;
   readonly conductedBy?: string | null;
   readonly rate?: number | string | null;
   readonly siwhp?: number | string | null;
+  readonly siwhpEstimate?: number | string | null;
   readonly depth: number | string;
   readonly productivityActual?: number | string | null;
   readonly productivityEstimate: number | string;
   readonly swl?: number | string | null;
+  readonly swlEstimate?: number | string | null;
   readonly dwl?: number | string | null;
   readonly hydPmpDpth?: number | null;
 }

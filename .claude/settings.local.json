@@ -26,7 +26,8 @@
       "Bash(npx playwright *)",
       "Bash(curl -fsSL https://openclaw.ai/install.sh)",
       "Bash(bash)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat {}')"
     ]
   }
 }

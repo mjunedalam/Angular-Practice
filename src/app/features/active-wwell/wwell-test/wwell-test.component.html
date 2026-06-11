@@ -114,7 +114,12 @@
           />
           <div class="wt-ir-cell">
             <span class="wt-ir-badge">IR</span>
-            <input class="wt-ir-input" type="text" readonly value="" />
+            <input
+              class="wt-ir-input"
+              type="text"
+              readonly
+              [value]="data()?.tdsEstimate ?? ''"
+            />
           </div>
         </div>
 
@@ -142,7 +147,7 @@
       <div class="wt-column">
         @if (!isFlowTest()) {
           <div class="wt-row">
-            <span class="wt-label wt-label--cased">Test rate (GPM)</span>
+            <span class="wt-label wt-label--cased">Test Rate (GPM)</span>
             <input
               class="wt-actual"
               type="text"
@@ -182,7 +187,12 @@
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
-              <input class="wt-ir-input" type="text" readonly value="" />
+              <input
+                class="wt-ir-input"
+                type="text"
+                readonly
+                [value]="data()?.swlEstimate ?? ''"
+              />
             </div>
           </div>
 
@@ -232,7 +242,12 @@
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
-              <input class="wt-ir-input" type="text" readonly value="" />
+              <input
+                class="wt-ir-input"
+                type="text"
+                readonly
+                [value]="data()?.siwhpEstimate ?? ''"
+              />
             </div>
           </div>
         }

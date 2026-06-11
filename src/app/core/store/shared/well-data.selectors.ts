@@ -37,7 +37,6 @@ function coercePositiveEpANum(value: number | string | null | undefined): number
     return numericValue;
 }
 
-// ─── Well list / pagination ────────────────────────────────────────────────────
 
 export function selectWellNamesFromList(wellList: WwellEntry[]): WellName[] {
     return wellList.flatMap((entry) => {
@@ -68,7 +67,7 @@ export function selectHasNextPage(names: WellName[], page: number): boolean {
     return (page + 1) * PAGE_SIZE < names.length;
 }
 
-// ─── Well data helpers ─────────────────────────────────────────────────────────
+
 
 export function selectWellEpANum(d: IWellData | null | undefined): number | null {
     const epANum = d?.DRLG_OP_STATUS?.[0]?.epANum ?? null;
@@ -134,7 +133,7 @@ export function displayValue(value: unknown, fallback = FALLBACK_STR): string {
     return value === null || value === undefined || value === '' ? fallback : String(value);
 }
 
-// ─── Well data selectors ───────────────────────────────────────────────────────
+
 
 export function selectDiagramData(d: IWellData | null): WellboreDiagramData | null {
     if (!d) return null;
@@ -271,8 +270,6 @@ export function selectWellTestResults(d: IWellData | null): WellTestResult[] {
         };
     });
 }
-
-// ─── View model selectors ──────────────────────────────────────────────────────
 
 export function selectWellHeaderViewModel(d: IWellData | null, epANum: number | null): WellHeaderViewModel | null {
     if (!d) return null;
@@ -449,24 +446,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const testOutcome = selectPrimaryTestOutcome(d);
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     return {
-        // flowType: hydro?.flowType ?? 'N',
-        // testType: testOutcome?.hydTestTypCd ?? FALLBACK_STR,
-        // aquiferActual: testOutcome?.rsvrCd ?? water?.aquifer ?? FALLBACK_STR,
-        // aquiferEstimate: hydro?.estTargetAquifier ?? prewap?.targetFormation ?? FALLBACK_STR,
-        // h2sActual: testOutcome?.hydH2sCnc ?? water?.h2s ?? FALLBACK_STR,
-        // h2sEstimate: hydro?.estH2s ?? FALLBACK_STR,
-        // temp: testOutcome?.temp ?? FALLBACK_STR,
-        // tds: testOutcome?.wtrSaTdsCnc ?? water?.fieldTds ?? hydro?.estWaterQuality ?? FALLBACK_STR,
-        // rpm: testOutcome?.rpm ?? water?.rpm ?? FALLBACK_STR,
-        // duration: testOutcome?.duration ?? water?.testDuration ?? FALLBACK_STR,
-        // conductedBy: drillingEngineer ?? foreman ?? FALLBACK_STR,
-        // rate: testOutcome?.hydProdRt ?? water?.flowRate ?? FALLBACK_STR,
-        // siwhp: testOutcome?.siwhp ?? water?.staticWaterLevel ?? FALLBACK_STR,
-        // depth: prewap?.estTargetDepth ?? status?.wPrsntDpth ?? FALLBACK_STR,
-        // productivityActual: testOutcome?.hydProduct ?? water?.specificCapacity ?? FALLBACK_STR,
-        // productivityEstimate: hydro?.estProductivity ?? FALLBACK_STR,
-        // swl: testOutcome?.statWlvl ?? water?.staticWaterLevel ?? hydro?.estStaticWaterLevel ?? FALLBACK_STR,
-        // dwl: testOutcome?.dyncWlvl ?? water?.drawDown ?? FALLBACK_STR,
+  
         flowType: hydro?.flowType ?? 'N',
         testType: testOutcome?.hydTestTypCd,
         aquiferActual: testOutcome?.rsvrCd,
@@ -475,16 +455,19 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
         h2sEstimate: hydro?.estH2s,
         temp: testOutcome?.temp,
         tds: testOutcome?.wtrSaTdsCnc,
+        tdsEstimate: hydro?.estWaterQuality,
         rpm: testOutcome?.rpm,
         duration: testOutcome?.duration,
         conductedBy: testOutcome?.testerNetworkId,
         rate: testOutcome?.hydProdRt,
         siwhp: testOutcome?.siwhp,
+        siwhpEstimate: hydro?.estStaticWaterLevel,
         depth: prewap?.estTargetDepth,
         hydPmpDpth: testOutcome?.hydPmpDpth,
         productivityActual: testOutcome?.hydProduct,
         productivityEstimate: hydro?.estProductivity,
         swl: testOutcome?.statWlvl,
+        swlEstimate: hydro?.estStaticWaterLevel,
         dwl: testOutcome?.dyncWlvl,
     };
 }
