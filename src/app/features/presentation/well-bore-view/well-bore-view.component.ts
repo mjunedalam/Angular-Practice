@@ -21,7 +21,7 @@ import { renderNotDrilledZone } from './renderers/not-drilled-zone.renderer';
 import { renderPump, renderTotalDepthLabel } from './renderers/pump-and-depth.renderer';
 import { renderStaticChrome } from './renderers/static-chrome.renderer';
 import { renderWaterLevel } from './renderers/water-level.renderer';
-import { resolveOhHalfWidth } from './renderers/wellbore-depth.helpers';
+import { resolveCompletionBottomDepth, resolveOhHalfWidth } from './renderers/wellbore-depth.helpers';
 import { DefsSel, GSel, SvgSel } from './renderers/wellbore-renderer.types';
 import { createDepthScale } from '@shared/utils/wellbore-math.util';
 
@@ -212,9 +212,9 @@ export class WellBoreViewComponent {
     });
     renderTotalDepthLabel({
       rootG: this.rootG,
-      totalDepth: data.totalDepth,
+      data,
       centerX: casingCenterX,
-      yPx: scale(data.totalDepth),
+      yPx: scale(this.resolveDepthLabelAnchor(data)),
       start: t_tdLabelStart,
       animation: resolveAnimation(this.animConfig()),
     });
@@ -226,5 +226,14 @@ export class WellBoreViewComponent {
       start: t_labelsStart,
       animation: resolveAnimation(this.animConfig()),
     });
+  }
+
+  private resolveDepthLabelAnchor(data: WellboreDiagramData): number {
+    const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
+    if (plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth) {
+      return resolveCompletionBottomDepth(data);
+    }
+
+    return data.totalDepth;
   }
 }

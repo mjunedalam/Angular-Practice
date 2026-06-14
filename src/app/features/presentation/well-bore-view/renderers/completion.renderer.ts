@@ -12,6 +12,8 @@ import {
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import {
+  resolveCompletionBottomDepth,
+  resolveCompletionBottomPx,
   getCasingTier,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
@@ -64,13 +66,13 @@ function renderOpenHoleAndScreen({
   const liner = data.casings.find(c => c.csgType === 'Liner');
   const gpCasing = data.casings.find(c => c.csgType === 'Gravel Pack');
   const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
-  const tdPx = scale(data.totalDepth);
+  const completionBottomDepth = resolveCompletionBottomDepth(data);
+  const completionBottomPx = scale(completionBottomDepth);
   const hasGP = wellDesign?.gpFlg === 'Y' || !!gpCasing;
-  const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), tdPx) : tdPx;
+  const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), completionBottomPx) : completionBottomPx;
   const screenBottomPx = wellDesign
-    ? (shouldDrawLS && hasGP ? gpBottomPx - gpScreenGap : tdPx)
-    : (liner ? scale(liner.csgDepth) : tdPx - 15);
-
+    ? (shouldDrawLS && hasGP ? gpBottomPx - gpScreenGap : completionBottomPx)
+    : (liner ? scale(liner.csgDepth) : completionBottomPx - 15);
   const clipHW = shouldDrawOH ? ohHW : screenHW;
   const clipId = 'dyn-oh-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -78,7 +80,7 @@ function renderOpenHoleAndScreen({
 
   if (shouldDrawOH) {
     rootG.append('path').attr('class', 'open-hole')
-      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, tdPx))
+      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, completionBottomPx))
       .attr('clip-path', `url(#${clipId})`);
   }
 
@@ -88,11 +90,11 @@ function renderOpenHoleAndScreen({
       .attr('clip-path', `url(#${clipId})`);
   }
 
-  clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', tdPx - shoePx + 5);
+  clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', completionBottomPx - shoePx + 5);
 
   if (shouldDrawOH) {
     const ohLabel = wellDesign?.ohRemarks ?? '8 1/2" Open Hole';
-    const ohLY = shoePx + (tdPx - shoePx) * 0.2;
+    const ohLY = shoePx + (completionBottomPx - shoePx) * 0.2;
     const ohLG = rootG.append('g').attr('class', 'open-hole-label');
     const ohLineX1 = centerX - ohHW;
     const ohLineX2 = centerX - ohHW - 33;
@@ -112,7 +114,7 @@ function renderOpenHoleAndScreen({
 
   if (shouldDrawLS) {
     const shoeDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
-    const fallbackFt = liner ? liner.csgDepth - shoeDepth : data.totalDepth - shoeDepth;
+    const fallbackFt = liner ? liner.csgDepth - shoeDepth : completionBottomDepth - shoeDepth;
     const screenLabel = wellDesign?.lsRemarks ?? (liner?.csgRemarks ?? `+/- ${fallbackFt.toLocaleString()} ft of Screen`);
     const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
     const scrLG = rootG.append('g').attr('class', 'screen-label');
@@ -154,7 +156,7 @@ function renderGravelPackDesign({
   const gpOuterEdge = lsHW + annulusWidth;
   const annulusCenter = lsHW + annulusWidth / 2;
   const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
-  const tdPx = scale(data.totalDepth);
+  const completionBottomPx = resolveCompletionBottomPx(data, scale);
 
   const clipId = 'dyn-gp-design-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -163,7 +165,7 @@ function renderGravelPackDesign({
 
   rootG.append('path')
     .attr('class', 'gravelHole')
-    .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, tdPx))
+    .attr('d', buildGravelPackUPath(centerX, annulusCenter, startDepthPx, completionBottomPx))
     .attr('stroke', 'url(#gravelpattern)')
     .attr('stroke-width', String(annulusWidth))
     .style('fill', 'none')
@@ -173,11 +175,11 @@ function renderGravelPackDesign({
     .delay(ohStart)
     .duration(ANIM.GRAVEL_DURATION)
     .ease(easeCubicInOut)
-    .attr('height', tdPx - startDepthPx);
+    .attr('height', completionBottomPx - startDepthPx);
 
   if (!data.wellDesign.gpRemarks) return;
 
-  const labelY = startDepthPx + (tdPx - startDepthPx) * 0.5;
+  const labelY = startDepthPx + (completionBottomPx - startDepthPx) * 0.5;
   const rEdge = centerX + gpOuterEdge;
   const lEnd = rEdge + 26;
   const lg = rootG.append('g').attr('class', 'gp-design-label');
@@ -212,9 +214,9 @@ function renderPrePerforatedLiner({
   const perforationGap = Math.max(12, Math.min(20, openHoleHwMargin * 0.65));
   const prePerfHW = Math.max(10, ohHW - perforationGap);
   const topPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
-  const tdPx = scale(data.totalDepth);
-  const perfTopPx = Math.min(topPx + perforationGap, tdPx);
-  const perfBottomPx = Math.max(perfTopPx, tdPx - perforationGap);
+  const completionBottomPx = resolveCompletionBottomPx(data, scale);
+  const perfTopPx = Math.min(topPx + perforationGap, completionBottomPx);
+  const perfBottomPx = Math.max(perfTopPx, completionBottomPx - perforationGap);
 
   const clipId = 'dyn-perf-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -226,16 +228,19 @@ function renderPrePerforatedLiner({
     .attr('clip-path', `url(#${clipId})`);
   const perfLeftX = centerX - prePerfHW;
   const perfRightX = centerX + prePerfHW;
+  const leftWallD = `M${perfLeftX},${perfTopPx} L${perfLeftX},${perfBottomPx}`;
+  const bottomWallD = `M${perfLeftX},${perfBottomPx} L${perfRightX},${perfBottomPx}`;
+  const rightWallD = `M${perfRightX},${perfTopPx} L${perfRightX},${perfBottomPx}`;
 
   perfGroup.append('path')
     .attr('class', 'perf-wall')
-    .attr('d', `M${perfLeftX},${perfTopPx} L${perfLeftX},${perfBottomPx}`);
+    .attr('d', leftWallD);
   perfGroup.append('path')
     .attr('class', 'perf-wall')
-    .attr('d', `M${perfLeftX},${perfBottomPx} L${perfRightX},${perfBottomPx}`);
+    .attr('d', bottomWallD);
   perfGroup.append('path')
     .attr('class', 'perf-wall')
-    .attr('d', `M${perfRightX},${perfTopPx} L${perfRightX},${perfBottomPx}`);
+    .attr('d', rightWallD);
 
   clipRect.transition()
     .delay(ohStart)

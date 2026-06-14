@@ -75,7 +75,9 @@ export function selectWellEpANum(d: IWellData | null | undefined): number | null
 }
 
 export function selectTotalDepth(d: IWellData | null): number {
-    return d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0;
+    const estTargetDepth = safeNum(d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth) ?? 0;
+    const currentDepth = safeNum(d?.DRLG_OP_STATUS?.[0]?.wPrsntDpth) ?? 0;
+    return Math.max(estTargetDepth, currentDepth);
 }
 
 export function selectDisplayDepth(d: IWellData | null): number {
@@ -139,7 +141,7 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
     if (!d) return null;
     return {
         wellName: d.WELL_MASTER?.[0]?.well ?? '',
-        totalDepth: d.EXAD_RCD_PREWAP?.[0]?.estTargetDepth ?? 0,
+        totalDepth: selectTotalDepth(d),
         displayDepth: selectDisplayDepth(d),
         casings: sortCasingsByDepthDesc(d.EXAD_GWD_IR_CASING ?? []),
         drlgCasings: [...(d.DRLG_CSG ?? [])].sort((a, b) => b.wCsgBotDpth - a.wCsgBotDpth),

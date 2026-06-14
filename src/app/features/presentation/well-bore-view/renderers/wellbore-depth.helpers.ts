@@ -4,6 +4,8 @@ import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
 import { DepthScale } from './wellbore-renderer.types';
 
+const OVERRUN_COMPLETION_LENGTH_FT = 1200;
+
 export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
   const irNonLiner = casings.filter(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
   const deepest = irNonLiner[0];
@@ -30,6 +32,22 @@ export function resolveCompletionTopPx(
   scale: DepthScale,
 ): number {
   return scale(resolveCompletionTopDepth(casings, drlgCasings));
+}
+
+export function resolveCompletionBottomDepth(data: WellboreDiagramData): number {
+  const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
+  const isCurrentDepthBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
+
+  if (!isCurrentDepthBeyondTarget) {
+    return data.totalDepth;
+  }
+
+  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
+  return Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT));
+}
+
+export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: DepthScale): number {
+  return scale(resolveCompletionBottomDepth(data));
 }
 
 export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLayout): number {

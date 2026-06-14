@@ -245,7 +245,6 @@ export function buildPrePerfLiner(
 
 export function casingGradientId(csgType: string): string {
   if (csgType === 'Conductor') return 'conductorGradient';
-  if (csgType === 'Liner')     return 'linerGradient';
   return 'mainGradient';
 }
 
@@ -289,9 +288,10 @@ export function buildScreenHanger(
 ): { left: string; right: string } {
   const sl = centerX - halfWidth; // left  edge of screen
   const sr = centerX + halfWidth; // right edge of screen
+  const connectY = y - 1;
 
-  const left  = `M${sl},${y} L${sl},${y + dropPx} L${sl + size},${y} Z`;
-  const right = `M${sr},${y} L${sr},${y + dropPx} L${sr - size},${y} Z`;
+  const left  = `M${sl},${connectY} L${sl},${y + dropPx} L${sl + size},${connectY} Z`;
+  const right = `M${sr},${connectY} L${sr},${y + dropPx} L${sr - size},${connectY} Z`;
 
   return { left, right };
 }

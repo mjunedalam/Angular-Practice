@@ -1,4 +1,4 @@
-import { easeBackOut, easeBounceOut, easeCubicInOut, easeLinear } from 'd3-ease';
+import { easeBackOut, easeBounceOut, easeCubicInOut, easeCubicOut, easeLinear } from 'd3-ease';
 import 'd3-transition';
 
 import { WellboreAnimConfig } from '@models/well-design/wellbore-diagram.model';
@@ -30,13 +30,23 @@ export function animateLabel(group: GSel, delay: number, animation: ResolvedAnim
       .attr('stroke-dashoffset', Math.abs(x2 - x1))
       .transition().delay(delay).duration(animation.lineDur).ease(easeLinear)
       .attr('stroke-dashoffset', 0);
-    group.selectAll<SVGElement, unknown>('path, text')
+    group.selectAll<SVGElement, unknown>('path')
       .style('opacity', 0)
-      .transition().delay(delay + animation.lineDur).duration(animation.fadeDur).ease(easeCubicInOut)
+      .attr('transform', 'translate(4,0)')
+      .transition().delay(delay + animation.lineDur).duration(animation.fadeDur).ease(easeBackOut)
+      .attr('transform', 'translate(0,0)')
+      .style('opacity', 1);
+    group.selectAll<SVGElement, unknown>('text')
+      .style('opacity', 0)
+      .attr('transform', 'translate(8,0)')
+      .transition().delay(delay + animation.lineDur + 80).duration(animation.fadeDur).ease(easeCubicOut)
+      .attr('transform', 'translate(0,0)')
       .style('opacity', 1);
   } else {
     group.style('opacity', 0)
+      .attr('transform', 'translate(6,0)')
       .transition().delay(delay).duration(animation.lineDur + animation.fadeDur).ease(easeCubicInOut)
+      .attr('transform', 'translate(0,0)')
       .style('opacity', 1);
   }
 }

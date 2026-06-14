@@ -5,7 +5,7 @@ import { DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
 export interface RenderTotalDepthLabelOptions {
   readonly rootG: GSel;
-  readonly totalDepth: number;
+  readonly data: WellboreDiagramData;
   readonly centerX: number;
   readonly yPx: number;
   readonly start: number;
@@ -23,19 +23,22 @@ export interface RenderPumpOptions {
 
 export function renderTotalDepthLabel({
   rootG,
-  totalDepth,
+  data,
   centerX,
   yPx,
   start,
   animation,
 }: RenderTotalDepthLabelOptions): void {
   const ty = yPx + 35;
+  const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
+  const isCurrentDepthBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
+  const labelDepth = isCurrentDepthBeyondTarget ? data.currentDepth : data.totalDepth;
   const g = rootG.append('g').attr('class', 'td-label');
   g.append('text')
-    .attr('class', 'total-depth-main')
+    .attr('class', isCurrentDepthBeyondTarget ? 'total-depth-main total-depth-main--current' : 'total-depth-main')
     .attr('x', 0).attr('y', 0)
     .attr('text-anchor', 'middle')
-    .text(`TOTAL DEPTH: ${totalDepth.toLocaleString()} FT`);
+    .text(`${isCurrentDepthBeyondTarget ? 'CURRENT DEPTH' : 'TOTAL DEPTH'}: ${labelDepth.toLocaleString()} FT`);
   applyPop(g, centerX, ty, start, animation);
 }
 
