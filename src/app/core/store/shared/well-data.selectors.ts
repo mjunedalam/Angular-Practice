@@ -546,7 +546,7 @@ export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWell
 
 export function selectWwellTestViewModels(
     data: IWellData[],
-): ReadonlyArray<WwellTestViewModel & { readonly wellName: string }> {
+): readonly (WwellTestViewModel & { readonly wellName: string })[] {
     return data.flatMap(d => {
         if (!selectPrimaryTestOutcome(d)) return [];
         const vm = selectWwellTestViewModel(d);

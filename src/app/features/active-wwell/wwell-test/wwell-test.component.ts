@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -36,11 +36,7 @@ export class WwellTestComponent {
 
 
   formService = inject(ActiveWwellFormService);
-  form: any = this.formService.wellTestForm;
-
-  ngOnInit() {
-
-  }
+  form: FormGroup = this.formService.wellTestForm;
 
   activeWellApiService = inject(ActiveWellViewService)
   notify = inject(NotificationService);
@@ -65,16 +61,16 @@ export class WwellTestComponent {
 
 
   createOrUpdateDrillingRemarks() {
-    let bodyGwdDailyRemarks = this.formService.drillingRemarksForm.value;
-    let egdrId = this.store.wellData()?.EXAD_GWD_DAILY_REMARKS?.[0]?.egdr_id;
+    const bodyGwdDailyRemarks = this.formService.drillingRemarksForm.value;
+    const egdrId = this.store.wellData()?.EXAD_GWD_DAILY_REMARKS?.[0]?.egdr_id;
     bodyGwdDailyRemarks.egdrId = egdrId;
     bodyGwdDailyRemarks.wActDt = formatDateForInput(this.store.selectedDate());
     return this.activeWellApiService.createOrUpdateGwdDailyRemark(bodyGwdDailyRemarks)
   }
 
   createOrUpdateWellTest() {
-    let bodyGwdWellTest = this.formService.wellTestForm.value
-    let egwtId = this.store.wellData()?.EXAD_GWD_WELL_TESTS?.[0]?.egwt_id;
+    const bodyGwdWellTest = this.formService.wellTestForm.value
+    const egwtId = this.store.wellData()?.EXAD_GWD_WELL_TESTS?.[0]?.egwt_id;
     bodyGwdWellTest.egwtId = egwtId;
     bodyGwdWellTest.testStaDt = formatDateForInput(this.store.selectedDate());
     return this.activeWellApiService.createOrUpdateGwdWellTest(bodyGwdWellTest)
@@ -91,7 +87,7 @@ export class WwellTestComponent {
   ] as const;
 
   protected onlyNumbers(event: KeyboardEvent): void {
-    const allowed = /[\d.\-]/.test(event.key) || [
+    const allowed = /[\d.-]/.test(event.key) || [
       'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'
     ].includes(event.key);
     if (!allowed) event.preventDefault();

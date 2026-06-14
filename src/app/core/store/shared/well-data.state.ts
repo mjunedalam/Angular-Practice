@@ -19,8 +19,9 @@ export function updateRigStatusOverrides(
 
     if (!rigStatus.trim()) {
         if (!(epANum in overrides)) return overrides;
-        const { [epANum]: _removed, ...rest } = overrides;
-        return rest;
+        return Object.fromEntries(
+            Object.entries(overrides).filter(([key]) => Number(key) !== epANum),
+        ) as RigStatusOverrides;
     }
 
     if (overrides[epANum] === rigStatus) return overrides;

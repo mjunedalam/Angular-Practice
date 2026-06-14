@@ -10,7 +10,10 @@ interface CirculationSegment {
   readonly pct: number;
   readonly topDepth: number;
   readonly botDepth: number;
+  readonly hasData: boolean;
 }
+
+const NO_CIRC_DATA_COLOUR = '#000000';
 
 export interface RenderDrillArrowOptions {
   readonly rootG: GSel;
@@ -66,14 +69,26 @@ export function renderDrillArrow({
       const topDepth = i === 0 ? 0 : points[i - 1].depth;
       const botDepth = Math.min(points[i].depth, effectiveDepth);
       if (topDepth < botDepth) {
-        segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth });
+        segs.push({ topPx: scale(topDepth), botPx: scale(botDepth), pct: points[i].pct, topDepth, botDepth, hasData: true });
       }
     }
 
+    const lastBotDepth = segs.length ? segs[segs.length - 1].botDepth : 0;
+    if (lastBotDepth < effectiveDepth) {
+      segs.push({
+        topPx: scale(lastBotDepth),
+        botPx: scale(effectiveDepth),
+        pct: 0,
+        topDepth: lastBotDepth,
+        botDepth: effectiveDepth,
+        hasData: false,
+      });
+    }
+
     segs.forEach((seg, idx) => {
-      const col = circulationColour(seg.pct);
+      const col = segmentColour(seg);
       const botPct = (seg.botPx / effectivePx) * 100;
-      const nextCol = idx + 1 < segs.length ? circulationColour(segs[idx + 1].pct) : col;
+      const nextCol = idx + 1 < segs.length ? segmentColour(segs[idx + 1]) : col;
       grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', col);
       if (nextCol !== col) grad.append('stop').attr('offset', `${botPct.toFixed(4)}%`).attr('stop-color', nextCol);
     });
@@ -82,8 +97,20 @@ export function renderDrillArrow({
     shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW).attr('height', cappedEffectivePx).attr('fill', 'rgba(255,255,255,0.10)').attr('pointer-events', 'none');
 
     segs.forEach(seg => {
-      const fill = circulationColour(seg.pct);
+      const fill = segmentColour(seg);
       const segH = Math.max(1, seg.botPx - seg.topPx);
+
+      if (!seg.hasData) {
+        shaftG.append('rect')
+          .attr('x', arrowCx - shaftHW)
+          .attr('y', seg.topPx)
+          .attr('width', shaftHW * 2)
+          .attr('height', segH)
+          .attr('fill', 'transparent')
+          .attr('class', 'mud-circ-seg');
+        return;
+      }
+
       const midY = seg.topPx + segH / 2;
       const ttipX = arrowCx + shaftHW + 10;
       const ttipG = arrowG.append('g').attr('class', 'circ-tooltip').style('opacity', 0).style('pointer-events', 'none');
@@ -107,6 +134,10 @@ export function renderDrillArrow({
 
   const headG = shaftG.append('g').attr('class', 'depth-arrow-head-g');
   headG.append('path').attr('class', 'depth-arrow-head').attr('d', `M${arrowCx - headHW},${currPx - headH} L${arrowCx},${currPx} L${arrowCx + headHW},${currPx - headH} Z`);
+}
+
+function segmentColour(seg: CirculationSegment): string {
+  return seg.hasData ? circulationColour(seg.pct) : NO_CIRC_DATA_COLOUR;
 }
 
 function circulationColour(pct: number): string {

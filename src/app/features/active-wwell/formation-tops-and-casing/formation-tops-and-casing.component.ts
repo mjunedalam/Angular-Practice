@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridOptions, RowClassParams, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
 
 

@@ -31,7 +31,7 @@ export const MorningReportStore = signalStore(
         waterWellTestResult: computed((): WaterWellTestResult[] =>
             selectWaterWellTestResultsFromData(allWellsData()),
         ),
-        wwellTestViewModels: computed((): ReadonlyArray<WwellTestViewModel & { readonly wellName: string }> =>
+        wwellTestViewModels: computed((): readonly (WwellTestViewModel & { readonly wellName: string })[] =>
             selectWwellTestViewModels(allWellsData()),
         ),
         isLoading: computed(() => listLoading() || detailLoading()),

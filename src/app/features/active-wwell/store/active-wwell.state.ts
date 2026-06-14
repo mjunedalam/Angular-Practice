@@ -1,7 +1,6 @@
 import { IWellData } from '@models/well-design/well-data.model';
 import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
 import { getTodayAtMidnight } from 'src/app/shared/utils/date.util';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 export interface ActiveWwellState {
     readonly wellList: WwellEntry[];

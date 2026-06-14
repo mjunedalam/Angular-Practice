@@ -69,7 +69,7 @@ export class TopNavbarComponent {
     this.menuOpen.update((open) => !open);
   }
 
-  protected keepMenuOpen(event: MouseEvent): void {
+  protected keepMenuOpen(event: Event): void {
     event.stopPropagation();
   }
 

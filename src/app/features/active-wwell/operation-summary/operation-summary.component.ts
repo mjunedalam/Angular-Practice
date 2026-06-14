@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 
@@ -17,9 +17,5 @@ export class OperationSummaryComponent {
   protected readonly data = this.store.operationSummary;
 
   formService = inject(ActiveWwellFormService);
-  form: any = this.formService.drillingRemarksForm;
-
-  ngOnInit() {
-
-  }
+  form: FormGroup = this.formService.drillingRemarksForm;
 }

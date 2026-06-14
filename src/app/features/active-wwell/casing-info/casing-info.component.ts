@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
-import { ColDef, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridReadyEvent, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 
@@ -60,7 +60,7 @@ export class CasingInfoComponent {
     //valueGetter: params => params.value ?? 'N/A'
   };
 
-  onGridReady(params: any) {
+  onGridReady(params: GridReadyEvent) {
     params.api.sizeColumnsToFit();
   }
 

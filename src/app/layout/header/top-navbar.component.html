@@ -79,7 +79,13 @@
       </button>
 
       @if (menuOpen()) {
-        <div class="top-navbar__menu-popup" (click)="keepMenuOpen($event)">
+        <div
+          class="top-navbar__menu-popup"
+          role="menu"
+          tabindex="0"
+          (click)="keepMenuOpen($event)"
+          (keydown)="keepMenuOpen($event)"
+        >
           <div class="top-navbar__profile-card">
 
             <div class="top-navbar__profile-hero">

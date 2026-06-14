@@ -5,6 +5,7 @@ import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-ma
 import { DepthScale } from './wellbore-renderer.types';
 
 const OVERRUN_COMPLETION_LENGTH_FT = 1200;
+const MIN_COMPLETION_VISIBLE_FT = 1000;
 
 export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
   const irNonLiner = casings.filter(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
@@ -35,15 +36,20 @@ export function resolveCompletionTopPx(
 }
 
 export function resolveCompletionBottomDepth(data: WellboreDiagramData): number {
+  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
   const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
   const isCurrentDepthBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
 
-  if (!isCurrentDepthBeyondTarget) {
-    return data.totalDepth;
-  }
+  const naturalBottom = isCurrentDepthBeyondTarget
+    ? Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT))
+    : data.totalDepth;
 
-  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
-  return Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT));
+  // wPrsntDpth and estTargetDepth can be equal/near-equal, or the casing shoe can sit
+  // right at totalDepth — either way the completion span collapses to ~0px and the
+  // open hole / screen / gravel pack become invisible. Force a minimum visible span,
+  // borrowing from the display padding below totalDepth.
+  const minVisibleBottom = completionTopDepth + MIN_COMPLETION_VISIBLE_FT;
+  return Math.min(Math.max(naturalBottom, minVisibleBottom), data.displayDepth);
 }
 
 export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: DepthScale): number {

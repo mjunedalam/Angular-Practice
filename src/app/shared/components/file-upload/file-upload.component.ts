@@ -157,7 +157,11 @@ export class FileUploadComponent {
   private setViewLoading(docName: string, loading: boolean): void {
     this.viewLoading.update(set => {
       const next = new Set(set);
-      loading ? next.add(docName) : next.delete(docName);
+      if (loading) {
+        next.add(docName);
+      } else {
+        next.delete(docName);
+      }
       return next;
     });
   }

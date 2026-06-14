@@ -11,7 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
@@ -202,9 +202,9 @@ export class ActiveWwellViewComponent implements OnInit {
 
       const exadGwdDailyRemarks = wellData?.EXAD_GWD_DAILY_REMARKS?.[0];
       const drlgOpStatus = wellData?.DRLG_OP_STATUS?.[0];
-      let wDrlgSmryRmk: any = '';
-      let wOpRmk: any = '';
-      let nxt24HrPlanRmk: any = '';
+      let wDrlgSmryRmk: string | null | undefined = '';
+      let wOpRmk: string | null | undefined = '';
+      let nxt24HrPlanRmk: string | null | undefined = '';
       if (exadGwdDailyRemarks?.drlgSmryRmk != null || exadGwdDailyRemarks?.opRmk != null || exadGwdDailyRemarks?.next24HrPlanRrmk != null) {
         wDrlgSmryRmk = exadGwdDailyRemarks?.drlgSmryRmk;
         wOpRmk = exadGwdDailyRemarks?.opRmk;
@@ -404,8 +404,8 @@ export class ActiveWwellViewComponent implements OnInit {
   }
 
   formService = inject(ActiveWwellFormService);
-  form: any = this.formService.drillingRemarksForm;
-  wellTestForm: any = this.formService.wellTestForm;
+  form: FormGroup = this.formService.drillingRemarksForm;
+  wellTestForm: FormGroup = this.formService.wellTestForm;
   ngOnInit(): void {
     this.form = this.formService.drillingRemarksForm;
 
@@ -458,7 +458,7 @@ export class ActiveWwellViewComponent implements OnInit {
         }
 
         this.uiStore.setStatusForWell(this.store.selectedEpANum(), name);
-        this.form.get('status').patchValue(name);
+        this.form.get('status')?.patchValue(name);
       });
   }
 

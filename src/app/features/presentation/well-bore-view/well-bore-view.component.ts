@@ -234,6 +234,9 @@ export class WellBoreViewComponent {
       return resolveCompletionBottomDepth(data);
     }
 
-    return data.totalDepth;
+    // When current depth ≈ target depth (or the casing shoe sits close to total depth),
+    // resolveCompletionBottomDepth() extends the completion section past totalDepth to
+    // keep it visible — anchor below that extended section so the label doesn't overlap it.
+    return Math.max(data.totalDepth, resolveCompletionBottomDepth(data));
   }
 }

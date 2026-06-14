@@ -180,8 +180,11 @@ export class ActiveWwellDocsViewerComponent {
   private setLoading(target: ReturnType<typeof signal<Set<string>>>, docName: string, loading: boolean): void {
     target.update((set: Set<string>) => {
       const next = new Set(set);
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      loading ? next.add(docName) : next.delete(docName);
+      if (loading) {
+        next.add(docName);
+      } else {
+        next.delete(docName);
+      }
       return next;
     });
   }
@@ -189,7 +192,11 @@ export class ActiveWwellDocsViewerComponent {
   private setDeletionStatus(target: ReturnType<typeof signal<Set<string>>>, docName: string, isDeleting: boolean): void {
     target.update((set: Set<string>) => {
       const next = new Set(set);
-      isDeleting ? next.add(docName) : next.delete(docName);
+      if (isDeleting) {
+        next.add(docName);
+      } else {
+        next.delete(docName);
+      }
       return next;
     });
   }

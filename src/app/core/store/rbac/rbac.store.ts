@@ -24,12 +24,16 @@ export const RbacStore = signalStore(
       }
     },
 
-    canAccessRoute(_routeId: string, _userRoles: string[]): boolean {
-      return true;
+    canAccessRoute(routeId: string, userRoles: string[]): boolean {
+      return store.roleDefinitions().some(
+        role => userRoles.includes(role.name) && role.routes.includes(routeId),
+      );
     },
 
-    canUpdateRoute(_routeId: string, _userRoles: string[]): boolean {
-      return true;
+    canUpdateRoute(routeId: string, userRoles: string[]): boolean {
+      return store.roleDefinitions().some(
+        role => userRoles.includes(role.name) && role.canUpdate.includes(routeId),
+      );
     },
   })),
 );

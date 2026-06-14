@@ -34,8 +34,8 @@ export const initialState: AuthState = {
   sessionExpired: false,
 };
 
-export function selectIsTokenExpired(_token: string | null, _jwt: JwtService): boolean {
-  return false; // _token ? _jwt.isExpired(_token) : true;
+export function selectIsTokenExpired(token: string | null, jwt: JwtService): boolean {
+  return token ? jwt.isExpired(token) : true;
 }
 
 export function selectDisplayUsername(user: AuthUser | null): string {

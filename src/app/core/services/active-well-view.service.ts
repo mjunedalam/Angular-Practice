@@ -1,9 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { IWellData } from '@models/well-design/well-data.model';
-import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
-import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { GwdDailyRemarks,GwdWellTests } from '@shared/models/wwell/active-wwell.model';
 
@@ -33,7 +30,7 @@ export class ActiveWellViewService {
             );
     }
 
-    private handleError(error: any) {
-        return throwError(error.error || 'An error occurred');
+    private handleError(error: HttpErrorResponse) {
+        return throwError(() => error.error || 'An error occurred');
     }
 }

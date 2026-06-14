@@ -104,7 +104,7 @@ export const WellDocsStore = signalStore(
                     }
                     patchState(store, { docNames: res.data.totalFiles, listLoading: false });
                   },
-                  error: (err: any) => {
+                  error: (err: unknown) => {
                     const msg = err instanceof Error ? err.message : 'Failed to load documents after deleting';
                     patchState(store, { docNames: [], listLoading: false, listError: msg });
                     notify.error(msg);
