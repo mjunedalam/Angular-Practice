@@ -5,6 +5,7 @@ import { ANIM, DiagramLayout } from '@models/well-design/wellbore-diagram.model'
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import {
+  buildArrowHeadLeft,
   buildArrowHeadRight,
   buildCasingPath,
   buildGravelPackUPath,
@@ -238,9 +239,11 @@ function renderCasingLabels({
     const actualCsg = isLiner ? null : (drlgCasings.find(d => d.wCsgOdSz === csg.csgSize) ?? null);
     const actualLnr = isLiner ? (drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null) : null;
     const hasActual = !isLiner && actualCsg !== null && actualCsg.wCsgBotDpth > 0;
-    const hasActualLiner = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
+    const hasActualLinerBot = isLiner && actualLnr !== null && (actualLnr.wLnrBotDepth ?? 0) > 0;
+    const hasActualLiner = isLiner && actualLnr !== null
+      && ((actualLnr.wLnrBotDepth ?? 0) > 0 || (actualLnr.wLnrTopDepth ?? 0) > 0);
     const actualDepth = hasActual ? actualCsg!.wCsgBotDpth
-      : hasActualLiner ? actualLnr!.wLnrBotDepth!
+      : hasActualLinerBot ? actualLnr!.wLnrBotDepth!
         : null;
     const actualSize = hasActual ? actualCsg!.wCsgOdSz
       : hasActualLiner ? actualLnr!.wLnrOdSz!
@@ -306,6 +309,29 @@ function renderCasingLabels({
     }
 
     animateLabel(lg, labelsStart, animation);
+
+    if (isLiner && actualLnr !== null && (actualLnr.wLnrTopDepth ?? 0) > 0) {
+      const tolPx = scale(actualLnr!.wLnrTopDepth!);
+      const tolLEdge = centerX - hw;
+      const tolLStart = tolLEdge - 26;
+      const tolLabelX = tolLStart - 8;
+      const tolLg = rootG.append('g').attr('class', 'casing-label');
+
+      tolLg.append('line')
+        .attr('class', 'casing-label__line')
+        .attr('x1', tolLEdge).attr('x2', tolLStart)
+        .attr('y1', tolPx).attr('y2', tolPx);
+      tolLg.append('path')
+        .attr('class', 'casing-label__arrow')
+        .attr('d', buildArrowHeadLeft(tolLStart, tolPx, 6));
+      tolLg.append('text')
+        .attr('class', 'casing-label__primary')
+        .attr('text-anchor', 'end')
+        .attr('x', tolLabelX).attr('y', tolPx + 4)
+        .text(`TOL @ ${actualLnr!.wLnrTopDepth!.toLocaleString()}`);
+
+      animateLabel(tolLg, labelsStart, animation);
+    }
   });
 }
 
@@ -348,25 +374,50 @@ function renderCasingLabelsFromActual({
       animateLabel(lg, labelsStart, animation);
     }
 
-    if (actual.wLnrBotDepth != null && actual.wLnrBotDepth > 0 && actual.wLnrOdSz) {
-      const linerTopPx = scale(shoeDepth);
-      const shoePx = scale(actual.wLnrBotDepth);
-      const midY = linerTopPx + (shoePx - linerTopPx) * 0.5;
+    if (actual.wLnrOdSz) {
+      const hasLinerBot = actual.wLnrBotDepth != null && actual.wLnrBotDepth > 0;
+      const hasLinerTop = (actual.wLnrTopDepth ?? 0) > 0;
       const linerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
       const rEdge = centerX + linerHW;
       const lEnd = rEdge + 26;
       const labelX = lEnd + 8;
-      const lg = rootG.append('g').attr('class', 'casing-label');
 
-      lg.append('line').attr('class', 'casing-label__line')
-        .attr('x1', rEdge).attr('x2', lEnd).attr('y1', midY).attr('y2', midY);
-      lg.append('path').attr('class', 'casing-label__arrow')
-        .attr('d', buildArrowHeadRight(lEnd, midY, 6));
-      lg.append('text').attr('class', 'casing-label__primary')
-        .attr('x', labelX).attr('y', midY + 4)
-        .text(`${actual.wLnrOdSz}" Liner @ ${actual.wLnrBotDepth.toLocaleString()}`);
+      if (hasLinerBot) {
+        const linerTopPx = scale(shoeDepth);
+        const shoePx = scale(actual.wLnrBotDepth!);
+        const midY = linerTopPx + (shoePx - linerTopPx) * 0.5;
+        const lg = rootG.append('g').attr('class', 'casing-label');
 
-      animateLabel(lg, labelsStart, animation);
+        lg.append('line').attr('class', 'casing-label__line')
+          .attr('x1', rEdge).attr('x2', lEnd).attr('y1', midY).attr('y2', midY);
+        lg.append('path').attr('class', 'casing-label__arrow')
+          .attr('d', buildArrowHeadRight(lEnd, midY, 6));
+        lg.append('text').attr('class', 'casing-label__primary')
+          .attr('fill', '#22c55e')
+          .attr('x', labelX).attr('y', midY + 4)
+          .text(`${actual.wLnrOdSz}" Liner @ ${actual.wLnrBotDepth!.toLocaleString()} *`);
+
+        animateLabel(lg, labelsStart, animation);
+      }
+
+      if (hasLinerTop) {
+        const tolPx = scale(actual.wLnrTopDepth!);
+        const tolLEdge = centerX - linerHW;
+        const tolLStart = tolLEdge - 26;
+        const tolLabelX = tolLStart - 8;
+        const tolLg = rootG.append('g').attr('class', 'casing-label');
+
+        tolLg.append('line').attr('class', 'casing-label__line')
+          .attr('x1', tolLEdge).attr('x2', tolLStart).attr('y1', tolPx).attr('y2', tolPx);
+        tolLg.append('path').attr('class', 'casing-label__arrow')
+          .attr('d', buildArrowHeadLeft(tolLStart, tolPx, 6));
+        tolLg.append('text').attr('class', 'casing-label__primary')
+          .attr('text-anchor', 'end')
+          .attr('x', tolLabelX).attr('y', tolPx + 4)
+          .text(`TOL @ ${actual.wLnrTopDepth!.toLocaleString()}`);
+
+        animateLabel(tolLg, labelsStart, animation);
+      }
     }
   });
 }

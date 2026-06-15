@@ -3,4 +3,5 @@ export interface IDrlgCsg {
     wCsgBotDpth: number;
     wLnrOdSz?: string | null;
     wLnrBotDepth?: number | null;
+    wLnrTopDepth?: number | null;
 }
