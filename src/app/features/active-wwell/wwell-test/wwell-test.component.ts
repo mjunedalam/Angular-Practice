@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWellViewService } from '@core/services/active-well-view.service';
@@ -15,7 +16,7 @@ import { formatDateForInput } from '@shared/utils/date.util';
 @Component({
   selector: 'app-wwell-test',
   standalone: true,
-  imports: [MatButtonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, FormsModule],
+  imports: [MatButtonModule, MatFormFieldModule, MatSelectModule, MatSlideToggleModule, ReactiveFormsModule, FormsModule],
   templateUrl: './wwell-test.component.html',
   styleUrl: './wwell-test.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +41,18 @@ export class WwellTestComponent {
 
   activeWellApiService = inject(ActiveWellViewService)
   notify = inject(NotificationService);
+
+  protected readonly isPublished = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.isPublished()) {
+        this.form.enable({ emitEvent: false });
+      } else {
+        this.form.disable({ emitEvent: false });
+      }
+    });
+  }
 
   createOrUpdateActiveWwell() {
     this.isUpdating.set(true);
@@ -69,7 +82,7 @@ export class WwellTestComponent {
   }
 
   createOrUpdateWellTest() {
-    const bodyGwdWellTest = this.formService.wellTestForm.value
+    const bodyGwdWellTest = this.formService.wellTestForm.getRawValue()
     const egwtId = this.store.wellData()?.EXAD_GWD_WELL_TESTS?.[0]?.egwt_id;
     bodyGwdWellTest.egwtId = egwtId;
     bodyGwdWellTest.testStaDt = formatDateForInput(this.store.selectedDate());

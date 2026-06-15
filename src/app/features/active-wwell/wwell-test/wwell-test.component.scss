@@ -14,7 +14,7 @@
 // ── Header row ────────────────────────────────────────────────────────────────
 .wt-header-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: stretch;
   gap: 0;
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
@@ -43,6 +43,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.wt-publish-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+
+  .mat-mdc-slide-toggle {
+    --mdc-switch-selected-track-color: #38bdf8;
+    --mdc-switch-selected-hover-track-color: #38bdf8;
+    --mdc-switch-selected-pressed-track-color: #38bdf8;
+    --mdc-switch-selected-handle-color: #fff;
+    --mdc-switch-selected-hover-handle-color: #fff;
+    --mdc-switch-selected-pressed-handle-color: #fff;
+    --mdc-switch-selected-icon-color: #fff;
+    --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.2);
+    --mdc-switch-unselected-handle-color: #fff;
+    --mdc-switch-unselected-hover-handle-color: #fff;
+    --mdc-switch-unselected-icon-color: #fff;
+
+    ::ng-deep .mdc-label {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+  }
 }
 
 .wt-expected-date-label {
@@ -129,6 +159,10 @@
     box-shadow: inset 0 0 0 1px #bfdbfe;
   }
 
+  &:disabled {
+    cursor: not-allowed;
+  }
+
   &--no-ir {
     border-right: none;
   }
@@ -159,6 +193,7 @@
     }
     .mat-mdc-select-arrow { color: #94a3b8; }
     .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .mat-mdc-select-disabled { cursor: not-allowed; }
   }
 }
 

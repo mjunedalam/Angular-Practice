@@ -12,6 +12,14 @@
           isFlowTest() ? "Flow Test" : "Pump Test"
         }}
       </div>
+      <div class="wt-publish-toggle">
+        <mat-slide-toggle
+          [checked]="isPublished()"
+          (change)="isPublished.set($event.checked)"
+        >
+          Publish Test Results
+        </mat-slide-toggle>
+      </div>
       <div class="wt-expected-date-label">Expected test date</div>
     </div>
 
