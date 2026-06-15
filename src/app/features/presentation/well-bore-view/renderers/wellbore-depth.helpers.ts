@@ -1,6 +1,7 @@
 import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
+import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
 import { DepthScale } from './wellbore-renderer.types';
 
@@ -56,17 +57,45 @@ export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: Dept
   return scale(resolveCompletionBottomDepth(data));
 }
 
+function isFlagYes(flg: string | null | undefined): boolean {
+  return (flg ?? '').trim().toUpperCase() === 'Y';
+}
+
+function hasText(value: string | null | undefined): boolean {
+  return !!value?.trim();
+}
+
+export function shouldRenderOpenHole(wellDesign: IWellDesign | null | undefined): boolean {
+  if (!isFlagYes(wellDesign?.ohFlg)) return false;
+  return parseInchSize(wellDesign?.ohRemarks) !== null;
+}
+
+export function shouldRenderGravelPack(wellDesign: IWellDesign | null | undefined): boolean {
+  if (!isFlagYes(wellDesign?.gpFlg)) return false;
+  return hasText(wellDesign?.gpRemarks);
+}
+
+export function shouldRenderLinerScreen(wellDesign: IWellDesign | null | undefined): boolean {
+  if (!isFlagYes(wellDesign?.lsFlg)) return false;
+  return hasText(wellDesign?.lsRemarks);
+}
+
+export function shouldRenderPrePerforatedLiner(wellDesign: IWellDesign | null | undefined): boolean {
+  if (!isFlagYes(wellDesign?.perforatedFlg)) return false;
+  return hasText(wellDesign?.perforatedRemarks);
+}
+
 export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLayout): number {
   const { baseHalfWidth, halfWidthIncrement, openHoleHwMargin } = layout;
   const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
 
-  if (data.wellDesign?.ohFlg !== 'Y') return innerHW + openHoleHwMargin;
+  if (!isFlagYes(data.wellDesign?.ohFlg)) return innerHW + openHoleHwMargin;
 
   const structuralCasings = data.casings.filter(
     c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack',
   );
   const innermostOD = parseInchSize(structuralCasings[0]?.csgSize ?? null);
-  const ohDiameter = parseInchSize(data.wellDesign.ohRemarks);
+  const ohDiameter = parseInchSize(data.wellDesign?.ohRemarks);
 
   if (ohDiameter !== null && innermostOD !== null && innermostOD > 0 && ohDiameter < innermostOD) {
     return innerHW * (ohDiameter / innermostOD);

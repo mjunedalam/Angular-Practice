@@ -19,6 +19,10 @@ import {
   resolveCompletionTopPx,
   resolveOhHalfWidth,
   resolveShoeDepth,
+  shouldRenderGravelPack,
+  shouldRenderLinerScreen,
+  shouldRenderOpenHole,
+  shouldRenderPrePerforatedLiner,
 } from './wellbore-depth.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
@@ -55,8 +59,8 @@ function renderOpenHoleAndScreen({
   if (!data.casings.length) return;
 
   const { wellDesign } = data;
-  const shouldDrawOH = wellDesign?.ohFlg === 'Y';
-  const shouldDrawLS = wellDesign?.lsFlg === 'Y';
+  const shouldDrawOH = shouldRenderOpenHole(wellDesign);
+  const shouldDrawLS = shouldRenderLinerScreen(wellDesign);
   if (!shouldDrawOH && !shouldDrawLS) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap } = layout;
@@ -68,7 +72,7 @@ function renderOpenHoleAndScreen({
   const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
   const completionBottomDepth = resolveCompletionBottomDepth(data);
   const completionBottomPx = scale(completionBottomDepth);
-  const hasGP = wellDesign?.gpFlg === 'Y' || !!gpCasing;
+  const hasGP = shouldRenderGravelPack(wellDesign) || !!gpCasing;
   const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), completionBottomPx) : completionBottomPx;
   const screenBottomPx = wellDesign
     ? (shouldDrawLS && hasGP ? gpBottomPx - gpScreenGap : completionBottomPx)
@@ -145,7 +149,8 @@ function renderGravelPackDesign({
   ohLabelStart,
   animation,
 }: RenderCompletionElementsOptions): void {
-  if (data.wellDesign?.gpFlg !== 'Y' || !data.casings.length) return;
+  const wellDesign = data.wellDesign;
+  if (!wellDesign || !shouldRenderGravelPack(wellDesign) || !data.casings.length) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap, gpFillRatio } = layout;
   const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
@@ -177,8 +182,6 @@ function renderGravelPackDesign({
     .ease(easeCubicInOut)
     .attr('height', completionBottomPx - startDepthPx);
 
-  if (!data.wellDesign.gpRemarks) return;
-
   const labelY = startDepthPx + (completionBottomPx - startDepthPx) * 0.5;
   const rEdge = centerX + gpOuterEdge;
   const lEnd = rEdge + 26;
@@ -190,7 +193,7 @@ function renderGravelPackDesign({
   lg.append('path').attr('d', buildArrowHeadRight(lEnd, labelY, 6));
   lg.append('text')
     .attr('class', 'screen-label-text')
-    .attr('x', lEnd + 6).attr('y', labelY + 4).text(data.wellDesign.gpRemarks);
+    .attr('x', lEnd + 6).attr('y', labelY + 4).text(wellDesign.gpRemarks);
 
   animateLabel(lg, ohLabelStart, animation);
 }
@@ -207,7 +210,7 @@ function renderPrePerforatedLiner({
   animation,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
-  if (!wellDesign || wellDesign.perforatedFlg?.trim().toUpperCase() !== 'Y') return;
+  if (!wellDesign || !shouldRenderPrePerforatedLiner(wellDesign)) return;
 
   const { openHoleHwMargin } = layout;
   const ohHW = resolveOhHalfWidth(data, layout);
@@ -279,7 +282,7 @@ export function renderScreenHanger({
 }: RenderCompletionElementsOptions): void {
   if (!data.casings.length) return;
   const hasLiner = data.casings.some(c => c.csgType === 'Liner');
-  const hasLinerScreen = data.wellDesign?.lsFlg === 'Y';
+  const hasLinerScreen = shouldRenderLinerScreen(data.wellDesign);
   if (!hasLiner && !hasLinerScreen) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = layout;

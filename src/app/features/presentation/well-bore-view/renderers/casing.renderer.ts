@@ -62,6 +62,7 @@ function renderCasings({
     const tier = getCasingTier(csg, casings);
     const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
     const isLiner = csg.csgType === 'Liner';
+    const isConductor = csg.csgType.toLowerCase() === 'conductor';
     const actualCsg = isLiner ? null : (drlgCasings.find(d => d.wCsgOdSz === csg.csgSize) ?? null);
     const actualLnr = isLiner ? (drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null) : null;
     const hasActual = !isLiner && actualCsg !== null && actualCsg.wCsgBotDpth > 0;
@@ -112,11 +113,14 @@ function renderCasings({
       return;
     }
 
+    const plannedFillGrad = isConductor
+      ? 'url(#mainGradient)'
+      : `url(#${casingGradientId(csg.csgType)})`;
     const fillGrad = hasActual
       ? 'url(#actualCasingGradient)'
       : hasActualLiner
         ? 'url(#actualLinerGradient)'
-        : `url(#${casingGradientId(csg.csgType)})`;
+        : plannedFillGrad;
 
     rootG.append('path')
       .attr('class', 'casing')
@@ -127,7 +131,7 @@ function renderCasings({
       .attr('fill', fillGrad)
       .attr('stroke', '#1e293b')
       .attr('stroke-width', '5')
-      .style('opacity', csg.csgType === 'Conductor' ? 0.92 : 0.65);
+      .style('opacity', isConductor ? 0.92 : 0.65);
 
     clipRect.transition()
       .delay(casingsStart + delay)

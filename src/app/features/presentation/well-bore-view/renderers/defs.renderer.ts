@@ -16,13 +16,13 @@ export function renderStaticDefs(defs: DefsSel): void {
     { offset: '100%', color: '#1a2130' },
   ]);
   addLinearGradient(defs, 'conductorGradient', [
-    { offset: '0%', color: '#0d2b1a' },
-    { offset: '18%', color: '#166534' },
-    { offset: '40%', color: '#3fb950' },
-    { offset: '50%', color: '#6ee7a0' },
-    { offset: '60%', color: '#3fb950' },
-    { offset: '82%', color: '#166534' },
-    { offset: '100%', color: '#0d2b1a' },
+   { offset: '0%', color: '#1a2130' },
+    { offset: '18%', color: '#4a5568' },
+    { offset: '38%', color: '#a0aec0' },
+    { offset: '50%', color: '#e2e8f0' },
+    { offset: '62%', color: '#a0aec0' },
+    { offset: '82%', color: '#4a5568' },
+    { offset: '100%', color: '#1a2130' },
   ]);
   addLinearGradient(defs, 'linerGradient', [
     { offset: '0%', color: '#7b8fa8' },
