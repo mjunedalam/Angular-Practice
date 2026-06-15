@@ -27,7 +27,8 @@
       "Bash(curl -fsSL https://openclaw.ai/install.sh)",
       "Bash(bash)",
       "Bash(python3 -c ' *)",
-      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat {}')"
+      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat {}')",
+      "Bash(npx jest *)"
     ]
   }
 }

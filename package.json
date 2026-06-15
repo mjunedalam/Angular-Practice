@@ -9,6 +9,7 @@
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "test": "jest",
+    "test:coverage": "jest --coverage --runInBand",
     "lint": "ng lint"
   },
   "dependencies": {

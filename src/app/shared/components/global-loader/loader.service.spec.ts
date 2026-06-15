@@ -26,14 +26,26 @@ describe('LoaderService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('completes the boot loader as soon as the app shell is ready', () => {
+  it('does not complete the boot loader until registered boot tasks are resolved', () => {
     service.registerBootTask('arcgis-map');
 
     service.markAppShellReady();
 
     expect(setBootProgress).toHaveBeenNthCalledWith(1, 56);
     expect(setBootProgress).toHaveBeenNthCalledWith(2, 96);
-    expect(setBootProgress).toHaveBeenNthCalledWith(3, 100);
+    expect(completeBootLoader).not.toHaveBeenCalled();
+  });
+
+  it('completes the boot loader after the app shell is ready and all tasks are resolved', () => {
+    service.registerBootTask('arcgis-map');
+
+    service.markAppShellReady();
+    service.resolveBootTask('arcgis-map');
+
+    expect(setBootProgress).toHaveBeenNthCalledWith(1, 56);
+    expect(setBootProgress).toHaveBeenNthCalledWith(2, 96);
+    expect(setBootProgress).toHaveBeenNthCalledWith(3, 96);
+    expect(setBootProgress).toHaveBeenNthCalledWith(4, 100);
     expect(completeBootLoader).toHaveBeenCalledTimes(1);
   });
 
