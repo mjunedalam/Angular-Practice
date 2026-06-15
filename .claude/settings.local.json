@@ -28,7 +28,10 @@
       "Bash(bash)",
       "Bash(python3 -c ' *)",
       "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat {}')",
-      "Bash(npx jest *)"
+      "Bash(npx jest *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
+      "Bash(npx sass *)"
     ]
   }
 }
