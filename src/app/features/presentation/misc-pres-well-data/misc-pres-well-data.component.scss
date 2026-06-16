@@ -44,6 +44,17 @@
   min-height: clamp(52px, 13cqi, 72px);
 }
 
+.cell--rig-info {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border: none;
+  color: #fff;
+  min-height: clamp(52px, 13cqi, 72px);
+}
+
+.cell--full {
+  grid-column: 1 / -1;
+}
+
 .cell--spud {
   background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
@@ -145,6 +156,10 @@
   background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(6px, 2cqi, 14px);
 }
 
 .cell--depth {

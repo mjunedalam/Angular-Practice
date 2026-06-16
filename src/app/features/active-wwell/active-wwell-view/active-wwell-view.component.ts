@@ -22,7 +22,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidnight, parseDateFromInput, validateDateInput } from 'src/app/shared/utils/date.util';
-import { CasingInfoComponent } from '../casing-info/casing-info.component';
 import { DatabaseInfoComponent } from '../database-info/database-info.component';
 import { FormationTopsAndCasingComponent } from '../formation-tops-and-casing/formation-tops-and-casing.component';
 import { OperationSummaryComponent } from '../operation-summary/operation-summary.component';
@@ -63,7 +62,6 @@ const WELL_PAGE_SIZE = 15;
     WwellHeaderComponent,
     OperationSummaryComponent,
     DatabaseInfoComponent,
-    CasingInfoComponent,
     FormationTopsAndCasingComponent,
     WwellTestComponent,
     FileUploadComponent,

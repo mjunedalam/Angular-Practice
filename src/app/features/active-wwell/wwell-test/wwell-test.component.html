@@ -7,20 +7,19 @@
 
     <div class="wt-header-row">
       <div class="wt-title">Well Test</div>
-      <div class="wt-flow-badge">
-        {{
-          isFlowTest() ? "Flow Test" : "Pump Test"
-        }}
-      </div>
-      <div class="wt-publish-toggle">
-        <mat-slide-toggle
-          [checked]="isPublished()"
-          (change)="isPublished.set($event.checked)"
-        >
-          Publish Test Results
-        </mat-slide-toggle>
+      <div class="wt-type-toggle">
+        <div class="wt-type-segment">
+          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="!isFlowTest()" (click)="isFlowTest.set(false)">Pump</button>
+          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="isFlowTest()" (click)="isFlowTest.set(true)">Flow</button>
+        </div>
       </div>
       <div class="wt-expected-date-label">Expected test date</div>
+      <button
+        type="button"
+        class="wt-edit-toggle"
+        [class.wt-edit-toggle--on]="isPublished()"
+        (click)="isPublished.set(!isPublished())"
+      >{{ isPublished() ? 'Editing' : 'Locked' }}</button>
     </div>
 
     <div class="wt-body">
@@ -258,6 +257,41 @@
               />
             </div>
           </div>
+
+          <div class="wt-row">
+            <span class="wt-label wt-label--cased">FWHP (psi)</span>
+            <input
+              class="wt-actual"
+              type="text"
+              inputmode="decimal"
+              formControlName="fwhp"
+              (keypress)="onlyNumbers($event)"
+            />
+            <div class="wt-ir-cell">
+              <span class="wt-ir-badge">IR</span>
+              <input class="wt-ir-input" type="text" readonly value="" />
+            </div>
+          </div>
+
+          <div class="wt-row">
+            <span class="wt-label wt-label--cased">Well Productivity (GPM/ft)</span>
+            <input
+              class="wt-actual"
+              type="text"
+              inputmode="decimal"
+              formControlName="hydProduct"
+              (keypress)="onlyNumbers($event)"
+            />
+            <div class="wt-ir-cell">
+              <span class="wt-ir-badge">IR</span>
+              <input
+                class="wt-ir-input"
+                type="text"
+                readonly
+                [value]="data()?.productivityEstimate ?? ''"
+              />
+            </div>
+          </div>
         }
 
         <div class="wt-row wt-row--conducted">
@@ -271,8 +305,8 @@
       </div>
     </div>
 
-    <div class="wt-footer">
-      @if (canUpdate()) {
+    @if (canUpdate()) {
+      <div class="wt-footer">
         <button
           mat-raised-button
           type="button"
@@ -282,7 +316,7 @@
         >
           {{ isUpdating() ? "UPDATING..." : "UPDATE" }}
         </button>
-      }
-    </div>
+      </div>
+    }
   </div>
 </form>

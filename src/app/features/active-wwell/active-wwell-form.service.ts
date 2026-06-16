@@ -36,6 +36,7 @@ export class ActiveWwellFormService {
         testerNetworkId: [null, [Validators.required]],
         hydProduct: [null, [Validators.required]],
         duration: [null, [Validators.required]],
+        fwhp: [null, [Validators.required]],
     });;
 
     constructor(private _fb: FormBuilder, private http: HttpClient) {

@@ -20,6 +20,8 @@ export interface MiscWellData {
   readonly rigMoveDays: number | null;
   readonly spudDate: string;
   readonly rigName: string;
+  readonly rigHeight: string | null;
+  readonly previousDepth: number;
   readonly drlgSmryRmk?: string | null;
   readonly holeSize: string | null;
 }
