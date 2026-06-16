@@ -31,7 +31,8 @@
       "Bash(npx jest *)",
       "Bash(node -e ' *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
-      "Bash(npx sass *)"
+      "Bash(npx sass *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200)"
     ]
   }
 }

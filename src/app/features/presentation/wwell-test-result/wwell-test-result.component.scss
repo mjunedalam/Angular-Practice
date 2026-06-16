@@ -107,11 +107,122 @@
   border-radius: var(--radius-card);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.08);
   overflow: visible;
+  display: flex;
+  max-width: none;
+  min-width: 0;
 }
 
 ::ng-deep .well-result-dialog .mat-mdc-dialog-content {
+  flex: 1;
+  min-height: 0;
   max-height: none;
-  overflow: visible;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+::ng-deep .well-result-backdrop {
+  background: rgba(15, 23, 42, 0.32);
+}
+
+// ── Draggable / resizable wrapper ────────────────────────────────────────────
+@keyframes dialog-pop-in {
+  from { opacity: 0; transform: scale(0.94) translateY(14px); filter: blur(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+
+.dialog__wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 760px;
+  height: 640px;
+  min-width: 480px;
+  min-height: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  animation: dialog-pop-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 180ms ease, height 180ms ease;
+
+  &--resizing {
+    animation: none;
+    transition: none;
+  }
+}
+
+// Shared resize handles
+.dialog__resize-handle {
+  position: absolute;
+  z-index: 10;
+  background: transparent;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 160ms ease;
+    border-radius: 999px;
+  }
+
+  &:hover::after,
+  &:active::after {
+    opacity: 0.45;
+  }
+
+  &--e {
+    top: 8px;
+    right: -4px;
+    bottom: 28px;
+    width: 9px;
+    cursor: ew-resize;
+
+    &::after {
+      top: 0; bottom: 0; left: 50%;
+      width: 3px;
+      transform: translateX(-50%);
+    }
+  }
+
+  &--s {
+    left: 8px;
+    right: 28px;
+    bottom: -4px;
+    height: 9px;
+    cursor: ns-resize;
+
+    &::after {
+      left: 0; right: 0; top: 50%;
+      height: 3px;
+      transform: translateY(-50%);
+    }
+  }
+
+  &--se {
+    right: 0;
+    bottom: 0;
+    width: 22px;
+    height: 22px;
+    cursor: se-resize;
+    border-bottom-right-radius: var(--radius-card);
+
+    &::after {
+      right: 5px;
+      bottom: 5px;
+      width: 10px;
+      height: 10px;
+      background: none;
+      border-bottom: 3px solid var(--accent);
+      border-right: 3px solid var(--accent);
+      border-radius: 0 0 4px 0;
+      opacity: 0.45;
+    }
+
+    &:hover::after,
+    &:active::after {
+      opacity: 0.9;
+    }
+  }
 }
 
 // ── Dialog header internals ───────────────────────────────────────────────────
@@ -152,21 +263,48 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, var(--bg-surface) 60%);
-  border-bottom: 1px solid var(--border-sub);
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(56, 189, 248, 0.08) 100%);
+  border-bottom: 1px solid rgba(14, 165, 233, 0.25);
   padding: 16px 20px;
+  cursor: grab;
+  touch-action: none;
+
+  &:active { cursor: grabbing; }
 }
 
 .dialog__close {
   width: 30px;
   height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+
+  svg { width: 16px; height: 16px; }
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.35);
+    color: var(--danger);
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
 }
 
-.dialog__body { padding: 22px 20px 20px; }
+.dialog__body {
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+}
 
 .results-header__badge {
   display: inline-flex;
@@ -198,73 +336,133 @@
   50%       { opacity: 0.45; transform: scale(0.75); }
 }
 
-// ── Metric grid ───────────────────────────────────────────────────────────────
-.metric-grid {
+// ── KPI hero row ──────────────────────────────────────────────────────────────
+.kpi-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
+  margin-bottom: 18px;
 }
 
-.metric {
-  background: var(--bg-surface);
-  padding: 12px 14px;
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--accent-muted);
+  border: 1px solid rgba(14, 165, 233, 0.3);
   border-radius: 12px;
-  border: 1px solid var(--border-sub);
-  display: flex; flex-direction: column;
-  gap: 2px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 
   &:hover {
     border-color: var(--accent);
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.1);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.12);
     transform: translateY(-1px);
   }
 
   &__icon {
+    width: 38px; height: 38px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-card);
+    border-radius: 10px;
     color: var(--accent);
-    opacity: 0.75;
-    margin-bottom: 6px;
     svg { width: 18px; height: 18px; }
   }
 
-  &__value {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
+  &__text {
+    min-width: 0;
   }
 
   &__label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: var(--text-secondary);
+  }
+
+  &__value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.3;
     margin-top: 2px;
   }
 
-  &--highlight {
+  &__unit {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-left: 3px;
+  }
+}
+
+// ── Detail section / data grid ───────────────────────────────────────────────
+.dialog__section {
+  &-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-sub);
+  border-radius: 8px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+
+  &:hover {
+    border-color: var(--accent);
     background: var(--accent-muted);
-    border-color: rgba(14, 165, 233, 0.3);
-
-    .metric__value { color: var(--accent); }
-    .metric__icon  { opacity: 1; }
   }
-}
 
-@media (max-width: 720px) {
-  .metric-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+
+    svg { width: 14px; height: 14px; color: var(--accent); opacity: 0.75; flex-shrink: 0; }
   }
-}
 
-@media (max-width: 520px) {
-  .metric-grid {
-    grid-template-columns: 1fr;
+  &__value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__unit {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-left: 3px;
   }
 }
 
 // ── Summary tags row ──────────────────────────────────────────────────────────
 .dialog__summary-row {
-  margin-top: 16px;
+  flex-shrink: 0;
+  margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid var(--border-sub);
   display: flex; flex-wrap: wrap; gap: 8px;
@@ -294,4 +492,49 @@
   font-size: 13px;
   font-style: italic;
   opacity: 0.7;
+}
+
+// ── Mobile dialog layout ─────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .dialog__wrapper {
+    width: 100vw;
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100dvh;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 0;
+    animation: none;
+    transition: none;
+  }
+
+  ::ng-deep .well-result-dialog .mat-mdc-dialog-surface {
+    border-radius: 0;
+    border-width: 0;
+    box-shadow: none;
+  }
+
+  .dialog__header {
+    padding: 12px 14px;
+    cursor: default;
+
+    &:active { cursor: default; }
+  }
+
+  .dialog__icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dialog__well-name {
+    font-size: 16px;
+  }
+
+  .dialog__body {
+    padding: 14px;
+  }
+
+  .dialog__resize-handle {
+    display: none;
+  }
 }

@@ -17,3 +17,6 @@ coverage/
 .angular/
 dist/
 .gradel/
+
+# Graphify skill output
+graphify-out/

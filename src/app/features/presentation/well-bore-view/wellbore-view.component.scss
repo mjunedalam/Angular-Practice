@@ -81,6 +81,10 @@
   .water-arrow { fill: #0ea5e9; stroke: #0ea5e9; opacity: 0.8; }
   .water-label {  font-size: 14.5px;  font-weight: 900; fill: #0ea5e9;}
 
+  .water-level-tooltip {
+    text { user-select: none; }
+  }
+
   .open-hole        { stroke: #000; stroke-width: 3; fill: none; stroke-dasharray: 5,3; opacity: 1; }
   .oh-label-line    { stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
   .oh-label-arrow   { fill: var(--text-muted); opacity: 0.65; }
