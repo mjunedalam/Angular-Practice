@@ -91,10 +91,11 @@
 
     <mat-dialog-content class="dialog__body">
 
-      <!-- KPI hero row -->
-      <div class="kpi-row">
-        <div class="kpi-card">
-          <div class="kpi-card__icon">
+      <div class="info-grid">
+
+        <!-- Test Rate -->
+        <div class="info-card">
+          <div class="info-card__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M4 18s2-2 4-2 4 2 4 2 4-2 4 2"/>
               <path d="M4 22s2-2 4-2 4 2 4 2 4-2 4 2"/>
@@ -102,142 +103,157 @@
               <polyline points="15 7 18 4 21 7"/>
             </svg>
           </div>
-          <div class="kpi-card__text">
-            <div class="kpi-card__label">Test Rate</div>
-            <div class="kpi-card__value">{{ r.rate | number }}<span class="kpi-card__unit">GPM</span></div>
+          <div class="info-card__content">
+            <div class="info-card__label">Test Rate</div>
+            <div class="info-card__value">{{ r.rate | number }}<span class="info-card__unit">GPM</span></div>
           </div>
         </div>
 
+        <!-- RPM (pump) / SIWHP (flow) -->
         @if (!isFlowTest()) {
-          <div class="kpi-card">
-            <div class="kpi-card__icon">
+          <div class="info-card">
+            <div class="info-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
             </div>
-            <div class="kpi-card__text">
-              <div class="kpi-card__label">RPM</div>
-              <div class="kpi-card__value">{{ r.rpm | number }}</div>
+            <div class="info-card__content">
+              <div class="info-card__label">RPM</div>
+              <div class="info-card__value">{{ r.rpm | number }}</div>
             </div>
           </div>
         } @else {
-          <div class="kpi-card">
-            <div class="kpi-card__icon">
+          <div class="info-card">
+            <div class="info-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <line x1="12" y1="2" x2="12" y2="22"/>
                 <path d="M5 10c2-2 5-3 7 0s5 2 7 0"/>
                 <path d="M5 14c2-2 5-3 7 0s5 2 7 0"/>
               </svg>
             </div>
-            <div class="kpi-card__text">
-              <div class="kpi-card__label">SIWHP</div>
-              <div class="kpi-card__value">{{ r.siwhp | number }}<span class="kpi-card__unit">PSI</span></div>
+            <div class="info-card__content">
+              <div class="info-card__label">SIWHP</div>
+              <div class="info-card__value">{{ r.siwhp | number }}<span class="info-card__unit">PSI</span></div>
             </div>
           </div>
         }
-      </div>
 
-      <!-- Test parameters -->
-      <div class="dialog__section">
-        <div class="dialog__section-title">Test Parameters</div>
-        <div class="data-grid">
-
-          <div class="data-row">
-            <span class="data-row__label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M6 2h12M6 22h12M6 2c0 5 4 6 6 8 2-2 6-3 6-8M6 22c0-5 4-6 6-8 2 2 6 3 6 8"/>
-              </svg>
-              Duration
-            </span>
-            <span class="data-row__value">{{ r.duration | number }}<span class="data-row__unit">H</span></span>
+        <!-- Duration -->
+        <div class="info-card">
+          <div class="info-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 2h12M6 22h12M6 2c0 5 4 6 6 8 2-2 6-3 6-8M6 22c0-5 4-6 6-8 2 2 6 3 6 8"/>
+            </svg>
           </div>
-
-          <div class="data-row">
-            <span class="data-row__label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
-                <path d="M12 8v4l3 3"/>
-              </svg>
-              TDS
-            </span>
-            <span class="data-row__value">{{ r.tds | number }}<span class="data-row__unit">PPM</span></span>
+          <div class="info-card__content">
+            <div class="info-card__label">Duration</div>
+            <div class="info-card__value">{{ r.duration | number }}<span class="info-card__unit">H</span></div>
           </div>
-
-          <div class="data-row">
-            <span class="data-row__label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
-              </svg>
-              Temperature
-            </span>
-            <span class="data-row__value">{{ r.temp | number:'1.0-1' }}<span class="data-row__unit">&deg;C</span></span>
-          </div>
-
-          @if (!isFlowTest()) {
-            <div class="data-row">
-              <span class="data-row__label">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <line x1="12" y1="2" x2="12" y2="14"/>
-                  <polyline points="6 10 12 16 18 10"/>
-                  <line x1="3" y1="20" x2="21" y2="20"/>
-                </svg>
-                Pump Depth
-              </span>
-              <span class="data-row__value">{{ r.hydPmpDpth | number }}<span class="data-row__unit">FT</span></span>
-            </div>
-
-            <div class="data-row">
-              <span class="data-row__label">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M2 12c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-                  <path d="M2 18c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-                </svg>
-                SWL
-              </span>
-              <span class="data-row__value">{{ r.swl | number }}<span class="data-row__unit">FT</span></span>
-            </div>
-
-            <div class="data-row">
-              <span class="data-row__label">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M2 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-                  <line x1="12" y1="2" x2="12" y2="10"/>
-                  <polyline points="9 7 12 10 15 7"/>
-                </svg>
-                DWL
-              </span>
-              <span class="data-row__value">{{ r.dwl | number }}<span class="data-row__unit">FT</span></span>
-            </div>
-
-            <div class="data-row">
-              <span class="data-row__label">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                  <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-                Productivity
-              </span>
-              <span class="data-row__value">{{ r.productivityActual | number:'1.2-2' }}<span class="data-row__unit">GPM/FT</span></span>
-            </div>
-          }
-
-          <div class="data-row">
-            <span class="data-row__label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                <line x1="12" y1="9"  x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-              H&#8322;S
-            </span>
-            <span class="data-row__value">{{ r.h2sActual | number }}<span class="data-row__unit">PPM</span></span>
-          </div>
-
         </div>
+
+        <!-- TDS -->
+        <div class="info-card">
+          <div class="info-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
+              <path d="M12 8v4l3 3"/>
+            </svg>
+          </div>
+          <div class="info-card__content">
+            <div class="info-card__label">TDS</div>
+            <div class="info-card__value">{{ r.tds | number }}<span class="info-card__unit">PPM</span></div>
+          </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="info-card">
+          <div class="info-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+            </svg>
+          </div>
+          <div class="info-card__content">
+            <div class="info-card__label">Temperature</div>
+            <div class="info-card__value">{{ r.temp | number:'1.0-1' }}<span class="info-card__unit">&deg;C</span></div>
+          </div>
+        </div>
+
+        <!-- H₂S -->
+        <div class="info-card">
+          <div class="info-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9"  x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="info-card__content">
+            <div class="info-card__label">H&#8322;S</div>
+            <div class="info-card__value">{{ r.h2sActual | number }}<span class="info-card__unit">PPM</span></div>
+          </div>
+        </div>
+
+        <!-- Pump-test-only fields -->
+        @if (!isFlowTest()) {
+          <div class="info-card">
+            <div class="info-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <line x1="12" y1="2" x2="12" y2="14"/>
+                <polyline points="6 10 12 16 18 10"/>
+                <line x1="3" y1="20" x2="21" y2="20"/>
+              </svg>
+            </div>
+            <div class="info-card__content">
+              <div class="info-card__label">Pump Depth</div>
+              <div class="info-card__value">{{ r.hydPmpDpth | number }}<span class="info-card__unit">FT</span></div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 12c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+                <path d="M2 18c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+              </svg>
+            </div>
+            <div class="info-card__content">
+              <div class="info-card__label">SWL</div>
+              <div class="info-card__value">{{ r.swl | number }}<span class="info-card__unit">FT</span></div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
+                <line x1="12" y1="2" x2="12" y2="10"/>
+                <polyline points="9 7 12 10 15 7"/>
+              </svg>
+            </div>
+            <div class="info-card__content">
+              <div class="info-card__label">DWL</div>
+              <div class="info-card__value">{{ r.dwl | number }}<span class="info-card__unit">FT</span></div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div class="info-card__content">
+              <div class="info-card__label">Productivity</div>
+              <div class="info-card__value">{{ r.productivityActual | number:'1.2-2' }}<span class="info-card__unit">GPM/FT</span></div>
+            </div>
+          </div>
+        }
+
       </div>
 
-      <!-- Summary tags row -->
+      <!-- Summary tags -->
       <div class="dialog__summary-row">
         <span class="summary-tag summary-tag--aquifer">{{ r.aquiferActual }}</span>
         <span class="summary-tag">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
