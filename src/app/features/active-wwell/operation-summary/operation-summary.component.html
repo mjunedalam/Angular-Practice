@@ -2,11 +2,13 @@
   <div class="aw-section">
     <div class="well-header">Summary Of Operation</div>
     <div class="ops-grid">
-      <div class="ops-label">Operation (retrieved from Drill Eye)</div>
+      <div class="ops-label">Operation</div>
       <textarea class="ops-textarea" rows="4" formControlName="wOpRmk"></textarea>
       <!-- <small class="red-color"
         *ngIf="!form.get('operations').valid && form.get('operations').errors && form.get('operations').touched">Field
         is required</small> -->
+      <div class="ops-label">Drilling Remarks</div>
+      <textarea class="ops-textarea" rows="4" formControlName="wDrlgSmryRmk"></textarea>
       <div class="ops-label">Next Operation</div>
       <textarea class="ops-textarea" rows="4" formControlName="nxt24HrPlanRmk"></textarea>
     </div>

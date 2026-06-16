@@ -86,6 +86,9 @@ export interface DatabaseInfoViewModel {
   readonly wellTdDate: string;
   readonly footage: number | string;
   readonly secondarySamDepth: number | string;
+  readonly formationDrilling: number | string;
+  readonly circulation: number | string;
+  readonly avgRop: number | string;
 }
 
 export interface OperationSummaryViewModel {

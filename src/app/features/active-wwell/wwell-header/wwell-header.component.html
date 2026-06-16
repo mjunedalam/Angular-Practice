@@ -83,7 +83,18 @@
       </mat-form-field>
     </div>
 
-    <div class="aw-cell">
+    <div class="aw-cell aw-cell--area" [formGroup]="drillingForm">
+      <span class="aw-label">Area</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="aw-area-select">
+        <mat-select formControlName="area">
+          @for (area of areas; track area.value) {
+            <mat-option [value]="area.value">{{ area.value }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="aw-cell aw-cell--full">
       <span class="aw-label">BI</span>
       <span class="aw-value">{{ d?.biNum ?? '—' }}</span>
     </div>

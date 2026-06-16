@@ -118,18 +118,9 @@
           <div class="active-wwell-main">
             <app-wwell-header></app-wwell-header>
             <app-database-info></app-database-info>
-            <app-operation-summary></app-operation-summary>
-
-            <div class="aw-section">
-              <div class="well-header">Drilling Remarks</div>
-              <textarea
-                class="active-wwell-remarks"
-                formControlName="wDrlgSmryRmk"
-              ></textarea>
-            </div>
-
             <app-formation-tops-and-casing></app-formation-tops-and-casing>
             <app-casing-info></app-casing-info>
+            <app-operation-summary></app-operation-summary>
             <app-wwell-test></app-wwell-test>
           </div>
 
@@ -139,57 +130,6 @@
               [date]="selectedDateString()"
             ></app-file-upload>
 
-            <div class="lt-orange active-wwell-status-panel">
-              <mat-form-field
-                appearance="outline"
-                subscriptSizing="dynamic"
-                class="active-wwell-select"
-              >
-                <mat-label>Area</mat-label>
-                <mat-select formControlName="area">
-                  @for (area of areas; track area.value) {
-                    <mat-option [value]="area.value">{{
-                      area.value
-                    }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-
-              <div class="active-wwell-stat-box">
-                <mat-label>Formation Drilling</mat-label>
-                <div class="stat-value">
-                  {{ displayValue(summaryStats().formationDrilling) }}
-                </div>
-              </div>
-
-              <!-- <div class="active-wwell-stat-box">
-                <mat-label>Bit Size</mat-label>
-                <div class="stat-value">
-                  {{ displayValue(summaryStats().bitSize) }}
-                </div>
-              </div> -->
-
-              <div class="active-wwell-stat-box">
-                <mat-label>Circulation</mat-label>
-                <div class="stat-value">
-                  {{ displayValue(summaryStats().circulation) }}
-                </div>
-              </div>
-
-              <!-- <div class="active-wwell-stat-box">
-                <mat-label>Mud Weight</mat-label>
-                <div class="stat-value">
-                  {{ displayValue(summaryStats().mudWeight) }}
-                </div>
-              </div> -->
-
-              <div class="active-wwell-stat-box avg-rop-box">
-                <mat-label>Avg ROP</mat-label>
-                <div class="stat-value">
-                  {{ displayValue(summaryStats().avgRop) }}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

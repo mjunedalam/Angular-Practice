@@ -9,6 +9,13 @@ import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
 
+const AREAS = [
+  { value: 'Western Area' },
+  { value: 'Southern Area' },
+  { value: 'Northern Area' },
+  { value: 'Central Area' },
+] as const;
+
 @Component({
   selector: 'app-wwell-header',
   standalone: true,
@@ -18,6 +25,7 @@ import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog
   styleUrl: './wwell-header.component.scss'
 })
 export class WwellHeaderComponent {
+  protected readonly areas = AREAS;
   protected readonly store = inject(ActiveWwellStore);
   protected readonly activeWwellFormService = inject(ActiveWwellFormService);
   protected readonly uiStore = inject(ActiveWwellUiStore);

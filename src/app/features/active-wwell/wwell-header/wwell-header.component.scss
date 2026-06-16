@@ -39,7 +39,10 @@
   &:hover { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); }
 }
 
-.aw-cell--status { padding-bottom: 0.45rem; }
+.aw-cell--status,
+.aw-cell--area { padding-bottom: 0.45rem; }
+
+.aw-cell--full { grid-column: 1 / -1; }
 
 // ── Cell header row (label + badge) ───────────────────────────────────────────
 .aw-cell-top {
@@ -104,7 +107,8 @@
 
 .aw-value-sep { color: #94a3b8; font-weight: 400; }
 
-// ── Status select ─────────────────────────────────────────────────────────────
+// ── Status & Area selects ─────────────────────────────────────────────────────
+.aw-area-select,
 .aw-status-select {
   width: 100%;
   margin-top: 2px;

@@ -12,7 +12,7 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { AuthStore } from '../../auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
 import { formatDateForInput } from '@shared/utils/date.util';
-import { calcFlowWellProductivity, calcPumpWellProductivity } from '@shared/utils/well-test-math.util';
+import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/utils/well-test-math.util';
 
 @Component({
   selector: 'app-wwell-test',
@@ -39,6 +39,26 @@ export class WwellTestComponent {
   notify = inject(NotificationService);
 
   protected readonly isPublished = signal(false);
+  protected readonly productivityInfo = signal<{
+    inputs: Array<{ label: string; value: string; unit: string }>;
+    calculation: string;
+  } | null>(null);
+
+  protected readonly tooltipVisible = signal(false);
+  protected readonly tooltipPos = signal({ bottom: 0, right: 0 });
+
+  protected showTooltip(event: MouseEvent): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.tooltipPos.set({
+      bottom: window.innerHeight - rect.top + 10,
+      right: window.innerWidth - rect.right,
+    });
+    this.tooltipVisible.set(true);
+  }
+
+  protected hideTooltip(): void {
+    this.tooltipVisible.set(false);
+  }
 
   constructor() {
     effect(() => {
@@ -54,7 +74,15 @@ export class WwellTestComponent {
       } else {
         this.form.disable({ emitEvent: false });
       }
+      // hydProduct is always computed — never user-editable
+      this.form.get('hydProduct')!.disable({ emitEvent: false });
     });
+
+    // Re-run calculation when test type changes so tooltip stays in sync
+    effect(() => {
+      this.isFlowTest();
+      this.recalculateProductivity();
+    }, { allowSignalWrites: true });
 
     merge(
       this.form.get('statWlvl')!.valueChanges,
@@ -67,13 +95,46 @@ export class WwellTestComponent {
 
   private recalculateProductivity(): void {
     const v = this.form.getRawValue();
-    const result = this.isFlowTest()
-      ? calcFlowWellProductivity(v.hydProdRt, v.siwhp, v.fwhp)
-      : calcPumpWellProductivity(v.hydProdRt, v.dyncWlvl, v.statWlvl);
-    this.form.get('hydProduct')!.setValue(
-      result != null ? +result.toFixed(4) : null,
-      { emitEvent: false },
-    );
+
+    if (this.isFlowTest()) {
+      const result = calcFlowProductivityIndex(v.hydProdRt, v.siwhp, v.fwhp);
+      this.form.get('hydProduct')!.setValue(
+        result != null ? +result.toFixed(4) : null,
+        { emitEvent: false },
+      );
+      const flowRate = v.hydProdRt ?? '—';
+      const siwhp = v.siwhp ?? '—';
+      const fwhp = v.fwhp ?? '—';
+      this.productivityInfo.set({
+        inputs: [
+          { label: 'Test Rate', value: `${flowRate}`, unit: 'GPM' },
+          { label: 'SIWHP', value: `${siwhp}`, unit: 'psi' },
+          { label: 'FWHP', value: `${fwhp}`, unit: 'psi' },
+        ],
+        calculation: result != null
+          ? `${flowRate} ÷ (2.3072 × (${siwhp} − ${fwhp})) = ${result.toFixed(4)} GPM/ft`
+          : '—',
+      });
+    } else {
+      const result = calcPumpProductivityIndex(v.hydProdRt, v.dyncWlvl, v.statWlvl);
+      this.form.get('hydProduct')!.setValue(
+        result != null ? +result.toFixed(4) : null,
+        { emitEvent: false },
+      );
+      const pumpRate = v.hydProdRt ?? '—';
+      const dynamicWaterLevel = v.dyncWlvl ?? '—';
+      const staticWaterLevel = v.statWlvl ?? '—';
+      this.productivityInfo.set({
+        inputs: [
+          { label: 'Test Rate', value: `${pumpRate}`, unit: 'GPM' },
+          { label: 'DWL', value: `${dynamicWaterLevel}`, unit: 'ft' },
+          { label: 'SWL', value: `${staticWaterLevel}`, unit: 'ft' },
+        ],
+        calculation: result != null
+          ? `${pumpRate} ÷ (${dynamicWaterLevel} − ${staticWaterLevel}) = ${result.toFixed(4)} GPM/ft`
+          : '—',
+      });
+    }
   }
 
   createOrUpdateActiveWwell() {

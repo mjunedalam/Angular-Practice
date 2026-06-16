@@ -47,6 +47,48 @@
   line-height: 1.4;
 }
 
+.di-sep--editable {
+  gap: 0.4rem;
+}
+
+.di-sep-rename-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0;
+  border-radius: 3px;
+  transition: color 0.15s ease, background 0.15s ease;
+  flex-shrink: 0;
+
+  svg { width: 11px; height: 11px; }
+
+  &:hover {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+}
+
+.di-sep-label-input {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #2563eb;
+  padding: 1px 4px;
+  border: 1px solid #2563eb;
+  border-radius: 3px;
+  background: #eff6ff;
+  outline: none;
+  min-width: 120px;
+  line-height: 1.4;
+}
+
 // ── Cells ─────────────────────────────────────────────────────────────────────
 .aw-db-cell {
   grid-column: span 3;

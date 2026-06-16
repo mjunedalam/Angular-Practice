@@ -219,13 +219,22 @@
           </div>
 
           <div class="wt-row">
-            <span class="wt-label wt-label--cased">Well productivity (GPM/FT)</span>
+            <span class="wt-label wt-label--cased wt-label--with-info">
+              Well productivity (GPM/FT)
+              <span class="wt-info-wrap"
+                (mouseenter)="showTooltip($event)"
+                (mouseleave)="hideTooltip()">
+                <svg class="wt-info-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="8" r="8" fill="currentColor"/>
+                  <rect x="7.1" y="7" width="1.8" height="5" rx="0.9" fill="white"/>
+                  <circle cx="8" cy="4.8" r="1.1" fill="white"/>
+                </svg>
+              </span>
+            </span>
             <input
               class="wt-actual"
               type="text"
-              inputmode="decimal"
               formControlName="hydProduct"
-              (keypress)="onlyNumbers($event)"
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
@@ -274,13 +283,22 @@
           </div>
 
           <div class="wt-row">
-            <span class="wt-label wt-label--cased">Well Productivity (GPM/ft)</span>
+            <span class="wt-label wt-label--cased wt-label--with-info">
+              Well Productivity (GPM/ft)
+              <span class="wt-info-wrap"
+                (mouseenter)="showTooltip($event)"
+                (mouseleave)="hideTooltip()">
+                <svg class="wt-info-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="8" r="8" fill="currentColor"/>
+                  <rect x="7.1" y="7" width="1.8" height="5" rx="0.9" fill="white"/>
+                  <circle cx="8" cy="4.8" r="1.1" fill="white"/>
+                </svg>
+              </span>
+            </span>
             <input
               class="wt-actual"
               type="text"
-              inputmode="decimal"
               formControlName="hydProduct"
-              (keypress)="onlyNumbers($event)"
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
@@ -319,4 +337,32 @@
       </div>
     }
   </div>
+
+  @if (tooltipVisible()) {
+    <div class="wt-tooltip"
+         [style.bottom.px]="tooltipPos().bottom"
+         [style.right.px]="tooltipPos().right">
+      <div class="wt-tooltip-header">
+        <span class="wt-tooltip-badge" [class.wt-tooltip-badge--flow]="isFlowTest()" [class.wt-tooltip-badge--pump]="!isFlowTest()">
+          {{ isFlowTest() ? 'FLOW' : 'PUMP' }}
+        </span>
+        <span class="wt-tooltip-title">Well Productivity</span>
+      </div>
+      <div class="wt-tooltip-formula">
+        {{ isFlowTest() ? 'WP = Test Rate ÷ (2.3072 × (SIWHP − FWHP))' : 'WP = Test Rate ÷ (DWL − SWL)' }}
+      </div>
+      <div class="wt-tooltip-divider"></div>
+      @if (productivityInfo(); as info) {
+        <div class="wt-tooltip-vars">
+          @for (inp of info.inputs; track inp.label) {
+            <span class="wt-tooltip-var-lbl">{{ inp.label }}</span>
+            <span class="wt-tooltip-var-val">{{ inp.value }}</span>
+            <span class="wt-tooltip-var-unit">{{ inp.unit }}</span>
+          }
+        </div>
+        <div class="wt-tooltip-divider"></div>
+        <div class="wt-tooltip-result">WP = {{ info.calculation }}</div>
+      }
+    </div>
+  }
 </form>

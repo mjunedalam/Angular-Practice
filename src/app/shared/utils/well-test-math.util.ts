@@ -1,23 +1,33 @@
-const FLOW_PSI_TO_FT = 2.3072;
+/** Conversion: 1 psi pressure difference ≈ 2.3072 ft of equivalent water head */
+const FT_HEAD_PER_PSI = 2.3072;
 
-export function calcPumpWellProductivity(
-  testRate: number | null | undefined,
-  dwl: number | null | undefined,
-  swl: number | null | undefined,
+/**
+ * Pump test productivity index: PI = Q / (DWL - SWL)
+ * Returns GPM/ft, or null if inputs are missing or drawdown is zero.
+ */
+export function calcPumpProductivityIndex(
+  pumpRateGpm: number | null | undefined,
+  dynamicWaterLevelFt: number | null | undefined,
+  staticWaterLevelFt: number | null | undefined,
 ): number | null {
-  if (testRate == null || dwl == null || swl == null) return null;
-  const drawdown = dwl - swl;
+  if (pumpRateGpm == null || dynamicWaterLevelFt == null || staticWaterLevelFt == null) return null;
+  const drawdown = dynamicWaterLevelFt - staticWaterLevelFt;
   if (drawdown === 0) return null;
-  return testRate / drawdown;
+  return pumpRateGpm / drawdown;
 }
 
-export function calcFlowWellProductivity(
-  testRate: number | null | undefined,
-  siwhp: number | null | undefined,
-  fwhp: number | null | undefined,
+/**
+ * Flow test productivity index: PI = Q / (FT_HEAD_PER_PSI × (SIWHP - FWHP))
+ * Converts pressure differential to equivalent head before dividing.
+ * Returns GPM/ft, or null if inputs are missing or equivalent drawdown is zero.
+ */
+export function calcFlowProductivityIndex(
+  flowRateGpm: number | null | undefined,
+  shutInWellheadPressurePsi: number | null | undefined,
+  flowingWellheadPressurePsi: number | null | undefined,
 ): number | null {
-  if (testRate == null || siwhp == null || fwhp == null) return null;
-  const drawdown = FLOW_PSI_TO_FT * (siwhp - fwhp);
-  if (drawdown === 0) return null;
-  return testRate / drawdown;
+  if (flowRateGpm == null || shutInWellheadPressurePsi == null || flowingWellheadPressurePsi == null) return null;
+  const equivalentDrawdown = FT_HEAD_PER_PSI * (shutInWellheadPressurePsi - flowingWellheadPressurePsi);
+  if (equivalentDrawdown === 0) return null;
+  return flowRateGpm / equivalentDrawdown;
 }

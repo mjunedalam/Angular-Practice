@@ -17,6 +17,7 @@
     line-height: 1.35;
     padding: 12px 16px;
     letter-spacing: 0.04em;
+    background: #1f8de8;
   }
 }
 
@@ -89,6 +90,43 @@
 
 @keyframes map-spin {
   to { transform: rotate(360deg); }
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 8px 12px;
+  background: #ffffff
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__dot {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+
+    &--water-supply  { background: #38bdf8; }
+    &--abandoned     { background: #1e1e1e; border: 1px solid #555; }
+    &--observation   { background: #f472b6; }
+    &--water-disposal { background: #b45309; }
+    &--other         { background: #6b7280; }
+  }
+
+  &__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #000
+    white-space: nowrap;
+  }
 }
 
 .map-state {

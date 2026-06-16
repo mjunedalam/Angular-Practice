@@ -4,40 +4,24 @@
   <div class="di-body">
     @if (data(); as data) {
       <div class="di-grid">
+
+        <!-- Dates -->
         <div class="di-sep"><span class="di-sep-label">Dates</span></div>
 
-        <div class="aw-db-cell">
-          <span class="aw-db-label">Date</span>
-          <span class="aw-db-value">{{ data.date }}</span>
-        </div>
-        <div class="aw-db-cell">
+        <div class="aw-db-cell aw-db-cell--third">
           <span class="aw-db-label">Spud date</span>
           <span class="aw-db-value">{{ data.spudDate }}</span>
         </div>
-        <div class="aw-db-cell">
+        <div class="aw-db-cell aw-db-cell--third">
           <span class="aw-db-label">Days since spud</span>
           <span class="aw-db-value">{{ data.daysSinceSpud }}</span>
         </div>
-        <div class="aw-db-cell">
+        <div class="aw-db-cell aw-db-cell--third">
           <span class="aw-db-label">Target Date</span>
           <span class="aw-db-value">{{ data.targetDate }}</span>
         </div>
 
-        <div class="di-sep"><span class="di-sep-label">Depth</span></div>
-
-        <div class="aw-db-cell aw-db-cell--third">
-          <span class="aw-db-label">Current Depth</span>
-          <span class="aw-db-value">{{ data.fiveAmDepth }}</span>
-        </div>
-        <div class="aw-db-cell aw-db-cell--third">
-          <span class="aw-db-label">Prevous depth(ft.)</span>
-          <span class="aw-db-value">{{ data.preFiveAmDepth }}</span>
-        </div>
-        <div class="aw-db-cell aw-db-cell--third">
-          <span class="aw-db-label">Footage FT.</span>
-          <span class="aw-db-value">{{ data.footage }}</span>
-        </div>
-
+        <!-- Casing & Rig -->
         <div class="di-sep">
           <span class="di-sep-label">Casing &amp; Rig</span>
         </div>
@@ -68,6 +52,59 @@
             >/{{ kpiRm() | number: "1.0-2" }}
           </span>
         </div>
+
+        <!-- Depth & Formation (renameable) -->
+        <div class="di-sep di-sep--editable">
+          @if (isEditingDepthLabel()) {
+            <input
+              class="di-sep-label-input"
+              [value]="depthSectionLabel()"
+              (blur)="commitDepthLabel($any($event.target).value)"
+              (keydown.enter)="commitDepthLabel($any($event.target).value)"
+              (keydown.escape)="isEditingDepthLabel.set(false)"
+              autofocus
+            />
+          } @else {
+            <span class="di-sep-label">{{ depthSectionLabel() }}</span>
+            <button
+              type="button"
+              class="di-sep-rename-btn"
+              title="Rename section"
+              (click)="startEditDepthLabel()"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H2v-3L11.5 2.5z"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Current Depth</span>
+          <span class="aw-db-value">{{ data.fiveAmDepth }}</span>
+        </div>
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Previous depth (ft.)</span>
+          <span class="aw-db-value">{{ data.preFiveAmDepth }}</span>
+        </div>
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Footage FT.</span>
+          <span class="aw-db-value">{{ data.footage }}</span>
+        </div>
+
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Formation Drilling</span>
+          <span class="aw-db-value">{{ data.formationDrilling }}</span>
+        </div>
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Circulation</span>
+          <span class="aw-db-value">{{ data.circulation }}</span>
+        </div>
+        <div class="aw-db-cell aw-db-cell--third">
+          <span class="aw-db-label">Avg ROP</span>
+          <span class="aw-db-value">{{ data.avgRop }}</span>
+        </div>
+
       </div>
     } @else {
       <p class="di-empty">No database information available.</p>

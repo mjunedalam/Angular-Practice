@@ -319,6 +319,9 @@ export function selectDatabaseInfoViewModel(d: IWellData | null, date: Date): Da
         wellTdDate: rig?.wDrlgEndDt ?? FALLBACK_STR,
         footage: status?.wDpthChgDis ?? FALLBACK_STR,
         secondarySamDepth: prewap?.estTargetDepth ?? FALLBACK_STR,
+        formationDrilling: selectLatestFormation(d)?.stLongCd ?? prewap?.targetFormation ?? FALLBACK_STR,
+        circulation: status?.wMudCircPc ?? FALLBACK_STR,
+        avgRop: d.ROP_DATA?.[0]?.rop ?? FALLBACK_STR,
     };
 }
 
