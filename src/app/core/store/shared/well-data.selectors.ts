@@ -448,7 +448,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const wellDesign = d.EXAD_GWD_WELL_DESIGN?.[0];
     return {
-  
+
         flowType: hydro?.flowType ?? 'N',
         testType: testOutcome?.hydTestTypCd,
         aquiferActual: testOutcome?.rsvrCd,
@@ -483,7 +483,7 @@ export function mapWellDataToMorningReport(d: IWellData): MorningReport {
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const opSmry = d.DRLG_OP_SMRY?.[0];
     const tops = d.DRLG_FM_TOPS ?? [];
-const lastTop = tops[tops.length - 1];
+    const lastTop = tops[tops.length - 1];
 
     return {
         epANum: String(status?.epANum ?? ''),

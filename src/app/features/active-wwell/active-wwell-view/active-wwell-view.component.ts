@@ -37,6 +37,7 @@ import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog
 import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { skip } from 'rxjs';
+import { CasingInfoComponent } from "../casing-info/casing-info.component";
 
 const AREAS = [
   { value: 'Western Area' },
@@ -65,7 +66,8 @@ const WELL_PAGE_SIZE = 15;
     FormationTopsAndCasingComponent,
     WwellTestComponent,
     FileUploadComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CasingInfoComponent
   ],
   templateUrl: './active-wwell-view.component.html',
   styleUrl: './active-wwell-view.component.scss',
