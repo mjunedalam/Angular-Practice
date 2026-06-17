@@ -92,6 +92,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
   @ViewChild('mapPanel') private mapPanelEl?: ElementRef<HTMLElement>;
   @ViewChild('allWellsPanel') private allWellsPanelEl?: ElementRef<HTMLElement>;
+  @ViewChild('legendPanel') private legendPanelEl?: ElementRef<HTMLElement>;
 
   private mapView?: __esri.MapView;
   private wwellLayer?: GraphicsLayer;
@@ -129,11 +130,29 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly mapReady = signal(false);
   protected readonly isFullscreen = signal(false);
   protected readonly isDrawingWells = signal(false);
+
+  // All Wells panel — drag
   protected readonly isDragging = signal(false);
   protected readonly panelX = signal<number | null>(null);
   protected readonly panelY = signal<number | null>(null);
   private dragOffsetX = 0;
   private dragOffsetY = 0;
+
+  // All Wells panel — resize
+  protected readonly isResizing = signal(false);
+  protected readonly panelWidth = signal<number | null>(null);
+  protected readonly panelHeight = signal<number | null>(null);
+  private resizeStartX = 0;
+  private resizeStartY = 0;
+  private resizeStartW = 0;
+  private resizeStartH = 0;
+
+  // Legend — drag
+  protected readonly isLegendDragging = signal(false);
+  protected readonly legendX = signal<number | null>(null);
+  protected readonly legendY = signal<number | null>(null);
+  private legendOffsetX = 0;
+  private legendOffsetY = 0;
   private readonly wwells = signal<WWell[]>([]);
 
   private readonly platformId = inject(PLATFORM_ID);
@@ -353,29 +372,84 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
+  protected onResizeStart(event: MouseEvent): void {
+    const panel = this.allWellsPanelEl?.nativeElement;
+    if (!panel) return;
+    this.isResizing.set(true);
+    this.resizeStartX = event.clientX;
+    this.resizeStartY = event.clientY;
+    this.resizeStartW = this.panelWidth() ?? panel.offsetWidth;
+    this.resizeStartH = this.panelHeight() ?? panel.offsetHeight;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  protected onLegendDragStart(event: MouseEvent): void {
+    const panel = this.legendPanelEl?.nativeElement;
+    const parent = this.mapPanelEl?.nativeElement;
+    if (!panel || !parent) return;
+
+    const rect = panel.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+
+    if (this.legendX() === null) {
+      this.legendX.set(rect.left - parentRect.left);
+      this.legendY.set(rect.top - parentRect.top);
+    }
+
+    this.isLegendDragging.set(true);
+    this.legendOffsetX = event.clientX - rect.left;
+    this.legendOffsetY = event.clientY - rect.top;
+    event.preventDefault();
+  }
+
   @HostListener('document:mousemove', ['$event'])
   protected onDocumentMouseMove(event: MouseEvent): void {
-    if (!this.isDragging()) return;
-    const parent = this.mapPanelEl?.nativeElement;
-    const panel = this.allWellsPanelEl?.nativeElement;
-    if (!parent || !panel) return;
+    if (this.isDragging()) {
+      const parent = this.mapPanelEl?.nativeElement;
+      const panel = this.allWellsPanelEl?.nativeElement;
+      if (parent && panel) {
+        const parentRect = parent.getBoundingClientRect();
+        this.panelX.set(Math.max(0, Math.min(
+          event.clientX - parentRect.left - this.dragOffsetX,
+          parentRect.width - panel.offsetWidth,
+        )));
+        this.panelY.set(Math.max(0, Math.min(
+          event.clientY - parentRect.top - this.dragOffsetY,
+          parentRect.height - panel.offsetHeight,
+        )));
+      }
+    }
 
-    const parentRect = parent.getBoundingClientRect();
-    const x = Math.max(0, Math.min(
-      event.clientX - parentRect.left - this.dragOffsetX,
-      parentRect.width - panel.offsetWidth,
-    ));
-    const y = Math.max(0, Math.min(
-      event.clientY - parentRect.top - this.dragOffsetY,
-      parentRect.height - panel.offsetHeight,
-    ));
-    this.panelX.set(x);
-    this.panelY.set(y);
+    if (this.isLegendDragging()) {
+      const parent = this.mapPanelEl?.nativeElement;
+      const panel = this.legendPanelEl?.nativeElement;
+      if (parent && panel) {
+        const parentRect = parent.getBoundingClientRect();
+        this.legendX.set(Math.max(0, Math.min(
+          event.clientX - parentRect.left - this.legendOffsetX,
+          parentRect.width - panel.offsetWidth,
+        )));
+        this.legendY.set(Math.max(0, Math.min(
+          event.clientY - parentRect.top - this.legendOffsetY,
+          parentRect.height - panel.offsetHeight,
+        )));
+      }
+    }
+
+    if (this.isResizing()) {
+      const parent = this.mapPanelEl?.nativeElement;
+      const maxH = parent ? parent.offsetHeight - 20 : 600;
+      this.panelWidth.set(Math.max(180, Math.min(this.resizeStartW + event.clientX - this.resizeStartX, 480)));
+      this.panelHeight.set(Math.max(140, Math.min(this.resizeStartH + event.clientY - this.resizeStartY, maxH)));
+    }
   }
 
   @HostListener('document:mouseup')
   protected onDocumentMouseUp(): void {
     this.isDragging.set(false);
+    this.isLegendDragging.set(false);
+    this.isResizing.set(false);
   }
 
   @HostListener('document:fullscreenchange')

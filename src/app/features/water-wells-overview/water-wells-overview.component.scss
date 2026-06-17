@@ -169,11 +169,11 @@
 }
 
 .wwo__pill-label {
-  font-size: 0.62rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #000;
   line-height: 1;
 }
 
@@ -439,6 +439,33 @@
   * { scrollbar-width: none; }
 }
 
+.wwo__all-wells-resize {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  cursor: se-resize;
+  z-index: 5;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid rgba(59, 130, 246, 0.38);
+    border-bottom: 2px solid rgba(59, 130, 246, 0.38);
+    border-radius: 0 0 2px 0;
+    transition: border-color 150ms;
+  }
+
+  &:hover::after {
+    border-color: rgba(59, 130, 246, 0.8);
+  }
+}
+
 // ─── Legend — light card floating over map ───────────────
 
 .wwo__legend {
@@ -458,6 +485,22 @@
     0 2px 8px rgba(0, 0, 0, 0.08),
     0 4px 16px rgba(59, 130, 246, 0.06);
   max-width: 280px;
+  cursor: grab;
+  user-select: none;
+
+  &:active { cursor: grabbing; }
+
+  &--dragged {
+    bottom: unset;
+  }
+
+  &--dragging {
+    cursor: grabbing;
+    opacity: 0.95;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.14),
+      0 4px 16px rgba(59, 130, 246, 0.12);
+  }
 }
 
 .wwo__legend-heading {

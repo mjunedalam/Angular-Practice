@@ -76,6 +76,8 @@
         [class.wwo__all-wells-panel--dragging]="isDragging()"
         [style.left.px]="panelX()"
         [style.top.px]="panelY()"
+        [style.width.px]="panelWidth()"
+        [style.max-height.px]="panelHeight()"
         aria-label="All wells table"
       >
         <div class="wwo__all-wells-header" (mousedown)="onPanelDragStart($event)">
@@ -91,10 +93,21 @@
             [gridOptions]="allWellsGridOptions"
           />
         </div>
+        <div class="wwo__all-wells-resize" (mousedown)="onResizeStart($event)"></div>
       </div>
 
-      <!-- Ownership legend — bottom-left -->
-      <footer class="wwo__legend" role="list" aria-label="Well ownership legend">
+      <!-- Ownership legend — bottom-left, draggable -->
+      <footer
+        #legendPanel
+        class="wwo__legend"
+        [class.wwo__legend--dragged]="legendX() !== null"
+        [class.wwo__legend--dragging]="isLegendDragging()"
+        [style.left.px]="legendX()"
+        [style.top.px]="legendY()"
+        role="list"
+        aria-label="Well ownership legend"
+        (mousedown)="onLegendDragStart($event)"
+      >
         <span class="wwo__legend-heading">Ownership</span>
         @for (item of legendItems; track item.biNum) {
           <div class="wwo__legend-chip" role="listitem" [style.--chip-color]="item.color">

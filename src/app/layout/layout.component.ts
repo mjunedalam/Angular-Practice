@@ -26,13 +26,21 @@ export class LayoutComponent {
   protected readonly activeRoute      = signal<string>('home');
 
   constructor() {
-    this.activeRoute.set(this.routeSegment(this.router.url));
+    const initialSegment = this.routeSegment(this.router.url);
+    this.activeRoute.set(initialSegment);
+    if (initialSegment === 'water-wells-overview') {
+      this.sidenavCollapsed.set(true);
+    }
 
     // Keep active nav item in sync with browser URL
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => {
-        this.activeRoute.set(this.routeSegment(e.urlAfterRedirects));
+        const segment = this.routeSegment(e.urlAfterRedirects);
+        this.activeRoute.set(segment);
+        if (segment === 'water-wells-overview') {
+          this.sidenavCollapsed.set(true);
+        }
       });
 
     // Fire after the first full render cycle — child ngOnInit calls (which register
