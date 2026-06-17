@@ -281,23 +281,26 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     cellHorizontalPaddingScale: 1.2,
   });
 
-  readonly allWellsGridTheme = themeQuartz.withParams({
-    accentColor: '#60a5fa',
-    backgroundColor: 'transparent',
-    foregroundColor: 'rgba(255,255,255,0.82)',
-    headerBackgroundColor: 'rgba(96,165,250,0.08)',
-    headerTextColor: 'rgba(96,165,250,0.58)',
-    headerFontSize: 9,
-    headerFontWeight: 700,
-    rowHoverColor: 'rgba(96,165,250,0.12)',
-    oddRowBackgroundColor: 'rgba(255,255,255,0.02)',
-    borderColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 0,
-    fontSize: 10,
-    headerHeight: 26,
-    spacing: 1.5,
-    fontFamily: 'inherit',
-    cellHorizontalPaddingScale: 0.9,
+  protected readonly allWellsScaledTheme = computed(() => {
+    const scale = Math.max(0.85, Math.min(1.5, (this.panelWidth() ?? 255) / 255));
+    return themeQuartz.withParams({
+      accentColor: '#3b82f6',
+      backgroundColor: '#ffffff',
+      foregroundColor: '#1e293b',
+      headerBackgroundColor: '#dbeafe',
+      headerTextColor: '#1d4ed8',
+      headerFontSize: Math.max(8, Math.round(9 * scale)),
+      headerFontWeight: 700,
+      rowHoverColor: 'rgba(59, 130, 246, 0.07)',
+      oddRowBackgroundColor: '#fafbfc',
+      borderColor: '#e2e8f0',
+      borderRadius: 0,
+      fontSize: Math.round(10 * scale),
+      headerHeight: Math.round(28 * scale),
+      spacing: Math.max(1.5, 2 * scale),
+      fontFamily: 'inherit',
+      cellHorizontalPaddingScale: 1.2,
+    });
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -316,7 +319,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
-    domLayout: 'normal',
+    domLayout: 'autoHeight',
     tooltipShowDelay: 300,
     defaultColDef: { sortable: true, filter: false, resizable: true },
     overlayNoRowsTemplate: '<span style="color:#94a3b8;font-size:12px">No data</span>',
@@ -343,8 +346,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
-      this.panelWidth();
       this.panelHeight();
+      this.panelWidth();
       requestAnimationFrame(() => this.allWellsGridApi?.sizeColumnsToFit());
     });
   }
