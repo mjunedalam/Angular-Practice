@@ -71,6 +71,16 @@ export const routes: Routes = [
           ),
         providers: [EmailStore, MorningReportStore],
       },
+      {
+        path: 'water-wells-overview',
+        data: { routeId: 'water-wells-overview' },
+        canActivate: [roleGuard],
+        loadComponent: () =>
+          import('./features/water-wells-overview/water-wells-overview.component').then(
+            (m) => m.WaterWellsOverviewComponent,
+          ),
+        providers: [MorningReportStore],
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },

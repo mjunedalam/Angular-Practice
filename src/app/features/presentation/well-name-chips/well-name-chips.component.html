@@ -75,8 +75,20 @@
       <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>
     </div>
 
-    <!-- Fullscreen toggle — positioned on the right -->
+    <!-- Right controls — wells overview + fullscreen -->
     <div class="fullscreen-toggle-section">
+      <button
+        type="button"
+        class="fullscreen-toggle wells-overview-btn"
+        (click)="toggleWellsOverview.emit()"
+        title="All Wells Overview"
+        aria-label="Open All Wells Overview"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+      </button>
+
       <button type="button" class="fullscreen-toggle" (click)="toggleFullscreen.emit()"
         [title]="isFullscreen() ? 'Exit full screen' : 'Enter full screen'"
         [attr.aria-label]="isFullscreen() ? 'Exit full screen' : 'Enter full screen'">

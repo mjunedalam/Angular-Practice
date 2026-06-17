@@ -1,0 +1,124 @@
+<div class="wwo" [class.wwo--fullscreen]="isFullscreen()">
+
+  <!-- Header -->
+  <header class="wwo__header">
+    <button type="button" class="wwo__back" (click)="goBack()" aria-label="Back to Presentations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+    </button>
+
+    <div class="wwo__header-center">
+      <div class="wwo__pill wwo__pill--total">
+        <span class="wwo__pill-value">{{ totalWells() }}</span>
+        <span class="wwo__pill-label">Total Wells</span>
+      </div>
+      @for (stat of statusStats(); track stat.status) {
+        <div class="wwo__pill" [style.--pill-color]="stat.color">
+          <span class="wwo__pill-dot" [style.background]="stat.color"></span>
+          <span class="wwo__pill-value">{{ stat.count }}</span>
+          <span class="wwo__pill-label">{{ stat.status }}</span>
+        </div>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="wwo__fullscreen-btn"
+      (click)="toggleFullscreen()"
+      [title]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
+      [attr.aria-label]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
+      [class.wwo__fullscreen-btn--active]="isFullscreen()"
+    >
+      @if (!isFullscreen()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+        </svg>
+      }
+    </button>
+
+    @if (store.isLoading()) {
+      <div class="wwo__loading-bar"><span></span></div>
+    }
+  </header>
+
+  <!-- Body: map (left) + By Status sidebar (right) -->
+  <div class="wwo__body">
+
+    <section #mapPanel class="wwo__map-panel" aria-label="Wells map">
+      <div #mapViewNode class="wwo__map-canvas"></div>
+
+      @if (!mapReady()) {
+        <div class="wwo__map-loader" aria-live="polite">
+          <span class="wwo__map-loader__spinner"></span>
+          <span class="wwo__map-loader__label">Loading map…</span>
+        </div>
+      }
+
+      @if (isDrawingWells()) {
+        <div class="wwo__plotting-banner" aria-live="polite">
+          <span class="wwo__plotting-pulse" aria-hidden="true"></span>
+          Plotting wells…
+        </div>
+      }
+
+      <!-- All Wells — draggable floating panel -->
+      <div
+        #allWellsPanel
+        class="wwo__all-wells-panel"
+        [class.wwo__all-wells-panel--dragged]="panelX() !== null"
+        [class.wwo__all-wells-panel--dragging]="isDragging()"
+        [style.left.px]="panelX()"
+        [style.top.px]="panelY()"
+        aria-label="All wells table"
+      >
+        <div class="wwo__all-wells-header" (mousedown)="onPanelDragStart($event)">
+          <span class="wwo__all-wells-dot"></span>
+          All Wells
+          <span class="wwo__all-wells-count">{{ allWellRows().length }}</span>
+        </div>
+        <div class="wwo__all-wells-grid">
+          <ag-grid-angular
+            [theme]="gridTheme"
+            [rowData]="allWellRows()"
+            [columnDefs]="allWellColumnDefs"
+            [gridOptions]="allWellsGridOptions"
+          />
+        </div>
+      </div>
+
+      <!-- Ownership legend — bottom-left -->
+      <footer class="wwo__legend" role="list" aria-label="Well ownership legend">
+        <span class="wwo__legend-heading">Ownership</span>
+        @for (item of legendItems; track item.biNum) {
+          <div class="wwo__legend-chip" role="listitem" [style.--chip-color]="item.color">
+            <span class="wwo__legend-chip__dot"></span>
+            {{ item.biNum }}
+          </div>
+        }
+      </footer>
+    </section>
+
+    <!-- Sidebar: By Status -->
+    <aside class="wwo__side-panel" aria-label="Well status table">
+      <div class="wwo__table-section">
+        <div class="wwo__table-label">By Status</div>
+        <div class="wwo__grid-wrap">
+          <ag-grid-angular
+            style="width: 100%; height: 100%"
+            [theme]="gridTheme"
+            [rowData]="statusGroupRows()"
+            [columnDefs]="columnDefs"
+            [gridOptions]="gridOptions"
+          />
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</div>

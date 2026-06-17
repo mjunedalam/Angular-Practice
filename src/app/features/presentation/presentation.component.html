@@ -4,7 +4,8 @@
   <div class="presentation__toolbar">
     <app-well-name-chips class="toolbar__chips"
       [isFullscreen]="isFullscreen()"
-      (toggleFullscreen)="toggleFullscreen()" />
+      (toggleFullscreen)="toggleFullscreen()"
+      (toggleWellsOverview)="navigateToOverview()" />
   </div>
 
   @if (store.error()) {
@@ -16,74 +17,62 @@
        ════════════════════════════════════════════════════════════════════════ -->
   <main class="pres-fixed" [class.pres-fixed--loading]="loadingVisible()">
 
-    <!-- Left -->
-    <div class="pres-fixed__left" [style.width.px]="leftWidth()" [class.pres-fixed__left--loading]="loadingVisible()">
-      <div class="pres-section-card pres-section-card--left">
-        <app-misc-pres-well-data />
-      </div>
-      <div class="pres-section-card pres-section-card--left">
-        <app-picked-formation-tops />
-      </div>
-    </div>
-
-    <app-resize-divider (dividerDrag)="onLeftDrag($event)" />
-
-    <!-- Center -->
-    <div class="pres-fixed__center" [class.pres-fixed__center--loading]="loadingVisible()">
-
-      <!-- Layout Toggle — top-right corner of diagram area, opens modal -->
-      <!-- <button class="diagram-layout-toggle" (click)="openDraggableDialog()"
-        title="Open Free Layout"
-        aria-label="Open free layout modal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      </button> -->
-
-      @if (!store.isLoaded()) {
-        <div class="empty-state">
-          <div class="empty-state__icon">🛢</div>
-          <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
+      <!-- Left -->
+      <div class="pres-fixed__left" [style.width.px]="leftWidth()" [class.pres-fixed__left--loading]="loadingVisible()">
+        <div class="pres-section-card pres-section-card--left">
+          <app-misc-pres-well-data />
         </div>
-      } @else {
-        <div class="diagram-card" [class.diagram-card--loading]="loadingVisible()">
+        <div class="pres-section-card pres-section-card--left">
+          <app-picked-formation-tops />
+        </div>
+      </div>
 
-          <div class="diagram-scroll-area">
-            <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
-            <app-well-bore-view
-              [diagramData]="store.diagramData()"
-              [animTrigger]="store.animationTrigger()"
-              [animConfig]="store.animConfig()"
-              [formationTops]="store.allFormationTops()" />
+      <app-resize-divider (dividerDrag)="onLeftDrag($event)" />
+
+      <!-- Center -->
+      <div class="pres-fixed__center" [class.pres-fixed__center--loading]="loadingVisible()">
+
+        @if (!store.isLoaded()) {
+          <div class="empty-state">
+            <div class="empty-state__icon">🛢</div>
+            <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
           </div>
-          <app-wwells-logs-indicators />
+        } @else {
+          <div class="diagram-card" [class.diagram-card--loading]="loadingVisible()">
+
+            <div class="diagram-scroll-area">
+              <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
+              <app-well-bore-view
+                [diagramData]="store.diagramData()"
+                [animTrigger]="store.animationTrigger()"
+                [animConfig]="store.animConfig()"
+                [formationTops]="store.allFormationTops()" />
+            </div>
+            <app-wwells-logs-indicators />
+          </div>
+        }
+      </div>
+
+      <app-resize-divider (dividerDrag)="onRightDrag($event)" />
+
+      <!-- Right -->
+      <aside class="pres-fixed__right" [style.width.px]="rightWidth()" [class.pres-fixed__right--loading]="loadingVisible()">
+        <div class="pres-section-card pres-section-card--right">
+          <!-- <app-active-wwell-map />  -->
+
         </div>
-      }
-    </div>
+        <div class="pres-section-card pres-section-card--right">
+          <app-offset-wwells />
+        </div>
+        <div class="pres-section-card pres-section-card--right">
+          <app-wwell-test-result />
+        </div>
+        <div class="pres-section-card pres-section-card--right">
+          <app-active-wwell-docs-viewer />
+        </div>
+      </aside>
 
-    <app-resize-divider (dividerDrag)="onRightDrag($event)" />
-
-    <!-- Right -->
-    <aside class="pres-fixed__right" [style.width.px]="rightWidth()" [class.pres-fixed__right--loading]="loadingVisible()">
-      <div class="pres-section-card pres-section-card--right">
-        <!-- <app-active-wwell-map />  -->
-        
-      </div>
-      <div class="pres-section-card pres-section-card--right">
-        <app-offset-wwells />
-      </div>
-      <div class="pres-section-card pres-section-card--right">
-        <app-wwell-test-result />
-      </div>
-      <div class="pres-section-card pres-section-card--right">
-        <app-active-wwell-docs-viewer />
-      </div>
-    </aside>
-
-  </main>
+    </main>
 
   <!-- ════════════════════════════════════════════════════════════════════════
        MODE B — FREE LAYOUT — PrimeNG Dialog

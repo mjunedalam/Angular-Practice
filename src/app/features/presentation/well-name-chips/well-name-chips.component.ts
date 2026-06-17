@@ -25,6 +25,7 @@ export class WellNameChipsComponent {
 
   readonly isFullscreen = input(false);
   readonly toggleFullscreen = output<void>();
+  readonly toggleWellsOverview = output<void>();
 
   private loaderTimer: ReturnType<typeof setTimeout> | null = null;
   private loaderShownAt = 0;

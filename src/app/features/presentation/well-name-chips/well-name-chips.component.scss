@@ -148,11 +148,12 @@
   }
 }
 
-// ── Fullscreen toggle — right side ───────────────────────────────────────────
+// ── Right controls — wells overview + fullscreen ─────────────────────────────
 .fullscreen-toggle-section {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 8px;
   flex-shrink: 0;
   justify-self: end;
   grid-column: 3;
@@ -184,6 +185,13 @@
     background: var(--accent-muted);
     transform: scale(1.05);
   }
+}
+
+.wells-overview-btn--active {
+  border-color: var(--accent) !important;
+  background: var(--accent-muted, rgba(14, 165, 233, 0.08)) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
 }
 
 @media (max-width: 1100px) {

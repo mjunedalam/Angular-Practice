@@ -1,0 +1,568 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+:host(:fullscreen),
+:host(:-webkit-full-screen),
+:host(:-moz-full-screen) {
+  width: 100vw;
+  height: 100vh;
+}
+
+// ─── Root ─────────────────────────────────────────────────
+
+.wwo {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  &--fullscreen {
+    background: #ffffff;
+  }
+}
+
+// ─── Header ───────────────────────────────────────────────
+
+.wwo__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  height: 44px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.wwo__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms, border-color 150ms, color 150ms;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #3b82f6;
+  }
+}
+
+.wwo__title-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.wwo__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  margin-bottom: 2px;
+}
+
+.wwo__live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  flex-shrink: 0;
+  animation: wwo-live-pulse 2s ease-out infinite;
+}
+
+@keyframes wwo-live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+  60%  { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.wwo__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+// ─── Header center — pills ────────────────────────────────
+
+.wwo__header-center {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  overflow-x: auto;
+  min-width: 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.wwo__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+
+  &--total {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    border-color: rgba(96, 165, 250, 0.35);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+
+    .wwo__pill-value,
+    .wwo__pill-label { color: #fff; }
+  }
+}
+
+.wwo__pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wwo__pill-value {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.wwo__pill-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+// ─── Fullscreen button ────────────────────────────────────
+
+.wwo__fullscreen-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms, border-color 150ms, color 150ms;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #3b82f6;
+  }
+
+  &--active {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// ─── Loading bar ──────────────────────────────────────────
+
+.wwo__loading-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e2e8f0;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, #2563eb, #60a5fa, #2563eb);
+    border-radius: 999px;
+    animation: wwo-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes wwo-shimmer {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(400%); }
+}
+
+// ─── Body ─────────────────────────────────────────────────
+
+.wwo__body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ─── Map panel ───────────────────────────────────────────
+
+.wwo__map-panel {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  // contain: paint clips WebGL canvas output — overflow:hidden alone won't
+  contain: layout paint;
+}
+
+.wwo__map-canvas {
+  // absolute fill keeps canvas exactly in-bounds regardless of fullscreen state
+  position: absolute;
+  inset: 0;
+}
+
+// ─── Map loader ──────────────────────────────────────────
+
+.wwo__map-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(248, 250, 252, 0.85);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+
+  &__spinner {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(59, 130, 246, 0.15);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: wwo-spin 0.8s linear infinite;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #3b82f6;
+  }
+}
+
+@keyframes wwo-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ─── Plotting banner ─────────────────────────────────────
+
+.wwo__plotting-banner {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.wwo__plotting-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: wwo-plotting-blink 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes wwo-plotting-blink {
+  from { opacity: 1; }
+  to   { opacity: 0.2; }
+}
+
+// ─── All Wells — dark glass panel floating top-left on map ─
+
+.wwo__all-wells-panel {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  width: 255px;
+  max-height: 58%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8edf4;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 6px 20px rgba(59, 130, 246, 0.08);
+  overflow: hidden;
+}
+
+.wwo__all-wells-panel--dragged {
+  right: unset;
+}
+
+.wwo__all-wells-panel--dragging {
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.16),
+    0 6px 20px rgba(59, 130, 246, 0.14);
+  opacity: 0.96;
+}
+
+.wwo__all-wells-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.48rem 0.75rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  background: linear-gradient(120deg, #eff6ff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #dbeafe;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+    flex-shrink: 0;
+  }
+}
+
+.wwo__all-wells-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  flex-shrink: 0;
+  animation: wwo-live-pulse 2s ease-out infinite;
+}
+
+.wwo__all-wells-count {
+  margin-left: auto;
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  padding: 0.05rem 0.42rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.wwo__all-wells-grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+
+  ag-grid-angular {
+    display: block;
+    width: 100%;
+  }
+
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+}
+
+// ─── Legend — light card floating over map ───────────────
+
+.wwo__legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.22rem 0.28rem;
+  padding: 0.38rem 0.55rem;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(59, 130, 246, 0.06);
+  max-width: 280px;
+}
+
+.wwo__legend-heading {
+  width: 100%;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.22rem;
+}
+
+.wwo__legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.38rem;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: background 150ms, border-color 150ms;
+
+  &:hover {
+    background: #eff6ff;
+    border-color: var(--chip-color, #93c5fd);
+  }
+}
+
+.wwo__legend-chip__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--chip-color);
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.06);
+}
+
+// ─── Sidebar — light panel ───────────────────────────────
+
+.wwo__side-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: #f0f4f8;
+  border-left: 1px solid #e2e8f0;
+  gap: 8px;
+  padding: 8px;
+}
+
+// ─── Table sections — clean white cards ──────────────────
+
+.wwo__table-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8edf4;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  transition: box-shadow 200ms;
+
+  &:hover {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 6px 20px rgba(59, 130, 246, 0.08);
+  }
+}
+
+.wwo__table-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.48rem 0.75rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  background: linear-gradient(120deg, #eff6ff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #dbeafe;
+  flex-shrink: 0;
+  border-radius: 12px 12px 0 0;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Grid wrap ───────────────────────────────────────────
+
+.wwo__grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+
+  // Hide scrollbar completely
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+}

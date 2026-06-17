@@ -117,6 +117,10 @@ export class PresentationComponent implements OnInit {
       .subscribe((params) => this.applyQueryParams(params));
   }
 
+  protected navigateToOverview(): void {
+    void this.router.navigate(['/main/water-wells-overview']);
+  }
+
   protected openDraggableDialog(): void {
     if (!this.freeLayoutDialog || this.draggableMode()) return;
 
