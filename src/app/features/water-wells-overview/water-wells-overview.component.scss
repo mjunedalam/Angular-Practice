@@ -347,7 +347,8 @@
   right: 0.75rem;
   z-index: 10;
   width: 255px;
-  max-height: 58%;
+  height: 58%;
+  max-height: calc(100% - 1.5rem);
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -426,17 +427,15 @@
 
 .wwo__all-wells-grid {
   flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  overflow: hidden;
   position: relative;
 
   ag-grid-angular {
     display: block;
     width: 100%;
+    height: 100%;
   }
-
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; }
 }
 
 .wwo__all-wells-resize {

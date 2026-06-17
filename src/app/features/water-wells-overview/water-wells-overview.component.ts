@@ -23,7 +23,7 @@ import WebMap from '@arcgis/core/WebMap'; // office: uses authenticated portal W
 import MapView from '@arcgis/core/views/MapView';
 import { watch as reactiveWatch } from '@arcgis/core/core/reactiveUtils';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridApi, GridOptions, themeQuartz } from 'ag-grid-community';
 import { IWellData } from '@models/well-design/well-data.model';
 import { MorningReportStore } from '../morning-report/store/morning-report.store';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
@@ -153,6 +153,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly legendY = signal<number | null>(null);
   private legendOffsetX = 0;
   private legendOffsetY = 0;
+  private allWellsGridApi?: GridApi<AllWellRow>;
   private readonly wwells = signal<WWell[]>([]);
 
   private readonly platformId = inject(PLATFORM_ID);
@@ -315,11 +316,14 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
-    domLayout: 'autoHeight',
+    domLayout: 'normal',
     tooltipShowDelay: 300,
     defaultColDef: { sortable: true, filter: false, resizable: true },
     overlayNoRowsTemplate: '<span style="color:#94a3b8;font-size:12px">No data</span>',
-    onGridReady: (params) => params.api.sizeColumnsToFit(),
+    onGridReady: (params) => {
+      this.allWellsGridApi = params.api;
+      params.api.sizeColumnsToFit();
+    },
   };
 
   protected readonly legendItems = tilesArray.map(t => ({
@@ -336,6 +340,12 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
       this.wwells();
       if (!this.mapReady() || !this.wwellLayer || !this.labelsLayer) return;
       void this.drawWwells(this.wwellLayer, this.labelsLayer);
+    });
+
+    effect(() => {
+      this.panelWidth();
+      this.panelHeight();
+      requestAnimationFrame(() => this.allWellsGridApi?.sizeColumnsToFit());
     });
   }
 
