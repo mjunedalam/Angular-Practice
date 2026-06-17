@@ -23,7 +23,7 @@ import WebMap from '@arcgis/core/WebMap'; // office: uses authenticated portal W
 import MapView from '@arcgis/core/views/MapView';
 import { watch as reactiveWatch } from '@arcgis/core/core/reactiveUtils';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridApi, GridOptions, themeQuartz } from 'ag-grid-community';
+import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
 import { IWellData } from '@models/well-design/well-data.model';
 import { MorningReportStore } from '../morning-report/store/morning-report.store';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
@@ -91,7 +91,6 @@ const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
 export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
   @ViewChild('mapPanel') private mapPanelEl?: ElementRef<HTMLElement>;
-  @ViewChild('allWellsPanel') private allWellsPanelEl?: ElementRef<HTMLElement>;
   @ViewChild('legendPanel') private legendPanelEl?: ElementRef<HTMLElement>;
 
   private mapView?: __esri.MapView;
@@ -131,29 +130,13 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly isFullscreen = signal(false);
   protected readonly isDrawingWells = signal(false);
 
-  // All Wells panel — drag
-  protected readonly isDragging = signal(false);
-  protected readonly panelX = signal<number | null>(null);
-  protected readonly panelY = signal<number | null>(null);
-  private dragOffsetX = 0;
-  private dragOffsetY = 0;
-
-  // All Wells panel — resize
-  protected readonly isResizing = signal(false);
-  protected readonly panelWidth = signal<number | null>(null);
-  protected readonly panelHeight = signal<number | null>(null);
-  private resizeStartX = 0;
-  private resizeStartY = 0;
-  private resizeStartW = 0;
-  private resizeStartH = 0;
-
   // Legend — drag
   protected readonly isLegendDragging = signal(false);
   protected readonly legendX = signal<number | null>(null);
   protected readonly legendY = signal<number | null>(null);
   private legendOffsetX = 0;
   private legendOffsetY = 0;
-  private allWellsGridApi?: GridApi<AllWellRow>;
+
   private readonly wwells = signal<WWell[]>([]);
 
   private readonly platformId = inject(PLATFORM_ID);
@@ -281,26 +264,24 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     cellHorizontalPaddingScale: 1.2,
   });
 
-  protected readonly allWellsScaledTheme = computed(() => {
-    const scale = Math.max(0.85, Math.min(1.5, (this.panelWidth() ?? 255) / 255));
-    return themeQuartz.withParams({
-      accentColor: '#3b82f6',
-      backgroundColor: '#ffffff',
-      foregroundColor: '#1e293b',
-      headerBackgroundColor: '#dbeafe',
-      headerTextColor: '#1d4ed8',
-      headerFontSize: Math.max(8, Math.round(9 * scale)),
-      headerFontWeight: 700,
-      rowHoverColor: 'rgba(59, 130, 246, 0.07)',
-      oddRowBackgroundColor: '#fafbfc',
-      borderColor: '#e2e8f0',
-      borderRadius: 0,
-      fontSize: Math.round(10 * scale),
-      headerHeight: Math.round(28 * scale),
-      spacing: Math.max(1.5, 2 * scale),
-      fontFamily: 'inherit',
-      cellHorizontalPaddingScale: 1.2,
-    });
+  readonly allWellsTheme = themeQuartz.withParams({
+    accentColor: '#3b82f6',
+    backgroundColor: '#ffffff',
+    foregroundColor: '#1e293b',
+    headerBackgroundColor: '#dbeafe',
+    headerTextColor: '#1d4ed8',
+    headerFontSize: 10,
+    headerFontWeight: 700,
+    rowHoverColor: 'rgba(59, 130, 246, 0.07)',
+    oddRowBackgroundColor: '#fafbfc',
+    borderColor: '#e2e8f0',
+    borderRadius: 0,
+    fontSize: 10,
+    rowHeight: 28,
+    headerHeight: 28,
+    spacing: 2,
+    fontFamily: 'inherit',
+    cellHorizontalPaddingScale: 1.2,
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -319,14 +300,11 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
-    domLayout: 'autoHeight',
+    domLayout: 'normal',
     tooltipShowDelay: 300,
     defaultColDef: { sortable: true, filter: false, resizable: true },
     overlayNoRowsTemplate: '<span style="color:#94a3b8;font-size:12px">No data</span>',
-    onGridReady: (params) => {
-      this.allWellsGridApi = params.api;
-      params.api.sizeColumnsToFit();
-    },
+    onGridReady: (params) => params.api.sizeColumnsToFit(),
   };
 
   protected readonly legendItems = tilesArray.map(t => ({
@@ -345,11 +323,6 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
       void this.drawWwells(this.wwellLayer, this.labelsLayer);
     });
 
-    effect(() => {
-      this.panelHeight();
-      this.panelWidth();
-      requestAnimationFrame(() => this.allWellsGridApi?.sizeColumnsToFit());
-    });
   }
 
   protected goBack(): void {
@@ -364,37 +337,6 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     } else {
       document.exitFullscreen();
     }
-  }
-
-  protected onPanelDragStart(event: MouseEvent): void {
-    const panel = this.allWellsPanelEl?.nativeElement;
-    const parent = this.mapPanelEl?.nativeElement;
-    if (!panel || !parent) return;
-
-    const rect = panel.getBoundingClientRect();
-    const parentRect = parent.getBoundingClientRect();
-
-    if (this.panelX() === null) {
-      this.panelX.set(rect.left - parentRect.left);
-      this.panelY.set(rect.top - parentRect.top);
-    }
-
-    this.isDragging.set(true);
-    this.dragOffsetX = event.clientX - rect.left;
-    this.dragOffsetY = event.clientY - rect.top;
-    event.preventDefault();
-  }
-
-  protected onResizeStart(event: MouseEvent): void {
-    const panel = this.allWellsPanelEl?.nativeElement;
-    if (!panel) return;
-    this.isResizing.set(true);
-    this.resizeStartX = event.clientX;
-    this.resizeStartY = event.clientY;
-    this.resizeStartW = this.panelWidth() ?? panel.offsetWidth;
-    this.resizeStartH = this.panelHeight() ?? panel.offsetHeight;
-    event.preventDefault();
-    event.stopPropagation();
   }
 
   protected onLegendDragStart(event: MouseEvent): void {
@@ -418,22 +360,6 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
   @HostListener('document:mousemove', ['$event'])
   protected onDocumentMouseMove(event: MouseEvent): void {
-    if (this.isDragging()) {
-      const parent = this.mapPanelEl?.nativeElement;
-      const panel = this.allWellsPanelEl?.nativeElement;
-      if (parent && panel) {
-        const parentRect = parent.getBoundingClientRect();
-        this.panelX.set(Math.max(0, Math.min(
-          event.clientX - parentRect.left - this.dragOffsetX,
-          parentRect.width - panel.offsetWidth,
-        )));
-        this.panelY.set(Math.max(0, Math.min(
-          event.clientY - parentRect.top - this.dragOffsetY,
-          parentRect.height - panel.offsetHeight,
-        )));
-      }
-    }
-
     if (this.isLegendDragging()) {
       const parent = this.mapPanelEl?.nativeElement;
       const panel = this.legendPanelEl?.nativeElement;
@@ -450,19 +376,11 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.isResizing()) {
-      const parent = this.mapPanelEl?.nativeElement;
-      const maxH = parent ? parent.offsetHeight - 20 : 600;
-      this.panelWidth.set(Math.max(180, Math.min(this.resizeStartW + event.clientX - this.resizeStartX, 480)));
-      this.panelHeight.set(Math.max(140, Math.min(this.resizeStartH + event.clientY - this.resizeStartY, maxH)));
-    }
   }
 
   @HostListener('document:mouseup')
   protected onDocumentMouseUp(): void {
-    this.isDragging.set(false);
     this.isLegendDragging.set(false);
-    this.isResizing.set(false);
   }
 
   @HostListener('document:fullscreenchange')

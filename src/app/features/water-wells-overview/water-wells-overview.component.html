@@ -68,34 +68,6 @@
         </div>
       }
 
-      <!-- All Wells — draggable floating panel -->
-      <div
-        #allWellsPanel
-        class="wwo__all-wells-panel"
-        [class.wwo__all-wells-panel--dragged]="panelX() !== null"
-        [class.wwo__all-wells-panel--dragging]="isDragging()"
-        [style.left.px]="panelX()"
-        [style.top.px]="panelY()"
-        [style.width.px]="panelWidth()"
-        [style.height.px]="panelHeight()"
-        aria-label="All wells table"
-      >
-        <div class="wwo__all-wells-header" (mousedown)="onPanelDragStart($event)">
-          <span class="wwo__all-wells-dot"></span>
-          All Wells
-          <span class="wwo__all-wells-count">{{ allWellRows().length }}</span>
-        </div>
-        <div class="wwo__all-wells-grid">
-          <ag-grid-angular
-            [theme]="allWellsScaledTheme()"
-            [rowData]="allWellRows()"
-            [columnDefs]="allWellColumnDefs"
-            [gridOptions]="allWellsGridOptions"
-          />
-        </div>
-        <div class="wwo__all-wells-resize" (mousedown)="onResizeStart($event)"></div>
-      </div>
-
       <!-- Ownership legend — bottom-left, draggable -->
       <footer
         #legendPanel
@@ -118,17 +90,20 @@
       </footer>
     </section>
 
-    <!-- Sidebar: By Status -->
-    <aside class="wwo__side-panel" aria-label="Well status table">
+    <!-- Sidebar: All Wells -->
+    <aside class="wwo__side-panel" aria-label="All wells table">
       <div class="wwo__table-section">
-        <div class="wwo__table-label">By Status</div>
+        <div class="wwo__table-label">
+          All Wells
+          <span class="wwo__table-count">{{ allWellRows().length }}</span>
+        </div>
         <div class="wwo__grid-wrap">
           <ag-grid-angular
             style="width: 100%; height: 100%"
-            [theme]="gridTheme"
-            [rowData]="statusGroupRows()"
-            [columnDefs]="columnDefs"
-            [gridOptions]="gridOptions"
+            [theme]="allWellsTheme"
+            [rowData]="allWellRows()"
+            [columnDefs]="allWellColumnDefs"
+            [gridOptions]="allWellsGridOptions"
           />
         </div>
       </div>

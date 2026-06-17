@@ -347,7 +347,7 @@
   right: 0.75rem;
   z-index: 10;
   width: 255px;
-  height: auto;
+  height: 280px;
   max-height: calc(100% - 1.5rem);
   display: flex;
   flex-direction: column;
@@ -426,16 +426,15 @@
 }
 
 .wwo__all-wells-grid {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
 
   ag-grid-angular {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
 }
 
@@ -603,6 +602,23 @@
     background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
     flex-shrink: 0;
   }
+}
+
+.wwo__table-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-left: auto;
 }
 
 // ─── Grid wrap ───────────────────────────────────────────
