@@ -32,6 +32,7 @@ export class WwellTestComponent {
 
   protected readonly isFlowTest = signal(false);
   private initialFlowType = false;
+  private wellTestSnapshot: string | null = null;
 
   formService = inject(ActiveWwellFormService);
   form: FormGroup = this.formService.wellTestForm;
@@ -82,11 +83,13 @@ export class WwellTestComponent {
     effect(() => {
       if (this.isPublished()) {
         this.form.enable({ emitEvent: false });
+        this.form.get('hydProduct')!.disable({ emitEvent: false });
+        this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
       } else {
         this.form.disable({ emitEvent: false });
+        this.form.get('hydProduct')!.disable({ emitEvent: false });
+        this.wellTestSnapshot = null;
       }
-      // hydProduct is always computed — never user-editable
-      this.form.get('hydProduct')!.disable({ emitEvent: false });
     });
 
     // Re-run calculation when test type changes so tooltip stays in sync
@@ -149,8 +152,10 @@ export class WwellTestComponent {
   }
 
   createOrUpdateActiveWwell() {
-    const wellTestChanged = this.isPublished() &&
-      (this.form.dirty || this.isFlowTest() !== this.initialFlowType);
+    const wellTestChanged = this.isPublished() && (
+      this.isFlowTest() !== this.initialFlowType ||
+      JSON.stringify(this.form.getRawValue()) !== this.wellTestSnapshot
+    );
     const remarksChanged = this.formService.drillingRemarksForm.dirty;
 
     if (!wellTestChanged && !remarksChanged) {
@@ -174,9 +179,9 @@ export class WwellTestComponent {
 
       if (remarksOk && wellTestOk) {
         this.notify.info('Well details updated successfully');
-        this.form.markAsPristine();
         this.formService.drillingRemarksForm.markAsPristine();
         this.initialFlowType = this.isFlowTest();
+        this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
         this.store.refreshWellDetail();
       } else if (remarksOk) {
         this.notify.info('Drilling remarks saved');

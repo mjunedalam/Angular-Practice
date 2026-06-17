@@ -310,6 +310,7 @@ export function selectDatabaseInfoViewModel(d: IWellData | null, date: Date): Da
         fiveAmDepth: status?.wPrsntDpth ?? FALLBACK_STR,
         lastCasingSize: displayValue(casing?.csgSize ?? status?.wCsgOdSz),
         rig: rig?.wRigCd ?? FALLBACK_STR,
+        rigHeight: d.RIG_IDENTIFICATION?.[0]?.rigHeight != null ? String(d.RIG_IDENTIFICATION[0].rigHeight) : null,
         targetDate: rig?.wDrlgEndDt ?? FALLBACK_STR,
         releaseDate: rig?.wDrlgEndDt ?? FALLBACK_STR,
         preFiveAmDepth: status?.wPrevDpth ?? FALLBACK_STR,

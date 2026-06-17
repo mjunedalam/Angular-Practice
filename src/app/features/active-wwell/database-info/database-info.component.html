@@ -26,31 +26,37 @@
           <span class="di-sep-label">Casing &amp; Rig</span>
         </div>
 
-        <div class="aw-db-cell">
-          <span class="aw-db-label">Last casing size</span>
-          <span class="aw-db-value">{{ data.lastCasingSize }}</span>
-        </div>
-        <div class="aw-db-cell">
-          <span class="aw-db-label">Last casing depth</span>
-          <span class="aw-db-value">{{ data.lastCasingDepth }}</span>
-        </div>
-        <div class="aw-db-cell">
-          <span class="aw-db-label">Rig</span>
-          <span class="aw-db-value">{{ data.rig }}</span>
-        </div>
-        <div class="aw-db-cell">
-          <span class="aw-db-label">Rig Move KPI</span>
-          <span class="aw-db-value">
-            <span
-              [ngClass]="{
-                'aw-db-value--positive':
-                  rigMoveTone(rigMoveDays()) === 'positive',
-                'aw-db-value--negative':
-                  rigMoveTone(rigMoveDays()) === 'negative',
-              }"
-              >{{ actualRm() | number: "1.0-2" }}</span
-            >/{{ kpiRm() | number: "1.0-2" }}
-          </span>
+        <div class="aw-db-row aw-db-row--5">
+          <div class="aw-db-cell">
+            <span class="aw-db-label">Last casing size</span>
+            <span class="aw-db-value">{{ data.lastCasingSize }}</span>
+          </div>
+          <div class="aw-db-cell">
+            <span class="aw-db-label">Last casing depth</span>
+            <span class="aw-db-value">{{ data.lastCasingDepth }}</span>
+          </div>
+          <div class="aw-db-cell">
+            <span class="aw-db-label">Rig</span>
+            <span class="aw-db-value">{{ data.rig }}</span>
+          </div>
+          <div class="aw-db-cell">
+            <span class="aw-db-label">Rig Height</span>
+            <span class="aw-db-value">{{ data.rigHeight ?? '—' }}</span>
+          </div>
+          <div class="aw-db-cell">
+            <span class="aw-db-label">Rig Move KPI</span>
+            <span class="aw-db-value">
+              <span
+                [ngClass]="{
+                  'aw-db-value--positive':
+                    rigMoveTone(rigMoveDays()) === 'positive',
+                  'aw-db-value--negative':
+                    rigMoveTone(rigMoveDays()) === 'negative',
+                }"
+                >{{ actualRm() | number: "1.0-2" }}</span
+              >/{{ kpiRm() | number: "1.0-2" }}
+            </span>
+          </div>
         </div>
 
         <!-- Depth & Formation (renameable) -->

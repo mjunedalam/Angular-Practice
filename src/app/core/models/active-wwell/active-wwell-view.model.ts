@@ -77,6 +77,7 @@ export interface DatabaseInfoViewModel {
   readonly fiveAmDepth: number | string;
   readonly lastCasingSize: string;
   readonly rig: string;
+  readonly rigHeight: string | null;
   readonly targetDate: string;
   readonly releaseDate: string;
   readonly preFiveAmDepth: number | string;

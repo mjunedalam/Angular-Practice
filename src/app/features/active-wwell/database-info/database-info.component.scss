@@ -89,6 +89,18 @@
   line-height: 1.4;
 }
 
+// ── Row containers (full-width wrappers with own sub-grid) ───────────────────
+.aw-db-row {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1px;
+  background: #e2e8f0;
+
+  .aw-db-cell { grid-column: auto; }
+}
+
+.aw-db-row--5 { grid-template-columns: repeat(5, 1fr); }
+
 // ── Cells ─────────────────────────────────────────────────────────────────────
 .aw-db-cell {
   grid-column: span 3;
