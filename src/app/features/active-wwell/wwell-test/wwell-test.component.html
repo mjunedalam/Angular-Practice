@@ -9,8 +9,8 @@
       <div class="wt-title">Well Test</div>
       <div class="wt-type-toggle">
         <div class="wt-type-segment">
-          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="!isFlowTest()" (click)="isFlowTest.set(false)">Pump</button>
-          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="isFlowTest()" (click)="isFlowTest.set(true)">Flow</button>
+          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="!isFlowTest()" [disabled]="!isPublished()" (click)="isFlowTest.set(false)">Pump</button>
+          <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="isFlowTest()" [disabled]="!isPublished()" (click)="isFlowTest.set(true)">Flow</button>
         </div>
       </div>
       <div class="wt-expected-date-label">Expected test date</div>

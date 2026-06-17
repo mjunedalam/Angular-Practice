@@ -4,7 +4,7 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { forkJoin, merge } from 'rxjs';
+import { catchError, forkJoin, merge, of } from 'rxjs';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWellViewService } from '@core/services/active-well-view.service';
@@ -64,9 +64,17 @@ export class WwellTestComponent {
     effect(() => {
       const data = this.data();
       if (data) {
-        this.isFlowTest.set(data.flowType === 'Y' || data.testType?.toLowerCase() === 'flow');
+        this.isFlowTest.set(data.flowType === 'Y');
       }
     }, { allowSignalWrites: true });
+
+    // Sync toggle → form so hydTestTypCd is always Y (FLOW) or N (PUMP) on submit
+    effect(() => {
+      this.form.get('hydTestTypCd')!.setValue(
+        this.isFlowTest() ? 'Y' : 'N',
+        { emitEvent: false },
+      );
+    });
 
     effect(() => {
       if (this.isPublished()) {
@@ -140,17 +148,31 @@ export class WwellTestComponent {
   createOrUpdateActiveWwell() {
     this.isUpdating.set(true);
     forkJoin({
-      drillingRemarksResponse: this.createOrUpdateDrillingRemarks(),
-      wellTestResponse: this.createOrUpdateWellTest()
-    }).subscribe({
-      next: () => {
-        this.isUpdating.set(false);
-        this.notify.info('Active water well details updated successfully');
+      remarks: this.createOrUpdateDrillingRemarks().pipe(
+        catchError(() => of(null)),
+      ),
+      wellTest: this.createOrUpdateWellTest().pipe(
+        catchError(() => of(null)),
+      ),
+    }).subscribe(({ remarks, wellTest }) => {
+      this.isUpdating.set(false);
+
+      const remarksOk = remarks !== null;
+      const wellTestOk = wellTest !== null;
+
+      if (remarksOk && wellTestOk) {
+        this.notify.info('Well details updated successfully');
         this.store.refreshWellDetail();
-      },
-      error: () => {
-        this.isUpdating.set(false);
-        this.notify.error('Error updating active water well details');
+      } else if (remarksOk) {
+        this.notify.info('Drilling remarks saved');
+        this.notify.error('Well test update failed');
+        this.store.refreshWellDetail();
+      } else if (wellTestOk) {
+        this.notify.info('Well test saved');
+        this.notify.error('Drilling remarks update failed');
+        this.store.refreshWellDetail();
+      } else {
+        this.notify.error('Update failed — please try again');
       }
     });
   }

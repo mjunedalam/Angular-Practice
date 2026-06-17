@@ -71,6 +71,12 @@
   &:hover:not(.wt-type-btn--active) {
     color: rgba(255, 255, 255, 0.85);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+  }
 }
 
 .wt-expected-date-label {
