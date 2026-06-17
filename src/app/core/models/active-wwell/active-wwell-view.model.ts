@@ -67,6 +67,7 @@ export interface WellHeaderViewModel {
   readonly depth: number | string;
   readonly epNum: number | string;
   readonly biNum: string;
+  readonly supportingBusiness:string;
 }
 
 export interface DatabaseInfoViewModel {

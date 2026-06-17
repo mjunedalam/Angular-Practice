@@ -23,6 +23,14 @@
 
   &--fullscreen {
     background: #ffffff;
+
+    .wwo__body {
+      grid-template-columns: 1fr 0;
+    }
+
+    .wwo__side-panel {
+      display: none;
+    }
   }
 }
 

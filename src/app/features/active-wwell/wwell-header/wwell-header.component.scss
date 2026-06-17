@@ -42,6 +42,46 @@
 .aw-cell--status,
 .aw-cell--area { padding-bottom: 0.45rem; }
 
+.aw-cell--bi {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.aw-bi-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.aw-bi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.aw-bi-primary {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.aw-bi-sub {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.35;
+}
+
 .aw-cell--full { grid-column: 1 / -1; }
 
 // ── Cell header row (label + badge) ───────────────────────────────────────────

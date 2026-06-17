@@ -94,9 +94,12 @@
       </mat-form-field>
     </div>
 
-    <div class="aw-cell aw-cell--full">
-      <span class="aw-label">BI</span>
-      <span class="aw-value">{{ d?.biNum ?? '—' }}</span>
+    <div class="aw-cell aw-cell--full aw-cell--bi">
+      <span class="aw-bi-badge">BI</span>
+      <div class="aw-bi-stack">
+        <span class="aw-bi-primary">{{ d?.biNum ?? '—' }}</span>
+        <span class="aw-bi-sub">{{ d?.supportingBusiness ?? '—' }}</span>
+      </div>
     </div>
 
   </div>

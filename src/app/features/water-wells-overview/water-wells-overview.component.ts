@@ -17,10 +17,11 @@ import { Router } from '@angular/router';
 import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-import ArcGISMap from '@arcgis/core/Map';
+// import ArcGISMap from '@arcgis/core/Map'; // default only
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
-// import WebMap from '@arcgis/core/WebMap'; // office: uses authenticated portal WebMap
+import WebMap from '@arcgis/core/WebMap'; // office: uses authenticated portal WebMap
 import MapView from '@arcgis/core/views/MapView';
+import { watch as reactiveWatch } from '@arcgis/core/core/reactiveUtils';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridOptions, themeQuartz } from 'ag-grid-community';
 import { IWellData } from '@models/well-design/well-data.model';
@@ -29,11 +30,10 @@ import { LoaderService } from 'src/app/shared/components/global-loader/loader.se
 import {
   MAP_CONFIG,
   tilesArray,
-  tilesMap,
   WWell,
 } from 'src/app/shared/models/config/agwa-map.config';
-// import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
-// import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
+import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
+import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
 import { formatDateForInput, getTodayAtMidnight } from 'src/app/shared/utils/date.util';
 
 export interface StatusStat {
@@ -71,6 +71,15 @@ const LEGEND_CHIP_COLORS: Record<string, string> = {
   '60': '#60a5fa',
 };
 
+// RGB tuples matching LEGEND_CHIP_COLORS exactly — used for ArcGIS dot rendering
+// so map dots always match the legend visually
+const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
+  '3300': [132, 204, 22],
+  '58':   [192, 132, 252],
+  '1514': [248, 113, 113],
+  '60':   [96,  165, 250],
+};
+
 @Component({
   selector: 'app-water-wells-overview',
   standalone: true,
@@ -96,7 +105,23 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
   private readonly MAP_TIMEOUT_MS = 20_000;
   private readonly MAX_RETRY_DELAY_MS = 30_000;
-  private readonly INITIAL_ZOOM = 6;
+
+  // ── Map zoom levels — tweak these to control the viewport ─────────────────
+  private readonly INITIAL_ZOOM = 6;             // starting zoom on map load
+  // goTo() supports fractional zoom — MapView.zoom property snaps to integers,
+  // but goTo target { zoom } is continuous and actually renders the in-between level.
+  private readonly FULLSCREEN_ENTER_ZOOM = 6.5;  // ~one half-step tighter in fullscreen
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // ── Well drawing animation — tweak to adjust speed / drama ────────────────
+  private readonly DRAW_STAGGER_MS = 60;         // ms between each dot birth
+  private readonly DOT_START_SIZE = 1;           // initial dot size (px)
+  private readonly DOT_FINAL_SIZE = 8;           // final dot size (px)
+  // Total ms from birth → full size. Uses ease-out quad + fade-in alpha.
+  // rAF loop keeps animation synced to browser repaint so every frame renders.
+  private readonly DOT_GROW_DURATION_MS = 500;
+  private readonly LABEL_STAGGER_MS = 40;        // ms between each label appearing
+  // ──────────────────────────────────────────────────────────────────────────
 
   private pulseIntervalId?: ReturnType<typeof setInterval>;
   private pulsePhase = 0;
@@ -116,8 +141,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly hostEl = inject(ElementRef);
   protected readonly store = inject(MorningReportStore);
-  // private readonly esriAuth = inject(EsriMapService);          // office: OAuth auth
-  // private readonly extConfigService = inject(ExternalConfigService); // office: portal config
+  private readonly esriAuth = inject(EsriMapService);          // office: OAuth auth
+  private readonly extConfigService = inject(ExternalConfigService); // office: portal config
 
   protected readonly statusStats = computed((): StatusStat[] => {
     const counts = new Map<string, number>();
@@ -357,14 +382,14 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected onFullscreenChange(): void {
     const entering = !!document.fullscreenElement;
     this.isFullscreen.set(entering);
-    // Two-phase resize: immediate layout signal + delayed map goTo after transition settles
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+    // Wait for browser fullscreen transition (~400ms) before repositioning.
+    // Use mapView.center so the view stays on the user's current pan position.
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-      if (this.mapView && this.ksaExtent) {
-        const expand = entering ? 0.72 : 1.05;
-        void this.mapView.goTo(this.ksaExtent.expand(expand), { duration: 600, animate: true });
-      }
+      if (!this.mapView) return;
+      const target = this.ksaExtent
+        ? this.ksaExtent.expand(entering ? 0.72 : 1.05)
+        : { center: this.mapView.center, zoom: entering ? this.FULLSCREEN_ENTER_ZOOM : this.INITIAL_ZOOM };
+      void this.mapView.goTo(target, { duration: 700, animate: true });
     }, 450);
   }
 
@@ -419,55 +444,69 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     this.mapReady.set(false);
 
     // ── Office (authenticated portal WebMap) ──────────────────────────────
-    // await this.esriAuth.authenticateUserForMapAccess();
-    // const webMap = new WebMap({
-    //   portalItem: { id: this.extConfigService.settings.morningReportWebMapId },
-    // });
-    // this.mapView = new MapView({
-    //   container: this.mapViewEl?.nativeElement,
-    //   map: webMap,
-    //   center: MAP_CONFIG.center,
-    //   zoom: this.INITIAL_ZOOM,
-    //   ui: { components: [] },
-    // });
-    // await Promise.race([
-    //   Promise.all([this.mapView.when(), webMap.load()]),
-    //   new Promise<never>((_, reject) =>
-    //     setTimeout(() => reject(new Error('Map timed out')), this.MAP_TIMEOUT_MS),
-    //   ),
-    // ]);
-    // if (webMap.loadStatus === 'failed') throw webMap.loadError ?? new Error('WebMap failed to load');
-    // this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
-    // this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
-    // webMap.addMany([this.wwellLayer, this.labelsLayer]);
-    // ─────────────────────────────────────────────────────────────────────
-
-    // ── Free public basemap (no auth required) ────────────────────────────
-    this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
-    this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
-    const map = new ArcGISMap({ basemap: 'gray-vector', layers: [this.wwellLayer, this.labelsLayer] });
+    await this.esriAuth.authenticateUserForMapAccess();
+    const webMap = new WebMap({
+      portalItem: { id: this.extConfigService.settings.morningReportWebMapId },
+    });
     this.mapView = new MapView({
       container: this.mapViewEl?.nativeElement,
-      map,
+      map: webMap,
       center: MAP_CONFIG.center,
-      zoom: 5,
+      zoom: this.INITIAL_ZOOM,
       ui: { components: [] },
     });
     await Promise.race([
-      this.mapView.when(),
+      Promise.all([this.mapView.when(), webMap.load()]),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Map timed out')), this.MAP_TIMEOUT_MS),
       ),
     ]);
+    if (webMap.loadStatus === 'failed') throw webMap.loadError ?? new Error('WebMap failed to load');
+    this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
+    this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
+    webMap.addMany([this.wwellLayer, this.labelsLayer]);
     // ─────────────────────────────────────────────────────────────────────
 
-    // Force KSA into view immediately — no network dependency
-    await this.mapView.goTo({ center: [45.0, 24.0], zoom: 6 }, { animate: false });
+    // ── Free public basemap (no auth required) ────────────────────────────
+    // this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
+    // this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
+    // const map = new ArcGISMap({ basemap: 'gray-vector', layers: [this.wwellLayer, this.labelsLayer] });
+    // this.mapView = new MapView({
+    //   container: this.mapViewEl?.nativeElement,
+    //   map,
+    //   center: MAP_CONFIG.center,
+    //   zoom: 5,
+    //   ui: { components: [] },
+    // });
+    // await Promise.race([
+    //   this.mapView.when(),
+    //   new Promise<never>((_, reject) =>
+    //     setTimeout(() => reject(new Error('Map timed out')), this.MAP_TIMEOUT_MS),
+    //   ),
+    // ]);
+    // ─────────────────────────────────────────────────────────────────────
 
-    void this.addKsaBoundary(map);
+    // Non-animated snap to correct position (hidden behind spinner)
+    this.mapView.zoom = this.INITIAL_ZOOM;
+    this.mapView.center = { longitude: MAP_CONFIG.center[0], latitude: MAP_CONFIG.center[1] } as __esri.Point;
 
+    // void this.addKsaBoundary(map); // default only — WebMap already has basemap
+
+    // Show map first so user sees the drawing animation (matches active-wwell-map pattern)
     this.mapReady.set(true);
+    await this.waitForMapRender();
     this.resolveBootTask();
+  }
+
+  private async waitForMapRender(): Promise<void> {
+    if (!this.mapView) return;
+    if (!this.mapView.updating) { await new Promise(requestAnimationFrame); return; }
+    await new Promise<void>((resolve) => {
+      const handle = reactiveWatch(
+        () => this.mapView?.updating ?? false,
+        (updating) => { if (!updating) { handle.remove(); requestAnimationFrame(() => resolve()); } },
+      );
+    });
   }
 
   private buildWwells(data: IWellData[]): void {
@@ -501,24 +540,59 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
     const { default: SimpleMarkerSymbol } = await import('@arcgis/core/symbols/SimpleMarkerSymbol');
 
-    // Stagger dots with grow-in animation per point
-    for (const wwell of wells) {
-      if (this.isDestroyed) break;
-      const pt = new Point({ latitude: wwell.lat, longitude: wwell.lng });
-      const [r, g, b] = tilesMap.get(wwell.label)?.color ?? [200, 200, 200, 1];
+    // Add all dots to the layer upfront (invisible, alpha=0).
+    // rAF loop then animates each one in with a staggered birth time so the
+    // browser paint cycle drives every frame — setTimeout-based updates get
+    // batched by ArcGIS and most intermediate sizes never render.
+    interface DotAnim { graphic: Graphic; birthTime: number; r: number; g: number; b: number; }
+    const anims: DotAnim[] = [];
+    const startTime = performance.now();
+
+    for (let i = 0; i < wells.length; i++) {
+      const wwell = wells[i];
+      const [r, g, b] = LEGEND_DOT_RGB[wwell.label] ?? [160, 160, 160];
       const graphic = new Graphic({
-        geometry: pt,
-        symbol: new SimpleMarkerSymbol({ style: 'circle', size: 2, color: [r, g, b, 1], outline: { width: 0 } }),
+        geometry: new Point({ latitude: wwell.lat, longitude: wwell.lng }),
+        symbol: new SimpleMarkerSymbol({ style: 'circle', size: this.DOT_START_SIZE, color: [r, g, b, 0], outline: { width: 0 } }),
       });
       dotsLayer.add(graphic);
-      // Linear grow-in: 2 → 5 → 8 over ~160ms
-      [5, 8].forEach((size, i) => {
-        setTimeout(() => {
-          if (this.isDestroyed) return;
-          graphic.symbol = new SimpleMarkerSymbol({ style: 'circle', size, color: [r, g, b, 1], outline: { width: 0 } });
-        }, (i + 1) * 80);
-      });
-      await new Promise<void>(resolve => setTimeout(resolve, 25));
+      anims.push({ graphic, birthTime: startTime + i * this.DRAW_STAGGER_MS, r, g, b });
+    }
+
+    // Run until every dot has finished its grow + fade-in
+    await new Promise<void>((resolve) => {
+      const tick = () => {
+        if (this.isDestroyed) { resolve(); return; }
+        const now = performance.now();
+        let anyPending = false;
+
+        for (const dot of anims) {
+          const elapsed = now - dot.birthTime;
+          if (elapsed < 0) { anyPending = true; continue; }
+          if (elapsed >= this.DOT_GROW_DURATION_MS) continue;
+
+          const t = elapsed / this.DOT_GROW_DURATION_MS;
+          const eased = 1 - (1 - t) * (1 - t); // ease-out quad: fast start, soft landing
+          const size = this.DOT_START_SIZE + (this.DOT_FINAL_SIZE - this.DOT_START_SIZE) * eased;
+          dot.graphic.symbol = new SimpleMarkerSymbol({
+            style: 'circle', size, color: [dot.r, dot.g, dot.b, eased], outline: { width: 0 },
+          });
+          anyPending = true;
+        }
+
+        if (anyPending) requestAnimationFrame(tick);
+        else resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+
+    // Snap all dots to final state so none are left partially grown
+    if (!this.isDestroyed) {
+      for (const dot of anims) {
+        dot.graphic.symbol = new SimpleMarkerSymbol({
+          style: 'circle', size: this.DOT_FINAL_SIZE, color: [dot.r, dot.g, dot.b, 1], outline: { width: 0 },
+        });
+      }
     }
 
     this.isDrawingWells.set(false);
@@ -539,7 +613,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           yoffset: 8,
         }),
       }));
-      await new Promise<void>(resolve => setTimeout(resolve, 30));
+      await new Promise<void>(resolve => setTimeout(resolve, this.LABEL_STAGGER_MS));
     }
   }
 
@@ -549,9 +623,11 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     const l = layer as any;
     this.pulseIntervalId = setInterval(() => {
       if (this.isDestroyed) { this.stopPulseAnimation(); return; }
-      this.pulsePhase = (this.pulsePhase + 0.06) % (Math.PI * 2);
-      const strength = (0.7 + Math.sin(this.pulsePhase) * 0.35).toFixed(2);
-      l.effect = `bloom(${strength}, 0.5px, 0)`;
+      this.pulsePhase = (this.pulsePhase + 0.08) % (Math.PI * 2);
+      // Bloom oscillates between ~0.4 and ~1.2 for a clearly visible pulse
+      const strength = (0.8 + Math.sin(this.pulsePhase) * 0.4).toFixed(2);
+      const blur = (0.4 + Math.sin(this.pulsePhase) * 0.3).toFixed(2);
+      l.effect = `bloom(${strength}, ${blur}px, 0)`;
     }, 50);
   }
 
@@ -562,7 +638,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async addKsaBoundary(map: ArcGISMap): Promise<void> {
+  private async addKsaBoundary(map: WebMap): Promise<void> {
     try {
       const [
         { default: FeatureLayer },
