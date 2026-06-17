@@ -453,7 +453,11 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
     const wellDesign = d.EXAD_GWD_WELL_DESIGN?.[0];
     return {
 
-        flowType: (testOutcome?.hydTestTypCd ?? 'N').toUpperCase().trim() === 'Y' ? 'Y' : 'N',
+        flowType: (() => {
+            const fromTest = testOutcome?.hydTestTypCd?.trim();
+            const raw = fromTest ? fromTest : (hydro?.flowType?.trim() ?? '');
+            return raw.toUpperCase() === 'Y' ? 'Y' : 'N';
+        })(),
         testType: testOutcome?.hydTestTypCd,
         aquiferActual: testOutcome?.rsvrCd,
         aquiferEstimate: hydro?.estTargetAquifier,

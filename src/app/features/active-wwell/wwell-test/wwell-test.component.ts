@@ -31,6 +31,7 @@ export class WwellTestComponent {
   protected readonly isUpdating = signal(false);
 
   protected readonly isFlowTest = signal(false);
+  private initialFlowType = false;
 
   formService = inject(ActiveWwellFormService);
   form: FormGroup = this.formService.wellTestForm;
@@ -64,7 +65,9 @@ export class WwellTestComponent {
     effect(() => {
       const data = this.data();
       if (data) {
-        this.isFlowTest.set(data.flowType === 'Y');
+        const flowType = data.flowType === 'Y';
+        this.isFlowTest.set(flowType);
+        this.initialFlowType = flowType;
       }
     }, { allowSignalWrites: true });
 
@@ -146,22 +149,34 @@ export class WwellTestComponent {
   }
 
   createOrUpdateActiveWwell() {
-    this.isUpdating.set(true);
-    forkJoin({
-      remarks: this.createOrUpdateDrillingRemarks().pipe(
-        catchError(() => of(null)),
-      ),
-      wellTest: this.createOrUpdateWellTest().pipe(
-        catchError(() => of(null)),
-      ),
-    }).subscribe(({ remarks, wellTest }) => {
-      this.isUpdating.set(false);
+    const wellTestChanged = this.isPublished() &&
+      (this.form.dirty || this.isFlowTest() !== this.initialFlowType);
+    const remarksChanged = this.formService.drillingRemarksForm.dirty;
 
-      const remarksOk = remarks !== null;
-      const wellTestOk = wellTest !== null;
+    if (!wellTestChanged && !remarksChanged) {
+      this.notify.info('No changes to save');
+      return;
+    }
+
+    this.isUpdating.set(true);
+
+    const remarks$ = remarksChanged
+      ? this.createOrUpdateDrillingRemarks().pipe(catchError(() => of(null)))
+      : of(true as const);
+    const wellTest$ = wellTestChanged
+      ? this.createOrUpdateWellTest().pipe(catchError(() => of(null)))
+      : of(true as const);
+
+    forkJoin({ remarks: remarks$, wellTest: wellTest$ }).subscribe(({ remarks, wellTest }) => {
+      this.isUpdating.set(false);
+      const remarksOk = !remarksChanged || remarks !== null;
+      const wellTestOk = !wellTestChanged || wellTest !== null;
 
       if (remarksOk && wellTestOk) {
         this.notify.info('Well details updated successfully');
+        this.form.markAsPristine();
+        this.formService.drillingRemarksForm.markAsPristine();
+        this.initialFlowType = this.isFlowTest();
         this.store.refreshWellDetail();
       } else if (remarksOk) {
         this.notify.info('Drilling remarks saved');
