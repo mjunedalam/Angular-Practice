@@ -18,7 +18,6 @@ import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
-import ArcGISMap from '@arcgis/core/Map';
 import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
 import { watch as reactiveWatch } from '@arcgis/core/core/reactiveUtils';
@@ -71,13 +70,11 @@ const LEGEND_CHIP_COLORS: Record<string, string> = {
   '60': '#0f67d2',
 };
 
-// RGB tuples matching LEGEND_CHIP_COLORS exactly — used for ArcGIS dot rendering
-// so map dots always match the legend visually
 const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
   '3300': [150, 245, 8],    // #96f508
-  '58':   [127, 12, 243],   // #7f0cf3
+  '58': [127, 12, 243],   // #7f0cf3
   '1514': [248, 113, 113],  // #f87171
-  '60':   [15, 103, 210],   // #0f67d2
+  '60': [15, 103, 210],   // #0f67d2
 };
 
 @Component({
@@ -155,10 +152,16 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private readonly esriAuth = inject(EsriMapService);          // office: OAuth auth
   private readonly extConfigService = inject(ExternalConfigService); // office: portal config
 
+  private toTitleCase(str: string): string {
+    return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   protected readonly statusStats = computed((): StatusStat[] => {
     const counts = new Map<string, number>();
     for (const d of this.store.allWellsData()) {
-      const status = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim() || 'Unknown';
+      const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
+      if (!raw) continue;
+      const status = this.toTitleCase(raw);
       counts.set(status, (counts.get(status) ?? 0) + 1);
     }
     return Array.from(counts.entries())
@@ -169,7 +172,9 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly statusGroupRows = computed((): StatusGroupRow[] => {
     const groups = new Map<string, string[]>();
     for (const d of this.store.allWellsData()) {
-      const status = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim() || 'Unknown';
+      const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
+      if (!raw) continue;
+      const status = this.toTitleCase(raw);
       const wellName = d.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A';
       if (!groups.has(status)) groups.set(status, []);
       groups.get(status)!.push(wellName);
@@ -187,12 +192,15 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly totalWells = computed(() => this.store.allWellsData().length);
 
   protected readonly allWellRows = computed((): AllWellRow[] =>
-    this.store.allWellsData().map((d) => ({
-      rigName: d.RIG_IDENTIFICATION?.[0]?.rigname ?? d.RIG_ACTIVITY?.[0]?.wRigCd ?? 'N/A',
-      wellName: d.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A',
-      targetAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? 'N/A',
-      status: d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim() ?? 'Unknown',
-    }))
+    this.store.allWellsData().map((d) => {
+      const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
+      return {
+        rigName: d.RIG_IDENTIFICATION?.[0]?.rigname ?? d.RIG_ACTIVITY?.[0]?.wRigCd ?? 'N/A',
+        wellName: d.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A',
+        targetAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? 'N/A',
+        status: raw ? this.toTitleCase(raw) : '—',
+      };
+    })
   );
 
   protected readonly columnDefs: ColDef<StatusGroupRow>[] = [
@@ -340,7 +348,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected toggleFullscreen(): void {
     if (!document.fullscreenElement) {
       const mainEl = (this.hostEl.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
-      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch(() => {});
+      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch(() => { });
     } else {
       document.exitFullscreen();
     }
@@ -490,15 +498,18 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private async initMap(): Promise<void> {
     this.mapView?.destroy();
     this.mapView = undefined;
+    this.wwellLayer = undefined;
+    this.labelsLayer = undefined;
     this.mapReady.set(false);
 
-    // ── Free public basemap (no auth required) ────────────────────────────
-    this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
-    this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
-    const map = new ArcGISMap({ basemap: 'gray-vector', layers: [this.wwellLayer, this.labelsLayer] });
+    // ── Office (authenticated portal WebMap) ──────────────────────────────
+    await this.esriAuth.authenticateUserForMapAccess();
+    const webMap = new WebMap({
+      portalItem: { id: this.extConfigService.settings.morningReportWebMapId },
+    });
     this.mapView = new MapView({
       container: this.mapViewEl?.nativeElement,
-      map,
+      map: webMap,
       center: MAP_CONFIG.center,
       zoom: this.INITIAL_ZOOM,
       ui: { components: [] },
@@ -515,7 +526,10 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     this.mapView.zoom = this.INITIAL_ZOOM;
     this.mapView.center = { longitude: MAP_CONFIG.center[0], latitude: MAP_CONFIG.center[1] } as __esri.Point;
 
-    // void this.addKsaBoundary(map); // default only — WebMap already has basemap
+    // Create graphics layers for well dots and labels
+    this.wwellLayer = new GraphicsLayer();
+    this.labelsLayer = new GraphicsLayer();
+    webMap.addMany([this.wwellLayer, this.labelsLayer]);
 
     // Show map first so user sees the drawing animation (matches active-wwell-map pattern)
     this.mapReady.set(true);
