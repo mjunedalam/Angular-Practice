@@ -151,6 +151,12 @@
     box-shadow: inset 0 0 0 1px #bfdbfe;
   }
 
+  &.ng-invalid.ng-touched {
+    background: #fff5f5;
+    border-right-color: #fca5a5;
+    box-shadow: inset 0 0 0 1px #fca5a5;
+  }
+
   &:disabled {
     background: #f1f5f9;
     color: #64748b;
@@ -375,6 +381,13 @@
     .mat-mdc-select-arrow { color: #94a3b8; }
     .mat-mdc-form-field-subscript-wrapper { display: none; }
     .mat-mdc-select-disabled { cursor: not-allowed; }
+  }
+
+  &.ng-invalid.ng-touched ::ng-deep {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch { border-color: #ef4444; }
+    .mat-mdc-text-field-wrapper { background: #fff5f5; }
   }
 }
 

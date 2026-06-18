@@ -135,6 +135,13 @@
     .mat-mdc-select-arrow { color: #94a3b8; }
     .mat-mdc-form-field-subscript-wrapper { display: none; }
   }
+
+  &.ng-invalid.ng-touched ::ng-deep {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch { border-color: #ef4444; }
+    .mat-mdc-text-field-wrapper { background: #fff5f5; }
+  }
 }
 
 @media (max-width: 960px) {

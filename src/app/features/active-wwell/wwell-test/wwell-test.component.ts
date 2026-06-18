@@ -154,6 +154,13 @@ export class WwellTestComponent {
   }
 
   createOrUpdateActiveWwell() {
+    this.form.markAllAsTouched();
+    this.formService.drillingRemarksForm.markAllAsTouched();
+
+    const statusInvalid = this.formService.drillingRemarksForm.get('status')?.invalid;
+    const areaInvalid   = this.formService.drillingRemarksForm.get('area')?.invalid;
+    if ((this.isPublished() && this.form.invalid) || statusInvalid || areaInvalid) return;
+
     const wellTestChanged = this.isPublished() && (
       this.isFlowTest() !== this.initialFlowType ||
       JSON.stringify(this.form.getRawValue()) !== this.wellTestSnapshot
