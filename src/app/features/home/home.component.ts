@@ -33,16 +33,6 @@ export class HomeComponent {
 
   protected readonly quickItems: QuickListItem[] = [
     {
-      label: 'Reports',
-      route: 'morning-report',
-      routeId: 'morning-report',
-      iconPaths: [
-        'M5 4h14a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3z',
-        'M2 7l10 7 10-7',
-      ],
-      color: '#3b82f6',
-    },
-    {
       label: 'Active Water Well',
       route: 'active-wwell',
       routeId: 'active-wwell',
@@ -53,6 +43,17 @@ export class HomeComponent {
       iconImage: 'assets/images/oil-rig-icon.png',
       color: '#06b6d4',
     },
+    {
+      label: 'Reports',
+      route: 'morning-report',
+      routeId: 'morning-report',
+      iconPaths: [
+        'M5 4h14a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3z',
+        'M2 7l10 7 10-7',
+      ],
+      color: '#3b82f6',
+    },
+    
     {
       label: 'Presentation',
       route: 'water-wells-overview',
