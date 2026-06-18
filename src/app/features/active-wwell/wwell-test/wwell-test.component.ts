@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -92,6 +92,35 @@ export class WwellTestComponent {
         this.form.get('hydProduct')!.disable({ emitEvent: false });
         this.wellTestSnapshot = null;
       }
+    });
+
+    // Reset edit mode and clear validation state when well or date changes
+    effect(() => {
+      this.store.selectedEpANum();
+      this.store.selectedDate();
+
+      this.isPublished.set(false);
+      this.form.markAsUntouched();
+      this.formService.drillingRemarksForm.markAsUntouched();
+    }, { allowSignalWrites: true });
+
+    // Swap required validators when test type changes
+    effect(() => {
+      const isFlow = this.isFlowTest();
+      const flowOnly = ['siwhp', 'fwhp'];
+      const pumpOnly = ['rpm', 'hydPmpDpth', 'statWlvl', 'dyncWlvl'];
+
+      const toRequire  = isFlow ? flowOnly : pumpOnly;
+      const toOptional = isFlow ? pumpOnly : flowOnly;
+
+      toOptional.forEach(field => {
+        this.form.get(field)?.clearValidators();
+        this.form.get(field)?.updateValueAndValidity({ emitEvent: false });
+      });
+      toRequire.forEach(field => {
+        this.form.get(field)?.setValidators(Validators.required);
+        this.form.get(field)?.updateValueAndValidity({ emitEvent: false });
+      });
     });
 
     // Re-run calculation when test type changes so tooltip stays in sync
