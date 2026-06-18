@@ -4,10 +4,10 @@
       class="active-wwell-loading-slot"
       [class.active-wwell-loading-slot--active]="loadingVisible()"
     >
-      <mat-progress-bar mode="indeterminate" class="active-wwell-loading-bar" />
+      <div class="active-wwell-loading-bar"></div>
     </div>
 
-    <div class="active-wwell-shell">
+    <div class="active-wwell-shell" [class.active-wwell-shell--loading]="loadingVisible()">
       <div class="active-wwell-sidebar">
         <div class="well-header well-list">Wells List</div>
 
@@ -116,6 +116,18 @@
 
         <div class="active-wwell-grid">
           <div class="active-wwell-main">
+            @if (uiStore.isUpdating() || loadingVisible()) {
+              <div class="aw-update-overlay" aria-hidden="true"></div>
+              <div class="aw-loader-fixed" aria-hidden="true">
+                <div class="aw-bars-loader">
+                  <span class="aw-bar"></span>
+                  <span class="aw-bar"></span>
+                  <span class="aw-bar"></span>
+                  <span class="aw-bar"></span>
+                  <span class="aw-bar"></span>
+                </div>
+              </div>
+            }
             <app-wwell-header></app-wwell-header>
             <app-database-info></app-database-info>
             <app-formation-tops-and-casing></app-formation-tops-and-casing>

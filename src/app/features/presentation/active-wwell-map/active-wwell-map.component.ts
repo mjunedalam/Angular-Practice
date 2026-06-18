@@ -121,11 +121,7 @@ export class ActiveWwellMapComponent implements OnInit, OnDestroy {
 
   private async initMap(): Promise<void> {
     try {
-      await this.esriAuth.authenticateUserForMapAccess();
-
-      const webMap = new WebMap({
-        portalItem: { id: this.extConfigService.settings.presWebMapId },
-      });
+      const webMap = new WebMap({ portalItem: { id: 'f2e9b762544945f390ca4ac3671cfa72' } });
 
       this.mapView = new MapView({
         container: this.mapViewEl?.nativeElement,

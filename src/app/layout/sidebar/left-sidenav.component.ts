@@ -63,9 +63,9 @@ export class LeftSidenavComponent {
       icon: 'M5 4h14a3 3 0 013 3v10a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3zM2 7l10 7 10-7',
     },
     {
-      id: 'presentations',
+      id: 'water-wells-overview',
       label: 'Presentations',
-      routeId: 'presentations',
+      routeId: 'water-wells-overview',
       icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     },
   ];

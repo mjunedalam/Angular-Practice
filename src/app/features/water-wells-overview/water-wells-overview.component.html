@@ -2,13 +2,6 @@
 
   <!-- Header -->
   <header class="wwo__header">
-    <button type="button" class="wwo__back" (click)="goBack()" aria-label="Back to Presentations">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3"/>
-        <path d="M3 13h18"/>
-        <path d="M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-      </svg>
-    </button>
 
     <div class="wwo__header-center">
       <div class="wwo__pill wwo__pill--total">
@@ -16,39 +9,51 @@
         <span class="wwo__pill-label">Total Wells</span>
       </div>
       @for (stat of statusStats(); track stat.status) {
-        <div class="wwo__pill" [style.--pill-color]="stat.color">
-          <span class="wwo__pill-dot" [style.background]="stat.color"></span>
-          <span class="wwo__pill-value">{{ stat.count }}</span>
-          <span class="wwo__pill-label">{{ stat.status }}</span>
+        <div class="wwo__badge"
+             [style.background]="stat.color + '18'"
+             [style.border-color]="stat.color + '45'">
+          <span class="wwo__badge-dot" [style.background]="stat.color"></span>
+          <span class="wwo__badge-label" [style.color]="stat.color">{{ stat.status }}</span>
+          <span class="wwo__badge-count" [style.background]="stat.color">{{ stat.count }}</span>
         </div>
       }
     </div>
 
-    <button
-      type="button"
-      class="wwo__fullscreen-btn"
-      (click)="toggleFullscreen()"
-      [title]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
-      [attr.aria-label]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
-      [class.wwo__fullscreen-btn--active]="isFullscreen()"
-    >
-      @if (!isFullscreen()) {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+    <div class="wwo__header-actions">
+      <button type="button" class="wwo__back" (click)="goBack()" aria-label="Back to Presentations" title="Open Presentations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3"/>
+          <path d="M3 13h18"/>
+          <path d="M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-      } @else {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
-        </svg>
-      }
-    </button>
+      </button>
+
+      <button
+        type="button"
+        class="wwo__fullscreen-btn"
+        (click)="toggleFullscreen()"
+        [title]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
+        [attr.aria-label]="isFullscreen() ? 'Exit full screen' : 'Full screen'"
+        [class.wwo__fullscreen-btn--active]="isFullscreen()"
+      >
+        @if (!isFullscreen()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+          </svg>
+        }
+      </button>
+    </div>
 
     @if (store.isLoading()) {
       <div class="wwo__loading-bar"><span></span></div>
     }
   </header>
 
-  <!-- Body: map (left) + By Status sidebar (right) -->
+  <!-- Body: map full-width, All Wells floating on left -->
   <div class="wwo__body">
 
     <section #mapPanel class="wwo__map-panel" aria-label="Wells map">
@@ -67,6 +72,32 @@
           Plotting wells…
         </div>
       }
+
+      <!-- All Wells floating panel — draggable + resizable, left side -->
+      <div
+        #allWellsPanel
+        class="wwo__all-wells-panel"
+        [class.wwo__all-wells-panel--dragging]="isAllWellsDragging()"
+        [style.left.px]="allWellsX()"
+        [style.top.px]="allWellsY()"
+        [style.right]="allWellsX() !== null ? 'unset' : null"
+        aria-label="All wells table"
+      >
+        <div class="wwo__all-wells-header" (mousedown)="onAllWellsDragStart($event)">
+          <span class="wwo__all-wells-dot"></span>
+          All Wells
+          <span class="wwo__all-wells-count">{{ allWellRows().length }}</span>
+        </div>
+        <div class="wwo__all-wells-grid">
+          <ag-grid-angular
+            style="width: 100%"
+            [theme]="allWellsTheme"
+            [rowData]="allWellRows()"
+            [columnDefs]="allWellColumnDefs"
+            [gridOptions]="allWellsGridOptions"
+          />
+        </div>
+      </div>
 
       <!-- Ownership legend — bottom-left, draggable -->
       <footer
@@ -89,25 +120,6 @@
         }
       </footer>
     </section>
-
-    <!-- Sidebar: All Wells -->
-    <aside class="wwo__side-panel" aria-label="All wells table">
-      <div class="wwo__table-section">
-        <div class="wwo__table-label">
-          All Wells
-          <span class="wwo__table-count">{{ allWellRows().length }}</span>
-        </div>
-        <div class="wwo__grid-wrap">
-          <ag-grid-angular
-            style="width: 100%; height: 100%"
-            [theme]="allWellsTheme"
-            [rowData]="allWellRows()"
-            [columnDefs]="allWellColumnDefs"
-            [gridOptions]="allWellsGridOptions"
-          />
-        </div>
-      </div>
-    </aside>
 
   </div>
 

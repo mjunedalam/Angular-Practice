@@ -28,6 +28,7 @@
   height: 3px;
   overflow: hidden;
   opacity: 0;
+  flex-shrink: 0;
   transition: opacity 0.15s ease;
   pointer-events: none;
   background: transparent;
@@ -36,17 +37,15 @@
 }
 
 .active-wwell-loading-bar {
-  --mdc-linear-progress-track-height: 3px;
-  --mdc-linear-progress-active-indicator-height: 3px;
-  --mdc-linear-progress-track-color: transparent;
-  --mdc-linear-progress-active-indicator-color: transparent;
   height: 3px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 35%, #38bdf8 65%, #2563eb 100%);
+  background-size: 250% 100%;
+  animation: aw-bar-shimmer 1.4s linear infinite;
 }
 
-:host ::ng-deep .active-wwell-loading-bar .mdc-linear-progress__bar-inner {
-  border-color: transparent;
-  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 35%, #38bdf8 65%, #2563eb 100%);
-  background-size: 220% 100%;
+@keyframes aw-bar-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -150% 0; }
 }
 
 // ── Shell ─────────────────────────────────────────────────────────────────────
@@ -278,9 +277,32 @@
   border: 1px solid #e2e8f0;
   margin-top: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, opacity 0.22s ease, filter 0.22s ease;
+  position: relative;
 
   &:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09), 0 1px 3px rgba(0, 0, 0, 0.05); }
+}
+
+// ── Shell loading state ───────────────────────────────────────────────────────
+.active-wwell-shell--loading ::ng-deep .aw-section {
+  opacity: 0.88;
+  filter: saturate(0.88);
+}
+
+.active-wwell-shell--loading ::ng-deep .aw-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.07), transparent);
+  transform: translateX(-100%);
+  pointer-events: none;
+  animation: aw-card-sheen 1.15s linear infinite;
+  z-index: 5;
+}
+
+@keyframes aw-card-sheen {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
 }
 
 // ── Page header ────────────────────────────────────────────────────────────────
@@ -403,6 +425,55 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  position: relative;
+}
+
+// ── Single update overlay covering the entire main column ─────────────────────
+// Freezes only the content column — absolute so sidebar/header stay interactive
+.aw-update-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(248, 250, 252, 0.72);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: all;
+  cursor: wait;
+}
+
+// Loader always visible at viewport center regardless of scroll position
+.aw-loader-fixed {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 31;
+  pointer-events: none;
+}
+
+.aw-bars-loader {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 36px;
+}
+
+.aw-bar {
+  width: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #38bdf8 0%, #2563eb 60%, #1e3a8a 100%);
+  transform-origin: bottom;
+
+  &:nth-child(1) { height: 14px; animation: aw-bar-bounce 0.70s ease-in-out infinite alternate; animation-delay: 0.00s; }
+  &:nth-child(2) { height: 26px; animation: aw-bar-bounce 0.85s ease-in-out infinite alternate; animation-delay: 0.12s; }
+  &:nth-child(3) { height: 36px; animation: aw-bar-bounce 0.60s ease-in-out infinite alternate; animation-delay: 0.22s; }
+  &:nth-child(4) { height: 24px; animation: aw-bar-bounce 0.78s ease-in-out infinite alternate; animation-delay: 0.08s; }
+  &:nth-child(5) { height: 16px; animation: aw-bar-bounce 0.95s ease-in-out infinite alternate; animation-delay: 0.18s; }
+}
+
+@keyframes aw-bar-bounce {
+  from { transform: scaleY(0.2); opacity: 0.55; }
+  to   { transform: scaleY(1);   opacity: 1; }
 }
 
 // ── Side panel ────────────────────────────────────────────────────────────────

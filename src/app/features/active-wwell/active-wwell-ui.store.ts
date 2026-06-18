@@ -3,6 +3,12 @@ import { ACTIVE_WWELL_FALLBACK, normalizeStatusName } from './active-wwell.helpe
 
 @Injectable()
 export class ActiveWwellUiStore {
+  readonly isUpdating = signal(false);
+
+  setUpdating(value: boolean): void {
+    this.isUpdating.set(value);
+  }
+
   readonly statusOptions = signal<string[]>([
     'Casing operation',
     'Fishing',

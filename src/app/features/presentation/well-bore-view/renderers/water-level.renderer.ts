@@ -1,4 +1,5 @@
 import { easeCubicInOut, easeLinear } from 'd3-ease';
+import { pointer } from 'd3-selection';
 import 'd3-transition';
 
 import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
@@ -153,99 +154,139 @@ export function renderWaterLevel({
     .style('pointer-events', 'none');
 
   const hideTooltip = (): void => {
-    tooltipLayer.interrupt().transition().duration(120).style('opacity', 0);
+    tooltipLayer.interrupt()
+      .transition().duration(130).ease(easeCubicInOut)
+      .style('opacity', 0);
   };
 
-  const showTooltip = (): void => {
-    const lines = wrapLabel(label, 30, 2);
-    const tooltipW = 220;
-    const lineHeight = 15;
-    const tooltipH = 56 + lines.length * lineHeight;
+  const showTooltip = (event: MouseEvent): void => {
+    const [mx] = pointer(event, rootG.node() as Element);
+    const hoverX = Math.min(Math.max(mx, lL), lR);
 
-    const minTooltipX = 4;
-    const maxTooltipX = layout.wellboreViewWidth - tooltipW - 4;
-    const tooltipX = Math.min(Math.max(lR + 26, minTooltipX), maxTooltipX);
+    const lines = wrapLabel(label, 28, 2);
+    const formulaLines: string[] = isFlowing && siwhpPsi !== null
+      ? [
+          'Depth = −(SIWHP × 2.37)',
+          `= −(${siwhpPsi} × 2.37) = ${waterDepth.toFixed(2).replace('-', '−')} ft`,
+        ]
+      : lines;
+
+    const tooltipW = 265;
+    const lineHeight = 18;
+    const tooltipH = 56 + formulaLines.length * lineHeight;
+
+    const minTX = 4;
+    const maxTX = layout.wellboreViewWidth - tooltipW - 4;
+    const tooltipX = Math.min(Math.max(hoverX + 16, minTX), maxTX);
 
     const viewportTop = -layout.marginTop + 4;
     const viewportBottom = layout.svgHeight - layout.marginTop - 4;
-    const tooltipY = Math.max(viewportTop, Math.min(wPx - tooltipH / 2, viewportBottom - tooltipH));
-    const connectorY = Math.max(tooltipY + 22, Math.min(wPx, tooltipY + tooltipH - 16));
+    const preferredY = wPx - tooltipH - 40;
+    const tooltipY = preferredY >= viewportTop
+      ? preferredY
+      : Math.min(wPx + 18, viewportBottom - tooltipH);
+    const isAbove = tooltipY < wPx;
 
     tooltipLayer.selectAll('*').remove();
     tooltipLayer.raise();
 
-    tooltipLayer.append('path')
-      .attr('d', `M${centerX},${wPx} H${tooltipX - 14} Q${tooltipX - 7},${wPx} ${tooltipX - 7},${connectorY} H${tooltipX}`)
+    // Dashed connector from tooltip edge to water line anchor
+    tooltipLayer.append('line')
+      .attr('x1', hoverX).attr('y1', isAbove ? tooltipY + tooltipH + 2 : tooltipY - 2)
+      .attr('x2', hoverX).attr('y2', isAbove ? wPx - 5 : wPx + 5)
       .attr('stroke', WATER_ACCENT)
-      .attr('stroke-width', 1.6)
+      .attr('stroke-width', 1.4)
+      .attr('stroke-dasharray', '4,3')
       .attr('stroke-linecap', 'round')
-      .attr('stroke-linejoin', 'round')
-      .attr('opacity', 0.76)
-      .attr('fill', 'none');
+      .attr('opacity', 0.55);
 
+    // Anchor dot on the water line
     tooltipLayer.append('circle')
-      .attr('cx', centerX).attr('cy', wPx)
+      .attr('cx', hoverX).attr('cy', wPx)
       .attr('r', 3.2)
       .attr('fill', '#ffffff')
       .attr('stroke', WATER_ACCENT)
       .attr('stroke-width', 1.6);
 
+    // Card
     tooltipLayer.append('rect')
       .attr('x', tooltipX).attr('y', tooltipY)
       .attr('width', tooltipW).attr('height', tooltipH)
-      .attr('rx', 10)
+      .attr('rx', 5)
       .attr('fill', '#ffffff')
       .attr('stroke', WATER_ACCENT)
       .attr('stroke-width', 1.4)
       .attr('filter', 'drop-shadow(0 8px 14px rgba(15,23,42,0.18))');
 
+    // Accent rail
     tooltipLayer.append('rect')
       .attr('x', tooltipX).attr('y', tooltipY)
       .attr('width', 5).attr('height', tooltipH)
       .attr('rx', 2)
       .attr('fill', WATER_ACCENT);
 
+    // Badge background
     tooltipLayer.append('rect')
       .attr('x', tooltipX + 14).attr('y', tooltipY + 12)
-      .attr('width', isFlowing ? 60 : 78).attr('height', 22)
+      .attr('width', isFlowing ? 80 : 64).attr('height', 22)
       .attr('rx', 11)
       .attr('fill', WATER_ACCENT_MUTED);
 
+    // Badge label
     tooltipLayer.append('text')
-      .attr('x', tooltipX + (isFlowing ? 44 : 53)).attr('y', tooltipY + 27)
+      .attr('x', tooltipX + (isFlowing ? 54 : 46)).attr('y', tooltipY + 27)
       .attr('text-anchor', 'middle')
       .attr('font-size', '10')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', WATER_ACCENT)
-      .text(isFlowing ? 'FLOWING' : 'Water Level');
+      .text(isFlowing ? 'SIWHP(PSI)' : 'Water Level');
 
+    // Value (positive psi for flowing, depth for static)
     tooltipLayer.append('text')
       .attr('x', tooltipX + tooltipW - 16).attr('y', tooltipY + 27)
       .attr('text-anchor', 'end')
-      .attr('font-size', '13')
+      .attr('font-size', '12')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', '#0f172a')
-      .text(waterDepth < 0 ? `${Math.abs(waterDepth).toFixed(2)} ft.agl` : `${waterDepth.toFixed(2)} ft.bgl`);
+      .text(isFlowing && siwhpPsi !== null
+        ? `${siwhpPsi.toFixed(2)} psi`
+        : waterDepth < 0 ? `${Math.abs(waterDepth).toFixed(2)} ft.bgl` : `${waterDepth.toFixed(2)} ft.bgl`);
 
+    // Divider
     tooltipLayer.append('line')
       .attr('x1', tooltipX + 14).attr('x2', tooltipX + tooltipW - 14)
       .attr('y1', tooltipY + 43).attr('y2', tooltipY + 43)
       .attr('stroke', '#e2e8f0');
 
-    lines.forEach((line, idx) => {
+    // Formula / label lines — template row + calculation row, both on one line each
+    formulaLines.forEach((line, idx) => {
+      const isCalc = isFlowing && idx === 1;
+
       tooltipLayer.append('text')
         .attr('x', tooltipX + 16)
-        .attr('y', tooltipY + 63 + idx * lineHeight)
-        .attr('font-size', '12')
-        .attr('font-family', 'DM Sans, sans-serif')
-        .attr('font-weight', '600')
-        .attr('fill', '#334155')
+        .attr('y', tooltipY + 60 + idx * lineHeight)
+        .attr('font-size',   isCalc ? '11' : '10')
+        .attr('font-family', isFlowing
+          ? "'Courier New', 'Lucida Console', monospace"
+          : 'DM Sans, sans-serif')
+        .attr('font-weight', '700')
+        .attr('font-style',  !isCalc && isFlowing ? 'italic' : 'normal')
+        .attr('fill',        isCalc ? WATER_ACCENT : '#0f172a')
+        .attr('letter-spacing', isFlowing ? '0.3' : '0')
         .text(line);
     });
 
-    tooltipLayer.interrupt().style('opacity', 0).transition().duration(120).style('opacity', 1);
+    // Slide-in from below (above tooltip) or from above (below tooltip) + fade
+    const slideOffset = isAbove ? 6 : -6;
+    tooltipLayer
+      .interrupt()
+      .attr('transform', `translate(0, ${slideOffset})`)
+      .style('opacity', 0)
+      .transition().duration(200).ease(easeCubicInOut)
+      .attr('transform', 'translate(0, 0)')
+      .style('opacity', 1);
   };
 
   wg.append('rect')
@@ -254,6 +295,6 @@ export function renderWaterLevel({
     .attr('width', lineWidth).attr('height', 12)
     .attr('fill', 'transparent')
     .style('cursor', 'pointer')
-    .on('mouseenter', showTooltip)
+    .on('mouseenter', (event: MouseEvent) => showTooltip(event))
     .on('mouseleave', hideTooltip);
 }

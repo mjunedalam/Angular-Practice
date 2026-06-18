@@ -23,7 +23,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   border-bottom: 1px solid $nav-border;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
   position: relative;
-  z-index: 100;
+  z-index: 200;
 
   // Subtle grid texture
   &::before {
@@ -312,11 +312,11 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
 .top-navbar__menu-popup {
   width: 17rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: #1e293b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
   box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(56, 189, 248, 0.08);
+    0 20px 48px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06);
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
@@ -337,7 +337,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .top-navbar__profile-avatar {
@@ -364,7 +364,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
 }
 
 .top-navbar__profile-name {
-  color: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
   font-size: 0.9rem;
   font-weight: 800;
   white-space: nowrap;
@@ -378,8 +378,8 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   align-items: flex-start;
   gap: 0.35rem;
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 800;
+  color: #64748b;
+  font-weight: 500;
   white-space: normal;
   line-height: 1.45;
 
@@ -388,7 +388,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
     height: 11px;
     flex-shrink: 0;
     margin-top: 1px;
-    color: #38bdf8;
+    color: #0ea5e9;
   }
 }
 
@@ -398,7 +398,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   flex-direction: column;
   gap: 0.65rem;
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .top-navbar__profile-roles {
@@ -430,7 +430,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   padding: 0.8rem 1rem;
   border: none;
   background: transparent;
-  color: #f87171;
+  color: #ef4444;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -444,7 +444,7 @@ $nav-hover-bg: rgba(14, 165, 233, 0.14);
   }
 
   &:hover {
-    background: rgba(239, 68, 68, 0.08);
+    background: rgba(239, 68, 68, 0.06);
   }
 }
 

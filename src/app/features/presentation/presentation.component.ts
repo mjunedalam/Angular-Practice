@@ -110,6 +110,10 @@ export class PresentationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (document.fullscreenElement) {
+      this.isFullscreen.set(true);
+      this.moveOverlayContainerToFullscreen();
+    }
     this.applyQueryParams(this.route.snapshot.queryParamMap, true);
 
     this.route.queryParamMap
@@ -143,23 +147,13 @@ export class PresentationComponent implements OnInit {
     this.dialogRef?.close();
   }
 
-  protected async toggleFullscreen(): Promise<void> {
-    if (this.isFullscreen()) {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-      this.isFullscreen.set(false);
-      this.restoreOverlayContainer();
-      return;
+  protected toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      const mainEl = (this.elementRef.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
+      (mainEl ?? (this.elementRef.nativeElement as HTMLElement)).requestFullscreen().catch(() => {});
     }
-
-    try {
-      await this.elementRef.nativeElement.requestFullscreen();
-      this.moveOverlayContainerToFullscreen();
-    } catch {
-      // Browser fullscreen unavailable — fall back to in-app overlay only.
-    }
-    this.isFullscreen.set(true);
   }
 
   @HostListener('document:fullscreenchange')

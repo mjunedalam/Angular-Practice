@@ -11,27 +11,9 @@ export class EsriMapService {
 
     private extAppConfigService = inject(ExternalConfigService);
 
-    async authenticateUserForMapAccess(popup = false) {
-
-        const portalUrl = this.extAppConfigService.settings.esriUrl;
-        esriConfig.portalUrl = portalUrl;
-        const info = new OAuthInfo({
-            appId: `${this.extAppConfigService.settings.appId}`,
-            portalUrl,
-            popup
-        });
-
-        esriId.registerOAuthInfos([info]);
-        const url = `${portalUrl}/sharing`;
-
-        try {
-            const credentials = await esriId.checkSignInStatus(url);
-            return credentials;
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            const credential = await esriId.getCredential(url);
-            return credential;
-        }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async authenticateUserForMapAccess(_popup = false): Promise<null> {
+        return null;
     }
 
     destroyEsriMapCredentials() {

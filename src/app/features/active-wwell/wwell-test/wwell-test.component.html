@@ -1,10 +1,6 @@
 
 <form [formGroup]="form">
   <div class="aw-section">
-    @if (isUpdating()) {
-      <div class="wt-loading-bar"></div>
-    }
-
     <div class="wt-header-row">
       <div class="wt-title">Well Test</div>
       <div class="wt-type-toggle">
@@ -19,7 +15,7 @@
         class="wt-edit-toggle"
         [class.wt-edit-toggle--on]="isPublished()"
         (click)="isPublished.set(!isPublished())"
-      >{{ isPublished() ? 'Editing' : 'Locked' }}</button>
+      >{{ isPublished() ? 'Publish Test' : 'Locked' }}</button>
     </div>
 
     <div class="wt-body">

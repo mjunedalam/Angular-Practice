@@ -32,7 +32,8 @@
       "Bash(node -e ' *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
       "Bash(npx sass *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200)",
+      "WebFetch(domain:developers.arcgis.com)"
     ]
   }
 }

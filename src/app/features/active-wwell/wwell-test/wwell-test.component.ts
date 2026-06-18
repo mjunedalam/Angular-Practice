@@ -4,9 +4,10 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { catchError, forkJoin, merge, of } from 'rxjs';
+import { catchError, forkJoin, map, merge, of, timer } from 'rxjs';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
+import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { ActiveWellViewService } from '@core/services/active-well-view.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { AuthStore } from '../../auth/store/auth.store';
@@ -24,11 +25,12 @@ import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/ut
 })
 export class WwellTestComponent {
   private readonly store = inject(ActiveWwellStore);
+  private readonly uiStore = inject(ActiveWwellUiStore);
   private readonly auth = inject(AuthStore);
   private readonly rbac = inject(RbacStore);
 
   protected readonly data = this.store.wwellTest;
-  protected readonly isUpdating = signal(false);
+  protected readonly isUpdating = this.uiStore.isUpdating;
 
   protected readonly isFlowTest = signal(false);
   private initialFlowType = false;
@@ -163,34 +165,51 @@ export class WwellTestComponent {
       return;
     }
 
-    this.isUpdating.set(true);
+    this.uiStore.setUpdating(true);
 
+    // Discriminated union: null = not attempted, true = success, false = failed
     const remarks$ = remarksChanged
-      ? this.createOrUpdateDrillingRemarks().pipe(catchError(() => of(null)))
-      : of(true as const);
+      ? this.createOrUpdateDrillingRemarks().pipe(
+          map(() => true as const),
+          catchError(() => of(false as const)),
+        )
+      : of(null);
     const wellTest$ = wellTestChanged
-      ? this.createOrUpdateWellTest().pipe(catchError(() => of(null)))
-      : of(true as const);
+      ? this.createOrUpdateWellTest().pipe(
+          map(() => true as const),
+          catchError(() => of(false as const)),
+        )
+      : of(null);
 
-    forkJoin({ remarks: remarks$, wellTest: wellTest$ }).subscribe(({ remarks, wellTest }) => {
-      this.isUpdating.set(false);
-      const remarksOk = !remarksChanged || remarks !== null;
-      const wellTestOk = !wellTestChanged || wellTest !== null;
+    forkJoin({ remarks: remarks$, wellTest: wellTest$, _min: timer(1500) }).subscribe(({ remarks, wellTest }) => {
+      this.uiStore.setUpdating(false);
 
-      if (remarksOk && wellTestOk) {
+      const remarksFailed = remarks === false;
+      const wellTestFailed = wellTest === false;
+
+      if (!remarksFailed && !wellTestFailed) {
         this.notify.info('Well details updated successfully');
-        this.formService.drillingRemarksForm.markAsPristine();
-        this.initialFlowType = this.isFlowTest();
-        this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
+        if (remarks === true) this.formService.drillingRemarksForm.markAsPristine();
+        if (wellTest === true) {
+          this.initialFlowType = this.isFlowTest();
+          this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
+        }
         this.store.refreshWellDetail();
-      } else if (remarksOk) {
-        this.notify.info('Drilling remarks saved');
+      } else if (!remarksFailed && wellTestFailed) {
+        if (remarks === true) {
+          this.notify.info('Drilling remarks saved');
+          this.formService.drillingRemarksForm.markAsPristine();
+          this.store.refreshWellDetail();
+        }
         this.notify.error('Well test update failed');
-        this.store.refreshWellDetail();
-      } else if (wellTestOk) {
-        this.notify.info('Well test saved');
+      } else if (!wellTestFailed && remarksFailed) {
+        if (wellTest === true) {
+          this.notify.info('Well test saved');
+          this.initialFlowType = this.isFlowTest();
+          this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
+          this.store.refreshWellDetail();
+        }
         this.notify.error('Drilling remarks update failed');
-        this.store.refreshWellDetail();
       } else {
         this.notify.error('Update failed — please try again');
       }

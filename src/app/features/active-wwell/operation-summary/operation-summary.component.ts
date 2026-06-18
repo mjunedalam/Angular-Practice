@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
+import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 
 @Component({
   selector: 'app-operation-summary',
@@ -13,6 +14,7 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
 })
 export class OperationSummaryComponent {
   private readonly store = inject(ActiveWwellStore);
+  protected readonly uiStore = inject(ActiveWwellUiStore);
 
   protected readonly data = this.store.operationSummary;
 

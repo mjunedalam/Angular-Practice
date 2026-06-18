@@ -17,9 +17,9 @@ import { Router } from '@angular/router';
 import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-// import ArcGISMap from '@arcgis/core/Map'; // default only
 import TextSymbol from '@arcgis/core/symbols/TextSymbol';
-import WebMap from '@arcgis/core/WebMap'; // office: uses authenticated portal WebMap
+import ArcGISMap from '@arcgis/core/Map';
+import WebMap from '@arcgis/core/WebMap';
 import MapView from '@arcgis/core/views/MapView';
 import { watch as reactiveWatch } from '@arcgis/core/core/reactiveUtils';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -65,19 +65,19 @@ const STATUS_COLORS = [
 const BOOT_TASK = 'arcgis-map-overview';
 
 const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '3300': '#84cc16',
-  '58': '#c084fc',
+  '3300': '#96f508',
+  '58': '#7f0cf3',
   '1514': '#f87171',
-  '60': '#60a5fa',
+  '60': '#0f67d2',
 };
 
 // RGB tuples matching LEGEND_CHIP_COLORS exactly — used for ArcGIS dot rendering
 // so map dots always match the legend visually
 const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
-  '3300': [132, 204, 22],
-  '58':   [192, 132, 252],
-  '1514': [248, 113, 113],
-  '60':   [96,  165, 250],
+  '3300': [150, 245, 8],    // #96f508
+  '58':   [127, 12, 243],   // #7f0cf3
+  '1514': [248, 113, 113],  // #f87171
+  '60':   [15, 103, 210],   // #0f67d2
 };
 
 @Component({
@@ -92,6 +92,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   @ViewChild('mapViewNode', { static: true }) private mapViewEl?: ElementRef<HTMLDivElement>;
   @ViewChild('mapPanel') private mapPanelEl?: ElementRef<HTMLElement>;
   @ViewChild('legendPanel') private legendPanelEl?: ElementRef<HTMLElement>;
+  @ViewChild('allWellsPanel') private allWellsPanelEl?: ElementRef<HTMLElement>;
 
   private mapView?: __esri.MapView;
   private wwellLayer?: GraphicsLayer;
@@ -136,6 +137,13 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly legendY = signal<number | null>(null);
   private legendOffsetX = 0;
   private legendOffsetY = 0;
+
+  // All Wells panel — drag
+  protected readonly isAllWellsDragging = signal(false);
+  protected readonly allWellsX = signal<number | null>(null);
+  protected readonly allWellsY = signal<number | null>(null);
+  private allWellsOffsetX = 0;
+  private allWellsOffsetY = 0;
 
   private readonly wwells = signal<WWell[]>([]);
 
@@ -270,16 +278,16 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     foregroundColor: '#1e293b',
     headerBackgroundColor: '#dbeafe',
     headerTextColor: '#1d4ed8',
-    headerFontSize: 10,
-    headerFontWeight: 700,
+    headerFontSize: 12,
+    headerFontWeight: 800,
     rowHoverColor: 'rgba(59, 130, 246, 0.07)',
     oddRowBackgroundColor: '#fafbfc',
     borderColor: '#e2e8f0',
     borderRadius: 0,
-    fontSize: 10,
-    rowHeight: 28,
-    headerHeight: 28,
-    spacing: 2,
+    fontSize: 13,
+    rowHeight: 34,
+    headerHeight: 32,
+    spacing: 3,
     fontFamily: 'inherit',
     cellHorizontalPaddingScale: 1.2,
   });
@@ -300,9 +308,9 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     animateRows: true,
     suppressMovableColumns: true,
     suppressCellFocus: true,
-    domLayout: 'normal',
+    domLayout: 'autoHeight',
     tooltipShowDelay: 300,
-    defaultColDef: { sortable: true, filter: false, resizable: true },
+    defaultColDef: { sortable: true, filter: false, resizable: false },
     overlayNoRowsTemplate: '<span style="color:#94a3b8;font-size:12px">No data</span>',
     onGridReady: (params) => params.api.sizeColumnsToFit(),
   };
@@ -331,9 +339,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
   protected toggleFullscreen(): void {
     if (!document.fullscreenElement) {
-      (this.hostEl.nativeElement as HTMLElement).requestFullscreen().catch((err: unknown) => {
-        console.warn('[WellsOverview] Fullscreen request failed:', err);
-      });
+      const mainEl = (this.hostEl.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
+      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen();
     }
@@ -358,6 +365,25 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
+  protected onAllWellsDragStart(event: MouseEvent): void {
+    const panel = this.allWellsPanelEl?.nativeElement;
+    const parent = this.mapPanelEl?.nativeElement;
+    if (!panel || !parent) return;
+
+    const rect = panel.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+
+    if (this.allWellsX() === null) {
+      this.allWellsX.set(rect.left - parentRect.left);
+      this.allWellsY.set(rect.top - parentRect.top);
+    }
+
+    this.isAllWellsDragging.set(true);
+    this.allWellsOffsetX = event.clientX - rect.left;
+    this.allWellsOffsetY = event.clientY - rect.top;
+    event.preventDefault();
+  }
+
   @HostListener('document:mousemove', ['$event'])
   protected onDocumentMouseMove(event: MouseEvent): void {
     if (this.isLegendDragging()) {
@@ -376,11 +402,28 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (this.isAllWellsDragging()) {
+      const parent = this.mapPanelEl?.nativeElement;
+      const panel = this.allWellsPanelEl?.nativeElement;
+      if (parent && panel) {
+        const parentRect = parent.getBoundingClientRect();
+        this.allWellsX.set(Math.max(0, Math.min(
+          event.clientX - parentRect.left - this.allWellsOffsetX,
+          parentRect.width - panel.offsetWidth,
+        )));
+        this.allWellsY.set(Math.max(0, Math.min(
+          event.clientY - parentRect.top - this.allWellsOffsetY,
+          parentRect.height - panel.offsetHeight,
+        )));
+      }
+    }
+
   }
 
   @HostListener('document:mouseup')
   protected onDocumentMouseUp(): void {
     this.isLegendDragging.set(false);
+    this.isAllWellsDragging.set(false);
   }
 
   @HostListener('document:fullscreenchange')
@@ -399,6 +442,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.isFullscreen.set(!!document.fullscreenElement);
     if (!isPlatformBrowser(this.platformId)) return;
     this.store.loadMorningReportData(formatDateForInput(getTodayAtMidnight()));
     this.observeVisibility();
@@ -448,47 +492,23 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     this.mapView = undefined;
     this.mapReady.set(false);
 
-    // ── Office (authenticated portal WebMap) ──────────────────────────────
-    await this.esriAuth.authenticateUserForMapAccess();
-    const webMap = new WebMap({
-      portalItem: { id: this.extConfigService.settings.morningReportWebMapId },
-    });
+    // ── Free public basemap (no auth required) ────────────────────────────
+    this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
+    this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
+    const map = new ArcGISMap({ basemap: 'gray-vector', layers: [this.wwellLayer, this.labelsLayer] });
     this.mapView = new MapView({
       container: this.mapViewEl?.nativeElement,
-      map: webMap,
+      map,
       center: MAP_CONFIG.center,
       zoom: this.INITIAL_ZOOM,
       ui: { components: [] },
     });
     await Promise.race([
-      Promise.all([this.mapView.when(), webMap.load()]),
+      this.mapView.when(),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Map timed out')), this.MAP_TIMEOUT_MS),
       ),
     ]);
-    if (webMap.loadStatus === 'failed') throw webMap.loadError ?? new Error('WebMap failed to load');
-    this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
-    this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
-    webMap.addMany([this.wwellLayer, this.labelsLayer]);
-    // ─────────────────────────────────────────────────────────────────────
-
-    // ── Free public basemap (no auth required) ────────────────────────────
-    // this.wwellLayer = new GraphicsLayer({ id: 'overview-wwells' });
-    // this.labelsLayer = new GraphicsLayer({ id: 'overview-labels' });
-    // const map = new ArcGISMap({ basemap: 'gray-vector', layers: [this.wwellLayer, this.labelsLayer] });
-    // this.mapView = new MapView({
-    //   container: this.mapViewEl?.nativeElement,
-    //   map,
-    //   center: MAP_CONFIG.center,
-    //   zoom: 5,
-    //   ui: { components: [] },
-    // });
-    // await Promise.race([
-    //   this.mapView.when(),
-    //   new Promise<never>((_, reject) =>
-    //     setTimeout(() => reject(new Error('Map timed out')), this.MAP_TIMEOUT_MS),
-    //   ),
-    // ]);
     // ─────────────────────────────────────────────────────────────────────
 
     // Non-animated snap to correct position (hidden behind spinner)
