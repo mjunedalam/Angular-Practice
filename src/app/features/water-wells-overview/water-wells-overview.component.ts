@@ -112,12 +112,12 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   // ──────────────────────────────────────────────────────────────────────────
 
   // ── Well drawing animation — tweak to adjust speed / drama ────────────────
-  private readonly DRAW_STAGGER_MS = 60;         // ms between each dot birth
-  private readonly DOT_START_SIZE = 1;           // initial dot size (px)
-  private readonly DOT_FINAL_SIZE = 8;           // final dot size (px)
-  // Total ms from birth → full size. Uses ease-out quad + fade-in alpha.
+  private readonly DRAW_STAGGER_MS = 80;         // ms between each dot birth
+  private readonly DOT_START_SIZE = 2;           // initial dot size (px)
+  private readonly DOT_FINAL_SIZE = 12;          // final dot size (px)
+  // Total ms from birth → full size. Linear grow + fade-in alpha.
   // rAF loop keeps animation synced to browser repaint so every frame renders.
-  private readonly DOT_GROW_DURATION_MS = 500;
+  private readonly DOT_GROW_DURATION_MS = 700;
   private readonly LABEL_STAGGER_MS = 40;        // ms between each label appearing
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -611,10 +611,10 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           if (elapsed >= this.DOT_GROW_DURATION_MS) continue;
 
           const t = elapsed / this.DOT_GROW_DURATION_MS;
-          const eased = 1 - (1 - t) * (1 - t); // ease-out quad: fast start, soft landing
-          const size = this.DOT_START_SIZE + (this.DOT_FINAL_SIZE - this.DOT_START_SIZE) * eased;
+          const size = this.DOT_START_SIZE + (this.DOT_FINAL_SIZE - this.DOT_START_SIZE) * t;
           dot.graphic.symbol = new SimpleMarkerSymbol({
-            style: 'circle', size, color: [dot.r, dot.g, dot.b, eased], outline: { width: 0 },
+            style: 'circle', size, color: [dot.r, dot.g, dot.b, t],
+            outline: { color: [255, 255, 255, t * 0.9], width: 1.5 },
           });
           anyPending = true;
         }
@@ -629,7 +629,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     if (!this.isDestroyed) {
       for (const dot of anims) {
         dot.graphic.symbol = new SimpleMarkerSymbol({
-          style: 'circle', size: this.DOT_FINAL_SIZE, color: [dot.r, dot.g, dot.b, 1], outline: { width: 0 },
+          style: 'circle', size: this.DOT_FINAL_SIZE, color: [dot.r, dot.g, dot.b, 1],
+          outline: { color: [255, 255, 255, 0.9], width: 1.5 },
         });
       }
     }
@@ -663,9 +664,9 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     this.pulseIntervalId = setInterval(() => {
       if (this.isDestroyed) { this.stopPulseAnimation(); return; }
       this.pulsePhase = (this.pulsePhase + 0.08) % (Math.PI * 2);
-      // Bloom oscillates between ~0.4 and ~1.2 for a clearly visible pulse
-      const strength = (0.8 + Math.sin(this.pulsePhase) * 0.4).toFixed(2);
-      const blur = (0.4 + Math.sin(this.pulsePhase) * 0.3).toFixed(2);
+      // Strength oscillates between 0.6 and 1.0; blur kept low so dots stay sharp
+      const strength = (0.8 + Math.sin(this.pulsePhase) * 0.2).toFixed(2);
+      const blur = (0.1 + Math.sin(this.pulsePhase) * 0.1).toFixed(2);
       l.effect = `bloom(${strength}, ${blur}px, 0)`;
     }, 50);
   }

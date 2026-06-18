@@ -310,9 +310,14 @@
 }
 
 .wwo__map-canvas {
-  // absolute fill keeps canvas exactly in-bounds regardless of fullscreen state
   position: absolute;
   inset: 0;
+  opacity: 0;
+  transition: opacity 1s linear;
+
+  &--ready {
+    opacity: 1;
+  }
 }
 
 // ─── Map loader ──────────────────────────────────────────
@@ -329,6 +334,13 @@
   background: rgba(248, 250, 252, 0.85);
   backdrop-filter: blur(6px);
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.7s linear;
+
+  &--hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 
   &__spinner {
     display: block;

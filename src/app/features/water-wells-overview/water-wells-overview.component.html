@@ -57,14 +57,12 @@
   <div class="wwo__body">
 
     <section #mapPanel class="wwo__map-panel" aria-label="Wells map">
-      <div #mapViewNode class="wwo__map-canvas"></div>
+      <div #mapViewNode class="wwo__map-canvas" [class.wwo__map-canvas--ready]="mapReady()"></div>
 
-      @if (!mapReady()) {
-        <div class="wwo__map-loader" aria-live="polite">
-          <span class="wwo__map-loader__spinner"></span>
-          <span class="wwo__map-loader__label">Loading map…</span>
-        </div>
-      }
+      <div class="wwo__map-loader" [class.wwo__map-loader--hidden]="mapReady()" aria-live="polite">
+        <span class="wwo__map-loader__spinner"></span>
+        <span class="wwo__map-loader__label">Loading map…</span>
+      </div>
 
       @if (isDrawingWells()) {
         <div class="wwo__plotting-banner" aria-live="polite">
