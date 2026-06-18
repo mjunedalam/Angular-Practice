@@ -13,7 +13,7 @@
         <span class="cell__label">Rig</span>
         <div class="cell__name">{{ d.rigName }}</div>
         @if (d.rigHeight) {
-          <div class="cell__sub">Rig Height: {{ d.rigHeight }}</div>
+          <div class="cell__sub">Rig Height (ft): {{ d.rigHeight }}</div>
         }
       </div>
 
@@ -103,7 +103,7 @@
       <div class="cell cell--depth">
         <div class="depth-labels">
           <div class="cell__label-light">Current</div>
-          <div class="cell__label-light">Depth</div>
+          <div class="cell__label-light">Depth (ft)</div>
         </div>
         <div class="depth-value">{{ d.currentDepth | number }}</div>
       </div>
@@ -133,7 +133,7 @@
       <div class="cell cell--prev">
         <div class="depth-labels">
           <div class="cell__label-light">Previous</div>
-          <div class="cell__label-light">Depth</div>
+          <div class="cell__label-light">Depth (ft)</div>
         </div>
         <div class="depth-value">{{ d.previousDepth | number }}</div>
       </div>
@@ -142,7 +142,7 @@
       <div class="cell cell--feet">
         <div class="feet-left">
           <div class="feet-value">{{ d.feetDrilledToday | number }}</div>
-          <div class="cell__label-light" style="font-size: 0.65rem; text-transform: none">footage (ft.)</div>
+          <div class="cell__label-light" style="font-size: 0.65rem; text-transform: none">Footage (ft)</div>
         </div>
         <div class="feet-icon">
           <svg
@@ -171,7 +171,7 @@
       <div class="cell cell--rop">
         <div class="depth-labels">
           <div class="rop-value">{{ d.rop | number }}</div>
-          <div class="cell__label-light">ROP</div>
+          <div class="cell__label-light">ROP (ft/h)</div>
         </div>
         <div class="feet-icon">
           <mat-icon>speed</mat-icon>
