@@ -224,13 +224,24 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
     });
 }
 
+const NOT_REQUIRED_RE = /^not required$/i;
+
+function toActiveRemark(val: string | undefined): string | null {
+    const trimmed = val?.trim();
+    return trimmed && !NOT_REQUIRED_RE.test(trimmed) ? trimmed : null;
+}
+
+function isLogActive(val: string | undefined): boolean {
+    return toActiveRemark(val) !== null;
+}
+
 export function selectWellLogsIndicators(d: IWellData | null): WellLogsIndicators | null {
     if (!d) return null;
     const h: IHeaderIR | undefined = d.EXAD_GWD_IR_HEADER?.[0];
     return {
-        rcc: !!(h?.dtRemarks?.trim()),
-        mudLog: !!(h?.mudRemarks?.trim()),
-        logging: !!(h?.loggingRemarks?.trim()),
+        rcc: isLogActive(h?.dtRemarks),
+        mudLog: isLogActive(h?.mudRemarks),
+        logging: isLogActive(h?.loggingRemarks),
     };
 }
 
@@ -245,9 +256,9 @@ export function selectWellLogsRemarks(d: IWellData | null): WellLogsRemarks | nu
     const h: IHeaderIR | undefined = d.EXAD_GWD_IR_HEADER?.[0];
     if (!h) return null;
     return {
-        dtRemarks: h.dtRemarks?.trim() || null,
-        mudRemarks: h.mudRemarks?.trim() || null,
-        loggingRemarks: h.loggingRemarks?.trim() || null,
+        dtRemarks: toActiveRemark(h.dtRemarks),
+        mudRemarks: toActiveRemark(h.mudRemarks),
+        loggingRemarks: toActiveRemark(h.loggingRemarks),
     };
 }
 
