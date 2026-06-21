@@ -243,7 +243,7 @@ export function createLegendLayer(mapView?: __esri.MapView): GraphicsLayer {
             spatialReference: {wkid: 4326},
         }),
         symbol: new TextSymbol({
-            text: 'Target Aquifier',
+            text: 'Target Aquifer',
             font: LEGEND_FONT_SMAAL_BOLD,
             color: [255,255,255],
             horizontalAlignment: 'center',

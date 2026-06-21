@@ -59,6 +59,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   protected readonly store = inject(MorningReportStore);
   private readonly authStore = inject(AuthStore);
   private readonly emailStore = inject(EmailStore);
+  protected readonly isSendingEmail = this.emailStore.isSending;
   private readonly emailService = inject(EmailService);
   private readonly notificationService = inject(NotificationService);
   private readonly route = inject(ActivatedRoute);

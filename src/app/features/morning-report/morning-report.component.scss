@@ -222,6 +222,34 @@
   svg { width: 13px; height: 13px; }
 }
 
+.email-btn--sending {
+  opacity: 0.75;
+  cursor: not-allowed;
+  pointer-events: none;
+
+  &:hover {
+    background: var(--bg-card);
+    border-color: rgba(148, 163, 184, 0.5);
+    color: var(--text-primary);
+  }
+}
+
+.email-btn__spinner {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .report-content {
   display: flex;
   flex-direction: column;

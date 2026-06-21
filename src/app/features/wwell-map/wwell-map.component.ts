@@ -517,7 +517,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
         bg: LEGEND_CHIP_COLORS[t.biNum] ?? `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
         textColor: '#fff',
       })),
-      { text: 'Aquifier', bg: '#22b8e6', textColor: '#fff' },
+      { text: 'Aquifer', bg: '#22b8e6', textColor: '#fff' },
     ];
 
     const { fontSize, px, gap, chipH } = this.getLegendMetrics(canvasWidth);
