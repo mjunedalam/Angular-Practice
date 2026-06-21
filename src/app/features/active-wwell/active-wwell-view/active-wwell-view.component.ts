@@ -241,6 +241,7 @@ export class ActiveWwellViewComponent implements OnInit {
         testStaDt: this.selectedDateString,
         hydProdRt: wellTestData?.rate,
         siwhp: wellTestData?.siwhp,
+        fwhp: wellTestData?.fwhp,
         hydProduct: wellTestData?.productivityActual,
         hydPmpDpth: wellTestData?.hydPmpDpth,
         statWlvl: wellTestData?.swl,

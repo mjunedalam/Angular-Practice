@@ -71,7 +71,7 @@
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
-              <input class="wt-ir-input" type="text" readonly value="" />
+              <input class="wt-ir-input" type="text" readonly [value]="data()?.testRateEstimate ?? ''" />
             </div>
           </div>
         } @else {
@@ -160,7 +160,7 @@
             />
             <div class="wt-ir-cell">
               <span class="wt-ir-badge">IR</span>
-              <input class="wt-ir-input" type="text" readonly value="" />
+              <input class="wt-ir-input" type="text" readonly [value]="data()?.testRateEstimate ?? ''" />
             </div>
           </div>
 
@@ -238,7 +238,7 @@
                 class="wt-ir-input"
                 type="text"
                 readonly
-                [value]="data()?.productivityEstimate ?? ''"
+                value=""
               />
             </div>
           </div>
@@ -302,7 +302,7 @@
                 class="wt-ir-input"
                 type="text"
                 readonly
-                [value]="data()?.productivityEstimate ?? ''"
+                value=""
               />
             </div>
           </div>

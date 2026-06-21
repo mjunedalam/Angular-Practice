@@ -130,10 +130,11 @@ export interface WwellTestViewModel {
   readonly conductedBy?: string | null;
   readonly rate?: number | string | null;
   readonly siwhp?: number | string | null;
+  readonly fwhp?: number | string | null;
   readonly siwhpEstimate?: number | string | null;
   readonly depth: number | string;
   readonly productivityActual?: number | string | null;
-  readonly productivityEstimate: number | string;
+  readonly testRateEstimate: number | string;
   readonly swl?: number | string | null;
   readonly swlEstimate?: number | string | null;
   readonly dwl?: number | string | null;

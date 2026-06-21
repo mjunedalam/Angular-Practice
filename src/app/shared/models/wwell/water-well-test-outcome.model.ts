@@ -9,6 +9,7 @@ export interface IWaterWellTestOutcome {
     wtrSaTdsCnc?: number | null;
     rpm?: number | null;
     siwhp?: number | null;
+    fwhp?: number | null;
     hydPmpDpth?: number | null;
     hydProdRt?: number | null;
     statWlvl?: number | null;
