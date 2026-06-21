@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Unified Smart Home Architecture Proposal</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #172033;
+      background: #ffffff;
+      font-size: 11px;
+      line-height: 1.38;
+    }
+    h1, h2, h3 { margin: 0; color: #111827; }
+    h1 { font-size: 30px; line-height: 1.1; letter-spacing: 0; }
+    h2 { font-size: 20px; margin: 0 0 10px; border-bottom: 2px solid #dbe4ef; padding-bottom: 6px; }
+    h3 { font-size: 13px; margin: 10px 0 6px; color: #334155; }
+    p { margin: 0 0 8px; }
+    .page { page-break-after: always; break-after: page; min-height: 268mm; position: relative; }
+    .page:last-child { page-break-after: auto; }
+    .cover {
+      min-height: 268mm;
+      height: 268mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(135deg, #0f172a 0%, #0f172a 46%, #0b8fac 46%, #0b8fac 64%, #f8fafc 64%, #f8fafc 100%);
+      color: #fff;
+      padding: 18mm;
+      page-break-after: always;
+      break-after: page;
+      overflow: hidden;
+    }
+    .cover h1 { color: #fff; max-width: 560px; font-size: 36px; }
+    .cover .subtitle { font-size: 15px; color: #dbeafe; max-width: 520px; margin-top: 12px; }
+    .cover-card {
+      background: rgba(255,255,255,.96);
+      color: #0f172a;
+      border-radius: 16px;
+      padding: 18px;
+      width: 380px;
+      margin-left: auto;
+      box-shadow: 0 18px 42px rgba(15,23,42,.25);
+    }
+    .cover-card strong { display: block; font-size: 13px; margin-bottom: 6px; }
+    .logo-row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+    .logo-chip {
+      min-height: 34px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 9px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #fff;
+      color: #111827;
+      font-weight: 700;
+    }
+    .logo-chip img { width: 20px; height: 20px; object-fit: contain; }
+    .brand-badge {
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-weight: 700;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      letter-spacing: .1px;
+      white-space: nowrap;
+    }
+    .sonoff { background: #00a8e8; }
+    .aqara { background: #12a4dd; }
+    .broadlink { background: #111827; }
+    .tplink { background: #00a0dc; }
+    .apple { background: #222; }
+    .samsung { background: #1428a0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .card {
+      border: 1px solid #d6e0ec;
+      border-radius: 10px;
+      padding: 10px;
+      background: #ffffff;
+      break-inside: avoid;
+    }
+    .card.soft { background: #f8fafc; }
+    .small { font-size: 9.5px; color: #475569; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px;
+      font-size: 9.7px;
+    }
+    th, td { border: 1px solid #cfd9e6; padding: 6px; vertical-align: top; }
+    th { background: #eaf0f7; text-align: left; color: #1e293b; }
+    ul { margin: 6px 0 8px 16px; padding: 0; }
+    li { margin: 2px 0; }
+    .diagram {
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 12px;
+      background: #f8fafc;
+      break-inside: avoid;
+      margin: 8px 0 12px;
+    }
+    .diagram-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .node-row { display: flex; gap: 9px; align-items: stretch; justify-content: center; }
+    .node {
+      background: #fff;
+      border: 1.5px solid #9eb4c9;
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      min-height: 50px;
+      flex: 1;
+      box-shadow: 0 3px 8px rgba(15,23,42,.06);
+    }
+    .node.dark { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .node.blue { border-color: #0b8fac; background: #ecfeff; }
+    .node.green { border-color: #22c55e; background: #f0fdf4; }
+    .node.orange { border-color: #f59e0b; background: #fffbeb; }
+    .node.purple { border-color: #8b5cf6; background: #f5f3ff; }
+    .node .name { font-weight: 800; font-size: 11px; }
+    .node .desc { font-size: 8.8px; color: #475569; margin-top: 3px; }
+    .node.dark .desc { color: #cbd5e1; }
+    .arrow {
+      text-align: center;
+      color: #64748b;
+      font-weight: 800;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+    .connector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .schematic {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .wire {
+      height: 3px;
+      background: repeating-linear-gradient(90deg, #64748b, #64748b 7px, transparent 7px, transparent 11px);
+      position: relative;
+    }
+    .wire:after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -4px;
+      border-left: 8px solid #64748b;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+    .terminal {
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      background: #fff;
+      padding: 7px;
+      min-height: 44px;
+    }
+    .terminal strong { display: block; font-size: 10.5px; }
+    .terminal span { font-size: 8.8px; color: #475569; }
+    .legend { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+    .legend span { border-radius: 999px; padding: 4px 8px; background: #eef2f7; font-size: 9px; }
+    .footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 1px solid #d6e0ec;
+      padding-top: 5px;
+      font-size: 8.5px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+    }
+    .page-content { padding-bottom: 14mm; }
+    .source-note { font-size: 8.5px; color: #64748b; }
+    .warning {
+      border-left: 4px solid #ef4444;
+      background: #fef2f2;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <h1>Unified Smart Home Architecture Proposal</h1>
+    <p class="subtitle">G+1 villa automation architecture with local-first control, real device stack, schematic diagrams, room-wise automation, and installation-ready topology.</p>
+    <div class="logo-row">
+      <span class="logo-chip"><img src="assets/logos/homeassistant.svg" alt="">Home Assistant</span>
+      <span class="logo-chip"><img src="assets/logos/mqtt.svg" alt="">MQTT</span>
+      <span class="logo-chip"><img src="assets/logos/zigbee.svg" alt="">Zigbee</span>
+      <span class="logo-chip"><img src="assets/logos/shelly.svg" alt="">Shelly</span>
+      <span class="logo-chip"><img src="assets/logos/philipshue.svg" alt="">Philips Hue</span>
+    </div>
+  </div>
+  <div class="cover-card">
+    <strong>Project Scope</strong>
+    Ground + 1 floor smart home solution for 5 first-floor bedrooms, attached washrooms, living, dining, prayer area, powder room, staircase, exterior zones, and garden.
+    <br><br>
+    <strong>Design Principle</strong>
+    Local-first automation. Internet improves remote access but must not be required for daily operation.
+    <br><br>
+    <strong>Document Output</strong>
+    Architecture, schematic diagrams, named product stack, BOQ categories, and implementation phases.
+  </div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>1. Recommended Real Device Stack</h2>
+    <div class="grid-2">
+      <div class="card soft">
+        <h3>Core Automation</h3>
+        <table>
+          <tr><th>Layer</th><th>Recommended Device / Product</th><th>Role</th></tr>
+          <tr><td>Controller</td><td><b>Home Assistant Green</b> or Intel NUC running Home Assistant OS</td><td>Main local automation server</td></tr>
+          <tr><td>Zigbee/Thread</td><td><b>Home Assistant Connect ZBT-2</b> or <b>SONOFF Zigbee 3.0 USB Dongle Plus ZBDongle-E</b></td><td>Zigbee sensor and device mesh</td></tr>
+          <tr><td>MQTT</td><td><b>Eclipse Mosquitto</b></td><td>Local command and telemetry broker</td></tr>
+          <tr><td>Firmware</td><td><b>ESPHome</b> for ESP32-based custom nodes</td><td>Custom controller firmware</td></tr>
+        </table>
+      </div>
+      <div class="card soft">
+        <h3>Control Hardware</h3>
+        <table>
+          <tr><th>Function</th><th>Recommended Device / Product</th><th>Use</th></tr>
+          <tr><td>DIN relay</td><td><b>Shelly Pro 4PM</b></td><td>Lighting zones, metered relay outputs</td></tr>
+          <tr><td>DIN dimmer</td><td><b>Shelly Pro Dimmer 2PM</b></td><td>Dimmable lighting circuits</td></tr>
+          <tr><td>Curtains</td><td><b>Shelly Plus 2PM</b> or <b>Aqara Roller Shade Driver E1</b></td><td>Motorized curtains / roller shades</td></tr>
+          <tr><td>AC / TV IR</td><td><b>BroadLink RM4 Pro</b></td><td>IR/RF control for AC, TV, AV</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3>Network And Voice Layer</h3>
+    <table>
+      <tr><th>Function</th><th>Recommended Device / Product</th><th>Notes</th></tr>
+      <tr><td>Router / gateway</td><td><b>TP-Link Omada ER605</b></td><td>VLAN-ready router for smart home segmentation</td></tr>
+      <tr><td>PoE switch</td><td><b>TP-Link Omada TL-SG2210P</b></td><td>Gateway, access points, cameras, panels</td></tr>
+      <tr><td>Wi-Fi AP</td><td><b>TP-Link Omada EAP610 / EAP650</b></td><td>Reliable villa coverage</td></tr>
+      <tr><td>Voice</td><td><b>Google Home</b>, <b>Amazon Alexa</b>, <b>Apple Home</b></td><td>Via Home Assistant integrations/cloud bridge</td></tr>
+      <tr><td>Optional lighting ecosystem</td><td><b>Philips Hue Bridge</b> / <b>Hue Bridge Pro</b></td><td>Decorative lamps, strips, mood scenes</td></tr>
+    </table>
+
+    <div class="warning">
+      <b>Electrical note:</b> final relay/dimmer selection must follow load calculation, local electrical code, neutral availability, switchboard depth, heat dissipation, and DB/MCB design.
+    </div>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 1</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>2. Architecture Diagram With Product Logos</h2>
+    <div class="diagram">
+      <div class="diagram-title">Local-First Smart Home Architecture <span class="small">Internet optional for local control</span></div>
+      <div class="node-row">
+        <div class="node dark"><div class="name">Mobile App</div><div class="desc">Owner / family control</div></div>
+        <div class="node dark"><div class="name">Wall Keypads</div><div class="desc">Manual fallback</div></div>
+        <div class="node dark"><div class="name">Voice</div><div class="desc">Google / Alexa / Apple</div></div>
+      </div>
+      <div class="arrow">HTTPS / local LAN / voice cloud</div>
+      <div class="node-row">
+        <div class="node blue">
+          <div class="name"><img src="assets/logos/homeassistant.svg" style="width:18px;vertical-align:middle"> Home Assistant Green</div>
+          <div class="desc">Automation engine, dashboards, scenes, users, integrations</div>
+        </div>
+        <div class="node purple">
+          <div class="name"><img src="assets/logos/mqtt.svg" style="width:18px;vertical-align:middle"> Eclipse Mosquitto</div>
+          <div class="desc">Local MQTT broker for commands and telemetry</div>
+        </div>
+        <div class="node orange">
+          <div class="name"><img src="assets/logos/zigbee.svg" style="width:18px;vertical-align:middle"> Zigbee Coordinator</div>
+          <div class="desc">Connect ZBT-2 / SONOFF ZBDongle-E</div>
+        </div>
+      </div>
+      <div class="arrow">Wi-Fi / Ethernet / Zigbee / IR / dry contact</div>
+      <div class="connector">
+        <div class="node green"><div class="name"><img src="assets/logos/shelly.svg" style="width:18px;vertical-align:middle"> Shelly Pro 4PM</div><div class="desc">COB and relay lighting</div></div>
+        <div class="node green"><div class="name">Shelly Pro Dimmer 2PM</div><div class="desc">Dimmable strip/cove lighting</div></div>
+        <div class="node green"><div class="name">Shelly Plus 2PM</div><div class="desc">Curtain motor control</div></div>
+        <div class="node green"><div class="name">BroadLink RM4 Pro</div><div class="desc">AC / TV IR control</div></div>
+      </div>
+      <div class="connector">
+        <div class="node"><div class="name">SONOFF SNZB-03P</div><div class="desc">Motion sensor</div></div>
+        <div class="node"><div class="name">SONOFF SNZB-02D</div><div class="desc">Temp/humidity sensor</div></div>
+        <div class="node"><div class="name">Philips Hue Bridge</div><div class="desc">Decorative smart lights</div></div>
+        <div class="node"><div class="name">Outdoor IP65 Panel</div><div class="desc">Exterior/garden circuits</div></div>
+      </div>
+    </div>
+
+    <h3>Control Behavior</h3>
+    <div class="grid-3">
+      <div class="card"><b>Local mode</b><br>Phone connects to Home Assistant on LAN. Commands execute through MQTT/relay modules even without internet.</div>
+      <div class="card"><b>Remote mode</b><br>Home Assistant Cloud, VPN, or secure reverse tunnel provides remote access. No direct port forwarding recommended.</div>
+      <div class="card"><b>Fallback mode</b><br>Physical switches/keypads remain connected. Essential lights must work without app/cloud.</div>
+    </div>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 2</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>3. Network Topology Schematic</h2>
+    <div class="diagram">
+      <div class="diagram-title">Villa Network And Smart Home VLAN Design</div>
+      <div class="node-row">
+        <div class="node dark"><div class="name">ISP Fiber ONT</div><div class="desc">Internet handoff</div></div>
+        <div class="wire"></div>
+        <div class="node blue"><div class="name">TP-Link Omada ER605</div><div class="desc">Router, firewall, VLAN gateway</div></div>
+        <div class="wire"></div>
+        <div class="node blue"><div class="name">Omada TL-SG2210P</div><div class="desc">PoE managed switch</div></div>
+      </div>
+      <div class="arrow">VLAN segmentation</div>
+      <div class="connector">
+        <div class="node"><div class="name">VLAN 10 Owner LAN</div><div class="desc">Phones, tablets, admin laptops</div></div>
+        <div class="node"><div class="name">VLAN 20 Smart Home</div><div class="desc">Home Assistant, Shelly, BroadLink, Hue</div></div>
+        <div class="node"><div class="name">VLAN 30 CCTV</div><div class="desc">NVR and cameras future</div></div>
+        <div class="node"><div class="name">VLAN 40 Guest Wi-Fi</div><div class="desc">Internet only, no device access</div></div>
+      </div>
+      <div class="connector">
+        <div class="node green"><div class="name">EAP610 Ground Floor</div><div class="desc">Wi-Fi coverage</div></div>
+        <div class="node green"><div class="name">EAP610 First Floor</div><div class="desc">Wi-Fi coverage</div></div>
+        <div class="node green"><div class="name">Home Assistant Green</div><div class="desc">Wired Ethernet preferred</div></div>
+        <div class="node green"><div class="name">Zigbee Coordinator</div><div class="desc">USB extension, central location</div></div>
+      </div>
+    </div>
+
+    <h3>Network Rules</h3>
+    <table>
+      <tr><th>Rule</th><th>Reason</th></tr>
+      <tr><td>Home Assistant must be wired by Ethernet.</td><td>Stable command execution and reliable dashboards.</td></tr>
+      <tr><td>Smart devices stay on Smart Home VLAN.</td><td>Limits exposure and keeps guest devices isolated.</td></tr>
+      <tr><td>No router port-forwarding to Home Assistant.</td><td>Use Home Assistant Cloud, VPN, or secure tunnel instead.</td></tr>
+      <tr><td>Zigbee coordinator should use USB extension cable.</td><td>Reduces RF interference from gateway/USB port.</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 3</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>4. Bedroom Control Schematic</h2>
+    <div class="diagram">
+      <div class="diagram-title">Typical Bedroom: Lighting, Fan, AC, TV, Curtains</div>
+      <div class="schematic">
+        <div class="terminal">
+          <strong>DB / MCB</strong>
+          <span>Lighting MCB, fan MCB if separate, surge protection, neutral/live/earth</span>
+        </div>
+        <div class="wire"></div>
+        <div class="terminal">
+          <strong>Bedroom Automation Panel</strong>
+          <span>Shelly Pro 4PM + Shelly Pro Dimmer 2PM + Shelly Plus 2PM</span>
+        </div>
+      </div>
+      <div class="arrow">Outputs</div>
+      <div class="connector">
+        <div class="node"><div class="name">COB Group A/B</div><div class="desc">Relay channels from Shelly Pro 4PM</div></div>
+        <div class="node"><div class="name">False Ceiling Strip</div><div class="desc">LED driver + dimmer channel</div></div>
+        <div class="node"><div class="name">Ceiling Fan</div><div class="desc">Smart fan controller / compatible regulator</div></div>
+        <div class="node"><div class="name">Curtains</div><div class="desc">Shelly Plus 2PM open/close/position</div></div>
+      </div>
+      <div class="connector">
+        <div class="node"><div class="name">AC</div><div class="desc">BroadLink RM4 Pro IR or AC gateway</div></div>
+        <div class="node"><div class="name">LCD TV</div><div class="desc">IR / IP / HDMI-CEC where supported</div></div>
+        <div class="node"><div class="name">Wall Keypad</div><div class="desc">Manual inputs remain active</div></div>
+        <div class="node"><div class="name">Intercom</div><div class="desc">Provision only unless API/dry contact exists</div></div>
+      </div>
+    </div>
+
+    <h3>Bedroom Scene Logic</h3>
+    <table>
+      <tr><th>Scene</th><th>Lighting</th><th>Fan / AC</th><th>Curtain / TV</th></tr>
+      <tr><td>Relax</td><td>Strip warm 35%, COB low</td><td>Fan medium, AC comfort</td><td>Curtains partial close</td></tr>
+      <tr><td>Sleep</td><td>All lights off except optional night strip</td><td>Fan/AC sleep mode</td><td>Curtains close, TV off</td></tr>
+      <tr><td>Movie</td><td>COB off, strip dim</td><td>Comfort mode</td><td>Curtains close, TV on</td></tr>
+      <tr><td>Wake Up</td><td>Soft strip on</td><td>AC adjust</td><td>Curtains open</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 4</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>5. Washroom, Living, Exterior Schematics</h2>
+    <div class="grid-2">
+      <div class="diagram">
+        <div class="diagram-title">Attached Washroom</div>
+        <div class="node blue"><div class="name">3-Channel Relay Module</div><div class="desc">Certified relay, protected enclosure, outside wet zone</div></div>
+        <div class="arrow">Controls</div>
+        <div class="node-row">
+          <div class="node"><div class="name">COB</div></div>
+          <div class="node"><div class="name">Strip</div></div>
+          <div class="node"><div class="name">Exhaust</div></div>
+        </div>
+        <div class="legend"><span>Optional: motion</span><span>Optional: humidity</span><span>Auto fan timer</span></div>
+      </div>
+      <div class="diagram">
+        <div class="diagram-title">Living Area</div>
+        <div class="node blue"><div class="name">Living Multi-Controller</div><div class="desc">Lighting, curtains, TV, sunroof-ready controls</div></div>
+        <div class="arrow">Zones</div>
+        <div class="node-row">
+          <div class="node"><div class="name">Main COB</div></div>
+          <div class="node"><div class="name">Cove Strip</div></div>
+          <div class="node"><div class="name">Glass Curtains</div></div>
+        </div>
+        <div class="legend"><span>Guest</span><span>Movie</span><span>Prayer</span><span>All Off</span></div>
+      </div>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">Exterior And Garden Panel</div>
+      <div class="schematic">
+        <div class="terminal">
+          <strong>Dedicated Exterior MCB</strong>
+          <span>Separate weather-protected circuit, RCCB/ELCB as per electrical design</span>
+        </div>
+        <div class="wire"></div>
+        <div class="terminal">
+          <strong>Outdoor IP65/IP67 Control Panel</strong>
+          <span>Shelly Pro 4PM or industrial relay panel, contactors for heavy loads</span>
+        </div>
+      </div>
+      <div class="arrow">Zone outputs</div>
+      <div class="connector">
+        <div class="node"><div class="name">Front Facade</div><div class="desc">Sunset scene</div></div>
+        <div class="node"><div class="name">Rear Lights</div><div class="desc">Security / utility</div></div>
+        <div class="node"><div class="name">Left / Right</div><div class="desc">Wall lights</div></div>
+        <div class="node"><div class="name">Garden</div><div class="desc">Landscape + irrigation-ready</div></div>
+      </div>
+    </div>
+
+    <h3>Recommended Controller Distribution</h3>
+    <table>
+      <tr><th>Area</th><th>Controller</th><th>Real Product Examples</th></tr>
+      <tr><td>5 bedrooms</td><td>Room panel per room</td><td>Shelly Pro 4PM, Shelly Pro Dimmer 2PM, Shelly Plus 2PM, BroadLink RM4 Pro</td></tr>
+      <tr><td>5 washrooms + powder</td><td>3-channel relay per room</td><td>Shelly Plus 1PM / Shelly Pro 4PM shared panel where practical</td></tr>
+      <tr><td>Living/dining/prayer</td><td>Multi-zone lighting and curtain panel</td><td>Shelly Pro series + Philips Hue Bridge for decorative scenes</td></tr>
+      <tr><td>Exterior/garden</td><td>Outdoor-rated relay panel</td><td>Shelly Pro series, contactors, IP65/IP67 enclosure</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 5</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>6. Software, Naming, MQTT And Security</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Room Naming Standard</h3>
+        <p><b>Format:</b> floor / area / device / function</p>
+        <ul>
+          <li>first/bedroom1/light/cob</li>
+          <li>first/bedroom1/light/strip</li>
+          <li>first/bedroom1/fan/main</li>
+          <li>first/bedroom1/ac/main</li>
+          <li>first/washroom1/exhaust/main</li>
+          <li>exterior/front/light/facade</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>MQTT Topic Pattern</h3>
+        <ul>
+          <li>home/{floor}/{area}/{device}/{function}/set</li>
+          <li>home/{floor}/{area}/{device}/{function}/state</li>
+          <li>home/{floor}/{area}/{device}/{function}/telemetry</li>
+          <li>home/{floor}/{area}/scene/{scene}/trigger</li>
+        </ul>
+      </div>
+    </div>
+    <div class="diagram">
+      <div class="diagram-title">Local Command Flow</div>
+      <div class="node-row">
+        <div class="node dark"><div class="name">Mobile App</div></div>
+        <div class="wire"></div>
+        <div class="node blue"><div class="name">Home Assistant</div></div>
+        <div class="wire"></div>
+        <div class="node purple"><div class="name">MQTT</div></div>
+        <div class="wire"></div>
+        <div class="node green"><div class="name">Room Controller</div></div>
+      </div>
+      <div class="arrow">State feedback returns to dashboard after execution</div>
+    </div>
+    <h3>Security Requirements</h3>
+    <table>
+      <tr><th>Control</th><th>Requirement</th></tr>
+      <tr><td>Remote access</td><td>Home Assistant Cloud, VPN, or secure tunnel. No public port forwarding.</td></tr>
+      <tr><td>User roles</td><td>Owner/admin, family, guest, maintenance access.</td></tr>
+      <tr><td>Network</td><td>Smart Home VLAN isolated from Guest Wi-Fi and CCTV VLAN.</td></tr>
+      <tr><td>Backups</td><td>Scheduled Home Assistant backup to local NAS/cloud storage.</td></tr>
+      <tr><td>Manual fallback</td><td>All critical lights must remain physically operable.</td></tr>
+    </table>
+
+    <h3>Implementation Phases</h3>
+    <table>
+      <tr><th>Phase</th><th>Deliverable</th></tr>
+      <tr><td>1. Site survey</td><td>Device count, switchboard depth, DB mapping, curtain motor count, AC brands, Wi-Fi heatmap.</td></tr>
+      <tr><td>2. Electrical design</td><td>Load schedule, relay/dimmer map, MCB/RCCB plan, enclosure placement.</td></tr>
+      <tr><td>3. Network setup</td><td>Router, switch, access points, VLANs, gateway location, Zigbee coordinator placement.</td></tr>
+      <tr><td>4. Installation</td><td>Modules, sensors, curtain motors, IR gateways, panels, labels.</td></tr>
+      <tr><td>5. Commissioning</td><td>Room testing, offline test, remote test, scene test, handover document.</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 6</span></div>
+</section>
+
+<section class="page">
+  <div class="page-content">
+    <h2>7. BOQ Categories And Final Recommendation</h2>
+    <table>
+      <tr><th>Category</th><th>Recommended Product Families</th><th>Notes</th></tr>
+      <tr><td>Automation gateway</td><td>Home Assistant Green / Intel NUC + Home Assistant OS</td><td>Use wired Ethernet and UPS.</td></tr>
+      <tr><td>Zigbee coordinator</td><td>Home Assistant Connect ZBT-2 / SONOFF ZBDongle-E</td><td>Use USB extension cable.</td></tr>
+      <tr><td>Relay control</td><td>Shelly Pro 4PM, Shelly Plus 1PM</td><td>Lighting and exhaust circuits after load check.</td></tr>
+      <tr><td>Dimming</td><td>Shelly Pro Dimmer 2PM, compatible LED drivers</td><td>Confirm dimmable driver type.</td></tr>
+      <tr><td>Curtains</td><td>Shelly Plus 2PM, Aqara Roller Shade Driver E1</td><td>Choose based on motor type and curtain hardware.</td></tr>
+      <tr><td>IR control</td><td>BroadLink RM4 Pro</td><td>AC and TV where no IP integration exists.</td></tr>
+      <tr><td>Sensors</td><td>SONOFF SNZB-03P, SNZB-02D, Aqara sensors</td><td>Motion, humidity, temperature, contact.</td></tr>
+      <tr><td>Network</td><td>TP-Link Omada ER605, TL-SG2210P, EAP610/EAP650</td><td>VLAN-ready and scalable.</td></tr>
+      <tr><td>Lighting ecosystem</td><td>Philips Hue Bridge / Hue Bridge Pro</td><td>Optional for decorative/mood lighting.</td></tr>
+    </table>
+
+    <div class="card soft">
+      <h3>Final Architecture Recommendation</h3>
+      <p>Build the solution around a local Home Assistant gateway with MQTT, VLAN-separated networking, room-wise smart relay/dimmer panels, Zigbee sensors, and secure remote access. Keep all daily functions local: lights, fans, curtains, AC scenes, washroom exhaust, staircase lights, and exterior/garden scenes.</p>
+      <p>The strongest design is not a cloud-only smart home. It is a professionally wired local automation system with app, voice, scenes, and remote access layered on top.</p>
+    </div>
+
+    <h3>References Used For Product Naming</h3>
+    <p class="source-note">Product names and capabilities were checked against official product pages where available: Home Assistant Green, SONOFF ZBDongle-E, Aqara Roller Shade Driver E1, Philips Hue Bridge, and TP-Link Omada ER605.</p>
+  </div>
+  <div class="footer"><span>Unified Smart Home Architecture Proposal</span><span>Page 7</span></div>
+</section>
+
+</body>
+</html>
