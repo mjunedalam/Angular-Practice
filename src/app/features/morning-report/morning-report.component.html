@@ -88,25 +88,103 @@
             <div class="report-card report-card--test">
               <div class="card-header card-header--green">
                 <span class="card-header__name">{{ vm.wellName || 'Unknown' }}</span>
-                <span class="card-header__badge">Test Result</span>
+                <span class="card-header__badge">{{ isFlowTestVm(vm) ? 'FLOW' : 'PUMP' }}</span>
               </div>
               <table class="card-table">
                 <tbody>
-                  @for (row of testRows(vm); track row[0].label) {
                   <tr>
-                    <td class="card-table__label">{{ row[0].label }}</td>
-                    <td class="card-table__value" [class.missing]="!hasMetricValue(row[0].value)">
-                      {{ hasMetricValue(row[0].value) ? row[0].value : 'Missing' }}
+                    <td class="card-table__label">Aquifer</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.aquiferActual)">
+                      {{ hasMetricValue(vm.aquiferActual) ? vm.aquiferActual : 'Missing' }}
                     </td>
-                    @if (row[1]) {
-                    <td class="card-table__label">{{ row[1].label }}</td>
-                    <td class="card-table__value" [class.missing]="!hasMetricValue(row[1].value)">
-                      {{ hasMetricValue(row[1].value) ? row[1].value : 'Missing' }}
+                    <td class="card-table__label">Test Duration (h)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.duration)">
+                      {{ hasMetricValue(vm.duration) ? vm.duration : 'Missing' }}
                     </td>
-                    } @else {
-                    <td class="card-table__label"></td>
-                    <td class="card-table__value"></td>
-                    }
+                  </tr>
+                  @if (!isFlowTestVm(vm)) {
+                  <tr>
+                    <td class="card-table__label">RPM</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.rpm)">
+                      {{ hasMetricValue(vm.rpm) ? vm.rpm : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">Test Rate (GPM)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.rate)">
+                      {{ hasMetricValue(vm.rate) ? vm.rate : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">Temperature (°C)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.temp)">
+                      {{ hasMetricValue(vm.temp) ? vm.temp : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">Pump Depth (ft)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.hydPmpDpth)">
+                      {{ hasMetricValue(vm.hydPmpDpth) ? vm.hydPmpDpth : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">TDS (PPM)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.tds)">
+                      {{ hasMetricValue(vm.tds) ? vm.tds : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">SWL (ft)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.swl)">
+                      {{ hasMetricValue(vm.swl) ? vm.swl : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">H2S (PPM)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.h2sActual)">
+                      {{ hasMetricValue(vm.h2sActual) ? vm.h2sActual : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">DWL (ft)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.dwl)">
+                      {{ hasMetricValue(vm.dwl) ? vm.dwl : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">Well Productivity (GPM/FT)</td>
+                    <td class="card-table__value" colspan="3" [class.missing]="!hasMetricValue(vm.productivityActual)">
+                      {{ hasMetricValue(vm.productivityActual) ? vm.productivityActual : 'Missing' }}
+                    </td>
+                  </tr>
+                  } @else {
+                  <tr>
+                    <td class="card-table__label">Test Rate (GPM)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.rate)">
+                      {{ hasMetricValue(vm.rate) ? vm.rate : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">SIWHP (psi)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.siwhp)">
+                      {{ hasMetricValue(vm.siwhp) ? vm.siwhp : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">Temperature (°C)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.temp)">
+                      {{ hasMetricValue(vm.temp) ? vm.temp : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">FWHP (psi)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.fwhp)">
+                      {{ hasMetricValue(vm.fwhp) ? vm.fwhp : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">TDS (PPM)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.tds)">
+                      {{ hasMetricValue(vm.tds) ? vm.tds : 'Missing' }}
+                    </td>
+                    <td class="card-table__label">Well Productivity (GPM/ft)</td>
+                    <td class="card-table__value" [class.missing]="!hasMetricValue(vm.productivityActual)">
+                      {{ hasMetricValue(vm.productivityActual) ? vm.productivityActual : 'Missing' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="card-table__label">H2S (PPM)</td>
+                    <td class="card-table__value" colspan="3" [class.missing]="!hasMetricValue(vm.h2sActual)">
+                      {{ hasMetricValue(vm.h2sActual) ? vm.h2sActual : 'Missing' }}
+                    </td>
                   </tr>
                   }
                 </tbody>

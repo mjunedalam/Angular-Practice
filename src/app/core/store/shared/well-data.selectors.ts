@@ -534,6 +534,7 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellN
         wellName: drillingWellName,
         rPM: testType === 'PUMP' ? String(o.rpm ?? '') : '',
         siwhp: testType === 'FLOW' ? String(o.siwhp ?? '') : '',
+        fwhp: testType === 'FLOW' ? String(o.fwhp ?? '') : '',
         pumpDepth: testType === 'PUMP' ? String(o.hydPmpDpth ?? '') : '',
         swl: testType === 'PUMP' ? String(o.statWlvl ?? '') : '',
         dwl: testType === 'PUMP' ? String(o.dyncWlvl ?? '') : '',
@@ -542,7 +543,7 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellN
         trgtRsvrCd: o.rsvrCd ?? '',
         duration: String(o.duration ?? ''),
         testRate: String(o.hydProdRt ?? ''),
-        wellProductivity: testType === 'PUMP' ? String(o.hydProduct ?? '') : '',
+        wellProductivity: String(o.hydProduct ?? ''),
         tds: String(o.wtrSaTdsCnc ?? ''),
         conductedBy: o.testerNetworkId ?? '',
     };

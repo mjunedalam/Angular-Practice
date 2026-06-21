@@ -306,8 +306,12 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     return value !== null && value !== undefined && String(value).trim() !== '';
   }
 
+  protected isFlowTestVm(vm: WwellTestReportViewModel): boolean {
+    return vm.flowType === 'Y' || vm.testType?.toLowerCase() === 'flow';
+  }
+
   private testTypeLabel(vm: WwellTestReportViewModel): 'FLOW' | 'PUMP' {
-    return vm.flowType === 'Y' || vm.testType?.toLowerCase() === 'flow' ? 'FLOW' : 'PUMP';
+    return this.isFlowTestVm(vm) ? 'FLOW' : 'PUMP';
   }
 
   private toEmailWaterTestResult(vm: WwellTestReportViewModel): WaterWellTestEmailResult {
@@ -317,6 +321,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       wellName: vm.wellName,
       rPM: testType === 'PUMP' ? this.metricText(vm.rpm) : '',
       siwhp: testType === 'FLOW' ? this.metricText(vm.siwhp) : '',
+      fwhp: testType === 'FLOW' ? this.metricText(vm.fwhp) : '',
       pumpDepth: testType === 'PUMP' ? this.metricText(vm.hydPmpDpth) : '',
       swl: testType === 'PUMP' ? this.metricText(vm.swl) : '',
       dwl: testType === 'PUMP' ? this.metricText(vm.dwl) : '',
@@ -325,9 +330,9 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       trgtRsvrCd: this.metricText(vm.aquiferActual),
       duration: this.metricText(vm.duration),
       testRate: this.metricText(vm.rate),
-      wellProductivity: testType === 'PUMP' ? this.metricText(vm.productivityActual) : '',
+      wellProductivity: this.metricText(vm.productivityActual),
       tds: this.metricText(vm.tds),
-      conductedBy: '',
+      conductedBy: this.metricText(vm.conductedBy),
       rows: this.testRows(vm).map(([left, right]) => ({
         leftLabel: left.label,
         leftValue: this.metricText(left.value),

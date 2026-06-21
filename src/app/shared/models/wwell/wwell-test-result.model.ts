@@ -5,6 +5,7 @@ export interface WaterWellTestResult {
   readonly wellName: string;
   readonly rPM: string;
   readonly siwhp: string;
+  readonly fwhp: string;
   readonly pumpDepth: string;
   readonly swl: string;
   readonly dwl: string;
