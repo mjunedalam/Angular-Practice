@@ -109,7 +109,6 @@
         aria-label="Well ownership legend"
         (mousedown)="onLegendDragStart($event)"
       >
-        <span class="wwo__legend-heading">Ownership</span>
         @for (item of legendItems; track item.biNum) {
           <div class="wwo__legend-chip" role="listitem" [style.--chip-color]="item.color">
             <span class="wwo__legend-chip__dot"></span>
