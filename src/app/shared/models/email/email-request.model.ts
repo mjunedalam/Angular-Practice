@@ -12,6 +12,7 @@ export interface EmailRequest {
     morningReport: MorningReport[];
     mapImageData: string;
     waterWellTestResults?: WaterWellTestEmailResult[];
+    mrReportDate: string;
   };
   generatePdf: boolean;
   templateName: string;

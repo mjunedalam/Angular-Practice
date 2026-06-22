@@ -17,6 +17,15 @@ export class EmailService {
   private apiUrl = `${this.extConfigService.settings.emailServiceUrl}` + "/send-email";
 
 
+  private formatReportDate(dateStr: string): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${days[date.getDay()]} ${dd} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
   sendEmail(emailRequest: EmailRequest): Observable<number> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(this.apiUrl, emailRequest, { headers, responseType: 'text', observe: 'response' }).pipe(
@@ -29,6 +38,7 @@ export class EmailService {
     mapImageData: string,
     recipientEmail: string,
     waterWellTestResults?: WaterWellTestEmailResult[],
+    reportDate?: string,
   ): EmailRequest {
     return {
       subject: EMAIL_SUBJECT,
@@ -42,7 +52,8 @@ export class EmailService {
       templateData: {
         morningReport: reports,
         mapImageData: mapImageData,
-        waterWellTestResults
+        waterWellTestResults,
+        mrReportDate: this.formatReportDate(reportDate ?? new Date().toISOString().slice(0, 10))
       }
     };
   }

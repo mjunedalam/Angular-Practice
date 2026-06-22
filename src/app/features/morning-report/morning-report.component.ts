@@ -268,6 +268,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
         mapData ?? '',
         recipientEmail,
         waterWelltestResults,
+        this.selectedDateString,
       );
       this.emailStore.sendEmail(emailRequest);
     } catch {
@@ -284,11 +285,11 @@ export class MorningReportComponent implements OnInit, OnDestroy {
         { label: 'Test Duration (h)', value: vm.duration },
       ];
       cells.push(
-        { label: 'Test Rate (GPM)', value: vm.rate },
+        { label: 'Test Rate (gpm)', value: vm.rate },
         { label: 'SIWHP (psi)', value: vm.siwhp },
         { label: 'Temperature (°C)', value: vm.temp },
-        { label: 'TDS (PPM)', value: vm.tds },
-        { label: 'H2S (PPM)', value: vm.h2sActual },
+        { label: 'TDS (ppm)', value: vm.tds },
+        { label: 'H2S (ppm)', value: vm.h2sActual },
       );
       return this.toMetricRows(cells);
     }
@@ -315,7 +316,8 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   }
 
   protected get displayDate(): string {
-    return getTodayAtMidnight().toLocaleDateString('en-GB', {
+    const [y, m, d] = this.selectedDateString.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     }).replace(',', '');
   }
