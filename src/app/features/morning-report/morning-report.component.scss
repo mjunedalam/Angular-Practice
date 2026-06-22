@@ -33,9 +33,11 @@
 
 /* ── Title block — exact mr.html banner ─────────────────────── */
 .report-title-block {
-  padding: 14px 24px 12px;
+  padding: 18px 24px 20px;
   background: #fff;
   border-left: 5px solid var(--mr-navy-dark);
+  margin-bottom: 2px;
+  text-align: center;
 }
 
 .report-title-main {
@@ -264,7 +266,7 @@
 
 /* ── Content area ────────────────────────────────────────────── */
 .report-content {
-  padding: 0 1.25rem 0.5rem;
+  padding: 1.25rem 1.25rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -298,7 +300,7 @@
   font-weight: 600;
 }
 
-/* ── Data table — exact mr.html .data-table ─────────────────── */
+/* ── Data table ──────────────────────────────────────────────── */
 .data-table {
   border-collapse: collapse;
   width: 100%;
@@ -307,34 +309,36 @@
 
   td {
     border: 1px solid var(--mr-border);
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.5;
     word-wrap: break-word;
     width: 25%;
   }
 }
 
-/* mr.html .tbl-header */
 .tbl-header {
   background-color: var(--mr-tbl-hdr-bg);
   color: var(--mr-tbl-hdr-text);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   text-align: center;
-  padding: 8px 10px;
+  padding: 10px 14px;
+  letter-spacing: 0.3px;
 }
 
-/* mr.html .lbl */
 .lbl {
   background-color: var(--mr-label-bg);
   color: var(--mr-label-text);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 13px;
   text-align: left;
 }
 
-/* mr.html .val */
 .val {
   color: var(--mr-value-text);
+  font-size: 14px;
+  font-weight: 500;
   text-align: left;
 
   &.missing {
@@ -343,36 +347,38 @@
   }
 }
 
-/* mr.html .val-span */
 .val-span {
   color: var(--mr-value-text);
+  font-size: 14px;
+  font-weight: 500;
   text-align: left;
 }
 
-/* mr.html .well-name-cell */
 .well-name-cell {
   background-color: var(--mr-well-bg);
   color: var(--mr-well-text);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.5;
+  padding: 10px 14px;
 }
 
-/* mr.html .status-cell */
 .status-cell {
   background-color: var(--mr-well-bg);
   color: var(--mr-well-text);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   text-align: center;
+  padding: 10px 14px;
 }
 
-/* mr.html .opt-cell */
 .opt-cell {
   word-wrap: break-word;
   white-space: normal;
   text-align: left;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* ── Rig status inline input ─────────────────────────────────── */
@@ -384,7 +390,7 @@
   outline: none;
   color: var(--mr-well-text);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   text-align: center;
   padding: 2px 4px;
