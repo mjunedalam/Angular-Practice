@@ -12,53 +12,53 @@
   --mr-value-text:    #111827;
   --mr-border:        #c0c0c0;
   --mr-missing:       #cc0000;
-  --mr-divider:       #1f3864;
-
-  /* ── page shell ───────────────────────────────────────────── */
-  --report-bg:           var(--bg-surface);
-  --report-border:       var(--border);
-  --report-border-strong: rgba(148, 163, 184, 0.26);
-  --report-shadow:       0 18px 48px rgba(15, 23, 42, 0.12);
-  --report-text:         var(--mr-value-text);
-  --report-muted:        var(--text-secondary);
 
   display: block;
   padding: 2rem 1rem 3rem;
   background: var(--bg-app);
 }
 
+/* ── Outer shell ─────────────────────────────────────────────── */
 .report-shell {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 1rem 1rem 2rem;
-  border: 1px solid var(--report-border);
-  border-radius: 24px;
-  background: var(--report-bg);
-  box-shadow: var(--report-shadow);
-  color: var(--report-text);
+  padding: 0 0 2rem;
+  border: 1px solid var(--mr-border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.1), 0 1px 4px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  color: var(--mr-value-text);
 }
 
-/* ── Header bar — mr.html section-heading style ──────────────── */
-.report-header {
-  margin-bottom: 1.25rem;
+/* ── Title block — exact mr.html banner ─────────────────────── */
+.report-title-block {
+  padding: 14px 24px 12px;
+  background: #fff;
+  border-left: 5px solid var(--mr-navy-dark);
 }
 
-.report-header__bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 3.4rem;
-  border-radius: 16px;
-  background: var(--mr-navy);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.report-title-main {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--mr-navy-dark);
+  margin: 0 0 2px;
+  line-height: 1.2;
 }
 
-.report-header__title {
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+.report-title-sub {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2e4a;
+  margin: 0 0 3px;
+  line-height: 1.3;
+}
+
+.report-title-date {
+  font-size: 11px;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0;
 }
 
 /* ── Toolbar ─────────────────────────────────────────────────── */
@@ -67,7 +67,10 @@
   align-items: center;
   gap: 1rem;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  background: #f9fafb;
+  border-top: 1px solid var(--mr-border);
+  border-bottom: 1px solid var(--mr-border);
 }
 
 .date-picker-section {
@@ -95,7 +98,7 @@
 .date-picker-input {
   padding: 6px 34px 6px 12px;
   border: 1.5px solid var(--mr-border);
-  border-radius: var(--radius-inner);
+  border-radius: 6px;
   background: #fff;
   color: var(--mr-value-text);
   font-family: inherit;
@@ -162,6 +165,14 @@
   -webkit-appearance: none;
 }
 
+/* ── Divider bar — mr.html .divider ─────────────────────────── */
+.report-divider {
+  width: 100%;
+  height: 6px;
+  background-color: var(--mr-navy);
+  margin: 0;
+}
+
 /* ── Loading bar ─────────────────────────────────────────────── */
 .report-loading-bar {
   position: fixed;
@@ -190,7 +201,7 @@
   gap: 0.55rem;
   padding: 0.55rem 1.1rem 0.55rem 0.85rem;
   border: 1.5px solid rgba(31, 56, 100, 0.35);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   color: var(--mr-navy);
   font-size: 0.82rem;
@@ -233,12 +244,6 @@
   opacity: 0.75;
   cursor: not-allowed;
   pointer-events: none;
-
-  &:hover {
-    background: #fff;
-    border-color: rgba(31, 56, 100, 0.35);
-    color: var(--mr-navy);
-  }
 }
 
 .email-btn__spinner {
@@ -259,9 +264,10 @@
 
 /* ── Content area ────────────────────────────────────────────── */
 .report-content {
+  padding: 0 1.25rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 0;
   transition: opacity 200ms ease;
 
   &--loading {
@@ -272,8 +278,9 @@
 
 .report-error {
   padding: 0.95rem 1.1rem;
+  margin: 1rem 0;
   border: 1px solid rgba(204, 0, 0, 0.35);
-  border-radius: 16px;
+  border-radius: 8px;
   background: rgba(204, 0, 0, 0.06);
   color: var(--mr-missing);
   font-weight: 600;
@@ -281,8 +288,9 @@
 
 .report-empty {
   padding: 1.1rem 1.2rem;
+  margin: 1rem 0;
   border: 1px solid rgba(31, 56, 100, 0.2);
-  border-radius: 16px;
+  border-radius: 8px;
   background: var(--mr-label-bg);
   color: var(--mr-navy);
   text-align: center;
@@ -290,221 +298,121 @@
   font-weight: 600;
 }
 
-/* ── Section heading — mr.html section-heading ───────────────── */
-.report-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.report-section__heading {
-  display: flex;
-  justify-content: center;
-  padding: 0.3rem 0 0.1rem;
-}
-
-.report-section__title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  background: var(--mr-navy);
-  padding: 0.45rem 1.8rem;
-  border-radius: 8px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* ── Card grid ───────────────────────────────────────────────── */
-.report-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-  border: 1px solid var(--mr-border);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.report-card {
-  overflow: hidden;
-  border: 1px solid var(--mr-border);
-  border-radius: 0;
-  background: #fff;
-  margin-right: -1px;
-  margin-bottom: -1px;
-}
-
-/* ── Card header ─────────────────────────────────────────────── */
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.65rem 0.85rem;
-
-  /* Drilling summary — well-name-cell style from mr.html */
-  &--blue {
-    background: var(--mr-well-bg);
-    border-bottom: 2px solid var(--mr-navy);
-  }
-
-  /* Water well test header — tbl-header style from mr.html */
-  &--green {
-    background: var(--mr-tbl-hdr-bg);
-    border-bottom: 2px solid var(--mr-navy);
-  }
-}
-
-.card-header__left {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-/* Drilling summary: brown text (well-name-cell) */
-.card-header--blue .card-header__name {
-  color: var(--mr-well-text);
-}
-
-.card-header--blue .card-header__rig {
-  color: rgba(135, 73, 32, 0.72);
-}
-
-/* Test results: dark red text (tbl-header) */
-.card-header--green .card-header__name {
-  color: var(--mr-tbl-hdr-text);
-}
-
-.card-header__name {
-  font-size: 1.25rem;
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card-header__rig {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.card-header__badge {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--mr-tbl-hdr-text);
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(139, 0, 0, 0.28);
-  background: rgba(208, 206, 206, 0.55);
-  flex-shrink: 0;
-}
-
-.card-header__status-input {
-  width: 150px;
-  flex-shrink: 0;
-  padding: 5px 12px;
-  border: 1.5px solid rgba(135, 73, 32, 0.35);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.65);
-  color: var(--mr-well-text);
-  font-family: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
-  text-align: center;
-
-  &::placeholder { color: rgba(135, 73, 32, 0.55); }
-  &:focus { outline: none; background: rgba(255, 255, 255, 0.9); border-color: var(--mr-well-text); }
-
-  &--na {
-    border-color: rgba(204, 0, 0, 0.55);
-    background: rgba(204, 0, 0, 0.08);
-    color: var(--mr-missing);
-
-    &::placeholder { color: rgba(204, 0, 0, 0.5); }
-    &:focus { background: rgba(204, 0, 0, 0.12); }
-  }
-}
-
-/* ── Data table — exact mr.html .lbl / .val mapping ─────────── */
-.card-table {
-  width: 100%;
+/* ── Data table — exact mr.html .data-table ─────────────────── */
+.data-table {
   border-collapse: collapse;
+  width: 100%;
+  margin: 0;
   table-layout: fixed;
 
-  tbody tr {
-    border-bottom: 1px solid var(--mr-border);
-
-    &:last-child { border-bottom: none; }
-
-    &:hover .card-table__value {
-      background: #f5f8fd;
-    }
+  td {
+    border: 1px solid var(--mr-border);
+    padding: 6px 10px;
+    font-size: 12px;
+    word-wrap: break-word;
+    width: 25%;
   }
 }
 
-/* .lbl from mr.html */
-.card-table__label {
-  width: 28%;
-  padding: 0.75rem 1rem;
-  background: var(--mr-label-bg);
-  color: var(--mr-label-text);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  border-right: 2px solid #b8d0eb;
-  vertical-align: middle;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.35;
+/* mr.html .tbl-header */
+.tbl-header {
+  background-color: var(--mr-tbl-hdr-bg);
+  color: var(--mr-tbl-hdr-text);
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  padding: 8px 10px;
 }
 
-/* .val from mr.html */
-.card-table__value {
-  width: 22%;
-  padding: 0.75rem 1rem;
-  background: #fff;
-  color: var(--mr-value-text);
-  font-size: 1rem;
+/* mr.html .lbl */
+.lbl {
+  background-color: var(--mr-label-bg);
+  color: var(--mr-label-text);
   font-weight: 700;
-  text-align: center;
-  vertical-align: middle;
-  transition: background 180ms ease;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* mr.html .val */
+.val {
+  color: var(--mr-value-text);
+  text-align: left;
 
   &.missing {
     color: var(--mr-missing);
     font-weight: 700;
-    font-style: italic;
-  }
-
-  &.present {
-    color: var(--mr-navy-dark);
-  }
-
-  &--op {
-    text-align: left;
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1.55;
-    color: var(--mr-value-text);
-    width: auto;
-    overflow: visible;
-    text-overflow: clip;
   }
 }
 
-/* ── Divider between drilling sections — mr.html .divider ────── */
-.report-card--summary + .report-card--summary {
-  border-top: 6px solid var(--mr-navy);
+/* mr.html .val-span */
+.val-span {
+  color: var(--mr-value-text);
+  text-align: left;
+}
+
+/* mr.html .well-name-cell */
+.well-name-cell {
+  background-color: var(--mr-well-bg);
+  color: var(--mr-well-text);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* mr.html .status-cell */
+.status-cell {
+  background-color: var(--mr-well-bg);
+  color: var(--mr-well-text);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* mr.html .opt-cell */
+.opt-cell {
+  word-wrap: break-word;
+  white-space: normal;
+  text-align: left;
+}
+
+/* ── Rig status inline input ─────────────────────────────────── */
+.status-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  outline: none;
+  color: var(--mr-well-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  padding: 2px 4px;
+  cursor: text;
+  transition: background 150ms ease, border-color 150ms ease;
+
+  &::placeholder { color: rgba(135, 73, 32, 0.5); }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(135, 73, 32, 0.3);
+  }
+
+  &:focus {
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(135, 73, 32, 0.55);
+  }
+
+  &--na {
+    color: var(--mr-missing);
+    &::placeholder { color: rgba(204, 0, 0, 0.5); }
+  }
 }
 
 /* ── Map section ─────────────────────────────────────────────── */
 .report-map-section {
-  margin-top: 0.5rem;
-  border: 1px solid var(--mr-border);
+  margin-top: 0;
   border-top: 4px solid var(--mr-navy);
-  border-radius: 16px;
   background: #fff;
   overflow: hidden;
 }
@@ -526,9 +434,10 @@
 @media (max-width: 640px) {
   :host { padding: 1rem 0.5rem 2rem; }
 
-  .report-shell { padding: 0.8rem; border-radius: 16px; }
+  .report-title-main { font-size: 16px; }
+  .report-title-sub  { font-size: 12px; }
 
-  .report-header__title { font-size: 0.95rem; }
+  .report-toolbar { flex-wrap: wrap; }
 
   .map-container { min-height: 300px; }
 

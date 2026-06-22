@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
@@ -46,7 +45,6 @@ type TestMetricRow = readonly [TestMetricCell, TestMetricCell?];
   imports: [
     WwellmapComponent,
     FormsModule,
-    MatCardModule,
     MatProgressBarModule,
   ],
   templateUrl: './morning-report.component.html',
@@ -72,7 +70,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   protected readonly morningReport = this.store.morningReport;
   protected readonly hasError = this.store.hasError;
   protected readonly errorMessage = this.store.errorMessage;
-  protected readonly waterWelltestResult = this.store.waterWellTestResult;
   protected readonly wwellTestViewModels = this.store.wwellTestViewModels;
   protected readonly statusCode = this.store.statusCode;
   protected readonly pageMessage = computed(() => {
@@ -280,10 +277,6 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected downloadReport(): void {
-    this.wwellMap.saveMapImage();
-  }
-
   protected testRows(vm: WwellTestReportViewModel): readonly TestMetricRow[] {
     const isFlow = vm.flowType === 'Y' || vm.testType?.toLowerCase() === 'flow';
 
@@ -321,6 +314,14 @@ export class MorningReportComponent implements OnInit, OnDestroy {
       rows.push([cells[i], next]);
     }
     return rows;
+  }
+
+  protected get displayDate(): string {
+    const d = parseDateFromInput(this.selectedDateString);
+    if (isNaN(d.getTime())) return this.selectedDateString;
+    return d.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    }).replace(',', '');
   }
 
   protected hasMetricValue(value: number | string | null | undefined): boolean {
