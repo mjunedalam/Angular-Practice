@@ -317,9 +317,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   }
 
   protected get displayDate(): string {
-    const d = parseDateFromInput(this.selectedDateString);
-    if (isNaN(d.getTime())) return this.selectedDateString;
-    return d.toLocaleDateString('en-GB', {
+    return getTodayAtMidnight().toLocaleDateString('en-GB', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     }).replace(',', '');
   }

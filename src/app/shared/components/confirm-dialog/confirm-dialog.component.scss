@@ -80,7 +80,7 @@ $missing:      #cc0000;
 .cd-header__title {
   margin: 0;
   color: #fff;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -89,8 +89,8 @@ $missing:      #cc0000;
 
 .cd-header__subtitle {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -121,17 +121,17 @@ $missing:      #cc0000;
 /* matches mr.html .lbl */
 .cd-table__label {
   width: 38%;
-  padding: 0.8rem 1rem;
+  padding: 0.9rem 1.1rem;
   background: $label-bg;
   color: $label-text;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   text-align: left;
   vertical-align: middle;
   border-right: 2px solid #b8d0eb;
   white-space: normal;
   word-break: break-word;
-  line-height: 1.35;
+  line-height: 1.4;
 
   display: table-cell;
   align-items: center;
@@ -139,8 +139,8 @@ $missing:      #cc0000;
 }
 
 .cd-table__icon {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
   vertical-align: middle;
   margin-right: 6px;
@@ -149,16 +149,17 @@ $missing:      #cc0000;
 
 /* matches mr.html .val */
 .cd-table__value {
-  padding: 0.8rem 1rem;
+  padding: 0.9rem 1.1rem;
   background: #fff;
   color: $value-text;
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   vertical-align: middle;
+  line-height: 1.45;
   transition: background 150ms ease;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */
@@ -176,15 +177,15 @@ $missing:      #cc0000;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   color: #6b7280;
   font-weight: 500;
   flex-shrink: 1;
   min-width: 0;
 
   svg {
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
     color: #9ca3af;
   }
@@ -202,10 +203,10 @@ $missing:      #cc0000;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0.5rem 1.1rem;
+  padding: 0.55rem 1.2rem;
   border-radius: 6px;
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   border: 1.5px solid transparent;
