@@ -171,16 +171,7 @@
               <td colspan="2" class="well-name-cell">
                 {{ report.wGnrName }}<br>({{ report.wRigCd }})
               </td>
-              <td colspan="2" class="status-cell">
-                <input
-                  class="status-input"
-                  [class.status-input--na]="report.rigStatus === 'NA'"
-                  placeholder="Rig status"
-                  [ngModel]="report.rigStatus"
-                  (ngModelChange)="store.updateRigStatus(report.epANum, $event)"
-                  name="rigStatus"
-                />
-              </td>
+              <td colspan="2" class="status-cell">{{ report.rigStatus }}</td>
             </tr>
             <tr>
               <td class="lbl">Target Aquifer</td>

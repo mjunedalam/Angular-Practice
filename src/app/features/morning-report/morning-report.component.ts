@@ -13,7 +13,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
@@ -44,7 +43,6 @@ type TestMetricRow = readonly [TestMetricCell, TestMetricCell?];
   standalone: true,
   imports: [
     WwellmapComponent,
-    FormsModule,
     MatProgressBarModule,
   ],
   templateUrl: './morning-report.component.html',

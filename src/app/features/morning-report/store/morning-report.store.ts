@@ -18,15 +18,14 @@ import {
     selectWaterWellTestResultsFromData,
     selectWwellTestViewModels,
 } from 'src/app/core/store/shared/well-data.selectors';
-import { updateRigStatusOverrides } from 'src/app/core/store/shared/well-data.state';
 import { MorningReportStoreState, initialMorningReportState } from './morning-report.state';
 
 export const MorningReportStore = signalStore(
     withState<MorningReportStoreState>(initialMorningReportState),
 
-    withComputed(({ allWellsData, rigStatusOverrides, listLoading, detailLoading, error }) => ({
+    withComputed(({ allWellsData, listLoading, detailLoading, error }) => ({
         morningReport: computed((): MorningReport[] =>
-            selectMorningReports(allWellsData(), rigStatusOverrides()),
+            selectMorningReports(allWellsData()),
         ),
         waterWellTestResult: computed((): WaterWellTestResult[] =>
             selectWaterWellTestResultsFromData(allWellsData()),
@@ -106,16 +105,6 @@ export const MorningReportStore = signalStore(
 
             setDate(date: string): void {
                 loadReport(date);
-            },
-
-            updateRigStatus(epANum: number | string, rigStatus: string): void {
-                patchState(store, {
-                    rigStatusOverrides: updateRigStatusOverrides(
-                        store.rigStatusOverrides(),
-                        epANum,
-                        rigStatus,
-                    ),
-                });
             },
 
             setUiError(message: string | null): void {

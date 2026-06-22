@@ -549,16 +549,8 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellN
     };
 }
 
-export function selectMorningReports(
-    data: IWellData[],
-    rigStatusOverrides: Record<number, string>,
-): MorningReport[] {
-    return data.map(d => {
-        const report = mapWellDataToMorningReport(d);
-        const overrideKey = Number.parseInt(report.epANum, 10);
-        const override = Number.isFinite(overrideKey) ? rigStatusOverrides[overrideKey] : undefined;
-        return override !== undefined ? { ...report, rigStatus: override } : report;
-    });
+export function selectMorningReports(data: IWellData[]): MorningReport[] {
+    return data.map(d => mapWellDataToMorningReport(d));
 }
 
 export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
