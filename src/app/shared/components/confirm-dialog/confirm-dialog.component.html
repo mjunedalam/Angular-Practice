@@ -1,0 +1,78 @@
+<div class="cd-dialog" [attr.data-severity]="severity" role="dialog"
+     [attr.aria-labelledby]="'cd-title'" [attr.aria-describedby]="'cd-subtitle'">
+
+  <!-- ── Header bar ── -->
+  <div class="cd-header">
+    <div class="cd-header__icon-wrap">
+      <svg class="cd-header__icon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <rect x="2" y="4" width="20" height="16" rx="3"/>
+        <path d="m2 7 10 7 10-7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="cd-header__copy">
+      <h2 class="cd-header__title" id="cd-title">{{ data.title }}</h2>
+      <p class="cd-header__subtitle" id="cd-subtitle">
+        {{ data.subtitle ?? 'Please review the information before confirming.' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Body: label/value rows ── -->
+  <div class="cd-body">
+    <table class="cd-table" role="presentation">
+      <tbody>
+        @for (row of data.rows; track row.label) {
+          <tr class="cd-table__row">
+            <th class="cd-table__label" scope="row">
+              @if (isEmail(row.value)) {
+                <svg class="cd-table__icon" viewBox="0 0 16 16" fill="none"
+                     stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <rect x="1" y="3" width="14" height="10" rx="2"/>
+                  <path d="M1 5.5l7 4.5 7-4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              } @else {
+                <svg class="cd-table__icon" viewBox="0 0 16 16" fill="none"
+                     stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <rect x="2" y="2" width="12" height="13" rx="1.5"/>
+                  <path d="M2 6h12" stroke-linecap="round"/>
+                  <path d="M6 1v2M10 1v2" stroke-linecap="round"/>
+                  <rect x="5" y="9" width="2" height="2" rx="0.4" fill="currentColor" stroke="none"/>
+                </svg>
+              }
+              {{ row.label }}
+            </th>
+            <td class="cd-table__value">{{ row.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="cd-footer">
+    <span class="cd-footer__hint">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor"
+           stroke-width="1.5" aria-hidden="true">
+        <circle cx="7" cy="7" r="6"/>
+        <path d="M7 4.5v3M7 9.5h.01" stroke-linecap="round"/>
+      </svg>
+      This action will trigger an email notification.
+    </span>
+    <div class="cd-footer__actions">
+      <button class="cd-btn cd-btn--cancel" (click)="cancel()" type="button"
+              aria-label="Cancel and close dialog">
+        {{ cancelLabel }}
+      </button>
+      <button class="cd-btn cd-btn--confirm" (click)="confirm()" type="button"
+              [attr.aria-label]="confirmLabel">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="2" aria-hidden="true">
+          <path d="M2 8h12M8 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ confirmLabel }}
+      </button>
+    </div>
+  </div>
+
+</div>

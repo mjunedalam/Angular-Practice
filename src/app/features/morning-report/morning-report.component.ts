@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
 
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { EmailStore } from 'src/app/core/store/email/email.store';
@@ -66,6 +67,7 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   protected readonly morningReport = this.store.morningReport;
   protected readonly hasError = this.store.hasError;
@@ -236,15 +238,33 @@ export class MorningReportComponent implements OnInit, OnDestroy {
     this.store.setDate(newStr);
   }
 
-  protected async sendEmail(): Promise<void> {
+  protected openConfirmDialog(): void {
+    const recipientEmail = this.authStore.userEmail();
+
+    if (!recipientEmail) {
+      this.showError('Unable to determine the logged-in user email.');
+      return;
+    }
+
+    this.confirmDialog
+      .open({
+        title: 'Send Daily Report',
+        rows: [
+          { label: 'Report Date', value: this.selectedDateString },
+          { label: 'Recipient',   value: recipientEmail },
+        ],
+        confirmLabel: 'Send Report',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.sendEmail(recipientEmail);
+        }
+      });
+  }
+
+  private async sendEmail(recipientEmail: string): Promise<void> {
     try {
-      const recipientEmail = this.authStore.userEmail();
-
-      if (!recipientEmail) {
-        this.showError('Unable to determine the logged-in user email.');
-        return;
-      }
-
       const morningReport = this.morningReport();
       const mapData = await this.wwellMap.captureDefaultMapAsBase64();
       const waterWelltestResults = this.wwellTestViewModels().map((vm) => this.toEmailWaterTestResult(vm));

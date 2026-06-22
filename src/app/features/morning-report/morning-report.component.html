@@ -43,7 +43,7 @@
 
     <button
       type="button"
-      (click)="sendEmail()"
+      (click)="openConfirmDialog()"
       class="email-btn"
       [class.email-btn--sending]="isSendingEmail()"
       [disabled]="isSendingEmail()"
