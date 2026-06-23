@@ -134,11 +134,11 @@
               </tr>
               }
               <tr>
-                <td class="lbl">H2S (PPM)</td>
+                <td class="lbl">H2S (ppm)</td>
                 <td class="val" [class.missing]="!hasMetricValue(vm.h2sActual)">
                   {{ hasMetricValue(vm.h2sActual) ? vm.h2sActual : 'Missing' }}
                 </td>
-                <td class="lbl">Well Productivity (GPM/FT)</td>
+                <td class="lbl">Well Productivity (GPM/ft)</td>
                 <td class="val" [class.missing]="!hasMetricValue(vm.productivityActual)">
                   {{ hasMetricValue(vm.productivityActual) ? vm.productivityActual : 'Missing' }}
                 </td>
@@ -148,7 +148,7 @@
                 <td class="val" [class.missing]="!hasMetricValue(vm.temp)">
                   {{ hasMetricValue(vm.temp) ? vm.temp : 'Missing' }}
                 </td>
-                <td class="lbl">TDS (PPM)</td>
+                <td class="lbl">TDS (ppm)</td>
                 <td class="val" [class.missing]="!hasMetricValue(vm.tds)">
                   {{ hasMetricValue(vm.tds) ? vm.tds : 'Missing' }}
                 </td>
@@ -195,8 +195,8 @@
             </tr>
             <tr>
               <td class="lbl">Footage (ft)</td>
-              <td class="val" [class.missing]="!report.wDpthChgDis">
-                {{ report.wDpthChgDis || 'Missing' }}
+              <td class="val" >
+                {{ report.wDpthChgDis || '0' }}
               </td>
               <td class="lbl">Supporting</td>
               <td class="val" [class.missing]="!report.supportings">
