@@ -37,37 +37,39 @@
       </div>
     </div>
 
-    <button
-      type="button"
-      (click)="openConfirmDialog()"
-      class="email-btn"
-      [class.email-btn--sending]="isSendingEmail()"
-      [disabled]="isSendingEmail()"
-      aria-label="Email report to me"
-    >
-      <span class="email-btn__shimmer"></span>
-      @if (isSendingEmail()) {
-        <span class="email-btn__spinner" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span class="email-btn__label">Sending...</span>
-      } @else {
-        <span class="email-btn__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="2" y="4" width="20" height="16" rx="3"/>
-            <path d="m2 7 10 7 10-7"/>
-          </svg>
-        </span>
-        <span class="email-btn__label">Email To Me</span>
-        <span class="email-btn__arrow" aria-hidden="true">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 8h10M9 4l4 4-4 4"/>
-          </svg>
-        </span>
-      }
-    </button>
+    @if (canEmail()) {
+      <button
+        type="button"
+        (click)="openConfirmDialog()"
+        class="email-btn"
+        [class.email-btn--sending]="isSendingEmail()"
+        [disabled]="isSendingEmail()"
+        aria-label="Email report to me"
+      >
+        <span class="email-btn__shimmer"></span>
+        @if (isSendingEmail()) {
+          <span class="email-btn__spinner" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="email-btn__label">Sending...</span>
+        } @else {
+          <span class="email-btn__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="4" width="20" height="16" rx="3"/>
+              <path d="m2 7 10 7 10-7"/>
+            </svg>
+          </span>
+          <span class="email-btn__label">Email To Me</span>
+          <span class="email-btn__arrow" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        }
+      </button>
+    }
   </div>
 
   <!-- ── Title block — below toolbar ────────────────────────── -->

@@ -6,6 +6,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { JwtService } from 'src/app/core/services/jwt/jwt.service';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+import { RbacStore } from '@store/rbac/rbac.store';
 import { AuthState, initialState, selectDisplayUsername, selectIsTokenExpired, selectLastLogin, selectUserEmail } from './auth.selectors';
 
 export const AuthStore = signalStore(
@@ -24,6 +25,7 @@ export const AuthStore = signalStore(
     jwt = inject(JwtService),
     loading = inject(LoaderService),
     extAppConfigService = inject(ExternalConfigService),
+    rbacStore = inject(RbacStore),
   ) => ({
     async login() {
       loading.startLogin('Contacting identity service...');
@@ -31,11 +33,13 @@ export const AuthStore = signalStore(
 
       http.get(`${extAppConfigService.settings.tokenUrl}`, { responseType: 'text', withCredentials: true })
         .subscribe({
-          next: (token) => {
+          next: async (token) => {
             const normalizedToken = token.trim();
             const decoded = jwt.decode(normalizedToken) as Record<string, unknown>;
             localStorage.setItem('agwa_token', normalizedToken);
             patchState(store, { token: normalizedToken, isAuthenticated: true, user: decoded, isLoading: false });
+            const baseUrl = extAppConfigService.settings.dailyOperationServiceUrl;
+            await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
             void router.navigate(['main']).finally(() => loading.completeLogin());
           },
           error: () => {
@@ -49,6 +53,7 @@ export const AuthStore = signalStore(
     logout() {
       localStorage.removeItem('agwa_token');
       patchState(store, initialState);
+      rbacStore.reset();
       void router.navigate(['/login']);
     },
 

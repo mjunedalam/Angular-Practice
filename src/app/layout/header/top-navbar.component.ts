@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
-import { RbacStore } from '@store/rbac/rbac.store';
 
 @Component({
   selector: 'app-top-navbar',
@@ -25,14 +24,11 @@ export class TopNavbarComponent {
   readonly toggleSidenav = output<void>();
 
   protected readonly auth     = inject(AuthStore);
-  protected readonly rbac     = inject(RbacStore);
   protected readonly menuOpen = signal(false);
 
-  protected readonly userRoleLabels = computed(() => {
-    const groups = this.auth.user()?.groups ?? [];
-    const defs   = this.rbac.roleDefinitions();
-    return groups.map(g => defs.find(d => d.name === g)?.label ?? g);
-  });
+  protected readonly userRoleLabels = computed(() =>
+    (this.auth.user()?.groups as string[] | undefined) ?? [],
+  );
 
   protected readonly lastLoginDisplay = computed(() => {
     const d = this.auth.lastLogin();

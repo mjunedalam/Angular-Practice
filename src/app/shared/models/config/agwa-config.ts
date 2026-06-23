@@ -9,5 +9,4 @@ export interface AgwaConfig {
   appId: string;
   esriUrl: string;
 morningReportWebMapId: string;
-  rolesUrl?: string;
 }

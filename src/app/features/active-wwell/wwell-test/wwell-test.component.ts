@@ -10,8 +10,8 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { ActiveWellViewService } from '@core/services/active-well-view.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
-import { AuthStore } from '../../auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 import { formatDateForInput } from '@shared/utils/date.util';
 import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/utils/well-test-math.util';
 
@@ -26,7 +26,6 @@ import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/ut
 export class WwellTestComponent {
   private readonly store = inject(ActiveWwellStore);
   private readonly uiStore = inject(ActiveWwellUiStore);
-  private readonly auth = inject(AuthStore);
   private readonly rbac = inject(RbacStore);
 
   protected readonly data = this.store.wwellTest;
@@ -272,7 +271,7 @@ export class WwellTestComponent {
 
 
   protected readonly canUpdate = computed(() =>
-    this.rbac.canUpdateRoute('active-wwell', this.auth.user()?.groups ?? []),
+    this.rbac.hasPermission('active-wwell', ACTIONS.UPDATE),
   );
 
   protected readonly aquiferOptions = [

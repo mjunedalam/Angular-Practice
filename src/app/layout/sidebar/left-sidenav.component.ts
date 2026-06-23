@@ -7,8 +7,8 @@ import {
   output,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AuthStore } from '../../features/auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 import { BuildInfoService } from '@shared/services/build-info.service';
 
 export interface NavItem {
@@ -30,7 +30,6 @@ export interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeftSidenavComponent {
-  private readonly authStore = inject(AuthStore);
   private readonly rbacStore = inject(RbacStore);
   private readonly buildInfoService = inject(BuildInfoService);
 
@@ -70,14 +69,13 @@ export class LeftSidenavComponent {
     },
   ];
 
-  protected readonly lockedRouteIds = computed(() => {
-    const userRoles = this.authStore.user()?.groups ?? [];
-    return new Set(
+  protected readonly lockedRouteIds = computed(() =>
+    new Set(
       this.navItems
-        .filter(item => item.routeId && !this.rbacStore.canAccessRoute(item.routeId, userRoles))
+        .filter(item => item.routeId && !this.rbacStore.hasPermission(item.routeId, ACTIONS.READ))
         .map(item => item.routeId!),
-    );
-  });
+    ),
+  );
 
   protected isLocked(item: NavItem): boolean {
     return !!item.routeId && this.lockedRouteIds().has(item.routeId);

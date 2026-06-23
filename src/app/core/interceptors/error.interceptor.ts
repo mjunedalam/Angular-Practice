@@ -8,6 +8,9 @@ import { AuthStore } from '../../features/auth/store/auth.store';
 // The interceptor will still re-throw but skip the global toast.
 export const SUPPRESS_GLOBAL_ERROR = new HttpContextToken<boolean>(() => false);
 
+// Set to true on requests that should NOT trigger logout on 401 (e.g. permission checks).
+export const SKIP_AUTO_LOGOUT = new HttpContextToken<boolean>(() => false);
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notify    = inject(NotificationService);
   const authStore = inject(AuthStore);
@@ -15,7 +18,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        authStore.logout();
+        if (!req.context.get(SKIP_AUTO_LOGOUT)) {
+          authStore.logout();
+        }
         return EMPTY;
       }
 

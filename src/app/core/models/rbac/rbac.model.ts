@@ -1,16 +1,7 @@
-export interface RoleDefinition {
-  readonly name: string;
-  readonly label: string;
-  readonly routes: string[];
-  readonly canUpdate: string[];
-}
-
-export interface RbacConfig {
-  readonly roles: RoleDefinition[];
-}
+import { Action } from './role.constants';
 
 export interface RbacState {
-  readonly roleDefinitions: RoleDefinition[];
+  readonly userPermissions: Record<string, Action[]>;
   readonly isLoaded: boolean;
   readonly error: string | null;
 }

@@ -26,6 +26,8 @@ import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidni
 import { MorningReportStore } from './store/morning-report.store';
 import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model';
 import { WaterWellTestEmailResult } from '@shared/models/wwell/wwell-test-result.model';
+import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 
 const MORNING_REPORT_NOTIFICATION_DURATION_MS = 12000;
 
@@ -56,6 +58,9 @@ export class MorningReportComponent implements OnInit, OnDestroy {
   protected readonly store = inject(MorningReportStore);
   private readonly authStore = inject(AuthStore);
   private readonly emailStore = inject(EmailStore);
+  private readonly rbacStore = inject(RbacStore);
+
+  protected readonly canEmail = computed(() => this.rbacStore.hasPermission('morning-report', ACTIONS.EMAIL));
   protected readonly isSendingEmail = this.emailStore.isSending;
   private readonly emailService = inject(EmailService);
   private readonly notificationService = inject(NotificationService);

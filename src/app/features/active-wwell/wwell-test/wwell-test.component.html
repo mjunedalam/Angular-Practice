@@ -10,12 +10,14 @@
         </div>
       </div>
       <div class="wt-expected-date-label">Expected test date</div>
-      <button
-        type="button"
-        class="wt-edit-toggle"
-        [class.wt-edit-toggle--on]="isPublished()"
-        (click)="isPublished.set(!isPublished())"
-      >{{ isPublished() ? 'Publish Test' : 'Locked' }}</button>
+      @if (canUpdate()) {
+        <button
+          type="button"
+          class="wt-edit-toggle"
+          [class.wt-edit-toggle--on]="isPublished()"
+          (click)="isPublished.set(!isPublished())"
+        >{{ isPublished() ? 'Publish Test' : 'Locked' }}</button>
+      }
     </div>
 
     <div class="wt-body">

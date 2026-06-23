@@ -20,21 +20,19 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     importProvidersFrom(MatSnackBarModule, MatDialogModule),
 
-    // 1. Load external config, then RBAC roles (sequential so roleGuard
-    //    has settings.rolesUrl before any protected route activates).
+    // Ordered startup: config → restore JWT → fetch permissions (needs JWT).
     provideAppInitializer(async () => {
       const configService = inject(ExternalConfigService);
+      const authStore     = inject(AuthStore);
       const rbacStore     = inject(RbacStore);
       await configService.loadConfig();
-      await rbacStore.loadRoles(configService.settings.rolesUrl ?? 'assets/roles.json');
+      authStore.autoLogin();
+      if (authStore.isAuthenticated()) {
+        const baseUrl = configService.settings.dailyOperationServiceUrl;
+        await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
+      }
     }),
 
-    // 2. Restore session from localStorage.
-    provideAppInitializer(() => {
-      inject(AuthStore).autoLogin();
-    }),
-
-    // 3. Configure Material icon font class.
     provideAppInitializer(() => {
       inject(MatIconRegistry).setDefaultFontSetClass('material-icons');
     }),

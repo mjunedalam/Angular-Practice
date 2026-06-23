@@ -8,6 +8,8 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
+import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 
 const AREAS = [
   { value: 'Western Area' },
@@ -30,6 +32,11 @@ export class WwellHeaderComponent {
   protected readonly activeWwellFormService = inject(ActiveWwellFormService);
   protected readonly uiStore = inject(ActiveWwellUiStore);
   private readonly dialog = inject(MatDialog);
+  private readonly rbac = inject(RbacStore);
+
+  protected readonly canUpdate = computed(() =>
+    this.rbac.hasPermission('active-wwell', ACTIONS.UPDATE),
+  );
 
   protected readonly data = this.store.wellHeaderData;
   protected readonly drillingForm = this.activeWwellFormService.drillingRemarksForm;

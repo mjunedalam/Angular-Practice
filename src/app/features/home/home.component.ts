@@ -6,8 +6,8 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AuthStore } from '../auth/store/auth.store';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 
 interface QuickListItem {
   label: string;
@@ -28,7 +28,6 @@ interface QuickListItem {
 })
 export class HomeComponent {
   private readonly router    = inject(Router);
-  private readonly authStore = inject(AuthStore);
   private readonly rbacStore = inject(RbacStore);
 
   protected readonly quickItems: QuickListItem[] = [
@@ -66,14 +65,13 @@ export class HomeComponent {
     },
   ];
 
-  protected readonly lockedRouteIds = computed(() => {
-    const userRoles = this.authStore.user()?.groups ?? [];
-    return new Set(
+  protected readonly lockedRouteIds = computed(() =>
+    new Set(
       this.quickItems
-        .filter(item => item.routeId && !this.rbacStore.canAccessRoute(item.routeId, userRoles))
+        .filter(item => item.routeId && !this.rbacStore.hasPermission(item.routeId, ACTIONS.READ))
         .map(item => item.routeId!),
-    );
-  });
+    ),
+  );
 
   protected isLocked(item: QuickListItem): boolean {
     return !!item.routeId && this.lockedRouteIds().has(item.routeId);
