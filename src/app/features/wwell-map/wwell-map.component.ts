@@ -32,7 +32,6 @@ import {
   MAX_WIDTH,
   STYLE,
   tilesArray,
-  tilesMap,
   WWell,
   wwellIdTextSymbol,
 } from 'src/app/shared/models/config/agwa-map.config';
@@ -45,10 +44,19 @@ const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 // Mirrors `.wwell-map-legend__chip--*` colors in wwell-map.component.scss
 // so the email's baked-in legend matches the legend shown outside the map.
 const LEGEND_CHIP_COLORS: Record<string, string> = {
-  'BI-33': '#84cc16',
-  'BI-58': '#c084fc',
-  'BI-34': '#f87171',
-  'BI-60': '#60a5fa',
+  '3300': '#84cc16',
+  '58': '#c084fc',
+  '1514': '#f87171',
+  '60': '#60a5fa',
+};
+
+// RGB equivalents of LEGEND_CHIP_COLORS — used for ArcGIS symbol colors so
+// map dots/sticks/bubbles always match the legend chips.
+const DOT_COLOR: Record<string, [number, number, number, number]> = {
+  '3300': [132, 204, 22, 0.9],   // #84cc16
+  '58':   [192, 132, 252, 0.9],  // #c084fc
+  '1514': [248, 113, 113, 0.9],  // #f87171
+  '60':   [96, 165, 250, 0.9],   // #60a5fa
 };
 
 @Component({
@@ -243,7 +251,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     const { default: SimpleMarkerSymbol } = await import('@arcgis/core/symbols/SimpleMarkerSymbol');
     for (const wwell of this.wwells()) {
       const point = new Point({ latitude: wwell.lat, longitude: wwell.lng });
-      const [r, g, b] = tilesMap.get(wwell.label)?.color ?? [200, 200, 200, 1];
+      const [r, g, b] = DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9];
       layer.add(new Graphic({
         geometry: point,
         symbol: new SimpleMarkerSymbol({ style: 'circle', size: 3, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
@@ -314,7 +322,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
           paths: [[[wwell.lng, wwell.lat], [cx, cy + topH / 2]]],
           spatialReference: { wkid: 4326 },
         }),
-        symbol: lineSymbol(tilesMap.get(wwell.label)?.color ?? STYLE.stickColor),
+        symbol: lineSymbol(DOT_COLOR[wwell.label] ?? STYLE.stickColor),
       }));
 
       graphics.push(new Graphic({
@@ -324,7 +332,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
           spatialReference: { wkid: 4326 },
         }),
         symbol: new SimpleFillSymbol({
-          color: tilesMap.get(wwell.label)?.color ?? [200, 200, 200, 0.9],
+          color: DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9],
           outline: { color: [0, 0, 0], width: 1 },
         }),
       }));
