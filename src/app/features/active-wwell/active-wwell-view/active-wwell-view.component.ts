@@ -11,8 +11,8 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthStore } from 'src/app/features/auth/store/auth.store';
-import { ROLES } from '@models/rbac/role.constants';
+import { ACTIONS } from '@models/rbac/role.constants';
+import { RbacStore } from '@store/rbac/rbac.store';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { MatChipsModule } from '@angular/material/chips';
@@ -82,10 +82,10 @@ export class ActiveWwellViewComponent implements OnInit {
 
   protected readonly store = inject(ActiveWwellStore);
   protected readonly uiStore = inject(ActiveWwellUiStore);
-  private readonly auth = inject(AuthStore);
+  private readonly rbac = inject(RbacStore);
 
   protected readonly canUpload = computed(() =>
-    ((this.auth.user()?.groups) as string[] | undefined)?.includes(ROLES.ADMIN) ?? false,
+    this.rbac.hasPermission('active-wwell', ACTIONS.UPLOAD),
   );
 
   private readonly route = inject(ActivatedRoute);

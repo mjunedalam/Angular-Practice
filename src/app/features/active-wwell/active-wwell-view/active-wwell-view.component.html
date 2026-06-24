@@ -136,13 +136,15 @@
             <app-wwell-test></app-wwell-test>
           </div>
 
-          <div class="active-wwell-sidepanel">
-            <app-file-upload
-              [epANum]="store.selectedEpANum()"
-              [date]="selectedDateString()"
-              [canUpload]="canUpload()"
-            ></app-file-upload>
-          </div>
+          @if (canUpload()) {
+            <div class="active-wwell-sidepanel">
+              <app-file-upload
+                [epANum]="store.selectedEpANum()"
+                [date]="selectedDateString()"
+                [canUpload]="true"
+              ></app-file-upload>
+            </div>
+          }
         </div>
       </div>
     </div>

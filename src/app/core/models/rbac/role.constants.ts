@@ -17,6 +17,7 @@ export const ACTIONS = {
   UPDATE: 'update',
   DELETE: 'delete',
   EMAIL:  'email',
+  UPLOAD: 'upload',
 } as const;
 
 export type Action = typeof ACTIONS[keyof typeof ACTIONS];
