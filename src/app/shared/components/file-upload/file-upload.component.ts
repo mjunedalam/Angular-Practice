@@ -21,6 +21,7 @@ import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-d
 export class FileUploadComponent {
   readonly epANum = input<number | null>(null);
   readonly date = input<string>('');
+  readonly canUpload = input<boolean>(false);
 
   private readonly dialog = inject(MatDialog);
   private readonly svc = inject(PresDocsService);
