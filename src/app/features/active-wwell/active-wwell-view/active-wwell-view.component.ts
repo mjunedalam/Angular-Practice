@@ -85,7 +85,7 @@ export class ActiveWwellViewComponent implements OnInit {
   private readonly rbac = inject(RbacStore);
 
   protected readonly canUpload = computed(() =>
-    this.rbac.hasPermission('active-wwell', ACTIONS.UPLOAD),
+    this.rbac.hasPermission('active-wwell', ACTIONS.ACTIVE_WWELL_FILE_UPLOAD),
   );
 
   private readonly route = inject(ActivatedRoute);
