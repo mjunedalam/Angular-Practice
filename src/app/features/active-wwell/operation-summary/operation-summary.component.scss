@@ -39,4 +39,16 @@
     outline: 2px solid rgba(37, 99, 235, 0.35);
     outline-offset: -2px;
   }
+
+  &[readonly] {
+    background: #f8fafc;
+    color: #64748b;
+    cursor: default;
+    resize: none;
+
+    &:focus {
+      background: #f8fafc;
+      outline: none;
+    }
+  }
 }

@@ -3,14 +3,14 @@
     <div class="well-header">Summary Of Operation</div>
     <div class="ops-grid">
       <div class="ops-label">Operation</div>
-      <textarea class="ops-textarea" rows="4" formControlName="wOpRmk" [attr.readonly]="!canUpdate() ? '' : null"></textarea>
+      <textarea class="ops-textarea" rows="4" formControlName="wOpRmk" [readonly]="!canUpdate()"></textarea>
       <!-- <small class="red-color"
         *ngIf="!form.get('operations').valid && form.get('operations').errors && form.get('operations').touched">Field
         is required</small> -->
       <div class="ops-label">Drilling Remarks</div>
-      <textarea class="ops-textarea" rows="4" formControlName="wDrlgSmryRmk" [attr.readonly]="!canUpdate() ? '' : null"></textarea>
+      <textarea class="ops-textarea" rows="4" formControlName="wDrlgSmryRmk" [readonly]="!canUpdate()"></textarea>
       <div class="ops-label">Next Operation</div>
-      <textarea class="ops-textarea" rows="4" formControlName="nxt24HrPlanRmk" [attr.readonly]="!canUpdate() ? '' : null"></textarea>
+      <textarea class="ops-textarea" rows="4" formControlName="nxt24HrPlanRmk" [readonly]="!canUpdate()"></textarea>
     </div>
   </div>
 </form>
