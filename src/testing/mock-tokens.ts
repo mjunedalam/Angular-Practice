@@ -1,5 +1,4 @@
 import { AuthUser } from '../app/features/auth/store/auth.selectors';
-import { ROLES } from '../app/core/models/rbac/role.constants';
 
 const BASE_CLAIMS: Omit<AuthUser, 'groups'> = {
   sub: 'Authentication Token',
@@ -16,33 +15,33 @@ export const MOCK_TOKENS = {
   // Single-role scenarios
   ADMIN_ONLY: {
     ...BASE_CLAIMS,
-    groups: [ROLES.ADMIN],
+    groups: ['GWD_admin'],
   } satisfies AuthUser,
 
   MEMBER_ONLY: {
     ...BASE_CLAIMS,
-    groups: [ROLES.MEMBER],
+    groups: ['GWD_member'],
   } satisfies AuthUser,
 
   CLIENT_ONLY: {
     ...BASE_CLAIMS,
-    groups: [ROLES.CLIENT],
+    groups: ['GWD_client'],
   } satisfies AuthUser,
 
   // Multi-role scenarios
   MEMBER_AND_ADMIN: {
     ...BASE_CLAIMS,
-    groups: [ROLES.MEMBER, ROLES.ADMIN],
+    groups: ['GWD_member', 'GWD_admin'],
   } satisfies AuthUser,
 
   CLIENT_AND_MEMBER: {
     ...BASE_CLAIMS,
-    groups: [ROLES.CLIENT, ROLES.MEMBER],
+    groups: ['GWD_client', 'GWD_member'],
   } satisfies AuthUser,
 
   ALL_ROLES: {
     ...BASE_CLAIMS,
-    groups: [ROLES.CLIENT, ROLES.MEMBER, ROLES.ADMIN],
+    groups: ['GWD_client', 'GWD_member', 'GWD_admin'],
   } satisfies AuthUser,
 
   // Edge cases
@@ -53,7 +52,7 @@ export const MOCK_TOKENS = {
 
   MIXED_KNOWN_AND_UNKNOWN: {
     ...BASE_CLAIMS,
-    groups: [ROLES.MEMBER, 'FAKE_role'],
+    groups: ['GWD_member', 'FAKE_role'],
   } satisfies AuthUser,
 
   NO_GROUPS: {
