@@ -61,7 +61,7 @@ export const AuthStore = signalStore(
     autoLogin() {
       const token = localStorage.getItem('agwa_token');
 
-      if (token /* && !jwt.isExpired(token) */) {
+      if (token && !jwt.isExpired(token)) {
         const decoded = jwt.decode(token);
         patchState(store, { token, isAuthenticated: true, user: decoded, sessionExpired: false });
         return;
