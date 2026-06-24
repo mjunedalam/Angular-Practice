@@ -18,6 +18,7 @@ import {
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
   resolveLinerTopDepth,
+  resolveShoeDepth,
   resolveOhHalfWidth,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
@@ -301,12 +302,12 @@ export function renderScreenHanger({
     const liner = data.casings.find(c => c.csgType === 'Liner');
     if (liner) {
       const linerHW = computeCasingHalfWidth(getCasingTier(liner, data.casings), baseHalfWidth, halfWidthIncrement);
-      addHanger(scale(resolveLinerTopDepth(data.casings, data.drlgCasings)), linerHW);
+      addHanger(scale(resolveShoeDepth(data.casings, data.drlgCasings)), linerHW);
     }
   }
 
   if (hasLinerScreen) {
-    addHanger(scale(resolveCompletionTopDepth(data.casings, data.drlgCasings)), screenHW);
+    addHanger(scale(resolveLinerTopDepth(data.casings, data.drlgCasings)), screenHW);
   }
 
   hangerG.transition().delay(hangerStart).duration(ANIM.HANGER_DURATION).ease(easeCubicInOut).style('opacity', 1);
