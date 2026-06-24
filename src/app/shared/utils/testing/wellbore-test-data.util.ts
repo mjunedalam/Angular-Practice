@@ -106,7 +106,7 @@ export class WellboreTestDataUtil {
       surfaceElevation: 0,
       estTargetDepth: this.plannedTargetDepthFt,
       targetFormation: 'TWLF',
-      supportedBusiness: 'BI1514',
+      supportedBusiness: 'BI-34',
       ...overrides,
     };
   }

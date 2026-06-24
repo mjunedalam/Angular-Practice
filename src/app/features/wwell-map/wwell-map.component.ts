@@ -45,10 +45,10 @@ const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 // Mirrors `.wwell-map-legend__chip--*` colors in wwell-map.component.scss
 // so the email's baked-in legend matches the legend shown outside the map.
 const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '3300': '#84cc16',
-  '58': '#c084fc',
-  '1514': '#f87171',
-  '60': '#60a5fa',
+  'BI-33': '#84cc16',
+  'BI-58': '#c084fc',
+  'BI-34': '#f87171',
+  'BI-60': '#60a5fa',
 };
 
 @Component({

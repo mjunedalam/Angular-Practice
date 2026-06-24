@@ -64,17 +64,17 @@ const STATUS_COLORS = [
 const BOOT_TASK = 'arcgis-map-overview';
 
 const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '3300': '#96f508',
-  '58': '#7f0cf3',
-  '1514': '#f87171',
-  '60': '#0f67d2',
+  'BI-33': '#96f508',
+  '5BI-8': '#7f0cf3',
+  'BI-14': '#f87171',
+  'BI-60': '#0f67d2',
 };
 
 const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
-  '3300': [150, 245, 8],    // #96f508
-  '58': [127, 12, 243],   // #7f0cf3
-  '1514': [248, 113, 113],  // #f87171
-  '60': [15, 103, 210],   // #0f67d2
+  'BI-33': [150, 245, 8],    // #96f508
+  '5BI-8': [127, 12, 243],   // #7f0cf3
+  'BI-14': [248, 113, 113],  // #f87171
+  'BI-60': [15, 103, 210],   // #0f67d2
 };
 
 @Component({
