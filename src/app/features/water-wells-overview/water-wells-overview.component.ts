@@ -55,6 +55,10 @@ export interface AllWellRow {
   status: string;
 }
 
+const DOT_RGB: Record<string, [number, number, number]> = Object.fromEntries(
+  tilesArray.map(t => [t.biNum, [t.color[0], t.color[1], t.color[2]] as [number, number, number]])
+);
+
 const STATUS_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
   '#8b5cf6', '#06b6d4', '#f97316', '#84cc16',
@@ -70,12 +74,6 @@ const LEGEND_CHIP_COLORS: Record<string, string> = {
   'BI-60': '#0f67d2',
 };
 
-const LEGEND_DOT_RGB: Record<string, [number, number, number]> = {
-  'BI-33': [150, 245, 8],    // #96f508
-  '5BI-8': [127, 12, 243],   // #7f0cf3
-  'BI-14': [248, 113, 113],  // #f87171
-  'BI-60': [15, 103, 210],   // #0f67d2
-};
 
 @Component({
   selector: 'app-water-wells-overview',
@@ -589,7 +587,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
     for (let i = 0; i < wells.length; i++) {
       const wwell = wells[i];
-      const [r, g, b] = LEGEND_DOT_RGB[wwell.label] ?? [160, 160, 160];
+      const [r, g, b] = DOT_RGB[wwell.label] ?? [160, 160, 160];
       const graphic = new Graphic({
         geometry: new Point({ latitude: wwell.lat, longitude: wwell.lng }),
         symbol: new SimpleMarkerSymbol({ style: 'circle', size: this.DOT_START_SIZE, color: [r, g, b, 0], outline: { width: 0 } }),
@@ -650,7 +648,10 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           font: { size: 10, weight: 'bold', family: 'sans-serif' },
           horizontalAlignment: 'center',
           verticalAlignment: 'bottom',
-          yoffset: 8,
+          yoffset: 16,
+          backgroundColor: [255, 255, 255, 0.88],
+          borderLineColor: [200, 200, 200, 0.6],
+          borderLineSize: 0.5,
         }),
       }));
       await new Promise<void>(resolve => setTimeout(resolve, this.LABEL_STAGGER_MS));
