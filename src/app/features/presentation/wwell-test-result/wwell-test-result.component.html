@@ -1,46 +1,43 @@
+@if (store.wwellTest(); as result) {
 <div class="test-results-container">
   <!-- ── Section header ── -->
   <div class="results-header">
     <div class="results-header__title">
-    
       <span>Well Test Results</span>
     </div>
-    <div class="results-header__badge">{{ store.wwellTest() ? 1 : 0 }}</div>
+    <div class="results-header__badge">1</div>
   </div>
 
   <!-- ── List of results ── -->
   <div class="results-list">
-    @if (store.wwellTest(); as result) {
-      <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
-        <div class="result-tab__left">
-          <div class="well-indicator">
-            <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            </svg>
-          </div>
-          <div class="well-details">
-            <div class="name">{{ store.wellHeaderData()?.wellName }}</div>
-            <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
-          </div>
+    <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
+      <div class="result-tab__left">
+        <div class="well-indicator">
+          <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+          </svg>
         </div>
+        <div class="well-details">
+          <div class="name">{{ store.wellHeaderData()?.wellName }}</div>
+          <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
+        </div>
+      </div>
 
-        <div class="result-tab__right">
-          <div class="main-stat">
-            <span class="val">{{ result.rate | number }}</span>
-            <span class="unit">GPM</span>
-          </div>
-          <div class="view-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </div>
+      <div class="result-tab__right">
+        <div class="main-stat">
+          <span class="val">{{ result.rate | number }}</span>
+          <span class="unit">GPM</span>
         </div>
-      </button>
-    } @else {
-      <div class="results-empty">No test records available.</div>
-    }
+        <div class="view-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </div>
+    </button>
   </div>
 </div>
+}
 
 <svg style="width:0;height:0;position:absolute;" aria-hidden="true">
   <defs>
@@ -105,7 +102,7 @@
           </div>
         </div>
 
-        <!-- RPM (pump) / SIWHP (flow) -->
+        <!-- RPM (pump) / SIWHP + FWHP (flow) -->
         @if (!isFlowTest()) {
           <div class="info-card">
             <div class="info-card__icon">
@@ -131,6 +128,20 @@
             <div class="info-card__content">
               <div class="info-card__label">SIWHP</div>
               <div class="info-card__value">{{ r.siwhp | number }}<span class="info-card__unit">PSI</span></div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <line x1="12" y1="22" x2="12" y2="2"/>
+                <path d="M5 14c2 2 5 3 7 0s5-2 7 0"/>
+                <path d="M5 10c2 2 5 3 7 0s5-2 7 0"/>
+              </svg>
+            </div>
+            <div class="info-card__content">
+              <div class="info-card__label">FWHP</div>
+              <div class="info-card__value">{{ r.fwhp | number }}<span class="info-card__unit">PSI</span></div>
             </div>
           </div>
         }
@@ -232,17 +243,34 @@
               <div class="info-card__value">{{ r.dwl | number }}<span class="info-card__unit">FT</span></div>
             </div>
           </div>
+        }
 
+        <!-- Well Productivity (both flow and pump) -->
+        <div class="info-card">
+          <div class="info-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="info-card__content">
+            <div class="info-card__label">Well Productivity</div>
+            <div class="info-card__value">{{ r.productivityActual | number:'1.2-2' }}<span class="info-card__unit">GPM/FT</span></div>
+          </div>
+        </div>
+
+        <!-- Conducted By -->
+        @if (r.conductedBy) {
           <div class="info-card">
             <div class="info-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
             <div class="info-card__content">
-              <div class="info-card__label">Productivity</div>
-              <div class="info-card__value">{{ r.productivityActual | number:'1.2-2' }}<span class="info-card__unit">GPM/FT</span></div>
+              <div class="info-card__label">Conducted By</div>
+              <div class="info-card__value info-card__value--text">{{ r.conductedBy }}</div>
             </div>
           </div>
         }

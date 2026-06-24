@@ -459,8 +459,9 @@ export function allCasingData(d: IWellData | null): CasingInfoViewModel[] | null
 
 export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewModel | null {
     if (!d) return null;
-    const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
     const testOutcome = selectPrimaryTestOutcome(d);
+    if (!testOutcome) return null;
+    const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const wellDesign = d.EXAD_GWD_WELL_DESIGN?.[0];
     return {
