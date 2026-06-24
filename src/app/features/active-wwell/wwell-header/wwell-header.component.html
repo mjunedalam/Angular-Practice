@@ -51,8 +51,11 @@
       <span class="aw-value">{{ d?.targetedAquifer ?? '—' }}</span>
     </div>
 
-    <div class="aw-cell">
-      <span class="aw-label">Target Depth</span>
+    <div class="aw-cell aw-cell--ir">
+      <div class="aw-cell-top">
+        <span class="aw-label">Target Depth</span>
+        <span class="aw-src-badge aw-src-badge--ir">IR</span>
+      </div>
       <span class="aw-value">{{ d?.depth ? (d?.depth + ' ft') : '—' }}</span>
     </div>
 
@@ -107,8 +110,11 @@
       <span class="aw-value">{{ d?.biNum ?? '—' }}</span>
     </div>
 
-    <div class="aw-cell aw-cell--span2">
-      <span class="aw-label">Supporting</span>
+    <div class="aw-cell aw-cell--span2 aw-cell--ir">
+      <div class="aw-cell-top">
+        <span class="aw-label">Supporting</span>
+        <span class="aw-src-badge aw-src-badge--ir">IR</span>
+      </div>
       <span class="aw-value">{{ d?.supportingBusiness ?? '—' }}</span>
     </div>
 

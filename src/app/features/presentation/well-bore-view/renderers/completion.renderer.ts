@@ -14,10 +14,8 @@ import { animateLabel } from './animation.helpers';
 import {
   resolveCompletionBottomDepth,
   resolveCompletionBottomPx,
-  getCasingTier,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
-  resolveLinerTopDepth,
   resolveShoeDepth,
   resolveOhHalfWidth,
   shouldRenderGravelPack,
@@ -299,15 +297,11 @@ export function renderScreenHanger({
   };
 
   if (hasLiner) {
-    const liner = data.casings.find(c => c.csgType === 'Liner');
-    if (liner) {
-      const linerHW = computeCasingHalfWidth(getCasingTier(liner, data.casings), baseHalfWidth, halfWidthIncrement);
-      addHanger(scale(resolveShoeDepth(data.casings, data.drlgCasings)), linerHW);
-    }
+    addHanger(scale(resolveShoeDepth(data.casings, data.drlgCasings)), innerHW);
   }
 
   if (hasLinerScreen) {
-    addHanger(scale(resolveLinerTopDepth(data.casings, data.drlgCasings)), screenHW);
+    addHanger(scale(resolveCompletionTopDepth(data.casings, data.drlgCasings)), screenHW);
   }
 
   hangerG.transition().delay(hangerStart).duration(ANIM.HANGER_DURATION).ease(easeCubicInOut).style('opacity', 1);
