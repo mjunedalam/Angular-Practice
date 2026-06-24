@@ -17,8 +17,8 @@ import {
   getCasingTier,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
+  resolveLinerTopDepth,
   resolveOhHalfWidth,
-  resolveShoeDepth,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
   shouldRenderOpenHole,
@@ -301,7 +301,7 @@ export function renderScreenHanger({
     const liner = data.casings.find(c => c.csgType === 'Liner');
     if (liner) {
       const linerHW = computeCasingHalfWidth(getCasingTier(liner, data.casings), baseHalfWidth, halfWidthIncrement);
-      addHanger(scale(resolveShoeDepth(data.casings, data.drlgCasings)), linerHW);
+      addHanger(scale(resolveLinerTopDepth(data.casings, data.drlgCasings)), linerHW);
     }
   }
 

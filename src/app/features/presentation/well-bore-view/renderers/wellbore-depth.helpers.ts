@@ -17,6 +17,16 @@ export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]):
   return (actual !== null && actual.wCsgBotDpth > 0 ? actual.wCsgBotDpth : null) ?? deepest.csgDepth;
 }
 
+export function resolveLinerTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+  const liner = casings.find(c => c.csgType === 'Liner');
+  if (liner) {
+    const actualLnr = drlgCasings.find(d => d.wLnrOdSz === liner.csgSize) ?? null;
+    const topDepth = (actualLnr?.wLnrTopDepth ?? 0) > 0 ? (actualLnr?.wLnrTopDepth ?? null) : null;
+    if (topDepth !== null) return topDepth;
+  }
+  return resolveShoeDepth(casings, drlgCasings);
+}
+
 export function resolveCompletionTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
   const liner = casings.find(c => c.csgType === 'Liner');
   if (liner) {
