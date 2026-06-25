@@ -43,7 +43,7 @@ export class WwellTestComponent {
 
   protected readonly isPublished = signal(false);
   protected readonly productivityInfo = signal<{
-    inputs: Array<{ label: string; value: string; unit: string }>;
+    inputs: { label: string; value: string; unit: string }[];
     calculation: string;
   } | null>(null);
 

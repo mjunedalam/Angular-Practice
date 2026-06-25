@@ -149,10 +149,10 @@ export class PresentationComponent implements OnInit {
 
   protected toggleFullscreen(): void {
     if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
+      document.exitFullscreen().catch((err: unknown) => console.warn('[Presentation] exitFullscreen failed:', err));
     } else {
       const mainEl = (this.elementRef.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
-      (mainEl ?? (this.elementRef.nativeElement as HTMLElement)).requestFullscreen().catch(() => {});
+      (mainEl ?? (this.elementRef.nativeElement as HTMLElement)).requestFullscreen().catch((err: unknown) => console.warn('[Presentation] requestFullscreen failed:', err));
     }
   }
 

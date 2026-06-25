@@ -346,7 +346,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected toggleFullscreen(): void {
     if (!document.fullscreenElement) {
       const mainEl = (this.hostEl.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
-      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch(() => { });
+      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch((err: unknown) => console.warn('[WellsOverview] requestFullscreen failed:', err));
     } else {
       document.exitFullscreen();
     }

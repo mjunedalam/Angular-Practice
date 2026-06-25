@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { GwdDailyRemarks, GwdWellTests } from '@shared/models/wwell/active-wwell.model';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';

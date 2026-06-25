@@ -1,7 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import esriConfig from "@arcgis/core/config.js";
 import esriId from "@arcgis/core/identity/IdentityManager";
-import OAuthInfo from "@arcgis/core/identity/OAuthInfo";
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 
 @Injectable({

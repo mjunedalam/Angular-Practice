@@ -63,12 +63,12 @@
         <div class="di-sep di-sep--editable">
           @if (isEditingDepthLabel()) {
             <input
+              #depthLabelInput
               class="di-sep-label-input"
               [value]="depthSectionLabel()"
               (blur)="commitDepthLabel($any($event.target).value)"
               (keydown.enter)="commitDepthLabel($any($event.target).value)"
               (keydown.escape)="isEditingDepthLabel.set(false)"
-              autofocus
             />
           } @else {
             <span class="di-sep-label">{{ depthSectionLabel() }}</span>

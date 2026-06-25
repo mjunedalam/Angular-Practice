@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActiveWwellStore } from '../store/active-wwell.store';
@@ -14,6 +14,8 @@ import { ActiveWwellStore } from '../store/active-wwell.store';
 export class DatabaseInfoComponent {
   private readonly store = inject(ActiveWwellStore);
 
+  @ViewChild('depthLabelInput') private depthLabelInput?: ElementRef<HTMLInputElement>;
+
   protected readonly data = this.store.databaseInfo;
   protected readonly actualRm  = computed(() => this.store.selectedWell()?.actualRm  ?? null);
   protected readonly kpiRm     = computed(() => this.store.selectedWell()?.kpiRm     ?? null);
@@ -21,6 +23,14 @@ export class DatabaseInfoComponent {
 
   protected readonly depthSectionLabel = signal('Depth & Formation');
   protected readonly isEditingDepthLabel = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.isEditingDepthLabel()) {
+        setTimeout(() => this.depthLabelInput?.nativeElement.focus());
+      }
+    });
+  }
 
   protected startEditDepthLabel(): void {
     this.isEditingDepthLabel.set(true);
