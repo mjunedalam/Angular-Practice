@@ -79,8 +79,6 @@
     <p class="report-title-date">{{ displayDate }}</p>
   </div>
 
-  <div class="report-divider"></div>
-
   @if (loadingVisible()) {
     <mat-progress-bar mode="indeterminate" class="report-loading-bar" />
   }
@@ -159,12 +157,16 @@
                 <td class="lbl">Test Type</td>
                 <td colspan="3" class="val-span">{{ isFlowTestVm(vm) ? 'FLOW' : 'PUMP' }}</td>
               </tr>
+               <tr>
+                <td colspan="4" class="tbl-header"></td>
+              </tr>
+              <br/>
             </tbody>
           </table>
-          <div class="report-divider"></div>
+         
         }
       }
-
+     <br/>
       <!-- ── Daily Drilling — exact mr.html structure ─────────── -->
       @for (report of morningReport(); track report.epANum) {
         <table class="data-table">
