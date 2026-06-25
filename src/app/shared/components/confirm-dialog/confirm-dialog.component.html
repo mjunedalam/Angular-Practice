@@ -3,17 +3,36 @@
 
   <!-- ── Header bar ── -->
   <div class="cd-header">
-    <div class="cd-header__icon-wrap">
-      <svg class="cd-header__icon" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-        <rect x="2" y="4" width="20" height="16" rx="3"/>
-        <path d="m2 7 10 7 10-7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
     <div class="cd-header__copy">
-      <h2 class="cd-header__title" id="cd-title">{{ data.title }}</h2>
+      <h2 class="cd-header__title" id="cd-title">
+        <svg class="cd-header__title-icon" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="3"/>
+          <path d="m2 7 10 7 10-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ data.title }}
+      </h2>
       <p class="cd-header__subtitle" id="cd-subtitle">
-        {{ data.subtitle ?? 'Please review the information before confirming.' }}
+        <svg class="cd-header__warn-icon" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                stroke-linejoin="round"/>
+          <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
+          <line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round"/>
+        </svg>
+        <span class="cd-subtitle__text">
+          Unauthorized disclosure of this data violates Aramco cybersecurity policy
+          <span class="cd-subtitle__tags">
+            <span class="cd-subtitle__tag">
+              <span class="cd-subtitle__tag-code">SACS-330</span>
+              Cryptographic Cybersecurity Standard
+            </span>
+            <span class="cd-subtitle__tag">
+              <span class="cd-subtitle__tag-code">SACS-332</span>
+              Data Cybersecurity Controls
+            </span>
+          </span>
+        </span>
       </p>
     </div>
   </div>
@@ -47,26 +66,6 @@
         }
       </tbody>
     </table>
-  </div>
-
-  <!-- ── Compliance warning ── -->
-  <div class="cd-warning" role="alert">
-    <svg class="cd-warning__icon" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-            stroke-linejoin="round"/>
-      <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
-      <line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round"/>
-    </svg>
-    <div class="cd-warning__copy">
-      <p class="cd-warning__text">
-        Sharing confidential data to unauthorized parties will violate the Aramco guidelines stated in:
-      </p>
-      <ul class="cd-warning__list">
-        <li>SACS-330 Cryptographic Cybersecurity Standard</li>
-        <li>SACS-332 Data Cybersecurity Controls</li>
-      </ul>
-    </div>
   </div>
 
   <!-- ── Footer ── -->
