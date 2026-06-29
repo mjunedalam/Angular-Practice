@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -67,17 +67,18 @@ export class WwellTestComponent {
     effect(() => {
       const data = this.data();
       if (data) {
-        const flowType = data.flowType === 'Y';
+        const flowType = data.flowType === 'FLOW';
         this.isFlowTest.set(flowType);
         this.initialFlowType = flowType;
       }
     }, { allowSignalWrites: true });
 
-    // Sync toggle → form so hydTestTypCd is always Y (FLOW) or N (PUMP) on submit
+    // Sync mode → hydTestTypCd and re-evaluate the requiredFor validators
     effect(() => {
-      this.form.get('hydTestTypCd')!.setValue(
-        this.isFlowTest() ? 'Y' : 'N',
-        { emitEvent: false },
+      const isFlow = this.isFlowTest();
+      this.form.get('hydTestTypCd')!.setValue(isFlow ? 'FLOW' : 'PUMP', { emitEvent: false });
+      ['siwhp', 'fwhp', 'rpm', 'hydPmpDpth', 'statWlvl', 'dyncWlvl'].forEach(f =>
+        this.form.get(f)?.updateValueAndValidity({ emitEvent: false }),
       );
     });
 
@@ -103,24 +104,6 @@ export class WwellTestComponent {
       this.formService.drillingRemarksForm.markAsUntouched();
     }, { allowSignalWrites: true });
 
-    // Swap required validators when test type changes
-    effect(() => {
-      const isFlow = this.isFlowTest();
-      const flowOnly = ['siwhp', 'fwhp'];
-      const pumpOnly = ['rpm', 'hydPmpDpth', 'statWlvl', 'dyncWlvl'];
-
-      const toRequire  = isFlow ? flowOnly : pumpOnly;
-      const toOptional = isFlow ? pumpOnly : flowOnly;
-
-      toOptional.forEach(field => {
-        this.form.get(field)?.clearValidators();
-        this.form.get(field)?.updateValueAndValidity({ emitEvent: false });
-      });
-      toRequire.forEach(field => {
-        this.form.get(field)?.setValidators(Validators.required);
-        this.form.get(field)?.updateValueAndValidity({ emitEvent: false });
-      });
-    });
 
     // Re-run calculation when test type changes so tooltip stays in sync
     effect(() => {

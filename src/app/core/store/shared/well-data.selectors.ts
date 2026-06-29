@@ -460,16 +460,21 @@ export function allCasingData(d: IWellData | null): CasingInfoViewModel[] | null
 export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewModel | null {
     if (!d) return null;
     const testOutcome = selectPrimaryTestOutcome(d);
-    if (!testOutcome) return null;
     const hydro = d.EXAD_GWD_IR_HYDROGEOLOGY?.[0];
+    if (!testOutcome && !hydro) return null;
     const prewap = d.EXAD_RCD_PREWAP?.[0];
     const wellDesign = d.EXAD_GWD_WELL_DESIGN?.[0];
     return {
 
         flowType: (() => {
-            const fromTest = testOutcome?.hydTestTypCd?.trim();
-            const raw = fromTest ? fromTest : (hydro?.flowType?.trim() ?? '');
-            return raw.toUpperCase() === 'Y' ? 'Y' : 'N';
+            // Primary: WELL_TESTS.hydTestTypCd ('FLOW' | 'PUMP')
+            const testType = testOutcome?.hydTestTypCd?.trim().toUpperCase();
+            if (testType === 'FLOW' || testType === 'PUMP') return testType;
+            // WELL_TESTS empty → fallback to IR.flowType (Y = FLOW, N = PUMP)
+            const irType = hydro?.flowType?.trim().toUpperCase();
+            if (irType === 'Y') return 'FLOW';
+            if (irType === 'N') return 'PUMP';
+            return 'PUMP';
         })(),
         testType: testOutcome?.hydTestTypCd,
         aquiferActual: testOutcome?.rsvrCd,

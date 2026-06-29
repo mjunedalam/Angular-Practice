@@ -1,12 +1,20 @@
-import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, ValidationErrors, Validators } from "@angular/forms";
+
+function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    const current = ctrl.parent?.get('hydTestTypCd')?.value as string | undefined;
+    if (current !== mode) return null;
+    const v = ctrl.value;
+    const empty = v == null || (typeof v === 'string' && v.length === 0);
+    return empty ? { required: true } : null;
+  };
+}
 
 @Injectable({
     providedIn: "root"
 })
 export class ActiveWwellFormService {
-
 
     drillingRemarksForm: FormGroup = this._fb.group({
         epANum: [null, [Validators.required]],
@@ -18,7 +26,6 @@ export class ActiveWwellFormService {
         wDrlgSmryRmk: [null, [Validators.required]]
     });
 
-
     wellTestForm: FormGroup = this._fb.group({
         epANum: [null, [Validators.required]],
         rsvrCd: [null, [Validators.required]],
@@ -27,19 +34,17 @@ export class ActiveWwellFormService {
         temp: [null, [Validators.required]],
         hydH2sCnc: [null, [Validators.required]],
         wtrSaTdsCnc: [null, [Validators.required]],
-        rpm: [null, [Validators.required]],
-        siwhp: [null, [Validators.required]],
-        hydPmpDpth: [null, [Validators.required]],
-        hydProdRt: [null, [Validators.required]],
-        statWlvl: [null, [Validators.required]],
-        dyncWlvl: [null, [Validators.required]],
+        rpm:        [null, [requiredFor('PUMP')]],
+        siwhp:      [null, [requiredFor('FLOW')]],
+        hydPmpDpth: [null, [requiredFor('PUMP')]],
+        hydProdRt:  [null, [Validators.required]],
+        statWlvl:   [null, [requiredFor('PUMP')]],
+        dyncWlvl:   [null, [requiredFor('PUMP')]],
         testerNetworkId: [null, [Validators.required]],
-        hydProduct: [null, [Validators.required]],
-        duration: [null, [Validators.required]],
-        fwhp: [null, [Validators.required]],
-    });;
+        hydProduct: [null],
+        duration:   [null, [Validators.required]],
+        fwhp:       [null, [requiredFor('FLOW')]],
+    });
 
-    constructor(private _fb: FormBuilder, private http: HttpClient) {
-
-    }
+    constructor(private _fb: FormBuilder) {}
 }
