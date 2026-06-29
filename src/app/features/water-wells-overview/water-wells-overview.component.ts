@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   HostListener,
@@ -13,7 +14,9 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { skip } from 'rxjs';
 import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
@@ -33,7 +36,15 @@ import {
 } from 'src/app/shared/models/config/agwa-map.config';
 import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
 import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
-import { formatDateForInput, getTodayAtMidnight } from 'src/app/shared/utils/date.util';
+import { NotificationService } from '@shared/components/notification/notification.service';
+import {
+  blockFutureDigits,
+  clampDateDigits,
+  formatDateForInput,
+  getTodayAtMidnight,
+  parseDateFromInput,
+  validateDateInput,
+} from 'src/app/shared/utils/date.util';
 
 export interface StatusStat {
   status: string;
@@ -88,6 +99,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   @ViewChild('mapPanel') private mapPanelEl?: ElementRef<HTMLElement>;
   @ViewChild('legendPanel') private legendPanelEl?: ElementRef<HTMLElement>;
   @ViewChild('allWellsPanel') private allWellsPanelEl?: ElementRef<HTMLElement>;
+  @ViewChild('nativeDateInput') private nativeDateInput?: ElementRef<HTMLInputElement>;
 
   private mapView?: __esri.MapView;
   private wwellLayer?: GraphicsLayer;
@@ -145,10 +157,16 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly loader = inject(LoaderService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly hostEl = inject(ElementRef);
+  private readonly notificationService = inject(NotificationService);
   protected readonly store = inject(MorningReportStore);
   private readonly esriAuth = inject(EsriMapService);          // office: OAuth auth
   private readonly extConfigService = inject(ExternalConfigService); // office: portal config
+
+  protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
+  protected selectedDateString = this.maxDateString;
 
   private toTitleCase(str: string): string {
     return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
@@ -340,7 +358,102 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   }
 
   protected goBack(): void {
-    void this.router.navigate(['/main/presentations']);
+    void this.router.navigate(['/main/presentations'], {
+      queryParams: { date: this.selectedDateString },
+    });
+  }
+
+  protected onDateInputChange(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected onDateAutoFormat(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selStart = input.selectionStart ?? 0;
+    const rawVal = input.value;
+
+    const rawDigits = rawVal.replace(/\D/g, '').slice(0, 8);
+    const endsWithHyphen = rawVal.trimEnd().endsWith('-');
+
+    const paddedDigits = (endsWithHyphen && rawDigits.length === 5)
+      ? rawDigits.slice(0, 4) + '0' + rawDigits[4]
+      : rawDigits;
+
+    const { digits, isFuture } = blockFutureDigits(clampDateDigits(paddedDigits));
+
+    if (isFuture) {
+      this.notificationService.error('Future dates are not allowed');
+    }
+
+    let formatted = digits;
+    if (digits.length >= 5) formatted = digits.slice(0, 4) + '-' + digits.slice(4);
+    if (digits.length >= 7) formatted = digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6);
+
+    const trailingHyphen = endsWithHyphen && !isFuture && (digits.length === 4 || digits.length === 6);
+    if (trailingHyphen) formatted += '-';
+
+    const oldDashes = (rawVal.slice(0, selStart).match(/-/g) ?? []).length;
+    const newDashes = (formatted.slice(0, selStart).match(/-/g) ?? []).length;
+    const newCursor = trailingHyphen
+      ? formatted.length
+      : Math.min(selStart + (newDashes - oldDashes), formatted.length);
+
+    input.value = formatted;
+    input.setSelectionRange(newCursor, newCursor);
+
+    if (digits.length === 8) {
+      this.commitDate(formatted);
+    }
+  }
+
+  protected onDateTextCommit(value: string): void {
+    this.commitDate(value);
+  }
+
+  protected openNativePicker(): void {
+    this.nativeDateInput?.nativeElement.showPicker?.();
+  }
+
+  private commitDate(value: string): void {
+    let digits = clampDateDigits(value.trim().replace(/\D/g, '').slice(0, 8));
+
+    if (digits.length < 6) return;
+
+    if (digits.length === 6) digits += '01';
+    else if (digits.length === 7) digits = digits.slice(0, 6) + '0' + digits[6];
+
+    const normalized = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+
+    const error = validateDateInput(normalized);
+    if (error === 'invalid') { this.notificationService.error('Invalid date — use YYYY-MM-DD format'); return; }
+    if (error === 'future')  { this.notificationService.error('Future dates are not allowed'); return; }
+
+    const newStr = formatDateForInput(parseDateFromInput(normalized));
+    if (newStr === this.selectedDateString) return;
+
+    this.selectedDateString = newStr;
+    this.store.setDate(newStr);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { date: newStr },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private normalizeDateParam(value: string | null): string {
+    if (!value) return this.maxDateString;
+    const parsed = parseDateFromInput(value);
+    if (Number.isNaN(parsed.getTime()) || parsed > getTodayAtMidnight()) return this.maxDateString;
+    return value;
+  }
+
+  private applyDateFromQueryParams(params: ParamMap, forceLoad = false): void {
+    const requestedDate = this.normalizeDateParam(params.get('date'));
+    const currentDate = formatDateForInput(this.store.selectedDate());
+    this.selectedDateString = requestedDate;
+    if (!forceLoad && requestedDate === currentDate) return;
+    this.store.loadMorningReportData(requestedDate);
   }
 
   protected toggleFullscreen(): void {
@@ -450,7 +563,10 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isFullscreen.set(!!document.fullscreenElement);
     if (!isPlatformBrowser(this.platformId)) return;
-    this.store.loadMorningReportData(formatDateForInput(getTodayAtMidnight()));
+    this.applyDateFromQueryParams(this.route.snapshot.queryParamMap, true);
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => this.applyDateFromQueryParams(params));
     this.observeVisibility();
   }
 

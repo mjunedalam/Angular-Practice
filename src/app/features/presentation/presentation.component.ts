@@ -122,7 +122,9 @@ export class PresentationComponent implements OnInit {
   }
 
   protected navigateToOverview(): void {
-    void this.router.navigate(['/main/water-wells-overview']);
+    void this.router.navigate(['/main/water-wells-overview'], {
+      queryParams: { date: formatDateForInput(this.store.selectedDate()) },
+    });
   }
 
   protected openDraggableDialog(): void {

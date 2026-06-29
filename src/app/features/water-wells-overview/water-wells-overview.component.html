@@ -19,6 +19,41 @@
       }
     </div>
 
+    <div class="wwo__date">
+      <label class="wwo__date-label" for="wwo-date-input">Date:</label>
+      <div class="wwo__date-input-wrap">
+        <input
+          id="wwo-date-input"
+          type="text"
+          class="wwo__date-input"
+          [value]="selectedDateString"
+          placeholder="YYYY-MM-DD"
+          maxlength="10"
+          (focus)="$any($event.target).select()"
+          (input)="onDateAutoFormat($event)"
+          (blur)="onDateTextCommit($any($event.target).value)"
+          (keydown.enter)="onDateTextCommit($any($event.target).value); $any($event.target).blur()"
+          aria-label="Select date"
+        />
+        <button type="button" class="wwo__date-cal-btn" (click)="openNativePicker()" aria-label="Open calendar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </button>
+        <input
+          #nativeDateInput
+          type="date"
+          class="wwo__date-native-hidden"
+          [value]="selectedDateString"
+          [max]="maxDateString"
+          (change)="onDateInputChange($any($event.target).value)"
+          tabindex="-1"
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+
     <div class="wwo__header-actions">
       <button type="button" class="wwo__back" (click)="goBack()" aria-label="Back to Presentations" title="Open Presentations">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
