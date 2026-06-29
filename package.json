@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "prestart": "node scripts/sync-local-build-info.js",
+    "prestart": "node scripts/sync-local-build-info.js && ng lint",
     "start": "ng serve",
+    "prebuild": "ng lint",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "test": "jest",

@@ -47,28 +47,30 @@ describe('authGuard (functional guard)', () => {
     expect(routerMock.createUrlTree).not.toHaveBeenCalled();
   });
 
-  it('should allow navigation when not authenticated', () => {
+  it('should redirect to login when not authenticated', () => {
     authStoreMock.isAuthenticated.mockReturnValue(false);
     authStoreMock.isTokenExpired.mockReturnValue(false);
+    routerMock.createUrlTree.mockReturnValue({ url: '/login' });
 
     const result = TestBed.runInInjectionContext(() =>
       authGuard(createRouteSnapshot(), createStateSnapshot())
     );
 
-    expect(result).toBe(true);
-    expect(routerMock.createUrlTree).not.toHaveBeenCalled();
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
+    expect(result).toEqual({ url: '/login' });
   });
 
-  it('should allow navigation when token is expired', () => {
+  it('should redirect to login when token is expired', () => {
     authStoreMock.isAuthenticated.mockReturnValue(true);
     authStoreMock.isTokenExpired.mockReturnValue(true);
+    routerMock.createUrlTree.mockReturnValue({ url: '/login' });
 
     const result = TestBed.runInInjectionContext(() =>
       authGuard(createRouteSnapshot(), createStateSnapshot())
     );
 
-    expect(result).toBe(true);
-    expect(routerMock.createUrlTree).not.toHaveBeenCalled();
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
+    expect(result).toEqual({ url: '/login' });
   });
 
 });

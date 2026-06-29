@@ -11,7 +11,7 @@ describe('LeftSidenavComponent', () => {
     user: jest.fn(() => ({ groups: ['GWD_admin'] })),
   };
   const rbacStoreMock = {
-    canAccessRoute: jest.fn(() => true),
+    hasPermission: jest.fn(() => true),
   };
 
   beforeEach(async () => {

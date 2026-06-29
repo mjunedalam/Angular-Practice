@@ -31,7 +31,7 @@ describe('EmailService', () => {
   });
 
   it('builds an email request addressed to the current user email', () => {
-    const request = service.buildEmailRequest([], 'map-image-data', 'junedalam@aramco.com');
+    const request = service.buildEmailRequest([], 'map-image-data', 'junedalam@aramco.com', undefined, '2024-01-15');
 
     expect(request).toEqual({
       subject: EMAIL_SUBJECT,
@@ -46,6 +46,7 @@ describe('EmailService', () => {
         morningReport: [],
         mapImageData: 'map-image-data',
         waterWellTestResults: undefined,
+        mrReportDate: 'Monday 15 January 2024',
       },
     });
   });

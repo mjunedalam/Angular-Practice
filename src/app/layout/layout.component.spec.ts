@@ -24,7 +24,7 @@ describe('LayoutComponent', () => {
   };
   const rbacStoreMock = {
     roleDefinitions: jest.fn(() => []),
-    canAccessRoute: jest.fn(() => true),
+    hasPermission: jest.fn(() => true),
   };
   beforeEach(async () => {
     jest.clearAllMocks();
