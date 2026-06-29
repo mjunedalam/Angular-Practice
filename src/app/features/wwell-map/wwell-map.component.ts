@@ -254,7 +254,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       const [r, g, b] = DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9];
       layer.add(new Graphic({
         geometry: point,
-        symbol: new SimpleMarkerSymbol({ style: 'circle', size: 3, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
+        symbol: new SimpleMarkerSymbol({ style: 'circle', size: 13, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
         attributes: { wwellId: wwell.wwellId, location: wwell.location },
       }));
     }
