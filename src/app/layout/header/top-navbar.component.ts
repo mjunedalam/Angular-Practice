@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
+import { RbacStore } from '@store/rbac/rbac.store';
 
 @Component({
   selector: 'app-top-navbar',
@@ -24,11 +25,16 @@ export class TopNavbarComponent {
   readonly toggleSidenav = output<void>();
 
   protected readonly auth     = inject(AuthStore);
+  protected readonly rbac     = inject(RbacStore);
   protected readonly menuOpen = signal(false);
 
-  protected readonly userRoleLabels = computed(() =>
-    (this.auth.user()?.groups as string[] | undefined) ?? [],
-  );
+  protected readonly userRoleLabels = computed(() => {
+    // After permissions load: if the backend granted nothing, the JWT groups are stale/revoked.
+    if (this.rbac.isLoaded() && Object.keys(this.rbac.userPermissions()).length === 0) {
+      return [];
+    }
+    return (this.auth.user()?.groups as string[] | undefined) ?? [];
+  });
 
   protected readonly lastLoginDisplay = computed(() => {
     const d = this.auth.lastLogin();
@@ -45,6 +51,7 @@ export class TopNavbarComponent {
   protected readonly profileSubtitle = computed(() => this.auth.userEmail() ?? 'Ground Water Team');
   protected readonly roleCountLabel = computed(() => {
     const count = this.userRoleLabels().length;
+    if (count === 0) return 'No roles assigned';
     return count === 1 ? '1 role assigned' : `${count} roles assigned`;
   });
 

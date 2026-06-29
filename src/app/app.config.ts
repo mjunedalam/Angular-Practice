@@ -1,4 +1,5 @@
 import { ApplicationConfig, importProvidersFrom, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from '@interceptors/auth.interceptor';
@@ -29,7 +30,13 @@ export const appConfig: ApplicationConfig = {
       authStore.autoLogin();
       if (authStore.isAuthenticated()) {
         const baseUrl = configService.settings.dailyOperationServiceUrl;
-        await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
+        try {
+          await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
+        } catch (err) {
+          if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
+            authStore.logout();
+          }
+        }
       }
     }),
 

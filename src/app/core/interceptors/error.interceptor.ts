@@ -18,9 +18,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        if (!req.context.get(SKIP_AUTO_LOGOUT)) {
-          authStore.logout();
+        if (req.context.get(SKIP_AUTO_LOGOUT)) {
+          // Re-throw so the caller can detect the auth failure and decide (e.g. logout).
+          return throwError(() => error);
         }
+        authStore.logout();
         return EMPTY;
       }
 

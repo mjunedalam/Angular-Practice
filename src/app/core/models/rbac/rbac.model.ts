@@ -4,4 +4,5 @@ export interface RbacState {
   readonly userPermissions: Record<string, Action[]>;
   readonly isLoaded: boolean;
   readonly error: string | null;
+  readonly lastLoadedAt: number | null;
 }
