@@ -88,6 +88,10 @@ export class ActiveWwellViewComponent implements OnInit {
     this.rbac.hasPermission('active-wwell', ACTIONS.ACTIVE_WWELL_FILE_UPLOAD),
   );
 
+  protected readonly canViewAttachments = computed(() =>
+    this.rbac.hasPermission('active-wwell', ACTIONS.READ),
+  );
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
