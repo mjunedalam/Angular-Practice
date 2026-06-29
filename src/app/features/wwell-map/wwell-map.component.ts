@@ -38,6 +38,7 @@ import {
 import { findNonOverlappingPosition } from 'src/app/shared/utils/wwell-placement-utils';
 import { EsriMapService } from '@core/services/esri-map.service';
 import { ExternalConfigService } from '@shared/services/external-config.service';
+import { getMockKsaWwells } from './mock-wwells.util';
 
 const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 
@@ -242,7 +243,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       }];
     });
     this.defaultMapSnapshotBase64 = null;
-    this.wwells.set(wells);
+    this.wwells.set(wells.length ? wells : getMockKsaWwells());
     this.scheduleDefaultMapSnapshot();
   }
 
