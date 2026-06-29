@@ -95,6 +95,7 @@ export const PresentationStore = signalStore(
             casingInfo: computed((): CasingInfoViewModel | null =>
                 selectCasingInfoViewModel(wellData()),
             ),
+            hasActualWellTest: computed((): boolean => (wellData()?.EXAD_GWD_WELL_TESTS?.length ?? 0) > 0),
             wwellTest: computed((): WwellTestViewModel | null =>
                 selectWwellTestViewModel(wellData()),
             ),

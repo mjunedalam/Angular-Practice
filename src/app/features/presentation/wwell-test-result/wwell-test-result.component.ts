@@ -59,7 +59,7 @@ export class WwellTestResultComponent {
   protected readonly isFlowTest = computed(() => {
     const data = this.store.wwellTest();
     if (!data) return false;
-    return data.flowType === 'Y' || data.testType?.toLowerCase() === 'flow';
+    return data.flowType === 'FLOW';
   });
 
   protected openDialog(result: WwellTestViewModel): void {
