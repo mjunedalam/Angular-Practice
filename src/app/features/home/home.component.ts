@@ -8,6 +8,10 @@ import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RbacStore } from '@store/rbac/rbac.store';
 import { ACTIONS } from '@models/rbac/role.constants';
+import { NotificationService } from '@shared/components/notification/notification.service';
+
+const ACCESS_RESTRICTED_MESSAGE =
+  'Access Restricted — contact your administrator to request access to this module.';
 
 interface QuickListItem {
   label: string;
@@ -29,6 +33,7 @@ interface QuickListItem {
 export class HomeComponent {
   private readonly router    = inject(Router);
   private readonly rbacStore = inject(RbacStore);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly quickItems: QuickListItem[] = [
     {
@@ -76,7 +81,11 @@ export class HomeComponent {
     return !!item.routeId && this.lockedRouteIds().has(item.routeId);
   }
 
-  protected navigate(route: string): void {
-    this.router.navigate(['main', route]);
+  protected navigate(item: QuickListItem): void {
+    if (this.isLocked(item)) {
+      this.notificationService.error(ACCESS_RESTRICTED_MESSAGE);
+      return;
+    }
+    this.router.navigate(['main', item.route]);
   }
 }

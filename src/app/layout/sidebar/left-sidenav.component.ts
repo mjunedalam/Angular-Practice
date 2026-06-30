@@ -10,6 +10,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RbacStore } from '@store/rbac/rbac.store';
 import { ACTIONS } from '@models/rbac/role.constants';
 import { BuildInfoService } from '@shared/services/build-info.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
+
+const ACCESS_RESTRICTED_MESSAGE =
+  'Access Restricted — contact your administrator to request access to this module.';
 
 export interface NavItem {
   id: string;
@@ -32,6 +36,7 @@ export interface NavItem {
 export class LeftSidenavComponent {
   private readonly rbacStore = inject(RbacStore);
   private readonly buildInfoService = inject(BuildInfoService);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly buildInfo = this.buildInfoService.info;
   protected readonly shortHash = this.buildInfoService.shortHash;
@@ -81,7 +86,11 @@ export class LeftSidenavComponent {
     return !!item.routeId && this.lockedRouteIds().has(item.routeId);
   }
 
-  protected onItemClick(id: string): void {
-    this.navItemClick.emit(id);
+  protected onItemClick(item: NavItem): void {
+    if (this.isLocked(item)) {
+      this.notificationService.error(ACCESS_RESTRICTED_MESSAGE);
+      return;
+    }
+    this.navItemClick.emit(item.id);
   }
 }

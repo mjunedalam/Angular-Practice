@@ -5,12 +5,17 @@ import { RbacStore } from '@store/rbac/rbac.store';
 import { AuthStore } from '../../features/auth/store/auth.store';
 import { ExternalConfigService } from '@shared/services/external-config.service';
 import { ACTIONS } from '@models/rbac/role.constants';
+import { NotificationService } from '@shared/components/notification/notification.service';
+
+const ACCESS_RESTRICTED_MESSAGE =
+  'Access Restricted — contact your administrator to request access to this module.';
 
 export const roleGuard: CanActivateFn = async (route) => {
   const rbacStore = inject(RbacStore);
   const authStore = inject(AuthStore);
   const router    = inject(Router);
   const extConfig = inject(ExternalConfigService);
+  const notificationService = inject(NotificationService);
 
   if (rbacStore.isStale()) {
     const url = `${extConfig.settings.dailyOperationServiceUrl}/daily-operations/api/v1/rbac/permissions`;
@@ -27,5 +32,6 @@ export const roleGuard: CanActivateFn = async (route) => {
 
   const routeId = route.data?.['routeId'] as string | undefined;
   if (routeId && rbacStore.hasPermission(routeId, ACTIONS.READ)) return true;
+  notificationService.error(ACCESS_RESTRICTED_MESSAGE);
   return router.createUrlTree(['/main/home']);
 };

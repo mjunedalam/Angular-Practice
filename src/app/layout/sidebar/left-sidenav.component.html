@@ -11,7 +11,7 @@
           class="sidenav__btn"
           [class.sidenav__btn--active]="item.id === activeRoute()"
           [class.sidenav__btn--locked]="isLocked(item)"
-          (click)="onItemClick(item.id)"
+          (click)="onItemClick(item)"
           [attr.aria-current]="item.id === activeRoute() ? 'page' : null"
           [title]="collapsed() ? item.label : ''"
         >
