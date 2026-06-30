@@ -20,7 +20,7 @@
 
 .upload-card--has-files {
   .upload-card__body {
-    overflow: hidden;
+    overflow-y: auto;
   }
 
   .dropzone {
@@ -50,12 +50,7 @@
   }
 
   .pending-section {
-    flex: 1 1 auto;
-  }
-
-  .uploaded-section,
-  .server-docs-loading {
-    display: none;
+    flex: 0 1 auto;
   }
 }
 

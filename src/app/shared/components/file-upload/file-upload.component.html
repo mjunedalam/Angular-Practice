@@ -56,11 +56,11 @@
                   </span>
                 </div>
                 <div class="file-row__actions">
-                  <button mat-icon-button class="action-btn action-btn--view" matTooltip="Preview"
+                  <button mat-icon-button class="action-btn action-btn--view"
                     (click)="previewFile(item.file)" aria-label="Preview file">
                     <mat-icon>visibility</mat-icon>
                   </button>
-                  <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Remove"
+                  <button mat-icon-button class="action-btn action-btn--delete"
                     (click)="removeFile(item.id)" aria-label="Remove file" [disabled]="docsStore.uploading()">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
@@ -101,7 +101,7 @@
                 </span>
               </div>
               <div class="file-row__actions">
-                <button mat-icon-button class="action-btn action-btn--view" matTooltip="Preview"
+                <button mat-icon-button class="action-btn action-btn--view"
                   (click)="viewServerDoc(docName)" [disabled]="isViewLoading(docName)" aria-label="Preview file">
                   @if (isViewLoading(docName)) {
                     <mat-spinner diameter="14"></mat-spinner>
@@ -110,7 +110,7 @@
                   }
                 </button>
                 @if (canUpload()) {
-                  <button mat-icon-button class="action-btn action-btn--delete" matTooltip="Delete"
+                  <button mat-icon-button class="action-btn action-btn--delete"
                     (click)="deleteServerDoc(docName)" [disabled]="docsStore.deleting()" aria-label="Delete file">
                     <mat-icon>delete_outline</mat-icon>
                   </button>

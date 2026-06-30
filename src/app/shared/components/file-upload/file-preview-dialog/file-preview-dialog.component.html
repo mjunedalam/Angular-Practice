@@ -25,16 +25,14 @@
       @if (previewType === 'image') {
         <div class="pd-zoom">
           <button type="button" class="pd-zoom__btn"
-                  (click)="zoomOut()" [disabled]="zoomLevel() <= 0.25"
-                  matTooltip="Zoom out">
+                  (click)="zoomOut()" [disabled]="zoomLevel() <= 0.25">
             <mat-icon>remove</mat-icon>
           </button>
           <button type="button" class="pd-zoom__val" (click)="resetZoom()" matTooltip="Reset zoom">
             {{ zoomPercent }}%
           </button>
           <button type="button" class="pd-zoom__btn"
-                  (click)="zoomIn()" [disabled]="zoomLevel() >= 3"
-                  matTooltip="Zoom in">
+                  (click)="zoomIn()" [disabled]="zoomLevel() >= 3">
             <mat-icon>add</mat-icon>
           </button>
         </div>
