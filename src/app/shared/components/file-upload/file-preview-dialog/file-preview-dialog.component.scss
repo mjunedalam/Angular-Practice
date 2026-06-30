@@ -13,6 +13,7 @@ $text-lo    : #3d4e68;
 $accent-image    : #38bdf8;
 $accent-pdf      : #f43f5e;
 $accent-document : #a78bfa;
+$accent-docx     : #3b82f6;
 $accent-other    : #64748b;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,11 +54,13 @@ $accent-other    : #64748b;
   &--image    .pd-accent-stripe { background: $accent-image;    box-shadow: 0 0 18px rgba($accent-image,    .55); }
   &--pdf      .pd-accent-stripe { background: $accent-pdf;      box-shadow: 0 0 18px rgba($accent-pdf,      .55); }
   &--document .pd-accent-stripe { background: $accent-document; box-shadow: 0 0 18px rgba($accent-document, .55); }
+  &--docx     .pd-accent-stripe { background: $accent-docx;     box-shadow: 0 0 18px rgba($accent-docx,     .55); }
   &--unsupported .pd-accent-stripe { background: $accent-other; }
 
   &--image    .pd-badge { background: linear-gradient(135deg,#38bdf8,#0284c7); box-shadow: 0 4px 16px rgba(56,189,248,.4); }
   &--pdf      .pd-badge { background: linear-gradient(135deg,#fb7185,#e11d48); box-shadow: 0 4px 16px rgba(244, 63, 94,.4); }
   &--document .pd-badge { background: linear-gradient(135deg,#a78bfa,#7c3aed); box-shadow: 0 4px 16px rgba(167,139,250,.4); }
+  &--docx     .pd-badge { background: linear-gradient(135deg,#60a5fa,#1d4ed8); box-shadow: 0 4px 16px rgba(59,130,246,.4); }
   &--unsupported .pd-badge { background: linear-gradient(135deg,#475569,#334155); }
 }
 
@@ -295,19 +298,22 @@ $accent-other    : #64748b;
 // Image
 // ─────────────────────────────────────────────────────────────────────────────
 .pd-img-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
   z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 }
 
 .pd-img {
-  max-width: 90%;
-  max-height: 90%;
   object-fit: contain;
   border-radius: 8px;
   box-shadow:
@@ -315,10 +321,66 @@ $accent-other    : #64748b;
     0 2px 8px  rgba(0,0,0,0.4),
     0 12px 40px rgba(0,0,0,0.6),
     0 32px 80px rgba(0,0,0,0.4);
-  transition: transform 200ms cubic-bezier(0.34,1.2,0.64,1);
-  transform-origin: center center;
-  will-change: transform;
+  transition: width 200ms cubic-bezier(0.34,1.2,0.64,1), height 200ms cubic-bezier(0.34,1.2,0.64,1);
   animation: pd-pop 380ms cubic-bezier(0.22,1,0.36,1) 110ms both;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DOCX rendered HTML
+// ─────────────────────────────────────────────────────────────────────────────
+.pd-docx-body {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 2rem 3rem;
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  animation: pd-fade 300ms ease 60ms both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+
+  h1, h2, h3, h4, h5, h6 { margin: 1.2em 0 0.4em; font-weight: 700; line-height: 1.3; }
+  p  { margin: 0 0 0.75em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #d0d0d0; padding: 0.35rem 0.6rem; }
+  th { background: #f0f4f8; font-weight: 600; }
+  ul, ol { padding-left: 1.5rem; margin: 0.5em 0 0.75em; }
+  img { max-width: 100%; height: auto; }
+}
+
+.pd-docx-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  color: $text-mid;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  z-index: 1;
+}
+
+.pd-docx-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: $accent-docx;
+  border-radius: 50%;
+  animation: pd-spin 700ms linear infinite;
+}
+
+@keyframes pd-spin {
+  to { transform: rotate(360deg); }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

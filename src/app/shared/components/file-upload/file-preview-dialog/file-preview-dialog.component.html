@@ -60,7 +60,8 @@
       @case ('image') {
         <div class="pd-img-wrap">
           <img [src]="safeUrl" [alt]="fileName" class="pd-img"
-               [style.transform]="'scale(' + zoomLevel() + ')'"/>
+               [style.width.%]="zoomPercent"
+               [style.height.%]="zoomPercent"/>
         </div>
       }
 
@@ -70,6 +71,17 @@
 
       @case ('document') {
         <iframe [src]="safeUrl" class="pd-pdf" title="Document Preview"></iframe>
+      }
+
+      @case ('docx') {
+        @if (docxLoading()) {
+          <div class="pd-docx-loading">
+            <div class="pd-docx-spinner"></div>
+            <span>Rendering document…</span>
+          </div>
+        } @else {
+          <div class="pd-docx-body" [innerHTML]="docxHtml()"></div>
+        }
       }
 
       @case ('unsupported') {

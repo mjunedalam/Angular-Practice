@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnDestroy, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl, SafeHtml } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
-type PreviewType = 'image' | 'pdf' | 'document' | 'unsupported';
+type PreviewType = 'image' | 'pdf' | 'document' | 'docx' | 'unsupported';
 
 @Component({
   selector: 'app-file-preview-dialog',
@@ -27,6 +27,8 @@ export class FilePreviewDialogComponent implements OnDestroy {
   protected readonly typeIcon: string;
   protected readonly fileTypeLabel: string;
   protected readonly zoomLevel = signal(1);
+  protected readonly docxHtml = signal<SafeHtml | null>(null);
+  protected readonly docxLoading = signal(false);
 
   private readonly objectUrl: string | null;
   private readonly zoomStep = 0.25;
@@ -48,6 +50,10 @@ export class FilePreviewDialogComponent implements OnDestroy {
     } else {
       this.objectUrl = null;
       this.safeUrl = null;
+    }
+
+    if (this.previewType === 'docx') {
+      this.loadDocx(file);
     }
 
   }
@@ -74,6 +80,18 @@ export class FilePreviewDialogComponent implements OnDestroy {
 
   protected close(): void {
     this.dialogRef.close();
+  }
+
+  private loadDocx(file: File): void {
+    this.docxLoading.set(true);
+    import('mammoth').then(({ default: mammoth }) => {
+      file.arrayBuffer().then(buf => {
+        mammoth.convertToHtml({ arrayBuffer: buf }).then(result => {
+          this.docxHtml.set(this.sanitizer.bypassSecurityTrustHtml(result.value));
+          this.docxLoading.set(false);
+        });
+      });
+    });
   }
 
   protected download(): void {
@@ -114,7 +132,7 @@ export class FilePreviewDialogComponent implements OnDestroy {
     const mime = file.type.toLowerCase();
     if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
     if (mime === 'application/pdf' || ext === 'pdf') return 'pdf';
-    // txt/csv render as plain text in iframe; office binaries cannot be rendered by the browser natively
+    if (ext === 'docx') return 'docx';
     if (['txt', 'csv'].includes(ext)) return 'document';
     return 'unsupported';
   }
@@ -122,8 +140,9 @@ export class FilePreviewDialogComponent implements OnDestroy {
   private resolveIcon(): string {
     if (this.previewType === 'image') return 'image';
     if (this.previewType === 'pdf') return 'picture_as_pdf';
+    if (this.previewType === 'docx') return 'article';
     const ext = this.file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (['doc', 'docx'].includes(ext)) return 'article';
+    if (ext === 'doc') return 'article';
     if (['xls', 'xlsx'].includes(ext)) return 'table_chart';
     if (['ppt', 'pptx'].includes(ext)) return 'slideshow';
     if (['txt', 'csv'].includes(ext)) return 'description';
