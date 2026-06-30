@@ -257,9 +257,7 @@ export class WwellTestComponent {
     this.rbac.hasPermission('active-wwell', ACTIONS.UPDATE),
   );
 
-  protected readonly aquiferOptions = [
-    'ARUM', 'SAQA', 'UMER', 'WASI', 'SHRA', 'ALAT', 'KHOB', 'MNJQ', 'NOGN',
-  ] as const;
+  protected readonly aquiferOptions = this.store.aquifers;
 
   protected onlyNumbers(event: KeyboardEvent): void {
     const allowed = /[\d.-]/.test(event.key) || [

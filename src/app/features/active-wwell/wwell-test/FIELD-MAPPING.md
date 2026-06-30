@@ -98,7 +98,7 @@ WwellTestComponent.createOrUpdateActiveWwell()
 
 | UI Label | Form Control | Submitted API Field | IR Estimate (`data().*`) | IR Source |
 |---|---|---|---|---|
-| Aquifer | `rsvrCd` | `testOutcome.rsvrCd` | `aquiferEstimate` | `hydro.estTargetAquifier` |
+| Aquifer | `rsvrCd` (dropdown: `Aquifer[]` from `store.aquifers`, value=`code`, label=`description`) | `testOutcome.rsvrCd` | `aquiferEstimate` | `hydro.estTargetAquifier` |
 | Test Duration (h) | `duration` | `testOutcome.duration` | — | — |
 | Temperature (°C) | `temp` | `testOutcome.temp` | — | — |
 | TDS (PPM) | `wtrSaTdsCnc` | `testOutcome.wtrSaTdsCnc` | `tdsEstimate` | `hydro.estWaterQuality` |

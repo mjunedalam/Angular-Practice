@@ -30,8 +30,8 @@
             class="wt-aquifer-select"
           >
             <mat-select formControlName="rsvrCd">
-              @for (opt of aquiferOptions; track opt) {
-                <mat-option [value]="opt">{{ opt }}</mat-option>
+              @for (opt of aquiferOptions(); track opt.code) {
+                <mat-option [value]="opt.code">{{ opt.code }}</mat-option>
               }
             </mat-select>
           </mat-form-field>

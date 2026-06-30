@@ -1,5 +1,6 @@
 import { IWellData } from '@models/well-design/well-data.model';
 import { WwellEntry } from '@models/daily-operation/wwell-entry.model';
+import { Aquifer } from '@models/daily-operation/aquifer.model';
 import { getTodayAtMidnight } from 'src/app/shared/utils/date.util';
 
 export interface ActiveWwellState {
@@ -13,6 +14,8 @@ export interface ActiveWwellState {
     readonly animationTrigger: number;
     readonly wellNamesPage: number;
     readonly status:string;
+    readonly aquifers: Aquifer[];
+    readonly aquifersLoading: boolean;
 }
 
 export const initialActiveWwellState: ActiveWwellState = {
@@ -25,5 +28,7 @@ export const initialActiveWwellState: ActiveWwellState = {
     error: null,
     animationTrigger: 0,
     wellNamesPage: 0,
-    status:""
+    status:"",
+    aquifers: [],
+    aquifersLoading: false,
 };

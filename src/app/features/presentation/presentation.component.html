@@ -64,9 +64,11 @@
         <div class="pres-section-card pres-section-card--right">
           <app-offset-wwells />
         </div>
-        <div class="pres-section-card pres-section-card--right">
-          <app-wwell-test-result />
-        </div>
+        @if (store.hasActualWellTest()) {
+          <div class="pres-section-card pres-section-card--right">
+            <app-wwell-test-result />
+          </div>
+        }
         <div class="pres-section-card pres-section-card--right">
           <app-active-wwell-docs-viewer />
         </div>

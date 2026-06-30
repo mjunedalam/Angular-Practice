@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { EMPTY, pipe, switchMap, tap } from 'rxjs';
@@ -199,7 +199,27 @@ export const ActiveWwellStore = signalStore(
             ),
         );
 
-
+        const loadAquifers = rxMethod<void>(
+            pipe(
+                tap(() => patchState(store, { aquifersLoading: true })),
+                switchMap(() =>
+                    svc.getAquifers().pipe(
+                        tapResponse({
+                            next: (aquifers) => {
+                                patchState(store, {
+                                    aquifers,
+                                    aquifersLoading: false,
+                                });
+                            },
+                            error: (err: Error) => {
+                                patchState(store, { aquifersLoading: false });
+                                notify.error(err.message ?? 'Failed to load aquifer list');
+                            },
+                        }),
+                    ),
+                ),
+            ),
+        );
 
         return {
             initialize(date?: string, epANumOverride?: number): void {
@@ -286,7 +306,17 @@ export const ActiveWwellStore = signalStore(
                 loadDetail({ date, epANum });
             },
 
+            loadAquifers(): void {
+                loadAquifers();
+            },
+
         };
+    }),
+
+    withHooks({
+        onInit(store) {
+            store.loadAquifers();
+        },
     }),
 );
 export type ActiveWwellStoreType = InstanceType<typeof ActiveWwellStore>;
