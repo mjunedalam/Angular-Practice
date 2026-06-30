@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
       if (authStore.isAuthenticated()) {
         const baseUrl = configService.settings.dailyOperationServiceUrl;
         try {
-          await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
+          await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`, authStore.token());
         } catch (err) {
           if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
             authStore.logout();

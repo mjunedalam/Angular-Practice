@@ -39,7 +39,7 @@ export const AuthStore = signalStore(
             localStorage.setItem('agwa_token', normalizedToken);
             patchState(store, { token: normalizedToken, isAuthenticated: true, user: decoded, isLoading: false });
             const baseUrl = extAppConfigService.settings.dailyOperationServiceUrl;
-            await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`);
+            await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`, normalizedToken);
             void router.navigate(['main']).finally(() => loading.completeLogin());
           },
           error: () => {

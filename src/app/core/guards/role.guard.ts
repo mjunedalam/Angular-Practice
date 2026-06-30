@@ -17,10 +17,11 @@ export const roleGuard: CanActivateFn = async (route) => {
   const extConfig = inject(ExternalConfigService);
   const notificationService = inject(NotificationService);
 
-  if (rbacStore.isStale()) {
+  const currentToken = authStore.token();
+  if (rbacStore.needsRefresh(currentToken)) {
     const url = `${extConfig.settings.dailyOperationServiceUrl}/daily-operations/api/v1/rbac/permissions`;
     try {
-      await rbacStore.loadPermissions(url);
+      await rbacStore.loadPermissions(url, currentToken);
     } catch (err) {
       if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
         authStore.logout();
