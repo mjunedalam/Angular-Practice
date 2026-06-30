@@ -12,9 +12,11 @@
       <span>Well Documents</span>
     </div>
     <div class="docs-header__right">
-      <div class="docs-header__badge" *ngIf="docsStore.docNames().length > 0">
-        {{ docsStore.docNames().length }}
-      </div>
+      @if (docsStore.docNames().length > 0) {
+        <div class="docs-header__badge">
+          {{ docsStore.docNames().length }}
+        </div>
+      }
       <svg class="chevron" [class.chevron--open]="!collapsed()"
            viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -24,76 +26,96 @@
   </button>
 
   <!-- Collapsible body -->
-  <div @expandCollapse *ngIf="!collapsed()" class="docs-body">
+  @if (!collapsed()) {
+    <div @expandCollapse class="docs-body">
 
-    <!-- Loading -->
-    <div class="docs-state" *ngIf="docsStore.listLoading()">
-      <mat-spinner diameter="26" />
-      <span>Fetching documents…</span>
-    </div>
-
-    <!-- Error -->
-    <div class="docs-state docs-state--error"
-         *ngIf="docsStore.listError() && !docsStore.listLoading()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" class="state-icon">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <span>{{ docsStore.listError() }}</span>
-    </div>
-
-    <!-- Empty -->
-    <div class="docs-state docs-state--empty"
-         *ngIf="!docsStore.listLoading() && !docsStore.listError() && docsStore.docNames().length === 0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-           stroke-linecap="round" stroke-linejoin="round" class="state-icon">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        <line x1="2" y1="2" x2="22" y2="22"/>
-      </svg>
-      <span>No documents for this well &amp; date</span>
-    </div>
-
-    <!-- Document list -->
-    <div class="docs-list" @listStagger
-         *ngIf="!docsStore.listLoading() && !docsStore.listError() && docsStore.docNames().length > 0">
-
-      <div class="doc-row" *ngFor="let docName of docsStore.docNames()">
-
-        <div class="doc-row__icon" [attr.data-type]="fileTypeClass(docName)">
-          <mat-icon>{{ fileIcon(docName) }}</mat-icon>
+      <!-- Loading -->
+      @if (docsStore.listLoading()) {
+        <div class="docs-state">
+          <mat-spinner diameter="26" />
+          <span>Fetching documents…</span>
         </div>
+      }
 
-        <div class="doc-row__title">{{ docName }}</div>
-
-        <div class="doc-row__actions">
-          <button class="action-btn action-btn--view"
-                  [class.action-btn--loading]="isViewLoading(docName)"
-                  type="button"
-                  (click)="viewDoc(docName)">
-            <mat-spinner *ngIf="isViewLoading(docName)" diameter="14"></mat-spinner>
-            <mat-icon *ngIf="!isViewLoading(docName)">visibility</mat-icon>
-          </button>
-
-          <button class="action-btn action-btn--download"
-                  [class.action-btn--loading]="isDownloadLoading(docName)"
-                  type="button"
-                  (click)="downloadDoc(docName)">
-            <mat-spinner *ngIf="isDownloadLoading(docName)" diameter="14"></mat-spinner>
-            <mat-icon *ngIf="!isDownloadLoading(docName)">download</mat-icon>
-          </button>
-
-          <button class="action-btn action-btn--delete"
-                  [class.action-btn--loading]="isFileDeleting(docName)"
-                  type="button"
-                  (click)="deleteSingleDoc(docName)">
-            <mat-spinner *ngIf="isFileDeleting(docName)" diameter="14"></mat-spinner>
-            <mat-icon *ngIf="!isFileDeleting(docName)">delete</mat-icon>
-          </button>
+      <!-- Error -->
+      @if (docsStore.listError() && !docsStore.listLoading()) {
+        <div class="docs-state docs-state--error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" class="state-icon">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ docsStore.listError() }}</span>
         </div>
+      }
 
-      </div>
+      <!-- Empty -->
+      @if (!docsStore.listLoading() && !docsStore.listError() && docsStore.docNames().length === 0) {
+        <div class="docs-state docs-state--empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" stroke-linejoin="round" class="state-icon">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <line x1="2" y1="2" x2="22" y2="22"/>
+          </svg>
+          <span>No documents for this well &amp; date</span>
+        </div>
+      }
+
+      <!-- Document list -->
+      @if (!docsStore.listLoading() && !docsStore.listError() && docsStore.docNames().length > 0) {
+        <div class="docs-list" @listStagger>
+
+          @for (docName of docsStore.docNames(); track docName) {
+            <div class="doc-row">
+
+              <div class="doc-row__icon" [attr.data-type]="fileTypeClass(docName)">
+                <mat-icon>{{ fileIcon(docName) }}</mat-icon>
+              </div>
+
+              <div class="doc-row__title">{{ docName }}</div>
+
+              <div class="doc-row__actions">
+                <button class="action-btn action-btn--view"
+                        [class.action-btn--loading]="isViewLoading(docName)"
+                        type="button"
+                        (click)="viewDoc(docName)">
+                  @if (isViewLoading(docName)) {
+                    <mat-spinner diameter="14"></mat-spinner>
+                  } @else {
+                    <mat-icon>visibility</mat-icon>
+                  }
+                </button>
+
+                <button class="action-btn action-btn--download"
+                        [class.action-btn--loading]="isDownloadLoading(docName)"
+                        type="button"
+                        (click)="downloadDoc(docName)">
+                  @if (isDownloadLoading(docName)) {
+                    <mat-spinner diameter="14"></mat-spinner>
+                  } @else {
+                    <mat-icon>download</mat-icon>
+                  }
+                </button>
+
+                @if (canDelete()) {
+                  <button class="action-btn action-btn--delete"
+                          [class.action-btn--loading]="isFileDeleting(docName)"
+                          type="button"
+                          (click)="deleteSingleDoc(docName)">
+                    @if (isFileDeleting(docName)) {
+                      <mat-spinner diameter="14"></mat-spinner>
+                    } @else {
+                      <mat-icon>delete</mat-icon>
+                    }
+                  </button>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      }
+
     </div>
-
-  </div>
+  }
 </div>

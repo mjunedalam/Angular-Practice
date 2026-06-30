@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,11 +16,13 @@ import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresDocsService } from '@services/pres-docs.service';
 import { FilePreviewDialogComponent } from '@shared/components/file-upload/file-preview-dialog/file-preview-dialog.component';
 import { formatDateForInput } from 'src/app/shared/utils/date.util';
+import { RbacStore } from '@store/rbac/rbac.store';
+import { ACTIONS } from '@models/rbac/role.constants';
 
 @Component({
   selector: 'app-active-wwell-docs-viewer',
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, MatIconModule],
+  imports: [MatProgressSpinnerModule, MatIconModule],
   templateUrl: './active-wwell-docs-viewer.component.html',
   styleUrl: './active-wwell-docs-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +53,11 @@ export class ActiveWwellDocsViewerComponent {
   private readonly svc = inject(PresDocsService);
   private readonly dialog = inject(MatDialog);
   private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly rbac = inject(RbacStore);
+
+  protected readonly canDelete = computed(() =>
+    this.rbac.hasPermission('presentations', ACTIONS.DELETE),
+  );
 
   protected readonly collapsed = signal(true);
   protected readonly viewLoading = signal<Set<string>>(new Set());
