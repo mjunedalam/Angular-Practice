@@ -24,6 +24,7 @@ const presentationStoreMock = {
   wellHeaderData: jest.fn(() => null),
   selectedWell: jest.fn(() => null),
   isLoaded: jest.fn(() => false),
+  hasActualWellTest: jest.fn(() => false),
 };
 
 const dialogMock = { open: jest.fn() };

@@ -15,6 +15,9 @@ const activeWwellStoreMock = {
   selectedEpANum: jest.fn(() => null),
   selectedDate: jest.fn(() => ''),
   isDetailsLoading: jest.fn(() => false),
+  aquifers: jest.fn(() => []),
+  wellData: jest.fn(() => null),
+  refreshWellDetail: jest.fn(),
 };
 
 const rbacStoreMock = {

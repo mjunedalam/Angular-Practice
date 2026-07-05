@@ -1,12 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 
-export type NotificationType = 'error' | 'info';
+export type NotificationType = 'error' | 'info' | 'warn';
 export const DEFAULT_NOTIFICATION_DURATION_MS = 6000;
 
 export interface Notification {
   id: number;
   type: NotificationType;
   message: string;
+  durationMs: number;
 }
 
 export interface NotificationOptions {
@@ -26,8 +27,8 @@ export class NotificationService {
     options?: NotificationOptions,
   ): void {
     const id = ++this.nextId;
-    this.notifications.update(list => [...list, { id, type, message }]);
     const durationMs = Math.max(1000, options?.durationMs ?? this.defaultDurationMs());
+    this.notifications.update(list => [...list, { id, type, message, durationMs }]);
     setTimeout(() => this.dismiss(id), durationMs);
   }
 
@@ -41,6 +42,10 @@ export class NotificationService {
 
   info(message: string, options?: NotificationOptions): void {
     this.show(message, 'info', options);
+  }
+
+  warn(message: string, options?: NotificationOptions): void {
+    this.show(message, 'warn', options);
   }
 
   dismiss(id: number): void {

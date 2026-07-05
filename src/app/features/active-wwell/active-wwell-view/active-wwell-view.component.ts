@@ -50,7 +50,6 @@ const AREAS = [
 
 const ADD_NEW_SENTINEL = '__ADD_NEW__';
 const WELL_PAGE_SIZE = 15;
-
 @Component({
   selector: 'app-active-wwell-view',
   standalone: true,
@@ -298,6 +297,7 @@ export class ActiveWwellViewComponent implements OnInit {
 
       this.uiStore.ensureStatusForWell(epANum, deriveStatusLabel(details));
     });
+
   }
 
 

@@ -14,6 +14,7 @@ import { RbacStore } from '@store/rbac/rbac.store';
 import { ACTIONS } from '@models/rbac/role.constants';
 import { formatDateForInput } from '@shared/utils/date.util';
 import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/utils/well-test-math.util';
+import { getMissingDetailLabels } from '../active-wwell.helpers';
 
 @Component({
   selector: 'app-wwell-test',
@@ -165,6 +166,19 @@ export class WwellTestComponent {
   }
 
   createOrUpdateActiveWwell() {
+    const missing = getMissingDetailLabels(
+      this.store.wellHeaderData(),
+      this.store.operationSummary(),
+      this.store.databaseInfo(),
+    );
+    if (missing.length > 0) {
+      this.notify.warn(
+        `Missing required details: ${missing.join(', ')}`,
+        { durationMs: 12000 },
+      );
+      return;
+    }
+
     this.form.markAllAsTouched();
     this.formService.drillingRemarksForm.markAllAsTouched();
 
