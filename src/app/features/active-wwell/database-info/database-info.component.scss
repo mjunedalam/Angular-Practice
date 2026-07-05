@@ -29,7 +29,7 @@
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  background: #f8fafc;
+  background: var(--aw-cell-bg);
   padding: 0.38rem 0.9rem;
   border-top: 1px solid #e2e8f0;
 
@@ -79,11 +79,11 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #2563eb;
+  color: #475569;
   padding: 1px 4px;
-  border: 1px solid #2563eb;
+  border: 1px solid #cbd5e1;
   border-radius: 3px;
-  background: #eff6ff;
+  background: var(--aw-cell-bg);
   outline: none;
   min-width: 120px;
   line-height: 1.4;
@@ -110,11 +110,8 @@
   gap: 0.2rem;
   min-width: 0;
   padding: 0.6rem 0.85rem;
-  background: #ffffff;
+  background: var(--aw-cell-bg);
   border-top: 2px solid transparent;
-  transition: background 0.14s ease;
-
-  &:hover { background: #f8fafc; }
 
   &:nth-child(4n+2) {
     border-left: 2px solid #e2e8f0;

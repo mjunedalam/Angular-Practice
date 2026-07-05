@@ -7,7 +7,7 @@
 }
 
 .ops-label {
-  background: #f1f5f9;
+  background: var(--aw-cell-bg);
   padding: 0.65rem 0.75rem;
   font-size: 0.72rem;
   font-weight: 700;
@@ -17,7 +17,7 @@
   display: flex;
   align-items: flex-start;
   line-height: 1.5;
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid #cbd5e1;
 }
 
 .ops-textarea {
@@ -41,13 +41,13 @@
   }
 
   &[readonly] {
-    background: #f8fafc;
+    background: var(--aw-cell-bg);
     color: #64748b;
     cursor: default;
     resize: none;
 
     &:focus {
-      background: #f8fafc;
+      background: var(--aw-cell-bg);
       outline: none;
     }
   }

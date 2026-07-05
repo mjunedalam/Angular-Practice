@@ -20,27 +20,28 @@
   gap: 0.25rem;
   min-width: 0;
   padding: 0.7rem 1rem;
-  background: #ffffff;
+  background: var(--aw-cell-bg);
   transition: background 0.14s ease;
 
-  &:hover { background: #f8fafc; }
+  &:hover { background: var(--aw-cell-bg); }
 }
 
 .aw-cell--gis {
-  background: #fffbf5;
-  border-top: 3px solid #fed7aa;
-
-  &:hover { background: #fff7ed; }
+  background: var(--aw-cell-bg);
+  &:hover { background: var(--aw-cell-bg); }
 }
 
 .aw-cell--ir {
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-
-  &:hover { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); }
+  background: var(--aw-cell-bg);
+  &:hover { background: var(--aw-cell-bg); }
 }
 
 .aw-cell--status,
-.aw-cell--area { padding-bottom: 0.45rem; }
+.aw-cell--area {
+  padding-bottom: 0.45rem;
+  background: #ffffff;
+  &:hover { background: #ffffff; }
+}
 
 .aw-cell--full  { grid-column: 1 / -1; }
 .aw-cell--span2 { grid-column: span 2; }
@@ -63,8 +64,8 @@
   line-height: 1.2;
 }
 
-.aw-cell--gis .aw-label  { color: #c2410c; }
-.aw-cell--ir  .aw-label  { color: rgba(255, 255, 255, 0.65); }
+.aw-cell--gis .aw-label  { color: #94a3b8; }
+.aw-cell--ir  .aw-label  { color: #94a3b8; }
 
 .aw-value {
   font-size: 0.9rem;
@@ -74,7 +75,7 @@
   word-break: break-word;
 }
 
-.aw-cell--ir .aw-value { color: #ffffff; }
+.aw-cell--ir .aw-value { color: #0f172a; }
 
 // ── Source badges ─────────────────────────────────────────────────────────────
 .aw-src-badge {
@@ -93,9 +94,9 @@
   }
 
   &--ir {
-    background: rgba(255, 255, 255, 0.18);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.32);
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #93c5fd;
   }
 }
 
@@ -127,6 +128,12 @@
     .mdc-notched-outline__leading,
     .mdc-notched-outline__trailing,
     .mdc-notched-outline__notch { border-color: #d1d5db; }
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__trailing,
+      .mdc-notched-outline__notch { border-color: #d1d5db; }
+    }
+    .mat-mdc-form-field-focus-overlay { display: none; }
     .mat-mdc-select-value-text {
       font-size: 0.84rem;
       font-weight: 700;
