@@ -84,10 +84,20 @@ export const allWellColumnDefs: ColDef<AllWellRow>[] = [
     headerName: 'Target Aquifer',
     field: 'targetAquifer',
     flex: 1.8,
-    minWidth: 80,
+    minWidth: 120,
     wrapText: true,
     autoHeight: true,
-    cellStyle: { lineHeight: '1.4', paddingTop: '4px', paddingBottom: '4px', whiteSpace: 'pre-line', fontSize: '12px', color: '#94a3b8' },
+    cellStyle: {
+      lineHeight: '1.5',
+      paddingTop: '6px',
+      paddingBottom: '6px',
+      whiteSpace: 'normal',
+      overflow: 'visible',
+      wordBreak: 'break-word',
+      fontSize: '14px',
+      fontWeight: '700',
+      color: '#475569',
+    },
   },
 ];
 
@@ -148,7 +158,7 @@ export const allWellsGridOptions: GridOptions<AllWellRow> = {
   suppressCellFocus: true,
   domLayout: 'autoHeight',
   tooltipShowDelay: 300,
-  defaultColDef: { sortable: true, filter: false, resizable: false },
+  defaultColDef: { sortable: true, filter: false, resizable: false, wrapHeaderText: true, autoHeaderHeight: true },
   overlayNoRowsTemplate: '<span style="color:#94a3b8;font-size:12px">No data</span>',
   onGridReady: (params) => params.api.sizeColumnsToFit(),
 };
