@@ -26,6 +26,8 @@ import { IWellData } from '@models/well-design/well-data.model';
 import { MorningReportStore } from '../morning-report/store/morning-report.store';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import {
+  DOT_COLOR,
+  LEGEND_CHIP_COLORS,
   lineSymbol,
   locationTextSymbol,
   MAP_CONFIG,
@@ -42,23 +44,6 @@ import { getMockKsaWwells } from './mock-wwells.util';
 
 const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 
-// Mirrors `.wwell-map-legend__chip--*` colors in wwell-map.component.scss
-// so the email's baked-in legend matches the legend shown outside the map.
-const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '3300': '#84cc16',
-  '58': '#c084fc',
-  '1514': '#f87171',
-  '60': '#60a5fa',
-};
-
-// RGB equivalents of LEGEND_CHIP_COLORS — used for ArcGIS symbol colors so
-// map dots/sticks/bubbles always match the legend chips.
-const DOT_COLOR: Record<string, [number, number, number, number]> = {
-  '3300': [132, 204, 22, 0.9],   // #84cc16
-  '58':   [192, 132, 252, 0.9],  // #c084fc
-  '1514': [248, 113, 113, 0.9],  // #f87171
-  '60':   [96, 165, 250, 0.9],   // #60a5fa
-};
 
 @Component({
   selector: 'app-wwellmap',
