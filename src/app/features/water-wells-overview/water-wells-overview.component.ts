@@ -44,6 +44,7 @@ import {
   wwellIdTextSymbol,
 } from 'src/app/shared/models/config/agwa-map.config';
 import { findNonOverlappingPosition } from 'src/app/shared/utils/wwell-placement-utils';
+import { getMockKsaWwells } from 'src/app/shared/utils/mock-wwells.util';
 import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
 import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -693,7 +694,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
         label: rig?.biNum ?? 'N/A',
       }];
     });
-    this.wwells.set(wells);
+    this.wwells.set(wells.length ? wells : getMockKsaWwells());
   }
 
   private async drawWwells(dotsLayer: GraphicsLayer): Promise<void> {
@@ -741,7 +742,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           const size = this.DOT_START_SIZE + (this.DOT_FINAL_SIZE - this.DOT_START_SIZE) * t;
           dot.graphic.symbol = new SimpleMarkerSymbol({
             style: 'circle', size, color: [dot.r, dot.g, dot.b, t],
-            outline: { color: [255, 255, 255, t * 0.9], width: 1.5 },
+            outline: { width: 0 },
           });
           anyPending = true;
         }
@@ -757,7 +758,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
       for (const dot of anims) {
         dot.graphic.symbol = new SimpleMarkerSymbol({
           style: 'circle', size: this.DOT_FINAL_SIZE, color: [dot.r, dot.g, dot.b, 1],
-          outline: { color: [255, 255, 255, 0.9], width: 1.5 },
+          outline: { width: 0 },
         });
       }
     }

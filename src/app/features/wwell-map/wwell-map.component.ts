@@ -40,7 +40,7 @@ import {
 import { findNonOverlappingPosition } from 'src/app/shared/utils/wwell-placement-utils';
 import { EsriMapService } from '@core/services/esri-map.service';
 import { ExternalConfigService } from '@shared/services/external-config.service';
-import { getMockKsaWwells } from './mock-wwells.util';
+import { getMockKsaWwells } from 'src/app/shared/utils/mock-wwells.util';
 
 const WWELL_MAP_BOOT_TASK = 'arcgis-map';
 
