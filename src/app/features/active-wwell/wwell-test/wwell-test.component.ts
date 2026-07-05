@@ -166,9 +166,15 @@ export class WwellTestComponent {
   }
 
   createOrUpdateActiveWwell() {
+    const f = this.formService.drillingRemarksForm.getRawValue();
+    const opSummaryFromForm = {
+      operation:        f['wOpRmk']        ?? null,
+      nextOperation:    f['nxt24HrPlanRmk'] ?? null,
+      drillingRemarks:  f['wDrlgSmryRmk']  ?? null,
+    };
     const missing = getMissingDetailLabels(
       this.store.wellHeaderData(),
-      this.store.operationSummary(),
+      opSummaryFromForm,
       this.store.databaseInfo(),
     );
     if (missing.length > 0) {

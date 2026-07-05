@@ -4,13 +4,15 @@ import { FALLBACK_STR } from 'src/app/core/store/shared/well-data.selectors';
 
 export const ACTIVE_WWELL_FALLBACK = 'N/A';
 
+type OpSummaryInput = Pick<OperationSummaryViewModel, 'operation' | 'nextOperation' | 'drillingRemarks'> | null;
+
 export function getMissingDetailLabels(
   header: WellHeaderViewModel | null,
-  opSummary: OperationSummaryViewModel | null,
+  opSummary: OpSummaryInput,
   dbInfo: DatabaseInfoViewModel | null,
 ): string[] {
   const missing: string[] = [];
-  const isMissing = (v: unknown) => v == null || String(v) === FALLBACK_STR;
+  const isMissing = (v: unknown) => v == null || String(v).trim() === '' || String(v).trim() === FALLBACK_STR;
 
   if (!header || isMissing(header.wellName)) missing.push('Well Name');
   if (!header || isMissing(header.field)) missing.push('Field');
