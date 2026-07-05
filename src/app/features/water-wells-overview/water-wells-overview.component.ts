@@ -126,7 +126,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   // ── Well drawing animation — tweak to adjust speed / drama ────────────────
   private readonly DRAW_STAGGER_MS = 80;         // ms between each dot birth
   private readonly DOT_START_SIZE = 2;           // initial dot size (px)
-  private readonly DOT_FINAL_SIZE = 12;          // final dot size (px)
+  private readonly DOT_FINAL_SIZE = 8;          // final dot size (px)
   // Total ms from birth → full size. Linear grow + fade-in alpha.
   // rAF loop keeps animation synced to browser repaint so every frame renders.
   private readonly DOT_GROW_DURATION_MS = 700;
