@@ -1,3 +1,4 @@
+import { pointer } from 'd3-selection';
 import { easeCubicInOut } from 'd3-ease';
 import 'd3-transition';
 
@@ -14,8 +15,12 @@ import {
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { getCasingTier, resolveCompletionTopDepth } from './wellbore-depth.helpers';
-import { resolveLiners, renderLiners } from './liner.renderer';
+import { resolveLiners, renderLiners, LinerEntry } from './liner.renderer';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
+
+const CSG_TOOLTIP_GAP = 18;
+const CSG_TOOLTIP_W = 260;
+const CSG_TOOLTIP_FONT = 'DM Sans, sans-serif';
 
 export interface RenderCasingElementsOptions {
   readonly rootG: GSel;
@@ -41,6 +46,7 @@ export function renderCasingElements(options: RenderCasingElementsOptions): void
   renderCasings(options);
   renderLiners({ rootG, defsEl, layout, liners, centerX, scale, linersStart, labelsStart, animation, lastCasingBotDepth });
   renderCasingLabels(options);
+  addCasingLinerTooltips(options, liners);
 }
 
 function resolveLastCasingBotDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
@@ -208,7 +214,7 @@ function renderCasingsFromActual({
       .attr('clip-path', `url(#${clipId})`)
       .attr('fill', 'url(#actualCasingGradient)')
       .attr('stroke', '#000000')
-      .attr('stroke-width', '5')
+      .attr('stroke-width', '2')
       .style('opacity', 0.78);
 
     clipRect.transition()
@@ -286,10 +292,6 @@ function renderCasingLabels({
         primaryEl
           .attr('fill', '#22c55e')
           .text(`${displaySize}" ${csg.csgType} @ ${displayDepth.toLocaleString()} *`);
-        lg.append('text')
-          .attr('class', 'casing-label__secondary')
-          .attr('x', labelX).attr('y', shoePx + 24)
-          .text(`est: ${csg.csgSize}" @ ${csg.csgDepth.toLocaleString()} ft`);
       } else {
         primaryEl.text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
         if (csg.csgRemarks) {
@@ -357,4 +359,262 @@ function renderCasingLabelsFromActual({
 
     animateLabel(lg, labelsStart, animation);
   });
+}
+
+// ── Casing / Liner hover tooltips ──────────────────────────────────────────
+
+function buildCasingTooltipController(
+  tooltipLayer: GSel,
+  layout: DiagramLayout,
+  centerX: number,
+) {
+  type Row = { label: string; value: string; hilite?: boolean };
+
+  let isVisible = false;
+  let lastSide: 'left' | 'right' | null = null;
+
+  const hide = (): void => {
+    isVisible = false;
+    lastSide = null;
+    tooltipLayer.interrupt().transition().duration(120).style('opacity', 0);
+  };
+
+  const renderCard = (
+    title: string,
+    badge: string,
+    accent: string,
+    rows: ReadonlyArray<Row>,
+    hw: number,
+    mouseX: number,
+    mouseY: number,
+  ): void => {
+    const ROW_H = 26;
+    const tooltipH = 60 + rows.length * ROW_H + 14;
+    const tooltipW = CSG_TOOLTIP_W;
+    const onRight = mouseX > centerX;
+    const side: 'left' | 'right' = onRight ? 'right' : 'left';
+    const casingEdgeX = onRight ? centerX + hw : centerX - hw;
+    const mutedAccent = accent === '#16a34a' ? 'rgba(22,163,74,0.14)' : 'rgba(37,99,235,0.14)';
+
+    const rawTooltipX = onRight
+      ? casingEdgeX + CSG_TOOLTIP_GAP
+      : casingEdgeX - CSG_TOOLTIP_GAP - tooltipW;
+    const tooltipX = Math.max(8, Math.min(rawTooltipX, layout.wellboreViewWidth - tooltipW - 8));
+    const tooltipY = Math.max(4, Math.min(mouseY - tooltipH / 2, layout.drawingHeight - tooltipH - 4));
+    const connY = Math.min(Math.max(mouseY, tooltipY + 18), tooltipY + tooltipH - 18);
+
+    tooltipLayer.selectAll('*').remove();
+    tooltipLayer.raise();
+
+    // Connector: elbow from casing edge to tooltip connector-side edge
+    const connTipX = onRight ? tooltipX : tooltipX + tooltipW;
+    const connMidX = onRight ? tooltipX - 8 : tooltipX + tooltipW + 8;
+    tooltipLayer.append('path')
+      .attr('d', `M${casingEdgeX},${mouseY} H${connMidX} Q${connTipX},${mouseY} ${connTipX},${connY} H${connTipX}`)
+      .attr('fill', 'none').attr('stroke', accent)
+      .attr('stroke-width', 1.4).attr('stroke-dasharray', '4,3')
+      .attr('stroke-linecap', 'round').attr('opacity', 0.65);
+
+    // Anchor dot on casing edge
+    tooltipLayer.append('circle')
+      .attr('cx', casingEdgeX).attr('cy', mouseY)
+      .attr('r', 3.2).attr('fill', '#fff')
+      .attr('stroke', accent).attr('stroke-width', 1.6);
+
+    // Card background
+    tooltipLayer.append('rect')
+      .attr('x', tooltipX).attr('y', tooltipY)
+      .attr('width', tooltipW).attr('height', tooltipH)
+      .attr('rx', 8).attr('fill', '#ffffff')
+      .attr('stroke', '#e2e8f0').attr('stroke-width', 1.2)
+      .attr('filter', 'drop-shadow(0 8px 16px rgba(15,23,42,0.18))');
+
+    // Accent rail on the connector side of the card
+    const railX = onRight ? tooltipX : tooltipX + tooltipW - 5;
+    tooltipLayer.append('rect')
+      .attr('x', railX).attr('y', tooltipY)
+      .attr('width', 5).attr('height', tooltipH)
+      .attr('rx', 2).attr('fill', accent);
+
+    // Badge
+    const badgeW = badge.length * 7.2 + 14;
+    const badgeX = tooltipX + 12;
+    tooltipLayer.append('rect')
+      .attr('x', badgeX).attr('y', tooltipY + 11)
+      .attr('width', badgeW).attr('height', 22)
+      .attr('rx', 11).attr('fill', mutedAccent);
+    tooltipLayer.append('text')
+      .attr('x', badgeX + badgeW / 2).attr('y', tooltipY + 27)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '12').attr('font-family', CSG_TOOLTIP_FONT)
+      .attr('font-weight', '900').attr('letter-spacing', '0.5')
+      .attr('fill', accent).text(badge);
+
+    // Title
+    tooltipLayer.append('text')
+      .attr('x', tooltipX + tooltipW - 12).attr('y', tooltipY + 27)
+      .attr('text-anchor', 'end')
+      .attr('font-size', '15').attr('font-family', CSG_TOOLTIP_FONT)
+      .attr('font-weight', '800').attr('fill', '#0f172a').text(title);
+
+    // Divider
+    tooltipLayer.append('line')
+      .attr('x1', tooltipX + 12).attr('x2', tooltipX + tooltipW - 12)
+      .attr('y1', tooltipY + 44).attr('y2', tooltipY + 44)
+      .attr('stroke', '#e2e8f0').attr('stroke-width', 1);
+
+    // Rows
+    rows.forEach((row, i) => {
+      const rowY = tooltipY + 62 + i * ROW_H;
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + 14).attr('y', rowY)
+        .attr('font-size', '13').attr('font-family', CSG_TOOLTIP_FONT)
+        .attr('font-weight', '500').attr('fill', '#64748b').text(row.label);
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + tooltipW - 14).attr('y', rowY)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '15').attr('font-family', CSG_TOOLTIP_FONT)
+        .attr('font-weight', '800')
+        .attr('fill', row.hilite ? accent : '#0f172a').text(row.value);
+    });
+
+    // Fade in only on first show or when side changes; instant reposition otherwise
+    const sideChanged = side !== lastSide;
+    lastSide = side;
+    if (!isVisible || sideChanged) {
+      tooltipLayer.interrupt().style('opacity', 0).transition().duration(150).style('opacity', 1);
+      isVisible = true;
+    } else {
+      tooltipLayer.style('opacity', 1);
+    }
+  };
+
+  const showForCasing = (
+    csg: ICasingIR | null,
+    actual: IDrlgCsg | null,
+    hw: number,
+    mouseX: number,
+    mouseY: number,
+    accent: string,
+  ): void => {
+    const hasActual = actual !== null && (actual.wCsgBotDpth ?? 0) > 0;
+    const size = csg?.csgSize ?? actual?.wCsgOdSz ?? '?';
+    const typeName = csg?.csgType ?? 'Casing';
+    const typeLabel = typeName.toLowerCase() === 'conductor' ? 'CONDUCTOR' : typeName.toUpperCase();
+    const badge = hasActual ? `${typeLabel} ✓` : typeLabel;
+
+    const rows: Row[] = [];
+    if (hasActual) {
+      rows.push({ label: 'Actual depth', value: `${actual!.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
+      if (csg) rows.push({ label: 'Est. depth', value: `${csg.csgDepth.toLocaleString()} ft` });
+      if (csg?.csgRemarks) rows.push({ label: 'Remark', value: csg.csgRemarks });
+    } else if (csg) {
+      rows.push({ label: 'Est. depth', value: `${csg.csgDepth.toLocaleString()} ft` });
+      if (csg.csgRemarks) rows.push({ label: 'Remark', value: csg.csgRemarks });
+    } else if (actual) {
+      rows.push({ label: 'Actual depth', value: `${actual.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
+    }
+
+    renderCard(`${size}" ${typeName}`, badge, accent, rows, hw, mouseX, mouseY);
+  };
+
+  const showForLiner = (liner: LinerEntry, mouseX: number, mouseY: number): void => {
+    const length = liner.botDepth - liner.topDepth;
+    const typeLabel = liner.isScreen ? 'SCREEN' : 'LINER';
+    const accent = liner.hasActual ? '#16a34a' : '#2563eb';
+    const badge = liner.hasActual ? `${typeLabel} ✓` : typeLabel;
+    const typeName = liner.isScreen ? 'Screen Liner' : 'Liner';
+    const rows: Row[] = [
+      { label: 'Top (TOL)', value: `${liner.topDepth.toLocaleString()} ft` },
+      { label: 'Bottom shoe', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
+      { label: 'Length', value: `${length.toLocaleString()} ft` },
+    ];
+    renderCard(`${liner.odSz}" ${typeName}`, badge, accent, rows, liner.halfWidth, mouseX, mouseY);
+  };
+
+  return { showForCasing, showForLiner, hide };
+}
+
+function addCasingLinerTooltips(
+  options: RenderCasingElementsOptions,
+  liners: LinerEntry[],
+): void {
+  const { rootG, layout, casings, drlgCasings, centerX, scale } = options;
+  const { baseHalfWidth, halfWidthIncrement } = layout;
+
+  const hoverLayer = rootG.append('g').attr('class', 'csg-hover-targets');
+  const tooltipLayer = rootG.append('g')
+    .attr('class', 'csg-detail-tooltip')
+    .style('opacity', 0)
+    .style('pointer-events', 'none');
+
+  const ctrl = buildCasingTooltipController(tooltipLayer, layout, centerX);
+  const node = rootG.node() as Element;
+
+  if (casings.length === 0) {
+    const unique = uniqueCasingsByOd(drlgCasings);
+    const withHw = unique.map((actual, i) => ({
+      actual,
+      hw: computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement),
+    }));
+    withHw
+      .sort((a, b) => b.hw - a.hw)
+      .forEach(({ actual, hw }) => {
+        const bottomPx = scale(actual.wCsgBotDpth);
+        hoverLayer.append('rect')
+          .attr('x', centerX - hw).attr('y', 0)
+          .attr('width', hw * 2).attr('height', bottomPx)
+          .attr('fill', 'transparent')
+          .style('pointer-events', 'all').style('cursor', 'crosshair')
+          .on('mousemove', (event: MouseEvent) => {
+            const [mx, my] = pointer(event, node);
+            ctrl.showForCasing(null, actual, hw, mx, my, '#16a34a');
+          })
+          .on('mouseleave', ctrl.hide);
+      });
+  } else {
+    const nonLiners = casings.filter(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
+    const withHw = nonLiners.map(csg => {
+      const tier = getCasingTier(csg, casings);
+      const hw = computeCasingHalfWidth(tier, baseHalfWidth, halfWidthIncrement);
+      const actualCsg = drlgCasings.find(d => d.wCsgOdSz === csg.csgSize) ?? null;
+      const hasActual = actualCsg !== null && actualCsg.wCsgBotDpth > 0;
+      const displayDepth = hasActual ? actualCsg!.wCsgBotDpth : csg.csgDepth;
+      const accent = hasActual ? '#16a34a' : '#2563eb';
+      return { csg, hw, actualCsg, hasActual, displayDepth, accent };
+    });
+    withHw
+      .sort((a, b) => b.hw - a.hw)
+      .forEach(({ csg, hw, actualCsg, displayDepth, accent }) => {
+        const bottomPx = scale(displayDepth);
+        hoverLayer.append('rect')
+          .attr('x', centerX - hw).attr('y', 0)
+          .attr('width', hw * 2).attr('height', bottomPx)
+          .attr('fill', 'transparent')
+          .style('pointer-events', 'all').style('cursor', 'crosshair')
+          .on('mousemove', (event: MouseEvent) => {
+            const [mx, my] = pointer(event, node);
+            ctrl.showForCasing(csg, actualCsg, hw, mx, my, accent);
+          })
+          .on('mouseleave', ctrl.hide);
+      });
+  }
+
+  liners.forEach((liner) => {
+    const topPx = scale(liner.topDepth);
+    const botPx = scale(liner.botDepth);
+    hoverLayer.append('rect')
+      .attr('x', centerX - liner.halfWidth).attr('y', topPx)
+      .attr('width', liner.halfWidth * 2).attr('height', botPx - topPx)
+      .attr('fill', 'transparent')
+      .style('pointer-events', 'all').style('cursor', 'crosshair')
+      .on('mousemove', (event: MouseEvent) => {
+        const [mx, my] = pointer(event, node);
+        ctrl.showForLiner(liner, mx, my);
+      })
+      .on('mouseleave', ctrl.hide);
+  });
+
+  hoverLayer.raise();
+  tooltipLayer.raise();
 }

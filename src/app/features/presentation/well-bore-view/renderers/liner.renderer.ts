@@ -206,7 +206,7 @@ function renderLinerShapes({
       .attr('clip-path', `url(#${clipId})`)
       .attr('fill', fill)
       .attr('stroke', stroke)
-      .attr('stroke-width', '5')
+      .attr('stroke-width', '2')
       .style('opacity', opacity);
 
     rootG.append('ellipse')

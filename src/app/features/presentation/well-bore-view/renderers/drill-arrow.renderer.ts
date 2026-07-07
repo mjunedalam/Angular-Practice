@@ -112,12 +112,95 @@ export function renderDrillArrow({
       }
 
       const midY = seg.topPx + segH / 2;
-      const ttipX = arrowCx + shaftHW + 10;
+      const font = 'DM Sans, sans-serif';
+      const ttipW = 240;
+      const ROW_H = 26;
+      const ttipH = 60 + 2 * ROW_H + 14;
+      const rawTtipX = arrowCx + shaftHW + 14;
+      const ttipX = Math.min(rawTtipX, layout.wellboreViewWidth - ttipW - 8);
+      const ttipY = Math.max(4, Math.min(midY - ttipH / 2, layout.drawingHeight - ttipH - 4));
+      const connY = Math.min(Math.max(midY, ttipY + 18), ttipY + ttipH - 18);
+      const anchorX = arrowCx + shaftHW;
+      const connMidX = ttipX - 8;
+      const pctLabel = `${seg.pct}%`;
+      const badgeW = pctLabel.length * 7.2 + 14;
+      const mutedFill = circulationMuted(seg.pct);
+
       const ttipG = arrowG.append('g').attr('class', 'circ-tooltip').style('opacity', 0).style('pointer-events', 'none');
-      ttipG.append('rect').attr('x', ttipX).attr('y', midY - 29).attr('width', 220).attr('height', 58).attr('rx', 8).attr('fill', '#0f172a').attr('stroke', fill).attr('stroke-width', 2).attr('opacity', 0.97);
-      ttipG.append('circle').attr('cx', ttipX + 16).attr('cy', midY - 7).attr('r', 6).attr('fill', fill);
-      ttipG.append('text').attr('x', ttipX + 28).attr('y', midY - 3).attr('font-size', '14').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '700').attr('fill', '#e2e8f0').text(`${seg.topDepth.toLocaleString()} - ${seg.botDepth.toLocaleString()} ft`);
-      ttipG.append('text').attr('x', ttipX + 16).attr('y', midY + 18).attr('font-size', '16').attr('font-family', 'DM Sans, sans-serif').attr('font-weight', '800').attr('fill', fill).text(`Circulation: ${seg.pct}%`);
+
+      // Connector elbow + anchor dot
+      ttipG.append('path')
+        .attr('d', `M${anchorX},${midY} H${connMidX} Q${ttipX},${midY} ${ttipX},${connY} H${ttipX}`)
+        .attr('fill', 'none').attr('stroke', fill)
+        .attr('stroke-width', 1.4).attr('stroke-dasharray', '4,3')
+        .attr('stroke-linecap', 'round').attr('opacity', 0.65);
+      ttipG.append('circle')
+        .attr('cx', anchorX).attr('cy', midY)
+        .attr('r', 3.2).attr('fill', '#fff')
+        .attr('stroke', fill).attr('stroke-width', 1.6);
+
+      // Card
+      ttipG.append('rect')
+        .attr('x', ttipX).attr('y', ttipY)
+        .attr('width', ttipW).attr('height', ttipH)
+        .attr('rx', 8).attr('fill', '#ffffff')
+        .attr('stroke', '#e2e8f0').attr('stroke-width', 1.2)
+        .attr('filter', 'drop-shadow(0 8px 16px rgba(15,23,42,0.18))');
+
+      // Accent rail (left / connector side)
+      ttipG.append('rect')
+        .attr('x', ttipX).attr('y', ttipY)
+        .attr('width', 5).attr('height', ttipH)
+        .attr('rx', 2).attr('fill', fill);
+
+      // Badge
+      ttipG.append('rect')
+        .attr('x', ttipX + 12).attr('y', ttipY + 11)
+        .attr('width', badgeW).attr('height', 22)
+        .attr('rx', 11).attr('fill', mutedFill);
+      ttipG.append('text')
+        .attr('x', ttipX + 12 + badgeW / 2).attr('y', ttipY + 27)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '12').attr('font-family', font)
+        .attr('font-weight', '900').attr('letter-spacing', '0.5')
+        .attr('fill', fill).text(pctLabel);
+
+      // Title
+      ttipG.append('text')
+        .attr('x', ttipX + ttipW - 12).attr('y', ttipY + 27)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '15').attr('font-family', font)
+        .attr('font-weight', '800').attr('fill', '#0f172a').text('Mud Circulation');
+
+      // Divider
+      ttipG.append('line')
+        .attr('x1', ttipX + 12).attr('x2', ttipX + ttipW - 12)
+        .attr('y1', ttipY + 44).attr('y2', ttipY + 44)
+        .attr('stroke', '#e2e8f0').attr('stroke-width', 1);
+
+      // Row: Interval
+      ttipG.append('text')
+        .attr('x', ttipX + 14).attr('y', ttipY + 62)
+        .attr('font-size', '13').attr('font-family', font)
+        .attr('font-weight', '500').attr('fill', '#64748b').text('Interval');
+      ttipG.append('text')
+        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 62)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '15').attr('font-family', font)
+        .attr('font-weight', '800').attr('fill', '#0f172a')
+        .text(`${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`);
+
+      // Row: Circulation % (accent coloured)
+      ttipG.append('text')
+        .attr('x', ttipX + 14).attr('y', ttipY + 88)
+        .attr('font-size', '13').attr('font-family', font)
+        .attr('font-weight', '500').attr('fill', '#64748b').text('Circulation');
+      ttipG.append('text')
+        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 88)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '15').attr('font-family', font)
+        .attr('font-weight', '800').attr('fill', fill).text(`${seg.pct}%`);
+
       shaftG.append('rect')
         .attr('x', arrowCx - shaftHW)
         .attr('y', seg.topPx)
@@ -125,8 +208,8 @@ export function renderDrillArrow({
         .attr('height', segH)
         .attr('fill', 'transparent')
         .attr('class', 'mud-circ-seg')
-        .on('mouseenter', () => ttipG.transition().duration(100).style('opacity', 1))
-        .on('mouseleave', () => ttipG.transition().duration(100).style('opacity', 0));
+        .on('mouseenter', () => ttipG.interrupt().transition().duration(150).style('opacity', 1))
+        .on('mouseleave', () => ttipG.interrupt().transition().duration(120).style('opacity', 0));
     });
   } else {
     shaftG.append('rect').attr('x', arrowCx - shaftHW).attr('y', 0).attr('width', shaftHW * 2).attr('height', Math.min(currPx, shaftMaxPx)).attr('fill', 'var(--accent)');
@@ -147,4 +230,11 @@ function circulationColour(pct: number): string {
   const t = (clamped - 1) / 98;
   const hue = 30 + t * 25;
   return `hsl(${hue.toFixed(1)}, 90%, 50%)`;
+}
+
+function circulationMuted(pct: number): string {
+  const clamped = Math.max(0, Math.min(100, pct));
+  if (clamped === 0) return 'rgba(229,62,62,0.14)';
+  if (clamped === 100) return 'rgba(22,163,74,0.14)';
+  return 'rgba(234,179,8,0.14)';
 }

@@ -236,7 +236,7 @@ export function renderWaterLevel({
     tooltipLayer.append('text')
       .attr('x', tooltipX + (isFlowing ? 54 : 46)).attr('y', tooltipY + 27)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '10')
+      .attr('font-size', '12')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', WATER_ACCENT)
@@ -246,7 +246,7 @@ export function renderWaterLevel({
     tooltipLayer.append('text')
       .attr('x', tooltipX + tooltipW - 16).attr('y', tooltipY + 27)
       .attr('text-anchor', 'end')
-      .attr('font-size', '12')
+      .attr('font-size', '14')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', '#0f172a')
@@ -267,7 +267,7 @@ export function renderWaterLevel({
       tooltipLayer.append('text')
         .attr('x', tooltipX + 16)
         .attr('y', tooltipY + 60 + idx * lineHeight)
-        .attr('font-size',   isCalc ? '11' : '10')
+        .attr('font-size',   isCalc ? '13' : '12')
         .attr('font-family', isFlowing
           ? "'Courier New', 'Lucida Console', monospace"
           : 'DM Sans, sans-serif')
