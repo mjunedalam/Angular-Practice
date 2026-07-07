@@ -304,11 +304,13 @@ function renderCasingLabels({
 
       const innerDelay = labelsStart + (animation.lineStyle === 'draw' ? animation.lineDur : 0);
       const rank = sortedShoeDepths.indexOf(displayDepth);
-      const innerMidY = rank > 0 ? (scale(sortedShoeDepths[rank - 1]) + shoePx) / 2 : shoePx;
+      const topDepth = rank > 0 ? sortedShoeDepths[rank - 1] : 0;
+      const innerMidY = scale((topDepth + displayDepth) / 2);
       rootG.append('text')
         .attr('class', 'casing-size-inner')
         .attr('x', centerX).attr('y', innerMidY)
         .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
         .style('opacity', 0)
         .attr('fill', hasActual ? '#0f2d1a' : '')
         .style('font-weight', hasActual ? '800' : 'normal')
@@ -337,7 +339,8 @@ function renderCasingLabelsFromActual({
     const hw = computeCasingHalfWidth(i, baseHalfWidth, halfWidthIncrement);
     const shoePx = scale(actual.wCsgBotDpth);
     const prevActual = unique[i + 1];
-    const innerMidY = prevActual ? (scale(prevActual.wCsgBotDpth) + shoePx) / 2 : shoePx;
+    const topDepth = prevActual ? prevActual.wCsgBotDpth : 0;
+    const innerMidY = scale((topDepth + actual.wCsgBotDpth) / 2);
     const rEdge = centerX + hw;
     const lEnd = rEdge + 26;
     const labelX = lEnd + 8;
@@ -353,6 +356,7 @@ function renderCasingLabelsFromActual({
 
     rootG.append('text').attr('class', 'casing-size-inner')
       .attr('x', centerX).attr('y', innerMidY).attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
       .style('opacity', 0).text(`${actual.wCsgOdSz}"`)
       .transition().delay(labelsStart + (animation.lineStyle === 'draw' ? animation.lineDur : 0))
       .duration(animation.fadeDur).ease(easeCubicInOut).style('opacity', 1);
