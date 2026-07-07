@@ -110,3 +110,17 @@ transition: 0.3s ease;
   border-color: #38bdf8;
   color: #0f172a;
 }
+
+// Resizable expand dialog
+.resizable-dialog .mat-mdc-dialog-container {
+  resize: both;
+  overflow: hidden;
+  min-width: 480px;
+  min-height: 320px;
+}
+.resizable-dialog .mat-mdc-dialog-surface {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

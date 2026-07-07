@@ -1,0 +1,15 @@
+<div class="expand-header">
+  <h2 class="expand-title">{{ data.title }}</h2>
+  <button mat-icon-button [mat-dialog-close]="isEditable ? localFc.value : undefined"
+          class="expand-close" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="expand-content">
+  @if (isEditable) {
+    <textarea class="expand-textarea" [formControl]="localFc"></textarea>
+  } @else {
+    <p class="expand-text">{{ data.control?.value ?? data.text }}</p>
+  }
+</mat-dialog-content>

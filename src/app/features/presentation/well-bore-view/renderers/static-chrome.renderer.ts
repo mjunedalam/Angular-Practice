@@ -34,9 +34,8 @@ export function renderStaticChrome({
     .attr('class', 'column-label')
     .attr('x', geoLineX).attr('y', -30)
     .attr('text-anchor', 'middle')
-    .style('font-size', '13px')
     .call((text) => {
       text.append('tspan').attr('x', geoLineX).attr('dy', 0).text('Geologic');
-      text.append('tspan').attr('x', geoLineX).attr('dy', 12).text('Horizons (ft bgl)');
+      text.append('tspan').attr('x', geoLineX).attr('dy', 19).text('Horizons (ft bgl)');
     });
 }

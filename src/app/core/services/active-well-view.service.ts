@@ -29,6 +29,11 @@ export class ActiveWellViewService {
             .pipe(catchError(this.handleError));
     }
 
+    deleteGwdWellTest(egwtId: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/well-tests/${egwtId}`, { context: this.suppressCtx })
+            .pipe(catchError(this.handleError));
+    }
+
     private handleError(error: HttpErrorResponse) {
         return throwError(() => error);
     }

@@ -6,6 +6,16 @@
   padding: 1px;
 }
 
+.ops-label--expand {
+  cursor: pointer;
+
+  &:hover {
+    background: #e8edf4;
+    color: #1e40af;
+    border-left-color: #3b82f6;
+  }
+}
+
 .ops-label {
   background: var(--aw-cell-bg);
   padding: 0.65rem 0.75rem;

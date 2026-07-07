@@ -265,8 +265,31 @@
   }
 
   &--nav {
-    min-width: 32px; padding: 8px 12px;
-    font-size: 18px; color: var(--accent); font-weight: 800;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    padding: 0;
+    justify-content: center;
+    color: var(--accent);
+    font-weight: 800;
+    gap: 0;
+
+    mat-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+      line-height: 20px;
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  &--page-nav {
+    color: var(--text-primary);
+  }
+
+  &--well-nav {
+    color: var(--accent);
   }
 
   &.chip--nav:hover,

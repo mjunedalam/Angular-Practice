@@ -468,6 +468,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.6rem;
   padding: 0.6rem 0.85rem;
   border-top: 1px solid #e2e8f0;
   background: var(--aw-cell-bg);
@@ -488,5 +489,30 @@
   &:hover {
     box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4) !important;
     transform: translateY(-1px);
+  }
+}
+
+.wt-delete-btn {
+  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  min-height: 2rem;
+  font-size: 0.88rem !important;
+  line-height: 1;
+  padding: 0 1.75rem !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.28) !important;
+  transition: box-shadow 0.18s ease, transform 0.18s ease !important;
+
+  &:hover:not([disabled]) {
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.45) !important;
+    transform: translateY(-1px);
+  }
+
+  &[disabled] {
+    background: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
   }
 }

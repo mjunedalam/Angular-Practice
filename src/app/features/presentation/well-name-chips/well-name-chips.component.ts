@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, input, output, Signal, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { PresentationStore } from '../store/presentation.store';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -9,7 +10,7 @@ import { blockFutureDigits, clampDateDigits, formatDateForInput, getTodayAtMidni
 @Component({
   selector: 'app-well-name-chips',
   standalone: true,
-  imports: [NgClass, FormsModule, MatProgressBarModule],
+  imports: [NgClass, FormsModule, MatIconModule, MatProgressBarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './well-name-chips.component.html',
   styleUrl:    './well-name-chips.component.scss',
@@ -161,6 +162,16 @@ export class WellNameChipsComponent {
   protected onPrevPageClick(event: Event): void {
     event.preventDefault();
     this.store.prevPage();
+  }
+
+  protected onNextWellClick(event: Event): void {
+    event.preventDefault();
+    this.store.nextWell();
+  }
+
+  protected onPrevWellClick(event: Event): void {
+    event.preventDefault();
+    this.store.prevWell();
   }
 
   private clearLoaderTimer(): void {

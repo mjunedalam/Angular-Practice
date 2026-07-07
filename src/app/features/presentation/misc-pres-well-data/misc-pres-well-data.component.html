@@ -26,12 +26,11 @@
 
       <div class="cell cell--aquifer">
         <span class="cell__label cell__label--dark">Targeted<br />Aquifer</span>
-        <div style="display: flex">
+        <div class="aquifer-content">
           <img
-            class="size-8"
+            class="aquifer-logo"
             src="assets/images/agwa-logo.svg"
             alt="AGWA"
-            style="width: 20px"
           />
           <div class="aquifer-name">{{ d.targetedAquifer }}</div>
         </div>
@@ -211,7 +210,7 @@
 
       <!-- ROW 8: Operation Summary (full width) -->
       @if (d.operationSummary) {
-        <div class="cell cell--op-summary">
+        <div class="cell cell--op-summary" title="Double-click to expand" (dblclick)="openExpand('Operation Summary', d.operationSummary)">
           <div class="op-header">
             <svg
               viewBox="0 0 24 24"
@@ -237,7 +236,7 @@
 
       <!-- ROW 9: Drilling Summary Remark (full width, if exists) -->
       @if (d.drlgSmryRmk) {
-        <div class="cell cell--next24">
+        <div class="cell cell--next24" title="Double-click to expand" (dblclick)="openExpand('Drilling Remarks', d.drlgSmryRmk)">
           <div class="op-header">
             <svg
               viewBox="0 0 24 24"
@@ -262,7 +261,7 @@
 
       <!-- ROW 10: Next 24 Hr Operation (full width) -->
       @if (d.next24HrOperation) {
-        <div class="cell cell--next24">
+        <div class="cell cell--next24" title="Double-click to expand" (dblclick)="openExpand('Next 24 Hr Operation', d.next24HrOperation)">
           <div class="op-header">
             <svg
               viewBox="0 0 24 24"

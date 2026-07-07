@@ -73,7 +73,7 @@ export class DepthScaleComponent {
       .style('opacity', 0)
       .call((t) => {
         t.append('tspan').attr('x', titleX).attr('dy', 0).text('Depth');
-        t.append('tspan').attr('x', titleX).attr('dy', 14).text('(ft bgl)');
+        t.append('tspan').attr('x', titleX).attr('dy', 20).text('(ft bgl)');
       })
       .transition()
       .delay(80)

@@ -169,14 +169,8 @@ export class WwellTestComponent {
     const isMissing = (v: unknown) => v == null || String(v).trim() === '' || String(v).trim() === 'N/A';
 
     const f = this.formService.drillingRemarksForm.getRawValue();
-    const opSummaryFromForm = {
-      operation:        f['wOpRmk']        ?? null,
-      nextOperation:    f['nxt24HrPlanRmk'] ?? null,
-      drillingRemarks:  f['wDrlgSmryRmk']  ?? null,
-    };
     const missing = getMissingDetailLabels(
       this.store.wellHeaderData(),
-      opSummaryFromForm,
       this.store.databaseInfo(),
     );
 
@@ -301,6 +295,50 @@ export class WwellTestComponent {
   protected readonly canUpdate = computed(() =>
     this.rbac.hasPermission('active-wwell', ACTIONS.UPDATE),
   );
+
+  protected readonly canDelete = computed(() =>
+    this.rbac.hasPermission('active-wwell', ACTIONS.DELETE),
+  );
+
+  protected readonly egwtId = computed(() =>
+    this.store.wellData()?.EXAD_GWD_WELL_TESTS?.[0]?.egwt_id ?? null,
+  );
+
+  protected readonly isDeleting = signal(false);
+
+  protected readonly deleteDisabled = computed(() =>
+    !this.isPublished() || !this.egwtId() || this.isUpdating() || this.isDeleting(),
+  );
+
+  deleteWellTest(): void {
+    const egwtId = this.egwtId();
+    if (!egwtId) return;
+
+    const wellName = this.store.wellHeaderData()?.wellName ?? 'Unknown';
+    const testDate = formatDateForInput(this.store.selectedDate());
+    const testType = this.isFlowTest() ? 'Flow' : 'Pump';
+
+    this.isDeleting.set(true);
+
+    forkJoin([
+      this.activeWellApiService.deleteGwdWellTest(egwtId),
+      timer(1500),
+    ]).subscribe({
+      next: () => {
+        this.isDeleting.set(false);
+        this.notify.info(
+          `Well test deleted — ${wellName} | ${testType} test | ${testDate} | ID: ${egwtId}`,
+          { durationMs: 10000 },
+        );
+        this.isPublished.set(false);
+        this.store.refreshWellDetail();
+      },
+      error: () => {
+        this.isDeleting.set(false);
+        this.notify.error('Failed to delete well test — please try again');
+      },
+    });
+  }
 
   protected readonly aquiferOptions = this.store.aquifers;
 

@@ -64,6 +64,15 @@ export const PresentationStore = signalStore(
             pagedWellNames: computed((): WellName[] => selectPagedWellNames(wellNames(), wellNamesPage())),
             hasPrevPage: computed(() => selectHasPrevPage(wellNamesPage())),
             hasNextPage: computed(() => selectHasNextPage(wellNames(), wellNamesPage())),
+            hasPrevWell: computed(() => {
+                const selectedIndex = wellNames().findIndex(w => w.epANum === selectedEpANum());
+                return selectedIndex > 0;
+            }),
+            hasNextWell: computed(() => {
+                const names = wellNames();
+                const selectedIndex = names.findIndex(w => w.epANum === selectedEpANum());
+                return selectedIndex !== -1 && selectedIndex < names.length - 1;
+            }),
             totalPages: computed(() => selectTotalPages(wellNames())),
             isDetailsLoading: computed(() => detailLoading() && wellList().length > 0),
             isInitialLoading: computed(() => listLoading() && wellList().length === 0),
@@ -195,6 +204,21 @@ export const PresentationStore = signalStore(
             ),
         );
 
+        const selectWellAtOffset = (offset: -1 | 1): void => {
+            const names = selectWellNamesFromList(store.wellList());
+            const currentIndex = names.findIndex(w => w.epANum === store.selectedEpANum());
+            if (currentIndex === -1) return;
+
+            const target = names[currentIndex + offset];
+            if (!target) return;
+
+            patchState(store, {
+                selectedEpANum: target.epANum,
+                wellNamesPage: selectPageIndexForEpANum(names, target.epANum, store.wellNamesPage()),
+            });
+            loadDetail({ date: formatDateForInput(store.selectedDate()), epANum: target.epANum });
+        };
+
         return {
             initialize(date?: string, epANumOverride?: number): void {
                 loadListAndAutoSelect({
@@ -247,6 +271,14 @@ export const PresentationStore = signalStore(
                 if (firstOnPage) {
                     loadDetail({ date: formatDateForInput(store.selectedDate()), epANum: firstOnPage.epANum });
                 }
+            },
+
+            nextWell(): void {
+                selectWellAtOffset(1);
+            },
+
+            prevWell(): void {
+                selectWellAtOffset(-1);
             },
 
             setUiError(message: string | null): void {

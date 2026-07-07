@@ -7,6 +7,7 @@ import {
   buildArrowHeadRight,
   buildGravelPackUPath,
   buildOpenHolePath,
+  buildPrePerfLiner,
   buildScreenHanger,
   computeCasingHalfWidth,
 } from '@shared/utils/wellbore-math.util';
@@ -59,7 +60,9 @@ function renderOpenHoleAndScreen({
 
   const { wellDesign } = data;
   const shouldDrawOH = shouldRenderOpenHole(wellDesign);
-  const shouldDrawLS = shouldRenderLinerScreen(wellDesign);
+  // skip the old liner-screen path when drlg liners are present — liner.renderer handles those
+  const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
+  const shouldDrawLS = !hasDrlgLiners && shouldRenderLinerScreen(wellDesign);
   if (!shouldDrawOH && !shouldDrawLS) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap } = layout;
@@ -225,24 +228,14 @@ function renderPrePerforatedLiner({
     .attr('x', centerX - prePerfHW - 6).attr('y', perfTopPx - 5)
     .attr('width', (prePerfHW + 6) * 2).attr('height', 0);
 
+  const { walls, ticks, shoe } = buildPrePerfLiner(centerX, prePerfHW, perfTopPx, perfBottomPx);
   const perfGroup = rootG.append('g')
     .attr('class', 'perf-wall-group')
     .attr('clip-path', `url(#${clipId})`);
-  const perfLeftX = centerX - prePerfHW;
-  const perfRightX = centerX + prePerfHW;
-  const leftWallD = `M${perfLeftX},${perfTopPx} L${perfLeftX},${perfBottomPx}`;
-  const bottomWallD = `M${perfLeftX},${perfBottomPx} L${perfRightX},${perfBottomPx}`;
-  const rightWallD = `M${perfRightX},${perfTopPx} L${perfRightX},${perfBottomPx}`;
 
-  perfGroup.append('path')
-    .attr('class', 'perf-wall')
-    .attr('d', leftWallD);
-  perfGroup.append('path')
-    .attr('class', 'perf-wall')
-    .attr('d', bottomWallD);
-  perfGroup.append('path')
-    .attr('class', 'perf-wall')
-    .attr('d', rightWallD);
+  perfGroup.append('path').attr('class', 'perf-wall').attr('d', walls);
+  perfGroup.append('path').attr('class', 'perf-wall perf-wall--ticks').attr('d', ticks);
+  perfGroup.append('path').attr('class', 'perf-wall').attr('d', shoe);
 
   clipRect.transition()
     .delay(ohStart)
@@ -280,6 +273,9 @@ export function renderScreenHanger({
   hangerStart,
 }: RenderCompletionElementsOptions): void {
   if (!data.casings.length) return;
+  // when drlg liners are present, liner.renderer draws its own hangers
+  const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
+  if (hasDrlgLiners) return;
   const hasLiner = data.casings.some(c => c.csgType === 'Liner');
   const hasLinerScreen = shouldRenderLinerScreen(data.wellDesign);
   if (!hasLiner && !hasLinerScreen) return;

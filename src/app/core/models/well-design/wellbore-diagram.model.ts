@@ -52,21 +52,21 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   drawingHeight: 740,
 
   // -- RESPONSIVE MIDPOINT MATH --
-  depthScaleWidth: 90,
-  depthAxisX: 60, // Leaves exactly 30 units from the right edge of the Depth SVG
+  depthScaleWidth: 116,
+  depthAxisX: 82,
 
-  wellboreViewWidth: 980,
+  wellboreViewWidth: 1040,
 
   // ── Horizontal zone layout (left → right inside wellbore SVG) ──────────
-  // [0 - 28]   drill arrow body  (centerX=20, halfWidth=10 → spans 10-30)
-  // [28 - 95]  geo depth labels  (right-aligned at geoLineX-17 = 78, ~5 chars)
-  // [95]       geo axis line
-  // [95 - 170] geo formation codes (left start at geoLineX+18 = 113)
-  // [170+]     gap before bore structure
+  // [0 - 34]    drill arrow body
+  // [56 - 120]  geo depth labels
+  // [120]       geo axis line
+  // [120 - 210] geo formation codes
+  // [210+]      gap before bore structure
   // ─────────────────────────────────────────────────────────────────────
-  depthArrowX: 20,    // arrow centerX — spans x=10 to x=30, clear of geo labels
-  geoLineX: 95,       // geo axis — depth labels end ~x=78, codes start ~x=113
-  casingCenterX: 560, // bore structure center — plenty of gap after geo codes
+  depthArrowX: 24,
+  geoLineX: 120,
+  casingCenterX: 610,
   baseHalfWidth: 72,
   halfWidthIncrement: 26,
   shoeCurveOffset: 12,

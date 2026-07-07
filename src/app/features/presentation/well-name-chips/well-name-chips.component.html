@@ -43,10 +43,25 @@
       @if (store.hasPrevPage()) {
         <button
           type="button"
-          class="chip chip--nav"
-          aria-label="Previous wells"
+          class="chip chip--nav chip--page-nav"
+          aria-label="Previous wells page"
+          title="Previous wells page"
           (click)="onPrevPageClick($event)"
-        >‹</button>
+        >
+          <mat-icon aria-hidden="true">keyboard_double_arrow_left</mat-icon>
+        </button>
+      }
+
+      @if (store.hasPrevWell()) {
+        <button
+          type="button"
+          class="chip chip--nav chip--well-nav"
+          aria-label="Previous well"
+          title="Previous well"
+          (click)="onPrevWellClick($event)"
+        >
+          <mat-icon aria-hidden="true">chevron_left</mat-icon>
+        </button>
       }
 
       @for (well of store.pagedWellNames(); track well.epANum) {
@@ -63,13 +78,28 @@
         </button>
       }
 
+      @if (store.hasNextWell()) {
+        <button
+          type="button"
+          class="chip chip--nav chip--well-nav"
+          aria-label="Next well"
+          title="Next well"
+          (click)="onNextWellClick($event)"
+        >
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </button>
+      }
+
       @if (store.hasNextPage()) {
         <button
           type="button"
-          class="chip chip--nav"
-          aria-label="Next wells"
+          class="chip chip--nav chip--page-nav"
+          aria-label="Next wells page"
+          title="Next wells page"
           (click)="onNextPageClick($event)"
-        >›</button>
+        >
+          <mat-icon aria-hidden="true">keyboard_double_arrow_right</mat-icon>
+        </button>
       }
 
       <span class="chip-strip__page-indicator">{{ pageLabel() }}</span>

@@ -1,14 +1,11 @@
 import { IWellData } from '@models/well-design/well-data.model';
-import { DatabaseInfoViewModel, OperationSummaryViewModel, WellHeaderViewModel } from '@models/active-wwell/active-wwell-view.model';
+import { DatabaseInfoViewModel, WellHeaderViewModel } from '@models/active-wwell/active-wwell-view.model';
 import { FALLBACK_STR } from 'src/app/core/store/shared/well-data.selectors';
 
 export const ACTIVE_WWELL_FALLBACK = 'N/A';
 
-type OpSummaryInput = Pick<OperationSummaryViewModel, 'operation' | 'nextOperation' | 'drillingRemarks'> | null;
-
 export function getMissingDetailLabels(
   header: WellHeaderViewModel | null,
-  opSummary: OpSummaryInput,
   dbInfo: DatabaseInfoViewModel | null,
 ): string[] {
   const missing: string[] = [];
@@ -19,10 +16,6 @@ export function getMissingDetailLabels(
   if (!header || isMissing(header.targetedAquifer)) missing.push('Targeted Aquifer');
   if (!header || isMissing(header.depth)) missing.push('Target Depth');
   if (!header || isMissing(header.biNum)) missing.push('BI Number');
-
-  if (!opSummary || isMissing(opSummary.operation)) missing.push('Operation Summary');
-  if (!opSummary || isMissing(opSummary.nextOperation)) missing.push('Next 24hr Operation');
-  if (!opSummary || isMissing(opSummary.drillingRemarks)) missing.push('Drilling Remarks');
 
   if (!dbInfo || isMissing(dbInfo.rig)) missing.push('Rig');
   if (!dbInfo || isMissing(dbInfo.spudDate)) missing.push('Spud Date');

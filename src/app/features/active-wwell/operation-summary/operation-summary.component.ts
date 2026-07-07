@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { TextExpandModalComponent } from '@shared/components/text-expand-modal/text-expand-modal.component';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
@@ -27,4 +29,25 @@ export class OperationSummaryComponent {
   protected readonly canUpdate = computed(() =>
     this.rbac.hasPermission('active-wwell', ACTIONS.UPDATE),
   );
+
+  private readonly dialog = inject(MatDialog);
+
+  protected openExpand(title: string, control: AbstractControl | null): void {
+    if (!control) return;
+    this.dialog
+      .open(TextExpandModalComponent, {
+        data: { title, control, readonly: !this.canUpdate() },
+        width: '65vw',
+        maxWidth: '95vw',
+        minHeight: '50vh',
+        panelClass: 'resizable-dialog',
+      })
+      .afterClosed()
+      .subscribe((result: string | undefined) => {
+        if (result !== undefined) {
+          control.setValue(result);
+          control.markAsDirty();
+        }
+      });
+  }
 }

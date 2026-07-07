@@ -21,9 +21,9 @@ export class ActiveWwellFormService {
         wActDt: [null, [Validators.required]],
         area: [null, [Validators.required]],
         status: [null, [Validators.required]],
-        wOpRmk: [null, [Validators.required]],
-        nxt24HrPlanRmk: [null, [Validators.required]],
-        wDrlgSmryRmk: [null, [Validators.required]]
+        wOpRmk: [null],
+        nxt24HrPlanRmk: [null],
+        wDrlgSmryRmk: [null]
     });
 
     wellTestForm: FormGroup = this._fb.group({

@@ -45,22 +45,22 @@ export function renderNotDrilledZone({
   const ttipY = topPx + height * 0.4;
   ttipG.append('rect')
     .attr('x', ttipX).attr('y', ttipY - 36)
-    .attr('width', 260).attr('height', 66)
+    .attr('width', 320).attr('height', 82)
     .attr('rx', 8)
     .attr('fill', '#1e293b')
     .attr('fill-opacity', 0.82)
     .attr('stroke', 'rgba(239,68,68,0.55)')
     .attr('stroke-width', 1.5);
   ttipG.append('text')
-    .attr('x', ttipX + 14).attr('y', ttipY - 10)
-    .attr('font-size', '14').attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-weight', '700').attr('fill', 'rgba(239,100,68,1)')
-    .attr('letter-spacing', '0.04em')
+    .attr('x', ttipX + 16).attr('y', ttipY - 6)
+    .attr('font-size', '20').attr('font-family', 'DM Sans, sans-serif')
+    .attr('font-weight', '900').attr('fill', 'rgba(239,100,68,1)')
+    .attr('letter-spacing', '0')
     .text('NOT DRILLED');
   ttipG.append('text')
-    .attr('x', ttipX + 14).attr('y', ttipY + 14)
-    .attr('font-size', '13').attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-weight', '500').attr('fill', '#cbd5e1')
+    .attr('x', ttipX + 16).attr('y', ttipY + 24)
+    .attr('font-size', '18').attr('font-family', 'DM Sans, sans-serif')
+    .attr('font-weight', '800').attr('fill', '#cbd5e1')
     .text(`Remaining: ${undrilledFt.toLocaleString()} ft`);
 
   ndg.append('rect')

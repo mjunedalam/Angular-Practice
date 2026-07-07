@@ -5,7 +5,9 @@
  */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { TextExpandModalComponent } from '@shared/components/text-expand-modal/text-expand-modal.component';
 import { PresentationStore } from '../store/presentation.store';
 
 @Component({
@@ -18,6 +20,17 @@ import { PresentationStore } from '../store/presentation.store';
 })
 export class MiscPresWellDataComponent {
   protected readonly store = inject(PresentationStore);
+  private readonly dialog = inject(MatDialog);
+
+  protected openExpand(title: string, text: string): void {
+    this.dialog.open(TextExpandModalComponent, {
+      data: { title, text, readonly: true },
+      width: '65vw',
+      maxWidth: '95vw',
+      minHeight: '50vh',
+      panelClass: 'resizable-dialog',
+    });
+  }
 
   protected formatSpudDate(val: string): string {
     if (!val || val === 'N/A') return val || 'N/A';

@@ -10,6 +10,8 @@ const presentationStoreMock = {
   totalPages: jest.fn(() => 1),
   hasPrevPage: jest.fn(() => false),
   hasNextPage: jest.fn(() => false),
+  hasPrevWell: jest.fn(() => false),
+  hasNextWell: jest.fn(() => false),
   selectedWell: jest.fn(() => null),
   selectedEpANum: jest.fn(() => null),
   selectedDate: jest.fn(() => ''),
@@ -21,6 +23,8 @@ const presentationStoreMock = {
   setDate: jest.fn(),
   nextPage: jest.fn(),
   prevPage: jest.fn(),
+  nextWell: jest.fn(),
+  prevWell: jest.fn(),
 };
 
 const notificationServiceMock = {
@@ -53,5 +57,25 @@ describe('WellNameChipsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should move to the next well from the single-arrow control', () => {
+    const event = new Event('click');
+    jest.spyOn(event, 'preventDefault');
+
+    (component as unknown as { onNextWellClick(event: Event): void }).onNextWellClick(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(presentationStoreMock.nextWell).toHaveBeenCalled();
+  });
+
+  it('should move to the previous well from the single-arrow control', () => {
+    const event = new Event('click');
+    jest.spyOn(event, 'preventDefault');
+
+    (component as unknown as { onPrevWellClick(event: Event): void }).onPrevWellClick(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(presentationStoreMock.prevWell).toHaveBeenCalled();
   });
 });

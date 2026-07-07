@@ -3,10 +3,10 @@ import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
+import { resolveLiners } from './liner.renderer';
 import { DepthScale } from './wellbore-renderer.types';
 
 const OVERRUN_COMPLETION_LENGTH_FT = 1200;
-const MIN_COMPLETION_VISIBLE_FT = 1000;
 
 export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
   const irNonLiner = casings.filter(c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack');
@@ -55,12 +55,7 @@ export function resolveCompletionBottomDepth(data: WellboreDiagramData): number 
     ? Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT))
     : data.totalDepth;
 
-  // wPrsntDpth and estTargetDepth can be equal/near-equal, or the casing shoe can sit
-  // right at totalDepth — either way the completion span collapses to ~0px and the
-  // open hole / screen / gravel pack become invisible. Force a minimum visible span,
-  // borrowing from the display padding below totalDepth.
-  const minVisibleBottom = completionTopDepth + MIN_COMPLETION_VISIBLE_FT;
-  return Math.min(Math.max(naturalBottom, minVisibleBottom), data.displayDepth);
+  return Math.min(naturalBottom, data.displayDepth);
 }
 
 export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: DepthScale): number {
@@ -101,11 +96,25 @@ export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLay
 
   if (!isFlagYes(data.wellDesign?.ohFlg)) return innerHW + openHoleHwMargin;
 
+  const ohDiameter = parseInchSize(data.wellDesign?.ohRemarks);
+
+  // When liners exist, scale OH relative to the last liner so the
+  // physical size difference (e.g. 8.5" OH vs 7" liner) is preserved visually.
+  const liners = resolveLiners(data.casings, data.drlgCasings, layout);
+  const lastLiner = liners.length > 0 ? liners[liners.length - 1] : null;
+
+  if (lastLiner !== null && ohDiameter !== null) {
+    const linerOD = parseInchSize(lastLiner.odSz);
+    if (linerOD !== null && linerOD > 0) {
+      return lastLiner.halfWidth * (ohDiameter / linerOD);
+    }
+  }
+
+  // No liners: scale relative to innermost structural casing
   const structuralCasings = data.casings.filter(
     c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack',
   );
   const innermostOD = parseInchSize(structuralCasings[0]?.csgSize ?? null);
-  const ohDiameter = parseInchSize(data.wellDesign?.ohRemarks);
 
   if (ohDiameter !== null && innermostOD !== null && innermostOD > 0 && ohDiameter < innermostOD) {
     return innerHW * (ohDiameter / innermostOD);

@@ -231,7 +231,7 @@ export function renderGeoTops({
 
     const depthText = g.append('text')
       .attr('class', 'geo-depth')
-      .attr('x', geoLineX - 7)
+      .attr('x', geoLineX)
       .attr('dy', '0.35em')
       .style('opacity', 0)
       .text(hasActual ? actualDepth!.toLocaleString() : top.planTvdDepth.toLocaleString()) as TextSel;
@@ -267,7 +267,7 @@ export function renderGeoTops({
 
     const depthText = g.append('text')
       .attr('class', 'geo-depth')
-      .attr('x', geoLineX - 7)
+      .attr('x', geoLineX)
       .attr('dy', '0.35em')
       .style('opacity', 0)
       .text(actualDepth.toLocaleString()) as TextSel;
@@ -330,7 +330,7 @@ function animateGeoRow(
     .delay(delay + 120)
     .duration(280)
     .ease(easeCubicOut)
-    .attr('x', geoLineX - 17)
+    .attr('x', geoLineX - 5)
     .style('opacity', 1);
 
   codeText.transition()

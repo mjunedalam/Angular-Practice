@@ -25,19 +25,19 @@
 
   .pump-label {
     
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 900;
     fill: #1e293b;
   }
 
 
-  .ground-line   { stroke: #b94a12; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
-  .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; fill: #b94a12; text-transform: uppercase; opacity: 0.85; }
-  .geo-axis      { stroke: #000; stroke-width: 1.5; opacity: 1; }
-  .column-label  { font-family: 'DM Sans', sans-serif; font-size: 11px; fill: var(--accent); font-weight: 700; opacity: 0.9; }
-  .geo-tick      { stroke: #000; stroke-width: 1.5; opacity: 1; }
-  .geo-depth     { font-size: 18px; font-weight: 800;  text-anchor: end; }
-  .geo-code         { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; fill: var(--text-primary); letter-spacing: 0.05em; }
+  .ground-line   { stroke: #b94a12; stroke-width: 3; stroke-linecap: round; opacity: 0.9; }
+  .ground-label  { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 900; fill: #b94a12; text-transform: uppercase; opacity: 0.9; }
+  .geo-axis      { stroke: #000; stroke-width: 2.2; opacity: 1; }
+  .column-label  { font-family: 'DM Sans', sans-serif; font-size: 17px; fill: var(--accent); font-weight: 900; opacity: 1; }
+  .geo-tick      { stroke: #000; stroke-width: 2.2; opacity: 1; }
+  .geo-depth     { font-size: 19px; font-weight: 900;  text-anchor: end; }
+  .geo-code         { font-family: 'DM Sans', sans-serif; font-size: 19px; font-weight: 900; fill: var(--text-primary); letter-spacing: 0; }
   .geo-code--actual { fill: #16a34a; }
 
   .geo-depth,
@@ -57,43 +57,44 @@
   }
 
   .geo-target-band  { fill: rgb(35 135 232 / 60%);  }
-  .geo-tick--target { stroke: #d97706; stroke-width: 2.5; }
-  .geo-depth--target{ font-size: 12px; font-weight: 700; fill: #d97706; text-anchor: end; }
-  .geo-code--target { font-size: 14px; font-weight: 900; fill: #d97706; }
+  .geo-tick--target { stroke: #d97706; stroke-width: 3; }
+  .geo-depth--target{ font-size: 18px; font-weight: 900; fill: #d97706; text-anchor: end; }
+  .geo-code--target { font-size: 19px; font-weight: 900; fill: #d97706; }
 
   .casing            { stroke-linecap: round; }
-  .casing-label__line   { stroke: var(--text-muted); stroke-width: 1; opacity: 0.75; }
-  .casing-label__arrow  { fill: var(--text-muted); opacity: 0.75; }
+  .casing-label__line   { stroke: var(--text-muted); stroke-width: 1.6; opacity: 0.85; }
+  .casing-label__arrow  { fill: var(--text-muted); opacity: 0.85; }
   .casing-label__primary {
-     font-size: 15px; font-weight: 800;
+     font-size: 20px; font-weight: 900;
      
   }
   .casing-label__secondary {
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 900;
      font-style: italic;
   }
   .casing-size-inner {
-    font-size: 17px; font-weight: 600;
-    opacity: 0.70;
+    font-size: 23px; font-weight: 900;
+    opacity: 0.86;
   }
 
-  .water-line  { stroke: #0ea5e9; stroke-width: 1.8; stroke-dasharray: 7,4; opacity: 0.8; }
+  .water-line  { stroke: #0ea5e9; stroke-width: 2.4; stroke-dasharray: 7,4; opacity: 0.9; }
   .water-arrow { fill: #0ea5e9; stroke: #0ea5e9; opacity: 0.8; }
-  .water-label {  font-size: 14.5px;  font-weight: 900; fill: #0ea5e9;}
+  .water-label {  font-size: 20px;  font-weight: 900; fill: #0ea5e9;}
 
   .water-level-tooltip {
     text { user-select: none; }
   }
 
-  .open-hole        { stroke: #000; stroke-width: 3; fill: none; stroke-dasharray: 5,3; opacity: 1; }
-  .oh-label-line    { stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
-  .oh-label-arrow   { fill: var(--text-muted); opacity: 0.65; }
-  .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 900;  }
+  .open-hole        { stroke: #000; stroke-width: 3.4; fill: none; stroke-dasharray: 5,3; opacity: 1; }
+  .oh-label-line    { stroke: var(--text-muted); stroke-width: 1.6; opacity: 0.8; }
+  .oh-label-arrow   { fill: var(--text-muted); opacity: 0.8; }
+  .open-hole-text   { font-family: 'DM Sans', sans-serif; font-size: 19px; font-weight: 900;  }
 
   .liner-screen     { stroke: var(--text-secondary); stroke-width: 1.8; fill: url(#gridPattern); opacity: 0.72; }
   .screen-hanger    { opacity: 0.78; }
-  .screen-label-line{ stroke: var(--text-muted); stroke-width: 1; opacity: 0.65; }
-  .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;  }
+  .screen-label-line{ stroke: var(--text-muted); stroke-width: 1.6; opacity: 0.8; }
+  .screen-label-text{ font-family: 'DM Sans', sans-serif; font-size: 19px; font-weight: 900;  }
 
   .gravelHole { opacity: 1; }
 
@@ -124,13 +125,13 @@
   }
 
   .total-depth-main {
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;
-    fill: var(--accent); letter-spacing: 0.05em; opacity: 0.9;
+    font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 900;
+    fill: var(--accent); letter-spacing: 0; opacity: 0.95;
   }
 
   .total-depth-main--current {
     fill: #16a34a;
-    font-size: 15px;
+    font-size: 22px;
     font-weight: 950;
     opacity: 1;
   }

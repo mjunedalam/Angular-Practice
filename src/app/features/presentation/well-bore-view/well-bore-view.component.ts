@@ -10,6 +10,7 @@ import { select } from 'd3-selection';
 import 'd3-transition';
 
 import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, WellboreAnimConfig, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { resolveLiners } from './renderers/liner.renderer';
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
 import { resolveAnimation } from './renderers/animation.helpers';
 import { renderCasingElements } from './renderers/casing.renderer';
@@ -111,19 +112,22 @@ export class WellBoreViewComponent {
     const structuralCasings = data.casings.filter(
       c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
     );
+    const liners = resolveLiners(data.casings, data.drlgCasings, this.layout);
 
     const t_casingsStart = 0;
     const t_casingsDone = computeOverlayDelay(structuralCasings.length);
-    const t_ohStart = t_casingsDone + ANIM.SEQ_GAP;
+    const t_linersStart = t_casingsDone + ANIM.SEQ_GAP;
+    const t_linersDone = t_linersStart + (liners.length > 0 ? computeOverlayDelay(liners.length) : 0);
+    const t_ohStart = t_linersDone + ANIM.SEQ_GAP;
     const t_ohDone = t_ohStart + ANIM.OH_DURATION;
     const t_gravelStart = t_ohDone + ANIM.SEQ_GAP;
     const t_gravelDone = t_gravelStart + ANIM.GRAVEL_DURATION;
     const t_hangerStart = t_gravelDone + ANIM.SEQ_GAP;
     const t_drillStart = 0;
-    const t_labelsStart = t_casingsDone + ANIM.SEQ_GAP;
+    const t_labelsStart = t_linersDone + ANIM.SEQ_GAP;
     const t_ohLabelStart = t_ohDone + ANIM.SEQ_GAP;
     const t_waterStart = t_ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
-    const t_notDrilledStart = t_casingsDone + ANIM.SEQ_GAP;
+    const t_notDrilledStart = t_linersDone + ANIM.SEQ_GAP;
     const t_tdLabelStart = t_notDrilledStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
 
     // ── Draw ───────────────────────────────────────────────────────────────
@@ -165,6 +169,7 @@ export class WellBoreViewComponent {
       centerX: casingCenterX,
       scale,
       casingsStart: t_casingsStart,
+      linersStart: t_linersStart,
       gravelStart: t_gravelStart,
       labelsStart: t_labelsStart,
       openHoleHalfWidthPx: ohHW,
