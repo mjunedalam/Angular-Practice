@@ -530,7 +530,7 @@ function buildCasingTooltipController(
     const typeName = liner.isScreen ? 'Screen Liner' : 'Liner';
     const rows: Row[] = [
       { label: 'Top (TOL)', value: `${liner.topDepth.toLocaleString()} ft` },
-      { label: 'Bottom shoe', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
+      { label: 'Bottom Depth', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
       { label: 'Length', value: `${length.toLocaleString()} ft` },
     ];
     renderCard(`${liner.odSz}" ${typeName}`, badge, accent, rows, liner.halfWidth, mouseX, mouseY);
