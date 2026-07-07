@@ -98,6 +98,11 @@ export function linersFromIR(
   const irLiners = casings.filter(c => c.csgType === 'Liner');
   if (irLiners.length === 0) return [];
 
+  // Fallback top depth when no drlgCasing match exists: shoe of the deepest non-liner casing
+  const lastCasingShoe = casings
+    .filter(c => c.csgType !== 'Liner')
+    .reduce((max, c) => Math.max(max, c.csgDepth), 0);
+
   const matchedOdSizes = new Set<string>();
 
   const irEntries = irLiners.map(csg => {
@@ -105,9 +110,10 @@ export function linersFromIR(
     const hasActualBot = (actual?.wLnrBotDepth ?? 0) > 0;
     const hasActualTop = (actual?.wLnrTopDepth ?? 0) > 0;
     if (actual?.wLnrOdSz) matchedOdSizes.add(actual.wLnrOdSz);
+    const fallbackTopDepth = actual != null ? actual.wCsgBotDpth : lastCasingShoe;
     return {
       odSz: actual?.wLnrOdSz ?? csg.csgSize,
-      topDepth: hasActualTop ? actual!.wLnrTopDepth! : (actual?.wCsgBotDpth ?? 0),
+      topDepth: hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth,
       botDepth: hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth,
       hasActual: hasActualBot,
     };
