@@ -144,6 +144,8 @@ export interface WwellTestViewModel {
 
 
 
+export const MAX_UPLOAD_SIZE_BYTES = 25.5 * 1024 * 1024;
+
 export interface UploadFileItem {
   readonly file: File;
   readonly id: string;

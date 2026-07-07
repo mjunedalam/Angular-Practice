@@ -5,9 +5,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
+import { MAX_UPLOAD_SIZE_BYTES, UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresDocsService } from '@services/pres-docs.service';
+import { NotificationService } from '../notification/notification.service';
 import { FilePreviewDialogComponent } from './file-preview-dialog/file-preview-dialog.component';
 
 @Component({
@@ -25,6 +26,7 @@ export class FileUploadComponent {
 
   private readonly dialog = inject(MatDialog);
   private readonly svc = inject(PresDocsService);
+  private readonly notify = inject(NotificationService);
   protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
@@ -73,9 +75,18 @@ export class FileUploadComponent {
   }
 
   private addFiles(selected: File[]): void {
+    const oversized = selected.filter(f => f.size > MAX_UPLOAD_SIZE_BYTES);
+    const valid = selected.filter(f => f.size <= MAX_UPLOAD_SIZE_BYTES);
+
+    if (oversized.length) {
+      const names = oversized.map(f => f.name).join(', ');
+      this.notify.error(`File(s) exceed 25.5 MB limit and were skipped: ${names}`);
+    }
+
+    if (!valid.length) return;
     this.files.update((existing) => [
       ...existing,
-      ...selected.map((file, index) => ({
+      ...valid.map((file, index) => ({
         file,
         id: `${file.name}-${file.size}-${existing.length + index}`,
       })),
