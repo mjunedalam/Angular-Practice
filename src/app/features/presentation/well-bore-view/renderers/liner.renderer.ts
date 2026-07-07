@@ -203,6 +203,18 @@ function renderLinerShapes({
       .attr('stroke-width', '5')
       .style('opacity', opacity);
 
+    rootG.append('ellipse')
+      .attr('class', 'liner-top-ellipse')
+      .attr('cx', centerX)
+      .attr('cy', topPx)
+      .attr('rx', liner.halfWidth)
+      .attr('ry', 4)
+      .attr('clip-path', `url(#${clipId})`)
+      .attr('fill', fill)
+      .attr('stroke', stroke)
+      .attr('stroke-width', '2')
+      .style('opacity', opacity);
+
     if (liner.isScreen) {
       const screenStartPx = topPx + (botPx - topPx) * SCREEN_BLANK_RATIO;
       rootG.append('rect')
