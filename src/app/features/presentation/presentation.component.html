@@ -38,15 +38,42 @@
             <p class="empty-state__text">Select a well above to render the wellbore diagram</p>
           </div>
         } @else {
-          <div class="diagram-card" [class.diagram-card--loading]="loadingVisible()">
+          <div class="diagram-card"
+               [class.diagram-card--loading]="loadingVisible()"
+               [class.diagram-card--diagram-fs]="isDiagramFullscreen()">
+
+            <button
+              type="button"
+              class="diagram-fs-toggle"
+              [class.diagram-fs-toggle--active]="isDiagramFullscreen()"
+              (click)="toggleDiagramFullscreen()"
+              [attr.aria-label]="isDiagramFullscreen() ? 'Exit diagram fullscreen' : 'Expand diagram fullscreen'">
+              @if (isDiagramFullscreen()) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 0 2-2h3M3 16h3a2 2 0 0 0 2 2v3"/>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+              }
+            </button>
 
             <div class="diagram-scroll-area">
-              <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
+              <app-depth-scale
+                [totalDepth]="store.displayDepth()"
+                [animTrigger]="store.animationTrigger()"
+                [diagramLayout]="diagramLayout()"
+                [isFullscreen]="isDiagramFullscreen()"
+                [class.diagram-fs]="isDiagramFullscreen()" />
               <app-well-bore-view
                 [diagramData]="store.diagramData()"
                 [animTrigger]="store.animationTrigger()"
                 [animConfig]="store.animConfig()"
-                [formationTops]="store.allFormationTops()" />
+                [formationTops]="store.allFormationTops()"
+                [diagramLayout]="diagramLayout()"
+                [isFullscreen]="isDiagramFullscreen()"
+                [class.diagram-fs]="isDiagramFullscreen()" />
             </div>
             <app-wwells-logs-indicators />
           </div>

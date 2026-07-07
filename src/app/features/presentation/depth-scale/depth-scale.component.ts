@@ -12,7 +12,7 @@ import { easeBackOut, easeCubicOut } from 'd3-ease';
 import 'd3-transition';
 
 import { PresentationStore } from '../store/presentation.store';
-import { ANIM, DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
+import { ANIM, DIAGRAM_LAYOUT, DiagramLayout } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { buildDepthTicks, createDepthScale, pickTickInterval } from 'src/app/shared/utils/wellbore-math.util';
 
 @Component({
@@ -26,16 +26,20 @@ export class DepthScaleComponent {
   protected readonly store = inject(PresentationStore);
   readonly totalDepth = input.required<number>();
   readonly animTrigger = input.required<number>();
+  readonly diagramLayout = input<DiagramLayout>(DIAGRAM_LAYOUT);
+  readonly isFullscreen = input<boolean>(false);
 
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('scaleSvg');
 
-  private readonly layout = DIAGRAM_LAYOUT;
+  private get layout(): DiagramLayout { return this.diagramLayout(); }
 
   constructor() {
     effect(() => {
       const svgEl = this.svgRef();
       const depth = this.totalDepth();
       this.animTrigger(); // track trigger so we redraw on every new well load
+      this.diagramLayout(); // track layout changes
+      this.isFullscreen();  // track for SVG height
 
       if (svgEl?.nativeElement) {
         this.drawScale(depth, svgEl.nativeElement);
@@ -62,7 +66,9 @@ export class DepthScaleComponent {
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
-    const ticks = buildDepthTicks(totalDepth, pickTickInterval(totalDepth));
+    const baseInterval = pickTickInterval(totalDepth);
+    const interval = this.isFullscreen() ? baseInterval * 2 : baseInterval;
+    const ticks = buildDepthTicks(totalDepth, interval);
 
     const titleX = depthScaleWidth / 2;
     g.append('text')

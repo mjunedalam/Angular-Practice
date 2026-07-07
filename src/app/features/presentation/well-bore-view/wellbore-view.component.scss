@@ -5,6 +5,29 @@
   overflow-y: hidden;
 }
 
+:host.diagram-fs {
+  height: 100%;
+  overflow: hidden;
+
+  ::ng-deep {
+    .geo-code              { font-size: 24px; }
+    .geo-code--target      { font-size: 24px; }
+    .geo-depth             { font-size: 24px; }
+    .geo-depth--target     { font-size: 22px; }
+    .casing-label__primary   { font-size: 24px; }
+    .casing-label__secondary { font-size: 20px; }
+    .casing-size-inner       { font-size: 28px; }
+    .open-hole-text        { font-size: 24px; }
+    .screen-label-text     { font-size: 24px; }
+    .water-label           { font-size: 24px; }
+    .total-depth-main      { font-size: 24px; }
+    .total-depth-main--current { font-size: 26px; }
+    .pump-label            { font-size: 24px; }
+    .ground-label          { font-size: 20px; }
+    .column-label          { font-size: 20px; }
+  }
+}
+
 .wellbore-svg {
   display: block;
   background: transparent;

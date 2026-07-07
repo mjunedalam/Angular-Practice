@@ -76,6 +76,32 @@ export const DIAGRAM_LAYOUT: DiagramLayout = {
   gpFillRatio: 1.0,     // fill full annulus by default; reduce to 0.5 etc. to narrow the GP band
 };
 
+// Fullscreen layout: landscape viewBox (1400 × 940) so aspect ratio matches a
+// typical ~1.5:1 screen. With preserveAspectRatio:none, scale X ≈ scale Y ≈ 0.92
+// so nothing distorts. drawingHeight 860 > normal 740 gives 16 % more vertical
+// room per depth unit without requiring scrolling.
+export const FULLSCREEN_DIAGRAM_LAYOUT: DiagramLayout = {
+  svgHeight: 940,
+  marginTop: 80,
+  drawingHeight: 860,
+
+  depthScaleWidth: 150,
+  depthAxisX: 106,
+
+  wellboreViewWidth: 1400,
+
+  depthArrowX: 32,
+  geoLineX: 162,
+  casingCenterX: 820,
+  baseHalfWidth: 96,
+  halfWidthIncrement: 34,
+  shoeCurveOffset: 16,
+  openHoleHwMargin: 34,
+  linerScreenInset: 26,
+  gpScreenGap: 4,
+  gpFillRatio: 1.0,
+};
+
 // ─── Animation mode ────────────────────────────────────────────────────────
 // 'realistic' : full cinematic sequence — casings drill down one by one,
 //               then open-hole / overlays appear after all casings finish.

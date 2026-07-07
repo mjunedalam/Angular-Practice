@@ -9,7 +9,7 @@ import {
 import { select } from 'd3-selection';
 import 'd3-transition';
 
-import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, WellboreAnimConfig, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { ANIM, computeOverlayDelay, DEFAULT_ANIM_CONFIG, DIAGRAM_LAYOUT, DiagramLayout, WellboreAnimConfig, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { resolveLiners } from './renderers/liner.renderer';
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
 import { resolveAnimation } from './renderers/animation.helpers';
@@ -39,22 +39,33 @@ export class WellBoreViewComponent {
   readonly animTrigger = input.required<number>();
   readonly animConfig = input<WellboreAnimConfig>(DEFAULT_ANIM_CONFIG);
   readonly formationTops = input<FormationInfoViewModel[]>([]);
+  readonly diagramLayout = input<DiagramLayout>(DIAGRAM_LAYOUT);
+  readonly isFullscreen = input<boolean>(false);
 
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('wellboreSvg');
 
-  private readonly layout = DIAGRAM_LAYOUT;
+  private get layout(): DiagramLayout { return this.diagramLayout(); }
+  private _activeLayout: DiagramLayout | null = null;
   private rootG!: GSel;
   private defsEl!: DefsSel;
-
 
   constructor() {
     effect(() => {
       const svgEl = this.svgRef();
       const data = this.diagramData();
+      const layout = this.diagramLayout();
+      this.isFullscreen(); // track for SVG height update
 
       if (!svgEl?.nativeElement || !data) return;
 
-      // Bootstrap once; redraw on every data/trigger change.
+      // Re-bootstrap when layout identity changes (normal ↔ fullscreen toggle).
+      if (this._activeLayout !== layout) {
+        this._activeLayout = layout;
+        select(svgEl.nativeElement).selectAll('*').remove();
+        this.rootG = null!;
+        this.defsEl = null!;
+      }
+
       if (!this.rootG) {
         this.bootstrapSvg(svgEl.nativeElement);
       }
@@ -68,7 +79,6 @@ export class WellBoreViewComponent {
   private bootstrapSvg(element: SVGSVGElement): void {
     const { wellboreViewWidth, svgHeight, marginTop } = this.layout;
     const svg = select(element) as SvgSel;
-
     svg.attr('width', '100%')
       .attr('height', '100%')
       .attr('viewBox', `0 0 ${wellboreViewWidth} ${svgHeight}`)

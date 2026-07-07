@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, computed, effect, inject, OnInit, signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { skip } from 'rxjs';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { PresentationStore } from './store/presentation.store';
+import { DIAGRAM_LAYOUT, FULLSCREEN_DIAGRAM_LAYOUT } from 'src/app/core/models/well-design/wellbore-diagram.model';
 import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/app/shared/utils/date.util';
 import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
@@ -58,6 +59,10 @@ export class PresentationComponent implements OnInit {
   protected readonly draggableMode = signal(false);
   protected readonly loadingVisible = signal(false);
   protected readonly isFullscreen = signal(false);
+  protected readonly isDiagramFullscreen = signal(false);
+  protected readonly diagramLayout = computed(() =>
+    this.isDiagramFullscreen() ? FULLSCREEN_DIAGRAM_LAYOUT : DIAGRAM_LAYOUT
+  );
 
   protected readonly leftWidth = signal(LEFT_DEFAULT);
   protected readonly rightWidth = signal(RIGHT_DEFAULT);
@@ -168,6 +173,10 @@ export class PresentationComponent implements OnInit {
 
     this.isFullscreen.set(false);
     this.restoreOverlayContainer();
+  }
+
+  protected toggleDiagramFullscreen(): void {
+    this.isDiagramFullscreen.update(v => !v);
   }
 
   protected onLeftDrag(delta: number): void {

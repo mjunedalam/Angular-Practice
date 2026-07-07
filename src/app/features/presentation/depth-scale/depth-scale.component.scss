@@ -4,6 +4,21 @@
   height: 100%;
 }
 
+:host.diagram-fs {
+  flex: 0 0 150px;
+  height: 100%;
+
+  .depth-scale-svg {
+    height: 100%;
+  }
+
+  ::ng-deep {
+    .axis-title        { font-size: 20px; }
+    .tick-label        { font-size: 24px; }
+    .total-depth-label { font-size: 22px; }
+  }
+}
+
 .depth-scale-svg {
   display: block;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
