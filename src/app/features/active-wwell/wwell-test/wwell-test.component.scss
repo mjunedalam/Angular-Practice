@@ -116,8 +116,8 @@
 .wt-label {
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
   color: rgba(255, 255, 255, 0.95);
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.76rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.42rem 0.6rem;
@@ -230,7 +230,7 @@
   position: fixed;
   background: #fff;
   color: #1e293b;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
   border-radius: 7px;
@@ -270,8 +270,8 @@
 }
 
 .wt-tooltip-badge {
-  font-size: 0.54rem;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 900;
   letter-spacing: 0.1em;
   padding: 1px 5px;
   border-radius: 20px;
@@ -291,8 +291,8 @@
 }
 
 .wt-tooltip-title {
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.76rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: #334155;
@@ -300,8 +300,8 @@
 
 .wt-tooltip-formula {
   font-family: 'Courier New', monospace;
-  font-size: 0.63rem;
-  font-weight: 600;
+  font-size: 0.73rem;
+  font-weight: 700;
   color: #1d4ed8;
   padding: 3px 7px;
   background: #eff6ff;
@@ -325,30 +325,30 @@
 
 .wt-tooltip-var-lbl {
   font-family: 'Courier New', monospace;
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.73rem;
+  font-weight: 800;
   color: #64748b;
   letter-spacing: 0.03em;
 }
 
 .wt-tooltip-var-val {
   font-family: 'Courier New', monospace;
-  font-size: 0.63rem;
+  font-size: 0.74rem;
   color: #0f172a;
-  font-weight: 600;
+  font-weight: 700;
   text-align: right;
 }
 
 .wt-tooltip-var-unit {
   font-family: 'Courier New', monospace;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   color: #94a3b8;
 }
 
 .wt-tooltip-result {
   font-family: 'Courier New', monospace;
-  font-size: 0.66rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   color: #15803d;
   padding-top: 4px;
   border-top: 1px solid #d1fae5;

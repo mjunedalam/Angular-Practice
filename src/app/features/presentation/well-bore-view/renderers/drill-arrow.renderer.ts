@@ -114,8 +114,8 @@ export function renderDrillArrow({
       const midY = seg.topPx + segH / 2;
       const font = 'DM Sans, sans-serif';
       const ttipW = 240;
-      const ROW_H = 26;
-      const ttipH = 60 + 2 * ROW_H + 14;
+      const ROW_H = 28;
+      const ttipH = 60 + 2 * ROW_H + 16;
       const rawTtipX = arrowCx + shaftHW + 14;
       const ttipX = Math.min(rawTtipX, layout.wellboreViewWidth - ttipW - 8);
       const ttipY = Math.max(4, Math.min(midY - ttipH / 2, layout.drawingHeight - ttipH - 4));
@@ -123,7 +123,7 @@ export function renderDrillArrow({
       const anchorX = arrowCx + shaftHW;
       const connMidX = ttipX - 8;
       const pctLabel = `${seg.pct}%`;
-      const badgeW = pctLabel.length * 7.2 + 14;
+      const badgeW = pctLabel.length * 8.5 + 16;
       const mutedFill = circulationMuted(seg.pct);
 
       const ttipG = arrowG.append('g').attr('class', 'circ-tooltip').style('opacity', 0).style('pointer-events', 'none');
@@ -161,7 +161,7 @@ export function renderDrillArrow({
       ttipG.append('text')
         .attr('x', ttipX + 12 + badgeW / 2).attr('y', ttipY + 27)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '12').attr('font-family', font)
+        .attr('font-size', '14').attr('font-family', font)
         .attr('font-weight', '900').attr('letter-spacing', '0.5')
         .attr('fill', fill).text(pctLabel);
 
@@ -169,7 +169,7 @@ export function renderDrillArrow({
       ttipG.append('text')
         .attr('x', ttipX + ttipW - 12).attr('y', ttipY + 27)
         .attr('text-anchor', 'end')
-        .attr('font-size', '15').attr('font-family', font)
+        .attr('font-size', '17').attr('font-family', font)
         .attr('font-weight', '800').attr('fill', '#0f172a').text('Mud Circulation');
 
       // Divider
@@ -180,25 +180,25 @@ export function renderDrillArrow({
 
       // Row: Interval
       ttipG.append('text')
-        .attr('x', ttipX + 14).attr('y', ttipY + 62)
-        .attr('font-size', '13').attr('font-family', font)
-        .attr('font-weight', '500').attr('fill', '#64748b').text('Interval');
-      ttipG.append('text')
-        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 62)
-        .attr('text-anchor', 'end')
+        .attr('x', ttipX + 14).attr('y', ttipY + 64)
         .attr('font-size', '15').attr('font-family', font)
+        .attr('font-weight', '700').attr('fill', '#64748b').text('Interval');
+      ttipG.append('text')
+        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 64)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '17').attr('font-family', font)
         .attr('font-weight', '800').attr('fill', '#0f172a')
         .text(`${seg.topDepth.toLocaleString()} – ${seg.botDepth.toLocaleString()} ft`);
 
       // Row: Circulation % (accent coloured)
       ttipG.append('text')
-        .attr('x', ttipX + 14).attr('y', ttipY + 88)
-        .attr('font-size', '13').attr('font-family', font)
-        .attr('font-weight', '500').attr('fill', '#64748b').text('Circulation');
-      ttipG.append('text')
-        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 88)
-        .attr('text-anchor', 'end')
+        .attr('x', ttipX + 14).attr('y', ttipY + 92)
         .attr('font-size', '15').attr('font-family', font)
+        .attr('font-weight', '700').attr('fill', '#64748b').text('Circulation');
+      ttipG.append('text')
+        .attr('x', ttipX + ttipW - 14).attr('y', ttipY + 92)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '17').attr('font-family', font)
         .attr('font-weight', '800').attr('fill', fill).text(`${seg.pct}%`);
 
       shaftG.append('rect')

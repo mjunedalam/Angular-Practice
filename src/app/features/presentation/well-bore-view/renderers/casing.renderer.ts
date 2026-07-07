@@ -388,8 +388,8 @@ function buildCasingTooltipController(
     mouseX: number,
     mouseY: number,
   ): void => {
-    const ROW_H = 26;
-    const tooltipH = 60 + rows.length * ROW_H + 14;
+    const ROW_H = 28;
+    const tooltipH = 60 + rows.length * ROW_H + 16;
     const tooltipW = CSG_TOOLTIP_W;
     const onRight = mouseX > centerX;
     const side: 'left' | 'right' = onRight ? 'right' : 'left';
@@ -437,7 +437,7 @@ function buildCasingTooltipController(
       .attr('rx', 2).attr('fill', accent);
 
     // Badge
-    const badgeW = badge.length * 7.2 + 14;
+    const badgeW = badge.length * 8.5 + 16;
     const badgeX = tooltipX + 12;
     tooltipLayer.append('rect')
       .attr('x', badgeX).attr('y', tooltipY + 11)
@@ -446,7 +446,7 @@ function buildCasingTooltipController(
     tooltipLayer.append('text')
       .attr('x', badgeX + badgeW / 2).attr('y', tooltipY + 27)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12').attr('font-family', CSG_TOOLTIP_FONT)
+      .attr('font-size', '14').attr('font-family', CSG_TOOLTIP_FONT)
       .attr('font-weight', '900').attr('letter-spacing', '0.5')
       .attr('fill', accent).text(badge);
 
@@ -454,7 +454,7 @@ function buildCasingTooltipController(
     tooltipLayer.append('text')
       .attr('x', tooltipX + tooltipW - 12).attr('y', tooltipY + 27)
       .attr('text-anchor', 'end')
-      .attr('font-size', '15').attr('font-family', CSG_TOOLTIP_FONT)
+      .attr('font-size', '17').attr('font-family', CSG_TOOLTIP_FONT)
       .attr('font-weight', '800').attr('fill', '#0f172a').text(title);
 
     // Divider
@@ -465,15 +465,15 @@ function buildCasingTooltipController(
 
     // Rows
     rows.forEach((row, i) => {
-      const rowY = tooltipY + 62 + i * ROW_H;
+      const rowY = tooltipY + 64 + i * ROW_H;
       tooltipLayer.append('text')
         .attr('x', tooltipX + 14).attr('y', rowY)
-        .attr('font-size', '13').attr('font-family', CSG_TOOLTIP_FONT)
-        .attr('font-weight', '500').attr('fill', '#64748b').text(row.label);
+        .attr('font-size', '15').attr('font-family', CSG_TOOLTIP_FONT)
+        .attr('font-weight', '700').attr('fill', '#64748b').text(row.label);
       tooltipLayer.append('text')
         .attr('x', tooltipX + tooltipW - 14).attr('y', rowY)
         .attr('text-anchor', 'end')
-        .attr('font-size', '15').attr('font-family', CSG_TOOLTIP_FONT)
+        .attr('font-size', '17').attr('font-family', CSG_TOOLTIP_FONT)
         .attr('font-weight', '800')
         .attr('fill', row.hilite ? accent : '#0f172a').text(row.value);
     });
