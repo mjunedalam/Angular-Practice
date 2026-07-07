@@ -25,12 +25,12 @@ export class ActiveWellViewService {
     }
 
     createOrUpdateGwdWellTest(data: GwdWellTests): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/water-well-tests`, data, { context: this.suppressCtx })
+        return this.http.post<void>(`${this.apiUrl}/gwd/api/v1/well-tests`, data, { context: this.suppressCtx })
             .pipe(catchError(this.handleError));
     }
 
     deleteGwdWellTest(egwtId: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/well-tests/${egwtId}`, { context: this.suppressCtx })
+        return this.http.delete<void>(`${this.apiUrl}/gwd/api/v1/well-tests/${egwtId}`, { context: this.suppressCtx })
             .pipe(catchError(this.handleError));
     }
 

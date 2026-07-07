@@ -696,7 +696,7 @@ export function deriveStatusLabel(details: IWellData | null): string {
             [disabled]="deleteDisabled()"
             (click)="deleteWellTest()"
           >
-            {{ isDeleting() ? 'DELETING...' : 'DELETE TEST' }}
+            {{ isDeleting() ? 'DELETING...' : 'DELETE' }}
           </button>
         }
         @if (canUpdate()) {
