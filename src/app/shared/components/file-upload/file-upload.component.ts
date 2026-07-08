@@ -80,7 +80,7 @@ export class FileUploadComponent {
 
     if (oversized.length) {
       const names = oversized.map(f => f.name).join(', ');
-      this.notify.error(`File(s) exceed 25.5 MB limit and were skipped: ${names}`);
+      this.notify.error(`File(s) exceed 25 MB limit and were skipped: ${names}`);
     }
 
     if (!valid.length) return;
