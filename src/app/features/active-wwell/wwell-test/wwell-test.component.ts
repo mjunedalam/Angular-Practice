@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { catchError, forkJoin, map, merge, of, timer } from 'rxjs';
+import { catchError, filter, forkJoin, map, merge, of, timer } from 'rxjs';
+import { DeleteWellTestDialogComponent } from './delete-well-test-dialog.component';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
 import { ActiveWwellStore } from '../store/active-wwell.store';
 import { ActiveWwellUiStore } from '../active-wwell-ui.store';
@@ -39,8 +41,9 @@ export class WwellTestComponent {
   formService = inject(ActiveWwellFormService);
   form: FormGroup = this.formService.wellTestForm;
 
-  activeWellApiService = inject(ActiveWellViewService)
+  activeWellApiService = inject(ActiveWellViewService);
   notify = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly isPublished = signal(false);
   protected readonly productivityInfo = signal<{
@@ -310,34 +313,39 @@ export class WwellTestComponent {
     !this.isPublished() || !this.egwtId() || this.isUpdating() || this.isDeleting(),
   );
 
-  deleteWellTest(): void {
+  protected deleteWellTest(): void {
     const egwtId = this.egwtId();
     if (!egwtId) return;
 
-    const wellName = this.store.wellHeaderData()?.wellName ?? 'Unknown';
-    const testDate = formatDateForInput(this.store.selectedDate());
-    const testType = this.isFlowTest() ? 'Flow' : 'Pump';
+    this.dialog.open(DeleteWellTestDialogComponent, { width: '400px', disableClose: false })
+      .afterClosed()
+      .pipe(filter(confirmed => confirmed === true))
+      .subscribe(() => {
+        const wellName = this.store.wellHeaderData()?.wellName ?? 'Unknown';
+        const testDate = formatDateForInput(this.store.selectedDate());
+        const testType = this.isFlowTest() ? 'Flow' : 'Pump';
 
-    this.isDeleting.set(true);
+        this.isDeleting.set(true);
 
-    forkJoin([
-      this.activeWellApiService.deleteGwdWellTest(egwtId),
-      timer(1500),
-    ]).subscribe({
-      next: () => {
-        this.isDeleting.set(false);
-        this.notify.info(
-          `Well test deleted — ${wellName} | ${testType} test | ${testDate} | ID: ${egwtId}`,
-          { durationMs: 10000 },
-        );
-        this.isPublished.set(false);
-        this.store.refreshWellDetail();
-      },
-      error: () => {
-        this.isDeleting.set(false);
-        this.notify.error('Failed to delete well test — please try again');
-      },
-    });
+        forkJoin([
+          this.activeWellApiService.deleteGwdWellTest(egwtId),
+          timer(1500),
+        ]).subscribe({
+          next: () => {
+            this.isDeleting.set(false);
+            this.notify.info(
+              `Well test deleted — ${wellName} | ${testType} test | ${testDate} | ID: ${egwtId}`,
+              { durationMs: 10000 },
+            );
+            this.isPublished.set(false);
+            this.store.refreshWellDetail();
+          },
+          error: () => {
+            this.isDeleting.set(false);
+            this.notify.error('Failed to delete well test — please try again');
+          },
+        });
+      });
   }
 
   protected readonly aquiferOptions = this.store.aquifers;

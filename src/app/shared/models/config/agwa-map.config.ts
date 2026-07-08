@@ -25,9 +25,9 @@ export const KSA_EXTENT = {
 // maxLng: 63.33
 
 export const tilesArray = [
-  { color: [132, 224, 63, 0.9], biNum: '3300' },
+  { color: [132, 224, 63, 0.9], biNum: '33' },
   { color: [199, 153, 240, 0.9], biNum: '58' },
-  { color: [245, 100, 109, 0.9], biNum: '1514' },
+  { color: [245, 100, 109, 0.9], biNum: '34' },
   { color: [182, 216, 242, 0.9], biNum: '60' }
 ];
 
@@ -153,16 +153,16 @@ export const LEGEND_FONT_SMAAL_BOLD = Object.freeze({ size: 11, weight: 'bold', 
 
 // Shared dot colors keyed by biNum — used for ArcGIS symbols in all well maps
 export const DOT_COLOR: Record<string, [number, number, number, number]> = {
-  '3300': [132, 204, 22, 0.9],
+  '33': [132, 204, 22, 0.9],
   '58':   [192, 132, 252, 0.9],
-  '1514': [248, 113, 113, 0.9],
+  '34': [248, 113, 113, 0.9],
   '60':   [96, 165, 250, 0.9],
 };
 
 // Hex equivalents of DOT_COLOR — used for CSS legend chips in both maps
 export const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '3300': '#84cc16',
+  '33': '#84cc16',
   '58':   '#c084fc',
-  '1514': '#f87171',
+  '34': '#f87171',
   '60':   '#60a5fa',
 };
