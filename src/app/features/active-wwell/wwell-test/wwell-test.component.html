@@ -2,15 +2,21 @@
 <form [formGroup]="form">
   <div class="aw-section">
     <div class="wt-header-row">
-      <div class="wt-title">Well Test</div>
+      <div class="wt-title">
+        <span>Well Test</span>
+        @if (canDelete()) {
+          <button type="button" mat-icon-button class="wt-title-delete-btn" [disabled]="deleteDisabled()" (click)="deleteWellTest()" title="Delete well test">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        }
+      </div>
       <div class="wt-type-toggle">
         <div class="wt-type-segment">
           <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="!isFlowTest()" [disabled]="!isPublished()" (click)="isFlowTest.set(false)">Pump</button>
           <button type="button" class="wt-type-btn" [class.wt-type-btn--active]="isFlowTest()" [disabled]="!isPublished()" (click)="isFlowTest.set(true)">Flow</button>
         </div>
       </div>
-      <div class="wt-expected-date-label">Expected test date</div>
-      @if (canUpdate()) {
+@if (canUpdate()) {
         <button
           type="button"
           class="wt-edit-toggle"

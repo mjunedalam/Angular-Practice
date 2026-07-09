@@ -4,6 +4,7 @@ import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { catchError, filter, forkJoin, map, merge, of, timer } from 'rxjs';
 import { DeleteWellTestDialogComponent } from './delete-well-test-dialog.component';
@@ -21,7 +22,7 @@ import { getMissingDetailLabels } from '../active-wwell.helpers';
 @Component({
   selector: 'app-wwell-test',
   standalone: true,
-  imports: [MatButtonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, FormsModule],
+  imports: [MatButtonModule, MatIconModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, FormsModule],
   templateUrl: './wwell-test.component.html',
   styleUrl: './wwell-test.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
