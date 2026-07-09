@@ -122,7 +122,7 @@ export class WellBoreViewComponent {
     const structuralCasings = data.casings.filter(
       c => c.csgType !== 'Liner' && c.csgType !== 'Gravel Pack'
     );
-    const liners = resolveLiners(data.casings, data.drlgCasings, this.layout);
+    const liners = resolveLiners(data.casings, data.drlgCasings, this.layout, data.wellDesign);
 
     const t_casingsStart = 0;
     const t_casingsDone = computeOverlayDelay(structuralCasings.length);
@@ -176,6 +176,7 @@ export class WellBoreViewComponent {
       layout: this.layout,
       casings: data.casings,
       drlgCasings: data.drlgCasings,
+      wellDesign: data.wellDesign,
       centerX: casingCenterX,
       scale,
       casingsStart: t_casingsStart,

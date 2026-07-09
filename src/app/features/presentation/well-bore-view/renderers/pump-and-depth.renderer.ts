@@ -1,5 +1,5 @@
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
-import { buildArrowHeadLeft } from '@shared/utils/wellbore-math.util';
+import { buildArrowHeadRight } from '@shared/utils/wellbore-math.util';
 import { animateLabel, applyPop } from './animation.helpers';
 import { DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
@@ -58,9 +58,10 @@ export function renderPump({
   const iconW = 100;
   const iconH = 100;
   const iconX = cx - iconW / 2;
-  const lTip = iconX + iconW * 0.30;
-  const lEnd = lTip - 130;
-  const labelX = lEnd - 6;
+  // Pump leader/label on the RIGHT side of the icon.
+  const rTip = iconX + iconW * 0.70;
+  const rEnd = rTip + 130;
+  const labelX = rEnd + 6;
   const pumpG = rootG.append('g').attr('class', 'pump-group');
   const iconWrap = pumpG.append('g') as GSel;
   const icon = iconWrap.append('svg')
@@ -88,15 +89,15 @@ export function renderPump({
   const leaderG = pumpG.append('g').attr('class', 'pump-leader-group') as GSel;
   leaderG.append('line')
     .attr('class', 'pump-leader')
-    .attr('x1', lTip).attr('x2', lEnd)
+    .attr('x1', rTip).attr('x2', rEnd)
     .attr('y1', cy).attr('y2', cy);
   leaderG.append('path')
     .attr('class', 'pump-leader-arrow')
-    .attr('d', buildArrowHeadLeft(lEnd, cy, 6));
+    .attr('d', buildArrowHeadRight(rEnd, cy, 6));
   leaderG.append('text')
     .attr('class', 'pump-label')
     .attr('x', labelX).attr('y', cy + 4)
-    .attr('text-anchor', 'end')
+    .attr('text-anchor', 'start')
     .text(`PS @ ${pumpLvl}`);
 
   animateLabel(leaderG, start + animation.popDur, animation);

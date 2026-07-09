@@ -17,7 +17,6 @@ import {
   resolveCompletionBottomPx,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
-  resolveShoeDepth,
   resolveOhHalfWidth,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
@@ -60,7 +59,9 @@ function renderOpenHoleAndScreen({
 
   const { wellDesign } = data;
   const shouldDrawOH = shouldRenderOpenHole(wellDesign);
-  // skip the old liner-screen path when drlg liners are present — liner.renderer handles those
+  // When DRLG_CSG liners are present, liner.renderer owns all liner rendering (shapes,
+  // hangers, and the 7" screen via isScreen). The legacy completion-path screen is only
+  // drawn when there are no as-drilled liners and the well-design flags opt in.
   const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
   const shouldDrawLS = !hasDrlgLiners && shouldRenderLinerScreen(wellDesign);
   if (!shouldDrawOH && !shouldDrawLS) return;
@@ -273,12 +274,13 @@ export function renderScreenHanger({
   hangerStart,
 }: RenderCompletionElementsOptions): void {
   if (!data.casings.length) return;
-  // when drlg liners are present, liner.renderer draws its own hangers
+  // Liner hangers are drawn per-liner by liner.renderer (for both DRLG and IR sources).
+  // This function no longer draws a hanger for the liner itself — that produced a
+  // duplicate OUTER hanger set. It only draws the well-design liner-screen hanger
+  // (lsFlg='Y') for a screen that has no corresponding liner geometry.
+  if (!shouldRenderLinerScreen(data.wellDesign)) return;
   const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
   if (hasDrlgLiners) return;
-  const hasLiner = data.casings.some(c => c.csgType === 'Liner');
-  const hasLinerScreen = shouldRenderLinerScreen(data.wellDesign);
-  if (!hasLiner && !hasLinerScreen) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = layout;
   const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
@@ -286,19 +288,10 @@ export function renderScreenHanger({
   const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
   const hangerG = rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
 
-  const addHanger = (yPx: number, hw: number): void => {
-    const { left, right } = buildScreenHanger(centerX, yPx, hw);
-    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', left);
-    hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', right);
-  };
-
-  if (hasLiner) {
-    addHanger(scale(resolveShoeDepth(data.casings, data.drlgCasings)), innerHW);
-  }
-
-  if (hasLinerScreen) {
-    addHanger(scale(resolveCompletionTopDepth(data.casings, data.drlgCasings)), screenHW);
-  }
+  const screenY = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings));
+  const { left, right } = buildScreenHanger(centerX, screenY, screenHW);
+  hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', left);
+  hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', right);
 
   hangerG.transition().delay(hangerStart).duration(ANIM.HANGER_DURATION).ease(easeCubicInOut).style('opacity', 1);
 }

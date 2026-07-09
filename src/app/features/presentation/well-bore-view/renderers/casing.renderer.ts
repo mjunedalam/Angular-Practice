@@ -5,6 +5,7 @@ import 'd3-transition';
 import { ANIM, DiagramLayout } from '@models/well-design/wellbore-diagram.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
+import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import {
   buildArrowHeadRight,
   buildCasingPath,
@@ -36,11 +37,12 @@ export interface RenderCasingElementsOptions {
   readonly labelsStart: number;
   readonly openHoleHalfWidthPx: number;
   readonly animation: ResolvedAnimation;
+  readonly wellDesign?: IWellDesign | null;
 }
 
 export function renderCasingElements(options: RenderCasingElementsOptions): void {
-  const { casings, drlgCasings, layout, rootG, defsEl, centerX, scale, linersStart, labelsStart, animation } = options;
-  const liners = resolveLiners(casings, drlgCasings, layout);
+  const { casings, drlgCasings, layout, wellDesign, rootG, defsEl, centerX, scale, linersStart, labelsStart, animation } = options;
+  const liners = resolveLiners(casings, drlgCasings, layout, wellDesign);
   const lastCasingBotDepth = resolveLastCasingBotDepth(casings, drlgCasings);
 
   renderCasings(options);

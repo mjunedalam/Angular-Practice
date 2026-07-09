@@ -100,7 +100,7 @@ export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLay
 
   // When liners exist, scale OH relative to the last liner so the
   // physical size difference (e.g. 8.5" OH vs 7" liner) is preserved visually.
-  const liners = resolveLiners(data.casings, data.drlgCasings, layout);
+  const liners = resolveLiners(data.casings, data.drlgCasings, layout, data.wellDesign);
   const lastLiner = liners.length > 0 ? liners[liners.length - 1] : null;
 
   if (lastLiner !== null && ohDiameter !== null) {

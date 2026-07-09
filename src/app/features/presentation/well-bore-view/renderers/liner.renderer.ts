@@ -4,11 +4,14 @@ import 'd3-transition';
 import { ANIM, DiagramLayout } from '@models/well-design/wellbore-diagram.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
+import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import {
+  buildArrowHeadLeft,
   buildArrowHeadRight,
   buildCasingPath,
   buildScreenHanger,
   openHoleHalfWidth,
+  parseInchSize,
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
@@ -39,10 +42,12 @@ export function resolveLiners(
   casings: ICasingIR[],
   drlgCasings: IDrlgCsg[],
   layout: DiagramLayout,
+  wellDesign?: IWellDesign | null,
 ): LinerEntry[] {
+  // Source priority: IR data drives the list; DRLG data overrides depths when present.
   return casings.length > 0
-    ? linersFromIR(casings, drlgCasings, layout)
-    : linersFromDrlg(drlgCasings, layout);
+    ? linersFromIR(casings, drlgCasings, layout, wellDesign)
+    : linersFromDrlg(drlgCasings, layout, wellDesign);
 }
 
 const LINER_HW_DECREMENT = 14;
@@ -55,12 +60,70 @@ function assignHalfWidths(baseHalfWidth: number, count: number): number[] {
   );
 }
 
+const SCREEN_LINER_SIZE_IN = 7;
+
+/**
+ * Detects whether free-text remarks reference a given inch size anywhere in the string.
+ *
+ * lsRemarks is a free-form field (e.g. `+/- 500 ft of 7" screen`), so a naive
+ * parseInchSize() would return the first number token (500) and miss the real size.
+ * This scans every whole/fractional size token in the text and matches on value.
+ */
+function remarksReferenceSize(remarks: string | null | undefined, targetInches: number): boolean {
+  if (!remarks) return false;
+  const tokenRe = /(\d+(?:\.\d+)?)(?:\s+(\d+)\/(\d+))?/g;
+  for (const m of remarks.matchAll(tokenRe)) {
+    const whole = parseFloat(m[1]);
+    const value = m[2] && m[3] ? whole + parseInt(m[2], 10) / parseInt(m[3], 10) : whole;
+    if (value === targetInches) return true;
+  }
+  return false;
+}
+
+/**
+ * Determines whether a liner qualifies as a 7" liner screen.
+ *
+ * All four conditions must pass:
+ *   1. At least one data source (DRLG_CSG or EXAD_GWD_IR_CASING) reports a 7" OD.
+ *   2. EXAD_GWD_WELL_DESIGN.lsFlg is 'Y' (case-insensitive).
+ *   3. EXAD_GWD_WELL_DESIGN.lsRemarks references a 7" size somewhere in its free text.
+ *   4. When both sources are available their sizes agree; a mismatch means the
+ *      as-drilled and planned records refer to different liners, so do not draw a screen.
+ */
+function isLinerScreen(
+  actualOdSz: string | null | undefined,   // DRLG_CSG.wLnrOdSz
+  plannedOdSz: string | null | undefined,  // EXAD_GWD_IR_CASING.csgSize
+  wellDesign: IWellDesign | null | undefined,
+): boolean {
+  const actualSize = parseInchSize(actualOdSz);
+  const plannedSize = parseInchSize(plannedOdSz);
+
+  // Condition 1: at least one source must report a 7" liner.
+  if (actualSize !== SCREEN_LINER_SIZE_IN && plannedSize !== SCREEN_LINER_SIZE_IN) return false;
+
+  // Condition 2: lsFlg must explicitly opt-in to a liner screen.
+  if ((wellDesign?.lsFlg ?? '').trim().toUpperCase() !== 'Y') return false;
+
+  // Condition 3: lsRemarks must confirm the 7" screen size (scanned across free text).
+  if (!remarksReferenceSize(wellDesign?.lsRemarks, SCREEN_LINER_SIZE_IN)) return false;
+
+  // Condition 4: when both sizes are known they must agree — divergence means
+  // the records do not describe the same physical liner.
+  if (actualSize !== null && plannedSize !== null && actualSize !== plannedSize) return false;
+
+  return true;
+}
+
 /**
  * Extracts liner entries from drlgCasings when no ICasingIR data is available.
  * Deduplicates by wLnrOdSz, sorts shallowest-first (widest hw).
- * The deepest liner is marked isScreen=true only when multiple liners exist.
+ * isScreen is determined by the 7" liner screen rule (see isLinerScreen).
  */
-export function linersFromDrlg(drlgCasings: IDrlgCsg[], layout: DiagramLayout): LinerEntry[] {
+export function linersFromDrlg(
+  drlgCasings: IDrlgCsg[],
+  layout: DiagramLayout,
+  wellDesign?: IWellDesign | null,
+): LinerEntry[] {
   const dedupMap = new Map<string, { odSz: string; topDepth: number; botDepth: number }>();
   for (const d of drlgCasings) {
     if (!d.wLnrOdSz || (d.wLnrBotDepth ?? 0) <= 0) continue;
@@ -80,20 +143,27 @@ export function linersFromDrlg(drlgCasings: IDrlgCsg[], layout: DiagramLayout): 
   return sorted.map((liner, i) => ({
     ...liner,
     halfWidth: widths[i],
-    isScreen: sorted.length > 1 && i === sorted.length - 1,
+    // DRLG-only path: no planned OD to compare, so pass undefined for plannedOdSz.
+    isScreen: isLinerScreen(liner.odSz, undefined, wellDesign),
     hasActual: true,
   }));
 }
 
 /**
  * Extracts liner entries from ICasingIR + drlgCasings for actual depth override.
- * Includes extra drlgCasings liners not represented in ICasingIR.
- * The deepest liner is marked isScreen=true only when multiple liners exist.
+ *
+ * Source priority per liner:
+ *   - DRLG_CSG (actual/as-drilled) overrides depth when a matching wLnrOdSz exists.
+ *   - EXAD_GWD_IR_CASING (planned) is the fallback for depth and the primary OD source.
+ *
+ * Extra DRLG_CSG liners with no corresponding IR entry are appended at the end.
+ * isScreen is determined by the 7" liner screen rule (see isLinerScreen).
  */
 export function linersFromIR(
   casings: ICasingIR[],
   drlgCasings: IDrlgCsg[],
   layout: DiagramLayout,
+  wellDesign?: IWellDesign | null,
 ): LinerEntry[] {
   const irLiners = casings.filter(c => c.csgType === 'Liner');
   if (irLiners.length === 0) return [];
@@ -106,6 +176,7 @@ export function linersFromIR(
   const matchedOdSizes = new Set<string>();
 
   const irEntries = irLiners.map(csg => {
+    // Source priority: use DRLG_CSG depth when available; fall back to IR depth.
     const actual = drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null;
     const hasActualBot = (actual?.wLnrBotDepth ?? 0) > 0;
     const hasActualTop = (actual?.wLnrTopDepth ?? 0) > 0;
@@ -116,6 +187,8 @@ export function linersFromIR(
       topDepth: hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth,
       botDepth: hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth,
       hasActual: hasActualBot,
+      // 7" rule: pass actual (DRLG) and planned (IR) OD sizes — both must agree when present.
+      isScreen: isLinerScreen(actual?.wLnrOdSz, csg.csgSize, wellDesign),
     };
   });
 
@@ -126,6 +199,8 @@ export function linersFromIR(
       topDepth: d.wLnrTopDepth ?? d.wCsgBotDpth,
       botDepth: d.wLnrBotDepth!,
       hasActual: true,
+      // DRLG-only: no IR size to compare against, so plannedOdSz is undefined.
+      isScreen: isLinerScreen(d.wLnrOdSz, undefined, wellDesign),
     }));
 
   const allLiners = [...irEntries, ...extraEntries].sort((a, b) => a.botDepth - b.botDepth);
@@ -134,7 +209,6 @@ export function linersFromIR(
   return allLiners.map((liner, i) => ({
     ...liner,
     halfWidth: widths[i],
-    isScreen: allLiners.length > 1 && i === allLiners.length - 1,
   }));
 }
 
@@ -165,9 +239,11 @@ function renderLinerShapes({
     const thisLinerStart = linersStart + delay;
     const casingPath = buildCasingPath(centerX, liner.halfWidth, topPx, botPx, shoeCurveOffset);
 
-    const fill = liner.hasActual ? 'url(#actualCasingGradient)' : 'url(#linerGradient)';
+    // Planned/estimated liners share the casing look (mainGradient @ 0.40) so they
+    // read as the same "planned" style as conductor/casing; actual liners keep the actual fill.
+    const fill = liner.hasActual ? 'url(#actualCasingGradient)' : 'url(#mainGradient)';
     const stroke = LINER_WALL_COLOR;
-    const opacity = liner.hasActual ? 0.78 : 0.55;
+    const opacity = liner.hasActual ? 0.78 : 0.40;
 
     const hangerHW = liner.halfWidth;
     const hangerY = (i === 0 ? scale(lastCasingBotDepth) : scale(liners[i - 1].botDepth)) + 4;
@@ -280,16 +356,18 @@ function renderLinerLabels({
       .style('opacity', 1);
 
     if (liner.topDepth > 0) {
-      const rEdge = centerX + liner.halfWidth;
-      const tolEnd = rEdge + 56;
+      // TOL (top-of-liner) label on the LEFT side to avoid colliding with the
+      // right-side OD/liner labels.
+      const lEdge = centerX - liner.halfWidth;
+      const tolEnd = lEdge - 56;
       const tolLg = rootG.append('g').attr('class', 'casing-label');
       tolLg.append('line').attr('class', 'casing-label__line')
-        .attr('x1', rEdge).attr('x2', tolEnd).attr('y1', topPx).attr('y2', topPx);
+        .attr('x1', lEdge).attr('x2', tolEnd).attr('y1', topPx).attr('y2', topPx);
       tolLg.append('path').attr('class', 'casing-label__arrow')
-        .attr('d', buildArrowHeadRight(tolEnd, topPx, 6));
+        .attr('d', buildArrowHeadLeft(tolEnd, topPx, 6));
       tolLg.append('text').attr('class', 'casing-label__primary')
-        .attr('text-anchor', 'start')
-        .attr('x', tolEnd + 8).attr('y', topPx + 4)
+        .attr('text-anchor', 'end')
+        .attr('x', tolEnd - 8).attr('y', topPx + 4)
         .text(`TOL @ ${liner.topDepth.toLocaleString()}`);
       animateLabel(tolLg, labelsStart, animation);
     }

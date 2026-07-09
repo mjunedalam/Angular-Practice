@@ -171,8 +171,8 @@ export function renderWaterLevel({
         ]
       : lines;
 
-    const tooltipW = 265;
-    const lineHeight = 18;
+    const tooltipW = 300;
+    const lineHeight = 20;
     const tooltipH = 56 + formulaLines.length * lineHeight;
 
     const minTX = 4;
@@ -227,16 +227,16 @@ export function renderWaterLevel({
 
     // Badge background
     tooltipLayer.append('rect')
-      .attr('x', tooltipX + 14).attr('y', tooltipY + 12)
-      .attr('width', isFlowing ? 80 : 64).attr('height', 22)
+      .attr('x', tooltipX + 14).attr('y', tooltipY + 11)
+      .attr('width', isFlowing ? 96 : 78).attr('height', 22)
       .attr('rx', 11)
       .attr('fill', WATER_ACCENT_MUTED);
 
     // Badge label
     tooltipLayer.append('text')
-      .attr('x', tooltipX + (isFlowing ? 54 : 46)).attr('y', tooltipY + 27)
+      .attr('x', tooltipX + (isFlowing ? 62 : 53)).attr('y', tooltipY + 27)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12')
+      .attr('font-size', '14')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', WATER_ACCENT)
@@ -246,7 +246,7 @@ export function renderWaterLevel({
     tooltipLayer.append('text')
       .attr('x', tooltipX + tooltipW - 16).attr('y', tooltipY + 27)
       .attr('text-anchor', 'end')
-      .attr('font-size', '14')
+      .attr('font-size', '17')
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-weight', '900')
       .attr('fill', '#0f172a')
@@ -266,12 +266,12 @@ export function renderWaterLevel({
 
       tooltipLayer.append('text')
         .attr('x', tooltipX + 16)
-        .attr('y', tooltipY + 60 + idx * lineHeight)
-        .attr('font-size',   isCalc ? '13' : '12')
+        .attr('y', tooltipY + 62 + idx * lineHeight)
+        .attr('font-size',   isCalc ? '15' : '14')
         .attr('font-family', isFlowing
           ? "'Courier New', 'Lucida Console', monospace"
           : 'DM Sans, sans-serif')
-        .attr('font-weight', '700')
+        .attr('font-weight', '800')
         .attr('font-style',  !isCalc && isFlowing ? 'italic' : 'normal')
         .attr('fill',        isCalc ? WATER_ACCENT : '#0f172a')
         .attr('letter-spacing', isFlowing ? '0.3' : '0')
