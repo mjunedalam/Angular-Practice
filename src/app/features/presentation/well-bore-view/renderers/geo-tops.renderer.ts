@@ -48,6 +48,16 @@ export function renderGeoTops({
       .map(f => [f.formation, f.remarks!.trim()]),
   );
 
+  const prognosedMap = new Map(
+    formationTops
+      .filter(f => {
+        const n = Number(f.prognosed);
+        return f.prognosed !== null && f.prognosed !== undefined &&
+          f.prognosed !== '' && isFinite(n) && n > 0;
+      })
+      .map(f => [f.formation, Number(f.prognosed)]),
+  );
+
   const sorted = [...tops].sort((a, b) => a.planTvdDepth - b.planTvdDepth);
   const hoverLayer = rootG.append('g').attr('class', 'geo-hover-targets');
   const tooltipLayer = rootG.append('g')
@@ -66,11 +76,13 @@ export function renderGeoTops({
     remark: string,
     hasActual: boolean,
     isTarget: boolean,
+    estDepth?: number,
   ): void => {
     const tooltipW = 260;
     const lineHeight = 15;
     const lines = wrapGeoRemark(remark, 32, 3);
-    const tooltipH = 54 + lines.length * lineHeight;
+    const estRow = estDepth !== undefined && estDepth !== depth ? 22 : 0;
+    const tooltipH = 54 + estRow + lines.length * lineHeight;
     const tooltipX = geoLineX + 48;
     const tooltipY = Math.max(4, Math.min(yPx - tooltipH / 2, layout.drawingHeight - tooltipH - 4));
     const rowAnchorX = geoLineX + 18;
@@ -154,17 +166,38 @@ export function renderGeoTops({
       .attr('fill', '#64748b')
       .text(`${depth.toLocaleString()} ft`);
 
+    if (estRow > 0) {
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + 14)
+        .attr('y', tooltipY + 47)
+        .attr('font-size', '12')
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-weight', '700')
+        .attr('fill', '#94a3b8')
+        .text('Est. depth');
+
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + tooltipW - 16)
+        .attr('y', tooltipY + 47)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '14')
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-weight', '800')
+        .attr('fill', '#475569')
+        .text(`${estDepth!.toLocaleString()} ft`);
+    }
+
     tooltipLayer.append('line')
       .attr('x1', tooltipX + 14)
       .attr('x2', tooltipX + tooltipW - 14)
-      .attr('y1', tooltipY + 43)
-      .attr('y2', tooltipY + 43)
+      .attr('y1', tooltipY + 44 + estRow)
+      .attr('y2', tooltipY + 44 + estRow)
       .attr('stroke', '#e2e8f0');
 
     lines.forEach((line, lineIdx) => {
       tooltipLayer.append('text')
         .attr('x', tooltipX + 16)
-        .attr('y', tooltipY + 63 + lineIdx * lineHeight)
+        .attr('y', tooltipY + 63 + estRow + lineIdx * lineHeight)
         .attr('font-size', '14')
         .attr('font-family', 'DM Sans, sans-serif')
         .attr('font-weight', '600')
@@ -182,6 +215,7 @@ export function renderGeoTops({
     remark: string | undefined,
     hasActual: boolean,
     isTarget: boolean,
+    estDepth?: number,
   ): void => {
     const tooltipRemark = remark?.trim() ?? '';
 
@@ -195,7 +229,7 @@ export function renderGeoTops({
       .attr('fill', 'transparent')
       .style('pointer-events', 'all')
       .style('cursor', 'help')
-      .on('mouseenter', () => showTooltip(yPx, formation, depth, tooltipRemark, hasActual, isTarget))
+      .on('mouseenter', () => showTooltip(yPx, formation, depth, tooltipRemark, hasActual, isTarget, estDepth))
       .on('mouseleave', hideTooltip);
   };
 
@@ -244,7 +278,7 @@ export function renderGeoTops({
       .style('pointer-events', 'none')
       .text(top.stLongCd) as TextSel;
 
-    addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual, isTarget);
+    addHoverTarget(yPx, top.stLongCd, depth, remark, hasActual, isTarget, prognosedMap.get(top.stLongCd));
     animateGeoRow(g, tick, depthText, codeText, geoLineX, ANIM.GEO_DELAY + idx * ANIM.GEO_STAGGER);
   });
 
@@ -281,7 +315,7 @@ export function renderGeoTops({
       .style('pointer-events', 'none')
       .text(top.formation) as TextSel;
 
-    addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true, false);
+    addHoverTarget(yPx, top.formation, actualDepth, top.remarks?.trim(), true, false, prognosedMap.get(top.formation));
     animateGeoRow(
       g,
       tick,

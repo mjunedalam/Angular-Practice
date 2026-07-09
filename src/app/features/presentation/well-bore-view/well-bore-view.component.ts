@@ -242,6 +242,12 @@ export class WellBoreViewComponent {
       start: t_labelsStart,
       animation: resolveAnimation(this.animConfig()),
     });
+
+    // Raise all interactive hover/tooltip layers above every visual overlay
+    // (e.g. not-drilled-zone rect is appended last and would otherwise intercept
+    // mouse events before casing/liner/geo-tops hover targets can fire).
+    ['csg-hover-targets', 'csg-detail-tooltip', 'geo-hover-targets', 'geo-remark-tooltip']
+      .forEach(cls => this.rootG.select(`.${cls}`).raise());
   }
 
   private resolveDepthLabelAnchor(data: WellboreDiagramData): number {
