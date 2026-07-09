@@ -167,22 +167,31 @@ export function renderGeoTops({
       .text(`${depth.toLocaleString()} ft`);
 
     if (estRow > 0) {
-      tooltipLayer.append('text')
+      tooltipLayer.append('rect')
         .attr('x', tooltipX + 14)
-        .attr('y', tooltipY + 47)
-        .attr('font-size', '12')
+        .attr('y', tooltipY + 35)
+        .attr('width', 48)
+        .attr('height', 18)
+        .attr('rx', 9)
+        .attr('fill', 'rgba(100,116,139,0.15)');
+
+      tooltipLayer.append('text')
+        .attr('x', tooltipX + 38)
+        .attr('y', tooltipY + 48)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '11')
         .attr('font-family', 'DM Sans, sans-serif')
-        .attr('font-weight', '700')
-        .attr('fill', '#94a3b8')
-        .text('Est. depth');
+        .attr('font-weight', '900')
+        .attr('fill', '#64748b')
+        .text('EST.');
 
       tooltipLayer.append('text')
         .attr('x', tooltipX + tooltipW - 16)
-        .attr('y', tooltipY + 47)
+        .attr('y', tooltipY + 48)
         .attr('text-anchor', 'end')
         .attr('font-size', '14')
         .attr('font-family', 'DM Sans, sans-serif')
-        .attr('font-weight', '800')
+        .attr('font-weight', '700')
         .attr('fill', '#475569')
         .text(`${estDepth!.toLocaleString()} ft`);
     }
