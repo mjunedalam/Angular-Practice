@@ -511,14 +511,14 @@ function buildCasingTooltipController(
 
     const rows: Row[] = [];
     if (hasActual) {
-      rows.push({ label: 'Actual depth', value: `${actual!.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
-      if (csg) rows.push({ label: 'Est. depth', value: `${csg.csgDepth.toLocaleString()} ft` });
+      rows.push({ label: 'actual bottom depth', value: `${actual!.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
+      if (csg) rows.push({ label: 'est bottom depth', value: `${csg.csgDepth.toLocaleString()} ft` });
       if (csg?.csgRemarks) rows.push({ label: 'Remark', value: csg.csgRemarks });
     } else if (csg) {
-      rows.push({ label: 'Est. depth', value: `${csg.csgDepth.toLocaleString()} ft` });
+      rows.push({ label: 'est bottom depth', value: `${csg.csgDepth.toLocaleString()} ft` });
       if (csg.csgRemarks) rows.push({ label: 'Remark', value: csg.csgRemarks });
     } else if (actual) {
-      rows.push({ label: 'Actual depth', value: `${actual.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
+      rows.push({ label: 'actual bottom depth', value: `${actual.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
     }
 
     renderCard(`${size}" ${typeName}`, badge, accent, rows, hw, mouseX, mouseY);
