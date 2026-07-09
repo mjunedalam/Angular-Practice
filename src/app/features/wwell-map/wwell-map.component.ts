@@ -228,7 +228,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
       }];
     });
     this.defaultMapSnapshotBase64 = null;
-    this.wwells.set(wells.length ? wells : getMockKsaWwells());
+    this.wwells.set(wells);
     this.scheduleDefaultMapSnapshot();
   }
 

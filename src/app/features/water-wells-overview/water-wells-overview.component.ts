@@ -561,7 +561,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
         label: rig?.biNum ?? 'N/A',
       }];
     });
-    this.wwells.set(wells.length ? wells : getMockKsaWwells());
+    this.wwells.set(wells);
   }
 
   private async drawWwells(dotsLayer: GraphicsLayer): Promise<void> {
