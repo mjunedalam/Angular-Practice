@@ -44,6 +44,39 @@
   min-height: clamp(58px, 16cqi, 104px);
 }
 
+// ── Unified icon block ─────────────────────────────────────────────────────────
+.cell-icon {
+  flex-shrink: 0;
+  width: clamp(28px, 8cqi, 50px);
+  height: clamp(28px, 8cqi, 50px);
+  border-radius: clamp(3px, 1.5cqi, 10px);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: clamp(16px, 4.5cqi, 30px);
+    height: clamp(16px, 4.5cqi, 30px);
+    opacity: 0.9;
+  }
+
+  mat-icon {
+    font-size: clamp(16px, 4.5cqi, 30px);
+    width: clamp(16px, 4.5cqi, 30px);
+    height: clamp(16px, 4.5cqi, 30px);
+    color: #fff;
+    opacity: 0.85;
+  }
+}
+
+.cell-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
 // ── Cell color variants ────────────────────────────────────────────────────────
 
 .cell--well-name {
@@ -70,24 +103,8 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(4px, 1.5cqi, 10px);
-}
-
-.spud-icon {
-  width: clamp(28px, 8cqi, 50px);
-  height: clamp(28px, 8cqi, 50px);
-  border-radius: clamp(3px, 1.5cqi, 10px);
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: clamp(16px, 4.5cqi, 30px);
-    height: clamp(16px, 4.5cqi, 30px);
-  }
 }
 
 .spud-value {
@@ -106,8 +123,7 @@
   border: none;
   color: #fff;
   display: flex;
-  //flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(4px, 1.5cqi, 10px);
   padding: clamp(9px, 2.7cqi, 18px) clamp(10px, 3.2cqi, 22px);
 }
@@ -129,7 +145,7 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(4px, 1.5cqi, 10px);
 }
 
@@ -147,9 +163,7 @@
   background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   border: none;
   color: #fff;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
+  align-items: flex-start;
   gap: clamp(1px, 0.5cqi, 3px);
 }
 
@@ -159,8 +173,8 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: clamp(4px, 1.5cqi, 10px);
 }
 
 .cell--prev {
@@ -189,24 +203,8 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
- // gap: clamp(6px, 1.8cqi, 12px);
-}
-
-.next-well__icon {
-  flex-shrink: 0;
-  width: clamp(32px, 9cqi, 58px);
-  height: clamp(32px, 9cqi, 58px);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: clamp(18px, 5cqi, 34px);
-    height: clamp(18px, 5cqi, 34px);
-  }
+  align-items: flex-start;
+  gap: clamp(6px, 1.8cqi, 12px);
 }
 
 .next-well__body {
@@ -221,7 +219,7 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(4px, 1.5cqi, 10px);
   min-height: clamp(60px, 14cqi, 92px);
 
@@ -240,25 +238,9 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: clamp(6px, 1.8cqi, 12px);
   min-height: clamp(60px, 14cqi, 92px);
-}
-
-.hole-size__icon {
-  flex-shrink: 0;
-  width: clamp(28px, 8cqi, 50px);
-  height: clamp(28px, 8cqi, 50px);
-  border-radius: clamp(3px, 1.5cqi, 10px);
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: clamp(16px, 4.5cqi, 30px);
-    height: clamp(16px, 4.5cqi, 30px);
-  }
 }
 
 .hole-size__body {
@@ -397,12 +379,10 @@
   width: clamp(36px, 9cqi, 56px);
   height: clamp(36px, 9cqi, 56px);
   border-radius: 50%;
-  //background: linear-gradient(135deg, #0ea5e9, #2563eb);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  //box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
 
   svg {
     width: clamp(20px, 5cqi, 34px);
@@ -411,22 +391,6 @@
 }
 
 // ── Days cell ──────────────────────────────────────────────────────────────────
-.days-cal {
-  width: clamp(28px, 8cqi, 50px);
-  height: clamp(28px, 8cqi, 50px);
-  border-radius: clamp(3px, 1.5cqi, 10px);
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: clamp(16px, 4.5cqi, 30px);
-    height: clamp(16px, 4.5cqi, 30px);
-  }
-}
-
 .days-value {
   font-size: clamp(18px, 5.6cqi, 34px);
   font-weight: 900;
@@ -504,12 +468,6 @@
 }
 
 // ── Feet cell ──────────────────────────────────────────────────────────────────
-.feet-left {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .feet-value {
   font-size: clamp(24px, 8cqi, 48px);
   font-weight: 900;
@@ -519,26 +477,7 @@
   white-space: nowrap;
 }
 
-.feet-icon {
-  flex-shrink: 0;
-
-  svg {
-    width: clamp(32px, 9cqi, 58px);
-    height: clamp(32px, 9cqi, 58px);
-    opacity: 0.85;
-  }
-}
-
 // ── Depth cell ─────────────────────────────────────────────────────────────────
-.depth-labels {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: clamp(4px, 1cqi, 8px);
-  flex-shrink: 0;
-  min-width: 0;
-}
-
 .depth-value {
   font-size: clamp(24px, 7.2cqi, 42px);
   font-weight: 900;
@@ -550,22 +489,6 @@
   overflow: visible;
   text-overflow: clip;
   white-space: nowrap;
-}
-
-.next-kpi__icon {
-  width: clamp(28px, 8cqi, 50px);
-  height: clamp(28px, 8cqi, 50px);
-  border-radius: clamp(3px, 1.5cqi, 10px);
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: clamp(16px, 4.5cqi, 30px);
-    height: clamp(16px, 4.5cqi, 30px);
-  }
 }
 
 .next-kpi__content {
@@ -644,8 +567,8 @@
   color: #fff;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: clamp(4px, 1.5cqi, 10px);
 }
 
 .rop-value {
@@ -654,14 +577,6 @@
   color: #fff;
   line-height: 1.2;
   white-space: nowrap;
-}
-
-.feet-icon mat-icon {
-  font-size: clamp(32px, 9cqi, 58px);
-  width: clamp(32px, 9cqi, 58px);
-  height: clamp(32px, 9cqi, 58px);
-  color: #fff;
-  opacity: 0.85;
 }
 
 // ── Operation summary & Next 24 Hr (full-width) ───────────────────────────────
