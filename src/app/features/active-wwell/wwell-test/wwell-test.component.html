@@ -332,30 +332,17 @@
       </div>
     </div>
 
-    @if (canUpdate() || canDelete()) {
+    @if (canUpdate()) {
       <div class="wt-footer">
-        @if (canDelete()) {
-          <button
-            mat-raised-button
-            type="button"
-            class="wt-delete-btn"
-            [disabled]="deleteDisabled()"
-            (click)="deleteWellTest()"
-          >
-            {{ isDeleting() ? 'DELETING...' : 'DELETE' }}
-          </button>
-        }
-        @if (canUpdate()) {
-          <button
-            mat-raised-button
-            type="button"
-            class="wt-update-btn"
-            [disabled]="isUpdating()"
-            (click)="createOrUpdateActiveWwell()"
-          >
-            {{ isUpdating() ? 'UPDATING...' : 'UPDATE' }}
-          </button>
-        }
+        <button
+          mat-raised-button
+          type="button"
+          class="wt-update-btn"
+          [disabled]="isUpdating()"
+          (click)="createOrUpdateActiveWwell()"
+        >
+          {{ isUpdating() ? 'UPDATING...' : 'UPDATE' }}
+        </button>
       </div>
     }
   </div>
