@@ -21,8 +21,11 @@ export class ActiveWellViewService {
     }
 
     createOrUpdateGwdDailyRemark(data: GwdDailyRemarks): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/gwd-daily-remarks`, data, { context: this.suppressCtx })
-            .pipe(catchError(this.handleError));
+        return this.http.post<ApiResponse<unknown>>(`${this.apiUrl}/gwd-daily-remarks`, data, { context: this.suppressCtx })
+            .pipe(
+                switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
+                catchError(this.handleError),
+            );
     }
 
     createOrUpdateGwdWellTest(data: GwdWellTests): Observable<void> {
@@ -41,8 +44,11 @@ export class ActiveWellViewService {
     }
 
     deleteGwdWellTest(egwtId: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/gwd/api/v1/well-tests/${egwtId}`, { context: this.suppressCtx })
-            .pipe(catchError(this.handleError));
+        return this.http.delete<ApiResponse<unknown>>(`${this.apiUrl}/gwd/api/v1/well-tests/${egwtId}`, { context: this.suppressCtx })
+            .pipe(
+                switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
+                catchError(this.handleError),
+            );
     }
 
     private handleError(error: HttpErrorResponse) {

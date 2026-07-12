@@ -1,4 +1,5 @@
 export interface GwdDailyRemarks {
+    egdrId?: number | null;
     epANum: number | null;
     wActDt: string | null;
     area: string | null;
