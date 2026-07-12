@@ -13,7 +13,6 @@ export function getMissingDetailLabels(
 
   if (!header || isMissing(header.wellName)) missing.push('Well Name');
   if (!header || isMissing(header.field)) missing.push('Field');
-  if (!header || isMissing(header.targetedAquifer)) missing.push('Targeted Aquifer');
   if (!header || isMissing(header.depth)) missing.push('Target Depth');
   if (!header || isMissing(header.biNum)) missing.push('BI Number');
 
