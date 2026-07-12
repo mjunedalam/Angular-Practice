@@ -18,6 +18,16 @@ export const MOCK_TOKENS = {
     groups: ['GWD_admin'],
   } satisfies AuthUser,
 
+  OPERATION_ONLY: {
+    ...BASE_CLAIMS,
+    groups: ['GWD_operation'],
+  } satisfies AuthUser,
+
+  SUPPORT_ONLY: {
+    ...BASE_CLAIMS,
+    groups: ['GWD_support'],
+  } satisfies AuthUser,
+
   MEMBER_ONLY: {
     ...BASE_CLAIMS,
     groups: ['GWD_member'],
@@ -41,7 +51,7 @@ export const MOCK_TOKENS = {
 
   ALL_ROLES: {
     ...BASE_CLAIMS,
-    groups: ['GWD_client', 'GWD_member', 'GWD_admin'],
+    groups: ['GWD_client', 'GWD_member', 'GWD_admin', 'GWD_operation', 'GWD_support'],
   } satisfies AuthUser,
 
   // Edge cases

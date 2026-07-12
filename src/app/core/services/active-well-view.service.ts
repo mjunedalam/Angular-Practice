@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, switchMap, of, throwError } from 'rxjs';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { GwdDailyRemarks, GwdWellTests } from '@shared/models/wwell/active-wwell.model';
+import { ApiResponse } from '@shared/models/wwell/api-response.model';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 
 @Injectable({ providedIn: 'root' })
@@ -25,8 +26,18 @@ export class ActiveWellViewService {
     }
 
     createOrUpdateGwdWellTest(data: GwdWellTests): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/gwd/api/v1/well-tests`, data, { context: this.suppressCtx })
-            .pipe(catchError(this.handleError));
+        if (data.egwtId) {
+            return this.http.put<ApiResponse<number>>(`${this.apiUrl}/gwd/api/v1/well-tests/${data.egwtId}`, data, { context: this.suppressCtx })
+                .pipe(
+                    switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
+                    catchError(this.handleError),
+                );
+        }
+        return this.http.post<ApiResponse<number>>(`${this.apiUrl}/gwd/api/v1/well-tests`, data, { context: this.suppressCtx })
+            .pipe(
+                switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
+                catchError(this.handleError),
+            );
     }
 
     deleteGwdWellTest(egwtId: number): Observable<void> {

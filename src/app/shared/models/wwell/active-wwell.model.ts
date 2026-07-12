@@ -9,9 +9,10 @@ export interface GwdDailyRemarks {
 }
 
 export interface GwdWellTests {
+    egwtId?: number | null;
     epANum: number | null;
     rsvrCd: string | null;
-    hydTestTypCd: string;               // default is 'STP1'
+    hydTestTypCd: string;
     testStaDt: string | null;
     temp: number | null;
     hydH2sCnc: number | null;
@@ -25,4 +26,5 @@ export interface GwdWellTests {
     testerNetworkId: string | null;
     hydProduct: number | null;
     duration: number | null;
+    fwhp: number | null;
 }

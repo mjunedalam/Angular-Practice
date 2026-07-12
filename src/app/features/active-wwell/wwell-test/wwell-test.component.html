@@ -341,7 +341,7 @@
           [disabled]="isUpdating()"
           (click)="createOrUpdateActiveWwell()"
         >
-          {{ isUpdating() ? 'UPDATING...' : 'UPDATE' }}
+          {{ isUpdating() ? (egwtId() ? 'UPDATING...' : 'CREATING...') : (egwtId() ? 'UPDATE' : 'CREATE') }}
         </button>
       </div>
     }

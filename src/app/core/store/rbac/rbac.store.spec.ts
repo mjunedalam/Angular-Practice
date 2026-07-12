@@ -21,6 +21,14 @@ const ADMIN_ONLY_PERMISSIONS = {
   'active-wwell':   ['read', 'update', 'delete'],
 };
 
+/** GWD_operation or GWD_support — full access, same as admin */
+const OPERATION_OR_SUPPORT_PERMISSIONS = {
+  'home':           ['read'],
+  'morning-report': ['read', 'email'],
+  'presentations':  ['read'],
+  'active-wwell':   ['read', 'update', 'delete'],
+};
+
 /** GWD_member or GWD_client only — read everywhere, nothing else */
 const READ_ONLY_PERMISSIONS = {
   'home':           ['read'],
@@ -159,6 +167,28 @@ describe('RbacStore', () => {
 
     it('cannot update morning-report', () => {
       expect(store.hasPermission('morning-report', 'update')).toBe(false);
+    });
+  });
+
+  // ─── JWT scenario: GWD_operation / GWD_support ───────────────────────────
+
+  describe('JWT: GWD_operation or GWD_support (full access)', () => {
+    beforeEach(async () => loadWith(OPERATION_OR_SUPPORT_PERMISSIONS));
+
+    it('can read all routes', () => {
+      expect(store.hasPermission('home',           'read')).toBe(true);
+      expect(store.hasPermission('morning-report', 'read')).toBe(true);
+      expect(store.hasPermission('presentations',  'read')).toBe(true);
+      expect(store.hasPermission('active-wwell',   'read')).toBe(true);
+    });
+
+    it('can update and delete active-wwell', () => {
+      expect(store.hasPermission('active-wwell', 'update')).toBe(true);
+      expect(store.hasPermission('active-wwell', 'delete')).toBe(true);
+    });
+
+    it('can send email from morning-report', () => {
+      expect(store.hasPermission('morning-report', 'email')).toBe(true);
     });
   });
 

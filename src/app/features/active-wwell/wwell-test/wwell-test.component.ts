@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, filter, forkJoin, map, merge, of, timer } from 'rxjs';
 import { DeleteWellTestDialogComponent } from './delete-well-test-dialog.component';
 import { ActiveWwellFormService } from '../active-wwell-form.service';
@@ -227,32 +228,42 @@ export class WwellTestComponent {
 
     this.uiStore.setUpdating(true);
 
-    // Discriminated union: null = not attempted, true = success, false = failed
+    const isCreatingWellTest = wellTestChanged && !this.egwtId();
+
+    const extractMsg = (err: unknown): string => {
+      if (err instanceof Error) return err.message;
+      if (err instanceof HttpErrorResponse) return err.error?.detail ?? err.error?.message ?? err.message ?? 'Unknown error';
+      return 'Unknown error';
+    };
+
+    // Discriminated union: null = not attempted, true = success, Error = failed with message
     const remarks$ = remarksChanged
       ? this.createOrUpdateDrillingRemarks().pipe(
           map(() => true as const),
-          catchError(() => of(false as const)),
+          catchError((err: unknown) => of(new Error(extractMsg(err)))),
         )
       : of(null);
     const wellTest$ = wellTestChanged
       ? this.createOrUpdateWellTest().pipe(
           map(() => true as const),
-          catchError(() => of(false as const)),
+          catchError((err: unknown) => of(new Error(extractMsg(err)))),
         )
       : of(null);
 
     forkJoin({ remarks: remarks$, wellTest: wellTest$, _min: timer(1500) }).subscribe(({ remarks, wellTest }) => {
       this.uiStore.setUpdating(false);
 
-      const remarksFailed = remarks === false;
-      const wellTestFailed = wellTest === false;
+      const remarksFailed = remarks instanceof Error;
+      const wellTestFailed = wellTest instanceof Error;
 
       if (!remarksFailed && !wellTestFailed) {
-        this.notify.info('Well details updated successfully');
         if (remarks === true) this.formService.drillingRemarksForm.markAsPristine();
         if (wellTest === true) {
+          this.notify.info(isCreatingWellTest ? 'Well test created successfully' : 'Well test updated successfully');
           this.initialFlowType = this.isFlowTest();
           this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
+        } else {
+          this.notify.info('Drilling remarks updated successfully');
         }
         this.store.refreshWellDetail();
       } else if (!remarksFailed && wellTestFailed) {
@@ -261,15 +272,15 @@ export class WwellTestComponent {
           this.formService.drillingRemarksForm.markAsPristine();
           this.store.refreshWellDetail();
         }
-        this.notify.error('Well test update failed');
+        this.notify.error(`Well test ${isCreatingWellTest ? 'creation' : 'update'} failed — ${(wellTest as Error).message}`);
       } else if (!wellTestFailed && remarksFailed) {
         if (wellTest === true) {
-          this.notify.info('Well test saved');
+          this.notify.info(isCreatingWellTest ? 'Well test created successfully' : 'Well test updated successfully');
           this.initialFlowType = this.isFlowTest();
           this.wellTestSnapshot = JSON.stringify(this.form.getRawValue());
           this.store.refreshWellDetail();
         }
-        this.notify.error('Drilling remarks update failed');
+        this.notify.error(`Drilling remarks update failed — ${(remarks as Error).message}`);
       } else {
         this.notify.error('Update failed — please try again');
       }
