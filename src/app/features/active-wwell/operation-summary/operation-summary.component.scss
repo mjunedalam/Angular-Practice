@@ -1,9 +1,19 @@
 .ops-grid {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #94a3b8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ops-block {
   display: grid;
   grid-template-columns: 8.5rem 1fr;
-  gap: 1px;
-  background: #e2e8f0;
-  padding: 1px;
+  border-bottom: 2px solid #94a3b8;
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .ops-label--expand {
@@ -27,7 +37,8 @@
   display: flex;
   align-items: flex-start;
   line-height: 1.5;
-  border-left: 3px solid #cbd5e1;
+  border-left: 3px solid #3b82f6;
+  border-right: 2px solid #94a3b8;
 }
 
 .ops-textarea {

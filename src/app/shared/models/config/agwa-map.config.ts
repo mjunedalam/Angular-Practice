@@ -153,18 +153,20 @@ export const LEGEND_FONT_SMAAL_BOLD = Object.freeze({ size: 11, weight: 'bold', 
 
 // Shared dot colors keyed by biNum — used for ArcGIS symbols in all well maps
 export const DOT_COLOR: Record<string, [number, number, number, number]> = {
-  '33': [132, 204, 22, 0.9],
-  '58': [192, 132, 252, 0.9],
-  '34': [248, 113, 113, 0.9],
-  '60': [96, 165, 250, 0.9],
+  '33':   [132, 204, 22, 0.9],
+  '58':   [192, 132, 252, 0.9],
+  '34':   [248, 113, 113, 0.9],
+  '1514': [248, 113, 113, 0.9],  // same formation as 34
+  '60':   [96, 165, 250, 0.9],
 };
 
 // Hex equivalents of DOT_COLOR — used for CSS legend chips in both maps
 export const LEGEND_CHIP_COLORS: Record<string, string> = {
-  '33': '#84cc16',
-  '58': '#c084fc',
-  '34': '#f87171',
-  '60': '#60a5fa',
+  '33':   '#84cc16',
+  '58':   '#c084fc',
+  '34':   '#f87171',
+  '1514': '#f87171',  // same formation as 34
+  '60':   '#60a5fa',
 };
 
 const GRAY_FALLBACK: [number, number, number, number] = [200, 200, 200, 0.9];
