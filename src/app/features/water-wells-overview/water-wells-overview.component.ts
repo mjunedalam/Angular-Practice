@@ -49,6 +49,7 @@ import {
   lineSymbol,
   locationTextSymbol,
   MAP_CONFIG,
+  resolveBiColor,
   STYLE,
   WWell,
   wwellIdTextSymbol,
@@ -584,7 +585,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
     for (let i = 0; i < wells.length; i++) {
       const wwell = wells[i];
-      const [r, g, b] = DOT_COLOR[wwell.label] ?? [160, 160, 160, 0.9];
+      const [r, g, b] = resolveBiColor(wwell.label);
       const graphic = new Graphic({
         geometry: new Point({ latitude: wwell.lat, longitude: wwell.lng }),
         symbol: new SimpleMarkerSymbol({ style: 'circle', size: this.DOT_START_SIZE, color: [r, g, b, 0], outline: { width: 0 } }),
@@ -707,7 +708,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           paths: [[[wwell.lng, wwell.lat], [cx, cy + topH / 2]]],
           spatialReference: { wkid: 4326 },
         }),
-        symbol: lineSymbol(DOT_COLOR[wwell.label] ?? STYLE.stickColor),
+        symbol: lineSymbol(resolveBiColor(wwell.label)),
       }));
 
       graphics.push(new Graphic({
@@ -717,7 +718,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
           spatialReference: { wkid: 4326 },
         }),
         symbol: new SimpleFillSymbol({
-          color: DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9],
+          color: resolveBiColor(wwell.label),
           outline: { color: [0, 0, 0], width: 1 },
         }),
       }));
@@ -750,46 +751,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     layer.addMany(graphics);
   }
 
-  private async addKsaBoundary(map: WebMap): Promise<void> {
-    try {
-      const [
-        { default: FeatureLayer },
-        { default: SimpleRenderer },
-        { default: SimpleFillSymbol },
-      ] = await Promise.all([
-        import('@arcgis/core/layers/FeatureLayer'),
-        import('@arcgis/core/renderers/SimpleRenderer'),
-        import('@arcgis/core/symbols/SimpleFillSymbol'),
-      ]);
-
-      const ksaLayer = new FeatureLayer({
-        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
-        definitionExpression: "COUNTRY = 'Saudi Arabia'",
-        renderer: new SimpleRenderer({
-          symbol: new SimpleFillSymbol({
-            color: [0, 0, 0, 0],
-            outline: { color: [59, 130, 246, 1], width: 2 },
-          }),
-        }),
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (ksaLayer as any).effect = 'bloom(0.5, 1px, 0)';
-      map.add(ksaLayer, 0);
-
-      await ksaLayer.when();
-      if (this.isDestroyed || !this.mapView) return;
-
-      const result = await ksaLayer.queryExtent();
-      if (result?.extent) {
-        this.ksaExtent = result.extent;
-        // expand(1.05) adds a tiny margin so the boundary line stays visible inside the panel
-        await this.mapView.goTo(result.extent.expand(1.05), { duration: 600, animate: true });
-      }
-    } catch (err: unknown) {
-      console.warn('[WellsOverview] KSA boundary unavailable:', err);
-    }
-  }
+  
 
   private registerBootTask(): void {
     if (this.bootTaskRegistered) return;

@@ -32,6 +32,7 @@ import {
   locationTextSymbol,
   MAP_CONFIG,
   MAX_WIDTH,
+  resolveBiColor,
   STYLE,
   tilesArray,
   WWell,
@@ -237,7 +238,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     const { default: SimpleMarkerSymbol } = await import('@arcgis/core/symbols/SimpleMarkerSymbol');
     for (const wwell of this.wwells()) {
       const point = new Point({ latitude: wwell.lat, longitude: wwell.lng });
-      const [r, g, b] = DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9];
+      const [r, g, b] = resolveBiColor(wwell.label);
       layer.add(new Graphic({
         geometry: point,
         symbol: new SimpleMarkerSymbol({ style: 'circle', size: 13, color: [r, g, b, 1], outline: { color: [255, 255, 255, 0.9], width: 1.5 } }),
@@ -308,7 +309,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
           paths: [[[wwell.lng, wwell.lat], [cx, cy + topH / 2]]],
           spatialReference: { wkid: 4326 },
         }),
-        symbol: lineSymbol(DOT_COLOR[wwell.label] ?? STYLE.stickColor),
+        symbol: lineSymbol(resolveBiColor(wwell.label)),
       }));
 
       graphics.push(new Graphic({
@@ -318,7 +319,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
           spatialReference: { wkid: 4326 },
         }),
         symbol: new SimpleFillSymbol({
-          color: DOT_COLOR[wwell.label] ?? [200, 200, 200, 0.9],
+          color: resolveBiColor(wwell.label),
           outline: { color: [0, 0, 0], width: 1 },
         }),
       }));

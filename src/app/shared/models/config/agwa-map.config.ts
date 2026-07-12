@@ -154,15 +154,29 @@ export const LEGEND_FONT_SMAAL_BOLD = Object.freeze({ size: 11, weight: 'bold', 
 // Shared dot colors keyed by biNum — used for ArcGIS symbols in all well maps
 export const DOT_COLOR: Record<string, [number, number, number, number]> = {
   '33': [132, 204, 22, 0.9],
-  '58':   [192, 132, 252, 0.9],
+  '58': [192, 132, 252, 0.9],
   '34': [248, 113, 113, 0.9],
-  '60':   [96, 165, 250, 0.9],
+  '60': [96, 165, 250, 0.9],
 };
 
 // Hex equivalents of DOT_COLOR — used for CSS legend chips in both maps
 export const LEGEND_CHIP_COLORS: Record<string, string> = {
   '33': '#84cc16',
-  '58':   '#c084fc',
+  '58': '#c084fc',
   '34': '#f87171',
-  '60':   '#60a5fa',
+  '60': '#60a5fa',
 };
+
+const GRAY_FALLBACK: [number, number, number, number] = [200, 200, 200, 0.9];
+const DOT_COLOR_KEYS = Object.keys(DOT_COLOR);
+
+/**
+ * Resolves a biNum value (e.g. '3300', '60', '5800') to its DOT_COLOR entry.
+ * Tries exact match first, then checks if the biNum starts with a known key
+ * to handle backend codes that are padded (e.g. '3300' → '33').
+ */
+export function resolveBiColor(biNum: string): [number, number, number, number] {
+  if (DOT_COLOR[biNum]) return DOT_COLOR[biNum];
+  const matched = DOT_COLOR_KEYS.find(k => biNum.startsWith(k));
+  return matched ? DOT_COLOR[matched] : GRAY_FALLBACK;
+}
