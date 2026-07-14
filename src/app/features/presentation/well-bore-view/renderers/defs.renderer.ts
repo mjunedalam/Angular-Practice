@@ -51,6 +51,16 @@ export function renderStaticDefs(defs: DefsSel): void {
     { offset: '85%', color: '#15803d' },
     { offset: '100%', color: '#052e16' },
   ]);
+  
+  addLinearGradient(defs, 'glassReflection', [
+    { offset: '0%', color: 'rgba(255, 255, 255, 0)' },
+    { offset: '12%', color: 'rgba(255, 255, 255, 0.05)' },
+    { offset: '22%', color: 'rgba(255, 255, 255, 0.55)' }, // intense glass specular
+    { offset: '32%', color: 'rgba(255, 255, 255, 0)' },
+    { offset: '85%', color: 'rgba(255, 255, 255, 0)' },
+    { offset: '96%', color: 'rgba(255, 255, 255, 0.15)' },
+    { offset: '100%', color: 'rgba(255, 255, 255, 0)' },
+  ]);
 
   const grid = defs.append('pattern')
     .attr('id', 'gridPattern')

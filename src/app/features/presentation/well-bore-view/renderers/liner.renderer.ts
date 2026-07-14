@@ -302,6 +302,7 @@ function renderLinerShapes({
     // Darken the part of the liner that is inside the casing to simulate interior shadowing
     const exitPx = i === 0 ? scale(lastCasingBotDepth) : scale(liners[i - 1].botDepth);
     if (exitPx > topPx) {
+      // Very light inner dimming, mostly relying on the glass overlay for shadows now
       rootG.append('rect')
         .attr('class', 'liner-interior-shadow')
         .attr('x', centerX - liner.halfWidth)
@@ -309,7 +310,19 @@ function renderLinerShapes({
         .attr('width', liner.halfWidth * 2)
         .attr('height', exitPx - topPx)
         .attr('fill', '#0f172a')
-        .style('opacity', 0.5)
+        .style('opacity', 0.15)
+        .attr('clip-path', `url(#${clipId})`);
+
+      // Render the actual casing 3D gradient over the liner at semi-transparency.
+      // This perfectly simulates the front wall of the casing acting as a glass layer.
+      rootG.append('rect')
+        .attr('class', 'liner-glass-reflection')
+        .attr('x', centerX - liner.halfWidth)
+        .attr('y', topPx)
+        .attr('width', liner.halfWidth * 2)
+        .attr('height', exitPx - topPx)
+        .attr('fill', 'url(#mainGradient)')
+        .style('opacity', 0.45)
         .attr('clip-path', `url(#${clipId})`);
 
       // Shadow cast by the casing shoe onto the liner as it exits the hole
