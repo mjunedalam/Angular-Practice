@@ -25,13 +25,13 @@ export function renderStaticDefs(defs: DefsSel): void {
     { offset: '100%', color: '#1a2130' },
   ]);
   addLinearGradient(defs, 'linerGradient', [
-    { offset: '0%', color: '#7b8fa8' },
-    { offset: '18%', color: '#a8bcd0' },
-    { offset: '38%', color: '#cdd9e5' },
-    { offset: '50%', color: '#eef3f8' },
-    { offset: '62%', color: '#cdd9e5' },
-    { offset: '82%', color: '#a8bcd0' },
-    { offset: '100%', color: '#7b8fa8' },
+    { offset: '0%', color: '#475569' },
+    { offset: '15%', color: '#94a3b8' },
+    { offset: '28%', color: '#ffffff' }, // sharp highlight for rounded 3D effect
+    { offset: '42%', color: '#94a3b8' },
+    { offset: '65%', color: '#64748b' },
+    { offset: '85%', color: '#334155' },
+    { offset: '100%', color: '#1e293b' },
   ]);
   addLinearGradient(defs, 'actualCasingGradient', [
     { offset: '0%', color: '#0d3b1f' },
@@ -43,13 +43,13 @@ export function renderStaticDefs(defs: DefsSel): void {
     { offset: '100%', color: '#0d3b1f' },
   ]);
   addLinearGradient(defs, 'actualLinerGradient', [
-    { offset: '0%', color: '#0d3b1f' },
-    { offset: '18%', color: '#166534' },
-    { offset: '38%', color: '#16a34a' },
-    { offset: '50%', color: '#4ade80' },
-    { offset: '62%', color: '#16a34a' },
-    { offset: '82%', color: '#166534' },
-    { offset: '100%', color: '#0d3b1f' },
+    { offset: '0%', color: '#14532d' },
+    { offset: '15%', color: '#22c55e' },
+    { offset: '28%', color: '#dcfce7' }, // sharp highlight for rounded 3D effect
+    { offset: '42%', color: '#22c55e' },
+    { offset: '65%', color: '#16a34a' },
+    { offset: '85%', color: '#15803d' },
+    { offset: '100%', color: '#052e16' },
   ]);
 
   const grid = defs.append('pattern')
@@ -110,6 +110,16 @@ export function renderStaticDefs(defs: DefsSel): void {
   linerCapGrad.append('stop').attr('offset', '45%').attr('stop-color', '#15803d');
   linerCapGrad.append('stop').attr('offset', '85%').attr('stop-color', '#4ade80');
   linerCapGrad.append('stop').attr('offset', '100%').attr('stop-color', '#166534');
+
+  const plannedLinerCapGrad = defs.append('radialGradient')
+    .attr('id', 'plannedLinerCapDepthGradient')
+    .attr('cx', '50%').attr('cy', '50%')
+    .attr('r', '50%')
+    .attr('gradientUnits', 'objectBoundingBox');
+  plannedLinerCapGrad.append('stop').attr('offset', '0%').attr('stop-color', '#1e293b');
+  plannedLinerCapGrad.append('stop').attr('offset', '45%').attr('stop-color', '#334155');
+  plannedLinerCapGrad.append('stop').attr('offset', '85%').attr('stop-color', '#64748b');
+  plannedLinerCapGrad.append('stop').attr('offset', '100%').attr('stop-color', '#475569');
 
   addMarker(defs, 'arrowBlack', 'var(--text-secondary)');
   addMarker(defs, 'arrowBlue', '#3CC3FF');

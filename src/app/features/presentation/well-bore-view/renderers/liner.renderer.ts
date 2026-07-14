@@ -241,7 +241,8 @@ function renderLinerShapes({
 
     // Planned/estimated liners share the casing look (mainGradient @ 0.40) so they
     // read as the same "planned" style as conductor/casing; actual liners keep the actual fill.
-    const fill = liner.hasActual ? 'url(#actualCasingGradient)' : 'url(#mainGradient)';
+    const fill = liner.hasActual ? 'url(#actualLinerGradient)' : 'url(#linerGradient)';
+    const capFill = liner.hasActual ? 'url(#linerCapDepthGradient)' : 'url(#plannedLinerCapDepthGradient)';
     const stroke = LINER_WALL_COLOR;
     const opacity = liner.hasActual ? 0.78 : 0.40;
 
@@ -252,8 +253,9 @@ function renderLinerShapes({
       .attr('class', 'liner-hanger')
       .attr('d', `${lh} ${rh}`)
       .attr('fill', '#000000')
-      .attr('fill-opacity', '1')
-      .attr('stroke', 'none')
+      .attr('stroke', '#000000')
+      .attr('stroke-width', '1')
+      .attr('stroke-linejoin', 'round')
       .style('opacity', 0)
       .transition()
       .delay(thisLinerStart)
@@ -292,10 +294,36 @@ function renderLinerShapes({
       .attr('rx', liner.halfWidth)
       .attr('ry', 4)
       .attr('clip-path', `url(#${clipId})`)
-      .attr('fill', fill)
+      .attr('fill', capFill)
       .attr('stroke', stroke)
       .attr('stroke-width', '2')
       .style('opacity', opacity);
+
+    // Darken the part of the liner that is inside the casing to simulate interior shadowing
+    const exitPx = i === 0 ? scale(lastCasingBotDepth) : scale(liners[i - 1].botDepth);
+    if (exitPx > topPx) {
+      rootG.append('rect')
+        .attr('class', 'liner-interior-shadow')
+        .attr('x', centerX - liner.halfWidth)
+        .attr('y', topPx)
+        .attr('width', liner.halfWidth * 2)
+        .attr('height', exitPx - topPx)
+        .attr('fill', '#0f172a')
+        .style('opacity', 0.5)
+        .attr('clip-path', `url(#${clipId})`);
+
+      // Shadow cast by the casing shoe onto the liner as it exits the hole
+      rootG.append('ellipse')
+        .attr('cx', centerX)
+        .attr('cy', exitPx)
+        .attr('rx', liner.halfWidth + 8)
+        .attr('ry', 4)
+        .attr('fill', 'none')
+        .attr('stroke', '#020617')
+        .attr('stroke-width', '5')
+        .style('opacity', 0.6)
+        .attr('clip-path', `url(#${clipId})`);
+    }
 
     if (liner.isScreen) {
       const screenStartPx = topPx + (botPx - topPx) * SCREEN_BLANK_RATIO;
