@@ -111,6 +111,7 @@
         #allWellsPanel
         class="wwo__all-wells-panel"
         [class.wwo__all-wells-panel--dragging]="isAllWellsDragging()"
+        [class.wwo__all-wells-panel--minimized]="isAllWellsMinimized()"
         [style.left.px]="allWellsX()"
         [style.top.px]="allWellsY()"
         [style.right]="allWellsX() !== null ? 'unset' : null"
@@ -120,16 +121,47 @@
           <span class="wwo__all-wells-dot"></span>
           All Wells
           <span class="wwo__all-wells-count">{{ allWellRows().length }}</span>
+
+          <!-- Minimize / Maximize button -->
+          <button
+            type="button"
+            class="wwo__all-wells-toggle"
+            (click)="toggleAllWellsMinimized(); $event.stopPropagation()"
+            [title]="isAllWellsMinimized() ? 'Maximize' : 'Minimize'"
+            [attr.aria-label]="isAllWellsMinimized() ? 'Maximize table' : 'Minimize table'"
+            (mousedown)="$event.stopPropagation()"
+          >
+            @if (isAllWellsMinimized()) {
+              <!-- Maximize icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            } @else {
+              <!-- Minimize icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 14 10 14 10 20"/>
+                <polyline points="20 10 14 10 14 4"/>
+                <line x1="10" y1="14" x2="3" y2="21"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+              </svg>
+            }
+          </button>
         </div>
-        <div class="wwo__all-wells-grid">
-          <ag-grid-angular
-            style="width: 100%"
-            [theme]="allWellsTheme"
-            [rowData]="allWellRows()"
-            [columnDefs]="allWellColumnDefs"
-            [gridOptions]="allWellsGridOptions"
-          />
-        </div>
+        @if (!isAllWellsMinimized()) {
+          <div class="wwo__all-wells-grid">
+            <ag-grid-angular
+              style="width: 100%"
+              [theme]="allWellsTheme"
+              [rowData]="allWellRows()"
+              [columnDefs]="allWellColumnDefs"
+              [gridOptions]="allWellsGridOptions"
+              (gridReady)="onAllWellsGridReady($event.api)"
+            />
+          </div>
+        }
       </div>
 
       <!-- Ownership legend — bottom-left, draggable -->

@@ -14,6 +14,7 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
+import { GridApi } from 'ag-grid-community';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { skip } from 'rxjs';
@@ -132,12 +133,14 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private legendOffsetX = 0;
   private legendOffsetY = 0;
 
-  // All Wells panel — drag
+  // All Wells panel — drag + minimize
   protected readonly isAllWellsDragging = signal(false);
   protected readonly allWellsX = signal<number | null>(null);
   protected readonly allWellsY = signal<number | null>(null);
   private allWellsOffsetX = 0;
   private allWellsOffsetY = 0;
+  protected readonly isAllWellsMinimized = signal(false);
+  private allWellsGridApi: GridApi | null = null;
 
   private readonly wwells = signal<WWell[]>([]);
 
@@ -213,6 +216,19 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   readonly gridOptions = statusGroupGridOptions;
   readonly allWellsGridOptions = allWellsGridOptions;
   protected readonly legendItems = legendItems;
+
+  protected onAllWellsGridReady(api: GridApi): void {
+    this.allWellsGridApi = api;
+    api.sizeColumnsToFit();
+  }
+
+  protected toggleAllWellsMinimized(): void {
+    this.isAllWellsMinimized.update(v => !v);
+    // After expanding, let the layout settle then size columns to fill the panel
+    if (!this.isAllWellsMinimized()) {
+      setTimeout(() => this.allWellsGridApi?.sizeColumnsToFit(), 50);
+    }
+  }
 
   constructor() {
     effect(() => {

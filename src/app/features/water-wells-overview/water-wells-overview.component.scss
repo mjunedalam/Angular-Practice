@@ -584,6 +584,47 @@
   }
 }
 
+// ─── Minimize / Maximize toggle ───────────────────────────
+
+.wwo__all-wells-panel--minimized {
+  // Collapse to header only; transition is driven by the @if removing the grid
+  max-height: 36px !important;
+  overflow: hidden;
+}
+
+.wwo__all-wells-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin-left: 0.35rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #3b82f6;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 140ms, border-color 140ms, color 140ms, transform 140ms;
+
+  svg {
+    width: 11px;
+    height: 11px;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    transform: scale(1.08);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 // ─── Legend — light card floating over map ───────────────
 
 .wwo__legend {
