@@ -21,11 +21,16 @@ export class ActiveWellViewService {
     }
 
     createOrUpdateGwdDailyRemark(data: GwdDailyRemarks): Observable<void> {
-        return this.http.post<ApiResponse<unknown>>(`${this.apiUrl}/gwd-daily-remarks`, data, { context: this.suppressCtx })
-            .pipe(
-                switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
-                catchError(this.handleError),
-            );
+        const base = `${this.apiUrl}/gwd/api/v1/daily-remarks`;
+
+        const req$ = data.egdrId
+            ? this.http.put<ApiResponse<unknown>>(`${base}/${data.egdrId}`, data, { context: this.suppressCtx })
+            : this.http.post<ApiResponse<unknown>>(base, data, { context: this.suppressCtx });
+
+        return req$.pipe(
+            switchMap(res => res.error ? throwError(() => new Error(res.message)) : of(void 0)),
+            catchError(this.handleError),
+        );
     }
 
     createOrUpdateGwdWellTest(data: GwdWellTests): Observable<void> {

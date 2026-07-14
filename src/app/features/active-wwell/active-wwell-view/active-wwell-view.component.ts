@@ -223,14 +223,13 @@ export class ActiveWwellViewComponent implements OnInit {
         nxt24HrPlanRmk = drlgOpStatus?.nxt24HrPlanRmk;
       }
 
-      //const formattedDate = formatDateForInput(this.store.selectedDate());
-
       const status = this.store.status();
       const area = this.store.area();
       this.form.patchValue({
         area: area,
         epANum: this.store.selectedEpANum(),
-        status: status ?? deriveStatusLabel(this.store.selectedWell()),
+        wActDt: formatDateForInput(this.store.selectedDate()),
+        status: status || deriveStatusLabel(this.store.selectedWell()),
         wDrlgSmryRmk: wDrlgSmryRmk,
         wOpRmk: wOpRmk,
         nxt24HrPlanRmk: nxt24HrPlanRmk

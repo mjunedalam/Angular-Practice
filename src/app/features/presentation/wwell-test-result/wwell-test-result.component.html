@@ -1,14 +1,9 @@
 @if (store.hasActualWellTest() && store.wwellTest(); as result) {
 <div class="test-results-container">
-  <!-- ── Section header ── -->
   <div class="results-header">
-    <div class="results-header__title">
-      <span>Well Test Results</span>
-    </div>
+    <div class="results-header__title"><span>Well Test Results</span></div>
     <div class="results-header__badge">1</div>
   </div>
-
-  <!-- ── List of results ── -->
   <div class="results-list">
     <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
       <div class="result-tab__left">
@@ -22,7 +17,6 @@
           <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
         </div>
       </div>
-
       <div class="result-tab__right">
         <div class="main-stat">
           <span class="val">{{ result.rate | number }}</span>
@@ -45,6 +39,10 @@
       <stop offset="0%"   stop-color="#0ea5e9"/>
       <stop offset="100%" stop-color="#0369a1"/>
     </linearGradient>
+    <linearGradient id="dlgDropGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
   </defs>
 </svg>
 
@@ -57,236 +55,340 @@
          [cdkDragDisabled]="isMobile()"
          cdkDragRootElement=".cdk-overlay-pane"
          cdkDragBoundary="body">
+
+      <!-- ── Header ──────────────────────────────────────────────────────── -->
       <div class="dialog__header" mat-dialog-title cdkDragHandle>
         <div class="dialog__title-group">
-        <div class="dialog__icon-wrap">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="url(#dlgDropGrad2)">
-            <defs>
-              <linearGradient id="dlgDropGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stop-color="#38bdf8"/>
-                <stop offset="100%" stop-color="#0369a1"/>
-              </linearGradient>
-            </defs>
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-          </svg>
+          <div class="dialog__avatar">
+            <svg viewBox="0 0 24 24" fill="url(#dlgDropGrad2)">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+          </div>
+          <div class="dialog__meta">
+            <span class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</span>
+            <span class="dialog__subtitle">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }} · {{ r.aquiferActual }} Aquifer</span>
+          </div>
         </div>
-        <div>
-          <div class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</div>
-          <div class="dialog__subtitle">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }} · {{ r.aquiferActual }} Aquifer</div>
-        </div>
-        </div>
-        <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close test result dialog">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 6 6 18M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
-    <mat-dialog-content class="dialog__body">
+      <mat-dialog-content class="dialog__body">
 
-      <div class="info-grid">
+        <div class="tr-grid">
 
-        <!-- Test Rate -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M4 18s2-2 4-2 4 2 4 2 4-2 4 2"/>
-              <path d="M4 22s2-2 4-2 4 2 4 2 4-2 4 2"/>
-              <line x1="18" y1="4" x2="18" y2="14"/>
-              <polyline points="15 7 18 4 21 7"/>
-            </svg>
+          <!-- Aquifer -->
+          <div class="tr-card">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+              </div>
+              <div class="tr-label">Aquifer</div>
+            </div>
+            <div class="tr-text">{{ r.aquiferActual }}</div>
+            <div class="tr-ir">
+              <span class="tr-ir__badge">IR</span>
+              <span class="tr-ir__val tr-ir__val--text">{{ r.aquiferEstimate }}</span>
+            </div>
           </div>
-          <div class="info-card__content">
-            <div class="info-card__label">Test Rate</div>
-            <div class="info-card__value">{{ r.rate | number }}<span class="info-card__unit">GPM</span></div>
+
+          <!-- Duration -->
+          <div class="tr-card">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/>
+                </svg>
+              </div>
+              <div class="tr-label">Duration</div>
+            </div>
+            <div class="tr-val">
+              <span class="tr-num">{{ r.duration | number }}</span>
+              <span class="tr-unit">h</span>
+            </div>
+          </div>
+
+          <!-- Test Rate (flow = featured hero) / RPM (pump = blue) -->
+          @if (isFlowTest()) {
+            <div class="tr-card tr-card--featured">
+              <div class="tr-card__hd">
+                <div class="tr-icon tr-icon--inv">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                  </svg>
+                </div>
+                <div class="tr-label">Test Rate</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.rate | number }}</span>
+                <span class="tr-unit">GPM</span>
+              </div>
+              <div class="tr-ir tr-ir--inv">
+                <span class="tr-ir__badge tr-ir__badge--inv">IR</span>
+                <span class="tr-ir__val tr-ir__val--inv">{{ r.testRateEstimate }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-.06-4"/>
+                  </svg>
+                </div>
+                <div class="tr-label">RPM</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.rpm | number }}</span>
+              </div>
+            </div>
+          }
+
+          <!-- Temperature -->
+          <div class="tr-card">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                </svg>
+              </div>
+              <div class="tr-label">Temperature</div>
+            </div>
+            <div class="tr-val">
+              <span class="tr-num">{{ r.temp | number:'1.0-1' }}</span>
+              <span class="tr-unit">°C</span>
+            </div>
+          </div>
+
+          <!-- TDS -->
+          <div class="tr-card">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+              </div>
+              <div class="tr-label">TDS</div>
+            </div>
+            <div class="tr-val">
+              <span class="tr-num">{{ r.tds | number }}</span>
+              <span class="tr-unit">PPM</span>
+            </div>
+            <div class="tr-ir">
+              <span class="tr-ir__badge">IR</span>
+              <span class="tr-ir__val">{{ r.tdsEstimate }}</span>
+            </div>
+          </div>
+
+          <!-- H₂S -->
+          <div class="tr-card">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="tr-label">H&#8322;S</div>
+            </div>
+            <div class="tr-val">
+              <span class="tr-num">{{ r.h2sActual | number }}</span>
+              <span class="tr-unit">PPM</span>
+            </div>
+            <div class="tr-ir">
+              <span class="tr-ir__badge">IR</span>
+              <span class="tr-ir__val">{{ r.h2sEstimate }}</span>
+            </div>
+          </div>
+
+          <!-- Flow: SIWHP + FWHP / Pump: Test Rate (featured) + Pump Depth + SWL + DWL -->
+          @if (isFlowTest()) {
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"/>
+                    <polyline points="5 12 12 5 19 12"/>
+                  </svg>
+                </div>
+                <div class="tr-label">SIWHP</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.siwhp | number }}</span>
+                <span class="tr-unit">psi</span>
+              </div>
+              <div class="tr-ir">
+                <span class="tr-ir__badge">IR</span>
+                <span class="tr-ir__val">{{ r.siwhpEstimate }}</span>
+              </div>
+            </div>
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                  </svg>
+                </div>
+                <div class="tr-label">FWHP</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.fwhp | number }}</span>
+                <span class="tr-unit">psi</span>
+              </div>
+            </div>
+          } @else {
+            <div class="tr-card tr-card--featured">
+              <div class="tr-card__hd">
+                <div class="tr-icon tr-icon--inv">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                  </svg>
+                </div>
+                <div class="tr-label">Test Rate</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.rate | number }}</span>
+                <span class="tr-unit">GPM</span>
+              </div>
+              <div class="tr-ir tr-ir--inv">
+                <span class="tr-ir__badge tr-ir__badge--inv">IR</span>
+                <span class="tr-ir__val tr-ir__val--inv">{{ r.testRateEstimate }}</span>
+              </div>
+            </div>
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <polyline points="19 12 12 19 5 12"/>
+                    <line x1="5" y1="21" x2="19" y2="21"/>
+                  </svg>
+                </div>
+                <div class="tr-label">Pump Depth</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.hydPmpDpth | number }}</span>
+                <span class="tr-unit">ft</span>
+              </div>
+              <div class="tr-ir">
+                <span class="tr-ir__badge">IR</span>
+                <span class="tr-ir__val">{{ r.pumpDepthEstimate }}</span>
+              </div>
+            </div>
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 10c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 16c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <line x1="2" y1="6" x2="22" y2="6"/>
+                  </svg>
+                </div>
+                <div class="tr-label">SWL</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.swl | number }}</span>
+                <span class="tr-unit">ft</span>
+              </div>
+              <div class="tr-ir">
+                <span class="tr-ir__badge">IR</span>
+                <span class="tr-ir__val">{{ r.swlEstimate }}</span>
+              </div>
+            </div>
+            <div class="tr-card">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 14c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <path d="M2 19c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                    <line x1="12" y1="3" x2="12" y2="9"/>
+                    <polyline points="9 7 12 10 15 7"/>
+                  </svg>
+                </div>
+                <div class="tr-label">DWL</div>
+              </div>
+              <div class="tr-val">
+                <span class="tr-num">{{ r.dwl | number }}</span>
+                <span class="tr-unit">ft</span>
+              </div>
+            </div>
+          }
+
+          <!-- Well Productivity — always spans 2 columns -->
+          <div class="tr-card tr-card--span2">
+            <div class="tr-card__hd">
+              <div class="tr-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+              </div>
+              <div class="tr-label">Well Productivity</div>
+            </div>
+            <div class="tr-val">
+              <span class="tr-num tr-num--md">{{ r.productivityActual | number:'1.2-2' }}</span>
+              <span class="tr-unit">GPM/ft</span>
+            </div>
+          </div>
+
+          <!-- Conducted By: span-2 on flow, full-width on pump -->
+          @if (r.conductedBy) {
+            <div class="tr-card"
+                 [class.tr-card--span2]="isFlowTest()"
+                 [class.tr-card--full]="!isFlowTest()">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <div class="tr-label">Conducted By</div>
+              </div>
+              <div class="tr-text">{{ r.conductedBy }}</div>
+            </div>
+          }
+
+        </div>
+
+        <div class="dialog__footer">
+          <div class="footer-tags">
+            <span class="summary-tag summary-tag--aquifer">{{ r.aquiferActual }}</span>
+            <span class="summary-tag">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
+          </div>
+          <div class="test-legend">
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--actual"></span>
+              <span class="legend-label">Actual</span>
+            </div>
+            <span class="legend-sep">|</span>
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--ir"></span>
+              <span class="legend-label">IR Estimate</span>
+            </div>
           </div>
         </div>
 
-        <!-- RPM (pump) / SIWHP + FWHP (flow) -->
-        @if (!isFlowTest()) {
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">RPM</div>
-              <div class="info-card__value">{{ r.rpm | number }}</div>
-            </div>
-          </div>
-        } @else {
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <line x1="12" y1="2" x2="12" y2="22"/>
-                <path d="M5 10c2-2 5-3 7 0s5 2 7 0"/>
-                <path d="M5 14c2-2 5-3 7 0s5 2 7 0"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">SIWHP</div>
-              <div class="info-card__value">{{ r.siwhp | number }}<span class="info-card__unit">PSI</span></div>
-            </div>
-          </div>
+      </mat-dialog-content>
 
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <line x1="12" y1="22" x2="12" y2="2"/>
-                <path d="M5 14c2 2 5 3 7 0s5-2 7 0"/>
-                <path d="M5 10c2 2 5 3 7 0s5-2 7 0"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">FWHP</div>
-              <div class="info-card__value">{{ r.fwhp | number }}<span class="info-card__unit">PSI</span></div>
-            </div>
-          </div>
-        }
-
-        <!-- Duration -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M6 2h12M6 22h12M6 2c0 5 4 6 6 8 2-2 6-3 6-8M6 22c0-5 4-6 6-8 2 2 6 3 6 8"/>
-            </svg>
-          </div>
-          <div class="info-card__content">
-            <div class="info-card__label">Duration</div>
-            <div class="info-card__value">{{ r.duration | number }}<span class="info-card__unit">H</span></div>
-          </div>
-        </div>
-
-        <!-- TDS -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
-              <path d="M12 8v4l3 3"/>
-            </svg>
-          </div>
-          <div class="info-card__content">
-            <div class="info-card__label">TDS</div>
-            <div class="info-card__value">{{ r.tds | number }}<span class="info-card__unit">PPM</span></div>
-          </div>
-        </div>
-
-        <!-- Temperature -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
-            </svg>
-          </div>
-          <div class="info-card__content">
-            <div class="info-card__label">Temperature</div>
-            <div class="info-card__value">{{ r.temp | number:'1.0-1' }}<span class="info-card__unit">&deg;C</span></div>
-          </div>
-        </div>
-
-        <!-- H₂S -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-              <line x1="12" y1="9"  x2="12" y2="13"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <div class="info-card__content">
-            <div class="info-card__label">H&#8322;S</div>
-            <div class="info-card__value">{{ r.h2sActual | number }}<span class="info-card__unit">PPM</span></div>
-          </div>
-        </div>
-
-        <!-- Pump-test-only fields -->
-        @if (!isFlowTest()) {
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <line x1="12" y1="2" x2="12" y2="14"/>
-                <polyline points="6 10 12 16 18 10"/>
-                <line x1="3" y1="20" x2="21" y2="20"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">Pump Depth</div>
-              <div class="info-card__value">{{ r.hydPmpDpth | number }}<span class="info-card__unit">FT</span></div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M2 12c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-                <path d="M2 18c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">SWL</div>
-              <div class="info-card__value">{{ r.swl | number }}<span class="info-card__unit">FT</span></div>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M2 16c2-2 5-2 7 0s5 2 7 0 5-2 7 0"/>
-                <line x1="12" y1="2" x2="12" y2="10"/>
-                <polyline points="9 7 12 10 15 7"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">DWL</div>
-              <div class="info-card__value">{{ r.dwl | number }}<span class="info-card__unit">FT</span></div>
-            </div>
-          </div>
-        }
-
-        <!-- Well Productivity (both flow and pump) -->
-        <div class="info-card">
-          <div class="info-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <div class="info-card__content">
-            <div class="info-card__label">Well Productivity</div>
-            <div class="info-card__value">{{ r.productivityActual | number:'1.2-2' }}<span class="info-card__unit">GPM/FT</span></div>
-          </div>
-        </div>
-
-        <!-- Conducted By -->
-        @if (r.conductedBy) {
-          <div class="info-card">
-            <div class="info-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            <div class="info-card__content">
-              <div class="info-card__label">Conducted By</div>
-              <div class="info-card__value info-card__value--text">{{ r.conductedBy }}</div>
-            </div>
-          </div>
-        }
-
-      </div>
-
-      <!-- Summary tags -->
-      <div class="dialog__summary-row">
-        <span class="summary-tag summary-tag--aquifer">{{ r.aquiferActual }}</span>
-        <span class="summary-tag">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
-      </div>
-    </mat-dialog-content>
-
-      <div class="dialog__resize-handle dialog__resize-handle--e" (mousedown)="onResizeStart($event, 'width')" title="Drag to resize width"></div>
-      <div class="dialog__resize-handle dialog__resize-handle--s" (mousedown)="onResizeStart($event, 'height')" title="Drag to resize height"></div>
-      <div class="dialog__resize-handle dialog__resize-handle--se" (mousedown)="onResizeStart($event, 'both')" title="Drag to resize"></div>
+      <div class="dialog__resize-handle dialog__resize-handle--e"  (mousedown)="onResizeStart($event, 'width')"  title="Drag to resize width"></div>
+      <div class="dialog__resize-handle dialog__resize-handle--s"  (mousedown)="onResizeStart($event, 'height')" title="Drag to resize height"></div>
+      <div class="dialog__resize-handle dialog__resize-handle--se" (mousedown)="onResizeStart($event, 'both')"   title="Drag to resize"></div>
     </div>
   }
 </ng-template>
