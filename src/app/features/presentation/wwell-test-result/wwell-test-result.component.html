@@ -1,47 +1,55 @@
 @if (store.hasActualWellTest() && store.wwellTest(); as result) {
-<div class="test-results-container">
-  <div class="results-header">
-    <div class="results-header__title"><span>Well Test Results</span></div>
-    <div class="results-header__badge">1</div>
+  <div class="test-results-container">
+    <div class="results-header">
+      <div class="results-header__title"><span>Well Test Results</span></div>
+      <div class="results-header__badge">1</div>
+    </div>
+    <div class="results-list">
+      <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
+        <div class="result-tab__left">
+          <div class="well-indicator">
+            <img
+              class="size-8"
+              src="assets/images/agwa-logo.svg"
+              alt="AGWA"
+              style="width: 20px"
+            />
+          </div>
+          <div class="well-details">
+            <div class="name">{{ store.wellHeaderData()?.wellName }}</div>
+            <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
+          </div>
+        </div>
+        <div class="result-tab__right">
+          <div class="main-stat">
+            <span class="val">{{ result.rate | number }}</span>
+            <span class="unit">GPM</span>
+          </div>
+          <div class="view-btn">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+      </button>
+    </div>
   </div>
-  <div class="results-list">
-    <button @resultTabAnim class="result-tab" (click)="openDialog(result)">
-      <div class="result-tab__left">
-        <div class="well-indicator">
-          <svg viewBox="0 0 24 24" fill="url(#res-drop-grad)">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-          </svg>
-        </div>
-        <div class="well-details">
-          <div class="name">{{ store.wellHeaderData()?.wellName }}</div>
-          <div class="aquifer">{{ result.aquiferActual }} Aquifer</div>
-        </div>
-      </div>
-      <div class="result-tab__right">
-        <div class="main-stat">
-          <span class="val">{{ result.rate | number }}</span>
-          <span class="unit">GPM</span>
-        </div>
-        <div class="view-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </div>
-      </div>
-    </button>
-  </div>
-</div>
 }
 
-<svg style="width:0;height:0;position:absolute;" aria-hidden="true">
+<svg style="width: 0; height: 0; position: absolute" aria-hidden="true">
   <defs>
     <linearGradient id="res-drop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#0ea5e9"/>
-      <stop offset="100%" stop-color="#0369a1"/>
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#0369a1" />
     </linearGradient>
     <linearGradient id="dlgDropGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#7dd3fc"/>
-      <stop offset="100%" stop-color="#0369a1"/>
+      <stop offset="0%" stop-color="#7dd3fc" />
+      <stop offset="100%" stop-color="#0369a1" />
     </linearGradient>
   </defs>
 </svg>
@@ -50,46 +58,66 @@
 
 <ng-template #resultDialog>
   @if (r) {
-    <div class="dialog__wrapper"
-         cdkDrag
-         [cdkDragDisabled]="isMobile()"
-         cdkDragRootElement=".cdk-overlay-pane"
-         cdkDragBoundary="body">
-
+    <div
+      class="dialog__wrapper"
+      cdkDrag
+      [cdkDragDisabled]="isMobile()"
+      cdkDragRootElement=".cdk-overlay-pane"
+      cdkDragBoundary="body"
+    >
       <!-- ── Header ──────────────────────────────────────────────────────── -->
       <div class="dialog__header" mat-dialog-title cdkDragHandle>
         <div class="dialog__title-group">
           <div class="dialog__avatar">
-            <svg viewBox="0 0 24 24" fill="url(#dlgDropGrad2)">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            </svg>
+            <img class="size-8" src="assets/images/agwa-logo.svg" alt="AGWA" />
           </div>
-          <span class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</span>
+          <span class="dialog__well-name">{{
+            store.wellHeaderData()?.wellName
+          }}</span>
           <div class="dialog__tags">
-            <span class="dialog__tag dialog__tag--type">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
+            <span class="dialog__tag dialog__tag--type">{{
+              isFlowTest() ? "Flow Test" : "Pump Test"
+            }}</span>
             <span class="dialog__tag-sep">·</span>
-            <span class="dialog__tag dialog__tag--aquifer">{{ r.aquiferActual }}</span>
+            <span class="dialog__tag dialog__tag--aquifer">{{
+              r.aquiferActual
+            }}</span>
           </div>
         </div>
-        <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M18 6 6 18M6 6l12 12"/>
+        <button
+          type="button"
+          class="dialog__close"
+          (click)="closeDialog()"
+          aria-label="Close"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       <mat-dialog-content class="dialog__body">
-
         <div class="tr-grid">
-
           <!-- Aquifer -->
           <div class="tr-card">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                  <polyline points="2 17 12 22 22 17"/>
-                  <polyline points="2 12 12 17 22 12"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 17 12 22 22 17" />
+                  <polyline points="2 12 12 17 22 12" />
                 </svg>
               </div>
               <div class="tr-label">Aquifer</div>
@@ -97,7 +125,9 @@
             <div class="tr-text">{{ r.aquiferActual }}</div>
             <div class="tr-ir">
               <span class="tr-ir__badge">IR</span>
-              <span class="tr-ir__val tr-ir__val--text">{{ r.aquiferEstimate }}</span>
+              <span class="tr-ir__val tr-ir__val--text">{{
+                r.aquiferEstimate
+              }}</span>
             </div>
           </div>
 
@@ -105,8 +135,15 @@
           <div class="tr-card">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4" />
                 </svg>
               </div>
               <div class="tr-label">Duration</div>
@@ -122,10 +159,23 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
                   </svg>
                 </div>
                 <div class="tr-label">Test Rate</div>
@@ -143,9 +193,16 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"/>
-                    <path d="M20.49 15a9 9 0 1 1-.06-4"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-.06-4" />
                   </svg>
                 </div>
                 <div class="tr-label">RPM</div>
@@ -160,14 +217,23 @@
           <div class="tr-card">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"
+                  />
                 </svg>
               </div>
               <div class="tr-label">Temperature</div>
             </div>
             <div class="tr-val">
-              <span class="tr-num">{{ r.temp | number:'1.0-1' }}</span>
+              <span class="tr-num">{{ r.temp | number: "1.0-1" }}</span>
               <span class="tr-unit">°C</span>
             </div>
           </div>
@@ -176,8 +242,15 @@
           <div class="tr-card">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
                 </svg>
               </div>
               <div class="tr-label">TDS</div>
@@ -196,10 +269,19 @@
           <div class="tr-card">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               </div>
               <div class="tr-label">H&#8322;S</div>
@@ -219,9 +301,16 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="19" x2="12" y2="5"/>
-                    <polyline points="5 12 12 5 19 12"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="12" y1="19" x2="12" y2="5" />
+                    <polyline points="5 12 12 5 19 12" />
                   </svg>
                 </div>
                 <div class="tr-label">SIWHP</div>
@@ -238,9 +327,16 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <polyline points="19 12 12 19 5 12"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <polyline points="19 12 12 19 5 12" />
                   </svg>
                 </div>
                 <div class="tr-label">FWHP</div>
@@ -254,10 +350,23 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
                   </svg>
                 </div>
                 <div class="tr-label">Test Rate</div>
@@ -274,10 +383,17 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <polyline points="19 12 12 19 5 12"/>
-                    <line x1="5" y1="21" x2="19" y2="21"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <polyline points="19 12 12 19 5 12" />
+                    <line x1="5" y1="21" x2="19" y2="21" />
                   </svg>
                 </div>
                 <div class="tr-label">Pump Depth</div>
@@ -294,10 +410,21 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 10c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 16c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <line x1="2" y1="6" x2="22" y2="6"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2 10c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 16c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <line x1="2" y1="6" x2="22" y2="6" />
                   </svg>
                 </div>
                 <div class="tr-label">SWL</div>
@@ -314,11 +441,22 @@
             <div class="tr-card">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 14c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <path d="M2 19c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
-                    <line x1="12" y1="3" x2="12" y2="9"/>
-                    <polyline points="9 7 12 10 15 7"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2 14c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <path
+                      d="M2 19c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"
+                    />
+                    <line x1="12" y1="3" x2="12" y2="9" />
+                    <polyline points="9 7 12 10 15 7" />
                   </svg>
                 </div>
                 <div class="tr-label">DWL</div>
@@ -334,16 +472,25 @@
           <div class="tr-card tr-card--span2">
             <div class="tr-card__hd">
               <div class="tr-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                  <polyline points="2 17 12 22 22 17"/>
-                  <polyline points="2 12 12 17 22 12"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 17 12 22 22 17" />
+                  <polyline points="2 12 12 17 22 12" />
                 </svg>
               </div>
               <div class="tr-label">Well Productivity</div>
             </div>
             <div class="tr-val">
-              <span class="tr-num tr-num--md">{{ r.productivityActual | number:'1.2-2' }}</span>
+              <span class="tr-num tr-num--md">{{
+                r.productivityActual | number: "1.2-2"
+              }}</span>
               <span class="tr-unit">GPM/ft</span>
             </div>
           </div>
@@ -353,8 +500,17 @@
             <div class="tr-card tr-card--full">
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                    />
                   </svg>
                 </div>
                 <div class="tr-label">Remarks</div>
@@ -365,14 +521,23 @@
 
           <!-- Conducted By: span-2 on flow, full-width on pump -->
           @if (r.conductedBy) {
-            <div class="tr-card"
-                 [class.tr-card--span2]="isFlowTest()"
-                 [class.tr-card--full]="!isFlowTest()">
+            <div
+              class="tr-card"
+              [class.tr-card--span2]="isFlowTest()"
+              [class.tr-card--full]="!isFlowTest()"
+            >
               <div class="tr-card__hd">
                 <div class="tr-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
                   </svg>
                 </div>
                 <div class="tr-label">Conducted By</div>
@@ -380,13 +545,16 @@
               <div class="tr-text">{{ r.conductedBy }}</div>
             </div>
           }
-
         </div>
 
         <div class="dialog__footer">
           <div class="footer-tags">
-            <span class="summary-tag summary-tag--aquifer">{{ r.aquiferActual }}</span>
-            <span class="summary-tag">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
+            <span class="summary-tag summary-tag--aquifer">{{
+              r.aquiferActual
+            }}</span>
+            <span class="summary-tag">{{
+              isFlowTest() ? "Flow Test" : "Pump Test"
+            }}</span>
           </div>
           <div class="test-legend">
             <div class="legend-item">
@@ -400,12 +568,23 @@
             </div>
           </div>
         </div>
-
       </mat-dialog-content>
 
-      <div class="dialog__resize-handle dialog__resize-handle--e"  (mousedown)="onResizeStart($event, 'width')"  title="Drag to resize width"></div>
-      <div class="dialog__resize-handle dialog__resize-handle--s"  (mousedown)="onResizeStart($event, 'height')" title="Drag to resize height"></div>
-      <div class="dialog__resize-handle dialog__resize-handle--se" (mousedown)="onResizeStart($event, 'both')"   title="Drag to resize"></div>
+      <div
+        class="dialog__resize-handle dialog__resize-handle--e"
+        (mousedown)="onResizeStart($event, 'width')"
+        title="Drag to resize width"
+      ></div>
+      <div
+        class="dialog__resize-handle dialog__resize-handle--s"
+        (mousedown)="onResizeStart($event, 'height')"
+        title="Drag to resize height"
+      ></div>
+      <div
+        class="dialog__resize-handle dialog__resize-handle--se"
+        (mousedown)="onResizeStart($event, 'both')"
+        title="Drag to resize"
+      ></div>
     </div>
   }
 </ng-template>
