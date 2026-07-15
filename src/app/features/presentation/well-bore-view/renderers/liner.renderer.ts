@@ -12,6 +12,7 @@ import {
     buildScreenHanger,
     openHoleHalfWidth,
     parseInchSize,
+    remarksReferenceSize,
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
@@ -61,24 +62,6 @@ function assignHalfWidths(baseHalfWidth: number, count: number): number[] {
 }
 
 const SCREEN_LINER_SIZE_IN = 7;
-
-/**
- * Detects whether free-text remarks reference a given inch size anywhere in the string.
- *
- * lsRemarks is a free-form field (e.g. `+/- 500 ft of 7" screen`), so a naive
- * parseInchSize() would return the first number token (500) and miss the real size.
- * This scans every whole/fractional size token in the text and matches on value.
- */
-function remarksReferenceSize(remarks: string | null | undefined, targetInches: number): boolean {
-    if (!remarks) return false;
-    const tokenRe = /(\d+(?:\.\d+)?)(?:\s+(\d+)\/(\d+))?/g;
-    for (const m of remarks.matchAll(tokenRe)) {
-        const whole = parseFloat(m[1]);
-        const value = m[2] && m[3] ? whole + parseInt(m[2], 10) / parseInt(m[3], 10) : whole;
-        if (value === targetInches) return true;
-    }
-    return false;
-}
 
 /**
  * Determines whether a liner qualifies as a 7" liner screen.

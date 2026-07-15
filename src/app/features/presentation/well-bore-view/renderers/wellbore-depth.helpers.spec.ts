@@ -4,6 +4,7 @@ import {
   resolveCompletionBottomPx,
   resolveCompletionTopDepth,
   resolveOhHalfWidth,
+  resolvePrePerforatedLinerDepth,
   resolveShoeDepth,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
@@ -198,17 +199,142 @@ describe('wellbore-depth.helpers', () => {
     });
   });
 
-  describe('shouldRenderPrePerforatedLiner', () => {
-    it('returns true when perforatedFlg is Y and perforatedRemarks has text', () => {
-      expect(shouldRenderPrePerforatedLiner(WellboreTestDataUtil.wellDesign({ perforatedFlg: 'Y', perforatedRemarks: 'Perforated' }))).toBe(true);
+  describe('resolvePrePerforatedLinerDepth', () => {
+    it('resolves the matching 7" DRLG_CSG liner depths when all three conditions pass', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '+/- 400 ft of 7" pre-perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({
+          wCsgOdSz: '13 3/8',
+          wCsgBotDpth: 2020,
+          wLnrOdSz: '7',
+          wLnrTopDepth: 3430,
+          wLnrBotDepth: 3830,
+        }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toEqual({
+        topDepth: 3430,
+        botDepth: 3830,
+      });
     });
 
-    it('returns false when perforatedRemarks is empty', () => {
-      expect(shouldRenderPrePerforatedLiner(WellboreTestDataUtil.wellDesign({ perforatedFlg: 'Y', perforatedRemarks: '' }))).toBe(false);
+    it('falls back to the casing shoe depth when wLnrTopDepth is missing', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '7" perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({
+          wCsgOdSz: '13 3/8',
+          wCsgBotDpth: 2020,
+          wLnrOdSz: '7',
+          wLnrTopDepth: null,
+          wLnrBotDepth: 3830,
+        }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)?.topDepth).toBe(2020);
+    });
+
+    it('returns null when perforatedFlg is not Y', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'N',
+        perforatedRemarks: '7" perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toBeNull();
+    });
+
+    it('returns null when perforatedRemarks does not reference a 7" size', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: 'Perforated interval, size TBD',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toBeNull();
+    });
+
+    it('returns null when no DRLG_CSG liner reports a 7" OD', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '7" perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '5 1/2', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toBeNull();
+    });
+
+    it('returns null when the matching 7" liner has no valid bottom depth', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '7" perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 0 }),
+      ];
+
+      expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toBeNull();
+    });
+
+    it('returns null when wellDesign is null', () => {
+      expect(resolvePrePerforatedLinerDepth(null, [])).toBeNull();
+    });
+  });
+
+  describe('shouldRenderPrePerforatedLiner', () => {
+    it('returns true when perforatedFlg is Y, perforatedRemarks references 7", and a 7" DRLG_CSG liner exists', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '7" perforated liner',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(shouldRenderPrePerforatedLiner(wellDesign, drlgCasings)).toBe(true);
+    });
+
+    it('returns false when perforatedRemarks has text but does not reference 7"', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: 'Perforated',
+      });
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(shouldRenderPrePerforatedLiner(wellDesign, drlgCasings)).toBe(false);
+    });
+
+    it('returns false when no matching DRLG_CSG liner is passed', () => {
+      const wellDesign = WellboreTestDataUtil.wellDesign({
+        perforatedFlg: 'Y',
+        perforatedRemarks: '7" perforated liner',
+      });
+
+      expect(shouldRenderPrePerforatedLiner(wellDesign)).toBe(false);
     });
 
     it('returns false when perforatedFlg is null', () => {
-      expect(shouldRenderPrePerforatedLiner(WellboreTestDataUtil.wellDesign({ perforatedFlg: null, perforatedRemarks: 'Perforated' }))).toBe(false);
+      const drlgCasings = [
+        WellboreTestDataUtil.drlgCasing({ wLnrOdSz: '7', wLnrBotDepth: 3830 }),
+      ];
+
+      expect(shouldRenderPrePerforatedLiner(
+        WellboreTestDataUtil.wellDesign({ perforatedFlg: null, perforatedRemarks: '7" perforated liner' }),
+        drlgCasings,
+      )).toBe(false);
     });
 
     it('returns false when wellDesign is null', () => {

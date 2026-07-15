@@ -18,10 +18,10 @@ import {
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
   resolveOhHalfWidth,
+  resolvePrePerforatedLinerDepth,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
   shouldRenderOpenHole,
-  shouldRenderPrePerforatedLiner,
 } from './wellbore-depth.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
@@ -213,14 +213,17 @@ function renderPrePerforatedLiner({
   animation,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
-  if (!wellDesign || !shouldRenderPrePerforatedLiner(wellDesign)) return;
+  const prePerfDepth = resolvePrePerforatedLinerDepth(wellDesign, data.drlgCasings);
+  if (!wellDesign || !prePerfDepth) return;
 
   const { openHoleHwMargin } = layout;
   const ohHW = resolveOhHalfWidth(data, layout);
   const perforationGap = Math.max(12, Math.min(20, openHoleHwMargin * 0.65));
   const prePerfHW = Math.max(10, ohHW - perforationGap);
-  const topPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
-  const completionBottomPx = resolveCompletionBottomPx(data, scale);
+  const topPx = scale(prePerfDepth.topDepth);
+  // Never draw past the liner's own bottom depth, and still respect the current display cap.
+  const botDepth = Math.min(prePerfDepth.botDepth, resolveCompletionBottomDepth(data));
+  const completionBottomPx = scale(botDepth);
   const perfTopPx = Math.min(topPx + perforationGap, completionBottomPx);
   const perfBottomPx = Math.max(perfTopPx, completionBottomPx - perforationGap);
 

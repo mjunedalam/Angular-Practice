@@ -2,7 +2,7 @@ import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
-import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
+import { computeCasingHalfWidth, parseInchSize, remarksReferenceSize } from '@shared/utils/wellbore-math.util';
 import { resolveLiners } from './liner.renderer';
 import { DepthScale } from './wellbore-renderer.types';
 
@@ -85,9 +85,47 @@ export function shouldRenderLinerScreen(wellDesign: IWellDesign | null | undefin
   return hasText(wellDesign?.lsRemarks);
 }
 
-export function shouldRenderPrePerforatedLiner(wellDesign: IWellDesign | null | undefined): boolean {
-  if (!isFlagYes(wellDesign?.perforatedFlg)) return false;
-  return hasText(wellDesign?.perforatedRemarks);
+const PRE_PERF_LINER_SIZE_IN = 7;
+
+export interface PrePerforatedLinerDepth {
+  readonly topDepth: number;
+  readonly botDepth: number;
+}
+
+/**
+ * Resolves the pre-perforated liner overlay depth range.
+ *
+ * All three conditions must pass:
+ *   1. EXAD_GWD_WELL_DESIGN.perforatedFlg is 'Y' (case-insensitive).
+ *   2. EXAD_GWD_WELL_DESIGN.perforatedRemarks references a 7" size somewhere in its free text.
+ *   3. DRLG_CSG reports a matching 7" liner (wLnrOdSz) with a valid bottom depth.
+ *
+ * The returned depths come from that matched DRLG_CSG entry so the overlay is drawn
+ * only across the actual liner interval and never exceeds its bottom depth.
+ */
+export function resolvePrePerforatedLinerDepth(
+  wellDesign: IWellDesign | null | undefined,
+  drlgCasings: IDrlgCsg[],
+): PrePerforatedLinerDepth | null {
+  if (!isFlagYes(wellDesign?.perforatedFlg)) return null;
+  if (!remarksReferenceSize(wellDesign?.perforatedRemarks, PRE_PERF_LINER_SIZE_IN)) return null;
+
+  const matchedLiner = drlgCasings.find(
+    d => parseInchSize(d.wLnrOdSz) === PRE_PERF_LINER_SIZE_IN && (d.wLnrBotDepth ?? 0) > 0,
+  );
+  if (!matchedLiner) return null;
+
+  return {
+    topDepth: matchedLiner.wLnrTopDepth ?? matchedLiner.wCsgBotDpth,
+    botDepth: matchedLiner.wLnrBotDepth!,
+  };
+}
+
+export function shouldRenderPrePerforatedLiner(
+  wellDesign: IWellDesign | null | undefined,
+  drlgCasings: IDrlgCsg[] = [],
+): boolean {
+  return resolvePrePerforatedLinerDepth(wellDesign, drlgCasings) !== null;
 }
 
 export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLayout): number {
