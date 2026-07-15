@@ -121,10 +121,10 @@
 
   .gravelHole { opacity: 1; }
 
+  // Same outline/shape as .open-hole (left wall, bottom shoe, right wall) — wider dash gap,
+  // thicker stroke, and full-black weight so the pre-perforated liner reads darker & bolder.
   .perf-wall-group { cursor: help; }
-  .perf-wall { stroke: #000; stroke-width: 3; fill: none; stroke-dasharray: 5,9; opacity: 1; }
-  .perf-tick { stroke: #000; stroke-width: 2; fill: none; opacity: 1; }
-  .perf-shoe { stroke: #000; stroke-width: 2.5; fill: none; opacity: 1; }
+  .pre-perf-liner  { stroke: #000; stroke-width: 4.2; fill: none; stroke-dasharray: 5,9; opacity: 1; }
 
   .depth-arrow-group {
     .mud-circ-seg {

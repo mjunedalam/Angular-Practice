@@ -7,7 +7,6 @@ import {
   buildArrowHeadRight,
   buildGravelPackUPath,
   buildOpenHolePath,
-  buildPrePerfLiner,
   buildScreenHanger,
   computeCasingHalfWidth,
 } from '@shared/utils/wellbore-math.util';
@@ -236,17 +235,15 @@ function renderPrePerforatedLiner({
     .attr('x', centerX - prePerfHW - 6).attr('y', perfTopPx - 5)
     .attr('width', (prePerfHW + 6) * 2).attr('height', 0);
 
-  const { walls, ticks, shoe } = buildPrePerfLiner(centerX, prePerfHW, perfTopPx, perfBottomPx);
   const perfGroup = rootG.append('g')
     .attr('class', 'perf-wall-group')
     .attr('clip-path', `url(#${clipId})`);
 
-  // Distinct classes so the CSS-defined dash pattern only applies to the vertical walls —
-  // sharing it with the short tick marks previously cut each tick off after ~half its length,
-  // rendering asymmetrically on the left vs. right side.
-  perfGroup.append('path').attr('class', 'perf-wall').attr('d', walls);
-  perfGroup.append('path').attr('class', 'perf-tick').attr('d', ticks);
-  perfGroup.append('path').attr('class', 'perf-shoe').attr('d', shoe);
+  // Same outline as open hole (left wall, bottom shoe, right wall in one continuous path) —
+  // just a bigger dash gap and a thicker, darker stroke so it reads as its own element.
+  perfGroup.append('path')
+    .attr('class', 'pre-perf-liner')
+    .attr('d', buildOpenHolePath(centerX, prePerfHW, perfTopPx, perfBottomPx));
   perfGroup.append('title').text(`${prePerfDepth.odSz}" Pre Perf Liner`);
 
   clipRect.transition()
