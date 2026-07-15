@@ -124,7 +124,7 @@
   // Same outline/shape as .open-hole (left wall, bottom shoe, right wall) — wider dash gap,
   // thicker stroke, and full-black weight so the pre-perforated liner reads darker & bolder.
   .perf-wall-group { cursor: help; }
-  .pre-perf-liner  { stroke: #000; stroke-width: 4.2; fill: none; stroke-dasharray: 5,9; opacity: 1; }
+  .pre-perf-liner  { stroke: #000; stroke-width: 6; fill: none; stroke-dasharray: 9,16; opacity: 1; }
 
   .depth-arrow-group {
     .mud-circ-seg {

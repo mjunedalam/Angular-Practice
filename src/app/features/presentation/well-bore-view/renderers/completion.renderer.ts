@@ -244,7 +244,10 @@ function renderPrePerforatedLiner({
   perfGroup.append('path')
     .attr('class', 'pre-perf-liner')
     .attr('d', buildOpenHolePath(centerX, prePerfHW, perfTopPx, perfBottomPx));
-  perfGroup.append('title').text(`${prePerfDepth.odSz}" Pre Perf Liner`);
+  // odSz comes straight from DRLG_CSG and may already carry a trailing inch mark
+  // (e.g. `7"`) — strip it so the tooltip never doubles up as `7"" Pre Perf Liner`.
+  const prePerfOdSz = prePerfDepth.odSz.replace(/["']/g, '').trim();
+  perfGroup.append('title').text(`${prePerfOdSz}" Pre Perf Liner`);
 
   clipRect.transition()
     .delay(ohStart)
