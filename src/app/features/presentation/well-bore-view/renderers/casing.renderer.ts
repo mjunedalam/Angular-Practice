@@ -529,7 +529,7 @@ function buildCasingTooltipController(
         const typeLabel = liner.isScreen ? 'SCREEN' : 'LINER';
         const accent = liner.hasActual ? '#16a34a' : '#2563eb';
         const badge = liner.hasActual ? `${typeLabel} ✓` : typeLabel;
-        const typeName = liner.isScreen ? 'Screen Liner' : 'Liner';
+        const typeName = liner.isPrePerfLiner ? 'Pre Perf Liner' : liner.isScreen ? 'Screen Liner' : 'Liner';
         const rows: Row[] = [
             { label: 'Top (TOL)', value: `${liner.topDepth.toLocaleString()} ft` },
             { label: 'Bottom Depth', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
