@@ -485,8 +485,12 @@
             </div>
           }
 
-          <!-- Well Productivity — always spans 2 columns -->
-          <div class="tr-card tr-card--span2">
+          <!-- Well Productivity — full-width on flow (SIWHP+FWHP only fill 2 cols), span-2 on pump (pairs with SWL/DWL) -->
+          <div
+            class="tr-card"
+            [class.tr-card--full]="isFlowTest()"
+            [class.tr-card--span2]="!isFlowTest()"
+          >
             <div class="tr-card__hd">
               <div class="tr-icon">
                 <svg
