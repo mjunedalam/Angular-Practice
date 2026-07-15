@@ -64,15 +64,11 @@
               <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
             </svg>
           </div>
-          <div class="dialog__meta">
-            <span class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</span>
-            <div class="dialog__tags">
-              <span class="dialog__tag dialog__tag--type">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
-              <span class="dialog__tag-sep">·</span>
-              <span class="dialog__tag dialog__tag--aquifer">{{ r.aquiferActual }}</span>
-              <span class="dialog__tag-sep">·</span>
-              <span class="dialog__tag">Aquifer</span>
-            </div>
+          <span class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</span>
+          <div class="dialog__tags">
+            <span class="dialog__tag dialog__tag--type">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
+            <span class="dialog__tag-sep">·</span>
+            <span class="dialog__tag dialog__tag--aquifer">{{ r.aquiferActual }}</span>
           </div>
         </div>
         <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close">
@@ -351,6 +347,21 @@
               <span class="tr-unit">GPM/ft</span>
             </div>
           </div>
+
+          <!-- Remarks — always full-width, free text -->
+          @if (r.remarks) {
+            <div class="tr-card tr-card--full">
+              <div class="tr-card__hd">
+                <div class="tr-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <div class="tr-label">Remarks</div>
+              </div>
+              <div class="tr-text">{{ r.remarks }}</div>
+            </div>
+          }
 
           <!-- Conducted By: span-2 on flow, full-width on pump -->
           @if (r.conductedBy) {

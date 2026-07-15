@@ -199,14 +199,9 @@
   }
 }
 
-.dialog__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
 .dialog__well-name {
+  flex-shrink: 1;
+  min-width: 0;
   font-size: 15px;
   font-weight: 800;
   color: rgba(255,255,255,0.96);
@@ -222,6 +217,7 @@
   align-items: center;
   gap: 5px;
   flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .dialog__tag-sep {
