@@ -73,10 +73,12 @@
 }
 
 .well-indicator {
-  svg {
+  svg,
+  img {
     width: 18px;
     height: 18px;
     display: block;
+    object-fit: contain;
   }
 }
 
@@ -192,17 +194,19 @@
   align-items: center;
   justify-content: center;
 
-  svg {
+  svg,
+  img {
     width: 18px;
     height: 18px;
     display: block;
+    object-fit: contain;
   }
 }
 
 .dialog__well-name {
   flex-shrink: 1;
   min-width: 0;
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 800;
   color: rgba(255,255,255,0.96);
   white-space: nowrap;
@@ -239,9 +243,15 @@
   white-space: nowrap;
 
   &--type {
-    background: rgba(99,179,237,0.15);
-    border-color: rgba(99,179,237,0.25);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 4px 11px;
+    border-radius: 6px;
+    background: rgba(99,179,237,0.18);
+    border-color: rgba(125,211,252,0.4);
     color: #7dd3fc;
+    box-shadow: 0 0 0 1px rgba(125,211,252,0.08) inset;
   }
 
   &--aquifer {

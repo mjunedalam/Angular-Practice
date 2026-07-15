@@ -73,6 +73,9 @@ export class WwellTestResultComponent {
       backdropClass: 'well-result-backdrop',
       maxWidth: this.isMobile() ? '100vw' : '96vw',
       maxHeight: this.isMobile() ? '100dvh' : '96vh',
+      position: this.isMobile()
+        ? undefined
+        : { left: `${WwellTestResultComponent.VIEWPORT_MARGIN}px`, top: `${WwellTestResultComponent.VIEWPORT_MARGIN}px` },
       enterAnimationDuration: '260ms',
       exitAnimationDuration: '200ms',
     });
