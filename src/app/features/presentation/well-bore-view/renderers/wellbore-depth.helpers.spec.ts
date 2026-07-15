@@ -216,6 +216,7 @@ describe('wellbore-depth.helpers', () => {
       ];
 
       expect(resolvePrePerforatedLinerDepth(wellDesign, drlgCasings)).toEqual({
+        odSz: '7',
         topDepth: 3430,
         botDepth: 3830,
       });

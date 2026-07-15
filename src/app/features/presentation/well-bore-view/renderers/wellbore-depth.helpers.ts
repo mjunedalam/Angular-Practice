@@ -88,6 +88,7 @@ export function shouldRenderLinerScreen(wellDesign: IWellDesign | null | undefin
 const PRE_PERF_LINER_SIZE_IN = 7;
 
 export interface PrePerforatedLinerDepth {
+  readonly odSz: string;
   readonly topDepth: number;
   readonly botDepth: number;
 }
@@ -116,6 +117,7 @@ export function resolvePrePerforatedLinerDepth(
   if (!matchedLiner) return null;
 
   return {
+    odSz: matchedLiner.wLnrOdSz!,
     topDepth: matchedLiner.wLnrTopDepth ?? matchedLiner.wCsgBotDpth,
     botDepth: matchedLiner.wLnrBotDepth!,
   };

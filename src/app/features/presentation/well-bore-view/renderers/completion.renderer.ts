@@ -201,6 +201,10 @@ function renderGravelPackDesign({
   animateLabel(lg, ohLabelStart, animation);
 }
 
+// Matches the `+4` clearance liner.renderer uses between a liner's hanger bracket and its
+// own top depth, so the perforated overlay starts flush with — not below — the hanger.
+const PRE_PERF_HANGER_CLEARANCE_PX = 4;
+
 function renderPrePerforatedLiner({
   rootG,
   defsEl,
@@ -209,8 +213,6 @@ function renderPrePerforatedLiner({
   centerX,
   scale,
   ohStart,
-  ohLabelStart,
-  animation,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
   const prePerfDepth = resolvePrePerforatedLinerDepth(wellDesign, data.drlgCasings);
@@ -218,14 +220,16 @@ function renderPrePerforatedLiner({
 
   const { openHoleHwMargin } = layout;
   const ohHW = resolveOhHalfWidth(data, layout);
-  const perforationGap = Math.max(12, Math.min(20, openHoleHwMargin * 0.65));
-  const prePerfHW = Math.max(10, ohHW - perforationGap);
+  const perfHwInset = Math.max(12, Math.min(20, openHoleHwMargin * 0.65));
+  const prePerfHW = Math.max(10, ohHW - perfHwInset);
   const topPx = scale(prePerfDepth.topDepth);
   // Never draw past the liner's own bottom depth, and still respect the current display cap.
   const botDepth = Math.min(prePerfDepth.botDepth, resolveCompletionBottomDepth(data));
   const completionBottomPx = scale(botDepth);
-  const perfTopPx = Math.min(topPx + perforationGap, completionBottomPx);
-  const perfBottomPx = Math.max(perfTopPx, completionBottomPx - perforationGap);
+  // Start just after the liner hanger and run all the way to the liner's bottom — do not
+  // shorten either end.
+  const perfTopPx = Math.min(topPx + PRE_PERF_HANGER_CLEARANCE_PX, completionBottomPx);
+  const perfBottomPx = completionBottomPx;
 
   const clipId = 'dyn-perf-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -237,35 +241,19 @@ function renderPrePerforatedLiner({
     .attr('class', 'perf-wall-group')
     .attr('clip-path', `url(#${clipId})`);
 
+  // Distinct classes so the CSS-defined dash pattern only applies to the vertical walls —
+  // sharing it with the short tick marks previously cut each tick off after ~half its length,
+  // rendering asymmetrically on the left vs. right side.
   perfGroup.append('path').attr('class', 'perf-wall').attr('d', walls);
-  perfGroup.append('path').attr('class', 'perf-wall perf-wall--ticks').attr('d', ticks);
-  perfGroup.append('path').attr('class', 'perf-wall').attr('d', shoe);
+  perfGroup.append('path').attr('class', 'perf-tick').attr('d', ticks);
+  perfGroup.append('path').attr('class', 'perf-shoe').attr('d', shoe);
+  perfGroup.append('title').text(`${prePerfDepth.odSz}" Pre Perf Liner`);
 
   clipRect.transition()
     .delay(ohStart)
     .duration(ANIM.OH_DURATION)
     .ease(easeCubicInOut)
     .attr('height', perfBottomPx - perfTopPx + 10);
-
-  if (!wellDesign.perforatedRemarks) return;
-
-  const labelY = perfTopPx + (perfBottomPx - perfTopPx) * 0.7;
-  const lEdge = centerX - prePerfHW;
-  const lEnd = lEdge - 26;
-  const perfDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
-  const lg = rootG.append('g').attr('class', 'perf-label');
-
-  lg.append('line')
-    .attr('class', 'oh-label-line')
-    .attr('x1', lEdge).attr('x2', lEnd).attr('y1', labelY).attr('y2', labelY);
-  lg.append('path')
-    .attr('class', 'oh-label-arrow')
-    .attr('d', buildArrowHeadLeft(lEnd, labelY, 6));
-  lg.append('text')
-    .attr('class', 'open-hole-text')
-    .attr('x', lEnd - 4).attr('y', labelY + 4).attr('text-anchor', 'end').text(wellDesign.perforatedRemarks);
-
-  animateLabel(lg, perfDelay, animation);
 }
 
 export function renderScreenHanger({

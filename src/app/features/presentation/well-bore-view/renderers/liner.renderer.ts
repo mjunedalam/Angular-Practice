@@ -23,6 +23,7 @@ export interface LinerEntry {
     readonly botDepth: number;
     readonly halfWidth: number;
     readonly isScreen: boolean;
+    readonly isPrePerfLiner: boolean;
     readonly hasActual: boolean;
 }
 
@@ -98,6 +99,27 @@ function isLinerScreen(
 }
 
 /**
+ * Determines whether a liner qualifies as a 7" pre-perforated liner.
+ *
+ * All three conditions must pass:
+ *   1. The liner's own OD size (DRLG_CSG.wLnrOdSz, preferred over the planned size) is 7".
+ *   2. EXAD_GWD_WELL_DESIGN.perforatedFlg is 'Y' (case-insensitive).
+ *   3. EXAD_GWD_WELL_DESIGN.perforatedRemarks references a 7" size somewhere in its free text.
+ *
+ * Mirrors the gating in wellbore-depth.helpers' resolvePrePerforatedLinerDepth (which drives
+ * the dashed overlay itself); this is re-implemented locally rather than imported to avoid a
+ * circular dependency, since that module already imports resolveLiners from this file.
+ */
+function isPrePerforatedLiner(
+    odSz: string | null | undefined,
+    wellDesign: IWellDesign | null | undefined,
+): boolean {
+    if (parseInchSize(odSz) !== SCREEN_LINER_SIZE_IN) return false;
+    if ((wellDesign?.perforatedFlg ?? '').trim().toUpperCase() !== 'Y') return false;
+    return remarksReferenceSize(wellDesign?.perforatedRemarks, SCREEN_LINER_SIZE_IN);
+}
+
+/**
  * Extracts liner entries from drlgCasings when no ICasingIR data is available.
  * Deduplicates by wLnrOdSz, sorts shallowest-first (widest hw).
  * isScreen is determined by the 7" liner screen rule (see isLinerScreen).
@@ -128,6 +150,7 @@ export function linersFromDrlg(
         halfWidth: widths[i],
         // DRLG-only path: no planned OD to compare, so pass undefined for plannedOdSz.
         isScreen: isLinerScreen(liner.odSz, undefined, wellDesign),
+        isPrePerfLiner: isPrePerforatedLiner(liner.odSz, wellDesign),
         hasActual: true,
     }));
 }
@@ -165,13 +188,15 @@ export function linersFromIR(
         const hasActualTop = (actual?.wLnrTopDepth ?? 0) > 0;
         if (actual?.wLnrOdSz) matchedOdSizes.add(actual.wLnrOdSz);
         const fallbackTopDepth = actual != null ? actual.wCsgBotDpth : lastCasingShoe;
+        const odSz = actual?.wLnrOdSz ?? csg.csgSize;
         return {
-            odSz: actual?.wLnrOdSz ?? csg.csgSize,
+            odSz,
             topDepth: hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth,
             botDepth: hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth,
             hasActual: hasActualBot,
             // 7" rule: pass actual (DRLG) and planned (IR) OD sizes — both must agree when present.
             isScreen: isLinerScreen(actual?.wLnrOdSz, csg.csgSize, wellDesign),
+            isPrePerfLiner: isPrePerforatedLiner(odSz, wellDesign),
         };
     });
 
@@ -184,6 +209,7 @@ export function linersFromIR(
             hasActual: true,
             // DRLG-only: no IR size to compare against, so plannedOdSz is undefined.
             isScreen: isLinerScreen(d.wLnrOdSz, undefined, wellDesign),
+            isPrePerfLiner: isPrePerforatedLiner(d.wLnrOdSz, wellDesign),
         }));
 
     const allLiners = [...irEntries, ...extraEntries].sort((a, b) => a.botDepth - b.botDepth);
@@ -355,6 +381,7 @@ function renderLinerLabels({
         const lEnd = rEdge + 26;
         const labelX = lEnd + 8;
         const screenTag = liner.isScreen ? ' (Screen)' : '';
+        const prePerfTag = liner.isPrePerfLiner ? ' (Pre Perf Liner)' : '';
         const actualStar = liner.hasActual ? ' *' : '';
 
         const lg = rootG.append('g').attr('class', 'casing-label');
@@ -365,7 +392,7 @@ function renderLinerLabels({
         lg.append('text').attr('class', 'casing-label__primary')
             .attr('fill', liner.hasActual ? '#22c55e' : '')
             .attr('x', labelX).attr('y', midY + 4)
-            .text(`${liner.odSz}" Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${actualStar}`);
+            .text(`${liner.odSz}" Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${prePerfTag}${actualStar}`);
 
         animateLabel(lg, labelsStart, animation);
 
