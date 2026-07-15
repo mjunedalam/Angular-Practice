@@ -45,8 +45,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 7px;
+  padding: 12px 16px;
+  border-radius: 9px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   cursor: pointer;
@@ -62,7 +62,9 @@
   &__left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
   }
 
   &__right {
@@ -75,52 +77,74 @@
 .well-indicator {
   svg,
   img {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
     display: block;
     object-fit: contain;
   }
 }
 
-.well-details {
-  .name {
-    font-size: 11px;
-    font-weight: 700;
-    color: #0f172a;
-    line-height: 1.2;
-  }
-  .aquifer {
-    font-size: 10px;
-    font-weight: 500;
-    color: #64748b;
-    margin-top: 1px;
-  }
+.tab-metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1;
 }
 
-.main-stat {
+.tab-metric {
   display: flex;
-  align-items: baseline;
-  gap: 3px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 0 0 auto;
 
-  .val {
-    font-size: 15px;
-    font-weight: 800;
-    color: #1e3a8a;
-    font-variant-numeric: tabular-nums;
+  &--well {
+    flex: 1 1 auto;
   }
-  .unit {
+
+  &__label {
     font-size: 9px;
-    font-weight: 700;
-    color: #64748b;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+  }
+
+  &__value {
+    font-size: 15px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+
+    .tab-metric--well & {
+      max-width: none;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      word-break: break-word;
+    }
+
+    &--aquifer { color: #2563eb; }
+    &--type { color: #0284c7; }
+  }
+
+  &__sep {
+    flex-shrink: 0;
+    width: 2px;
+    height: 26px;
+    background: #e2e8f0;
   }
 }
 
 .view-btn {
   svg {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     color: #94a3b8;
     display: block;
   }
@@ -151,8 +175,9 @@
 .dialog__wrapper {
   display: flex;
   flex-direction: column;
-  width: 860px;
-  height: 640px;
+  width: min(960px, 92vw);
+  height: auto;
+  max-height: 92vh;
   min-width: 480px;
   min-height: 320px;
   background: var(--surface-card, #fff);
@@ -166,7 +191,7 @@
 .dialog__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 14px;
   padding: 10px 12px 10px 14px;
   background: linear-gradient(135deg, #0c1a4d 0%, #1e3a8a 100%);
   cursor: grab;
@@ -174,13 +199,6 @@
   border-bottom: 1px solid rgba(255,255,255,0.07);
 
   &:active { cursor: grabbing; }
-}
-
-.dialog__title-group {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
 }
 
 .dialog__avatar {
@@ -203,62 +221,65 @@
   }
 }
 
-.dialog__well-name {
-  flex-shrink: 1;
+// ── Header metrics (Well / Aquifer / Test Type) ────────────────────────────────
+
+.dialog__metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
   min-width: 0;
-  font-size: 19px;
+}
+
+.dialog__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 0 0 auto;
+
+  &--well {
+    flex: 1 1 auto;
+  }
+}
+
+.dialog__metric-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+}
+
+.dialog__metric-value {
+  font-size: 16px;
   font-weight: 800;
   color: rgba(255,255,255,0.96);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  max-width: 240px;
+
+  .dialog__metric--well & {
+    font-size: 19px;
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+  }
+
+  &--aquifer { color: #60a5fa; }
+  &--type { color: #7dd3fc; }
 }
 
-.dialog__tags {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: nowrap;
+.dialog__metric-sep {
   flex-shrink: 0;
-}
-
-.dialog__tag-sep {
-  font-size: 10px;
-  color: rgba(255,255,255,0.2);
-  line-height: 1;
-}
-
-.dialog__tag {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,255,255,0.1);
-  white-space: nowrap;
-
-  &--type {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 4px 11px;
-    border-radius: 6px;
-    background: rgba(99,179,237,0.18);
-    border-color: rgba(125,211,252,0.4);
-    color: #7dd3fc;
-    box-shadow: 0 0 0 1px rgba(125,211,252,0.08) inset;
-  }
-
-  &--aquifer {
-    background: rgba(16,185,129,0.12);
-    border-color: rgba(16,185,129,0.22);
-    color: #6ee7b7;
-  }
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.14);
 }
 
 .dialog__close {
@@ -305,7 +326,6 @@
   background: #e8eef5;
   flex: 1;
   align-content: start;
-  overflow-y: auto;
 }
 
 .tr-card {
@@ -490,33 +510,11 @@
 .dialog__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 7px 14px;
   border-top: 1px solid #e2e8f0;
   background: #f1f5f9;
   flex-shrink: 0;
-}
-
-.footer-tags {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.summary-tag {
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 10px;
-  background: #e2e8f0;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-
-  &--aquifer {
-    background: rgba(37,99,235,0.1);
-    color: #1d4ed8;
-  }
 }
 
 .test-legend {

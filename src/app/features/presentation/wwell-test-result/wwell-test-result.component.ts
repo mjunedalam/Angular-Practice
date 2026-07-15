@@ -4,12 +4,13 @@ import {
   computed,
   DestroyRef,
   inject,
+  LOCALE_ID,
   signal,
   TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { DecimalPipe } from '@angular/common';
+import { formatNumber } from '@angular/common';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { trigger, transition, animate, style } from '@angular/animations';
 import { PresentationStore } from '../store/presentation.store';
@@ -18,7 +19,7 @@ import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model
 @Component({
   selector: 'app-wwell-test-result',
   standalone: true,
-  imports: [DecimalPipe, MatDialogModule, CdkDrag, CdkDragHandle],
+  imports: [MatDialogModule, CdkDrag, CdkDragHandle],
   templateUrl: './wwell-test-result.component.html',
   styleUrl: './wwell-test-result.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,7 @@ export class WwellTestResultComponent {
   protected readonly store = inject(PresentationStore);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly locale = inject(LOCALE_ID);
   private dialogRef?: MatDialogRef<unknown>;
 
   private readonly mobileQuery = window.matchMedia(WwellTestResultComponent.MOBILE_QUERY);
@@ -62,6 +64,13 @@ export class WwellTestResultComponent {
     return data.flowType === 'FLOW';
   });
 
+  protected fmtNum(value: number | string | null | undefined, digitsInfo?: string): string {
+    if (value === null || value === undefined || value === '') return '';
+    const num = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(num)) return '';
+    return formatNumber(num, this.locale, digitsInfo);
+  }
+
   protected openDialog(result: WwellTestViewModel): void {
     this.selectedResult.set(result);
     this.dialogVisible.set(true);
@@ -73,9 +82,6 @@ export class WwellTestResultComponent {
       backdropClass: 'well-result-backdrop',
       maxWidth: this.isMobile() ? '100vw' : '96vw',
       maxHeight: this.isMobile() ? '100dvh' : '96vh',
-      position: this.isMobile()
-        ? undefined
-        : { left: `${WwellTestResultComponent.VIEWPORT_MARGIN}px`, top: `${WwellTestResultComponent.VIEWPORT_MARGIN}px` },
       enterAnimationDuration: '260ms',
       exitAnimationDuration: '200ms',
     });
