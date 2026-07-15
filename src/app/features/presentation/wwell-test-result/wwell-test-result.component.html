@@ -536,13 +536,9 @@
             </div>
           }
 
-          <!-- Conducted By: span-2 on flow, full-width on pump -->
+          <!-- Conducted By — always full-width, like Remarks -->
           @if (r.conductedBy) {
-            <div
-              class="tr-card"
-              [class.tr-card--span2]="isFlowTest()"
-              [class.tr-card--full]="!isFlowTest()"
-            >
+            <div class="tr-card tr-card--full">
               <div class="tr-card__hd">
                 <div class="tr-icon">
                   <svg
