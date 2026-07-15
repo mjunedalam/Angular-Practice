@@ -18,4 +18,5 @@ export interface IWaterWellTestOutcome {
     hydProduct?: number | null;
     duration?: number | null;
     egwt_id?: number | null;
+    remarks?: string | null;
 }

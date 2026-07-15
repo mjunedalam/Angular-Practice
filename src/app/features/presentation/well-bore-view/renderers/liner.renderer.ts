@@ -243,8 +243,8 @@ function renderLinerShapes({
     // read as the same "planned" style as conductor/casing; actual liners keep the actual fill.
     const fill = liner.hasActual ? 'url(#actualLinerGradient)' : 'url(#linerGradient)';
     const capFill = liner.hasActual ? 'url(#linerCapDepthGradient)' : 'url(#plannedLinerCapDepthGradient)';
-    const stroke = LINER_WALL_COLOR;
-    const opacity = liner.hasActual ? 0.78 : 0.40;
+    const stroke = '#020617';
+    const opacity = liner.hasActual ? 0.55 : 0.4;
 
     const hangerHW = liner.halfWidth;
     const hangerY = (i === 0 ? scale(lastCasingBotDepth) : scale(liners[i - 1].botDepth)) + 4;
@@ -284,8 +284,9 @@ function renderLinerShapes({
       .attr('clip-path', `url(#${clipId})`)
       .attr('fill', fill)
       .attr('stroke', stroke)
-      .attr('stroke-width', '2')
-      .style('opacity', opacity);
+      .attr('stroke-width', '3')
+      .style('opacity', opacity)
+      .style('filter', 'url(#casingDropShadow)');
 
     rootG.append('ellipse')
       .attr('class', 'liner-top-ellipse')
@@ -313,16 +314,15 @@ function renderLinerShapes({
         .style('opacity', 0.15)
         .attr('clip-path', `url(#${clipId})`);
 
-      // Render the actual casing 3D gradient over the liner at semi-transparency.
-      // This perfectly simulates the front wall of the casing acting as a glass layer.
+      // True glass transparency overlay. Creates a soft translucent sheen
+      // over the liner to mimic looking through the outer pipe's glass wall.
       rootG.append('rect')
         .attr('class', 'liner-glass-reflection')
         .attr('x', centerX - liner.halfWidth)
         .attr('y', topPx)
         .attr('width', liner.halfWidth * 2)
         .attr('height', exitPx - topPx)
-        .attr('fill', 'url(#mainGradient)')
-        .style('opacity', 0.45)
+        .attr('fill', 'url(#glassOverlayGradient)')
         .attr('clip-path', `url(#${clipId})`);
 
       // Shadow cast by the casing shoe onto the liner as it exits the hole

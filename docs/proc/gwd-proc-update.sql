@@ -1,3 +1,17 @@
+-- Param SIGNATURE confirmed from the office extraction (2026-07-15) — the ordering
+-- below (p_remarks, p_egwt_id, p_app_user, p_do_commit, p_return_value at the tail)
+-- matches what's actually deployed. GwdWellTestsMapper.callUpdateGwdWellTest was
+-- fixed to match this exact order (p_remarks and p_egwt_id were swapped before).
+--
+-- The BODY below is still INFERRED, not confirmed. The office extraction's body for
+-- this procedure was clearly corrupted/mismatched (it was an INSERT...VALUES...
+-- RETURNING INTO p_egwt_id, which can't be real — p_egwt_id is IN-only here, and
+-- RETURNING INTO requires OUT/IN OUT — most likely the insert proc's body got pasted
+-- under this signature during the screenshot-to-text extraction). The body here is
+-- reconstructed by analogy with insert_gwd_well_test's confirmed body: setup(p_app_user)
+-- first, and app_user is NOT written to a table column (only used for setup()) — only
+-- remarks is persisted, matching insert's confirmed INSERT column list. VERIFY this
+-- against a clean re-capture of the real UPDATE...SET body before deploying.
 PROCEDURE update_gwd_well_test
 (
     p_ep_a_num          IN exad_gwd_well_tests.ep_a_num%TYPE,
@@ -17,12 +31,15 @@ PROCEDURE update_gwd_well_test
     p_w_hyd_product     IN exad_gwd_well_tests.w_hyd_product%TYPE,
     p_duration          IN exad_gwd_well_tests.duration%TYPE,
     p_w_fwhp            IN exad_gwd_well_tests.w_fwhp%TYPE,
+    p_remarks           IN exad_gwd_well_tests.remarks%TYPE,
     p_egwt_id           IN exad_gwd_well_tests.egwt_id%TYPE,
+    p_app_user          IN VARCHAR2,
     p_do_commit         IN VARCHAR2 DEFAULT 'Y',
     p_return_value      OUT VARCHAR2
 ) IS
 
 BEGIN
+    setup(p_app_user);
 
     exad_log_pkg.debug(' p_ep_a_num=' || p_ep_a_num ||
                        ', p_rsvr_cd=' || p_rsvr_cd ||
@@ -41,6 +58,7 @@ BEGIN
                        ', p_w_hyd_product=' || p_w_hyd_product ||
                        ', p_duration=' || p_duration ||
                        ', p_w_fwhp=' || p_w_fwhp ||
+                       ', p_remarks=' || p_remarks ||
                        ', p_egwt_id=' || p_egwt_id ||
                        ', p_do_commit=' || p_do_commit);
 
@@ -61,7 +79,8 @@ BEGIN
         tester_network_id = p_tester_network_id,
         w_hyd_product     = p_w_hyd_product,
         duration          = p_duration,
-        w_fwhp            = p_w_fwhp
+        w_fwhp            = p_w_fwhp,
+        remarks           = p_remarks
     WHERE egwt_id = p_egwt_id;
 
     exad_util_pkg.do_commit(p_do_commit);

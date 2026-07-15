@@ -23,7 +23,8 @@ export class ActiveWwellFormService {
         status: [null, [Validators.required]],
         wOpRmk: [null],
         nxt24HrPlanRmk: [null],
-        wDrlgSmryRmk: [null]
+        wDrlgSmryRmk: [null],
+        remarks: [null],
     });
 
     wellTestForm: FormGroup = this._fb.group({
@@ -44,6 +45,7 @@ export class ActiveWwellFormService {
         hydProduct: [null],
         duration:   [null, [Validators.required]],
         fwhp:       [null, [requiredFor('FLOW')]],
+        remarks:    [null],
     });
 
     constructor(private _fb: FormBuilder) {}

@@ -66,7 +66,13 @@
           </div>
           <div class="dialog__meta">
             <span class="dialog__well-name">{{ store.wellHeaderData()?.wellName }}</span>
-            <span class="dialog__subtitle">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }} · {{ r.aquiferActual }} Aquifer</span>
+            <div class="dialog__tags">
+              <span class="dialog__tag dialog__tag--type">{{ isFlowTest() ? 'Flow Test' : 'Pump Test' }}</span>
+              <span class="dialog__tag-sep">·</span>
+              <span class="dialog__tag dialog__tag--aquifer">{{ r.aquiferActual }}</span>
+              <span class="dialog__tag-sep">·</span>
+              <span class="dialog__tag">Aquifer</span>
+            </div>
           </div>
         </div>
         <button type="button" class="dialog__close" (click)="closeDialog()" aria-label="Close">
@@ -117,9 +123,9 @@
 
           <!-- Test Rate (flow = featured hero) / RPM (pump = blue) -->
           @if (isFlowTest()) {
-            <div class="tr-card tr-card--featured">
+            <div class="tr-card">
               <div class="tr-card__hd">
-                <div class="tr-icon tr-icon--inv">
+                <div class="tr-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
                     <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
@@ -132,9 +138,9 @@
                 <span class="tr-num">{{ r.rate | number }}</span>
                 <span class="tr-unit">GPM</span>
               </div>
-              <div class="tr-ir tr-ir--inv">
-                <span class="tr-ir__badge tr-ir__badge--inv">IR</span>
-                <span class="tr-ir__val tr-ir__val--inv">{{ r.testRateEstimate }}</span>
+              <div class="tr-ir">
+                <span class="tr-ir__badge">IR</span>
+                <span class="tr-ir__val">{{ r.testRateEstimate }}</span>
               </div>
             </div>
           } @else {
@@ -249,9 +255,9 @@
               </div>
             </div>
           } @else {
-            <div class="tr-card tr-card--featured">
+            <div class="tr-card">
               <div class="tr-card__hd">
-                <div class="tr-icon tr-icon--inv">
+                <div class="tr-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
                     <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2"/>
@@ -264,9 +270,9 @@
                 <span class="tr-num">{{ r.rate | number }}</span>
                 <span class="tr-unit">GPM</span>
               </div>
-              <div class="tr-ir tr-ir--inv">
-                <span class="tr-ir__badge tr-ir__badge--inv">IR</span>
-                <span class="tr-ir__val tr-ir__val--inv">{{ r.testRateEstimate }}</span>
+              <div class="tr-ir">
+                <span class="tr-ir__badge">IR</span>
+                <span class="tr-ir__val">{{ r.testRateEstimate }}</span>
               </div>
             </div>
             <div class="tr-card">

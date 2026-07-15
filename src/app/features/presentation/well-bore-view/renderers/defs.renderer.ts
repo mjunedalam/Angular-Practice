@@ -6,52 +6,63 @@ interface GradientStop {
 }
 
 export function renderStaticDefs(defs: DefsSel): void {
+  // Drop Shadow Filter for Casings
+  const dropShadow = defs.append('filter')
+    .attr('id', 'casingDropShadow')
+    .attr('x', '-30%').attr('y', '-10%')
+    .attr('width', '160%').attr('height', '120%');
+  dropShadow.append('feDropShadow')
+    .attr('dx', '0').attr('dy', '8')
+    .attr('stdDeviation', '10')
+    .attr('flood-color', '#020617')
+    .attr('flood-opacity', '0.35');
+
+  // Premium, ultra-smooth 5-stop gradients for a high-end modern UI look
   addLinearGradient(defs, 'mainGradient', [
-    { offset: '0%', color: '#1a2130' },
-    { offset: '18%', color: '#4a5568' },
-    { offset: '38%', color: '#a0aec0' },
-    { offset: '50%', color: '#e2e8f0' },
-    { offset: '62%', color: '#a0aec0' },
-    { offset: '82%', color: '#4a5568' },
-    { offset: '100%', color: '#1a2130' },
+    { offset: '0%', color: '#1e293b' },   // Deep slate edge
+    { offset: '20%', color: '#475569' },  // Slate gray body
+    { offset: '50%', color: '#cbd5e1' },  // Soft light gray highlight
+    { offset: '80%', color: '#475569' },
+    { offset: '100%', color: '#0f172a' }, // Deep dark edge
   ]);
   addLinearGradient(defs, 'conductorGradient', [
-   { offset: '0%', color: '#1a2130' },
-    { offset: '18%', color: '#4a5568' },
-    { offset: '38%', color: '#a0aec0' },
-    { offset: '50%', color: '#e2e8f0' },
-    { offset: '62%', color: '#a0aec0' },
-    { offset: '82%', color: '#4a5568' },
-    { offset: '100%', color: '#1a2130' },
+    { offset: '0%', color: '#1e293b' },
+    { offset: '20%', color: '#475569' },
+    { offset: '50%', color: '#cbd5e1' },
+    { offset: '80%', color: '#475569' },
+    { offset: '100%', color: '#0f172a' },
   ]);
   addLinearGradient(defs, 'linerGradient', [
-    { offset: '0%', color: '#475569' },
-    { offset: '15%', color: '#94a3b8' },
-    { offset: '28%', color: '#ffffff' }, // sharp highlight for rounded 3D effect
-    { offset: '42%', color: '#94a3b8' },
-    { offset: '65%', color: '#64748b' },
-    { offset: '85%', color: '#334155' },
+    { offset: '0%', color: '#334155' },
+    { offset: '25%', color: '#64748b' },
+    { offset: '50%', color: '#e2e8f0' },
+    { offset: '75%', color: '#64748b' },
     { offset: '100%', color: '#1e293b' },
   ]);
   addLinearGradient(defs, 'actualCasingGradient', [
-    { offset: '0%', color: '#0d3b1f' },
-    { offset: '18%', color: '#15803d' },
-    { offset: '38%', color: '#22c55e' },
-    { offset: '50%', color: '#6ee7a0' },
-    { offset: '62%', color: '#22c55e' },
-    { offset: '82%', color: '#15803d' },
-    { offset: '100%', color: '#0d3b1f' },
+    { offset: '0%', color: '#064e3b' },   // Deep emerald shadow
+    { offset: '20%', color: '#059669' },  // Smooth rich emerald body
+    { offset: '50%', color: '#6ee7b7' },  // Sophisticated mint highlight
+    { offset: '80%', color: '#059669' },
+    { offset: '100%', color: '#022c22' }, // Very dark emerald edge
   ]);
   addLinearGradient(defs, 'actualLinerGradient', [
-    { offset: '0%', color: '#14532d' },
-    { offset: '15%', color: '#22c55e' },
-    { offset: '28%', color: '#dcfce7' }, // sharp highlight for rounded 3D effect
-    { offset: '42%', color: '#22c55e' },
-    { offset: '65%', color: '#16a34a' },
-    { offset: '85%', color: '#15803d' },
-    { offset: '100%', color: '#052e16' },
+    { offset: '0%', color: '#065f46' },
+    { offset: '25%', color: '#10b981' },
+    { offset: '50%', color: '#a7f3d0' },  // Soft mint
+    { offset: '75%', color: '#10b981' },
+    { offset: '100%', color: '#064e3b' },
   ]);
-  
+
+  // Dedicated glass effect for the translucent casing wall over the liner
+  addLinearGradient(defs, 'glassOverlayGradient', [
+    { offset: '0%', color: 'rgba(255,255,255,0)' },
+    { offset: '30%', color: 'rgba(255,255,255,0.05)' },
+    { offset: '50%', color: 'rgba(255,255,255,0.35)' }, // Soft translucent glass
+    { offset: '70%', color: 'rgba(255,255,255,0.05)' },
+    { offset: '100%', color: 'rgba(255,255,255,0)' },
+  ]);
+
   addLinearGradient(defs, 'glassReflection', [
     { offset: '0%', color: 'rgba(255, 255, 255, 0)' },
     { offset: '12%', color: 'rgba(255, 255, 255, 0.05)' },

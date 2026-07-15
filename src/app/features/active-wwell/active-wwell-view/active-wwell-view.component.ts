@@ -202,9 +202,18 @@ export class ActiveWwellViewComponent implements OnInit {
     effect(() => {
       const wellData = this.store.wellData();
 
-      // this.form.reset();
-      // this.wellTestForm.reset();
-      if (wellData == null) return;
+      // Well/date switches (and the gap right after a well-test delete, before
+      // refreshed data lands) pass through a transient null wellData — clear the
+      // remark fields here so stale text from the previous well never lingers.
+      if (wellData == null) {
+        this.form.patchValue({
+          wDrlgSmryRmk: null,
+          wOpRmk: null,
+          nxt24HrPlanRmk: null,
+        });
+        this.wellTestForm.patchValue({ remarks: null }, { emitEvent: false });
+        return;
+      }
 
       const wellTestData = selectWwellTestViewModel(wellData);
 
@@ -254,7 +263,8 @@ export class ActiveWwellViewComponent implements OnInit {
         hydProduct: wellTestData?.productivityActual,
         hydPmpDpth: wellTestData?.hydPmpDpth,
         statWlvl: wellTestData?.swl,
-        dyncWlvl: wellTestData?.dwl
+        dyncWlvl: wellTestData?.dwl,
+        remarks: wellTestData?.remarks
       }, {
         emitEvent: false
       })

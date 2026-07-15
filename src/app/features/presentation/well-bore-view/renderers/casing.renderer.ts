@@ -143,15 +143,18 @@ function renderCasings({
 
     const casingD = buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset);
 
+    // casingDropShadow's blur (stdDeviation 10) bleeds past every casing's own
+    // shoe curve, showing up as a stray dark smear right on the stroke itself
+    // — drop it from the casing paths entirely.
     if (hasActual) {
       rootG.append('path')
         .attr('class', 'casing')
         .attr('d', casingD)
         .attr('clip-path', `url(#${clipId})`)
         .attr('fill', 'url(#actualCasingGradient)')
-        .attr('stroke', '#000000')
-        .attr('stroke-width', '5')
-        .style('opacity', 0.78);
+        .attr('stroke', '#020617')
+        .attr('stroke-width', '4')
+        .style('opacity', 0.55);
     } else {
       const plannedFillGrad = isConductor
         ? 'url(#mainGradient)'
@@ -161,9 +164,9 @@ function renderCasings({
         .attr('d', casingD)
         .attr('clip-path', `url(#${clipId})`)
         .attr('fill', plannedFillGrad)
-        .attr('stroke', '#000000')
-        .attr('stroke-width', '5')
-        .style('opacity', isConductor ? 0.75 : 0.40);
+        .attr('stroke', '#0f172a')
+        .attr('stroke-width', '4')
+        .style('opacity', isConductor ? 0.5 : 0.4);
     }
 
     clipRect.transition()
@@ -215,9 +218,9 @@ function renderCasingsFromActual({
       .attr('d', buildCasingPath(centerX, hw, 0, bottomPx, shoeCurveOffset))
       .attr('clip-path', `url(#${clipId})`)
       .attr('fill', 'url(#actualCasingGradient)')
-      .attr('stroke', '#000000')
-      .attr('stroke-width', '2')
-      .style('opacity', 0.78);
+      .attr('stroke', '#020617')
+      .attr('stroke-width', '3')
+      .style('opacity', 0.55);
 
     clipRect.transition()
       .delay(casingsStart + delay).duration(ANIM.CASING_DURATION).ease(easeCubicInOut)

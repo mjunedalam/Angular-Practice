@@ -499,6 +499,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
         swlEstimate: hydro?.estStaticWaterLevel,
         dwl: testOutcome?.dyncWlvl,
         pumpDepthEstimate: wellDesign?.pumpLvl,
+        remarks: testOutcome?.remarks,
     };
 }
 
