@@ -10,6 +10,8 @@ import { formatDateForInput, getTodayAtMidnight, parseDateFromInput } from 'src/
 import { ResizeDividerComponent } from '@shared/components/resize-divider/resize-divider.component';
 import { WellBoreViewComponent } from './well-bore-view/well-bore-view.component';
 import { DepthScaleComponent } from './depth-scale/depth-scale.component';
+// 3D view — disabled for now, keep only Fortify changes
+// import { WellboreViewToggleComponent } from './well-bore-view/wellbore-view-toggle.component';
 import { WellNameChipsComponent } from './well-name-chips/well-name-chips.component';
 import { MiscPresWellDataComponent } from './misc-pres-well-data/misc-pres-well-data.component';
 import { PickedFormationTopsComponent } from './picked-formation-tops/picked-formation-tops.component';
@@ -30,6 +32,7 @@ const RIGHT_DEFAULT = 340; const RIGHT_MIN = 240; const RIGHT_MAX = 560;
     ResizeDividerComponent,
     WellBoreViewComponent,
     DepthScaleComponent,
+    // WellboreViewToggleComponent, // 3D view — disabled for now
     WellNameChipsComponent,
     MiscPresWellDataComponent,
     PickedFormationTopsComponent,
@@ -156,10 +159,10 @@ export class PresentationComponent implements OnInit {
 
   protected toggleFullscreen(): void {
     if (document.fullscreenElement) {
-      document.exitFullscreen().catch((err: unknown) => console.warn('[Presentation] exitFullscreen failed:', err));
+      document.exitFullscreen().catch(() => undefined);
     } else {
       const mainEl = (this.elementRef.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
-      (mainEl ?? (this.elementRef.nativeElement as HTMLElement)).requestFullscreen().catch((err: unknown) => console.warn('[Presentation] requestFullscreen failed:', err));
+      (mainEl ?? (this.elementRef.nativeElement as HTMLElement)).requestFullscreen().catch(() => undefined);
     }
   }
 

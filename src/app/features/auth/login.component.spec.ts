@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { randomUUID } from 'crypto';
 
 import { LoginComponent } from './login.component';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
@@ -9,6 +10,7 @@ import { LoaderService } from '@shared/components/global-loader/loader.service';
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
+  const testPassword = `test-${randomUUID()}`;
   const authStoreMock = {
     login: jest.fn(),
     isLoading: jest.fn(() => false),
@@ -68,7 +70,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
     expect(submitButton.disabled).toBe(true);
 
-    loginForm.controls.password.setValue('secret');
+    loginForm.controls.password.setValue(testPassword);
     fixture.detectChanges();
     expect(submitButton.disabled).toBe(false);
   });
@@ -79,7 +81,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
 
     const loginForm = (component as unknown as { loginForm: LoginComponent['loginForm'] }).loginForm;
-    loginForm.setValue({ username: 'jane.doe', password: 'secret' });
+    loginForm.setValue({ username: 'jane.doe', password: testPassword });
     fixture.detectChanges();
 
     const form = fixture.debugElement.query(By.css('form'));

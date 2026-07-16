@@ -351,7 +351,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected toggleFullscreen(): void {
     if (!document.fullscreenElement) {
       const mainEl = (this.hostEl.nativeElement as HTMLElement).closest('main') as HTMLElement | null;
-      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch((err: unknown) => console.warn('[WellsOverview] requestFullscreen failed:', err));
+      (mainEl ?? (this.hostEl.nativeElement as HTMLElement)).requestFullscreen().catch(() => undefined);
     } else {
       document.exitFullscreen();
     }
@@ -494,10 +494,9 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   }
 
   private initMapWithRetry(attempt = 0): void {
-    this.initMap().catch((err: unknown) => {
+    this.initMap().catch(() => {
       if (this.isDestroyed) return;
       const delay = Math.min(1000 * Math.pow(2, attempt), this.MAX_RETRY_DELAY_MS);
-      console.warn(`[WellsOverview] Reconnecting… attempt ${attempt + 1}`, err);
       this.mapRetryTimeoutId = setTimeout(() => this.initMapWithRetry(attempt + 1), delay);
     });
   }

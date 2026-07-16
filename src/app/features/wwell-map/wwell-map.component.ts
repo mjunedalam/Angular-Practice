@@ -94,9 +94,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     effect(() => {
       this.wwells();
       if (!this.mapReady() || !this.wwellLayer) return;
-      this.wwellIconsRenderTask = this.drawWWellIcons(this.wwellLayer).catch(e =>
-        console.error('[WwellMap] drawWWellIcons failed', e)
-      );
+      this.wwellIconsRenderTask = this.drawWWellIcons(this.wwellLayer).catch(() => undefined);
     });
 
     effect(() => {
@@ -146,10 +144,9 @@ export class WwellmapComponent implements OnInit, OnDestroy {
   private initMapWithRetry(attempt = 0): void {
     this.initMap().then(() => {
       if (attempt > 0) console.log(`[Map] Connected after ${attempt + 1} attempt(s)`);
-    }).catch((err: unknown) => {
+    }).catch(() => {
       if (this.isDestroyed) return;
       const delay = Math.min(1000 * Math.pow(2, attempt), this.MAX_RETRY_DELAY_MS);
-      console.warn(`[Map] Reconnecting… attempt ${attempt + 1} (retry in ${delay / 1000}s)`, err);
       this.mapRetryTimeoutId = setTimeout(() => this.initMapWithRetry(attempt + 1), delay);
     });
   }
@@ -410,9 +407,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
 
     this.clearDefaultSnapshotTimer();
     this.defaultSnapshotTimeoutId = setTimeout(() => {
-      void this.captureDefaultMapAsBase64().catch(error => {
-        console.warn('[WwellMap] Default map snapshot failed', error);
-      });
+      void this.captureDefaultMapAsBase64().catch(() => undefined);
     }, 500);
   }
 

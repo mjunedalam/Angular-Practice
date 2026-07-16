@@ -21,7 +21,7 @@ const ADMIN_ONLY_PERMISSIONS = {
   'active-wwell':   ['read', 'update', 'delete'],
 };
 
-/** GWD_operation or GWD_support — full access, same as admin */
+/** GWD_operation or AGWA_support — full access, same as admin */
 const OPERATION_OR_SUPPORT_PERMISSIONS = {
   'home':           ['read'],
   'morning-report': ['read', 'email'],
@@ -170,9 +170,9 @@ describe('RbacStore', () => {
     });
   });
 
-  // ─── JWT scenario: GWD_operation / GWD_support ───────────────────────────
+  // ─── JWT scenario: GWD_operation / AGWA_support ───────────────────────────
 
-  describe('JWT: GWD_operation or GWD_support (full access)', () => {
+  describe('JWT: GWD_operation or AGWA_support (full access)', () => {
     beforeEach(async () => loadWith(OPERATION_OR_SUPPORT_PERMISSIONS));
 
     it('can read all routes', () => {

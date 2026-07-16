@@ -149,6 +149,7 @@
             <form
               [formGroup]="loginForm"
               (ngSubmit)="submit()"
+              method="post"
               class="form-body"
             >
               <!-- Username field -->
@@ -192,7 +193,7 @@
                     id="password"
                     formControlName="password"
                     placeholder="Enter your password"
-                    autocomplete="current-password"
+                    autocomplete="off"
                     [class.is-invalid]="isFieldInvalid('password')"
                   />
                   <svg

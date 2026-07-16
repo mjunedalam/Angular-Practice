@@ -60,6 +60,16 @@
             </button> -->
 
             <div class="diagram-scroll-area">
+              <!-- 3D view — disabled for now, keep only Fortify changes
+              <app-wellbore-view-toggle
+                [diagramData]="store.diagramData()"
+                [animTrigger]="store.animationTrigger()"
+                [animConfig]="store.animConfig()"
+                [formationTops]="store.allFormationTops()"
+                [diagramLayout]="diagramLayout()"
+                [isFullscreen]="isDiagramFullscreen()"
+                [class.diagram-fs]="isDiagramFullscreen()" />
+              -->
               <app-depth-scale
                 [totalDepth]="store.displayDepth()"
                 [animTrigger]="store.animationTrigger()"
@@ -124,6 +134,13 @@
         </div>
       } @else {
         <div class="modal-diagram" [class.modal-diagram--loading]="loadingVisible()">
+          <!-- 3D view — disabled for now, keep only Fortify changes
+          <app-wellbore-view-toggle
+            [diagramData]="store.diagramData()"
+            [animTrigger]="store.animationTrigger()"
+            [animConfig]="store.animConfig()"
+            [formationTops]="store.allFormationTops()" />
+          -->
           <app-depth-scale [totalDepth]="store.displayDepth()" [animTrigger]="store.animationTrigger()" />
           <app-well-bore-view
             [diagramData]="store.diagramData()"

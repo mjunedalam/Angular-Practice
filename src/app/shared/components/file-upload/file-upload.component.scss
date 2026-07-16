@@ -291,6 +291,10 @@
   &--doc   .file-row__type-icon  { color: #9333ea; }
   &--doc   .file-type-ext        { background: #faf5ff; color: #7c3aed; border-color: #e9d5ff; }
 
+  &--excel .file-row__icon-wrap { background: #ecfdf5; border-color: #a7f3d0; }
+  &--excel .file-row__type-icon  { color: #059669; }
+  &--excel .file-type-ext        { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
   &--other .file-row__icon-wrap { background: #f8fafc; border-color: #e2e8f0; }
   &--other .file-row__type-icon  { color: #64748b; }
   &--other .file-type-ext        { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }

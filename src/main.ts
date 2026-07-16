@@ -51,6 +51,4 @@ bootstrapApplication(AppComponent, appConfig)
 
     loader.markAppShellReady();
   })
-  .catch((err: unknown) =>
-    console.error(err),
-  );
+  .catch(() => undefined);

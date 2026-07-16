@@ -147,6 +147,8 @@ export interface WwellTestViewModel {
 
 export const MAX_UPLOAD_SIZE_BYTES = 25 * 1024 * 1024;
 
+export const ALLOWED_UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'] as const;
+
 export interface UploadFileItem {
   readonly file: File;
   readonly id: string;

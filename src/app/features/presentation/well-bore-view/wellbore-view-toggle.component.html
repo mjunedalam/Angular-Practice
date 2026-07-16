@@ -1,0 +1,64 @@
+<div class="wellbore-toggle-shell">
+  <div class="wellbore-mode-switch" role="group" aria-label="Wellbore view mode">
+    <button
+      type="button"
+      class="wellbore-mode-btn"
+      [class.wellbore-mode-btn--active]="mode() === '2d'"
+      [attr.aria-pressed]="mode() === '2d'"
+      (click)="setMode('2d')"
+    >
+      2D
+    </button>
+    <button
+      type="button"
+      class="wellbore-mode-btn wellbore-mode-btn--3d"
+      [class.wellbore-mode-btn--active]="mode() === '3d'"
+      [attr.aria-pressed]="mode() === '3d'"
+      (click)="setMode('3d')"
+    >
+      <span class="wellbore-mode-btn__dot"></span>
+      3D
+    </button>
+  </div>
+
+  @if (mode() === '2d') {
+    <!-- Flat SVG ruler — only meaningful next to the flat 2D view. The 3D view draws its own
+         ruler inside the Three.js scene instead (see class doc comment). -->
+    <app-depth-scale
+      [totalDepth]="totalDepth()"
+      [animTrigger]="animTrigger()"
+      [diagramLayout]="diagramLayout()"
+      [isFullscreen]="isFullscreen()"
+      [class.diagram-fs]="isFullscreen()"
+    />
+    <app-well-bore-view
+      [diagramData]="diagramData()"
+      [animTrigger]="animTrigger()"
+      [animConfig]="animConfig()"
+      [formationTops]="formationTops()"
+      [diagramLayout]="diagramLayout()"
+      [isFullscreen]="isFullscreen()"
+      [class.diagram-fs]="isFullscreen()"
+    />
+  }
+
+  <!-- Three.js/GSAP only download once the user actually asks for the 3D view — keeps the
+       always-loaded presentation bundle free of the extra weight these libraries add. -->
+  @defer (when mode() === '3d') {
+    @if (mode() === '3d') {
+      <app-wellbore-3d-view
+        [diagramData]="diagramData()"
+        [animTrigger]="animTrigger()"
+        [animConfig]="animConfig()"
+        [formationTops]="formationTops()"
+        [diagramLayout]="diagramLayout()"
+        [isFullscreen]="isFullscreen()"
+        [class.diagram-fs]="isFullscreen()"
+      />
+    }
+  } @loading (minimum 200ms) {
+    @if (mode() === '3d') {
+      <div class="wellbore-3d-loading">Loading 3D engine…</div>
+    }
+  }
+</div>

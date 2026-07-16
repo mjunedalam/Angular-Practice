@@ -25,7 +25,7 @@ export const MOCK_TOKENS = {
 
   SUPPORT_ONLY: {
     ...BASE_CLAIMS,
-    groups: ['GWD_support'],
+    groups: ['AGWA_support'],
   } satisfies AuthUser,
 
   MEMBER_ONLY: {
@@ -51,7 +51,7 @@ export const MOCK_TOKENS = {
 
   ALL_ROLES: {
     ...BASE_CLAIMS,
-    groups: ['GWD_client', 'GWD_member', 'GWD_admin', 'GWD_operation', 'GWD_support'],
+    groups: ['GWD_client', 'GWD_member', 'GWD_admin', 'GWD_operation', 'AGWA_support'],
   } satisfies AuthUser,
 
   // Edge cases
