@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RbacStore } from './rbac.store';
 
@@ -117,7 +117,11 @@ describe('RbacStore', () => {
     it('sets error and keeps permissions empty on network error', async () => {
       const p = store.loadPermissions(PERMISSIONS_URL);
       httpMock.expectOne(PERMISSIONS_URL).flush(null, { status: 401, statusText: 'Unauthorized' });
-      await p;
+
+      // 401/403 are rethrown after state is patched, so callers (e.g. app.config.ts)
+      // can force a logout — see rbac.store.ts. HttpErrorResponse doesn't extend
+      // Error, so assert the rejection type directly rather than via toThrow().
+      await expect(p).rejects.toBeInstanceOf(HttpErrorResponse);
 
       expect(store.isLoaded()).toBe(true);
       expect(store.userPermissions()).toEqual({});

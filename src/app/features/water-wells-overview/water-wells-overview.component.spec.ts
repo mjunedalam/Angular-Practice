@@ -25,7 +25,9 @@ const morningReportStoreMock = {
   allWellsData: jest.fn(() => []),
   isLoading: jest.fn(() => false),
   hasError: jest.fn(() => false),
+  selectedDate: jest.fn(() => new Date()),
   loadMorningReportData: jest.fn(),
+  setDate: jest.fn(),
 };
 
 const loaderServiceMock = {

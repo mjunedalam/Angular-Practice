@@ -25,6 +25,7 @@ const activeWwellStoreMock = {
   allCasingData: jest.fn(() => []),
   wellNames: jest.fn(() => []),
   pagedWellNames: jest.fn(() => []),
+  aquifers: jest.fn(() => []),
   isLoading: jest.fn(() => false),
   isDetailsLoading: jest.fn(() => false),
   isInitialLoading: jest.fn(() => false),

@@ -1,12 +1,29 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
-import { of } from 'rxjs';
 import { roleGuard } from './role.guard';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
+import { ExternalConfigService } from '@shared/services/external-config.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
 
 const rbacStoreMock = {
   isLoaded: jest.fn(() => true),
   hasPermission: jest.fn(),
+  needsRefresh: jest.fn(() => false),
+  loadPermissions: jest.fn(() => Promise.resolve()),
+};
+
+const authStoreMock = {
+  token: jest.fn(() => 'mock-token'),
+  logout: jest.fn(),
+};
+
+const externalConfigMock = {
+  settings: { dailyOperationServiceUrl: 'http://localhost:8080' },
+};
+
+const notificationServiceMock = {
+  error: jest.fn(),
 };
 
 const routerMock = {
@@ -27,36 +44,34 @@ describe('roleGuard', () => {
     await TestBed.configureTestingModule({
       providers: [
         { provide: RbacStore, useValue: rbacStoreMock },
+        { provide: AuthStore, useValue: authStoreMock },
+        { provide: ExternalConfigService, useValue: externalConfigMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
         { provide: Router, useValue: routerMock },
       ],
     }).compileComponents();
   });
 
-  it('allows navigation when rbac is loaded and permission granted', (done) => {
+  it('allows navigation when rbac is loaded and permission granted', async () => {
     rbacStoreMock.hasPermission.mockReturnValue(true);
 
-    const result$ = TestBed.runInInjectionContext(() =>
+    const result = await TestBed.runInInjectionContext(() =>
       roleGuard(createRoute('some-route'), createState()),
-    ) as ReturnType<typeof of>;
+    );
 
-    (result$ as ReturnType<typeof of>).subscribe((val) => {
-      expect(val).toBe(true);
-      done();
-    });
+    expect(result).toBe(true);
   });
 
-  it('redirects to /main/home when permission denied', (done) => {
+  it('redirects to /main/home when permission denied', async () => {
     rbacStoreMock.hasPermission.mockReturnValue(false);
     routerMock.createUrlTree.mockReturnValue({ url: '/main/home' });
 
-    const result$ = TestBed.runInInjectionContext(() =>
+    const result = await TestBed.runInInjectionContext(() =>
       roleGuard(createRoute('restricted-route'), createState()),
-    ) as ReturnType<typeof of>;
+    );
 
-    (result$ as ReturnType<typeof of>).subscribe((val) => {
-      expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/main/home']);
-      expect(val).toEqual({ url: '/main/home' });
-      done();
-    });
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/main/home']);
+    expect(result).toEqual({ url: '/main/home' });
+    expect(notificationServiceMock.error).toHaveBeenCalled();
   });
 });

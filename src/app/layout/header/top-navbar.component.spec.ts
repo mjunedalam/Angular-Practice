@@ -19,6 +19,8 @@ describe('TopNavbarComponent', () => {
     roleDefinitions: jest.fn(() => [
       { name: 'GWD_admin', label: 'Admin', routes: [], canUpdate: [] },
     ]),
+    isLoaded: jest.fn(() => true),
+    userPermissions: jest.fn(() => ({ home: ['read'] })),
   };
   beforeEach(async () => {
     jest.clearAllMocks();
