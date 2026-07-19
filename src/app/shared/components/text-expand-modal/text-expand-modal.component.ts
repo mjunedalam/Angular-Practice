@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -19,12 +19,13 @@ export interface TextExpandData {
   styleUrl: './text-expand-modal.component.scss',
 })
 export class TextExpandModalComponent {
+  protected readonly data = inject<TextExpandData>(MAT_DIALOG_DATA);
   protected readonly localFc: FormControl;
   protected readonly isEditable: boolean;
 
-  constructor(@Inject(MAT_DIALOG_DATA) protected readonly data: TextExpandData) {
-    const initialValue = data.control?.value ?? data.text ?? '';
-    this.isEditable = !data.readonly && !!data.control;
+  constructor() {
+    const initialValue = this.data.control?.value ?? this.data.text ?? '';
+    this.isEditable = !this.data.readonly && !!this.data.control;
     this.localFc = new FormControl(initialValue);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, ValidationErrors, Validators } from "@angular/forms";
 
 function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
@@ -15,6 +15,7 @@ function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
     providedIn: "root"
 })
 export class ActiveWwellFormService {
+    private _fb = inject(FormBuilder);
 
     drillingRemarksForm: FormGroup = this._fb.group({
         epANum: [null, [Validators.required]],
@@ -48,5 +49,4 @@ export class ActiveWwellFormService {
         remarks:    [null],
     });
 
-    constructor(private _fb: FormBuilder) {}
 }

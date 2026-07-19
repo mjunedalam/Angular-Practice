@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnDestroy, ViewChild, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl, SafeHtml } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,11 +33,12 @@ export class FilePreviewDialogComponent implements OnDestroy {
   private readonly objectUrl: string | null;
   private readonly zoomStep = 0.25;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) readonly file: File,
-    private readonly dialogRef: MatDialogRef<FilePreviewDialogComponent>,
-    private readonly sanitizer: DomSanitizer,
-  ) {
+  protected readonly file = inject<File>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject(MatDialogRef<FilePreviewDialogComponent>);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  constructor() {
+    const file = this.file;
     this.fileName = file.name;
     this.previewType = this.resolveType(file);
     this.fileSize = this.formatSize(file.size);

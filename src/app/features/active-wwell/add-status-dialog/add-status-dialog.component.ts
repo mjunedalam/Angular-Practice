@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -23,12 +23,9 @@ import { normalizeStatusName } from '../active-wwell.helpers';
 })
 export class AddStatusDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<AddStatusDialogComponent, string>);
+  private readonly data = inject<{ name?: string } | null>(MAT_DIALOG_DATA);
 
-  protected name = '';
-
-  constructor(@Inject(MAT_DIALOG_DATA) data: { name?: string } | null) {
-    this.name = data?.name ?? '';
-  }
+  protected name = this.data?.name ?? '';
 
   protected cancel(): void {
     this.dialogRef.close();
