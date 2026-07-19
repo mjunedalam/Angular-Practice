@@ -32,7 +32,6 @@ export const legendItems = tilesArray.map(t => ({
   color: LEGEND_CHIP_COLORS[t.biNum] ?? `rgb(${t.color[0]}, ${t.color[1]}, ${t.color[2]})`,
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const statusGroupColumnDefs: ColDef<StatusGroupRow>[] = [
   {
     headerName: 'Status',

@@ -1,25 +1,10 @@
 import { IWellData } from '@models/well-design/well-data.model';
-import { DatabaseInfoViewModel, WellHeaderViewModel } from '@models/active-wwell/active-wwell-view.model';
-import { FALLBACK_STR } from 'src/app/core/store/shared/well-data.selectors';
 
 export const ACTIVE_WWELL_FALLBACK = 'N/A';
 
-export function getMissingDetailLabels(
-  header: WellHeaderViewModel | null,
-  dbInfo: DatabaseInfoViewModel | null,
-): string[] {
-  const missing: string[] = [];
-  const isMissing = (v: unknown) => v == null || String(v).trim() === '' || String(v).trim() === FALLBACK_STR;
-
-  // if (!header || isMissing(header.wellName)) missing.push('Well Name');
-  // if (!header || isMissing(header.field)) missing.push('Field');
-  // if (!header || isMissing(header.depth)) missing.push('Target Depth');
-  // if (!header || isMissing(header.biNum)) missing.push('BI Number');
-
-  // if (!dbInfo || isMissing(dbInfo.rig)) missing.push('Rig');
-  // if (!dbInfo || isMissing(dbInfo.spudDate)) missing.push('Spud Date');
-
-  return missing;
+// header/dbInfo checks are currently disabled.
+export function getMissingDetailLabels(): string[] {
+  return [];
 }
 
 export function normalizeStatusName(value: string): string {

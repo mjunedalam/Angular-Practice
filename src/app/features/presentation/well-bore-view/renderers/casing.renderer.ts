@@ -374,7 +374,7 @@ function buildCasingTooltipController(
     layout: DiagramLayout,
     centerX: number,
 ) {
-    type Row = { label: string; value: string; hilite?: boolean };
+    interface Row { label: string; value: string; hilite?: boolean; }
 
     let isVisible = false;
     let lastSide: 'left' | 'right' | null = null;
@@ -389,7 +389,7 @@ function buildCasingTooltipController(
         title: string,
         badge: string,
         accent: string,
-        rows: ReadonlyArray<Row>,
+        rows: readonly Row[],
         hw: number,
         mouseX: number,
         mouseY: number,

@@ -46,7 +46,6 @@ import { IWellData } from '@models/well-design/well-data.model';
 import { MorningReportStore } from '../morning-report/store/morning-report.store';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import {
-  DOT_COLOR,
   lineSymbol,
   locationTextSymbol,
   MAP_CONFIG,
@@ -56,7 +55,6 @@ import {
   wwellIdTextSymbol,
 } from 'src/app/shared/models/config/agwa-map.config';
 import { findNonOverlappingPosition } from 'src/app/shared/utils/wwell-placement-utils';
-import { getMockKsaWwells } from 'src/app/shared/utils/mock-wwells.util';
 import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
 import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
 import { NotificationService } from '@shared/components/notification/notification.service';

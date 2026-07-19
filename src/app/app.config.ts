@@ -1,7 +1,7 @@
 import { ApplicationConfig, importProvidersFrom, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { authInterceptor } from '@interceptors/auth.interceptor';
 import { errorInterceptor } from '@interceptors/error.interceptor';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -17,7 +17,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor, errorInterceptor]),
+      withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+    ),
     provideAnimationsAsync(),
     importProvidersFrom(MatSnackBarModule, MatDialogModule),
 

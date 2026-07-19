@@ -173,10 +173,7 @@ export class WwellTestComponent {
     const isMissing = (v: unknown) => v == null || String(v).trim() === '' || String(v).trim() === 'N/A';
 
     const f = this.formService.drillingRemarksForm.getRawValue();
-    const missing = getMissingDetailLabels(
-      this.store.wellHeaderData(),
-      this.store.databaseInfo(),
-    );
+    const missing = getMissingDetailLabels();
 
     if (isMissing(f['status'])) missing.push('Status');
     if (isMissing(f['area']))   missing.push('Area');
