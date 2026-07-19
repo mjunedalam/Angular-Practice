@@ -1,7 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { randomUUID } from 'crypto';
 
 import { LoginComponent } from './login.component';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
@@ -10,7 +8,6 @@ import { LoaderService } from '@shared/components/global-loader/loader.service';
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  const testPassword = `test-${randomUUID()}`;
   const authStoreMock = {
     login: jest.fn(),
     isLoading: jest.fn(() => false),
@@ -57,35 +54,10 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should disable submit until both fields are filled', () => {
-    const toggleButton: HTMLButtonElement = fixture.nativeElement.querySelector('.btn-toggle');
-    toggleButton.click();
+  it('should call login when the SSO button is clicked', () => {
+    const ssoButton: HTMLButtonElement = fixture.nativeElement.querySelector('.btn-sso');
+    ssoButton.click();
     fixture.detectChanges();
-
-    const loginForm = (component as unknown as { loginForm: LoginComponent['loginForm'] }).loginForm;
-    const submitButton: HTMLButtonElement = fixture.nativeElement.querySelector('.btn-submit');
-    expect(submitButton.disabled).toBe(true);
-
-    loginForm.controls.username.setValue('jane.doe');
-    fixture.detectChanges();
-    expect(submitButton.disabled).toBe(true);
-
-    loginForm.controls.password.setValue(testPassword);
-    fixture.detectChanges();
-    expect(submitButton.disabled).toBe(false);
-  });
-
-  it('should call login when the form is valid', () => {
-    const toggleButton: HTMLButtonElement = fixture.nativeElement.querySelector('.btn-toggle');
-    toggleButton.click();
-    fixture.detectChanges();
-
-    const loginForm = (component as unknown as { loginForm: LoginComponent['loginForm'] }).loginForm;
-    loginForm.setValue({ username: 'jane.doe', password: testPassword });
-    fixture.detectChanges();
-
-    const form = fixture.debugElement.query(By.css('form'));
-    form.triggerEventHandler('ngSubmit');
 
     expect(authStoreMock.login).toHaveBeenCalledTimes(1);
   });

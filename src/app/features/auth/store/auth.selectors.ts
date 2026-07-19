@@ -11,11 +11,6 @@ export interface AuthUser {
   readonly [key: string]: unknown;
 }
 
-export interface LoginRequest {
-  readonly username: string;
-  readonly password: string;
-}
-
 export interface AuthState {
   readonly token: string | null;
   readonly isAuthenticated: boolean;
