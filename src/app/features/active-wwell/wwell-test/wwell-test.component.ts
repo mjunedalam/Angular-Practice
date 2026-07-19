@@ -76,7 +76,7 @@ export class WwellTestComponent {
         this.isFlowTest.set(flowType);
         this.initialFlowType = flowType;
       }
-    }, { allowSignalWrites: true });
+    });
 
     // Sync mode → hydTestTypCd and re-evaluate the requiredFor validators
     effect(() => {
@@ -107,14 +107,14 @@ export class WwellTestComponent {
       this.isPublished.set(false);
       this.form.markAsUntouched();
       this.formService.drillingRemarksForm.markAsUntouched();
-    }, { allowSignalWrites: true });
+    });
 
 
     // Re-run calculation when test type changes so tooltip stays in sync
     effect(() => {
       this.isFlowTest();
       this.recalculateProductivity();
-    }, { allowSignalWrites: true });
+    });
 
     merge(
       this.form.get('statWlvl')!.valueChanges,

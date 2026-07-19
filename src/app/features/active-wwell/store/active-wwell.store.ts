@@ -295,10 +295,6 @@ export const ActiveWwellStore = signalStore(
                 return EMPTY as unknown as void;
             },
 
-            setStatus(status: string): void {
-                patchState(store, { status })
-            },
-
             refreshWellDetail(): void {
                 const epANum = store.selectedEpANum();
                 const date = formatDateForInput(store.selectedDate());

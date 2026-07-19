@@ -70,7 +70,7 @@ export class ActiveWwellDocsViewerComponent {
       this.wellStore.selectedEpANum();
       this.wellStore.selectedDate();
       this.collapsed.set(true);
-    }, { allowSignalWrites: true });
+    });
 
     // Load docs only when panel is expanded
     effect(() => {

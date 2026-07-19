@@ -13,7 +13,6 @@ export interface ActiveWwellState {
     readonly error: string | null;
     readonly animationTrigger: number;
     readonly wellNamesPage: number;
-    readonly status:string;
     readonly aquifers: Aquifer[];
     readonly aquifersLoading: boolean;
 }
@@ -28,7 +27,6 @@ export const initialActiveWwellState: ActiveWwellState = {
     error: null,
     animationTrigger: 0,
     wellNamesPage: 0,
-    status:"",
     aquifers: [],
     aquifersLoading: false,
 };

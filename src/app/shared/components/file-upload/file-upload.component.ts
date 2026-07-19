@@ -42,7 +42,7 @@ export class FileUploadComponent {
       if (epANum != null && date) {
         this.docsStore.loadDocList({ epANum, date });
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   protected onDragOver(event: DragEvent): void {
