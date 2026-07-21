@@ -8,6 +8,8 @@ import {
   selectPagedWellNames,
   selectTotalDepth,
   selectTotalPages,
+  selectWellLogsIndicators,
+  selectWellLogsRemarks,
   selectWellNamesFromList,
 } from './well-data.selectors';
 import { WellboreTestDataUtil } from '@shared/utils/testing/wellbore-test-data.util';
@@ -46,11 +48,7 @@ describe('well-data.selectors', () => {
       DRLG_OP_STATUS: [
         WellboreTestDataUtil.drillingStatus({
           wPrsntDpth: WellboreTestDataUtil.currentDepthBeyondTargetFt,
-        }),
-      ],
-      EXAD_RCD_PREWAP: [
-        WellboreTestDataUtil.preWellData({
-          estTargetDepth: WellboreTestDataUtil.plannedTargetDepthFt,
+          targetDepth: WellboreTestDataUtil.plannedTargetDepthFt,
         }),
       ],
     });
@@ -110,11 +108,7 @@ describe('well-data.selectors', () => {
       DRLG_OP_STATUS: [
         WellboreTestDataUtil.drillingStatus({
           wPrsntDpth: currentDepth,
-        }),
-      ],
-      EXAD_RCD_PREWAP: [
-        WellboreTestDataUtil.preWellData({
-          estTargetDepth: WellboreTestDataUtil.plannedTargetDepthFt,
+          targetDepth: WellboreTestDataUtil.plannedTargetDepthFt,
         }),
       ],
     });
@@ -128,5 +122,20 @@ describe('well-data.selectors', () => {
     expect(diagramData?.casings.map(casing => casing.csgDepth)).toEqual([3430, 2020]);
     expect(diagramData?.drlgCasings.map(casing => casing.wCsgBotDpth)).toEqual([3430, 2020]);
     expect(diagramData?.geologicTops.map(top => top.planTvdDepth)).toEqual([690, 6500]);
+  });
+
+  describe('NOT_REQUIRED_RE (case-insensitive, "require"/"required", optional period)', () => {
+    const withDtRemark = (dtRemarks: string) =>
+      WellboreTestDataUtil.wellData({ EXAD_GWD_IR_HEADER: [{ dtRemarks, mudRemarks: '', loggingRemarks: '' }] });
+
+    it.each([
+      ['not required', false], ['not require', false], ['not required.', false], ['not require.', false],
+      ['NOT REQUIRED', false], ['NOT REQUIRE.', false], ['Not Required', false], ['nOt reQuire.', false],
+      ['  Not Required.  ', false],
+      ['not required for this section but keep monitoring', true], ['not-required', true], ['RCC done', true],
+    ])('"%s" -> active=%s, remark cleared when inactive', (remark, active) => {
+      expect(selectWellLogsIndicators(withDtRemark(remark))?.rcc).toBe(active);
+      expect(selectWellLogsRemarks(withDtRemark(remark))?.dtRemarks).toBe(active ? remark : null);
+    });
   });
 });

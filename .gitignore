@@ -20,3 +20,4 @@ dist/
 
 # Graphify skill output
 graphify-out/
+.gstack/

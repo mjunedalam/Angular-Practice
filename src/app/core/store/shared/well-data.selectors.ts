@@ -75,9 +75,9 @@ export function selectWellEpANum(d: IWellData | null | undefined): number | null
 }
 
 export function selectTotalDepth(d: IWellData | null): number {
-    const estTargetDepth = safeNum(d?.EXAD_RCD_PREWAP?.[0]?.estTargetDepth) ?? 0;
+    const targetDepth = safeNum(d?.DRLG_OP_STATUS?.[0]?.targetDepth) ?? 0;
     const currentDepth = safeNum(d?.DRLG_OP_STATUS?.[0]?.wPrsntDpth) ?? 0;
-    return Math.max(estTargetDepth, currentDepth);
+    return Math.max(targetDepth, currentDepth);
 }
 
 export function selectDisplayDepth(d: IWellData | null): number {
@@ -224,7 +224,7 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
     });
 }
 
-const NOT_REQUIRED_RE = /^not required$/i;
+const NOT_REQUIRED_RE = /^not require[d]?\.?$/i;
 
 function toActiveRemark(val: string | undefined): string | null {
     const trimmed = val?.trim();

@@ -1,0 +1,1 @@
+nexus-iq-cli -i agwa-frontend -s https://ost1v.enp.aramco.com.sa:8070 -t build dist/agwa/*.js package.json package-lock.json -Djava.net.useSystemProxies=false --ssl-trust-store-path %JAVA_HOME%\lib\security\cacerts -a %NEXUS_CREDENTIALS%
