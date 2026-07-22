@@ -225,10 +225,11 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
     });
 }
 
-const NOT_REQUIRED_RE = /^not require[d]?\.?$/i;
+const NOT_REQUIRED_RE = /^(not\s*require[d]?|false)\s*\.?$/i;
 
 function toActiveRemark(val: string | undefined): string | null {
-    const trimmed = val?.trim();
+    if (typeof val !== 'string') return null;
+    const trimmed = val.trim();
     return trimmed && !NOT_REQUIRED_RE.test(trimmed) ? trimmed : null;
 }
 
