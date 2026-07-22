@@ -249,6 +249,7 @@ Rows are produced in two passes:
 | Well Productivity (GPM/FT) — Actual | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.hydProduct` | Pump test only; IR estimate from `hydro?.estProductivity` shown read-only |
 | SIWHP | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.siwhp` | Flow test only |
 | Conducted By | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.testerNetworkId` | Tester's network ID; editable text input |
+| Conducted By (presentation display) | `EXAD_GWD_WELL_TESTS[0]` | `testOutcome?.testerName` → `WwellTestViewModel.testerName` | Read-only "Conducted By" card in `WwellTestResultComponent`; distinct from the editable `conductedBy`/`testerNetworkId` field above |
 | Flow Test toggle | `EXAD_GWD_IR_HYDROGEOLOGY[0]` | `hydro?.flowType ?? 'N'` | `flowType !== 'N'` → flow test UI; else pump test UI |
 
 ---

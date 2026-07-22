@@ -495,6 +495,7 @@ export function selectWwellTestViewModel(d: IWellData | null): WwellTestViewMode
         rpm: testOutcome?.rpm,
         duration: testOutcome?.duration,
         conductedBy: testOutcome?.testerNetworkId,
+        testerName: testOutcome?.testerName,
         rate: testOutcome?.hydProdRt,
         siwhp: testOutcome?.siwhp,
         fwhp: testOutcome?.fwhp,

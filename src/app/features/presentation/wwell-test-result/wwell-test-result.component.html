@@ -541,7 +541,7 @@
           }
 
           <!-- Conducted By — always full-width, like Remarks -->
-          @if (r.conductedBy) {
+          @if (r.testerName) {
             <div class="tr-card tr-card--full">
               <div class="tr-card__hd">
                 <div class="tr-icon">
@@ -559,7 +559,7 @@
                 </div>
                 <div class="tr-label">Conducted By</div>
               </div>
-              <div class="tr-text">{{ r.conductedBy }}</div>
+              <div class="tr-text">{{ r.testerName }}</div>
             </div>
           }
         </div>

@@ -128,6 +128,7 @@ export interface WwellTestViewModel {
   readonly rpm?: number | string | null;
   readonly duration?: number | string | null;
   readonly conductedBy?: string | null;
+  readonly testerName?: string | null;
   readonly rate?: number | string | null;
   readonly siwhp?: number | string | null;
   readonly fwhp?: number | string | null;
