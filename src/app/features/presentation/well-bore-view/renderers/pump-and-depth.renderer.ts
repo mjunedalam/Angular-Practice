@@ -30,8 +30,7 @@ export function renderTotalDepthLabel({
   animation,
 }: RenderTotalDepthLabelOptions): void {
   const ty = yPx + 35;
-  const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
-  const isCurrentDepthBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
+  const isCurrentDepthBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
   const labelDepth = isCurrentDepthBeyondTarget ? data.currentDepth : data.totalDepth;
   const g = rootG.append('g').attr('class', 'td-label');
   g.append('text')

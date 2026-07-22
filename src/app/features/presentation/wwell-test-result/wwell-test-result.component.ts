@@ -15,6 +15,7 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { trigger, transition, animate, style } from '@angular/animations';
 import { PresentationStore } from '../store/presentation.store';
 import { WwellTestViewModel } from '@models/active-wwell/active-wwell-view.model';
+import { createMobileQuerySignal, startDialogResize } from '@shared/utils/dialog-interaction.util';
 
 @Component({
   selector: 'app-wwell-test-result',
@@ -46,17 +47,10 @@ export class WwellTestResultComponent {
   private readonly locale = inject(LOCALE_ID);
   private dialogRef?: MatDialogRef<unknown>;
 
-  private readonly mobileQuery = window.matchMedia(WwellTestResultComponent.MOBILE_QUERY);
-  protected readonly isMobile = signal(this.mobileQuery.matches);
+  protected readonly isMobile = createMobileQuerySignal(WwellTestResultComponent.MOBILE_QUERY, this.destroyRef);
 
   protected readonly selectedResult = signal<WwellTestViewModel | null>(null);
   protected readonly dialogVisible = signal(false);
-
-  constructor() {
-    const onMobileChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
-    this.mobileQuery.addEventListener('change', onMobileChange);
-    this.destroyRef.onDestroy(() => this.mobileQuery.removeEventListener('change', onMobileChange));
-  }
 
   protected readonly isFlowTest = computed(() => {
     const data = this.store.wwellTest();
@@ -99,65 +93,11 @@ export class WwellTestResultComponent {
   }
 
   protected onResizeStart(event: MouseEvent, axis: 'width' | 'height' | 'both'): void {
-    event.preventDefault();
-    event.stopPropagation();
     if (this.isMobile()) return;
-
-    const el = (event.currentTarget as HTMLElement)?.closest('.dialog__wrapper') as HTMLElement | null;
-    if (!el) return;
-
-    const pane = el.closest('.cdk-overlay-pane') as HTMLElement | null;
-
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startW = el.offsetWidth;
-    const startH = el.offsetHeight;
-
-    let pendingEvent: MouseEvent | null = null;
-    let frameId = 0;
-
-    const applyResize = () => {
-      frameId = 0;
-      if (!pendingEvent) return;
-      const w = axis === 'height'
-        ? startW
-        : Math.min(
-            Math.max(WwellTestResultComponent.MIN_DIALOG_WIDTH, startW + (pendingEvent.clientX - startX)),
-            window.innerWidth - WwellTestResultComponent.VIEWPORT_MARGIN,
-          );
-      const h = axis === 'width'
-        ? startH
-        : Math.min(
-            Math.max(WwellTestResultComponent.MIN_DIALOG_HEIGHT, startH + (pendingEvent.clientY - startY)),
-            window.innerHeight - WwellTestResultComponent.VIEWPORT_MARGIN,
-          );
-      el.style.width = `${w}px`;
-      el.style.height = `${h}px`;
-      if (pane) {
-        pane.style.width = `${w}px`;
-        pane.style.height = `${h}px`;
-      }
-    };
-
-    const onMove = (e: MouseEvent) => {
-      pendingEvent = e;
-      if (!frameId) frameId = requestAnimationFrame(applyResize);
-    };
-
-    const onUp = () => {
-      if (frameId) cancelAnimationFrame(frameId);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      el.classList.remove('dialog__wrapper--resizing');
-    };
-
-    const cursor = axis === 'width' ? 'ew-resize' : axis === 'height' ? 'ns-resize' : 'se-resize';
-    document.body.style.cursor = cursor;
-    document.body.style.userSelect = 'none';
-    el.classList.add('dialog__wrapper--resizing');
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    startDialogResize(event, axis, {
+      minWidth: WwellTestResultComponent.MIN_DIALOG_WIDTH,
+      minHeight: WwellTestResultComponent.MIN_DIALOG_HEIGHT,
+      viewportMargin: WwellTestResultComponent.VIEWPORT_MARGIN,
+    });
   }
 }

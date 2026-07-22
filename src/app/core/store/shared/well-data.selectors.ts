@@ -150,6 +150,7 @@ export function selectDiagramData(d: IWellData | null): WellboreDiagramData | nu
         prewap: d.EXAD_RCD_PREWAP?.[0] ?? null,
         rigActivity: d.RIG_ACTIVITY?.[0] ?? null,
         currentDepth: d.DRLG_OP_STATUS?.[0]?.wPrsntDpth ?? 0,
+        targetDepth: safeNum(d.DRLG_OP_STATUS?.[0]?.targetDepth) ?? 0,
         mudCirculation: (d.MUD_CIRC ?? []).map(m => ({
             depth: m.wPrsntDpth,
             pct: Number(m.wMudCircPc),
@@ -213,11 +214,11 @@ export function selectOffsetWells(d: IWellData | null): OffsetWaterWells[] {
         return {
             wellName: ow.offsetWaterWell,
             aquifer: ow.aquifer || test?.rsvrCd || 'WASI',
-            tds: test?.wtrSaTdsCnc ?? 0,
+            tds: ow.fieldTds ?? 0,
             rpm: ow.rpm ?? 0,
             h2s: ow.h2s ?? 0,
             distance: ow.distance ?? 0,
-            productivity: ow.specificCapacity ?? 0,
+            specificCapacity: ow.specificCapacity ?? 0,
             rate: test?.hydProdRt ?? ow.flowRate ?? 0,
             direction: ow?.direction ?? "NA",
         };

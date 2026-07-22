@@ -223,8 +223,7 @@ export function buildCompletion3D(
   const { bit, string: drillString, targetY } = buildDrillString(data, depthScale, group);
   buildPumpMarker(data, depthScale, group);
 
-  const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
-  const isBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
+  const isBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
   const labelDepth = isBeyondTarget ? data.currentDepth : data.totalDepth;
   const totalDepthY = depthScale.toY(resolveCompletionBottomDepth(data));
   const totalDepthLabel = createLabelSprite({

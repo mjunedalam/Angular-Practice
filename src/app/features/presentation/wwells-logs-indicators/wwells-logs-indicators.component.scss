@@ -26,37 +26,62 @@
   box-sizing: border-box;
 }
 
-.indicator-toggle {
+// Status tags — deliberately NOT pill/button-shaped (no full-fill gradient,
+// no border-radius:20px "toggle switch" look) so they read as data, not controls.
+.indicator-tag {
   flex: 1;
   min-width: 0;
   display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 6px;
-  padding: 4px 11px 4px 8px;
-  border-radius: 20px;
-  background: rgba(100, 116, 139, 0.1);
-  border: 1px solid rgba(100, 116, 139, 0.18);
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(100, 116, 139, 0.06);
+  border: 1px solid rgba(100, 116, 139, 0.16);
   cursor: default;
   position: relative;
   transition: background 0.2s ease, border-color 0.2s ease;
   user-select: none;
+
+  // Accent rail as its own layer (not a border-left) — mixing border-radius with an
+  // uneven border thickness makes the browser pinch the rounded corner into a beak shape.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    bottom: 3px;
+    width: 3px;
+    border-radius: 2px;
+    background: rgba(100, 116, 139, 0.4);
+    transition: background 0.2s ease;
+  }
 
   &--has-tooltip {
     cursor: help;
   }
 
   &--active {
-    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
-    border-color: transparent;
+    background: rgba(37, 99, 235, 0.07);
+    border-color: rgba(37, 99, 235, 0.22);
 
-    .indicator-toggle__dot {
-      background: #fff;
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    &::before {
+      background: #2563eb;
     }
 
-    .indicator-toggle__label {
-      color: #fff;
+    .indicator-tag__dot {
+      background: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+
+    .indicator-tag__value {
+      color: #2563eb;
+      opacity: 1;
+    }
+
+    .indicator-tag__tooltip::before {
+      background: #2563eb;
     }
   }
 
@@ -64,7 +89,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(100, 116, 139, 0.35);
+    background: rgba(100, 116, 139, 0.4);
     flex-shrink: 0;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
@@ -77,28 +102,44 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1;
-    opacity: 0.55;
 
-    .indicator-toggle--active & {
-      opacity: 1;
+    &::after {
+      content: ':';
+      margin: 0 3px;
+      opacity: 0.4;
+      font-weight: 600;
     }
   }
 
+  &__value {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    opacity: 0.55;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    transition: color 0.2s ease, opacity 0.2s ease;
+  }
+
+  // Same card theme as the wellbore casing hover tooltip (casing.renderer.ts):
+  // white card, subtle border, soft drop-shadow, DM Sans, colored accent rail.
   &__tooltip {
     position: absolute;
     bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
     width: 260px;
-    padding: 10px 13px;
-    background: #0f172a;
-    color: #cbd5e1;
-    font-size: 12px;
-    font-weight: 400;
+    padding: 12px 14px 12px 17px;
+    background: #ffffff;
+    color: #0f172a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
     line-height: 1.55;
     border-radius: 8px;
-    border: 1px solid rgba(99, 102, 241, 0.28);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
     white-space: normal;
     word-break: break-word;
     pointer-events: none;
@@ -107,6 +148,18 @@
     transition: opacity 0.16s ease, visibility 0.16s ease;
     z-index: 200;
 
+    // Accent rail as its own layer, same reasoning as .indicator-tag::before above.
+    &::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      bottom: 4px;
+      width: 4px;
+      border-radius: 2px;
+      background: rgba(100, 116, 139, 0.4);
+    }
+
     &::after {
       content: '';
       position: absolute;
@@ -114,13 +167,40 @@
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-top-color: #0f172a;
+      border-top-color: #ffffff;
     }
   }
 
   &:hover &__tooltip {
     opacity: 1;
     visibility: visible;
+  }
+}
+
+// The diagram card that hosts this strip clips overflow (rounded corners), so a
+// tooltip centered under the first/last tag would get its edge cut off instead of
+// floating free. Anchor those two to the tag's own edge instead of centering them.
+.log-strip {
+  .indicator-tag:first-child .indicator-tag__tooltip {
+    left: 0;
+    transform: none;
+
+    &::after {
+      left: 24px;
+      transform: none;
+    }
+  }
+
+  .indicator-tag:last-child .indicator-tag__tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+
+    &::after {
+      left: auto;
+      right: 24px;
+      transform: none;
+    }
   }
 }
 
@@ -136,11 +216,12 @@
     padding: 0 12px;
   }
 
-  .indicator-toggle {
-    padding: 3px 9px 3px 7px;
+  .indicator-tag {
+    padding: 4px 10px 4px 8px;
   }
 
-  .indicator-toggle__label {
+  .indicator-tag__label,
+  .indicator-tag__value {
     font-size: 10px;
   }
 }

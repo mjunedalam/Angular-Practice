@@ -1,75 +1,183 @@
-<div class="offset-well-section">
-  <div class="offset-well-section__header">
-    <div class="header-content">
-      <div class="header-title">Offset Wells</div>
-      <div class="header-sub">NEAREST WELLS</div>
-    </div>
-    <div class="header-badge">{{ store.offsetWells().length }}</div>
+<div class="ow-container">
+  <div class="ow-header">
+    <div class="ow-header__title"><span>Offset Wells</span></div>
+    <div class="ow-header__badge">{{ store.offsetWells().length }}</div>
   </div>
 
-  <div class="offset-accordion">
-    @for (well of store.offsetWells(); track well.wellName; let i = $index) {
-      <div #panelContainer>
-      <mat-expansion-panel [expanded]="activeValue() === i.toString()" (opened)="onPanelOpen(i.toString(), panelContainer)">
-        <mat-expansion-panel-header>
-          <div class="well-header-row">
-            <div class="well-info">
-              <div class="drop-icon">
-                <svg viewBox="0 0 24 24" fill="url(#well-drop-grad)">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                </svg>
+  <div class="ow-list">
+    @for (well of store.offsetWells(); track well.wellName) {
+      <div class="ow-item" #panelContainer>
+        <button
+          @owTabAnim
+          type="button"
+          class="ow-tab"
+          [class.ow-tab--expanded]="expandedWell() === well.wellName"
+          (click)="toggleWell(well.wellName, panelContainer)"
+        >
+          <div class="ow-tab__left">
+            <div class="ow-tab__icon">
+              <svg viewBox="0 0 24 24" fill="url(#well-drop-grad)">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </svg>
+            </div>
+            <div class="ow-tab-metrics">
+              <div class="ow-tab-metric ow-tab-metric--well">
+                <span class="ow-tab-metric__label">Well</span>
+                <span class="ow-tab-metric__value">{{ well.wellName }}</span>
               </div>
-              <div class="well-meta">
-                <div class="well-name">{{ well.wellName }}</div>
-                <div class="well-aquifer">{{ well.aquifer }} Aquifer</div>
+              <span class="ow-tab-metric__sep"></span>
+              <div class="ow-tab-metric">
+                <span class="ow-tab-metric__label">Aquifer</span>
+                <span class="ow-tab-metric__value ow-tab-metric__value--aquifer">{{ well.aquifer }}</span>
+              </div>
+              @if (well.h2s > 0) {
+                <span class="ow-tab-metric__sep"></span>
+                <div class="ow-tab-metric">
+                  <span class="ow-tab-metric__label">H&#8322;S</span>
+                  <span class="ow-tab-metric__value ow-tab-metric__value--warn">{{ well.h2s | number }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="ow-tab__right">
+            <div class="ow-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </div>
+          </div>
+        </button>
+
+        @if (expandedWell() === well.wellName) {
+          <div class="ow-content">
+            <div class="ow-grid">
+              <!-- TDS -->
+              <div class="ow-card">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                  </div>
+                  <div class="ow-label">TDS</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num">{{ well.tds | number }}</span>
+                  <span class="ow-unit">PPM</span>
+                </div>
+              </div>
+
+              <!-- RPM -->
+              <div class="ow-card">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 4 23 10 17 10" />
+                      <path d="M20.49 15a9 9 0 1 1-.06-4" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">RPM</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num">{{ well.rpm | number }}</span>
+                </div>
+              </div>
+
+              <!-- H2S -->
+              <div class="ow-card" [class.ow-card--warn]="well.h2s > 0">
+                <div class="ow-card__hd">
+                  <div class="ow-icon" [class.ow-icon--warn]="well.h2s > 0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">H&#8322;S</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num">{{ well.h2s | number }}</span>
+                  <span class="ow-unit">PPM</span>
+                </div>
+              </div>
+
+              <!-- Distance -->
+              <div class="ow-card">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="10" r="3" />
+                      <path d="M12 21c-4-4-7-7.58-7-11a7 7 0 0 1 14 0c0 3.42-3 7-7 11z" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">Distance</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num">{{ well.distance | number:'1.0-1' }}</span>
+                  <span class="ow-unit">km</span>
+                </div>
+              </div>
+
+              <!-- Direction -->
+              <div class="ow-card">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">Direction</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-text">{{ well.direction }}</span>
+                </div>
+              </div>
+
+              <!-- Specific Capacity -->
+              <div class="ow-card">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                      <polyline points="2 17 12 22 22 17" />
+                      <polyline points="2 12 12 17 22 12" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">Specific Capacity</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num ow-num--md">{{ well.specificCapacity | number:'1.0-2' }}</span>
+                  <span class="ow-unit">GPM/ft</span>
+                </div>
+              </div>
+
+              <!-- Flow Rate -->
+              <div class="ow-card ow-card--span2">
+                <div class="ow-card__hd">
+                  <div class="ow-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 12c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2" />
+                      <path d="M2 7c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2" />
+                      <path d="M2 17c1.333-1.333 2.667-2 4-2s2.667.667 4 2 2.667 2 4 2 2.667-.667 4-2" />
+                    </svg>
+                  </div>
+                  <div class="ow-label">Flow Rate</div>
+                </div>
+                <div class="ow-val">
+                  <span class="ow-num">{{ well.rate | number }}</span>
+                  <span class="ow-unit">GPM</span>
+                </div>
               </div>
             </div>
-           
           </div>
-        </mat-expansion-panel-header>
-
-        <div class="well-accordion__content">
-          <div class="stats-row">
-            <div class="stat-box">
-              <div class="stat-box__label">TDS (PPM)</div>
-              <div class="stat-box__value">{{ well.tds | number }}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box__label">RPM</div>
-              <div class="stat-box__value">{{ well.rpm | number }}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box__label">H2S</div>
-              <div class="stat-box__value" [class.highlight-warn]="well.h2s > 0">{{ well.h2s }}</div>
-            </div>
-          </div>
-
-          <div class="premium-row">
-            <div class="p-stat">
-              <div class="p-stat__label">Distance</div>
-              <div class="p-stat__val">{{ well.distance }} ft</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat__label">Direction</div>
-              <div class="p-stat__val">{{ well.direction }}</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat__label">Productivity</div>
-              <div class="p-stat__val">{{ well.productivity }}</div>
-            </div>
-            <div class="p-stat">
-              <div class="p-stat__label">Flow Rate</div>
-              <div class="p-stat__val">{{ well.rate }} GPM</div>
-            </div>
-          </div>
-        </div>
-      </mat-expansion-panel>
+        }
       </div>
     }
   </div>
 
   @if (store.offsetWells().length === 0) {
-    <div class="empty-state">No offset wells found for selection.</div>
+    <div class="ow-empty">No offset wells found for selection.</div>
   }
 
   <svg style="width:0;height:0;position:absolute;" aria-hidden="true">

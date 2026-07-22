@@ -225,6 +225,7 @@ export class WellBoreViewComponent {
       scale,
       start: t_notDrilledStart,
       openHoleHalfWidth: ohHW,
+      layout: this.layout,
     });
     renderTotalDepthLabel({
       rootG: this.rootG,
@@ -251,8 +252,7 @@ export class WellBoreViewComponent {
   }
 
   private resolveDepthLabelAnchor(data: WellboreDiagramData): number {
-    const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
-    if (plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth) {
+    if (data.targetDepth > 0 && data.currentDepth > data.targetDepth) {
       return resolveCompletionBottomDepth(data);
     }
 

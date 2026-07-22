@@ -48,8 +48,7 @@ export function resolveCompletionTopPx(
 
 export function resolveCompletionBottomDepth(data: WellboreDiagramData): number {
   const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
-  const plannedTargetDepth = data.prewap?.estTargetDepth ?? 0;
-  const isCurrentDepthBeyondTarget = plannedTargetDepth > 0 && data.currentDepth > plannedTargetDepth;
+  const isCurrentDepthBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
 
   const naturalBottom = isCurrentDepthBeyondTarget
     ? Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT))

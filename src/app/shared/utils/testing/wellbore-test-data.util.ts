@@ -154,6 +154,7 @@ export class WellboreTestDataUtil {
       prewap: this.preWellData(),
       rigActivity: null,
       currentDepth: this.plannedTargetDepthFt,
+      targetDepth: this.plannedTargetDepthFt,
       mudCirculation: [],
       wellDesign: this.wellDesign(),
       ...overrides,

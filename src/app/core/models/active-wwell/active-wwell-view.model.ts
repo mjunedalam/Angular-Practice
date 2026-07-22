@@ -40,7 +40,7 @@ export interface OffsetWaterWells {
   readonly h2s: number;
   readonly distance: number;
   readonly direction: string;
-  readonly productivity: number;
+  readonly specificCapacity: number;
   readonly rate: number;
 }
 

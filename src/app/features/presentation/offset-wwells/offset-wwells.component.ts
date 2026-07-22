@@ -5,24 +5,33 @@
  */
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { trigger, transition, animate, style } from '@angular/animations';
 import { PresentationStore } from '../store/presentation.store';
 
 @Component({
   selector: 'app-offset-wwells',
   standalone: true,
-  imports: [DecimalPipe, MatExpansionModule],
+  imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './offset-wwells.component.html',
   styleUrl: './offset-wwells.component.scss',
+  animations: [
+    trigger('owTabAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-8px)' }),
+        animate('300ms ease', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+    ]),
+  ],
 })
 export class OffsetWwellsComponent {
   protected readonly store = inject(PresentationStore);
-  protected readonly activeValue = signal<string>('-1');
+  protected readonly expandedWell = signal<string | null>(null);
 
-  protected onPanelOpen(index: string, container: HTMLElement): void {
-    this.activeValue.set(index);
-    setTimeout(() => this.scrollToPanel(container), 260);
+  protected toggleWell(wellName: string, container: HTMLElement): void {
+    const next = this.expandedWell() === wellName ? null : wellName;
+    this.expandedWell.set(next);
+    if (next) setTimeout(() => this.scrollToPanel(container), 260);
   }
 
   private scrollToPanel(el: HTMLElement): void {

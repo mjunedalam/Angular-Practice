@@ -21,6 +21,7 @@ export interface WellboreDiagramData {
   readonly prewap: IPreWellData | null;
   readonly rigActivity: IRigActivity | null;
   readonly currentDepth: number;
+  readonly targetDepth: number;
   readonly mudCirculation: MudCircPoint[];
   readonly wellDesign: IWellDesign | null;
 }

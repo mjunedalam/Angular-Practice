@@ -4,35 +4,47 @@
     @let remarks = store.wellsLogsRemarks();
 
     <div
-      class="indicator-toggle"
-      [class.indicator-toggle--active]="data?.rcc"
-      [class.indicator-toggle--has-tooltip]="!!remarks?.dtRemarks"
+      class="indicator-tag"
+      [class.indicator-tag--active]="data?.rcc"
+      [class.indicator-tag--has-tooltip]="!!remarks?.dtRemarks"
+      role="status"
+      [attr.aria-label]="'RCC status: ' + (data?.rcc ? 'Yes' : 'No')"
     >
-      <span class="indicator-toggle__label">RCC</span>
+      <span class="indicator-tag__dot"></span>
+      <span class="indicator-tag__label">RCC</span>
+      <span class="indicator-tag__value">{{ data?.rcc ? 'YES' : 'NO' }}</span>
       @if (remarks?.dtRemarks) {
-        <span class="indicator-toggle__tooltip">{{ remarks!.dtRemarks }}</span>
+        <span class="indicator-tag__tooltip">{{ remarks!.dtRemarks }}</span>
       }
     </div>
 
     <div
-      class="indicator-toggle"
-      [class.indicator-toggle--active]="data?.mudLog"
-      [class.indicator-toggle--has-tooltip]="!!remarks?.mudRemarks"
+      class="indicator-tag"
+      [class.indicator-tag--active]="data?.mudLog"
+      [class.indicator-tag--has-tooltip]="!!remarks?.mudRemarks"
+      role="status"
+      [attr.aria-label]="'Mud Log status: ' + (data?.mudLog ? 'Yes' : 'No')"
     >
-      <span class="indicator-toggle__label">Mud Log</span>
+      <span class="indicator-tag__dot"></span>
+      <span class="indicator-tag__label">Mud Log</span>
+      <span class="indicator-tag__value">{{ data?.mudLog ? 'YES' : 'NO' }}</span>
       @if (remarks?.mudRemarks) {
-        <span class="indicator-toggle__tooltip">{{ remarks!.mudRemarks }}</span>
+        <span class="indicator-tag__tooltip">{{ remarks!.mudRemarks }}</span>
       }
     </div>
 
     <div
-      class="indicator-toggle"
-      [class.indicator-toggle--active]="data?.logging"
-      [class.indicator-toggle--has-tooltip]="!!remarks?.loggingRemarks"
+      class="indicator-tag"
+      [class.indicator-tag--active]="data?.logging"
+      [class.indicator-tag--has-tooltip]="!!remarks?.loggingRemarks"
+      role="status"
+      [attr.aria-label]="'Logging status: ' + (data?.logging ? 'Yes' : 'No')"
     >
-      <span class="indicator-toggle__label">Logging</span>
+      <span class="indicator-tag__dot"></span>
+      <span class="indicator-tag__label">Logging</span>
+      <span class="indicator-tag__value">{{ data?.logging ? 'YES' : 'NO' }}</span>
       @if (remarks?.loggingRemarks) {
-        <span class="indicator-toggle__tooltip">{{ remarks!.loggingRemarks }}</span>
+        <span class="indicator-tag__tooltip">{{ remarks!.loggingRemarks }}</span>
       }
     </div>
   </div>
