@@ -233,6 +233,12 @@ function toActiveRemark(val: string | undefined): string | null {
     return trimmed && !NOT_REQUIRED_RE.test(trimmed) ? trimmed : null;
 }
 
+function toRemarkText(val: string | undefined): string | null {
+    if (typeof val !== 'string') return null;
+    const trimmed = val.trim();
+    return trimmed ? trimmed : null;
+}
+
 function isLogActive(val: string | undefined): boolean {
     return toActiveRemark(val) !== null;
 }
@@ -258,9 +264,9 @@ export function selectWellLogsRemarks(d: IWellData | null): WellLogsRemarks | nu
     const h: IHeaderIR | undefined = d.EXAD_GWD_IR_HEADER?.[0];
     if (!h) return null;
     return {
-        dtRemarks: toActiveRemark(h.dtRemarks),
-        mudRemarks: toActiveRemark(h.mudRemarks),
-        loggingRemarks: toActiveRemark(h.loggingRemarks),
+        dtRemarks: toRemarkText(h.dtRemarks),
+        mudRemarks: toRemarkText(h.mudRemarks),
+        loggingRemarks: toRemarkText(h.loggingRemarks),
     };
 }
 
