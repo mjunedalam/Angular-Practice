@@ -1,5 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, ValidationErrors, Validators } from "@angular/forms";
+import { commaSeparatedNetworkIds } from "@shared/validators/agwa-data-validator";
 
 function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
   return (ctrl: AbstractControl): ValidationErrors | null => {
@@ -8,16 +9,6 @@ function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
     const v = ctrl.value;
     const empty = v == null || (typeof v === 'string' && v.length === 0);
     return empty ? { required: true } : null;
-  };
-}
-
-const NETWORK_ID_LIST_PATTERN = /^[a-zA-Z0-9]+(\s*,\s*[a-zA-Z0-9]+)*$/;
-
-function commaSeparatedNetworkIds(): ValidatorFn {
-  return (ctrl: AbstractControl): ValidationErrors | null => {
-    const v = ctrl.value;
-    if (v == null || String(v).trim() === '') return null;
-    return NETWORK_ID_LIST_PATTERN.test(String(v).trim()) ? null : { invalidNetworkIds: true };
   };
 }
 

@@ -17,6 +17,7 @@ import { RbacStore } from '@store/rbac/rbac.store';
 import { ACTIONS } from '@models/rbac/role.constants';
 import { formatDateForInput } from '@shared/utils/date.util';
 import { calcFlowProductivityIndex, calcPumpProductivityIndex } from '@shared/utils/well-test-math.util';
+import { allowKeypress, NETWORK_ID_KEY_PATTERN, NUMERIC_KEY_PATTERN } from '@shared/validators/agwa-data-validator';
 import { getMissingDetailLabels } from '../active-wwell.helpers';
 
 @Component({
@@ -367,9 +368,10 @@ export class WwellTestComponent {
   protected readonly aquiferOptions = this.store.aquifers;
 
   protected onlyNumbers(event: KeyboardEvent): void {
-    const allowed = /[\d.-]/.test(event.key) || [
-      'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'
-    ].includes(event.key);
-    if (!allowed) event.preventDefault();
+    allowKeypress(event, NUMERIC_KEY_PATTERN);
+  }
+
+  protected onlyNetworkIdListChars(event: KeyboardEvent): void {
+    allowKeypress(event, NETWORK_ID_KEY_PATTERN);
   }
 }

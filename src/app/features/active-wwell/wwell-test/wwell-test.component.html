@@ -327,6 +327,7 @@
             class="wt-actual wt-actual--no-ir"
             type="text"
             formControlName="testerNetworkId"
+            (keypress)="onlyNetworkIdListChars($event)"
           />
         </div>
       </div>
