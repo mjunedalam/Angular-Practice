@@ -322,7 +322,18 @@
         }
 
         <div class="wt-row wt-row--conducted">
-          <span class="wt-label wt-label--cased wt-label--stacked">Conducted by<span class="wt-label__hint">(comma-separated Netword-IDs)</span></span>
+          <span class="wt-label wt-label--cased wt-label--with-info">
+            Conducted by
+            <span class="wt-info-wrap"
+              (mouseenter)="showNetworkHint($event)"
+              (mouseleave)="hideNetworkHint()">
+              <svg class="wt-info-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="8" fill="currentColor"/>
+                <rect x="7.1" y="7" width="1.8" height="5" rx="0.9" fill="white"/>
+                <circle cx="8" cy="4.8" r="1.1" fill="white"/>
+              </svg>
+            </span>
+          </span>
           <input
             class="wt-actual wt-actual--no-ir"
             type="text"
@@ -357,6 +368,19 @@
       </div>
     }
   </div>
+
+  @if (networkHintVisible()) {
+    <div class="wt-tooltip wt-tooltip--hint"
+         [style.bottom.px]="networkHintPos().bottom"
+         [style.right.px]="networkHintPos().right">
+      <div class="wt-tooltip-title">Conducted By</div>
+      <div class="wt-tooltip-divider"></div>
+      <div class="wt-network-hint-text">
+        Must be a comma-separated list of Network IDs. Example:
+      </div>
+      <div class="wt-network-hint-example">NetworkID1, NetworkID2, NetworkID3</div>
+    </div>
+  }
 
   @if (tooltipVisible()) {
     <div class="wt-tooltip"

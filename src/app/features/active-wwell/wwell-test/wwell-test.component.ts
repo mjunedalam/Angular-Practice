@@ -69,6 +69,22 @@ export class WwellTestComponent {
     this.tooltipVisible.set(false);
   }
 
+  protected readonly networkHintVisible = signal(false);
+  protected readonly networkHintPos = signal({ bottom: 0, right: 0 });
+
+  protected showNetworkHint(event: MouseEvent): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.networkHintPos.set({
+      bottom: window.innerHeight - rect.top + 10,
+      right: window.innerWidth - rect.right,
+    });
+    this.networkHintVisible.set(true);
+  }
+
+  protected hideNetworkHint(): void {
+    this.networkHintVisible.set(false);
+  }
+
   constructor() {
     effect(() => {
       const data = this.data();
@@ -213,7 +229,7 @@ export class WwellTestComponent {
 
     if (this.isPublished() && this.form.get('testerNetworkId')?.hasError('invalidNetworkIds')) {
       this.notify.warn(
-        'Conducted by must be a comma-separated list of Network IDs (e.g. jd12345, ab67890)',
+        'Conducted by must be a comma-separated list of Network IDs (e.g. abcx1o, abc2xk)',
         { durationMs: 10000 },
       );
       return;

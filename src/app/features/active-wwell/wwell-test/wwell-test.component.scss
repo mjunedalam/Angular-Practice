@@ -388,6 +388,32 @@
   white-space: nowrap;
 }
 
+.wt-tooltip--hint {
+  width: 280px;
+}
+
+.wt-network-hint-text {
+  font-size: 0.76rem;
+  color: #334155;
+  line-height: 1.5;
+  margin-bottom: 7px;
+}
+
+.wt-network-hint-example {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #15803d;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 5px;
+  padding: 5px 8px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
 // ── Aquifer mat-select ────────────────────────────────────────────────────────
 .wt-aquifer-select {
   flex: 1;
