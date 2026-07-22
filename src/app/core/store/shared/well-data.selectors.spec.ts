@@ -133,9 +133,20 @@ describe('well-data.selectors', () => {
       ['NOT REQUIRED', false], ['NOT REQUIRE.', false], ['Not Required', false], ['nOt reQuire.', false],
       ['  Not Required.  ', false],
       ['not required for this section but keep monitoring', true], ['not-required', true], ['RCC done', true],
-    ])('"%s" -> active=%s, remark cleared when inactive', (remark, active) => {
+    ])('"%s" -> active=%s, remark tooltip text shown (trimmed) regardless of active state', (remark, active) => {
       expect(selectWellLogsIndicators(withDtRemark(remark))?.rcc).toBe(active);
-      expect(selectWellLogsRemarks(withDtRemark(remark))?.dtRemarks).toBe(active ? remark : null);
+      expect(selectWellLogsRemarks(withDtRemark(remark))?.dtRemarks).toBe(remark.trim());
     });
+  });
+
+  it('clears remark tooltip text only when the raw value is empty or whitespace', () => {
+    const wellData = WellboreTestDataUtil.wellData({
+      EXAD_GWD_IR_HEADER: [{ dtRemarks: '   ', mudRemarks: '', loggingRemarks: '' }],
+    });
+
+    const remarks = selectWellLogsRemarks(wellData);
+    expect(remarks?.dtRemarks).toBeNull();
+    expect(remarks?.mudRemarks).toBeNull();
+    expect(remarks?.loggingRemarks).toBeNull();
   });
 });

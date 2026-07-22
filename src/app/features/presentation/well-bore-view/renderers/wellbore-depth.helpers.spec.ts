@@ -69,14 +69,14 @@ describe('wellbore-depth.helpers', () => {
     expect(resolveCompletionBottomDepth(data)).toBe(expectedBottomDepth);
   });
 
-  it('keeps completion visible by using display depth when total depth is shorter than the minimum span', () => {
+  it('clamps completion bottom to total depth when it is shorter than the overrun span', () => {
     const data = WellboreTestDataUtil.diagramData({
       totalDepth: 4100,
       displayDepth: 4200,
       currentDepth: WellboreTestDataUtil.currentDepthBeyondTargetFt,
     });
 
-    expect(resolveCompletionBottomDepth(data)).toBe(4200);
+    expect(resolveCompletionBottomDepth(data)).toBe(4100);
   });
 
   it('maps resolved completion bottom depth through the supplied scale', () => {
