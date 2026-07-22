@@ -210,6 +210,14 @@ export class WwellTestComponent {
     this.form.markAllAsTouched();
     this.formService.drillingRemarksForm.markAllAsTouched();
 
+    if (this.isPublished() && this.form.get('testerNetworkId')?.hasError('invalidNetworkIds')) {
+      this.notify.warn(
+        'Conducted by must be a comma-separated list of Network IDs (e.g. jd12345, ab67890)',
+        { durationMs: 10000 },
+      );
+      return;
+    }
+
     if (this.isPublished() && this.form.invalid) return;
 
     const wellTestChanged = this.isPublished() && (

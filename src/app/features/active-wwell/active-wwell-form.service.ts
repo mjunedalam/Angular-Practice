@@ -11,6 +11,16 @@ function requiredFor(mode: 'FLOW' | 'PUMP'): ValidatorFn {
   };
 }
 
+const NETWORK_ID_LIST_PATTERN = /^[a-zA-Z0-9]+(\s*,\s*[a-zA-Z0-9]+)*$/;
+
+function commaSeparatedNetworkIds(): ValidatorFn {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    const v = ctrl.value;
+    if (v == null || String(v).trim() === '') return null;
+    return NETWORK_ID_LIST_PATTERN.test(String(v).trim()) ? null : { invalidNetworkIds: true };
+  };
+}
+
 @Injectable({
     providedIn: "root"
 })
@@ -42,7 +52,7 @@ export class ActiveWwellFormService {
         hydProdRt:  [null, [Validators.required]],
         statWlvl:   [null, [requiredFor('PUMP')]],
         dyncWlvl:   [null, [requiredFor('PUMP')]],
-        testerNetworkId: [null, [Validators.required]],
+        testerNetworkId: [null, [Validators.required, commaSeparatedNetworkIds()]],
         hydProduct: [null],
         duration:   [null, [Validators.required]],
         fwhp:       [null, [requiredFor('FLOW')]],

@@ -148,6 +148,20 @@
   &--cased {
     text-transform: none;
   }
+
+  &--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    line-height: 1.2;
+  }
+}
+
+.wt-label__hint {
+  display: block;
+  font-size: 0.66em;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
 // ── Actual input ──────────────────────────────────────────────────────────────
