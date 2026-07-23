@@ -55,8 +55,8 @@ import {
   wwellIdTextSymbol,
 } from 'src/app/shared/models/config/agwa-map.config';
 import { findNonOverlappingPosition } from 'src/app/shared/utils/wwell-placement-utils';
-import { EsriMapService } from '@core/services/esri-map.service';       // office: OAuth auth
-import { ExternalConfigService } from '@shared/services/external-config.service'; // office: portal config
+import { EsriMapService } from '@core/services/esri-map.service';      
+import { ExternalConfigService } from '@shared/services/external-config.service'; 
 import { NotificationService } from '@shared/components/notification/notification.service';
 import {
   blockFutureDigits,
@@ -101,6 +101,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
   private readonly MAP_TIMEOUT_MS = 20_000;
   private readonly MAX_RETRY_DELAY_MS = 30_000;
+  private readonly MAX_MAP_RETRY_ATTEMPTS = 5;
 
   // ── Map zoom levels — tweak these to control the viewport ─────────────────
   private readonly INITIAL_ZOOM = 6;             // starting zoom on map load
@@ -121,6 +122,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private pulseIntervalId?: ReturnType<typeof setInterval>;
 
   protected readonly mapReady = signal(false);
+  protected readonly mapUnavailable = signal(false);
   protected readonly isFullscreen = signal(false);
   protected readonly isDrawingWells = signal(false);
 
@@ -150,8 +152,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private readonly hostEl = inject(ElementRef);
   private readonly notificationService = inject(NotificationService);
   protected readonly store = inject(MorningReportStore);
-  private readonly esriAuth = inject(EsriMapService);          // office: OAuth auth
-  private readonly extConfigService = inject(ExternalConfigService); // office: portal config
+  private readonly esriAuth = inject(EsriMapService);         
+  private readonly extConfigService = inject(ExternalConfigService); 
 
   protected readonly maxDateString = formatDateForInput(getTodayAtMidnight());
   protected selectedDateString = this.maxDateString;
@@ -495,9 +497,24 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   private initMapWithRetry(attempt = 0): void {
     this.initMap().catch(() => {
       if (this.isDestroyed) return;
+      if (attempt + 1 >= this.MAX_MAP_RETRY_ATTEMPTS) {
+        // Map service isn't coming up — stop silently retrying forever and surface
+        // a failure state confined to the map panel. Other data (well table, stats)
+        // doesn't depend on the map, so it keeps rendering regardless.
+        this.mapUnavailable.set(true);
+        this.resolveBootTask();
+        return;
+      }
       const delay = Math.min(1000 * Math.pow(2, attempt), this.MAX_RETRY_DELAY_MS);
       this.mapRetryTimeoutId = setTimeout(() => this.initMapWithRetry(attempt + 1), delay);
     });
+  }
+
+  protected retryMap(): void {
+    clearTimeout(this.mapRetryTimeoutId);
+    this.mapUnavailable.set(false);
+    this.registerBootTask();
+    this.initMapWithRetry();
   }
 
   private async initMap(): Promise<void> {
@@ -506,8 +523,8 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
     this.wwellLayer = undefined;
     this.bubbleLayerReady.set(null);
     this.mapReady.set(false);
+    this.mapUnavailable.set(false);
 
-    // ── Office (authenticated portal WebMap) ──────────────────────────────
     await this.esriAuth.authenticateUserForMapAccess();
     const webMap = new WebMap({
       portalItem: { id: this.extConfigService.settings.morningReportWebMapId },

@@ -95,8 +95,13 @@
       <div #mapViewNode class="wwo__map-canvas" [class.wwo__map-canvas--ready]="mapReady()"></div>
 
       <div class="wwo__map-loader" [class.wwo__map-loader--hidden]="mapReady()" aria-live="polite">
-        <span class="wwo__map-loader__spinner"></span>
-        <span class="wwo__map-loader__label">Loading map…</span>
+        @if (mapUnavailable()) {
+          <span class="wwo__map-loader__label">Map unavailable</span>
+          <button type="button" class="wwo__map-loader__retry" (click)="retryMap()">Retry</button>
+        } @else {
+          <span class="wwo__map-loader__spinner"></span>
+          <span class="wwo__map-loader__label">Loading map…</span>
+        }
       </div>
 
       @if (isDrawingWells()) {
