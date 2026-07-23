@@ -17,3 +17,10 @@ export interface MorningReport {
     readonly wEvntTime: string;
     readonly rigStatus: string;
 }
+
+/** A single well that failed to load during batch detail fetching. */
+export interface WellFetchFailure {
+    readonly epANum: number;
+    readonly wellName: string;
+    readonly reason: string;
+}

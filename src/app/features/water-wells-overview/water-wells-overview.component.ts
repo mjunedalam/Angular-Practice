@@ -163,7 +163,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly statusStats = computed((): StatusStat[] => {
     const counts = new Map<string, number>();
     for (const d of this.store.allWellsData()) {
-      const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
+      const raw = d?.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
       if (!raw) continue;
       const status = this.toTitleCase(raw);
       counts.set(status, (counts.get(status) ?? 0) + 1);
@@ -176,10 +176,10 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly statusGroupRows = computed((): StatusGroupRow[] => {
     const groups = new Map<string, string[]>();
     for (const d of this.store.allWellsData()) {
-      const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
+      const raw = d?.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
       if (!raw) continue;
       const status = this.toTitleCase(raw);
-      const wellName = d.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A';
+      const wellName = d?.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A';
       if (!groups.has(status)) groups.set(status, []);
       groups.get(status)!.push(wellName);
     }
@@ -196,14 +196,15 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
   protected readonly totalWells = computed(() => this.store.allWellsData().length);
 
   protected readonly allWellRows = computed((): AllWellRow[] =>
-    this.store.allWellsData().map((d) => {
+    this.store.allWellsData().flatMap((d): AllWellRow[] => {
+      if (!d) return [];
       const raw = d.EXAD_GWD_DAILY_REMARKS?.[0]?.status?.trim();
-      return {
+      return [{
         rigName: d.RIG_IDENTIFICATION?.[0]?.rigname ?? d.RIG_ACTIVITY?.[0]?.wRigCd ?? 'N/A',
         wellName: d.RIG_ACTIVITY?.[0]?.wellName ?? 'N/A',
         targetAquifer: d.EXAD_GWD_IR_HYDROGEOLOGY?.[0]?.estTargetAquifier ?? 'N/A',
         status: raw ? this.toTitleCase(raw) : '—',
-      };
+      }];
     })
   );
 
@@ -560,6 +561,7 @@ export class WaterWellsOverviewComponent implements OnInit, OnDestroy {
 
   private buildWwells(data: IWellData[]): void {
     const wells: WWell[] = data.flatMap((d) => {
+      if (!d) return [];
       const master = d.WELL_MASTER?.[0];
       const rig = d.RIG_ACTIVITY?.[0];
       const lat = master?.lat;

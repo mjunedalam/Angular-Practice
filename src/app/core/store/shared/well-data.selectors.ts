@@ -566,11 +566,12 @@ export function mapToWaterWellTestResult(o: IWaterWellTestOutcome, drillingWellN
 }
 
 export function selectMorningReports(data: IWellData[]): MorningReport[] {
-    return data.map(d => mapWellDataToMorningReport(d));
+    return data.flatMap(d => d ? [mapWellDataToMorningReport(d)] : []);
 }
 
 export function selectWaterWellTestResultsFromData(data: IWellData[]): WaterWellTestResult[] {
     return data.flatMap(d => {
+        if (!d) return [];
         const drillingWellName = d.RIG_ACTIVITY?.[0]?.wellName ?? d.WELL_MASTER?.[0]?.well ?? '';
         return (d.EXAD_GWD_WELL_TESTS ?? []).map(o => mapToWaterWellTestResult(o, drillingWellName));
     });
