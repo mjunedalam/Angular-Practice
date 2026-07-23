@@ -501,7 +501,7 @@ export class WwellmapComponent implements OnInit, OnDestroy {
     const chips = [
       { text: 'Legend', bg: '#cedf5f', textColor: '#35530a' },
       ...tilesArray.map(t => ({
-        text: t.biNum,
+        text: `BI-${t.biNum}`,
         bg: LEGEND_CHIP_COLORS[t.biNum] ?? `rgba(${t.color[0]}, ${t.color[1]}, ${t.color[2]}, ${t.color[3] ?? 1})`,
         textColor: '#fff',
       })),
