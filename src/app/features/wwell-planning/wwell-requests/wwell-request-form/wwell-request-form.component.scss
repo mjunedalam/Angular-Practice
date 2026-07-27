@@ -1,11 +1,48 @@
+@use '@angular/material' as mat;
+
 /* ── wwell-request-form tokens ─────────────────────────────────── */
-$navy:        #1e293b;
-$muted:       #64748b;
-$border:      #e2e8f0;
-$accent:      #3b82f6;
-$accent-dark: #1d4ed8;
-$danger:      #dc2626;
-$bg-subtle:   #f8fafc;
+$navy:      #1e293b;
+$muted:     #64748b;
+$border:    #e2e8f0;
+$accent:    #3b82f6;
+$danger:    #dc2626;
+$bg-subtle: #f8fafc;
+
+/*
+ * The app only calls mat.core() globally (no color theme is configured in
+ * styles.scss), so every Material component here resolves unset
+ * --mat-sys-* tokens. That's what caused the cramped text inset, the
+ * hint text sitting out of line with the field text above it, and the
+ * washed-out borders/select arrows — patching individual .mdc-* classes
+ * with !important (the previous approach) fights the symptom, not the
+ * cause, and leaves the internal notch-width/shape math inconsistent
+ * with the border-radius it draws. Scoping a real M3 theme to this
+ * dialog fixes the token source directly, and applies to the select
+ * overlay panel too (it's portaled to <body>, so it needs its own scope).
+ */
+.wrf,
+.wrf-select-panel {
+  color-scheme: light;
+
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$blue-palette,
+      tertiary: mat.$azure-palette,
+    ),
+    typography: (
+      plain-family: (Roboto, 'Helvetica Neue', sans-serif),
+      brand-family: (Roboto, 'Helvetica Neue', sans-serif),
+    ),
+    density: -1,
+  ));
+}
+
+.wrf {
+  @include mat.form-field-overrides((
+    outlined-container-shape: 10px,
+  ));
+}
 
 /* ── Dialog surface reset (targets this dialog's overlay only) ──── */
 .wwell-request-form-panel .mdc-dialog__surface {
@@ -15,13 +52,7 @@ $bg-subtle:   #f8fafc;
   overflow: hidden !important;
 }
 
-/*
- * The app has no global Material color theme configured (styles.scss only
- * calls mat.core()), so mat-select overlay panels render with a transparent
- * background app-wide. Scope an explicit fix to this dialog's selects only.
- */
 .wrf-select-panel {
-  background: #ffffff !important;
   border-radius: 10px !important;
   box-shadow:
     0 4px 10px rgba(15, 23, 42, 0.12),
@@ -39,11 +70,22 @@ $bg-subtle:   #f8fafc;
   }
 }
 
+@keyframes wrfFieldIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .wrf {
   display: flex;
   flex-direction: column;
   width: min(720px, 92vw);
-  max-height: min(88vh, 820px);
+  max-height: min(94vh, 780px);
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid $border;
@@ -51,7 +93,13 @@ $bg-subtle:   #f8fafc;
     0 24px 60px rgba(15, 23, 42, 0.18),
     0 4px 14px rgba(15, 23, 42, 0.08);
   overflow: hidden;
-  animation: wrfIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: wrfIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrf {
+    animation: none;
+  }
 }
 
 .wrf__header {
@@ -59,7 +107,7 @@ $bg-subtle:   #f8fafc;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.5rem 1.1rem;
+  padding: 1.1rem 1.5rem 0.9rem;
   border-bottom: 1px solid $border;
   background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
 }
@@ -87,6 +135,7 @@ $bg-subtle:   #f8fafc;
   flex-shrink: 0;
   color: $muted;
   margin-top: -4px;
+  transition: color 150ms ease;
 
   &:hover {
     color: $navy;
@@ -95,21 +144,73 @@ $bg-subtle:   #f8fafc;
 
 .wrf__body {
   flex: 1;
+  /* Kept as a fallback for very short viewports; the compact spacing above
+     and dynamic subscript sizing on the fields mean this shouldn't need to
+     engage in normal use. The scrollbar itself is hidden below so the
+     dialog never shows a visible scroll track. */
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem 1.25rem;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .wrf__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem 1rem;
+  gap: 0.75rem 1.25rem;
+  /* Fields without a hint would otherwise be stretched (grid's default
+     align-items: stretch) to match a sibling that has one, making the two
+     side-by-side boxes in a row render at visibly different heights. */
+  align-items: start;
 }
 
 .wrf__field {
   width: 100%;
+  border-radius: 10px;
+  transition: box-shadow 150ms ease;
+
+  &:focus-within {
+    box-shadow: 0 0 0 4px rgba($accent, 0.15);
+  }
 
   &--full {
     grid-column: 1 / -1;
+  }
+}
+
+.wrf__coord-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.wrf__coord-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.wrf__coord-hemi {
+  flex: 0 0 60px;
+
+  .mat-mdc-select-value-text {
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wrf__field {
+    opacity: 0;
+    animation: wrfFieldIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{40ms * ($i - 1)};
+      }
+    }
   }
 }
 
@@ -120,8 +221,8 @@ $bg-subtle:   #f8fafc;
 .wrf__attachments {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  margin-top: 0.5rem;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .wrf__attachments-label {
@@ -136,8 +237,8 @@ $bg-subtle:   #f8fafc;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 1.5rem 1rem;
+  gap: 0.35rem;
+  padding: 1rem;
   border: 1.5px dashed #93c5fd;
   border-radius: 12px;
   background: $bg-subtle;
@@ -157,6 +258,17 @@ $bg-subtle:   #f8fafc;
 
 .wrf__dropzone-icon {
   color: $accent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wrf__dropzone-icon {
+    transition: transform 150ms ease;
+  }
+
+  .wrf__dropzone:hover .wrf__dropzone-icon,
+  .wrf__dropzone--active .wrf__dropzone-icon {
+    transform: translateY(-2px) scale(1.08);
+  }
 }
 
 .wrf__dropzone-text {
@@ -238,7 +350,7 @@ $bg-subtle:   #f8fafc;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   border-top: 1px solid $border;
   background: $bg-subtle;
 }
@@ -271,8 +383,19 @@ $bg-subtle:   #f8fafc;
   }
 }
 
-.wrf__btn-submit {
-  background: $accent-dark;
+@media (prefers-reduced-motion: no-preference) {
+  .wrf__btn-draft,
+  .wrf__btn-submit {
+    transition: transform 150ms ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) scale(0.97);
+    }
+  }
 }
 
 @media (max-width: 640px) {

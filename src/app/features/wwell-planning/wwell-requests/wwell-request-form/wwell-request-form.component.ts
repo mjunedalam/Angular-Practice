@@ -17,10 +17,15 @@ import {
   WWELL_REQUEST_ASSIGNEE_OPTIONS,
   WWELL_REQUEST_BUSINESS_USE_OPTIONS,
   WWELL_REQUEST_CLIENT_OPTIONS,
-  WWELL_REQUEST_COORDINATES_PATTERN,
   WWELL_REQUEST_DEPTH_PATTERN,
+  WWELL_REQUEST_LAT_HEMISPHERES,
+  WWELL_REQUEST_LAT_VALUE_PATTERN,
+  WWELL_REQUEST_LNG_HEMISPHERES,
+  WWELL_REQUEST_LNG_VALUE_PATTERN,
   WWELL_REQUEST_MAX_ATTACHMENT_SIZE_BYTES,
   WWELL_REQUEST_PRIORITY_OPTIONS,
+  formatWwellCoordinates,
+  parseWwellCoordinates,
 } from './wwell-request-form.config';
 
 export type WwellRequestFormMode = 'create' | 'view';
@@ -67,18 +72,28 @@ export class WwellRequestFormComponent {
   protected readonly businessUseOptions = WWELL_REQUEST_BUSINESS_USE_OPTIONS;
   protected readonly assigneeOptions = WWELL_REQUEST_ASSIGNEE_OPTIONS;
   protected readonly priorityOptions = WWELL_REQUEST_PRIORITY_OPTIONS;
+  protected readonly latHemiOptions = WWELL_REQUEST_LAT_HEMISPHERES;
+  protected readonly lngHemiOptions = WWELL_REQUEST_LNG_HEMISPHERES;
 
   protected readonly isViewMode = this.data.mode === 'view';
   protected readonly isDragOver = signal(false);
   protected readonly attachments = signal<AttachmentItem[]>([]);
 
+  private readonly initialCoordinates = parseWwellCoordinates(this.data.request?.coordinates);
+
   protected readonly form = this.fb.nonNullable.group({
     client: [this.data.request?.client ?? '', Validators.required],
     supporting: [this.data.request?.supporting ?? '', Validators.required],
-    coordinates: [
-      this.data.request?.coordinates ?? '',
-      [Validators.required, Validators.pattern(WWELL_REQUEST_COORDINATES_PATTERN)],
+    latValue: [
+      this.initialCoordinates.latValue,
+      [Validators.required, Validators.pattern(WWELL_REQUEST_LAT_VALUE_PATTERN)],
     ],
+    latHemi: this.fb.nonNullable.control(this.initialCoordinates.latHemi),
+    lngValue: [
+      this.initialCoordinates.lngValue,
+      [Validators.required, Validators.pattern(WWELL_REQUEST_LNG_VALUE_PATTERN)],
+    ],
+    lngHemi: this.fb.nonNullable.control(this.initialCoordinates.lngHemi),
     targetAquifer: [this.data.request?.targetAquifer ?? '', Validators.required],
     proposedDepth: [
       this.data.request?.proposedDepth ?? '',
@@ -122,7 +137,12 @@ export class WwellRequestFormComponent {
     const payload: CreateWwellPlanningRequestPayload = {
       client: value.client,
       supporting: value.supporting,
-      coordinates: value.coordinates,
+      coordinates: formatWwellCoordinates({
+        latValue: value.latValue,
+        latHemi: value.latHemi,
+        lngValue: value.lngValue,
+        lngHemi: value.lngHemi,
+      }),
       targetAquifer: value.targetAquifer,
       proposedDepth: value.proposedDepth,
       businessUse: value.businessUse,
