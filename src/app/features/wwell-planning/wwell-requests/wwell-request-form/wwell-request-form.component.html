@@ -1,0 +1,189 @@
+<div class="wrf">
+  <header class="wrf__header">
+    <div class="wrf__header-copy">
+      <h2 class="wrf__title">{{ isViewMode ? 'Request Details' : 'New Request' }}</h2>
+      @if (!isViewMode) {
+        <p class="wrf__subtitle">Create a new well request &mdash; will be routed for approvals after submission</p>
+      } @else if (data.request) {
+        <p class="wrf__subtitle">{{ data.request.id }} &middot; Submitted {{ data.request.requestedDate }}</p>
+      }
+    </div>
+    <button type="button" class="wrf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="wrf__body">
+    <form class="wrf__form" [formGroup]="form">
+      <div class="wrf__grid">
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Client</mat-label>
+          <mat-select formControlName="client" panelClass="wrf-select-panel">
+            @for (opt of clientOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.client.invalid && form.controls.client.touched) {
+            <mat-error>Client is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Supporting</mat-label>
+          <input matInput formControlName="supporting" placeholder="e.g., Riyadh GOSP or WDQS-200" />
+          @if (form.controls.supporting.invalid && form.controls.supporting.touched) {
+            <mat-error>Supporting facility is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field wrf__field--full">
+          <mat-label>Initial Coordinates (Lat, Long)</mat-label>
+          <input matInput formControlName="coordinates" placeholder="e.g., 24.1751°N, 47.2951°E" />
+          @if (form.controls.coordinates.hasError('required') && form.controls.coordinates.touched) {
+            <mat-error>Coordinates are required</mat-error>
+          } @else if (form.controls.coordinates.hasError('pattern') && form.controls.coordinates.touched) {
+            <mat-error>Use the format 24.1751°N, 47.2951°E</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Target Aquifer</mat-label>
+          <mat-select formControlName="targetAquifer" panelClass="wrf-select-panel">
+            @for (opt of aquiferOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.targetAquifer.invalid && form.controls.targetAquifer.touched) {
+            <mat-error>Target aquifer is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Proposed Depth</mat-label>
+          <input matInput formControlName="proposedDepth" placeholder="e.g., 180m" />
+          @if (form.controls.proposedDepth.hasError('required') && form.controls.proposedDepth.touched) {
+            <mat-error>Proposed depth is required</mat-error>
+          } @else if (form.controls.proposedDepth.hasError('pattern') && form.controls.proposedDepth.touched) {
+            <mat-error>Use a numeric depth in meters, e.g. 180m</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Business Use</mat-label>
+          <mat-select formControlName="businessUse" panelClass="wrf-select-panel">
+            @for (opt of businessUseOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.businessUse.invalid && form.controls.businessUse.touched) {
+            <mat-error>Business use is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Assigned To</mat-label>
+          <mat-select formControlName="assignedTo" panelClass="wrf-select-panel">
+            <mat-option [value]="null">&mdash; Unassigned &mdash;</mat-option>
+            @for (opt of assigneeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field">
+          <mat-label>Priority</mat-label>
+          <mat-select formControlName="priority" panelClass="wrf-select-panel">
+            @for (opt of priorityOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="wrf__field wrf__field--full">
+          <mat-label>Request Notes</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="notes"
+            placeholder="Project background, timeline, special requirements..."
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="wrf__attachments">
+        <span class="wrf__attachments-label">Attachments</span>
+
+        @if (!isViewMode) {
+          <label
+            class="wrf__dropzone"
+            [class.wrf__dropzone--active]="isDragOver()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <input type="file" multiple class="wrf__file-input" (change)="onFileInputChange($event)" />
+            <mat-icon class="wrf__dropzone-icon">attach_file</mat-icon>
+            <span class="wrf__dropzone-text"
+              >Click to attach files (site plan, client authorization, reports, permits&hellip;)</span
+            >
+          </label>
+        }
+
+        @if (attachmentNames().length) {
+          <ul class="wrf__file-list">
+            @if (isViewMode) {
+              @for (name of attachmentNames(); track name) {
+                <li class="wrf__file-item">
+                  <mat-icon class="wrf__file-icon">description</mat-icon>
+                  <span class="wrf__file-name">{{ name }}</span>
+                </li>
+              }
+            } @else {
+              @for (item of attachments(); track item.id) {
+                <li class="wrf__file-item">
+                  <mat-icon class="wrf__file-icon">description</mat-icon>
+                  <span class="wrf__file-name">{{ item.file.name }}</span>
+                  <span class="wrf__file-size">{{ fileSizeLabel(item.file.size) }}</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    class="wrf__file-remove"
+                    (click)="removeAttachment(item.id)"
+                    aria-label="Remove attachment"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </li>
+              }
+            }
+          </ul>
+        } @else if (isViewMode) {
+          <p class="wrf__no-files">No attachments were provided.</p>
+        }
+      </div>
+    </form>
+  </div>
+
+  <footer class="wrf__footer">
+    <span class="wrf__hint">
+      @if (!isViewMode) {
+        <span class="wrf__required-mark">*</span> Required fields
+      }
+    </span>
+
+    <div class="wrf__actions">
+      @if (isViewMode) {
+        <button type="button" mat-stroked-button (click)="close()">Close</button>
+      } @else {
+        <button type="button" mat-stroked-button class="wrf__btn-draft" (click)="saveDraft()">
+          <mat-icon>bookmark_border</mat-icon>
+          Save as Draft
+        </button>
+        <button type="button" mat-flat-button color="primary" class="wrf__btn-submit" (click)="submitRequest()">
+          <mat-icon>send</mat-icon>
+          Submit
+        </button>
+      }
+    </div>
+  </footer>
+</div>

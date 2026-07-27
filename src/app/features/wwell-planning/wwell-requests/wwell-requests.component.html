@@ -1,0 +1,73 @@
+<section class="wwell-requests">
+  <header class="wwell-requests__header">
+    <div class="wwell-requests__heading">
+      <h1 class="wwell-requests__title">Requests</h1>
+      <span class="wwell-requests__count">{{ totalCount() }}</span>
+    </div>
+
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      class="wwell-requests__new-btn"
+      [disabled]="isCreating()"
+      (click)="openNewRequestDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      New Request
+    </button>
+  </header>
+
+  <div class="wwell-requests__stats">
+    <div class="wwell-requests__stat">
+      <span class="wwell-requests__stat-label">Total Requests</span>
+      <span class="wwell-requests__stat-value">{{ totalCount() }}</span>
+    </div>
+    <div class="wwell-requests__stat wwell-requests__stat--progress">
+      <span class="wwell-requests__stat-label">In Progress</span>
+      <span class="wwell-requests__stat-value">{{ inProgressCount() }}</span>
+    </div>
+    <div class="wwell-requests__stat wwell-requests__stat--review">
+      <span class="wwell-requests__stat-label">In Review</span>
+      <span class="wwell-requests__stat-value">{{ inReviewCount() }}</span>
+    </div>
+    <div class="wwell-requests__stat wwell-requests__stat--approved">
+      <span class="wwell-requests__stat-label">Approved</span>
+      <span class="wwell-requests__stat-value">{{ approvedCount() }}</span>
+    </div>
+  </div>
+
+  <div class="wwell-requests__card">
+    <div class="wwell-requests__toolbar">
+      <h2 class="wwell-requests__toolbar-title">All Requests</h2>
+      <label class="wwell-requests__search">
+        <mat-icon class="wwell-requests__search-icon">search</mat-icon>
+        <input
+          type="search"
+          placeholder="Search requests&hellip;"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+      </label>
+    </div>
+
+    @if (isLoading()) {
+      <div class="wwell-requests__status">Loading requests&hellip;</div>
+    } @else if (hasError()) {
+      <div class="wwell-requests__status wwell-requests__status--error">{{ errorMessage() }}</div>
+    } @else if (rows().length === 0) {
+      <div class="wwell-requests__status">No requests found.</div>
+    } @else {
+      <ag-grid-angular
+        class="wwell-requests__grid"
+        style="width: 100%"
+        [theme]="gridTheme"
+        [rowData]="rows()"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        (gridReady)="onGridReady($event.api)"
+        (cellClicked)="onCellClicked($event)"
+      />
+    }
+  </div>
+</section>

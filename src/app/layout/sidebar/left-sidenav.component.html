@@ -5,79 +5,84 @@
 >
   <!-- Nav Items -->
   <ul class="sidenav__list" role="list">
-    @for (item of navItems; track item.id) {
-      <li class="sidenav__item">
-        <button
-          class="sidenav__btn"
-          [class.sidenav__btn--active]="item.id === activeRoute()"
-          [class.sidenav__btn--locked]="isLocked(item)"
-          (click)="onItemClick(item)"
-          [attr.aria-current]="item.id === activeRoute() ? 'page' : null"
-          [title]="collapsed() ? item.label : ''"
-        >
-          <!-- Icon -->
-          <span class="sidenav__icon">
-            @if (item.iconImage) {
-              <span
-                class="sidenav__icon-img"
-                [style.-webkit-mask-image]="'url(' + item.iconImage + ')'"
-                [style.mask-image]="'url(' + item.iconImage + ')'"
-              ></span>
-            } @else {
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                @for (pathD of item.icon.split(" M "); track $index) {
-                  @if ($index === 0) {
-                    <path [attr.d]="pathD" />
-                  } @else {
-                    <path [attr.d]="'M ' + pathD" />
+    @for (group of navGroups; track $index) {
+      @if (group.section) {
+        <li class="sidenav__section-label">{{ group.section }}</li>
+      }
+      @for (item of group.items; track item.id) {
+        <li class="sidenav__item">
+          <button
+            class="sidenav__btn"
+            [class.sidenav__btn--active]="item.id === activeRoute()"
+            [class.sidenav__btn--locked]="isLocked(item)"
+            (click)="onItemClick(item)"
+            [attr.aria-current]="item.id === activeRoute() ? 'page' : null"
+            [title]="collapsed() ? item.label : ''"
+          >
+            <!-- Icon -->
+            <span class="sidenav__icon">
+              @if (item.iconImage) {
+                <span
+                  class="sidenav__icon-img"
+                  [style.-webkit-mask-image]="'url(' + item.iconImage + ')'"
+                  [style.mask-image]="'url(' + item.iconImage + ')'"
+                ></span>
+              } @else {
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  @for (pathD of item.icon.split(" M "); track $index) {
+                    @if ($index === 0) {
+                      <path [attr.d]="pathD" />
+                    } @else {
+                      <path [attr.d]="'M ' + pathD" />
+                    }
                   }
-                }
-              </svg>
-            }
-          </span>
-
-          <!-- Label (hidden when collapsed) -->
-          @if (!collapsed()) {
-            <span class="sidenav__label">{{ item.label }}</span>
-          }
-
-          <!-- Lock icon for restricted items -->
-          @if (isLocked(item) && !collapsed()) {
-            <span
-              class="sidenav__lock"
-              matTooltip="Access restricted — contact your administrator to request access to this module."
-              matTooltipPosition="after"
-              matTooltipClass="sidenav-lock-tooltip"
-              [matTooltipShowDelay]="180"
-              aria-label="Access restricted"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
+                </svg>
+              }
             </span>
-          }
 
-          <!-- Active indicator bar -->
-          @if (item.id === activeRoute()) {
-            <span class="sidenav__active-bar"></span>
-          }
-        </button>
-      </li>
+            <!-- Label (hidden when collapsed) -->
+            @if (!collapsed()) {
+              <span class="sidenav__label">{{ item.label }}</span>
+            }
+
+            <!-- Lock icon for restricted items -->
+            @if (isLocked(item) && !collapsed()) {
+              <span
+                class="sidenav__lock"
+                matTooltip="Access restricted — contact your administrator to request access to this module."
+                matTooltipPosition="after"
+                matTooltipClass="sidenav-lock-tooltip"
+                [matTooltipShowDelay]="180"
+                aria-label="Access restricted"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+              </span>
+            }
+
+            <!-- Active indicator bar -->
+            @if (item.id === activeRoute()) {
+              <span class="sidenav__active-bar"></span>
+            }
+          </button>
+        </li>
+      }
     }
   </ul>
 

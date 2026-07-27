@@ -6,6 +6,7 @@ import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresentationStore } from './features/presentation/store/presentation.store';
 import { ActiveWwellStore } from './features/active-wwell/store/active-wwell.store';
 import { MorningReportStore } from './features/morning-report/store/morning-report.store';
+import { WwellPlanningStore } from './features/wwell-planning/store/wwell-planning.store';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,31 @@ export const routes: Routes = [
           import('./features/home/home.component').then(
             (m) => m.HomeComponent,
           ),
+      },
+      // PLANNING — open to all roles for now, mirrors left-sidenav.component.ts (no RBAC gating yet)
+      {
+        path: 'requests',
+        loadComponent: () =>
+          import('./features/wwell-planning/wwell-requests/wwell-requests.component').then(
+            (m) => m.WwellRequestsComponent,
+          ),
+        providers: [WwellPlanningStore],
+      },
+      {
+        path: 'approvals',
+        loadComponent: () =>
+          import('./features/wwell-planning/wwell-approvals/wwell-approvals.component').then(
+            (m) => m.WwellApprovalsComponent,
+          ),
+        providers: [WwellPlanningStore],
+      },
+      {
+        path: 'integrated-requirements',
+        loadComponent: () =>
+          import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
+            (m) => m.WwellIrComponent,
+          ),
+        providers: [WwellPlanningStore],
       },
       {
         path: 'presentations',

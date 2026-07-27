@@ -1,0 +1,70 @@
+<section class="wwell-approvals">
+  <header class="wwell-approvals__header">
+    <h1 class="wwell-approvals__title">Approvals</h1>
+    <span class="wwell-approvals__count">{{ rows().length }}</span>
+  </header>
+
+  <div class="wwell-approvals__body">
+    <div class="wwell-approvals__card">
+      @if (isLoading()) {
+        <div class="wwell-approvals__status">Loading approvals&hellip;</div>
+      } @else if (hasError()) {
+        <div class="wwell-approvals__status wwell-approvals__status--error">{{ errorMessage() }}</div>
+      } @else if (rows().length === 0) {
+        <div class="wwell-approvals__status">No approvals found.</div>
+      } @else {
+        <ag-grid-angular
+          class="wwell-approvals__grid"
+          style="width: 100%"
+          [theme]="gridTheme"
+          [rowData]="rows()"
+          [columnDefs]="columnDefs"
+          [gridOptions]="gridOptions"
+          (gridReady)="onGridReady($event.api)"
+          (selectionChanged)="onSelectionChanged()"
+        />
+      }
+    </div>
+
+    @if (selectedApproval(); as approval) {
+      <aside class="wwell-approvals__decision">
+        <h2 class="wwell-approvals__decision-title">{{ approval.requestTitle }}</h2>
+        <p class="wwell-approvals__decision-meta">Approver: {{ approval.approver }}</p>
+        <p class="wwell-approvals__decision-meta">Current decision: {{ approval.decision }}</p>
+
+        <mat-form-field appearance="outline" class="wwell-approvals__comments-field">
+          <mat-label>Comments</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            placeholder="Add comments (optional)"
+            [ngModel]="comments()"
+            (ngModelChange)="comments.set($event)"
+            [disabled]="!canDecide()"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="wwell-approvals__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="!canDecide()"
+            (click)="approve()"
+          >
+            Approve
+          </button>
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            [disabled]="!canDecide()"
+            (click)="reject()"
+          >
+            Reject
+          </button>
+        </div>
+      </aside>
+    }
+  </div>
+</section>

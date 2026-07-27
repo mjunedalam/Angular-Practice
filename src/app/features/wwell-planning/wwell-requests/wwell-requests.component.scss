@@ -1,0 +1,243 @@
+:host {
+  display: block;
+  height: 100%;
+  overflow: auto;
+  background: #f0f4f8;
+}
+
+.wwell-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.wwell-requests__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wwell-requests__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wwell-requests__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.wwell-requests__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.wwell-requests__new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.28);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+/* ── Stat cards ───────────────────────────────────────────────── */
+.wwell-requests__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+.wwell-requests__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  border-left: 4px solid #94a3b8;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  }
+
+  &--progress {
+    border-left-color: #3b82f6;
+  }
+
+  &--review {
+    border-left-color: #a855f7;
+  }
+
+  &--approved {
+    border-left-color: #22c55e;
+  }
+}
+
+.wwell-requests__stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wwell-requests__stat-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+}
+
+/* ── Card / toolbar ───────────────────────────────────────────── */
+.wwell-requests__card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8edf4;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  overflow: hidden;
+}
+
+.wwell-requests__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e8edf4;
+}
+
+.wwell-requests__toolbar-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.wwell-requests__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  min-width: 220px;
+  flex: 0 1 280px;
+  transition: border-color 150ms ease;
+
+  &:focus-within {
+    border-color: #3b82f6;
+    background: #ffffff;
+  }
+}
+
+.wwell-requests__search-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.wwell-requests__search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: #1e293b;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+
+  &::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+}
+
+.wwell-requests__status {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+
+  &--error {
+    color: #dc2626;
+  }
+}
+
+.wwell-requests__grid {
+  display: block;
+  width: 100%;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wwell-requests {
+    padding: 1rem;
+  }
+
+  .wwell-requests__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wwell-requests__new-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wwell-requests__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wwell-requests__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wwell-requests__search {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}

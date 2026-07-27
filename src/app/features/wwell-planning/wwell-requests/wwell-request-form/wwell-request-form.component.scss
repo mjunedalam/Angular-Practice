@@ -1,0 +1,303 @@
+/* ── wwell-request-form tokens ─────────────────────────────────── */
+$navy:        #1e293b;
+$muted:       #64748b;
+$border:      #e2e8f0;
+$accent:      #3b82f6;
+$accent-dark: #1d4ed8;
+$danger:      #dc2626;
+$bg-subtle:   #f8fafc;
+
+/* ── Dialog surface reset (targets this dialog's overlay only) ──── */
+.wwell-request-form-panel .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+/*
+ * The app has no global Material color theme configured (styles.scss only
+ * calls mat.core()), so mat-select overlay panels render with a transparent
+ * background app-wide. Scope an explicit fix to this dialog's selects only.
+ */
+.wrf-select-panel {
+  background: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.12),
+    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+}
+
+@keyframes wrfIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wrf {
+  display: flex;
+  flex-direction: column;
+  width: min(720px, 92vw);
+  max-height: min(88vh, 820px);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid $border;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 4px 14px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  animation: wrfIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wrf__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1.1rem;
+  border-bottom: 1px solid $border;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.wrf__header-copy {
+  min-width: 0;
+}
+
+.wrf__title {
+  margin: 0 0 0.3rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wrf__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $muted;
+  line-height: 1.4;
+}
+
+.wrf__close {
+  flex-shrink: 0;
+  color: $muted;
+  margin-top: -4px;
+
+  &:hover {
+    color: $navy;
+  }
+}
+
+.wrf__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.wrf__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.wrf__field {
+  width: 100%;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.wrf .mat-mdc-form-field-required-marker {
+  color: $danger;
+}
+
+.wrf__attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.wrf__attachments-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.wrf__dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px dashed #93c5fd;
+  border-radius: 12px;
+  background: $bg-subtle;
+  color: $muted;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+
+  &:hover,
+  &--active {
+    border-color: $accent;
+    background: #eff6ff;
+  }
+}
+
+.wrf__dropzone-icon {
+  color: $accent;
+}
+
+.wrf__dropzone-text {
+  font-size: 0.8rem;
+  max-width: 40ch;
+  line-height: 1.4;
+}
+
+.wrf__file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wrf__file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wrf__file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+  background: $bg-subtle;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: $navy;
+}
+
+.wrf__file-icon {
+  color: $accent;
+  flex-shrink: 0;
+}
+
+.wrf__file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wrf__file-size {
+  color: $muted;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.wrf__file-remove {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  .mat-mdc-button-touch-target {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.wrf__no-files {
+  margin: 0;
+  font-size: 0.82rem;
+  color: $muted;
+  font-style: italic;
+}
+
+.wrf__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $border;
+  background: $bg-subtle;
+}
+
+.wrf__hint {
+  font-size: 0.78rem;
+  color: $muted;
+}
+
+.wrf__required-mark {
+  color: $danger;
+  font-weight: 700;
+}
+
+.wrf__actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.wrf__btn-draft,
+.wrf__btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.wrf__btn-submit {
+  background: $accent-dark;
+}
+
+@media (max-width: 640px) {
+  .wrf {
+    width: 100vw;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .wrf__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wrf__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .wrf__actions {
+    flex-direction: column-reverse;
+  }
+
+  .wrf__actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
