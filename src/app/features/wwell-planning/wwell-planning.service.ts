@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import {
   ApprovalDecision,
   CreateWwellPlanningRequestPayload,
@@ -10,6 +10,7 @@ import {
 } from '@models/wwell-planning/wwell-planning.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 
 @Injectable({ providedIn: 'root' })
 export class WwellPlanningService {
@@ -22,9 +23,11 @@ export class WwellPlanningService {
   }
 
   getRequests(): Observable<WwellPlanningRequest[]> {
-    return this.http
-      .get<ApiResponse<WwellPlanningRequest>>(`${this.apiUrl}/requests`)
-      .pipe(map(res => res.data));
+    return this.http.get<ApiResponse<WwellPlanningRequest>>(`${this.apiUrl}/requests`).pipe(
+      map(res => res.data),
+      // TODO: remove fallback once the requests endpoint is live.
+      catchError(() => of([...WWELL_REQUESTS_MOCK])),
+    );
   }
 
   createRequest(
