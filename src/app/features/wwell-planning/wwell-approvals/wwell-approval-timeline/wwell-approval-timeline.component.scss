@@ -1,0 +1,207 @@
+:host {
+  display: block;
+}
+
+.approval-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.approval-timeline__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.approval-timeline__header-icon {
+  display: inline-flex;
+  color: #3b82f6;
+}
+
+.approval-timeline__rail {
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.35rem 0 0;
+  list-style: none;
+}
+
+.approval-timeline__item {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+
+  &[data-status='approved'] {
+    .approval-timeline__track::after {
+      background: #22c55e;
+    }
+
+    .approval-timeline__node {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #fff;
+    }
+  }
+
+  &[data-status='in-progress'] .approval-timeline__node {
+    background: #dbeafe;
+    border-color: #3b82f6;
+  }
+
+  &[data-status='rejected'] .approval-timeline__node {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #fff;
+  }
+
+  &:last-child .approval-timeline__track::after {
+    display: none;
+  }
+}
+
+.approval-timeline__track {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 0;
+    transition: background 200ms ease;
+  }
+}
+
+.approval-timeline__node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease;
+}
+
+.approval-timeline__node-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.approval-timeline__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: approval-timeline-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes approval-timeline-pulse {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.approval-timeline__card {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  padding: 0 6px;
+  max-width: 150px;
+}
+
+.approval-timeline__role {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.approval-timeline__name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.approval-timeline__badge {
+  display: inline-flex;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.approval-timeline__date {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 720px) {
+  .approval-timeline__rail {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .approval-timeline__item {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding-bottom: 1.25rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  .approval-timeline__track {
+    width: auto;
+
+    &::after {
+      top: 28px;
+      left: 13px;
+      width: 2px;
+      height: calc(100% - 14px);
+    }
+  }
+
+  .approval-timeline__card {
+    margin-top: 0;
+    align-items: flex-start;
+    text-align: left;
+    max-width: none;
+    padding: 2px 0 0;
+  }
+}

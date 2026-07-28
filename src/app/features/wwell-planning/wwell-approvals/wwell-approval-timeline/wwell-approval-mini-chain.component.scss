@@ -1,0 +1,62 @@
+:host {
+  display: inline-flex;
+}
+
+.mini-chain {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mini-chain__item {
+  display: flex;
+  align-items: center;
+}
+
+.mini-chain__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+  transition: background 200ms ease;
+}
+
+.mini-chain__item[data-status='approved'] .mini-chain__dot {
+  background: #22c55e;
+}
+
+.mini-chain__item[data-status='in-progress'] .mini-chain__dot {
+  background: #3b82f6;
+  animation: mini-chain-pulse 1.4s ease-in-out infinite;
+}
+
+.mini-chain__item[data-status='rejected'] .mini-chain__dot {
+  background: #ef4444;
+}
+
+.mini-chain__line {
+  width: 14px;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 2px;
+  transition: background 200ms ease;
+}
+
+.mini-chain__line--filled {
+  background: #22c55e;
+}
+
+@keyframes mini-chain-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}

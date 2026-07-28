@@ -1,0 +1,151 @@
+<div class="wldaf">
+  <header class="wldaf__header">
+    <div class="wldaf__header-copy">
+      <h2 class="wldaf__title">Request WLDA Approval</h2>
+      <p class="wldaf__subtitle">{{ chainSubtitle }}</p>
+    </div>
+    <button type="button" class="wldaf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="wldaf__body">
+    <form class="wldaf__form" [formGroup]="form">
+      <div class="wldaf__grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Client</mat-label>
+          <mat-select formControlName="client" panelClass="wldaf-select-panel">
+            @for (opt of clientOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.client.invalid && form.controls.client.touched) {
+            <mat-error>Client is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Water Well Name</mat-label>
+          <input matInput formControlName="wellName" placeholder="e.g., KHAJ-300" />
+          @if (form.controls.wellName.hasError('required') && form.controls.wellName.touched) {
+            <mat-error>Well name is required</mat-error>
+          } @else if (form.controls.wellName.hasError('pattern') && form.controls.wellName.touched) {
+            <mat-error>4 letters + dash + hundreds, e.g. ABCD-200</mat-error>
+          } @else {
+            <mat-hint>4 letters + dash + hundreds (ABCD-200)</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Supporting</mat-label>
+          <input matInput formControlName="supporting" placeholder="e.g., Riyadh GOSP or well name" />
+          @if (form.controls.supporting.invalid && form.controls.supporting.touched) {
+            <mat-error>Supporting facility is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Initial Coordinates (Lat, Long)</mat-label>
+          <input matInput formControlName="initialCoordinates" placeholder="e.g., 24.1751°N, 47.2951°E" />
+          @if (form.controls.initialCoordinates.hasError('required') && form.controls.initialCoordinates.touched) {
+            <mat-error>Initial coordinates are required</mat-error>
+          } @else if (form.controls.initialCoordinates.hasError('pattern') && form.controls.initialCoordinates.touched) {
+            <mat-error>Use "lat°N, long°E" format</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Final Coordinates (Lat, Long)</mat-label>
+          <input matInput formControlName="finalCoordinates" placeholder="e.g., 24.1765°N, 47.2960°E" />
+          @if (form.controls.finalCoordinates.hasError('pattern') && form.controls.finalCoordinates.touched) {
+            <mat-error>Use "lat°N, long°E" format</mat-error>
+          } @else {
+            <mat-hint>Confirmed after site survey</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Proposed Depth</mat-label>
+          <input matInput formControlName="proposedDepth" placeholder="e.g., 180m" />
+          @if (form.controls.proposedDepth.hasError('required') && form.controls.proposedDepth.touched) {
+            <mat-error>Proposed depth is required</mat-error>
+          } @else if (form.controls.proposedDepth.hasError('pattern') && form.controls.proposedDepth.touched) {
+            <mat-error>Use a numeric depth in meters, e.g. 180 or 180m</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Target Aquifer</mat-label>
+          <mat-select formControlName="targetAquifer" panelClass="wldaf-select-panel">
+            @for (opt of aquiferOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.targetAquifer.invalid && form.controls.targetAquifer.touched) {
+            <mat-error>Target aquifer is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Business Use</mat-label>
+          <mat-select formControlName="businessUse" panelClass="wldaf-select-panel">
+            @for (opt of businessUseOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.businessUse.invalid && form.controls.businessUse.touched) {
+            <mat-error>Business use is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Drilling Method</mat-label>
+          <mat-select formControlName="drillingMethod" panelClass="wldaf-select-panel">
+            <mat-option [value]="null">&mdash; Select &mdash;</mat-option>
+            @for (opt of drillingMethodOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
+          <mat-label>Assigned To</mat-label>
+          <mat-select formControlName="assignedTo" panelClass="wldaf-select-panel">
+            <mat-option [value]="null">&mdash; Unassigned &mdash;</mat-option>
+            @for (opt of assigneeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field wldaf__field--full">
+          <mat-label>Additional Notes</mat-label>
+          <textarea matInput rows="3" formControlName="notes" placeholder="Any special requirements..."></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="wldaf__attachments">
+        <span class="wldaf__attachments-label">Attachments</span>
+        <app-wwell-attachment-dropzone
+          hint="Click to attach files (site plan, coordinates certificate, permits…)"
+          (filesChange)="onFilesChange($event)"
+        />
+      </div>
+    </form>
+  </div>
+
+  <footer class="wldaf__footer">
+    <span class="wldaf__hint"><span class="wldaf__required-mark">*</span> Required fields</span>
+
+    <div class="wldaf__actions">
+      <button type="button" mat-stroked-button class="wldaf__btn-draft" (click)="saveDraft()">
+        <mat-icon>bookmark_border</mat-icon>
+        Save as Draft
+      </button>
+      <button type="button" mat-flat-button color="primary" class="wldaf__btn-submit" (click)="submit()">
+        <mat-icon>send</mat-icon>
+        Submit
+      </button>
+    </div>
+  </footer>
+</div>

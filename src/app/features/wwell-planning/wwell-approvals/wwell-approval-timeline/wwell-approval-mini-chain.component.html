@@ -1,0 +1,10 @@
+<ol class="mini-chain" aria-label="Approval progress">
+  @for (step of steps(); track step.role; let last = $last) {
+    <li class="mini-chain__item" [attr.data-status]="step.status" [attr.title]="step.role + ': ' + step.status">
+      <span class="mini-chain__dot"></span>
+      @if (!last) {
+        <span class="mini-chain__line" [class.mini-chain__line--filled]="step.status === 'approved'"></span>
+      }
+    </li>
+  }
+</ol>

@@ -1,70 +1,296 @@
 <section class="wwell-approvals">
   <header class="wwell-approvals__header">
-    <h1 class="wwell-approvals__title">Approvals</h1>
-    <span class="wwell-approvals__count">{{ rows().length }}</span>
-  </header>
-
-  <div class="wwell-approvals__body">
-    <div class="wwell-approvals__card">
-      @if (isLoading()) {
-        <div class="wwell-approvals__status">Loading approvals&hellip;</div>
-      } @else if (hasError()) {
-        <div class="wwell-approvals__status wwell-approvals__status--error">{{ errorMessage() }}</div>
-      } @else if (rows().length === 0) {
-        <div class="wwell-approvals__status">No approvals found.</div>
-      } @else {
-        <ag-grid-angular
-          class="wwell-approvals__grid"
-          style="width: 100%"
-          [theme]="gridTheme"
-          [rowData]="rows()"
-          [columnDefs]="columnDefs"
-          [gridOptions]="gridOptions"
-          (gridReady)="onGridReady($event.api)"
-          (selectionChanged)="onSelectionChanged()"
-        />
-      }
+    <div class="wwell-approvals__heading">
+      <h1 class="wwell-approvals__title">Approvals</h1>
+      <span class="wwell-approvals__count">{{ totalCount() }}</span>
     </div>
 
-    @if (selectedApproval(); as approval) {
-      <aside class="wwell-approvals__decision">
-        <h2 class="wwell-approvals__decision-title">{{ approval.requestTitle }}</h2>
-        <p class="wwell-approvals__decision-meta">Approver: {{ approval.approver }}</p>
-        <p class="wwell-approvals__decision-meta">Current decision: {{ approval.decision }}</p>
+    <label class="wwell-approvals__search">
+      <mat-icon class="wwell-approvals__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search by req #, client or well name&hellip;"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
+  </header>
 
-        <mat-form-field appearance="outline" class="wwell-approvals__comments-field">
-          <mat-label>Comments</mat-label>
-          <textarea
-            matInput
-            rows="4"
-            placeholder="Add comments (optional)"
-            [ngModel]="comments()"
-            (ngModelChange)="comments.set($event)"
-            [disabled]="!canDecide()"
-          ></textarea>
-        </mat-form-field>
+  @if (hasError()) {
+    <div class="wwell-approvals__status wwell-approvals__status--error">{{ errorMessage() }}</div>
+  }
 
-        <div class="wwell-approvals__actions">
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
-            [disabled]="!canDecide()"
-            (click)="approve()"
-          >
-            Approve
-          </button>
-          <button
-            mat-stroked-button
-            color="warn"
-            type="button"
-            [disabled]="!canDecide()"
-            (click)="reject()"
-          >
-            Reject
-          </button>
-        </div>
-      </aside>
+  <!-- ── Well Location & Drilling Approval (WLDA) ─────────────────────── -->
+  <section class="wwell-approvals__panel">
+    <header class="wwell-approvals__panel-header">
+      <h2 class="wwell-approvals__panel-title">Well Location &amp; Drilling Approval (WLDA)</h2>
+      <button type="button" mat-flat-button color="primary" (click)="openWldaRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request WLDA Approval
+      </button>
+    </header>
+
+    @if (isLoading()) {
+      <div class="wwell-approvals__status">Loading WLDA approvals&hellip;</div>
+    } @else if (wldaRows().length === 0) {
+      <div class="wwell-approvals__status">No WLDA approval requests found.</div>
+    } @else {
+      <div class="wwell-approvals__table-wrap">
+        <table class="wwell-approvals__table">
+          <thead>
+            <tr>
+              <th>Req #</th>
+              <th>Client</th>
+              <th>Water Well Name</th>
+              <th>Supporting</th>
+              <th>Submitted By</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Workflow</th>
+              <th class="wwell-approvals__col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of wldaRows(); track row.id) {
+              <tr class="wwell-approvals__row" [class.wwell-approvals__row--expanded]="isExpanded(row.id)" (click)="toggleRow(row.id)">
+                <td class="wwell-approvals__req">{{ row.reqNo }}</td>
+                <td>{{ row.client }}</td>
+                <td>{{ row.wellName }}</td>
+                <td>{{ row.supporting }}</td>
+                <td>{{ row.submittedBy }}</td>
+                <td>{{ row.date }}</td>
+                <td>
+                  <span
+                    class="wwell-approvals__badge"
+                    [style.background]="statusMeta[row.status].bg"
+                    [style.color]="statusMeta[row.status].color"
+                  >
+                    <span class="wwell-approvals__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                    {{ statusMeta[row.status].label }}
+                  </span>
+                </td>
+                <td class="wwell-approvals__workflow-cell">
+                  <app-wwell-approval-mini-chain [steps]="row.chain" />
+                  @if (isChainComplete(row.chain)) {
+                    <button
+                      type="button"
+                      class="wwell-approvals__pdf-link"
+                      [disabled]="isDownloading(row.id)"
+                      [attr.aria-label]="'Download WLDA approval PDF for ' + row.reqNo"
+                      (click)="$event.stopPropagation(); downloadWldaPdf(row)"
+                    >
+                      <mat-icon>picture_as_pdf</mat-icon>
+                      {{ isDownloading(row.id) ? 'Preparing…' : 'WLDA.pdf' }}
+                    </button>
+                  }
+                </td>
+                <td class="wwell-approvals__col-actions">
+                  <button
+                    type="button"
+                    class="wwell-approvals__toggle-btn"
+                    [attr.aria-expanded]="isExpanded(row.id)"
+                    [attr.aria-label]="(isExpanded(row.id) ? 'Hide' : 'View') + ' approval chain for ' + row.reqNo"
+                    (click)="$event.stopPropagation(); toggleRow(row.id)"
+                  >
+                    <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'chevron_right' }}</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              @if (isExpanded(row.id)) {
+                <tr class="wwell-approvals__detail-row">
+                  <td colspan="9">
+                    <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" />
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
     }
-  </div>
+  </section>
+
+  <!-- ── Land Affairs ─────────────────────────────────────────────────── -->
+  <section class="wwell-approvals__panel">
+    <header class="wwell-approvals__panel-header">
+      <h2 class="wwell-approvals__panel-title">Land Affairs</h2>
+      <button type="button" mat-flat-button color="primary" (click)="openLandAffairsRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request Land Affairs Approval
+      </button>
+    </header>
+
+    @if (isLoading()) {
+      <div class="wwell-approvals__status">Loading Land Affairs approvals&hellip;</div>
+    } @else if (landAffairsRows().length === 0) {
+      <div class="wwell-approvals__status">No Land Affairs approval requests found.</div>
+    } @else {
+      <div class="wwell-approvals__table-wrap">
+        <table class="wwell-approvals__table">
+          <thead>
+            <tr>
+              <th>Req #</th>
+              <th>Client</th>
+              <th>Water Well Name</th>
+              <th>X</th>
+              <th>Y</th>
+              <th>UTM</th>
+              <th>Submitted By</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Workflow</th>
+              <th class="wwell-approvals__col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of landAffairsRows(); track row.id) {
+              <tr class="wwell-approvals__row" [class.wwell-approvals__row--expanded]="isExpanded(row.id)" (click)="toggleRow(row.id)">
+                <td class="wwell-approvals__req">{{ row.reqNo }}</td>
+                <td>{{ row.client }}</td>
+                <td>{{ row.wellName }}</td>
+                <td>{{ row.x }}</td>
+                <td>{{ row.y }}</td>
+                <td>{{ row.utm }}</td>
+                <td>{{ row.submittedBy }}</td>
+                <td>{{ row.date }}</td>
+                <td>
+                  <span
+                    class="wwell-approvals__badge"
+                    [style.background]="statusMeta[row.status].bg"
+                    [style.color]="statusMeta[row.status].color"
+                  >
+                    <span class="wwell-approvals__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                    {{ statusMeta[row.status].label }}
+                  </span>
+                </td>
+                <td class="wwell-approvals__workflow-cell">
+                  <app-wwell-approval-mini-chain [steps]="row.chain" />
+                  @if (isChainComplete(row.chain)) {
+                    <button
+                      type="button"
+                      class="wwell-approvals__pdf-link"
+                      [disabled]="isDownloading(row.id)"
+                      [attr.aria-label]="'Download Land Affairs approval PDF for ' + row.reqNo"
+                      (click)="$event.stopPropagation(); downloadLandAffairsPdf(row)"
+                    >
+                      <mat-icon>picture_as_pdf</mat-icon>
+                      {{ isDownloading(row.id) ? 'Preparing…' : 'Land Affairs.pdf' }}
+                    </button>
+                  }
+                </td>
+                <td class="wwell-approvals__col-actions">
+                  <button
+                    type="button"
+                    class="wwell-approvals__toggle-btn"
+                    [attr.aria-expanded]="isExpanded(row.id)"
+                    [attr.aria-label]="(isExpanded(row.id) ? 'Hide' : 'View') + ' approval chain for ' + row.reqNo"
+                    (click)="$event.stopPropagation(); toggleRow(row.id)"
+                  >
+                    <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'chevron_right' }}</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              @if (isExpanded(row.id)) {
+                <tr class="wwell-approvals__detail-row">
+                  <td colspan="11">
+                    <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" />
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- ── Integrated Requirements (IR) ─────────────────────────────────── -->
+  <section class="wwell-approvals__panel">
+    <header class="wwell-approvals__panel-header">
+      <h2 class="wwell-approvals__panel-title">Integrated Requirements (IR)</h2>
+      <button type="button" mat-flat-button color="primary" (click)="openIrApprovalRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request IR Approval
+      </button>
+    </header>
+
+    @if (isLoading()) {
+      <div class="wwell-approvals__status">Loading IR approvals&hellip;</div>
+    } @else if (irRows().length === 0) {
+      <div class="wwell-approvals__status">No IR approval requests found.</div>
+    } @else {
+      <div class="wwell-approvals__table-wrap">
+        <table class="wwell-approvals__table">
+          <thead>
+            <tr>
+              <th>Req #</th>
+              <th>Client</th>
+              <th>Water Well Name</th>
+              <th>Supporting</th>
+              <th>Submitted By</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Workflow</th>
+              <th class="wwell-approvals__col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of irRows(); track row.id) {
+              <tr class="wwell-approvals__row" [class.wwell-approvals__row--expanded]="isExpanded(row.id)" (click)="toggleRow(row.id)">
+                <td class="wwell-approvals__req">{{ row.reqNo }}</td>
+                <td>{{ row.client }}</td>
+                <td>{{ row.wellName }}</td>
+                <td>{{ row.supporting }}</td>
+                <td>{{ row.submittedBy }}</td>
+                <td>{{ row.date }}</td>
+                <td>
+                  <span
+                    class="wwell-approvals__badge"
+                    [style.background]="statusMeta[row.status].bg"
+                    [style.color]="statusMeta[row.status].color"
+                  >
+                    <span class="wwell-approvals__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                    {{ statusMeta[row.status].label }}
+                  </span>
+                </td>
+                <td class="wwell-approvals__workflow-cell">
+                  <app-wwell-approval-mini-chain [steps]="row.chain" />
+                  @if (isChainComplete(row.chain)) {
+                    <button
+                      type="button"
+                      class="wwell-approvals__pdf-link"
+                      [disabled]="isDownloading(row.id)"
+                      [attr.aria-label]="'Download IR approval PDF for ' + row.reqNo"
+                      (click)="$event.stopPropagation(); downloadIrPdf(row)"
+                    >
+                      <mat-icon>picture_as_pdf</mat-icon>
+                      {{ isDownloading(row.id) ? 'Preparing…' : 'IR.pdf' }}
+                    </button>
+                  }
+                </td>
+                <td class="wwell-approvals__col-actions">
+                  <button
+                    type="button"
+                    class="wwell-approvals__toggle-btn"
+                    [attr.aria-expanded]="isExpanded(row.id)"
+                    [attr.aria-label]="(isExpanded(row.id) ? 'Hide' : 'View') + ' approval chain for ' + row.reqNo"
+                    (click)="$event.stopPropagation(); toggleRow(row.id)"
+                  >
+                    <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'chevron_right' }}</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              @if (isExpanded(row.id)) {
+                <tr class="wwell-approvals__detail-row">
+                  <td colspan="9">
+                    <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" />
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
 </section>

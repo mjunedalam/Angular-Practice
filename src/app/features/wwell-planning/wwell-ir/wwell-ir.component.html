@@ -1,26 +1,126 @@
 <section class="wwell-ir">
   <header class="wwell-ir__header">
-    <h1 class="wwell-ir__title">Integrated Requirements</h1>
-    <span class="wwell-ir__count">{{ rows().length }}</span>
+    <div class="wwell-ir__heading">
+      <h1 class="wwell-ir__title">Integrated Requirements</h1>
+      <span class="wwell-ir__count">{{ rows().length }}</span>
+    </div>
+
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      class="wwell-ir__new-btn"
+      [disabled]="isCreating()"
+      (click)="openNewIrDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      New Integrated Requirement
+    </button>
   </header>
 
-  <div class="wwell-ir__card">
-    @if (isLoading()) {
-      <div class="wwell-ir__status">Loading integrated requirements&hellip;</div>
-    } @else if (hasError()) {
-      <div class="wwell-ir__status wwell-ir__status--error">{{ errorMessage() }}</div>
-    } @else if (rows().length === 0) {
-      <div class="wwell-ir__status">No integrated requirements found.</div>
-    } @else {
-      <ag-grid-angular
-        class="wwell-ir__grid"
-        style="width: 100%"
-        [theme]="gridTheme"
-        [rowData]="rows()"
-        [columnDefs]="columnDefs"
-        [gridOptions]="gridOptions"
-        (gridReady)="onGridReady($event.api)"
-      />
-    }
-  </div>
+  <label class="wwell-ir__search">
+    <mat-icon class="wwell-ir__search-icon">search</mat-icon>
+    <input
+      type="search"
+      placeholder="Search integrated requirements&hellip;"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </label>
+
+  @if (isLoading()) {
+    <div class="wwell-ir__status">Loading integrated requirements&hellip;</div>
+  } @else if (hasError()) {
+    <div class="wwell-ir__status wwell-ir__status--error">{{ errorMessage() }}</div>
+  } @else if (rows().length === 0) {
+    <div class="wwell-ir__status">No integrated requirements found.</div>
+  } @else {
+    <div class="wwell-ir__list">
+      @for (ir of rows(); track ir.id) {
+        <article class="wwell-ir__row">
+          <header class="wwell-ir__row-header">
+            <h2 class="wwell-ir__row-title">{{ ir.code }} — {{ ir.wellName }}</h2>
+
+            <span
+              class="wwell-ir__badge"
+              [style.background]="statusMeta[ir.status].bg"
+              [style.color]="statusMeta[ir.status].color"
+            >
+              <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
+              {{ statusMeta[ir.status].label }}
+            </span>
+
+            <span class="wwell-ir__metrics">
+              <strong>{{ ir.waterProduction.estYieldGpm }} GPM</strong>
+              <span>TDS {{ ir.waterProduction.waterQualityTds | number }} mg/L</span>
+            </span>
+          </header>
+
+          <p class="wwell-ir__row-meta">
+            Request {{ ir.requestId }} &middot; Client: {{ ir.client }} &middot; Updated {{ ir.updatedDate }}
+          </p>
+
+          <div class="wwell-ir__sections">
+            <div class="wwell-ir__section">
+              <h3 class="wwell-ir__section-title">Well Design</h3>
+              <dl class="wwell-ir__fields">
+                <div class="wwell-ir__field">
+                  <dt>Casing Points</dt>
+                  <dd>{{ ir.wellDesign.casingPoints }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Top Picked</dt>
+                  <dd>{{ ir.wellDesign.topPicked }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Completion</dt>
+                  <dd>{{ ir.wellDesign.completion }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="wwell-ir__section">
+              <h3 class="wwell-ir__section-title">Drilling Program</h3>
+              <dl class="wwell-ir__fields">
+                <div class="wwell-ir__field">
+                  <dt>Method</dt>
+                  <dd>{{ ir.drillingProgram.method }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Bit Size</dt>
+                  <dd>{{ ir.drillingProgram.bitSize }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Fluid Type</dt>
+                  <dd>{{ ir.drillingProgram.fluidType }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Stages</dt>
+                  <dd>{{ ir.drillingProgram.stages }}</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Cementing</dt>
+                  <dd>{{ ir.drillingProgram.cementing }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="wwell-ir__section">
+              <h3 class="wwell-ir__section-title">Water Production</h3>
+              <dl class="wwell-ir__fields">
+                <div class="wwell-ir__field">
+                  <dt>Est. Yield</dt>
+                  <dd>{{ ir.waterProduction.estYieldGpm }} GPM</dd>
+                </div>
+                <div class="wwell-ir__field">
+                  <dt>Water Quality</dt>
+                  <dd>TDS {{ ir.waterProduction.waterQualityTds | number }} mg/L</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
 </section>

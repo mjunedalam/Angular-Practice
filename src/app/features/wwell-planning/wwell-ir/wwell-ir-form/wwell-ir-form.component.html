@@ -1,0 +1,167 @@
+<div class="wif">
+  <header class="wif__header">
+    <div class="wif__header-copy">
+      <h2 class="wif__title">New Integrated Requirement</h2>
+      <p class="wif__subtitle">Capture well design, drilling program, and water production targets</p>
+    </div>
+    <button type="button" class="wif__close" mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="wif__body">
+    <form class="wif__form" [formGroup]="form">
+      <h3 class="wif__section-title">Request Details</h3>
+      <div class="wif__grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Well Name</mat-label>
+          <input matInput formControlName="wellName" placeholder="e.g., KHAJ-300" />
+          @if (form.controls.wellName.invalid && form.controls.wellName.touched) {
+            <mat-error>Well name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Related Request</mat-label>
+          <input matInput formControlName="requestId" placeholder="e.g., REQ-00231" />
+          @if (form.controls.requestId.invalid && form.controls.requestId.touched) {
+            <mat-error>Related request is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Client</mat-label>
+          <mat-select formControlName="client" panelClass="wif-select-panel">
+            @for (opt of clientOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.client.invalid && form.controls.client.touched) {
+            <mat-error>Client is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <h3 class="wif__section-title">Well Design</h3>
+      <div class="wif__grid" formGroupName="wellDesign">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Casing Points</mat-label>
+          <input matInput formControlName="casingPoints" placeholder="e.g., 120m" />
+          @if (form.controls.wellDesign.controls.casingPoints.invalid && form.controls.wellDesign.controls.casingPoints.touched) {
+            <mat-error>Casing points are required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Top Picked</mat-label>
+          <input matInput formControlName="topPicked" placeholder="e.g., Wasia-Biyadh" />
+          @if (form.controls.wellDesign.controls.topPicked.invalid && form.controls.wellDesign.controls.topPicked.touched) {
+            <mat-error>Formation top is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Completion</mat-label>
+          <mat-select formControlName="completion" panelClass="wif-select-panel">
+            @for (opt of completionOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.wellDesign.controls.completion.invalid && form.controls.wellDesign.controls.completion.touched) {
+            <mat-error>Completion type is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <h3 class="wif__section-title">Drilling Program</h3>
+      <div class="wif__grid" formGroupName="drillingProgram">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Method</mat-label>
+          <mat-select formControlName="method" panelClass="wif-select-panel">
+            @for (opt of methodOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.drillingProgram.controls.method.invalid && form.controls.drillingProgram.controls.method.touched) {
+            <mat-error>Drilling method is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Bit Size</mat-label>
+          <input matInput formControlName="bitSize" placeholder='e.g., 12.25"' />
+          @if (form.controls.drillingProgram.controls.bitSize.hasError('required') && form.controls.drillingProgram.controls.bitSize.touched) {
+            <mat-error>Bit size is required</mat-error>
+          } @else if (form.controls.drillingProgram.controls.bitSize.hasError('pattern') && form.controls.drillingProgram.controls.bitSize.touched) {
+            <mat-error>Use a numeric size, e.g. 12.25 or 12.25&quot;</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Fluid Type</mat-label>
+          <mat-select formControlName="fluidType" panelClass="wif-select-panel">
+            @for (opt of fluidTypeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.drillingProgram.controls.fluidType.invalid && form.controls.drillingProgram.controls.fluidType.touched) {
+            <mat-error>Fluid type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Stages</mat-label>
+          <input matInput type="number" min="1" formControlName="stages" placeholder="e.g., 3" />
+          @if (form.controls.drillingProgram.controls.stages.invalid && form.controls.drillingProgram.controls.stages.touched) {
+            <mat-error>Enter at least 1 stage</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Cementing</mat-label>
+          <mat-select formControlName="cementing" panelClass="wif-select-panel">
+            @for (opt of cementingOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.drillingProgram.controls.cementing.invalid && form.controls.drillingProgram.controls.cementing.touched) {
+            <mat-error>Cementing plan is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <h3 class="wif__section-title">Water Production</h3>
+      <div class="wif__grid" formGroupName="waterProduction">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Est. Yield</mat-label>
+          <input matInput type="number" min="0" formControlName="estYieldGpm" placeholder="e.g., 350" />
+          <span matTextSuffix>&nbsp;GPM</span>
+          @if (form.controls.waterProduction.controls.estYieldGpm.invalid && form.controls.waterProduction.controls.estYieldGpm.touched) {
+            <mat-error>Estimated yield is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wif__field">
+          <mat-label>Water Quality (TDS)</mat-label>
+          <input matInput type="number" min="0" formControlName="waterQualityTds" placeholder="e.g., 1200" />
+          <span matTextSuffix>&nbsp;mg/L</span>
+          @if (form.controls.waterProduction.controls.waterQualityTds.invalid && form.controls.waterProduction.controls.waterQualityTds.touched) {
+            <mat-error>Water quality is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
+
+  <footer class="wif__footer">
+    <span class="wif__hint"><span class="wif__required-mark">*</span> Required fields</span>
+
+    <div class="wif__actions">
+      <button type="button" mat-stroked-button (click)="close()">Cancel</button>
+      <button type="button" mat-flat-button color="primary" class="wif__btn-submit" (click)="create()">
+        <mat-icon>add</mat-icon>
+        Create
+      </button>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,129 @@
+<div class="laf">
+  <header class="laf__header">
+    <div class="laf__header-copy">
+      <h2 class="laf__title">Request Land Affairs Approval</h2>
+      <p class="laf__subtitle">{{ chainSubtitle }}</p>
+    </div>
+    <button type="button" class="laf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="laf__body">
+    <form class="laf__form" [formGroup]="form">
+      <div class="laf__grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Client</mat-label>
+          <mat-select formControlName="client" panelClass="laf-select-panel">
+            @for (opt of clientOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.client.invalid && form.controls.client.touched) {
+            <mat-error>Client is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Water Well Name</mat-label>
+          <input matInput formControlName="wellName" placeholder="e.g., MADN-100" />
+          @if (form.controls.wellName.hasError('required') && form.controls.wellName.touched) {
+            <mat-error>Well name is required</mat-error>
+          } @else if (form.controls.wellName.hasError('pattern') && form.controls.wellName.touched) {
+            <mat-error>4 letters + dash + hundreds, e.g. ABCD-200</mat-error>
+          } @else {
+            <mat-hint>4 letters + dash + hundreds</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Coordinate X</mat-label>
+          <input matInput inputmode="decimal" formControlName="coordinateX" placeholder="e.g., 680542.12" />
+          @if (form.controls.coordinateX.invalid && form.controls.coordinateX.touched) {
+            <mat-error>Numeric easting value is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Coordinate Y</mat-label>
+          <input matInput inputmode="decimal" formControlName="coordinateY" placeholder="e.g., 2712983.45" />
+          @if (form.controls.coordinateY.invalid && form.controls.coordinateY.touched) {
+            <mat-error>Numeric northing value is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>UTM Zone</mat-label>
+          <mat-select formControlName="utmZone" panelClass="laf-select-panel">
+            @for (opt of utmZoneOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.utmZone.invalid && form.controls.utmZone.touched) {
+            <mat-error>UTM zone is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Land Type</mat-label>
+          <mat-select formControlName="landType" panelClass="laf-select-panel">
+            @for (opt of landTypeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.landType.invalid && form.controls.landType.touched) {
+            <mat-error>Land type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Surveyor</mat-label>
+          <mat-select formControlName="surveyor" panelClass="laf-select-panel">
+            <mat-option [value]="null">&mdash; Unassigned &mdash;</mat-option>
+            @for (opt of surveyorOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
+          <mat-label>Parcel Number</mat-label>
+          <input matInput formControlName="parcelNumber" placeholder="e.g., PAR-2026-0123" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field laf__field--full">
+          <mat-label>Land Use Notes</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="notes"
+            placeholder="Land ownership details, restrictions..."
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="laf__attachments">
+        <span class="laf__attachments-label">Attachments</span>
+        <app-wwell-attachment-dropzone
+          hint="Land deed, survey map, coordinates certificate"
+          (filesChange)="onFilesChange($event)"
+        />
+      </div>
+    </form>
+  </div>
+
+  <footer class="laf__footer">
+    <span class="laf__hint"><span class="laf__required-mark">*</span> Required fields</span>
+
+    <div class="laf__actions">
+      <button type="button" mat-stroked-button class="laf__btn-draft" (click)="saveDraft()">
+        <mat-icon>bookmark_border</mat-icon>
+        Save as Draft
+      </button>
+      <button type="button" mat-flat-button color="primary" class="laf__btn-submit" (click)="submit()">
+        <mat-icon>send</mat-icon>
+        Submit
+      </button>
+    </div>
+  </footer>
+</div>

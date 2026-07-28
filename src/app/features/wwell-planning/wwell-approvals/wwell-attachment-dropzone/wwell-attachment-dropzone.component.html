@@ -1,0 +1,34 @@
+<div class="wad">
+  <label
+    class="wad__dropzone"
+    [class.wad__dropzone--active]="isDragOver()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <input type="file" multiple class="wad__file-input" (change)="onFileInputChange($event)" />
+    <mat-icon class="wad__dropzone-icon">attach_file</mat-icon>
+    <span class="wad__dropzone-text">{{ hint() }}</span>
+  </label>
+
+  @if (attachments().length) {
+    <ul class="wad__file-list">
+      @for (item of attachments(); track item.id) {
+        <li class="wad__file-item">
+          <mat-icon class="wad__file-icon">description</mat-icon>
+          <span class="wad__file-name">{{ item.file.name }}</span>
+          <span class="wad__file-size">{{ fileSizeLabel(item.file.size) }}</span>
+          <button
+            type="button"
+            mat-icon-button
+            class="wad__file-remove"
+            (click)="removeAttachment(item.id)"
+            aria-label="Remove attachment"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

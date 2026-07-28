@@ -1,0 +1,190 @@
+<div class="iraf">
+  <header class="iraf__header">
+    <div class="iraf__header-copy">
+      <h2 class="iraf__title">Request IR Approval</h2>
+      <p class="iraf__subtitle">{{ chainSubtitle }}</p>
+    </div>
+    <button type="button" class="iraf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="iraf__body">
+    <form class="iraf__form" [formGroup]="form">
+      <div class="iraf__grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Client</mat-label>
+          <mat-select formControlName="client" panelClass="iraf-select-panel">
+            @for (opt of clientOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.client.invalid && form.controls.client.touched) {
+            <mat-error>Client is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Supporting</mat-label>
+          <input matInput formControlName="supporting" placeholder="e.g., WDQS-200 or facility name" />
+          @if (form.controls.supporting.invalid && form.controls.supporting.touched) {
+            <mat-error>Supporting facility is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Water Well Name</mat-label>
+          <input matInput formControlName="wellName" placeholder="e.g., RXYD-100" />
+          @if (form.controls.wellName.hasError('required') && form.controls.wellName.touched) {
+            <mat-error>Well name is required</mat-error>
+          } @else if (form.controls.wellName.hasError('pattern') && form.controls.wellName.touched) {
+            <mat-error>4 letters + dash + hundreds, e.g. ABCD-200</mat-error>
+          } @else {
+            <mat-hint>4 letters + dash + hundreds</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Final Coordinates (Lat, Long)</mat-label>
+          <input matInput formControlName="finalCoordinates" placeholder="e.g., 24.1751°N, 47.2951°E" />
+          @if (form.controls.finalCoordinates.hasError('required') && form.controls.finalCoordinates.touched) {
+            <mat-error>Final coordinates are required</mat-error>
+          } @else if (form.controls.finalCoordinates.hasError('pattern') && form.controls.finalCoordinates.touched) {
+            <mat-error>Use "lat°N, long°E" format</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Casing Points</mat-label>
+          <input matInput formControlName="casingPoints" placeholder="e.g., 120m" />
+          @if (form.controls.casingPoints.invalid && form.controls.casingPoints.touched) {
+            <mat-error>Casing points are required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Tops Picked</mat-label>
+          <mat-select formControlName="topsPicked" panelClass="iraf-select-panel">
+            @for (opt of topsOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.topsPicked.invalid && form.controls.topsPicked.touched) {
+            <mat-error>Formation top is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Completion Type</mat-label>
+          <mat-select formControlName="completionType" panelClass="iraf-select-panel">
+            @for (opt of completionOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.completionType.invalid && form.controls.completionType.touched) {
+            <mat-error>Completion type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Drilling Method</mat-label>
+          <mat-select formControlName="drillingMethod" panelClass="iraf-select-panel">
+            @for (opt of methodOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.drillingMethod.invalid && form.controls.drillingMethod.touched) {
+            <mat-error>Drilling method is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Bit Size</mat-label>
+          <mat-select formControlName="bitSize" panelClass="iraf-select-panel">
+            @for (opt of bitSizeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.bitSize.invalid && form.controls.bitSize.touched) {
+            <mat-error>Bit size is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Fluid Type</mat-label>
+          <mat-select formControlName="fluidType" panelClass="iraf-select-panel">
+            @for (opt of fluidTypeOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.fluidType.invalid && form.controls.fluidType.touched) {
+            <mat-error>Fluid type is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Estimated Yield</mat-label>
+          <input matInput formControlName="estimatedYield" placeholder="e.g., 350 GPM" />
+          @if (form.controls.estimatedYield.hasError('required') && form.controls.estimatedYield.touched) {
+            <mat-error>Estimated yield is required</mat-error>
+          } @else if (form.controls.estimatedYield.hasError('pattern') && form.controls.estimatedYield.touched) {
+            <mat-error>Use a numeric value, e.g. 350 or 350 GPM</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Water Quality (TDS)</mat-label>
+          <input matInput formControlName="waterQualityTds" placeholder="e.g., TDS 1,200 mg/L" />
+          @if (form.controls.waterQualityTds.hasError('required') && form.controls.waterQualityTds.touched) {
+            <mat-error>Water quality is required</mat-error>
+          } @else if (form.controls.waterQualityTds.hasError('pattern') && form.controls.waterQualityTds.touched) {
+            <mat-error>Use a numeric value, e.g. TDS 1,200 mg/L</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Stages</mat-label>
+          <input matInput type="number" min="1" formControlName="stages" placeholder="e.g., 3" />
+          @if (form.controls.stages.invalid && form.controls.stages.touched) {
+            <mat-error>Enter at least 1 stage</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
+          <mat-label>Cementing Type</mat-label>
+          <mat-select formControlName="cementingType" panelClass="iraf-select-panel">
+            @for (opt of cementingOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.cementingType.invalid && form.controls.cementingType.touched) {
+            <mat-error>Cementing type is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="iraf__attachments">
+        <span class="iraf__attachments-label">Attachments</span>
+        <app-wwell-attachment-dropzone
+          hint="Click to attach files (well design, drilling program, lab results…)"
+          (filesChange)="onFilesChange($event)"
+        />
+      </div>
+    </form>
+  </div>
+
+  <footer class="iraf__footer">
+    <span class="iraf__hint"><span class="iraf__required-mark">*</span> Required fields</span>
+
+    <div class="iraf__actions">
+      <button type="button" mat-stroked-button class="iraf__btn-draft" (click)="saveDraft()">
+        <mat-icon>bookmark_border</mat-icon>
+        Save as Draft
+      </button>
+      <button type="button" mat-flat-button color="primary" class="iraf__btn-submit" (click)="submit()">
+        <mat-icon>send</mat-icon>
+        Submit
+      </button>
+    </div>
+  </footer>
+</div>

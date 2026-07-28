@@ -2,8 +2,14 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { pipe, switchMap, tap } from 'rxjs';
-import { ApprovalDecision, CreateWwellPlanningRequestPayload } from '@models/wwell-planning/wwell-planning.model';
+import { forkJoin, pipe, switchMap, tap } from 'rxjs';
+import {
+  CreateIntegratedRequirementPayload,
+  CreateIrApprovalPayload,
+  CreateLandAffairsApprovalPayload,
+  CreateWldaApprovalPayload,
+  CreateWwellPlanningRequestPayload,
+} from '@models/wwell-planning/wwell-planning.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStoreState, initialWwellPlanningState } from './wwell-planning.state';
 
@@ -14,10 +20,9 @@ function errorMessage(err: unknown, fallback: string): string {
 export const WwellPlanningStore = signalStore(
   withState<WwellPlanningStoreState>(initialWwellPlanningState),
 
-  withComputed(({ approvals, requestsLoading, approvalsLoading, integratedRequirementsLoading, error }) => ({
+  withComputed(({ requestsLoading, approvalsLoading, integratedRequirementsLoading, error }) => ({
     isLoading: computed(() => requestsLoading() || approvalsLoading() || integratedRequirementsLoading()),
     hasError: computed(() => error() !== null),
-    pendingApprovalsCount: computed(() => approvals().filter(a => a.decision === 'pending').length),
   })),
 
   withMethods((store, svc = inject(WwellPlanningService)) => {
@@ -40,9 +45,13 @@ export const WwellPlanningStore = signalStore(
       pipe(
         tap(() => patchState(store, { approvalsLoading: true, error: null })),
         switchMap(() =>
-          svc.getApprovals().pipe(
+          forkJoin({
+            wldaApprovals: svc.getWldaApprovals(),
+            landAffairsApprovals: svc.getLandAffairsApprovals(),
+            irApprovals: svc.getIrApprovals(),
+          }).pipe(
             tapResponse({
-              next: approvals => patchState(store, { approvals, approvalsLoading: false }),
+              next: result => patchState(store, { ...result, approvalsLoading: false }),
               error: (err: unknown) =>
                 patchState(store, { approvalsLoading: false, error: errorMessage(err, 'Failed to load approvals') }),
             }),
@@ -82,16 +91,6 @@ export const WwellPlanningStore = signalStore(
         loadIntegratedRequirements();
       },
 
-      decideApproval(approvalId: string, decision: ApprovalDecision, comments: string | null = null): void {
-        svc.decideApproval(approvalId, decision, comments).subscribe({
-          next: updated =>
-            patchState(store, {
-              approvals: store.approvals().map(a => (a.id === updated.id ? updated : a)),
-            }),
-          error: (err: unknown) => patchState(store, { error: errorMessage(err, 'Failed to update approval') }),
-        });
-      },
-
       createRequest(payload: CreateWwellPlanningRequestPayload, files: readonly File[] = []): void {
         patchState(store, { creatingRequest: true, error: null });
         svc.createRequest(payload, files).subscribe({
@@ -102,6 +101,64 @@ export const WwellPlanningStore = signalStore(
             }),
           error: (err: unknown) =>
             patchState(store, { creatingRequest: false, error: errorMessage(err, 'Failed to create request') }),
+        });
+      },
+
+      createIntegratedRequirement(payload: CreateIntegratedRequirementPayload): void {
+        patchState(store, { creatingIntegratedRequirement: true, error: null });
+        svc.createIntegratedRequirement(payload).subscribe({
+          next: created =>
+            patchState(store, {
+              integratedRequirements: [created, ...store.integratedRequirements()],
+              creatingIntegratedRequirement: false,
+            }),
+          error: (err: unknown) =>
+            patchState(store, {
+              creatingIntegratedRequirement: false,
+              error: errorMessage(err, 'Failed to create integrated requirement'),
+            }),
+        });
+      },
+
+      submitWldaApproval(payload: CreateWldaApprovalPayload, files: readonly File[] = []): void {
+        patchState(store, { creatingApproval: true, error: null });
+        svc.createWldaApproval(payload, files).subscribe({
+          next: created =>
+            patchState(store, {
+              wldaApprovals: [created, ...store.wldaApprovals()],
+              creatingApproval: false,
+            }),
+          error: (err: unknown) =>
+            patchState(store, { creatingApproval: false, error: errorMessage(err, 'Failed to submit WLDA approval request') }),
+        });
+      },
+
+      submitLandAffairsApproval(payload: CreateLandAffairsApprovalPayload, files: readonly File[] = []): void {
+        patchState(store, { creatingApproval: true, error: null });
+        svc.createLandAffairsApproval(payload, files).subscribe({
+          next: created =>
+            patchState(store, {
+              landAffairsApprovals: [created, ...store.landAffairsApprovals()],
+              creatingApproval: false,
+            }),
+          error: (err: unknown) =>
+            patchState(store, {
+              creatingApproval: false,
+              error: errorMessage(err, 'Failed to submit Land Affairs approval request'),
+            }),
+        });
+      },
+
+      submitIrApproval(payload: CreateIrApprovalPayload, files: readonly File[] = []): void {
+        patchState(store, { creatingApproval: true, error: null });
+        svc.createIrApproval(payload, files).subscribe({
+          next: created =>
+            patchState(store, {
+              irApprovals: [created, ...store.irApprovals()],
+              creatingApproval: false,
+            }),
+          error: (err: unknown) =>
+            patchState(store, { creatingApproval: false, error: errorMessage(err, 'Failed to submit IR approval request') }),
         });
       },
 

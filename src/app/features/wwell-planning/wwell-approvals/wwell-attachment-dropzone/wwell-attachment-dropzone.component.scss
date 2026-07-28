@@ -1,0 +1,106 @@
+:host {
+  display: block;
+}
+
+$navy: #1e293b;
+$muted: #64748b;
+$border: #e2e8f0;
+$accent: #3b82f6;
+$bg-subtle: #f8fafc;
+
+.wad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wad__dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1.5px dashed #93c5fd;
+  border-radius: 12px;
+  background: $bg-subtle;
+  color: $muted;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+
+  &:hover,
+  &--active {
+    border-color: $accent;
+    background: #eff6ff;
+  }
+}
+
+.wad__dropzone-icon {
+  color: $accent;
+}
+
+.wad__dropzone-text {
+  font-size: 0.8rem;
+  max-width: 42ch;
+  line-height: 1.4;
+}
+
+.wad__file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wad__file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wad__file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+  background: $bg-subtle;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: $navy;
+}
+
+.wad__file-icon {
+  color: $accent;
+  flex-shrink: 0;
+}
+
+.wad__file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wad__file-size {
+  color: $muted;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.wad__file-remove {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
