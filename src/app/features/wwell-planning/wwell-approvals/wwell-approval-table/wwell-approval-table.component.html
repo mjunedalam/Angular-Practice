@@ -1,0 +1,80 @@
+<div class="wwell-approvals__table-wrap">
+  <table class="wwell-approvals__table">
+    <thead>
+      <tr>
+        <th>Req #</th>
+        <th>Client</th>
+        <th>Water Well Name</th>
+        @for (col of columns(); track col.header) {
+          <th>{{ col.header }}</th>
+        }
+        <th>Submitted By</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Workflow</th>
+        <th class="wwell-approvals__col-actions"></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr
+          class="wwell-approvals__row"
+          [class.wwell-approvals__row--expanded]="isExpanded(row.id)"
+          (click)="rowToggle.emit(row.id)"
+        >
+          <td class="wwell-approvals__req">{{ row.reqNo }}</td>
+          <td>{{ row.client }}</td>
+          <td>{{ row.wellName }}</td>
+          @for (col of columns(); track col.header) {
+            <td>{{ col.value(row) }}</td>
+          }
+          <td>{{ row.submittedBy }}</td>
+          <td>{{ row.date }}</td>
+          <td>
+            <span
+              class="wwell-approvals__badge"
+              [style.background]="statusMeta()[row.status].bg"
+              [style.color]="statusMeta()[row.status].color"
+            >
+              <span class="wwell-approvals__badge-dot" [style.background]="statusMeta()[row.status].dot"></span>
+              {{ statusMeta()[row.status].label }}
+            </span>
+          </td>
+          <td class="wwell-approvals__workflow-cell">
+            <app-wwell-approval-mini-chain [steps]="row.chain" />
+            @if (isChainComplete(row.chain)) {
+              <button
+                type="button"
+                class="wwell-approvals__pdf-link"
+                [disabled]="isDownloading(row.id)"
+                [attr.aria-label]="pdfAriaLabel(row)"
+                (click)="$event.stopPropagation(); pdfDownload.emit(row)"
+              >
+                <mat-icon>picture_as_pdf</mat-icon>
+                {{ pdfButtonLabel(row) }}
+              </button>
+            }
+          </td>
+          <td class="wwell-approvals__col-actions">
+            <button
+              type="button"
+              class="wwell-approvals__toggle-btn"
+              [attr.aria-expanded]="isExpanded(row.id)"
+              [attr.aria-label]="toggleAriaLabel(row)"
+              (click)="$event.stopPropagation(); rowToggle.emit(row.id)"
+            >
+              <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'chevron_right' }}</mat-icon>
+            </button>
+          </td>
+        </tr>
+        @if (isExpanded(row.id)) {
+          <tr class="wwell-approvals__detail-row">
+            <td [attr.colspan]="colspan()">
+              <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" />
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

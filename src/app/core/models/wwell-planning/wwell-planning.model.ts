@@ -27,16 +27,19 @@ export interface WwellPlanningRequest {
   readonly attachments: readonly string[];
 }
 
-export interface CreateWwellPlanningRequestPayload {
-  readonly client: string;
-  readonly supporting: string;
-  readonly coordinates: string;
-  readonly targetAquifer: string;
-  readonly proposedDepth: string;
-  readonly businessUse: string;
-  readonly priority: WwellPlanningPriority | null;
-  readonly assignedTo: string | null;
-  readonly notes: string | null;
+export interface CreateWwellPlanningRequestPayload
+  extends Pick<
+    WwellPlanningRequest,
+    | 'client'
+    | 'supporting'
+    | 'coordinates'
+    | 'targetAquifer'
+    | 'proposedDepth'
+    | 'businessUse'
+    | 'priority'
+    | 'assignedTo'
+    | 'notes'
+  > {
   readonly status: Extract<WwellPlanningRequestStatus, 'draft' | 'submitted'>;
 }
 
@@ -50,7 +53,7 @@ export interface ApprovalChainStep {
   readonly date: string | null;
 }
 
-interface ApprovalRequestBase {
+export interface ApprovalRequestBase {
   readonly id: string;
   readonly reqNo: string;
   readonly client: string;
@@ -61,18 +64,17 @@ interface ApprovalRequestBase {
   readonly chain: readonly ApprovalChainStep[];
 }
 
-export interface WldaApproval extends ApprovalRequestBase {
+interface ApprovalWithSupportingDoc extends ApprovalRequestBase {
   readonly supporting: string;
 }
+
+export type WldaApproval = ApprovalWithSupportingDoc;
+export type IrApproval = ApprovalWithSupportingDoc;
 
 export interface LandAffairsApproval extends ApprovalRequestBase {
   readonly x: string;
   readonly y: string;
   readonly utm: string;
-}
-
-export interface IrApproval extends ApprovalRequestBase {
-  readonly supporting: string;
 }
 
 export interface CreateWldaApprovalPayload {
@@ -152,12 +154,10 @@ export interface IntegratedRequirement {
   readonly waterProduction: IntegratedRequirementWaterProduction;
 }
 
-export interface CreateIntegratedRequirementPayload {
-  readonly wellName: string;
-  readonly requestId: string;
-  readonly client: string;
-  readonly wellDesign: IntegratedRequirementWellDesign;
-  readonly drillingProgram: IntegratedRequirementDrillingProgram;
-  readonly waterProduction: IntegratedRequirementWaterProduction;
+export interface CreateIntegratedRequirementPayload
+  extends Pick<
+    IntegratedRequirement,
+    'wellName' | 'requestId' | 'client' | 'wellDesign' | 'drillingProgram' | 'waterProduction'
+  > {
   readonly status: Extract<IntegratedRequirementStatus, 'in-progress'>;
 }

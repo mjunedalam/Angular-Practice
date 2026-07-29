@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CellClickedEvent, GridApi } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { WwellPlanningRequest } from '@models/wwell-planning/wwell-planning.model';
@@ -15,6 +16,8 @@ import {
 } from './wwell-requests.config';
 import { WwellRequestFormComponent, WwellRequestFormResult } from './wwell-request-form/wwell-request-form.component';
 
+const SNACKBAR_DURATION_MS = 3000;
+
 @Component({
   selector: 'app-wwell-requests',
   standalone: true,
@@ -26,12 +29,12 @@ import { WwellRequestFormComponent, WwellRequestFormResult } from './wwell-reque
 export class WwellRequestsComponent implements OnInit {
   protected readonly store = inject(WwellPlanningStore);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly rows = this.store.requests;
   protected readonly isLoading = this.store.requestsLoading;
   protected readonly isCreating = this.store.creatingRequest;
-  protected readonly hasError = this.store.hasError;
-  protected readonly errorMessage = this.store.error;
+  protected readonly loadError = this.store.requestsError;
 
   protected readonly totalCount = computed(() => this.rows().length);
   protected readonly inProgressCount = computed(() => this.rows().filter(r => r.status === 'in-progress').length);
@@ -45,6 +48,15 @@ export class WwellRequestsComponent implements OnInit {
   protected readonly gridTheme = wwellRequestsGridTheme;
 
   private gridApi: GridApi<WwellPlanningRequest> | null = null;
+
+  constructor() {
+    effect(() => {
+      const message = this.store.createRequestError();
+      if (message) {
+        this.snackBar.open(message, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.store.loadRequests();

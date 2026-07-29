@@ -30,8 +30,8 @@
 
   @if (isLoading()) {
     <div class="wwell-ir__status">Loading integrated requirements&hellip;</div>
-  } @else if (hasError()) {
-    <div class="wwell-ir__status wwell-ir__status--error">{{ errorMessage() }}</div>
+  } @else if (loadError()) {
+    <div class="wwell-ir__status wwell-ir__status--error">{{ loadError() }}</div>
   } @else if (rows().length === 0) {
     <div class="wwell-ir__status">No integrated requirements found.</div>
   } @else {

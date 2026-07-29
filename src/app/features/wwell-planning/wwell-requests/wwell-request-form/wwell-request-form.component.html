@@ -1,19 +1,10 @@
 <div class="wrf">
-  <header class="wrf__header">
-    <div class="wrf__header-copy">
-      <h2 class="wrf__title">{{ isViewMode ? 'Request Details' : 'New Request' }}</h2>
-      @if (!isViewMode) {
-        <p class="wrf__subtitle">Create a new well request &mdash; will be routed for approvals after submission</p>
-      } @else if (data.request) {
-        <p class="wrf__subtitle">{{ data.request.id }} &middot; Submitted {{ data.request.requestedDate }}</p>
-      }
-    </div>
-    <button type="button" class="wrf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="wrf__body">
+  <app-wwell-form-dialog-shell
+    [title]="dialogTitle"
+    [subtitle]="dialogSubtitle"
+    [requiredHint]="!isViewMode"
+    (closed)="close()"
+  >
     <form class="wrf__form" [formGroup]="form">
       <div class="wrf__grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wrf__field">
@@ -142,85 +133,28 @@
 
       <div class="wrf__attachments">
         <span class="wrf__attachments-label">Attachments</span>
-
-        @if (!isViewMode) {
-          <label
-            class="wrf__dropzone"
-            [class.wrf__dropzone--active]="isDragOver()"
-            (dragover)="onDragOver($event)"
-            (dragleave)="onDragLeave($event)"
-            (drop)="onDrop($event)"
-          >
-            <input type="file" multiple class="wrf__file-input" (change)="onFileInputChange($event)" />
-            <mat-icon class="wrf__dropzone-icon">attach_file</mat-icon>
-            <span class="wrf__dropzone-text"
-              >Click to attach files (site plan, client authorization, reports, permits&hellip;)</span
-            >
-          </label>
-        }
-
-        @if (attachmentNames().length) {
-          <ul class="wrf__file-list">
-            @if (isViewMode) {
-              @for (name of attachmentNames(); track name) {
-                <li class="wrf__file-item">
-                  <mat-icon class="wrf__file-icon">description</mat-icon>
-                  <span class="wrf__file-name">{{ name }}</span>
-                </li>
-              }
-            } @else {
-              @for (item of attachments(); track item.id) {
-                <li class="wrf__file-item">
-                  <mat-icon class="wrf__file-icon">description</mat-icon>
-                  <span class="wrf__file-name">{{ item.file.name }}</span>
-                  <span class="wrf__file-size">{{ fileSizeLabel(item.file.size) }}</span>
-                  <button
-                    type="button"
-                    mat-icon-button
-                    class="wrf__file-remove"
-                    (click)="removeAttachment(item.id)"
-                    aria-label="Remove attachment"
-                  >
-                    <mat-icon>close</mat-icon>
-                  </button>
-                </li>
-              }
-            }
-          </ul>
-        } @else if (isViewMode) {
-          <p class="wrf__no-files">No attachments were provided.</p>
-        }
+        <app-wwell-attachment-dropzone
+          hint="Click to attach files (site plan, client authorization, reports, permits…)"
+          [disabled]="isViewMode"
+          [displayNames]="isViewMode ? (data.request?.attachments ?? []) : null"
+          (filesChange)="onFilesChange($event)"
+        />
       </div>
     </form>
-  </div>
 
-  <footer class="wrf__footer">
-    <span class="wrf__hint">
-      @if (!isViewMode) {
-        <span class="wrf__required-mark">*</span> Required fields
-      }
-    </span>
-
-    <div class="wrf__actions">
+    <ng-container dialogActions>
       @if (isViewMode) {
         <button type="button" mat-stroked-button (click)="close()">Close</button>
       } @else {
-        <button type="button" mat-stroked-button class="wrf__btn-draft" (click)="saveDraft()">
+        <button type="button" mat-stroked-button (click)="saveDraft()">
           <mat-icon>bookmark_border</mat-icon>
           Save as Draft
         </button>
-        <button
-          type="button"
-          mat-flat-button
-          color="primary"
-          class="wrf__btn-submit"
-          [disabled]="form.invalid"
-          (click)="submitRequest()"
-        >
+        <button type="button" mat-flat-button color="primary" [disabled]="form.invalid" (click)="submitRequest()">
           <mat-icon>send</mat-icon>
           Submit
         </button>
       }
-    </div>
-  </footer>
+    </ng-container>
+  </app-wwell-form-dialog-shell>
 </div>

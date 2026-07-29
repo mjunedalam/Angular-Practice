@@ -103,4 +103,22 @@ $bg-subtle: #f8fafc;
   width: 30px;
   height: 30px;
   padding: 0;
+
+  /*
+   * This component uses default (emulated) encapsulation, so a plain
+   * descendant selector can't reach the touch-target span mat-icon-button
+   * renders via its own internal template (it carries that component's
+   * scoping attribute, not this one's) — ::ng-deep is required here.
+   */
+  ::ng-deep .mat-mdc-button-touch-target {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.wad__no-files {
+  margin: 0;
+  font-size: 0.82rem;
+  color: $muted;
+  font-style: italic;
 }

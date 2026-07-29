@@ -1,15 +1,5 @@
 <div class="wldaf">
-  <header class="wldaf__header">
-    <div class="wldaf__header-copy">
-      <h2 class="wldaf__title">Request WLDA Approval</h2>
-      <p class="wldaf__subtitle">{{ chainSubtitle }}</p>
-    </div>
-    <button type="button" class="wldaf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="wldaf__body">
+  <app-wwell-form-dialog-shell title="Request WLDA Approval" [subtitle]="chainSubtitle" (closed)="close()">
     <form class="wldaf__form" [formGroup]="form">
       <div class="wldaf__grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wldaf__field">
@@ -132,20 +122,16 @@
         />
       </div>
     </form>
-  </div>
 
-  <footer class="wldaf__footer">
-    <span class="wldaf__hint"><span class="wldaf__required-mark">*</span> Required fields</span>
-
-    <div class="wldaf__actions">
-      <button type="button" mat-stroked-button class="wldaf__btn-draft" (click)="saveDraft()">
+    <ng-container dialogActions>
+      <button type="button" mat-stroked-button (click)="saveDraft()">
         <mat-icon>bookmark_border</mat-icon>
         Save as Draft
       </button>
-      <button type="button" mat-flat-button color="primary" class="wldaf__btn-submit" (click)="submit()">
+      <button type="button" mat-flat-button color="primary" (click)="submit()">
         <mat-icon>send</mat-icon>
         Submit
       </button>
-    </div>
-  </footer>
+    </ng-container>
+  </app-wwell-form-dialog-shell>
 </div>

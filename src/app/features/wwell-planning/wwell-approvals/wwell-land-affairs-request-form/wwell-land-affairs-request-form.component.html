@@ -1,15 +1,5 @@
 <div class="laf">
-  <header class="laf__header">
-    <div class="laf__header-copy">
-      <h2 class="laf__title">Request Land Affairs Approval</h2>
-      <p class="laf__subtitle">{{ chainSubtitle }}</p>
-    </div>
-    <button type="button" class="laf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="laf__body">
+  <app-wwell-form-dialog-shell title="Request Land Affairs Approval" [subtitle]="chainSubtitle" (closed)="close()">
     <form class="laf__form" [formGroup]="form">
       <div class="laf__grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
@@ -110,20 +100,16 @@
         />
       </div>
     </form>
-  </div>
 
-  <footer class="laf__footer">
-    <span class="laf__hint"><span class="laf__required-mark">*</span> Required fields</span>
-
-    <div class="laf__actions">
-      <button type="button" mat-stroked-button class="laf__btn-draft" (click)="saveDraft()">
+    <ng-container dialogActions>
+      <button type="button" mat-stroked-button (click)="saveDraft()">
         <mat-icon>bookmark_border</mat-icon>
         Save as Draft
       </button>
-      <button type="button" mat-flat-button color="primary" class="laf__btn-submit" (click)="submit()">
+      <button type="button" mat-flat-button color="primary" (click)="submit()">
         <mat-icon>send</mat-icon>
         Submit
       </button>
-    </div>
-  </footer>
+    </ng-container>
+  </app-wwell-form-dialog-shell>
 </div>

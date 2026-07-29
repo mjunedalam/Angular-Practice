@@ -1,0 +1,26 @@
+<header class="wfds__header">
+  <div class="wfds__header-copy">
+    <h2 class="wfds__title">{{ title() }}</h2>
+    @if (subtitle()) {
+      <p class="wfds__subtitle">{{ subtitle() }}</p>
+    }
+  </div>
+  <button type="button" class="wfds__close" mat-icon-button (click)="closed.emit()" aria-label="Close dialog">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<div class="wfds__body">
+  <ng-content />
+</div>
+
+<footer class="wfds__footer">
+  <span class="wfds__hint">
+    @if (requiredHint()) {
+      <span class="wfds__required-mark">*</span> Required fields
+    }
+  </span>
+  <div class="wfds__actions">
+    <ng-content select="[dialogActions]" />
+  </div>
+</footer>

@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CreateIntegratedRequirementPayload } from '@models/wwell-planning/wwell-planning.model';
+import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {
   WWELL_IR_BIT_SIZE_PATTERN,
   WWELL_IR_CEMENTING_OPTIONS,
@@ -27,6 +28,7 @@ import {
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    WwellFormDialogShellComponent,
   ],
   templateUrl: './wwell-ir-form.component.html',
   styleUrl: './wwell-ir-form.component.scss',

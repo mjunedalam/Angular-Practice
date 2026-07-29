@@ -8,7 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { CreateLandAffairsApprovalPayload } from '@models/wwell-planning/wwell-planning.model';
 import { WWELL_APPROVAL_WELL_NAME_PATTERN, WWELL_LAND_AFFAIRS_CHAIN_ROLES } from '../wwell-approvals.config';
-import { WwellAttachmentDropzoneComponent } from '../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {
   WWELL_LAND_AFFAIRS_FORM_CLIENT_OPTIONS,
   WWELL_LAND_AFFAIRS_FORM_COORDINATE_PATTERN,
@@ -35,6 +36,7 @@ export interface WwellLandAffairsRequestFormResult {
     MatInputModule,
     MatSelectModule,
     WwellAttachmentDropzoneComponent,
+    WwellFormDialogShellComponent,
   ],
   templateUrl: './wwell-land-affairs-request-form.component.html',
   styleUrl: './wwell-land-affairs-request-form.component.scss',

@@ -1,4 +1,4 @@
-export { WWELL_REQUEST_CLIENT_OPTIONS as WWELL_LAND_AFFAIRS_FORM_CLIENT_OPTIONS } from '../../wwell-requests/wwell-request-form/wwell-request-form.config';
+export { WWELL_CLIENT_OPTIONS as WWELL_LAND_AFFAIRS_FORM_CLIENT_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
 
 export const WWELL_LAND_AFFAIRS_FORM_UTM_ZONE_OPTIONS: readonly string[] = ['36N', '37N', '38N', '39N'];
 

@@ -1,8 +1,8 @@
-export { WWELL_REQUEST_CLIENT_OPTIONS as WWELL_IR_APPROVAL_FORM_CLIENT_OPTIONS } from '../../wwell-requests/wwell-request-form/wwell-request-form.config';
-export { WWELL_IR_COMPLETION_OPTIONS as WWELL_IR_APPROVAL_FORM_COMPLETION_OPTIONS } from '../../wwell-ir/wwell-ir-form/wwell-ir-form.config';
-export { WWELL_IR_METHOD_OPTIONS as WWELL_IR_APPROVAL_FORM_METHOD_OPTIONS } from '../../wwell-ir/wwell-ir-form/wwell-ir-form.config';
-export { WWELL_IR_FLUID_TYPE_OPTIONS as WWELL_IR_APPROVAL_FORM_FLUID_TYPE_OPTIONS } from '../../wwell-ir/wwell-ir-form/wwell-ir-form.config';
-export { WWELL_IR_CEMENTING_OPTIONS as WWELL_IR_APPROVAL_FORM_CEMENTING_OPTIONS } from '../../wwell-ir/wwell-ir-form/wwell-ir-form.config';
+export { WWELL_CLIENT_OPTIONS as WWELL_IR_APPROVAL_FORM_CLIENT_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
+export { WWELL_COMPLETION_OPTIONS as WWELL_IR_APPROVAL_FORM_COMPLETION_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
+export { WWELL_DRILLING_METHOD_OPTIONS as WWELL_IR_APPROVAL_FORM_METHOD_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
+export { WWELL_FLUID_TYPE_OPTIONS as WWELL_IR_APPROVAL_FORM_FLUID_TYPE_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
+export { WWELL_CEMENTING_OPTIONS as WWELL_IR_APPROVAL_FORM_CEMENTING_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
 
 export const WWELL_IR_APPROVAL_FORM_TOPS_OPTIONS: readonly string[] = [
   'Wasia-Biyadh',

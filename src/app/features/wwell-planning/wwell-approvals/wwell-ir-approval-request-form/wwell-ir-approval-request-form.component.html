@@ -1,15 +1,5 @@
 <div class="iraf">
-  <header class="iraf__header">
-    <div class="iraf__header-copy">
-      <h2 class="iraf__title">Request IR Approval</h2>
-      <p class="iraf__subtitle">{{ chainSubtitle }}</p>
-    </div>
-    <button type="button" class="iraf__close" mat-icon-button (click)="close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="iraf__body">
+  <app-wwell-form-dialog-shell title="Request IR Approval" [subtitle]="chainSubtitle" (closed)="close()">
     <form class="iraf__form" [formGroup]="form">
       <div class="iraf__grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iraf__field">
@@ -171,20 +161,16 @@
         />
       </div>
     </form>
-  </div>
 
-  <footer class="iraf__footer">
-    <span class="iraf__hint"><span class="iraf__required-mark">*</span> Required fields</span>
-
-    <div class="iraf__actions">
-      <button type="button" mat-stroked-button class="iraf__btn-draft" (click)="saveDraft()">
+    <ng-container dialogActions>
+      <button type="button" mat-stroked-button (click)="saveDraft()">
         <mat-icon>bookmark_border</mat-icon>
         Save as Draft
       </button>
-      <button type="button" mat-flat-button color="primary" class="iraf__btn-submit" (click)="submit()">
+      <button type="button" mat-flat-button color="primary" (click)="submit()">
         <mat-icon>send</mat-icon>
         Submit
       </button>
-    </div>
-  </footer>
+    </ng-container>
+  </app-wwell-form-dialog-shell>
 </div>

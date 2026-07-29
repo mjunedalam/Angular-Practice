@@ -1,5 +1,6 @@
 import { ColDef, GridOptions, ICellRendererParams, themeQuartz } from 'ag-grid-community';
 import { WwellPlanningRequest, WwellPlanningRequestStatus } from '@models/wwell-planning/wwell-planning.model';
+import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../shared/wwell-status.config';
 
 export const wwellRequestsGridTheme = themeQuartz.withParams({
   accentColor: '#3b82f6',
@@ -13,20 +14,13 @@ export const wwellRequestsGridTheme = themeQuartz.withParams({
   borderRadius: 0,
 });
 
-interface WwellRequestStatusMeta {
-  readonly label: string;
-  readonly bg: string;
-  readonly color: string;
-  readonly dot: string;
-}
-
-export const WWELL_REQUEST_STATUS_META: Record<WwellPlanningRequestStatus, WwellRequestStatusMeta> = {
-  draft: { label: 'Draft', bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' },
+export const WWELL_REQUEST_STATUS_META: Record<WwellPlanningRequestStatus, WwellStatusMeta> = {
+  draft: wwellStatusMeta('Draft', WWELL_STATUS_COLORS.slate),
   submitted: { label: 'Submitted', bg: '#f1f5f9', color: '#475569', dot: '#64748b' },
-  'in-review': { label: 'In Review', bg: '#f3e8ff', color: '#7e22ce', dot: '#a855f7' },
-  'in-progress': { label: 'In Progress', bg: '#dbeafe', color: '#1d4ed8', dot: '#3b82f6' },
-  approved: { label: 'Approved', bg: '#dcfce7', color: '#15803d', dot: '#22c55e' },
-  rejected: { label: 'Rejected', bg: '#fee2e2', color: '#b91c1c', dot: '#ef4444' },
+  'in-review': wwellStatusMeta('In Review', WWELL_STATUS_COLORS.purple),
+  'in-progress': wwellStatusMeta('In Progress', WWELL_STATUS_COLORS.blue),
+  approved: wwellStatusMeta('Approved', WWELL_STATUS_COLORS.green),
+  rejected: wwellStatusMeta('Rejected', WWELL_STATUS_COLORS.red),
 };
 
 function statusCellRenderer(

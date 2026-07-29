@@ -12,7 +12,8 @@ import {
   WWELL_APPROVAL_WELL_NAME_PATTERN,
   WWELL_IR_CHAIN_ROLES,
 } from '../wwell-approvals.config';
-import { WwellAttachmentDropzoneComponent } from '../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {
   WWELL_IR_APPROVAL_FORM_BIT_SIZE_OPTIONS,
   WWELL_IR_APPROVAL_FORM_CEMENTING_OPTIONS,
@@ -43,6 +44,7 @@ export interface WwellIrApprovalRequestFormResult {
     MatInputModule,
     MatSelectModule,
     WwellAttachmentDropzoneComponent,
+    WwellFormDialogShellComponent,
   ],
   templateUrl: './wwell-ir-approval-request-form.component.html',
   styleUrl: './wwell-ir-approval-request-form.component.scss',

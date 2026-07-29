@@ -1,0 +1,131 @@
+/* ── wwell-form-dialog-shell tokens ────────────────────────────── */
+$navy: #1e293b;
+$muted: #64748b;
+$border: #e2e8f0;
+$danger: #dc2626;
+$bg-subtle: #f8fafc;
+
+/*
+ * ViewEncapsulation.None (matching wwell-request-form.component.ts) so these
+ * chrome rules also reach the buttons projected into [dialogActions] by each
+ * consuming dialog — those elements carry the consuming component's own
+ * content attribute, not this component's, so emulated encapsulation
+ * wouldn't otherwise let a shared selector like .wfds__actions button match.
+ */
+.wfds__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem 0.9rem;
+  border-bottom: 1px solid $border;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.wfds__header-copy {
+  min-width: 0;
+}
+
+.wfds__title {
+  margin: 0 0 0.3rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wfds__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $muted;
+  line-height: 1.4;
+}
+
+.wfds__close {
+  flex-shrink: 0;
+  color: $muted;
+  margin-top: -4px;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: $navy;
+  }
+}
+
+.wfds__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.5rem 1.25rem;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wfds__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  border-top: 1px solid $border;
+  background: $bg-subtle;
+}
+
+.wfds__hint {
+  font-size: 0.78rem;
+  color: $muted;
+}
+
+.wfds__required-mark {
+  color: $danger;
+  font-weight: 700;
+}
+
+.wfds__actions {
+  display: flex;
+  gap: 0.6rem;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wfds__actions button {
+    transition: transform 150ms ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) scale(0.97);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .wfds__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .wfds__actions {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

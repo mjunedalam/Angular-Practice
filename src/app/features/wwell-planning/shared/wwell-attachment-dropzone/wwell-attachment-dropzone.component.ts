@@ -20,6 +20,10 @@ const ALLOWED_ATTACHMENT_EXTENSIONS: readonly string[] = ['pdf', 'doc', 'docx', 
 })
 export class WwellAttachmentDropzoneComponent {
   readonly hint = input('Click to attach files');
+  /** When true, hides the dropzone control and shows only a read-only file list (e.g. a "view" dialog mode). */
+  readonly disabled = input(false);
+  /** When set, renders this fixed list of names read-only instead of the live drag-and-drop attachments. */
+  readonly displayNames = input<readonly string[] | null>(null);
   readonly filesChange = output<File[]>();
 
   protected readonly isDragOver = signal(false);
@@ -28,6 +32,7 @@ export class WwellAttachmentDropzoneComponent {
   protected onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    if (this.disabled()) return;
     this.isDragOver.set(true);
   }
 
@@ -41,6 +46,7 @@ export class WwellAttachmentDropzoneComponent {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver.set(false);
+    if (this.disabled()) return;
     this.addFiles(Array.from(event.dataTransfer?.files ?? []));
   }
 

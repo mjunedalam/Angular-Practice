@@ -1,13 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateIntegratedRequirementPayload } from '@models/wwell-planning/wwell-planning.model';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
 import { WwellIrFormComponent } from './wwell-ir-form/wwell-ir-form.component';
+
+const SNACKBAR_DURATION_MS = 3000;
 
 @Component({
   selector: 'app-wwell-ir',
@@ -20,11 +23,11 @@ import { WwellIrFormComponent } from './wwell-ir-form/wwell-ir-form.component';
 export class WwellIrComponent implements OnInit {
   protected readonly store = inject(WwellPlanningStore);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly isLoading = this.store.integratedRequirementsLoading;
   protected readonly isCreating = this.store.creatingIntegratedRequirement;
-  protected readonly hasError = this.store.hasError;
-  protected readonly errorMessage = this.store.error;
+  protected readonly loadError = this.store.integratedRequirementsError;
 
   protected readonly searchTerm = signal('');
 
@@ -43,6 +46,15 @@ export class WwellIrComponent implements OnInit {
   });
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
+
+  constructor() {
+    effect(() => {
+      const message = this.store.createIntegratedRequirementError();
+      if (message) {
+        this.snackBar.open(message, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.store.loadIntegratedRequirements();

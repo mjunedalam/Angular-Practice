@@ -1,0 +1,86 @@
+/*
+ * Shared mat-select polish for every wwell-planning form dialog.
+ *
+ * Each dialog (wrf, wif, iraf, laf, wldaf) already scopes its own M3 theme to
+ * itself and to its portaled `<panel-prefix>-select-panel` (see that
+ * component's .scss for why). What's still bare-Material by default:
+ *   - option rows have no radius/spacing and snap between states instantly
+ *   - the trigger arrow rotates with an 80ms linear transition
+ * `panel()` and `trigger()` fill both gaps using each dialog's own $accent /
+ * $navy so the result matches that dialog's palette instead of introducing a
+ * new one, and reuse the same cubic-bezier(0.16, 1, 0.3, 1) easing already
+ * used for the dialog-open/field-in keyframes in these files.
+ */
+
+$_ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+@mixin panel($accent, $navy: #1e293b) {
+  /*
+   * MDC resolves the panel background from --mat-sys-surface-container, which
+   * the M3 tonal palette generates as a faint gray/lavender tint rather than
+   * pure white — visibly inconsistent with each dialog's own solid #fff
+   * surface. Pin it to white here instead of chasing the token in 5 places.
+   */
+  background-color: #fff !important;
+  padding: 6px !important;
+
+  &.mat-select-panel-animations-enabled {
+    animation-duration: 160ms;
+    animation-timing-function: $_ease;
+  }
+
+  .mat-mdc-option {
+    border-radius: 8px;
+    margin: 2px 0;
+    transition: background-color 140ms ease;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background-color: rgba($accent, 0.08);
+    }
+
+    &.mat-mdc-option-active,
+    &:focus.mdc-list-item {
+      background-color: rgba($accent, 0.12);
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled):not(.mat-mdc-option-multiple) {
+      background-color: rgba($accent, 0.14);
+
+      .mdc-list-item__primary-text {
+        color: $navy;
+        font-weight: 600;
+      }
+
+      .mat-mdc-option-pseudo-checkbox {
+        --mat-pseudo-checkbox-minimal-selected-checkmark-color: #{$accent};
+      }
+    }
+  }
+
+  .mat-mdc-optgroup-label {
+    font-weight: 700;
+    color: $navy;
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba($navy, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($navy, 0.2);
+    border-radius: 999px;
+  }
+}
+
+@mixin trigger($accent) {
+  .mat-mdc-select-arrow {
+    transition: transform 200ms $_ease !important;
+  }
+
+  .mat-select-open .mat-mdc-select-arrow {
+    color: $accent;
+  }
+}

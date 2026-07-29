@@ -1,15 +1,9 @@
 <div class="wif">
-  <header class="wif__header">
-    <div class="wif__header-copy">
-      <h2 class="wif__title">New Integrated Requirement</h2>
-      <p class="wif__subtitle">Capture well design, drilling program, and water production targets</p>
-    </div>
-    <button type="button" class="wif__close" mat-icon-button (click)="close()" aria-label="Close dialog">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="wif__body">
+  <app-wwell-form-dialog-shell
+    title="New Integrated Requirement"
+    subtitle="Capture well design, drilling program, and water production targets"
+    (closed)="close()"
+  >
     <form class="wif__form" [formGroup]="form">
       <h3 class="wif__section-title">Request Details</h3>
       <div class="wif__grid">
@@ -151,17 +145,13 @@
         </mat-form-field>
       </div>
     </form>
-  </div>
 
-  <footer class="wif__footer">
-    <span class="wif__hint"><span class="wif__required-mark">*</span> Required fields</span>
-
-    <div class="wif__actions">
+    <ng-container dialogActions>
       <button type="button" mat-stroked-button (click)="close()">Cancel</button>
-      <button type="button" mat-flat-button color="primary" class="wif__btn-submit" (click)="create()">
+      <button type="button" mat-flat-button color="primary" (click)="create()">
         <mat-icon>add</mat-icon>
         Create
       </button>
-    </div>
-  </footer>
+    </ng-container>
+  </app-wwell-form-dialog-shell>
 </div>

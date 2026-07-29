@@ -12,7 +12,8 @@ import {
   WWELL_APPROVAL_WELL_NAME_PATTERN,
   WWELL_WLDA_CHAIN_ROLES,
 } from '../wwell-approvals.config';
-import { WwellAttachmentDropzoneComponent } from '../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {
   WWELL_WLDA_FORM_AQUIFER_OPTIONS,
   WWELL_WLDA_FORM_ASSIGNEE_OPTIONS,
@@ -40,6 +41,7 @@ export interface WwellWldaRequestFormResult {
     MatInputModule,
     MatSelectModule,
     WwellAttachmentDropzoneComponent,
+    WwellFormDialogShellComponent,
   ],
   templateUrl: './wwell-wlda-request-form.component.html',
   styleUrl: './wwell-wlda-request-form.component.scss',

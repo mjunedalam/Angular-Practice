@@ -1,24 +1,51 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ComponentType } from '@angular/cdk/portal';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { ApprovalChainStep, IrApproval, LandAffairsApproval, WldaApproval } from '@models/wwell-planning/wwell-planning.model';
+import {
+  CreateIrApprovalPayload,
+  CreateLandAffairsApprovalPayload,
+  CreateWldaApprovalPayload,
+  IrApproval,
+  LandAffairsApproval,
+  WldaApproval,
+} from '@models/wwell-planning/wwell-planning.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WWELL_APPROVAL_STATUS_META } from './wwell-approvals.config';
-import { WwellApprovalMiniChainComponent } from './wwell-approval-timeline/wwell-approval-mini-chain.component';
-import { WwellApprovalTimelineComponent } from './wwell-approval-timeline/wwell-approval-timeline.component';
-import { WwellWldaRequestFormComponent } from './wwell-wlda-request-form/wwell-wlda-request-form.component';
-import { WwellLandAffairsRequestFormComponent } from './wwell-land-affairs-request-form/wwell-land-affairs-request-form.component';
-import { WwellIrApprovalRequestFormComponent } from './wwell-ir-approval-request-form/wwell-ir-approval-request-form.component';
+import { WwellApprovalTableColumn, WwellApprovalTableComponent } from './wwell-approval-table/wwell-approval-table.component';
+import {
+  WwellWldaRequestFormComponent,
+  WwellWldaRequestFormResult,
+} from './wwell-wlda-request-form/wwell-wlda-request-form.component';
+import {
+  WwellLandAffairsRequestFormComponent,
+  WwellLandAffairsRequestFormResult,
+} from './wwell-land-affairs-request-form/wwell-land-affairs-request-form.component';
+import {
+  WwellIrApprovalRequestFormComponent,
+  WwellIrApprovalRequestFormResult,
+} from './wwell-ir-approval-request-form/wwell-ir-approval-request-form.component';
 
 interface SearchableApproval {
   readonly reqNo: string;
   readonly client: string;
   readonly wellName: string;
+}
+
+interface DraftOrSubmitResult<TPayload> {
+  readonly mode: 'draft' | 'submit';
+  readonly payload: TPayload;
+  readonly files: File[];
+}
+
+interface ApprovalDialogLabels {
+  readonly draftMessage: string;
+  readonly submitMessage: string;
 }
 
 const SNACKBAR_DURATION_MS = 3000;
@@ -27,7 +54,7 @@ const DOWNLOAD_URL_REVOKE_DELAY_MS = 5000;
 @Component({
   selector: 'app-wwell-approvals',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, WwellApprovalMiniChainComponent, WwellApprovalTimelineComponent],
+  imports: [FormsModule, MatButtonModule, MatIconModule, WwellApprovalTableComponent],
   templateUrl: './wwell-approvals.component.html',
   styleUrl: './wwell-approvals.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,18 +66,29 @@ export class WwellApprovalsComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly isLoading = this.store.approvalsLoading;
-  protected readonly hasError = this.store.hasError;
-  protected readonly errorMessage = this.store.error;
+  protected readonly loadError = this.store.approvalsError;
 
   protected readonly statusMeta = WWELL_APPROVAL_STATUS_META;
 
   protected readonly searchTerm = signal('');
-  private readonly expandedIds = signal<ReadonlySet<string>>(new Set());
-  private readonly downloadingIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly expandedIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly downloadingIds = signal<ReadonlySet<string>>(new Set());
 
   protected readonly wldaRows = computed(() => this.filterRows(this.store.wldaApprovals()));
   protected readonly landAffairsRows = computed(() => this.filterRows(this.store.landAffairsApprovals()));
   protected readonly irRows = computed(() => this.filterRows(this.store.irApprovals()));
+
+  protected readonly wldaColumns: readonly WwellApprovalTableColumn<WldaApproval>[] = [
+    { header: 'Supporting', value: row => row.supporting },
+  ];
+  protected readonly landAffairsColumns: readonly WwellApprovalTableColumn<LandAffairsApproval>[] = [
+    { header: 'X', value: row => row.x },
+    { header: 'Y', value: row => row.y },
+    { header: 'UTM', value: row => row.utm },
+  ];
+  protected readonly irColumns: readonly WwellApprovalTableColumn<IrApproval>[] = [
+    { header: 'Supporting', value: row => row.supporting },
+  ];
 
   protected readonly totalCount = computed(
     () =>
@@ -59,16 +97,21 @@ export class WwellApprovalsComponent implements OnInit {
       this.store.irApprovals().length,
   );
 
+  constructor() {
+    effect(() => {
+      const message = this.store.createApprovalError();
+      if (message) {
+        this.snackBar.open(message, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.store.loadApprovals();
   }
 
   protected onSearchChange(term: string): void {
     this.searchTerm.set(term);
-  }
-
-  protected isExpanded(id: string): boolean {
-    return this.expandedIds().has(id);
   }
 
   protected toggleRow(id: string): void {
@@ -82,60 +125,50 @@ export class WwellApprovalsComponent implements OnInit {
   }
 
   protected openWldaRequestDialog(): void {
-    this.dialog
-      .open(WwellWldaRequestFormComponent, { panelClass: 'wwell-wlda-request-form-panel', maxWidth: '95vw', autoFocus: false })
-      .afterClosed()
-      .subscribe(result => {
-        if (!result) return;
-        if (result.mode === 'draft') {
-          this.snackBar.open('WLDA request saved as draft.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-          return;
-        }
-        this.store.submitWldaApproval(result.payload, result.files);
-        this.snackBar.open('WLDA approval request submitted.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-      });
+    this.openApprovalDialog<CreateWldaApprovalPayload, WwellWldaRequestFormResult>(
+      WwellWldaRequestFormComponent,
+      'wwell-wlda-request-form-panel',
+      (payload, files) => this.store.submitWldaApproval(payload, files),
+      { draftMessage: 'WLDA request saved as draft.', submitMessage: 'WLDA approval request submitted.' },
+    );
   }
 
   protected openLandAffairsRequestDialog(): void {
-    this.dialog
-      .open(WwellLandAffairsRequestFormComponent, {
-        panelClass: 'wwell-land-affairs-request-form-panel',
-        maxWidth: '95vw',
-        autoFocus: false,
-      })
-      .afterClosed()
-      .subscribe(result => {
-        if (!result) return;
-        if (result.mode === 'draft') {
-          this.snackBar.open('Land Affairs request saved as draft.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-          return;
-        }
-        this.store.submitLandAffairsApproval(result.payload, result.files);
-        this.snackBar.open('Land Affairs approval request submitted.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-      });
+    this.openApprovalDialog<CreateLandAffairsApprovalPayload, WwellLandAffairsRequestFormResult>(
+      WwellLandAffairsRequestFormComponent,
+      'wwell-land-affairs-request-form-panel',
+      (payload, files) => this.store.submitLandAffairsApproval(payload, files),
+      { draftMessage: 'Land Affairs request saved as draft.', submitMessage: 'Land Affairs approval request submitted.' },
+    );
   }
 
   protected openIrApprovalRequestDialog(): void {
+    this.openApprovalDialog<CreateIrApprovalPayload, WwellIrApprovalRequestFormResult>(
+      WwellIrApprovalRequestFormComponent,
+      'wwell-ir-approval-request-form-panel',
+      (payload, files) => this.store.submitIrApproval(payload, files),
+      { draftMessage: 'IR request saved as draft.', submitMessage: 'IR approval request submitted.' },
+    );
+  }
+
+  private openApprovalDialog<TPayload, TResult extends DraftOrSubmitResult<TPayload>>(
+    dialogComponent: ComponentType<unknown>,
+    panelClass: string,
+    submit: (payload: TPayload, files: File[]) => void,
+    labels: ApprovalDialogLabels,
+  ): void {
     this.dialog
-      .open(WwellIrApprovalRequestFormComponent, {
-        panelClass: 'wwell-ir-approval-request-form-panel',
-        maxWidth: '95vw',
-        autoFocus: false,
-      })
+      .open<unknown, unknown, TResult>(dialogComponent, { panelClass, maxWidth: '95vw', autoFocus: false })
       .afterClosed()
       .subscribe(result => {
         if (!result) return;
         if (result.mode === 'draft') {
-          this.snackBar.open('IR request saved as draft.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
+          this.snackBar.open(labels.draftMessage, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
           return;
         }
-        this.store.submitIrApproval(result.payload, result.files);
-        this.snackBar.open('IR approval request submitted.', 'Dismiss', { duration: SNACKBAR_DURATION_MS });
+        submit(result.payload, result.files);
+        this.snackBar.open(labels.submitMessage, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
       });
-  }
-
-  protected isChainComplete(chain: readonly ApprovalChainStep[]): boolean {
-    return chain.length > 0 && chain.every(step => step.status === 'approved');
   }
 
   protected isDownloading(id: string): boolean {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -11,8 +11,9 @@ import {
   WwellPlanningPriority,
   WwellPlanningRequest,
 } from '@models/wwell-planning/wwell-planning.model';
+import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {
-  WWELL_REQUEST_ALLOWED_ATTACHMENT_EXTENSIONS,
   WWELL_REQUEST_AQUIFER_OPTIONS,
   WWELL_REQUEST_ASSIGNEE_OPTIONS,
   WWELL_REQUEST_BUSINESS_USE_OPTIONS,
@@ -22,7 +23,6 @@ import {
   WWELL_REQUEST_LAT_VALUE_PATTERN,
   WWELL_REQUEST_LNG_HEMISPHERES,
   WWELL_REQUEST_LNG_VALUE_PATTERN,
-  WWELL_REQUEST_MAX_ATTACHMENT_SIZE_BYTES,
   WWELL_REQUEST_PRIORITY_OPTIONS,
   formatWwellCoordinates,
   parseWwellCoordinates,
@@ -40,11 +40,6 @@ export interface WwellRequestFormResult {
   readonly files: File[];
 }
 
-interface AttachmentItem {
-  readonly id: string;
-  readonly file: File;
-}
-
 @Component({
   selector: 'app-wwell-request-form',
   standalone: true,
@@ -56,6 +51,8 @@ interface AttachmentItem {
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    WwellAttachmentDropzoneComponent,
+    WwellFormDialogShellComponent,
   ],
   templateUrl: './wwell-request-form.component.html',
   styleUrl: './wwell-request-form.component.scss',
@@ -76,8 +73,14 @@ export class WwellRequestFormComponent {
   protected readonly lngHemiOptions = WWELL_REQUEST_LNG_HEMISPHERES;
 
   protected readonly isViewMode = this.data.mode === 'view';
-  protected readonly isDragOver = signal(false);
-  protected readonly attachments = signal<AttachmentItem[]>([]);
+  private files: File[] = [];
+
+  protected readonly dialogTitle = this.isViewMode ? 'Request Details' : 'New Request';
+  protected readonly dialogSubtitle = this.isViewMode
+    ? this.data.request
+      ? `${this.data.request.id} · Submitted ${this.data.request.requestedDate}`
+      : null
+    : 'Create a new well request — will be routed for approvals after submission';
 
   private readonly initialCoordinates = parseWwellCoordinates(this.data.request?.coordinates);
 
@@ -104,10 +107,6 @@ export class WwellRequestFormComponent {
     priority: this.fb.control<WwellPlanningPriority | null>(this.data.request?.priority ?? null),
     notes: this.fb.control<string | null>(this.data.request?.notes ?? null),
   });
-
-  protected readonly attachmentNames = computed(() =>
-    this.isViewMode ? (this.data.request?.attachments ?? []) : this.attachments().map(a => a.file.name),
-  );
 
   constructor() {
     if (this.isViewMode) {
@@ -152,62 +151,10 @@ export class WwellRequestFormComponent {
       status,
     };
 
-    this.dialogRef.close({ payload, files: this.attachments().map(a => a.file) });
+    this.dialogRef.close({ payload, files: this.files });
   }
 
-  protected onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!this.isViewMode) this.isDragOver.set(true);
-  }
-
-  protected onDragLeave(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragOver.set(false);
-  }
-
-  protected onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragOver.set(false);
-    if (this.isViewMode) return;
-    this.addFiles(Array.from(event.dataTransfer?.files ?? []));
-  }
-
-  protected onFileInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement | null;
-    this.addFiles(Array.from(input?.files ?? []));
-    if (input) input.value = '';
-  }
-
-  protected removeAttachment(id: string): void {
-    this.attachments.update(items => items.filter(item => item.id !== id));
-  }
-
-  protected fileSizeLabel(size: number): string {
-    if (size < 1024) return `${size} B`;
-    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  private addFiles(selected: File[]): void {
-    if (!selected.length) return;
-
-    const valid = selected.filter(
-      file =>
-        this.hasAllowedExtension(file) && file.size <= WWELL_REQUEST_MAX_ATTACHMENT_SIZE_BYTES,
-    );
-    if (!valid.length) return;
-
-    this.attachments.update(existing => [
-      ...existing,
-      ...valid.map((file, index) => ({ file, id: `${file.name}-${file.size}-${existing.length + index}` })),
-    ]);
-  }
-
-  private hasAllowedExtension(file: File): boolean {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    return (WWELL_REQUEST_ALLOWED_ATTACHMENT_EXTENSIONS as readonly string[]).includes(ext);
+  protected onFilesChange(files: File[]): void {
+    this.files = files;
   }
 }
