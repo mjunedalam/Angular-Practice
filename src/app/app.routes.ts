@@ -52,10 +52,18 @@ export const routes: Routes = [
         providers: [WwellPlanningStore],
       },
       {
-        path: 'approvals',
+        path: 'wlda-approvals',
         loadComponent: () =>
-          import('./features/wwell-planning/wwell-approvals/wwell-approvals.component').then(
-            (m) => m.WwellApprovalsComponent,
+          import('./features/wwell-planning/wwell-wlda-approvals/wwell-wlda-approvals.component').then(
+            (m) => m.WwellWldaApprovalsComponent,
+          ),
+        providers: [WwellPlanningStore],
+      },
+      {
+        path: 'land-affairs-approvals',
+        loadComponent: () =>
+          import('./features/wwell-planning/wwell-land-affairs-approvals/wwell-land-affairs-approvals.component').then(
+            (m) => m.WwellLandAffairsApprovalsComponent,
           ),
         providers: [WwellPlanningStore],
       },

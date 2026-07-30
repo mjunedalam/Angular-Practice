@@ -1,5 +1,5 @@
 import { ApprovalStepStatus, ApprovalWorkflowStatus } from '@models/wwell-planning/wwell-planning.model';
-import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../shared/wwell-status.config';
+import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../wwell-status.config';
 
 export const WWELL_APPROVAL_STATUS_META: Record<ApprovalWorkflowStatus, WwellStatusMeta> = {
   'in-progress': wwellStatusMeta('In Progress', WWELL_STATUS_COLORS.blue),
@@ -24,8 +24,6 @@ export const WWELL_WLDA_CHAIN_ROLES: readonly string[] = [
 ];
 
 export const WWELL_LAND_AFFAIRS_CHAIN_ROLES: readonly string[] = ['Land Surveyor', 'Land Affairs Officer', 'Manager'];
-
-export const WWELL_IR_CHAIN_ROLES: readonly string[] = ['Hydrogeologist', 'Lead Hydrogeologist', 'Manager'];
 
 /** 4 letters + dash + a 2-4 digit "hundreds" suffix, e.g. KHAJ-300, RXYD-100. */
 export const WWELL_APPROVAL_WELL_NAME_PATTERN = /^[A-Za-z]{4}-\d{2,4}$/;

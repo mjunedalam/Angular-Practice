@@ -1,0 +1,155 @@
+:host {
+  display: block;
+  height: 100%;
+  overflow: auto;
+  background: #f0f4f8;
+}
+
+.wwell-approvals {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.wwell-approvals__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wwell-approvals__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wwell-approvals__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.wwell-approvals__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.wwell-approvals__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 0.9rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-width: 320px;
+  width: 100%;
+  transition: border-color 150ms ease;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
+}
+
+.wwell-approvals__search-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.wwell-approvals__search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: #1e293b;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+
+  &::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+}
+
+.wwell-approvals__status {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+
+  &--error {
+    color: #dc2626;
+  }
+}
+
+/* ── Panels ───────────────────────────────────────────────────── */
+.wwell-approvals__panel {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8edf4;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  overflow: hidden;
+}
+
+.wwell-approvals__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.wwell-approvals__panel-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wwell-approvals {
+    padding: 1rem;
+  }
+
+  .wwell-approvals__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wwell-approvals__search {
+    max-width: none;
+  }
+
+  .wwell-approvals__panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

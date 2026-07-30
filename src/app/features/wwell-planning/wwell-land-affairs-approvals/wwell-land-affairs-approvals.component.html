@@ -1,0 +1,50 @@
+<section class="wwell-approvals">
+  <header class="wwell-approvals__header">
+    <div class="wwell-approvals__heading">
+      <h1 class="wwell-approvals__title">Land Affairs Approvals</h1>
+      <span class="wwell-approvals__count">{{ totalCount() }}</span>
+    </div>
+
+    <label class="wwell-approvals__search">
+      <mat-icon class="wwell-approvals__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search by req #, client or well name&hellip;"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
+  </header>
+
+  @if (loadError()) {
+    <div class="wwell-approvals__status wwell-approvals__status--error">{{ loadError() }}</div>
+  }
+
+  <!-- ── Land Affairs ─────────────────────────────────────────────────── -->
+  <section class="wwell-approvals__panel">
+    <header class="wwell-approvals__panel-header">
+      <h2 class="wwell-approvals__panel-title">Land Affairs</h2>
+      <button type="button" mat-flat-button color="primary" (click)="openLandAffairsRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request Land Affairs Approval
+      </button>
+    </header>
+
+    @if (isLoading()) {
+      <div class="wwell-approvals__status">Loading Land Affairs approvals&hellip;</div>
+    } @else if (landAffairsRows().length === 0) {
+      <div class="wwell-approvals__status">No Land Affairs approval requests found.</div>
+    } @else {
+      <app-wwell-approval-table
+        [rows]="landAffairsRows()"
+        [columns]="landAffairsColumns"
+        [statusMeta]="statusMeta"
+        [expandedIds]="expandedIds()"
+        [downloadingIds]="downloadingIds()"
+        approvalKindLabel="Land Affairs"
+        (rowToggle)="toggleRow($event)"
+        (pdfDownload)="downloadLandAffairsPdf($event)"
+      />
+    }
+  </section>
+</section>

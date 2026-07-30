@@ -69,7 +69,6 @@ interface ApprovalWithSupportingDoc extends ApprovalRequestBase {
 }
 
 export type WldaApproval = ApprovalWithSupportingDoc;
-export type IrApproval = ApprovalWithSupportingDoc;
 
 export interface LandAffairsApproval extends ApprovalRequestBase {
   readonly x: string;
@@ -101,23 +100,6 @@ export interface CreateLandAffairsApprovalPayload {
   readonly surveyor: string | null;
   readonly parcelNumber: string | null;
   readonly notes: string | null;
-}
-
-export interface CreateIrApprovalPayload {
-  readonly client: string;
-  readonly wellName: string;
-  readonly supporting: string;
-  readonly finalCoordinates: string;
-  readonly casingPoints: string;
-  readonly topsPicked: string;
-  readonly completionType: string;
-  readonly drillingMethod: string;
-  readonly bitSize: string;
-  readonly fluidType: string;
-  readonly estimatedYield: string;
-  readonly waterQualityTds: string;
-  readonly stages: string;
-  readonly cementingType: string;
 }
 
 export type IntegratedRequirementStatus = 'in-progress' | 'submit-for-review' | 'in-review' | 'approved';

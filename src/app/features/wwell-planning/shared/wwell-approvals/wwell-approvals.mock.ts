@@ -1,10 +1,5 @@
-import {
-  ApprovalChainStep,
-  IrApproval,
-  LandAffairsApproval,
-  WldaApproval,
-} from '@models/wwell-planning/wwell-planning.model';
-import { WWELL_IR_CHAIN_ROLES, WWELL_LAND_AFFAIRS_CHAIN_ROLES, WWELL_WLDA_CHAIN_ROLES } from './wwell-approvals.config';
+import { ApprovalChainStep, LandAffairsApproval, WldaApproval } from '@models/wwell-planning/wwell-planning.model';
+import { WWELL_LAND_AFFAIRS_CHAIN_ROLES, WWELL_WLDA_CHAIN_ROLES } from './wwell-approvals.config';
 
 function buildChain(
   roles: readonly string[],
@@ -184,77 +179,6 @@ export const WWELL_LAND_AFFAIRS_APPROVALS_MOCK: readonly LandAffairsApproval[] =
       ['', '', ''],
       -1,
       0,
-    ),
-  },
-];
-
-export const WWELL_IR_APPROVALS_MOCK: readonly IrApproval[] = [
-  {
-    id: 'IRA-00218',
-    reqNo: 'REQ-00218',
-    client: 'BI-32',
-    wellName: 'RXYD-100',
-    supporting: 'WDQS-200',
-    submittedBy: 'Eng. A. Al-Mutairi',
-    date: '2026-06-18',
-    status: 'in-review',
-    chain: buildChain(
-      WWELL_IR_CHAIN_ROLES,
-      ['Eng. A. Al-Mutairi', 'Dr. F. Al-Zahrani', 'M. Al-Otaibi'],
-      ['2026-06-19', '2026-06-20', ''],
-      1,
-      2,
-    ),
-  },
-  {
-    id: 'IRA-00205',
-    reqNo: 'REQ-00205',
-    client: 'BI-11',
-    wellName: 'QASS-400',
-    supporting: 'QSSM-400',
-    submittedBy: 'Eng. S. Al-Dossari',
-    date: '2026-05-30',
-    status: 'approved',
-    chain: buildChain(
-      WWELL_IR_CHAIN_ROLES,
-      ['Eng. S. Al-Dossari', 'Dr. F. Al-Zahrani', 'M. Al-Otaibi'],
-      ['2026-05-30', '2026-05-31', '2026-06-01'],
-      2,
-      null,
-    ),
-  },
-  {
-    id: 'IRA-00271',
-    reqNo: 'REQ-00271',
-    client: 'BI-33',
-    wellName: 'DMAM-200',
-    supporting: 'DMMAM-200',
-    submittedBy: 'Eng. S. Al-Dossari',
-    date: '2026-06-30',
-    status: 'in-review',
-    chain: buildChain(
-      WWELL_IR_CHAIN_ROLES,
-      ['Eng. S. Al-Dossari', 'Dr. F. Al-Zahrani', 'M. Al-Otaibi'],
-      ['2026-07-01', '2026-07-02', ''],
-      1,
-      2,
-    ),
-  },
-  {
-    id: 'IRA-00266',
-    reqNo: 'REQ-00266',
-    client: 'BI-32',
-    wellName: 'NJRC-200',
-    supporting: 'NJRC-200',
-    submittedBy: 'Eng. A. Al-Mutairi',
-    date: '2026-07-05',
-    status: 'in-progress',
-    chain: buildChain(
-      WWELL_IR_CHAIN_ROLES,
-      ['Eng. A. Al-Mutairi', 'Dr. F. Al-Zahrani', 'M. Al-Otaibi'],
-      ['2026-07-06', '', ''],
-      0,
-      1,
     ),
   },
 ];

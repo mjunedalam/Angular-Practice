@@ -11,7 +11,7 @@ import {
   WWELL_APPROVAL_COORDINATES_PATTERN,
   WWELL_APPROVAL_WELL_NAME_PATTERN,
   WWELL_WLDA_CHAIN_ROLES,
-} from '../wwell-approvals.config';
+} from '../../shared/wwell-approvals/wwell-approvals.config';
 import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
 import {

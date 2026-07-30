@@ -4,12 +4,10 @@ import { Observable, catchError, map, of } from 'rxjs';
 import {
   ApprovalChainStep,
   CreateIntegratedRequirementPayload,
-  CreateIrApprovalPayload,
   CreateLandAffairsApprovalPayload,
   CreateWldaApprovalPayload,
   CreateWwellPlanningRequestPayload,
   IntegratedRequirement,
-  IrApproval,
   LandAffairsApproval,
   WldaApproval,
   WwellPlanningRequest,
@@ -18,14 +16,10 @@ import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
-import {
-  WWELL_IR_APPROVALS_MOCK,
-  WWELL_LAND_AFFAIRS_APPROVALS_MOCK,
-  WWELL_WLDA_APPROVALS_MOCK,
-} from './wwell-approvals/wwell-approvals.mock';
-import { WWELL_IR_CHAIN_ROLES, WWELL_LAND_AFFAIRS_CHAIN_ROLES, WWELL_WLDA_CHAIN_ROLES } from './wwell-approvals/wwell-approvals.config';
-import { buildApprovalPdfBlob } from './wwell-approvals/wwell-approval-pdf.util';
-import { buildInitialApprovalChain, generateApprovalReqNo, todayIsoDate } from './wwell-approvals/wwell-approval-request.util';
+import { WWELL_LAND_AFFAIRS_APPROVALS_MOCK, WWELL_WLDA_APPROVALS_MOCK } from './shared/wwell-approvals/wwell-approvals.mock';
+import { WWELL_LAND_AFFAIRS_CHAIN_ROLES, WWELL_WLDA_CHAIN_ROLES } from './shared/wwell-approvals/wwell-approvals.config';
+import { buildApprovalPdfBlob } from './shared/wwell-approvals/wwell-approval-pdf.util';
+import { buildInitialApprovalChain, generateApprovalReqNo, todayIsoDate } from './shared/wwell-approvals/wwell-approval-request.util';
 
 interface ApprovalPdfSource {
   readonly reqNo: string;
@@ -88,14 +82,6 @@ export class WwellPlanningService {
     );
   }
 
-  getIrApprovals(): Observable<IrApproval[]> {
-    return this.http.get<ApiResponse<IrApproval>>(`${this.apiUrl}/approvals/ir`).pipe(
-      map(res => res.data),
-      // TODO: remove fallback once the IR approvals endpoint is live.
-      catchError(() => of([...WWELL_IR_APPROVALS_MOCK])),
-    );
-  }
-
   createWldaApproval(payload: CreateWldaApprovalPayload, files: readonly File[] = []): Observable<WldaApproval> {
     return this.http
       .post<ApiResponse<WldaApproval>>(`${this.apiUrl}/approvals/wlda`, this.toFormData(payload, files))
@@ -116,16 +102,6 @@ export class WwellPlanningService {
         map(res => res.data[0]),
         // TODO: remove fallback once the Land Affairs approval-creation endpoint is live.
         catchError(() => of(this.buildFallbackLandAffairsApproval(payload))),
-      );
-  }
-
-  createIrApproval(payload: CreateIrApprovalPayload, files: readonly File[] = []): Observable<IrApproval> {
-    return this.http
-      .post<ApiResponse<IrApproval>>(`${this.apiUrl}/approvals/ir`, this.toFormData(payload, files))
-      .pipe(
-        map(res => res.data[0]),
-        // TODO: remove fallback once the IR approval-creation endpoint is live.
-        catchError(() => of(this.buildFallbackIrApproval(payload))),
       );
   }
 
@@ -172,31 +148,12 @@ export class WwellPlanningService {
     };
   }
 
-  private buildFallbackIrApproval(payload: CreateIrApprovalPayload): IrApproval {
-    const reqNo = generateApprovalReqNo();
-    return {
-      id: `IRA-${reqNo.slice(4)}`,
-      reqNo,
-      client: payload.client,
-      wellName: payload.wellName,
-      supporting: payload.supporting,
-      submittedBy: 'You',
-      date: todayIsoDate(),
-      status: 'submitted',
-      chain: buildInitialApprovalChain(WWELL_IR_CHAIN_ROLES, 'You'),
-    };
-  }
-
   getWldaApprovalPdf(row: WldaApproval): Observable<Blob> {
     return this.fetchApprovalPdf('wlda', row.id, 'WLDA Approval', row);
   }
 
   getLandAffairsApprovalPdf(row: LandAffairsApproval): Observable<Blob> {
     return this.fetchApprovalPdf('land-affairs', row.id, 'Land Affairs Approval', row);
-  }
-
-  getIrApprovalPdf(row: IrApproval): Observable<Blob> {
-    return this.fetchApprovalPdf('ir', row.id, 'IR Approval', row);
   }
 
   private fetchApprovalPdf(kind: string, id: string, label: string, row: ApprovalPdfSource): Observable<Blob> {

@@ -5,7 +5,7 @@ import {
   ApprovalRequestBase,
   ApprovalWorkflowStatus,
 } from '@models/wwell-planning/wwell-planning.model';
-import { WwellStatusMeta } from '../../shared/wwell-status.config';
+import { WwellStatusMeta } from '../../wwell-status.config';
 import { WwellApprovalMiniChainComponent } from '../wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellApprovalTimelineComponent } from '../wwell-approval-timeline/wwell-approval-timeline.component';
 

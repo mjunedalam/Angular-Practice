@@ -1,0 +1,50 @@
+<section class="wwell-approvals">
+  <header class="wwell-approvals__header">
+    <div class="wwell-approvals__heading">
+      <h1 class="wwell-approvals__title">WLDA Approvals</h1>
+      <span class="wwell-approvals__count">{{ totalCount() }}</span>
+    </div>
+
+    <label class="wwell-approvals__search">
+      <mat-icon class="wwell-approvals__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search by req #, client or well name&hellip;"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
+  </header>
+
+  @if (loadError()) {
+    <div class="wwell-approvals__status wwell-approvals__status--error">{{ loadError() }}</div>
+  }
+
+  <!-- ── Well Location & Drilling Approval (WLDA) ─────────────────────── -->
+  <section class="wwell-approvals__panel">
+    <header class="wwell-approvals__panel-header">
+      <h2 class="wwell-approvals__panel-title">Well Location &amp; Drilling Approval (WLDA)</h2>
+      <button type="button" mat-flat-button color="primary" (click)="openWldaRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request WLDA Approval
+      </button>
+    </header>
+
+    @if (isLoading()) {
+      <div class="wwell-approvals__status">Loading WLDA approvals&hellip;</div>
+    } @else if (wldaRows().length === 0) {
+      <div class="wwell-approvals__status">No WLDA approval requests found.</div>
+    } @else {
+      <app-wwell-approval-table
+        [rows]="wldaRows()"
+        [columns]="wldaColumns"
+        [statusMeta]="statusMeta"
+        [expandedIds]="expandedIds()"
+        [downloadingIds]="downloadingIds()"
+        approvalKindLabel="WLDA"
+        (rowToggle)="toggleRow($event)"
+        (pdfDownload)="downloadWldaPdf($event)"
+      />
+    }
+  </section>
+</section>

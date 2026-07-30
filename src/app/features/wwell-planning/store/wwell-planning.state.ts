@@ -1,6 +1,5 @@
 import {
   IntegratedRequirement,
-  IrApproval,
   LandAffairsApproval,
   WldaApproval,
   WwellPlanningRequest,
@@ -10,7 +9,6 @@ export interface WwellPlanningStoreState {
   readonly requests: WwellPlanningRequest[];
   readonly wldaApprovals: WldaApproval[];
   readonly landAffairsApprovals: LandAffairsApproval[];
-  readonly irApprovals: IrApproval[];
   readonly integratedRequirements: IntegratedRequirement[];
   readonly requestsLoading: boolean;
   readonly approvalsLoading: boolean;
@@ -36,7 +34,6 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   requests: [],
   wldaApprovals: [],
   landAffairsApprovals: [],
-  irApprovals: [],
   integratedRequirements: [],
   requestsLoading: false,
   approvalsLoading: false,

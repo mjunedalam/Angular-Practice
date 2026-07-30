@@ -2,10 +2,9 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { forkJoin, pipe, switchMap, tap } from 'rxjs';
+import { pipe, switchMap, tap } from 'rxjs';
 import {
   CreateIntegratedRequirementPayload,
-  CreateIrApprovalPayload,
   CreateLandAffairsApprovalPayload,
   CreateWldaApprovalPayload,
   CreateWwellPlanningRequestPayload,
@@ -71,19 +70,36 @@ export const WwellPlanningStore = signalStore(
       ),
     );
 
-    const loadApprovals = rxMethod<void>(
+    const loadWldaApprovals = rxMethod<void>(
       pipe(
         tap(() => patchState(store, { approvalsLoading: true, approvalsError: null })),
         switchMap(() =>
-          forkJoin({
-            wldaApprovals: svc.getWldaApprovals(),
-            landAffairsApprovals: svc.getLandAffairsApprovals(),
-            irApprovals: svc.getIrApprovals(),
-          }).pipe(
+          svc.getWldaApprovals().pipe(
             tapResponse({
-              next: result => patchState(store, { ...result, approvalsLoading: false }),
+              next: wldaApprovals => patchState(store, { wldaApprovals, approvalsLoading: false }),
               error: (err: unknown) =>
-                patchState(store, { approvalsLoading: false, approvalsError: errorMessage(err, 'Failed to load approvals') }),
+                patchState(store, {
+                  approvalsLoading: false,
+                  approvalsError: errorMessage(err, 'Failed to load WLDA approvals'),
+                }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    const loadLandAffairsApprovals = rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { approvalsLoading: true, approvalsError: null })),
+        switchMap(() =>
+          svc.getLandAffairsApprovals().pipe(
+            tapResponse({
+              next: landAffairsApprovals => patchState(store, { landAffairsApprovals, approvalsLoading: false }),
+              error: (err: unknown) =>
+                patchState(store, {
+                  approvalsLoading: false,
+                  approvalsError: errorMessage(err, 'Failed to load Land Affairs approvals'),
+                }),
             }),
           ),
         ),
@@ -113,8 +129,12 @@ export const WwellPlanningStore = signalStore(
         loadRequests();
       },
 
-      loadApprovals(): void {
-        loadApprovals();
+      loadWldaApprovals(): void {
+        loadWldaApprovals();
+      },
+
+      loadLandAffairsApprovals(): void {
+        loadLandAffairsApprovals();
       },
 
       loadIntegratedRequirements(): void {
@@ -178,22 +198,6 @@ export const WwellPlanningStore = signalStore(
             patchState(store, {
               creatingApproval: false,
               createApprovalError: errorMessage(err, 'Failed to submit Land Affairs approval request'),
-            }),
-        });
-      },
-
-      submitIrApproval(payload: CreateIrApprovalPayload, files: readonly File[] = []): void {
-        patchState(store, { creatingApproval: true, createApprovalError: null });
-        svc.createIrApproval(payload, files).subscribe({
-          next: created =>
-            patchState(store, {
-              irApprovals: [created, ...store.irApprovals()],
-              creatingApproval: false,
-            }),
-          error: (err: unknown) =>
-            patchState(store, {
-              creatingApproval: false,
-              createApprovalError: errorMessage(err, 'Failed to submit IR approval request'),
             }),
         });
       },

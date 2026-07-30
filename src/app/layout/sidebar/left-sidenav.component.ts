@@ -67,8 +67,14 @@ export class LeftSidenavComponent {
       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
     },
     {
-      id: 'approvals',
-      label: 'Approvals',
+      id: 'wlda-approvals',
+      label: 'WLDA Approvals',
+      section: 'PLANNING',
+      icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
+    },
+    {
+      id: 'land-affairs-approvals',
+      label: 'Land Affairs Approvals',
       section: 'PLANNING',
       icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
     },
