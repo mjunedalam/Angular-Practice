@@ -193,12 +193,21 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
   },
   {
     key: 'hydrogeology',
-    label: 'Hydrogeology & Testing',
+    label: 'Estimated Hydrology',
     sections: [
       {
-        key: 'estimated',
-        title: 'Estimated Hydrogeology',
+        key: 'main',
+        title: null,
         fields: [
+          {
+            key: 'testType',
+            label: 'Test Type',
+            type: 'toggle-group',
+            options: WWELL_TEST_TYPE_OPTIONS,
+            validators: { required: true },
+            colSpan: 2,
+            defaultValue: 'flow-test',
+          },
           {
             key: 'aquifer',
             label: 'Aquifer',
@@ -207,23 +216,32 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             validators: { required: true },
           },
           { key: 'estimatedTdsPpm', label: 'Estimated TDS', type: 'number', suffix: 'ppm' },
-          { key: 'h2sPpm', label: 'H2S', type: 'number', suffix: 'ppm' },
-          { key: 'estimatedPumpDepthFt', label: 'Estimated Pump Depth', type: 'number', suffix: 'ft' },
-        ],
-      },
-      {
-        key: 'testProgram',
-        title: 'Test Program',
-        fields: [
-          {
-            key: 'testType',
-            label: 'Test Type',
-            type: 'toggle-group',
-            options: WWELL_TEST_TYPE_OPTIONS,
-            validators: { required: true },
-          },
           { key: 'estimatedRateGpm', label: 'Estimated Rate', type: 'number', suffix: 'GPM' },
-          { key: 'estimatedWaterLevelFt', label: 'Estimated Water Level', type: 'number', suffix: 'ft' },
+          { key: 'h2sPpm', label: 'H2S', type: 'number', suffix: 'ppm' },
+          // Mode-specific fields are grouped last (after an even count of always-visible fields above)
+          // so a collapsed field never shares a grid row with an unrelated visible one.
+          {
+            key: 'siwhpPsi',
+            label: 'SIWHP',
+            type: 'number',
+            suffix: 'psi',
+            colSpan: 2,
+            visibleWhen: { field: 'testType', equals: 'flow-test' },
+          },
+          {
+            key: 'estimatedWaterLevelFt',
+            label: 'Estimated Water Level',
+            type: 'number',
+            suffix: 'ft',
+            visibleWhen: { field: 'testType', equals: 'pump-test' },
+          },
+          {
+            key: 'estimatedPumpDepthFt',
+            label: 'Estimated Pump Depth',
+            type: 'number',
+            suffix: 'ft',
+            visibleWhen: { field: 'testType', equals: 'pump-test' },
+          },
         ],
       },
     ],

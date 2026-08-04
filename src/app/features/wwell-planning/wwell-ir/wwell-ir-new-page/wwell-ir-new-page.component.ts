@@ -129,6 +129,16 @@ export class WwellIrNewPageComponent {
     return this.stepGroup(stepKey).valid;
   }
 
+  protected reviewCompletionSummary(): { done: number; total: number } {
+    const total = this.reviewSteps.length;
+    const done = this.reviewSteps.filter(step => this.isStepValid(step.key)).length;
+    return { done, total };
+  }
+
+  protected onReviewCardOpened(index: number): void {
+    this.reviewCards?.get(index)?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   protected onStepSelectionChange(index: number): void {
     this.activeStepIndex.set(index);
   }

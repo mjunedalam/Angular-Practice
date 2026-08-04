@@ -1,3 +1,9 @@
+/* The component host sits between the grid container and `.dyf`, so without this,
+ * `.dyf--span-2`'s grid-column has no grid item to act on — flatten it away. */
+:host {
+  display: contents;
+}
+
 .dyf__field {
   width: 100%;
 }
@@ -20,28 +26,128 @@
   color: #475569;
 }
 
+.dyf__required {
+  margin-left: 0.15rem;
+  color: #dc2626;
+}
+
 .dyf__toggle-error {
   font-size: 0.72rem;
   color: #dc2626;
 }
 
+/* Enterprise segmented toggle — one connected bar, equal-width segments, solid
+ * fill for the active segment. Overrides Material's default toggle chrome via
+ * ::ng-deep since mat-button-toggle's internal markup lives outside this
+ * component's view encapsulation boundary. */
+.dyf__toggle-group {
+  display: flex;
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8fafc;
+
+  ::ng-deep .mat-button-toggle {
+    flex: 1 1 0;
+
+    & + .mat-button-toggle {
+      border-left: 1.5px solid #e2e8f0;
+    }
+  }
+
+  ::ng-deep .mat-button-toggle-button {
+    width: 100%;
+    height: auto;
+    padding: 0 !important;
+  }
+
+  /* Material reserves left padding on the button for this checkbox glyph — hiding just
+   * the wrapper leaves that space unfilled by our background, exposing the focus overlay
+   * underneath. Removing it from layout (not just hiding it) is what actually closes the gap. */
+  ::ng-deep .mat-button-toggle-checkbox-wrapper {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  ::ng-deep .mat-button-toggle-label-content {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    line-height: 1.2;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #64748b;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  ::ng-deep .mat-button-toggle:not(.mat-button-toggle-checked):hover .mat-button-toggle-label-content {
+    color: #1e293b;
+    background: #eef2f7;
+  }
+
+  ::ng-deep .mat-button-toggle-checked .mat-button-toggle-label-content {
+    color: #fff;
+    background: #3b82f6;
+  }
+
+  ::ng-deep .mat-button-toggle-button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+  }
+}
+
+.dyf__toggle-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+  flex-shrink: 0;
+}
+
 .dyf--review {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.3rem;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+  }
 }
 
 .dyf__label {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #64748b;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
 }
 
 .dyf__value {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #1e293b;
+  word-break: break-word;
+
+  &--empty {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-style: italic;
+  }
 }

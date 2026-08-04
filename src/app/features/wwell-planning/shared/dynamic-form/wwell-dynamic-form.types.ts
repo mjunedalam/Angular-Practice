@@ -5,12 +5,20 @@ export type WwellFieldControlType = 'text' | 'number' | 'textarea' | 'select' | 
 export interface WwellFieldOption {
   readonly value: string;
   readonly label: string;
+  /** Material icon ligature name — used by 'toggle-group' only. */
+  readonly icon?: string;
 }
 
 export interface WwellFieldValidatorConfig {
   readonly required?: boolean;
   readonly pattern?: RegExp;
   readonly min?: number;
+}
+
+/** Field is only shown (and its control enabled) while a sibling control in the same section equals this value. */
+export interface WwellFieldVisibilityCondition {
+  readonly field: string;
+  readonly equals: string;
 }
 
 export interface WwellFieldConfig {
@@ -24,6 +32,9 @@ export interface WwellFieldConfig {
   readonly options?: readonly (string | WwellFieldOption)[];
   readonly validators?: WwellFieldValidatorConfig;
   readonly colSpan?: 1 | 2;
+  readonly visibleWhen?: WwellFieldVisibilityCondition;
+  /** Overrides the type-based empty default (e.g. pre-selecting a toggle-group option). */
+  readonly defaultValue?: string | number;
 }
 
 export interface WwellRepeatableRowConfig {
@@ -56,4 +67,8 @@ export function wwellFieldOptionLabel(option: string | WwellFieldOption): string
 
 export function wwellFieldOptionValue(option: string | WwellFieldOption): string {
   return typeof option === 'string' ? option : option.value;
+}
+
+export function wwellFieldOptionIcon(option: string | WwellFieldOption): string | undefined {
+  return typeof option === 'string' ? undefined : option.icon;
 }

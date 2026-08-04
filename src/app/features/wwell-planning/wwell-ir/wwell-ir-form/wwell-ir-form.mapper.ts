@@ -46,11 +46,17 @@ export function mapIrFormValueToSubmission(
     },
     offsetWells: raw.contacts.offsetWells.map(row => ({ wellName: row.wellName })),
     offsetWellsRemarks: raw.contacts.remarks.offsetWellsRemarks || null,
-    hydrogeology: { ...raw.hydrogeology.estimated },
+    hydrogeology: {
+      aquifer: raw.hydrogeology.main.aquifer,
+      estimatedTdsPpm: raw.hydrogeology.main.estimatedTdsPpm,
+      h2sPpm: raw.hydrogeology.main.h2sPpm,
+      estimatedPumpDepthFt: raw.hydrogeology.main.estimatedPumpDepthFt,
+    },
     testProgram: {
-      testType: raw.hydrogeology.testProgram.testType as IntegratedRequirementTestType,
-      estimatedRateGpm: raw.hydrogeology.testProgram.estimatedRateGpm,
-      estimatedWaterLevelFt: raw.hydrogeology.testProgram.estimatedWaterLevelFt,
+      testType: raw.hydrogeology.main.testType as IntegratedRequirementTestType,
+      estimatedRateGpm: raw.hydrogeology.main.estimatedRateGpm,
+      estimatedWaterLevelFt: raw.hydrogeology.main.estimatedWaterLevelFt,
+      siwhpPsi: raw.hydrogeology.main.siwhpPsi,
     },
   };
 

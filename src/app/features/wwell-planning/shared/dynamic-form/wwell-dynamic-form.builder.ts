@@ -9,7 +9,8 @@ import {
 /** Empty `File[]` isn't falsy to Angular's default `required` validator — needs its own check. */
 const requiredFileList: ValidatorFn = control => (control.value?.length ? null : { required: true });
 
-function defaultValueFor(field: WwellFieldConfig): unknown {
+export function defaultValueFor(field: WwellFieldConfig): unknown {
+  if (field.defaultValue !== undefined) return field.defaultValue;
   if (field.type === 'file') return [];
   if (field.type === 'number') return null;
   return '';

@@ -46,7 +46,20 @@ $danger: #dc2626;
   @include wsel.panel($accent, $navy);
 }
 
-:host {
+/*
+ * `:host` is a no-op on this component: ViewEncapsulation.None (see the M3
+ * theme rationale above) strips Angular's `:host` processing entirely, since
+ * there's no shadow boundary left to scope it against — the block silently
+ * compiles to nothing. Confirmed at runtime: no rule in any stylesheet ever
+ * set this background, so the host never became its own scroll container.
+ * That matters here specifically because the parent layout applies
+ * `overflow: hidden` to `.dashboard__content` for this route
+ * (dashboard__content--scroll-locked, in layout.component.scss) — it expects
+ * routed pages under 'integrated-requirements' to own their own scrolling.
+ * Target the tag directly instead; under None encapsulation styles are
+ * already global, so this is exactly what `:host` was meant to do.
+ */
+app-wwell-ir-new-page {
   display: block;
   height: 100%;
   overflow: auto;
@@ -123,6 +136,19 @@ $danger: #dc2626;
   padding: 1rem 0.25rem 0;
 }
 
+/* Material's stepper hardcodes `overflow: hidden` on the content container
+ * (see @angular/material/stepper structural styles) to clip the horizontal
+ * slide transition between steps. That also clips anything inside the active
+ * step that grows *after* the step has settled — e.g. expanding a review
+ * accordion — so the newly revealed content is cut off with no way to scroll
+ * to it. The host element above already owns the real scroll container
+ * (`overflow: auto`), so it's safe to let this inner container size to its
+ * content.
+ */
+.nip .mat-horizontal-content-container {
+  overflow: visible;
+}
+
 /* ── Stepper header ───────────────────────────────────────────────────────
  * Icon-above-label layout via Material's own `labelPosition="bottom"` mode.
  * Material centers the connector line using a hardcoded assumption of a 24px
@@ -132,10 +158,20 @@ $danger: #dc2626;
  * variable Material reads, and the hand-computed $line-top corrects for the
  * bigger icon: padding-top ((header-height - 24) / 2, Material's own formula)
  * plus half our real icon size.
+ *
+ * Material actually draws this connector in THREE separate pieces: the
+ * `<div class="mat-stepper-horizontal-line">` between each pair of headers,
+ * plus a `::before`/`::after` pseudo-element on each header itself (bridging
+ * the header's own side padding up to its icon). Only the middle `<div>` was
+ * shifted down to `$line-top` below — the pseudo-elements stayed at
+ * Material's un-adjusted default `top`, so they visibly break away from the
+ * div's line right next to every circle. All three need the same `top` and
+ * color to read as one continuous line.
  */
 $header-height: 88px;
 $icon-size: 40px;
 $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
+$line-idle: #e5e7eb;
 
 .nip .mat-stepper-horizontal {
   --mat-stepper-header-height: #{$header-height};
@@ -150,6 +186,11 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
 .nip .mat-step-header {
   border-radius: 12px;
   background-color: transparent !important;
+  transition: background-color 150ms ease;
+
+  &:not([aria-disabled='true']):hover {
+    background-color: rgba($accent, 0.06) !important;
+  }
 }
 
 .nip .mat-step-icon {
@@ -201,15 +242,78 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
 
 .nip .mat-stepper-horizontal-line {
   border-top-width: 2px;
-  border-top-color: #e5e7eb;
+  border-top-color: $line-idle;
   top: #{$line-top} !important;
+  transition: border-top-color 300ms ease;
+}
+
+/* The header's own bridging pieces — see the comment above $header-height
+ * for why these need to match the connector `<div>` exactly. */
+.nip .mat-horizontal-stepper-header::before,
+.nip .mat-horizontal-stepper-header::after {
+  top: #{$line-top} !important;
+  border-top-width: 2px;
+  border-top-color: $line-idle;
+  transition: border-top-color 300ms ease;
+}
+
+/* Traveled-path progress: recolor every connector segment that sits behind a
+ * completed step — the header's own trailing edge, the `<div>` after it, and
+ * the following header's leading edge — so the path already walked reads as
+ * a distinct accent track instead of a flat uniform gray. Driven entirely by
+ * Material's own `mat-step-icon-state-done` class, so it stays in sync with
+ * navigation for free and animates via the transitions above.
+ */
+.nip .mat-step-header:has(.mat-step-icon-state-done)::after,
+.nip .mat-step-header:has(.mat-step-icon-state-done) + .mat-stepper-horizontal-line,
+.nip .mat-step-header:has(.mat-step-icon-state-done) + .mat-stepper-horizontal-line + .mat-step-header::before {
+  border-top-color: $accent !important;
 }
 
 /* ── Review section ───────────────────────────────────────────── */
+$done: #10b981;
+$pending: #b45309;
+
 .nip__review {
   margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid $border;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, rgba($accent, 0.05), rgba($accent, 0));
+  border: 1px solid rgba($accent, 0.14);
+  border-radius: 14px;
+}
+
+.nip__review-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+
+.nip__review-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.nip__review-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, $accent, #60a5fa);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba($accent, 0.32);
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
 }
 
 .nip__review-title {
@@ -220,9 +324,33 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
 }
 
 .nip__review-subtitle {
-  margin: 0.2rem 0 1rem;
+  margin: 0.2rem 0 0;
   font-size: 0.82rem;
   color: $muted;
+}
+
+.nip__review-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $pending;
+  background: #fef3c7;
+  white-space: nowrap;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &--done {
+    color: #047857;
+    background: #d1fae5;
+  }
 }
 
 .nip__review-grid {
@@ -232,17 +360,40 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
 }
 
 .nip .nip__review-card {
+  position: relative;
   border: 1px solid $border !important;
   border-radius: 12px !important;
   box-shadow: none !important;
   overflow: hidden;
+  background: #fff;
+  transition:
+    box-shadow 180ms ease,
+    border-color 180ms ease;
 
   &::before {
     display: none;
   }
 
+  /* Status accent bar — pending amber, complete green. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: $pending;
+  }
+
+  &--done::after {
+    background: $done;
+  }
+
   &:not(.mat-expanded) .nip__review-card-header:hover {
     background: rgba($accent, 0.04);
+  }
+
+  &.mat-expanded {
+    border-color: rgba($accent, 0.35) !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
   }
 }
 
@@ -268,6 +419,9 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
   border-radius: 50%;
   background: #fef3c7;
   color: #b45309;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 
   mat-icon {
     width: 14px;
@@ -296,7 +450,7 @@ $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
 }
 
 .nip__review-card-body {
-  padding-top: 0.5rem;
+  padding: 0.75rem 0.25rem 0.25rem;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */

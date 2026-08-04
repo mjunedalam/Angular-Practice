@@ -1,4 +1,4 @@
-<section class="dys">
+<section class="dys" [class.dys--review]="mode() === 'review'">
   @if (section().title) {
     <h3 class="dys__title">{{ section().title }}</h3>
   }
@@ -6,12 +6,23 @@
   @if (section().fields) {
     <div class="dys__grid">
       @for (field of section().fields!; track field.key) {
-        <app-dynamic-field
-          [config]="field"
-          [control]="fieldControl(field.key)"
-          [mode]="mode()"
-          [selectPanelClass]="selectPanelClass()"
-        />
+        @if (field.visibleWhen) {
+          <div class="dys__field-host" [class.dys__field-host--span-2]="field.colSpan === 2" #fieldHost>
+            <app-dynamic-field
+              [config]="field"
+              [control]="fieldControl(field.key)"
+              [mode]="mode()"
+              [selectPanelClass]="selectPanelClass()"
+            />
+          </div>
+        } @else {
+          <app-dynamic-field
+            [config]="field"
+            [control]="fieldControl(field.key)"
+            [mode]="mode()"
+            [selectPanelClass]="selectPanelClass()"
+          />
+        }
       }
     </div>
   } @else if (section().repeatable) {

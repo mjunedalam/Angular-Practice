@@ -176,6 +176,8 @@ export interface IntegratedRequirementTestProgram {
   readonly testType: IntegratedRequirementTestType;
   readonly estimatedRateGpm: number | null;
   readonly estimatedWaterLevelFt: number | null;
+  /** Shut-in wellhead pressure — only meaningful for a flow test. */
+  readonly siwhpPsi?: number | null;
 }
 
 export interface IntegratedRequirement {

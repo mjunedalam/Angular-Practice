@@ -3,10 +3,16 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { WwellAttachmentDropzoneComponent } from '../../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
-import { WwellFieldConfig, wwellFieldOptionLabel, wwellFieldOptionValue } from '../wwell-dynamic-form.types';
+import {
+  WwellFieldConfig,
+  wwellFieldOptionIcon,
+  wwellFieldOptionLabel,
+  wwellFieldOptionValue,
+} from '../wwell-dynamic-form.types';
 
 export type WwellDynamicFieldMode = 'edit' | 'review';
 
@@ -20,6 +26,7 @@ export type WwellDynamicFieldMode = 'edit' | 'review';
     MatSelectModule,
     MatButtonToggleModule,
     MatAutocompleteModule,
+    MatIconModule,
     WwellAttachmentDropzoneComponent,
   ],
   templateUrl: './dynamic-field.component.html',
@@ -35,6 +42,7 @@ export class DynamicFieldComponent {
 
   protected readonly optionLabel = wwellFieldOptionLabel;
   protected readonly optionValue = wwellFieldOptionValue;
+  protected readonly optionIcon = wwellFieldOptionIcon;
 
   protected readonly reviewValue = computed(() => {
     const value = this.control().value;
@@ -50,6 +58,8 @@ export class DynamicFieldComponent {
     }
     return value === null || value === undefined || value === '' ? '—' : String(value);
   });
+
+  protected readonly isReviewValueEmpty = computed(() => this.reviewValue() === '—');
 
   protected onFilesChange(files: File[]): void {
     this.control().setValue(files);

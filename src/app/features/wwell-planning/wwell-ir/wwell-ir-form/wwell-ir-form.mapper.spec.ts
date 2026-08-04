@@ -29,8 +29,16 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       remarks: { offsetWellsRemarks: '' },
     },
     hydrogeology: {
-      estimated: { aquifer: 'Saq', estimatedTdsPpm: 1200, h2sPpm: 5, estimatedPumpDepthFt: 150 },
-      testProgram: { testType: 'pump-test', estimatedRateGpm: 350, estimatedWaterLevelFt: 95 },
+      main: {
+        testType: 'pump-test',
+        aquifer: 'Saq',
+        siwhpPsi: null,
+        estimatedTdsPpm: 1200,
+        estimatedRateGpm: 350,
+        h2sPpm: 5,
+        estimatedWaterLevelFt: 95,
+        estimatedPumpDepthFt: 150,
+      },
     },
     attachments: { files: { locationMap: [], initiationRequest: [new File(['x'], 'init.pdf')] } },
     ...overrides,

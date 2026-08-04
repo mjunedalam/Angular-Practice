@@ -49,17 +49,15 @@ export interface WwellIrRawRemarks {
   readonly offsetWellsRemarks: string;
 }
 
-export interface WwellIrRawEstimatedHydrogeology {
-  readonly aquifer: string;
-  readonly estimatedTdsPpm: number | null;
-  readonly h2sPpm: number | null;
-  readonly estimatedPumpDepthFt: number | null;
-}
-
-export interface WwellIrRawTestProgram {
+export interface WwellIrRawHydrology {
   readonly testType: string;
+  readonly aquifer: string;
+  readonly siwhpPsi: number | null;
+  readonly estimatedTdsPpm: number | null;
   readonly estimatedRateGpm: number | null;
+  readonly h2sPpm: number | null;
   readonly estimatedWaterLevelFt: number | null;
+  readonly estimatedPumpDepthFt: number | null;
 }
 
 export interface WwellIrRawFiles {
@@ -82,9 +80,6 @@ export interface WwellIrFormRawValue {
     readonly offsetWells: WwellIrRawOffsetWell[];
     readonly remarks: WwellIrRawRemarks;
   };
-  readonly hydrogeology: {
-    readonly estimated: WwellIrRawEstimatedHydrogeology;
-    readonly testProgram: WwellIrRawTestProgram;
-  };
+  readonly hydrogeology: { readonly main: WwellIrRawHydrology };
   readonly attachments: { readonly files: WwellIrRawFiles };
 }

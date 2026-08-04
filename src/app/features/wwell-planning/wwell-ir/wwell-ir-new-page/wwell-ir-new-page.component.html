@@ -34,12 +34,35 @@
 
           @if (step.key === 'attachments') {
             <div class="nip__review">
-              <h3 class="nip__review-title">Review before you submit</h3>
-              <p class="nip__review-subtitle">Check each section below — use Edit to jump back and fix anything.</p>
+              <div class="nip__review-head">
+                <div class="nip__review-heading">
+                  <span class="nip__review-icon">
+                    <mat-icon>fact_check</mat-icon>
+                  </span>
+                  <div>
+                    <h3 class="nip__review-title">Review before you submit</h3>
+                    <p class="nip__review-subtitle">Check each section below — use Edit to jump back and fix anything.</p>
+                  </div>
+                </div>
+
+                @let summary = reviewCompletionSummary();
+                <span
+                  class="nip__review-summary"
+                  [class.nip__review-summary--done]="summary.done === summary.total"
+                >
+                  <mat-icon>{{ summary.done === summary.total ? 'verified' : 'pending_actions' }}</mat-icon>
+                  {{ summary.done }} of {{ summary.total }} complete
+                </span>
+              </div>
 
               <mat-accordion class="nip__review-grid" multi>
                 @for (reviewStep of reviewSteps; track reviewStep.key; let i = $index) {
-                  <mat-expansion-panel class="nip__review-card" #reviewCard>
+                  <mat-expansion-panel
+                    class="nip__review-card"
+                    [class.nip__review-card--done]="isStepValid(reviewStep.key)"
+                    #reviewCard
+                    (opened)="onReviewCardOpened(i)"
+                  >
                     <mat-expansion-panel-header class="nip__review-card-header">
                       <mat-panel-title class="nip__review-card-title">
                         <span

@@ -1,7 +1,7 @@
 @if (mode() === 'review') {
   <div class="dyf dyf--review" [class.dyf--span-2]="config().colSpan === 2">
     <dt class="dyf__label">{{ config().label }}</dt>
-    <dd class="dyf__value">{{ reviewValue() }}</dd>
+    <dd class="dyf__value" [class.dyf__value--empty]="isReviewValueEmpty()">{{ reviewValue() }}</dd>
   </div>
 } @else {
   <div class="dyf" [class.dyf--span-2]="config().colSpan === 2">
@@ -53,10 +53,20 @@
       }
       @case ('toggle-group') {
         <div class="dyf__toggle">
-          <span class="dyf__toggle-label">{{ config().label }}</span>
-          <mat-button-toggle-group [formControl]="control()">
+          <span class="dyf__toggle-label">
+            {{ config().label }}
+            @if (config().validators?.required) {
+              <span class="dyf__required">*</span>
+            }
+          </span>
+          <mat-button-toggle-group class="dyf__toggle-group" [formControl]="control()">
             @for (opt of config().options ?? []; track optionValue(opt)) {
-              <mat-button-toggle [value]="optionValue(opt)">{{ optionLabel(opt) }}</mat-button-toggle>
+              <mat-button-toggle [value]="optionValue(opt)">
+                @if (optionIcon(opt); as icon) {
+                  <mat-icon class="dyf__toggle-icon">{{ icon }}</mat-icon>
+                }
+                {{ optionLabel(opt) }}
+              </mat-button-toggle>
             }
           </mat-button-toggle-group>
           @if (errorMessage()) {
