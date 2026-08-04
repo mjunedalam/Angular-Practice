@@ -25,17 +25,19 @@ $accent: #3b82f6;
 }
 
 /* ── Master column ────────────────────────────────────────────── */
+/* Shadow matches `wwell-ir-new-page`'s card treatment (accent-tinted, two-layer) so the
+ * list/detail view and the create-flow page read as one feature, not two depth systems. */
 .wwell-ir__master {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  width: 360px;
+  gap: 0.75rem;
+  width: 300px;
   flex-shrink: 0;
   max-height: 100%;
   background: #ffffff;
   border: 1px solid #e8edf4;
-  border-radius: 12px;
-  padding: 1.1rem;
+  border-radius: 10px;
+  padding: 0.9rem;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(59, 130, 246, 0.05);
@@ -58,7 +60,7 @@ $accent: #3b82f6;
 
 .wwell-ir__title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.01em;
@@ -68,13 +70,13 @@ $accent: #3b82f6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
-  background: $accent;
-  color: #fff;
-  font-size: 0.72rem;
+  background: rgba($accent, 0.12);
+  color: $accent;
+  font-size: 0.68rem;
   font-weight: 800;
 }
 
@@ -83,16 +85,16 @@ $accent: #3b82f6;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 7px;
   font-weight: 700;
-  font-size: 0.8rem;
-  padding: 0 12px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.28);
+  font-size: 0.76rem;
+  padding: 0 10px;
+  box-shadow: none;
 
   mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
   }
 }
 
@@ -101,10 +103,10 @@ $accent: #3b82f6;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0.5rem 0.9rem;
+  padding: 0.42rem 0.75rem;
   background: #f8fafc;
   border: 1px solid $border;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: border-color 150ms ease;
 
   &:focus-within {
@@ -149,6 +151,60 @@ $accent: #3b82f6;
   }
 }
 
+/* ── Loading skeleton ─────────────────────────────────────────────
+ * Mirrors `.wwell-ir__row`'s shape so the swap into real rows reads as a
+ * content refresh, not a layout jump. Shimmer is a CSS keyframe loop
+ * (indefinite duration), matching the approval-timeline pulse convention —
+ * GSAP is reserved for the finite, one-shot reveal transitions.
+ */
+.wwell-ir__list--skeleton {
+  overflow: hidden;
+}
+
+.wwell-ir__skeleton-row {
+  cursor: default;
+  pointer-events: none;
+}
+
+.wwell-ir__skeleton-bar {
+  display: block;
+  height: 0.6rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
+  background-size: 400% 100%;
+  animation: wwell-ir-shimmer 1.4s ease-in-out infinite;
+
+  &--code {
+    width: 34%;
+  }
+
+  &--badge {
+    width: 22%;
+    height: 0.9rem;
+    border-radius: 999px;
+  }
+
+  &--name {
+    width: 62%;
+    height: 0.7rem;
+    margin-top: 0.2rem;
+  }
+
+  &--meta {
+    width: 48%;
+    margin-top: 0.15rem;
+  }
+}
+
+@keyframes wwell-ir-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
 /* ── Row list ─────────────────────────────────────────────────── */
 .wwell-ir__list {
   margin: 0;
@@ -156,7 +212,7 @@ $accent: #3b82f6;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -174,28 +230,32 @@ $accent: #3b82f6;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.7rem 0.85rem;
+  gap: 0.2rem;
+  padding: 0.55rem 0.65rem;
   background: #ffffff;
-  border: 1px solid $border;
-  border-left: 3px solid transparent;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 7px;
   cursor: pointer;
   font: inherit;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
-    transform 150ms ease;
+    box-shadow 150ms ease;
 
   &:hover {
     background: #f8fafc;
-    transform: translateX(1px);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
   }
 
   &--active {
     background: rgba($accent, 0.06);
-    border-color: rgba($accent, 0.35);
+    border-color: rgba($accent, 0.16);
     border-left-color: $accent;
+  }
+
+  &--active:hover {
+    box-shadow: none;
   }
 }
 
@@ -207,38 +267,49 @@ $accent: #3b82f6;
 }
 
 .wwell-ir__row-code {
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 800;
   color: $navy;
+  letter-spacing: 0.01em;
 }
 
 .wwell-ir__row-name {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: $navy;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wwell-ir__row-meta {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   color: $muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wwell-ir__row-chain {
+  margin-top: 3px;
 }
 
 .wwell-ir__badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
+  gap: 4px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .wwell-ir__badge-dot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -299,14 +370,38 @@ $accent: #3b82f6;
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */
+/*
+ * `.wwell-ir` becomes the scroll container here (was `height: auto`, no `overflow-y`) —
+ * that left NOTHING to scroll: the parent app shell applies `overflow: hidden` to itself for
+ * every route under `integrated-requirements` (`.dashboard__content--scroll-locked` in
+ * layout.component.scss), on the assumption that the routed page owns its own scrolling.
+ * On desktop that contract was satisfied by `.wwell-ir__master`/`.wwell-ir__detail` each
+ * scrolling independently side-by-side; stacking them to `height: auto` dropped that contract
+ * without anything replacing it, so ~2/3 of a typical detail view (everything below the KPI
+ * stat strip) was permanently unreachable — confirmed live: `.dashboard__content`'s
+ * `scrollHeight` (2968px) vastly exceeded its `clientHeight` (962px) with `overflow-y: hidden`
+ * and no scrollable descendant anywhere in the tree.
+ *
+ * Fix: keep `.wwell-ir` at the full `height: 100%` it already has on desktop and let it scroll
+ * as ONE unit (master list + detail stacked, not two nested independently-scrolling boxes —
+ * nested scroll areas are their own bad-mobile-UX problem). `.ird__header`/`.ird__sidebar`'s
+ * `position: sticky` rules keep working unchanged — sticky always resolves against whichever
+ * ancestor actually scrolls, which is now `.wwell-ir` here instead of `.wwell-ir__detail`.
+ */
 @media (max-width: 900px) {
   .wwell-ir {
     flex-direction: column;
-    height: auto;
+    overflow-y: auto;
   }
 
   .wwell-ir__master {
     width: 100%;
+    max-height: none;
+  }
+
+  .wwell-ir__detail {
+    max-height: none;
+    overflow-y: visible;
   }
 }
 

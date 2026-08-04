@@ -14,25 +14,57 @@ $stat-offset: #7c3aed;
 }
 
 .ird {
+  /* Set from `WwellIrDetailComponent` via a `ResizeObserver` on the header — the sidebar
+   * (below) needs this to park itself just under the frozen header instead of colliding
+   * with it; see the `.ird__sidebar` comment. */
+  --ird-header-h: 0px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-/* ── Header ───────────────────────────────────────────────────── */
+/* ── Header: frozen while the detail panel scrolls ───────────────
+ * `wwell-ir.component.scss`'s `.wwell-ir__detail` is the scrolling ancestor. Sticky needs its
+ * own opaque background + shadow (card treatment matching the rest of this feature) since
+ * every card below now scrolls underneath it instead of the page's plain background.
+ */
 .ird__header {
+  position: sticky;
+  top: 0;
+  z-index: 6;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid $border;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+
+  /* Whatever card is scrolling past underneath gets sliced clean off by the header's bottom
+   * edge — normal for any sticky header, but a hard 1px cutoff mid-row (e.g. through the
+   * General Information card's first line) reads as broken rather than "scrolled behind a
+   * panel". This fades it out over ~20px instead of chopping it, `pointer-events: none` so it
+   * never blocks clicks/scroll on the content underneath. */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -20px;
+    height: 20px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
 }
 
 .ird__eyebrow {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: $accent;
   text-transform: uppercase;
@@ -41,7 +73,7 @@ $stat-offset: #7c3aed;
 
 .ird__title {
   margin: 0.15rem 0 0;
-  font-size: 1.4rem;
+  font-size: 1.22rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.01em;
@@ -49,17 +81,17 @@ $stat-offset: #7c3aed;
 
 .ird__subtitle {
   margin: 0.2rem 0 0;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   color: $muted;
 }
 
 .ird__badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
+  gap: 5px;
+  padding: 4px 11px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -78,17 +110,20 @@ $stat-offset: #7c3aed;
  */
 .ird__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 220px;
   align-items: start;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
+/* `top` clears the frozen header's live height (+ `.ird`'s flex `gap`) instead of `0` — both
+ * this and `.ird__header` are sticky against the same scroll container, so a plain `top: 0`
+ * would make the sidebar slide up underneath the header instead of stopping below it. */
 .ird__sidebar {
   position: sticky;
-  top: 0;
+  top: calc(var(--ird-header-h) + 1.25rem);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .ird__submit-btn {
@@ -96,11 +131,12 @@ $stat-offset: #7c3aed;
   justify-content: center;
   gap: 6px;
   font-weight: 700;
+  font-size: 0.82rem;
 
   mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
   }
 }
 
@@ -116,30 +152,48 @@ $stat-offset: #7c3aed;
 .ird__main {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 0.9rem;
 }
 
+/*
+ * 1.3fr : 1fr — Program & Hydrogeology carries far more rows than Contacts & Attachments;
+ * an even 50/50 split left one column cramped and the other mostly blank.
+ *
+ * `align-items` stays at Grid's `stretch` default (not `start`): Contacts & Attachments
+ * runs noticeably shorter than its neighbor, and with `start` its card border simply
+ * stopped short, exposing bare page background in the gap above Offset Water Wells —
+ * read as a layout bug, not a card. Stretching both cards to the row's full height turns
+ * that same gap into the shorter card's own bottom padding.
+ */
 .ird__pair {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  align-items: start;
-  gap: 1.1rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 0.9rem;
 }
 
+/* Shadow matches `wwell-ir-new-page`'s card treatment — see the `.wwell-ir__master`
+ * comment in the parent list component for why. */
 .ird__card {
   background: #ffffff;
   border: 1px solid $border;
-  border-radius: 14px;
-  padding: 1.1rem 1.25rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+/* Approval card in the sidebar reads as a compact rail, not a bento card. */
+.ird__sidebar .ird__card {
+  padding: 0.85rem 0.9rem;
 }
 
 .ird__card-title {
-  margin: 0 0 0.95rem;
+  margin: 0 0 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 0.72rem;
+  gap: 0.5rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: $navy;
   text-transform: uppercase;
@@ -150,24 +204,24 @@ $stat-offset: #7c3aed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
   background: rgba($accent, 0.1);
   color: $accent;
   flex-shrink: 0;
 
   &.mat-icon {
-    width: 24px;
-    height: 24px;
-    font-size: 15px;
+    width: 21px;
+    height: 21px;
+    font-size: 13px;
   }
 }
 
 /* ── Subsections within a merged card ─────────────────────────── */
 .ird__subsection + .ird__subsection {
-  margin-top: 1.1rem;
-  padding-top: 1.1rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
   border-top: 1px dashed $border;
 }
 
@@ -180,16 +234,30 @@ $stat-offset: #7c3aed;
   letter-spacing: 0.05em;
 }
 
-/* ── Wellbore Design: schematic beside its data tables ───────────── */
+/*
+ * ── Wellbore Design: schematic above its data tables ───────────────
+ * Used to run side-by-side (schematic column + tables column), but Casing alone
+ * needs ~405px to show its 4 columns (Type/Size/Depth/Remarks) without clipping —
+ * more than an equal split of this card ever has left over, so "SUB-SEA (FT ASL)"
+ * and "Remarks" were permanently cut off with no visible way to reach them.
+ * Stacking gives the tables the card's full content width instead.
+ */
 .ird__wellbore {
-  display: grid;
-  grid-template-columns: minmax(220px, 300px) 1fr;
-  align-items: start;
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.ird__wellbore-preview {
+  align-self: center;
+  width: 100%;
+  max-width: 240px;
 }
 
 .ird__wellbore-tables {
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 /* ── KPI stat strip ───────────────────────────────────────────────
@@ -203,15 +271,15 @@ $stat-offset: #7c3aed;
   overflow: hidden;
   background: $border;
   border: 1px solid $border;
-  border-radius: 14px;
+  border-radius: 10px;
 }
 
 .ird__stat {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  flex: 1 1 190px;
-  padding: 0.9rem 1.15rem;
+  gap: 0.6rem;
+  flex: 1 1 170px;
+  padding: 0.7rem 0.95rem;
   background: #ffffff;
 }
 
@@ -219,15 +287,15 @@ $stat-offset: #7c3aed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   flex-shrink: 0;
 
   &.mat-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 18px;
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
   }
 }
 
@@ -272,14 +340,14 @@ $stat-offset: #7c3aed;
 }
 
 .ird__stat-value {
-  font-size: 1.45rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.02em;
 
   small {
     margin-left: 3px;
-    font-size: 0.76rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: $muted;
   }
@@ -290,23 +358,27 @@ $stat-offset: #7c3aed;
   margin: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .ird__kv-grid--wide {
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem 2rem;
+  gap: 0.5rem 2rem;
 }
 
 .ird__kv {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 0.75rem;
-  font-size: 0.85rem;
-  padding: 0.35rem 0;
+  font-size: 0.81rem;
+  padding: 0.3rem 0;
   border-bottom: 1px dashed $border;
 
   dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: $muted;
   }
 
@@ -318,33 +390,44 @@ $stat-offset: #7c3aed;
   }
 }
 
+.ird__kv-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
 /* ── Tables ───────────────────────────────────────────────────── */
 .ird__table-wrap {
   overflow-x: auto;
   border: 1px solid $border;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .ird__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 0.79rem;
   white-space: nowrap;
 
   th {
     background: #f8fafc;
     color: $muted;
     font-weight: 700;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     text-align: left;
-    padding: 0.6rem 0.85rem;
+    padding: 0.5rem 0.7rem;
     border-bottom: 1px solid $border;
   }
 
   td {
-    padding: 0.55rem 0.85rem;
+    padding: 0.45rem 0.7rem;
     color: $navy;
     border-bottom: 1px solid #f1f5f9;
   }
@@ -354,10 +437,56 @@ $stat-offset: #7c3aed;
   }
 }
 
-.ird__table--wide th,
-.ird__table--wide td {
-  padding-left: 0.6rem;
-  padding-right: 0.6rem;
+/*
+ * ── Offset wells grid ────────────────────────────────────────────
+ * AG Grid, not a card grid or a plain `<table>` — 14 columns of test-result data is exactly
+ * what AG Grid's own horizontal scrollbar + pinned first column are for; unlike the
+ * `.ird__table-wrap` tables above (which get their full stacked-card width and never need to
+ * scroll), forcing 14 columns into any fixed card width would always need it.
+ */
+.ird__offset-grid-wrap {
+  position: relative;
+}
+
+.ird__offset-grid {
+  display: block;
+  opacity: 0;
+  transition: opacity 200ms ease;
+
+  &--ready {
+    opacity: 1;
+  }
+
+  /* AG Grid itself hardcodes `.ag-layout-auto-height .ag-center-cols-viewport { min-height:
+   * 150px }` (ag-grid-community's own stylesheet, not our theme) so an `autoHeight` grid never
+   * renders jarringly thin — but with only 2-3 offset wells (76-114px of real rows), that floor
+   * left ~40-75px of visibly empty white space below the last row. `::ng-deep` is the only way
+   * to reach AG Grid's internally-generated DOM, which sits outside Angular's template
+   * encapsulation; scoped to this grid instance via `.ird__offset-grid` so it doesn't touch
+   * other autoHeight grids elsewhere in the app (e.g. `wwell-requests`, which relies on that
+   * floor to avoid looking cramped next to its paginated 5-row page size).
+   */
+  ::ng-deep .ag-center-cols-viewport {
+    min-height: 0 !important;
+  }
+}
+
+/* Same concept as `active-wwell-docs-viewer`'s list-loading state (presentation feature):
+ * a centered `mat-spinner` + label over the content area, not the master list's shimmer bars —
+ * this is already-visible chrome with content still arriving, not a whole page being fetched. */
+.ird__grid-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #ffffff;
+  color: $muted;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .ird__table-empty {
@@ -383,6 +512,10 @@ $stat-offset: #7c3aed;
   gap: 0.5rem;
 }
 
+/* Plain metadata, not a link — `attachmentNames` is filenames only (no file/URL data
+ * behind it yet), so this deliberately reads as neutral navy text, not accent blue.
+ * Blue + a paperclip icon is a strong "click me" signal; nothing happens on click,
+ * and the mismatch between the promise and the (non-)behavior is worse than plain text. */
 .ird__attachment {
   display: flex;
   align-items: center;
@@ -392,7 +525,7 @@ $stat-offset: #7c3aed;
   border: 1px solid $border;
   border-radius: 8px;
   font-size: 0.82rem;
-  color: $accent;
+  color: $navy;
   font-weight: 600;
   width: fit-content;
 
@@ -417,17 +550,16 @@ $stat-offset: #7c3aed;
     grid-template-columns: 1fr;
   }
 
+  /* Stays `position: sticky` here too (was `static`) — dropping stickiness on the stacked
+   * layout meant the Approval Chain card scrolled away with the rest of the page on tablet/
+   * mobile, unlike the desktop 2-column layout where it stays pinned under the frozen header.
+   * `order: -1` still moves it above the main content column in the stack. */
   .ird__sidebar {
-    position: static;
     order: -1;
   }
 }
 
 @media (max-width: 760px) {
-  .ird__wellbore {
-    grid-template-columns: 1fr;
-  }
-
   .ird__pair {
     grid-template-columns: 1fr;
   }

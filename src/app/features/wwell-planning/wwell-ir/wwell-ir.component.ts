@@ -17,16 +17,19 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
+import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
+import { WwellApprovalMiniChainComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WwellIrDetailComponent } from './wwell-ir-detail/wwell-ir-detail.component';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
 
 const SNACKBAR_DURATION_MS = 3000;
+const SKELETON_ROW_COUNT = 6;
 
 @Component({
   selector: 'app-wwell-ir',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, WwellIrDetailComponent],
+  imports: [FormsModule, MatButtonModule, MatIconModule, WwellIrDetailComponent, WwellApprovalMiniChainComponent],
   templateUrl: './wwell-ir.component.html',
   styleUrl: './wwell-ir.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,7 +69,10 @@ export class WwellIrComponent implements OnInit {
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
 
+  protected readonly skeletonRows = Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => index);
+
   @ViewChild('detailHost') private readonly detailHost?: ElementRef<HTMLElement>;
+  @ViewChild('listHost') private readonly listHost?: ElementRef<HTMLElement>;
   private previousSelectedId: string | null = null;
 
   constructor() {
@@ -100,6 +106,20 @@ export class WwellIrComponent implements OnInit {
       const host = this.detailHost?.nativeElement;
       if (host) playIfMotionAllowed(buildDetailRevealTimeline(host));
       this.previousSelectedId = id;
+    });
+
+    // Re-plays whenever the visible rows actually change (initial load finishing, or the
+    // search term narrowing/widening the result set) — not on every keystroke that leaves
+    // the result set untouched, since `rows()` only changes reference when it does.
+    effect(() => {
+      const currentRows = this.rows();
+      if (this.isLoading() || currentRows.length === 0) return;
+
+      const host = this.listHost?.nativeElement;
+      if (!host) return;
+
+      const items = Array.from(host.querySelectorAll<HTMLElement>('.wwell-ir__row'));
+      if (items.length) playIfMotionAllowed(buildListRowsRevealTimeline(items));
     });
   }
 

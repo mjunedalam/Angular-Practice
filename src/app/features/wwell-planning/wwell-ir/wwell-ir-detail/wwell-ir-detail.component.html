@@ -1,5 +1,5 @@
-<div class="ird">
-  <header class="ird__header">
+<div class="ird" [style.--ird-header-h.px]="headerHeight()">
+  <header class="ird__header" #headerEl>
     <div class="ird__heading">
       <p class="ird__eyebrow">{{ ir().code }}</p>
       <h2 class="ird__title">{{ ir().requestReference.wellName }}</h2>
@@ -60,19 +60,12 @@
       <section class="ird__card">
         <h3 class="ird__card-title"><mat-icon class="ird__card-icon">info</mat-icon>General Information</h3>
         <dl class="ird__kv-grid ird__kv-grid--wide">
-          <div class="ird__kv"><dt>ID#</dt><dd>{{ ir().code }}</dd></div>
-          <div class="ird__kv"><dt>Letter#</dt><dd>{{ ir().requestReference.linkedRequestId || '—' }}</dd></div>
-          <div class="ird__kv"><dt>Water Well Name</dt><dd>{{ ir().requestReference.wellName }}</dd></div>
-          <div class="ird__kv"><dt>Client</dt><dd>{{ ir().requestReference.client }}</dd></div>
-          <div class="ird__kv"><dt>Coordinates</dt><dd>{{ ir().requestReference.coordinates }}</dd></div>
-          <div class="ird__kv"><dt>Supporting Business</dt><dd>{{ ir().requestReference.supportingBusiness }}</dd></div>
-          <div class="ird__kv">
-            <dt>Surface Elevation</dt>
-            <dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd>
-          </div>
-          <div class="ird__kv"><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer }}</dd></div>
-          <div class="ird__kv"><dt>Target Depth</dt><dd>{{ ir().requestReference.targetDepthFt }} ft</dd></div>
-          <div class="ird__kv"><dt>Last Updated</dt><dd>{{ ir().updatedDate }}</dd></div>
+          @for (row of generalInfoRows(); track row.label) {
+            <div class="ird__kv">
+              <dt><mat-icon class="ird__kv-icon">{{ row.icon }}</mat-icon>{{ row.label }}</dt>
+              <dd>{{ row.value }}</dd>
+            </div>
+          }
         </dl>
       </section>
 
@@ -157,38 +150,24 @@
           <div class="ird__subsection">
             <h4 class="ird__subsection-title">Program Details</h4>
             <dl class="ird__kv-grid">
-              <div class="ird__kv"><dt>Completion</dt><dd>{{ ir().programDetails.completion }}</dd></div>
-              <div class="ird__kv"><dt>Logging</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
-              <div class="ird__kv"><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
-              <div class="ird__kv">
-                <dt>Mud Logging</dt>
-                <dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd>
-              </div>
-              <div class="ird__kv"><dt>Transmission</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
-              <div class="ird__kv"><dt>Sampling</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
-              <div class="ird__kv"><dt>Flow Test</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+              @for (row of programDetailsRows(); track row.label) {
+                <div class="ird__kv">
+                  <dt><mat-icon class="ird__kv-icon">{{ row.icon }}</mat-icon>{{ row.label }}</dt>
+                  <dd>{{ row.value }}</dd>
+                </div>
+              }
             </dl>
           </div>
 
           <div class="ird__subsection">
             <h4 class="ird__subsection-title">Estimated Hydrogeology</h4>
             <dl class="ird__kv-grid">
-              <div class="ird__kv"><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer }}</dd></div>
-              <div class="ird__kv">
-                <dt>Test Type</dt>
-                <dd>{{ ir().testProgram.testType === 'pump-test' ? 'Pump Test' : 'Flow Test' }}</dd>
-              </div>
-              <div class="ird__kv"><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
-              <div class="ird__kv"><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
-              <div class="ird__kv"><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
-              <div class="ird__kv">
-                <dt>Estimated Water Level</dt>
-                <dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd>
-              </div>
-              <div class="ird__kv">
-                <dt>Estimated Pump Depth</dt>
-                <dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd>
-              </div>
+              @for (row of hydrogeologyRows(); track row.label) {
+                <div class="ird__kv">
+                  <dt><mat-icon class="ird__kv-icon">{{ row.icon }}</mat-icon>{{ row.label }}</dt>
+                  <dd>{{ row.value }}</dd>
+                </div>
+              }
             </dl>
           </div>
         </section>
@@ -199,8 +178,12 @@
           <div class="ird__subsection">
             <h4 class="ird__subsection-title">Geologist Contact</h4>
             <dl class="ird__kv-grid">
-              <div class="ird__kv"><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary }}</dd></div>
-              <div class="ird__kv"><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
+              @for (row of geologistContactRows(); track row.label) {
+                <div class="ird__kv">
+                  <dt><mat-icon class="ird__kv-icon">{{ row.icon }}</mat-icon>{{ row.label }}</dt>
+                  <dd>{{ row.value }}</dd>
+                </div>
+              }
             </dl>
           </div>
 
@@ -224,52 +207,26 @@
 
       <section class="ird__card">
         <h3 class="ird__card-title"><mat-icon class="ird__card-icon">share_location</mat-icon>Offset Water Wells</h3>
-        <div class="ird__table-wrap">
-          <table class="ird__table ird__table--wide">
-            <thead>
-              <tr>
-                <th>Well</th>
-                <th>Dist (km)</th>
-                <th>Location</th>
-                <th>Aquifer</th>
-                <th>TD (ft)</th>
-                <th>Dur (min)</th>
-                <th>Rate (GPM)</th>
-                <th>RPM</th>
-                <th>SWL (ft)</th>
-                <th>PWL (ft)</th>
-                <th>DD (ft)</th>
-                <th>Spec Cap</th>
-                <th>TDS (ppm)</th>
-                <th>H2S (ppm)</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (well of ir().offsetWells; track well.wellName) {
-                <tr>
-                  <td>{{ well.wellName }}</td>
-                  <td>{{ well.distanceKm ?? '—' }}</td>
-                  <td>{{ well.location || '—' }}</td>
-                  <td>{{ well.aquifer || '—' }}</td>
-                  <td>{{ well.totalDepthFt ?? '—' }}</td>
-                  <td>{{ well.testDurationMin ?? '—' }}</td>
-                  <td>{{ well.rateGpm ?? '—' }}</td>
-                  <td>{{ well.rpm ?? '—' }}</td>
-                  <td>{{ well.swlFt ?? '—' }}</td>
-                  <td>{{ well.pwlFt ?? '—' }}</td>
-                  <td>{{ well.drawdownFt ?? '—' }}</td>
-                  <td>{{ well.specificCapacity ?? '—' }}</td>
-                  <td>{{ well.tdsPpm ?? '—' }}</td>
-                  <td>{{ well.h2sPpm ?? '—' }}</td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="14" class="ird__table-empty">No offset wells recorded.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+
+        <div class="ird__offset-grid-wrap">
+          @if (!offsetWellsGridReady()) {
+            <div class="ird__grid-loading">
+              <mat-spinner diameter="26" />
+              <span>Loading offset wells&hellip;</span>
+            </div>
+          }
+          <ag-grid-angular
+            class="ird__offset-grid"
+            [class.ird__offset-grid--ready]="offsetWellsGridReady()"
+            style="width: 100%"
+            [theme]="offsetWellsGridTheme"
+            [rowData]="offsetWellsRows()"
+            [columnDefs]="offsetWellsColumnDefs"
+            [gridOptions]="offsetWellsGridOptions"
+            (gridReady)="onOffsetWellsGridReady()"
+          />
         </div>
+
         @if (ir().offsetWellsRemarks) {
           <p class="ird__remarks">{{ ir().offsetWellsRemarks }}</p>
         }

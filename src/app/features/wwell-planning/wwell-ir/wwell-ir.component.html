@@ -23,13 +23,24 @@
     </label>
 
     @if (isLoading()) {
-      <div class="wwell-ir__status">Loading&hellip;</div>
+      <ul class="wwell-ir__list wwell-ir__list--skeleton" aria-hidden="true">
+        @for (n of skeletonRows; track n) {
+          <li class="wwell-ir__row wwell-ir__skeleton-row">
+            <div class="wwell-ir__row-top">
+              <span class="wwell-ir__skeleton-bar wwell-ir__skeleton-bar--code"></span>
+              <span class="wwell-ir__skeleton-bar wwell-ir__skeleton-bar--badge"></span>
+            </div>
+            <span class="wwell-ir__skeleton-bar wwell-ir__skeleton-bar--name"></span>
+            <span class="wwell-ir__skeleton-bar wwell-ir__skeleton-bar--meta"></span>
+          </li>
+        }
+      </ul>
     } @else if (loadError()) {
       <div class="wwell-ir__status wwell-ir__status--error">{{ loadError() }}</div>
     } @else if (rows().length === 0) {
       <div class="wwell-ir__status">No integrated requirements found.</div>
     } @else {
-      <ul class="wwell-ir__list">
+      <ul class="wwell-ir__list" #listHost>
         @for (ir of rows(); track ir.id) {
           <li>
             <button
@@ -51,6 +62,7 @@
               </div>
               <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
               <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
+              <app-wwell-approval-mini-chain class="wwell-ir__row-chain" [steps]="ir.chain" size="compact" stretch />
             </button>
           </li>
         }

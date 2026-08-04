@@ -40,6 +40,7 @@
 .mini-chain__line {
   width: 14px;
   height: 2px;
+  border-radius: 999px;
   background: #e2e8f0;
   margin: 0 2px;
   transition: background 200ms ease;
@@ -58,5 +59,53 @@
   50% {
     opacity: 1;
     transform: scale(1.2);
+  }
+}
+
+/*
+ * `compact` is only ever used paired with `stretch` today (the wwell-ir list row) — sized as
+ * a full-width status bar, not a shrunk copy of the default dot-and-line indicator. Dots and
+ * connector both sized up a step further (13px / 4px) so the line reads as a clear connecting
+ * stroke across the row instead of a thin hairline between dots.
+ */
+:host(.mini-chain--compact) {
+  .mini-chain__dot {
+    width: 13px;
+    height: 13px;
+  }
+
+  .mini-chain__line {
+    width: 9px;
+    height: 4px;
+    margin: 0 2px;
+    background: #cbd5e1;
+  }
+}
+
+/* Connector lines grow to fill the host's full width instead of sizing to content —
+ * a full-length stepper rather than a compact content-sized indicator.
+ *
+ * `width: 100%` on `.mini-chain` alone isn't enough: flex items default to `flex: 0 1 auto`
+ * (shrink-to-fit), so the `<li>`s just packed together on the left and left the extra width
+ * as dead space after the last dot — `.mini-chain__line`'s own `flex: 1 1 auto` had nothing to
+ * grow into, since its parent `<li>` never claimed any of that leftover width to begin with.
+ * Growing every non-last `<li>` (the ones that own a connector) is what actually pushes the
+ * dots apart and gives the line real room to stretch between them.
+ */
+:host(.mini-chain--stretch) {
+  display: flex;
+  width: 100%;
+
+  .mini-chain {
+    width: 100%;
+  }
+
+  .mini-chain__item:not(:last-child) {
+    flex: 1 1 auto;
+  }
+
+  .mini-chain__line {
+    flex: 1 1 auto;
+    width: auto;
   }
 }
