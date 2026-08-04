@@ -102,44 +102,112 @@ export interface CreateLandAffairsApprovalPayload {
   readonly notes: string | null;
 }
 
-export type IntegratedRequirementStatus = 'in-progress' | 'submit-for-review' | 'in-review' | 'approved';
+export type IntegratedRequirementStatus = 'draft' | 'in-progress' | 'submit-for-review' | 'in-review' | 'approved';
+export type IntegratedRequirementTestType = 'flow-test' | 'pump-test';
 
-export interface IntegratedRequirementWellDesign {
-  readonly casingPoints: string;
-  readonly topPicked: string;
+export interface IntegratedRequirementRequestReference {
+  readonly linkedRequestId: string | null;
+  readonly client: string;
+  readonly supportingBusiness: string;
+  readonly wellName: string;
+  readonly targetAquifer: string;
+  readonly targetDepthFt: number;
+  readonly surfaceElevationFtAsl: number | null;
+  readonly coordinates: string;
+}
+
+export interface IntegratedRequirementFormationTop {
+  readonly name: string;
+  readonly depthFt: number;
+}
+
+export interface IntegratedRequirementCasingRow {
+  readonly type: string;
+  readonly sizeIn: string;
+  readonly depthFtBgl: number;
+  readonly remarks: string | null;
+}
+
+export interface IntegratedRequirementDevelopmentTesting {
+  readonly logging: string;
+  readonly mudLogging: string;
+  readonly sampling: string;
+  readonly flowTest: string;
+}
+
+export interface IntegratedRequirementProgramDetails {
   readonly completion: string;
+  readonly acidization: string;
+  readonly transmission: string;
+  readonly developmentTesting: IntegratedRequirementDevelopmentTesting;
 }
 
-export interface IntegratedRequirementDrillingProgram {
-  readonly method: string;
-  readonly bitSize: string;
-  readonly fluidType: string;
-  readonly stages: number;
-  readonly cementing: string;
+export interface IntegratedRequirementContacts {
+  readonly geologistPrimary: string;
+  readonly geologistSecondary: string | null;
 }
 
-export interface IntegratedRequirementWaterProduction {
-  readonly estYieldGpm: number;
-  readonly waterQualityTds: number;
+export interface IntegratedRequirementOffsetWell {
+  readonly wellName: string;
+  /** Everything below is historical test-result data — usually enriched after creation, not captured at intake. */
+  readonly distanceKm?: number | null;
+  readonly location?: string | null;
+  readonly aquifer?: string | null;
+  readonly totalDepthFt?: number | null;
+  readonly testDurationMin?: number | null;
+  readonly rateGpm?: number | null;
+  readonly rpm?: number | null;
+  readonly swlFt?: number | null;
+  readonly pwlFt?: number | null;
+  readonly drawdownFt?: number | null;
+  readonly specificCapacity?: number | null;
+  readonly tdsPpm?: number | null;
+  readonly h2sPpm?: number | null;
+}
+
+export interface IntegratedRequirementHydrogeology {
+  readonly aquifer: string;
+  readonly estimatedTdsPpm: number | null;
+  readonly h2sPpm: number | null;
+  readonly estimatedPumpDepthFt: number | null;
+}
+
+export interface IntegratedRequirementTestProgram {
+  readonly testType: IntegratedRequirementTestType;
+  readonly estimatedRateGpm: number | null;
+  readonly estimatedWaterLevelFt: number | null;
 }
 
 export interface IntegratedRequirement {
   readonly id: string;
   readonly code: string;
-  readonly wellName: string;
-  readonly requestId: string;
-  readonly client: string;
   readonly updatedDate: string;
   readonly status: IntegratedRequirementStatus;
-  readonly wellDesign: IntegratedRequirementWellDesign;
-  readonly drillingProgram: IntegratedRequirementDrillingProgram;
-  readonly waterProduction: IntegratedRequirementWaterProduction;
+  readonly requestReference: IntegratedRequirementRequestReference;
+  readonly formationTops: readonly IntegratedRequirementFormationTop[];
+  readonly casing: readonly IntegratedRequirementCasingRow[];
+  readonly programDetails: IntegratedRequirementProgramDetails;
+  readonly contacts: IntegratedRequirementContacts;
+  readonly offsetWells: readonly IntegratedRequirementOffsetWell[];
+  readonly offsetWellsRemarks: string | null;
+  readonly hydrogeology: IntegratedRequirementHydrogeology;
+  readonly testProgram: IntegratedRequirementTestProgram;
+  readonly attachmentNames: readonly string[];
+  readonly chain: readonly ApprovalChainStep[];
 }
 
 export interface CreateIntegratedRequirementPayload
   extends Pick<
     IntegratedRequirement,
-    'wellName' | 'requestId' | 'client' | 'wellDesign' | 'drillingProgram' | 'waterProduction'
+    | 'requestReference'
+    | 'formationTops'
+    | 'casing'
+    | 'programDetails'
+    | 'contacts'
+    | 'offsetWells'
+    | 'offsetWellsRemarks'
+    | 'hydrogeology'
+    | 'testProgram'
   > {
-  readonly status: Extract<IntegratedRequirementStatus, 'in-progress'>;
+  readonly status: Extract<IntegratedRequirementStatus, 'draft' | 'in-progress'>;
 }

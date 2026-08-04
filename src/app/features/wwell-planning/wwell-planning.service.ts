@@ -17,7 +17,11 @@ import { ExternalConfigService } from 'src/app/shared/services/external-config.s
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
 import { WWELL_LAND_AFFAIRS_APPROVALS_MOCK, WWELL_WLDA_APPROVALS_MOCK } from './shared/wwell-approvals/wwell-approvals.mock';
-import { WWELL_LAND_AFFAIRS_CHAIN_ROLES, WWELL_WLDA_CHAIN_ROLES } from './shared/wwell-approvals/wwell-approvals.config';
+import {
+  WWELL_IR_CHAIN_ROLES,
+  WWELL_LAND_AFFAIRS_CHAIN_ROLES,
+  WWELL_WLDA_CHAIN_ROLES,
+} from './shared/wwell-approvals/wwell-approvals.config';
 import { buildApprovalPdfBlob } from './shared/wwell-approvals/wwell-approval-pdf.util';
 import { buildInitialApprovalChain, generateApprovalReqNo, todayIsoDate } from './shared/wwell-approvals/wwell-approval-request.util';
 
@@ -109,7 +113,9 @@ export class WwellPlanningService {
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
-        formData.append(key, String(value));
+        // Nested objects/arrays (e.g. IR's requestReference/programDetails/casing[]) would
+        // otherwise serialize to the literal string "[object Object]" via String(value).
+        formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
       }
     });
     files.forEach(file => formData.append('attachments', file, file.name));
@@ -183,9 +189,48 @@ export class WwellPlanningService {
 
   createIntegratedRequirement(
     payload: CreateIntegratedRequirementPayload,
+    files: readonly File[] = [],
   ): Observable<IntegratedRequirement> {
     return this.http
-      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`, payload)
-      .pipe(map(res => res.data[0]));
+      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`, this.toFormData(payload, files))
+      .pipe(
+        map(res => res.data[0]),
+        // TODO: remove fallback once the integrated-requirements creation endpoint is live.
+        catchError(() => of(this.buildFallbackIntegratedRequirement(payload, files))),
+      );
+  }
+
+  submitIntegratedRequirementForReview(ir: IntegratedRequirement): Observable<IntegratedRequirement> {
+    return this.http
+      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements/${ir.id}/submit-for-review`, {})
+      .pipe(
+        map(res => res.data[0]),
+        // TODO: remove fallback once the submit-for-review endpoint is live.
+        catchError(() => of({ ...ir, status: 'submit-for-review' as const, updatedDate: todayIsoDate() })),
+      );
+  }
+
+  private buildFallbackIntegratedRequirement(
+    payload: CreateIntegratedRequirementPayload,
+    files: readonly File[],
+  ): IntegratedRequirement {
+    const code = `IR-${todayIsoDate().slice(2, 4)}-${Math.floor(Math.random() * 900 + 100)}`;
+    return {
+      id: code,
+      code,
+      updatedDate: todayIsoDate(),
+      status: payload.status,
+      requestReference: payload.requestReference,
+      formationTops: payload.formationTops,
+      casing: payload.casing,
+      programDetails: payload.programDetails,
+      contacts: payload.contacts,
+      offsetWells: payload.offsetWells,
+      offsetWellsRemarks: payload.offsetWellsRemarks,
+      hydrogeology: payload.hydrogeology,
+      testProgram: payload.testProgram,
+      attachmentNames: files.map(file => file.name),
+      chain: buildInitialApprovalChain(WWELL_IR_CHAIN_ROLES, 'You'),
+    };
   }
 }

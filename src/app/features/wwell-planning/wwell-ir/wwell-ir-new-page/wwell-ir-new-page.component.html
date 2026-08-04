@@ -1,0 +1,95 @@
+<div class="nip">
+  <header class="nip__header">
+    <div class="nip__heading">
+      <button type="button" mat-icon-button class="nip__back" (click)="cancel()" aria-label="Back to integrated requirements">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1 class="nip__title">New Integrated Requirement (IR)</h1>
+        <p class="nip__subtitle">3-step chain: Hydrogeologist → Lead Hydrogeologist → Manager</p>
+      </div>
+    </div>
+
+    <app-wwell-approval-mini-chain [steps]="chainPreview" />
+  </header>
+
+  <mat-stepper
+    class="nip__stepper"
+    [linear]="false"
+    labelPosition="bottom"
+    (selectionChange)="onStepSelectionChange($event.selectedIndex)"
+    #stepper
+  >
+    @for (step of schema; track step.key) {
+      <mat-step [stepControl]="stepGroup(step.key)" [label]="step.label">
+        <div class="nip__step-content" #stepContent>
+          @for (section of step.sections; track section.key) {
+            <app-dynamic-section
+              [section]="section"
+              [control]="sectionControl(step.key, section.key)"
+              mode="edit"
+              [selectPanelClass]="selectPanelClass"
+            />
+          }
+
+          @if (step.key === 'attachments') {
+            <div class="nip__review">
+              <h3 class="nip__review-title">Review before you submit</h3>
+              <p class="nip__review-subtitle">Check each section below — use Edit to jump back and fix anything.</p>
+
+              <mat-accordion class="nip__review-grid" multi>
+                @for (reviewStep of reviewSteps; track reviewStep.key; let i = $index) {
+                  <mat-expansion-panel class="nip__review-card" #reviewCard>
+                    <mat-expansion-panel-header class="nip__review-card-header">
+                      <mat-panel-title class="nip__review-card-title">
+                        <span
+                          class="nip__review-card-badge"
+                          [class.nip__review-card-badge--done]="isStepValid(reviewStep.key)"
+                        >
+                          <mat-icon>{{ isStepValid(reviewStep.key) ? 'check' : 'priority_high' }}</mat-icon>
+                        </span>
+                        {{ reviewStep.label }}
+                      </mat-panel-title>
+
+                      <button
+                        type="button"
+                        mat-button
+                        class="nip__review-card-edit"
+                        (click)="$event.stopPropagation(); stepper.selectedIndex = i"
+                      >
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                      </button>
+                    </mat-expansion-panel-header>
+
+                    <div class="nip__review-card-body">
+                      @for (section of reviewStep.sections; track section.key) {
+                        <app-dynamic-section
+                          [section]="section"
+                          [control]="sectionControl(reviewStep.key, section.key)"
+                          mode="review"
+                        />
+                      }
+                    </div>
+                  </mat-expansion-panel>
+                }
+              </mat-accordion>
+            </div>
+          }
+        </div>
+      </mat-step>
+    }
+  </mat-stepper>
+
+  <footer class="nip__footer">
+    <button type="button" mat-stroked-button (click)="cancel()">Cancel</button>
+    <button type="button" mat-stroked-button [disabled]="isSaving()" (click)="saveAsDraft()">
+      <mat-icon>save</mat-icon>
+      Save as Draft
+    </button>
+    <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="submit(stepper)">
+      <mat-icon>send</mat-icon>
+      Submit
+    </button>
+  </footer>
+</div>

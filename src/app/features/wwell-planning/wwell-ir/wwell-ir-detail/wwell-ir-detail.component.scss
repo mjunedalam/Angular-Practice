@@ -1,0 +1,440 @@
+$navy: #1e293b;
+$muted: #64748b;
+$border: #e2e8f0;
+$accent: #3b82f6;
+
+$stat-depth: #3b82f6;
+$stat-rate: #0891b2;
+$stat-tds: #d97706;
+$stat-h2s: #dc2626;
+$stat-offset: #7c3aed;
+
+:host {
+  display: block;
+}
+
+.ird {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.ird__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $border;
+}
+
+.ird__eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: $accent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ird__title {
+  margin: 0.15rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.ird__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: $muted;
+}
+
+.ird__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ird__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Body: card column + sticky approval sidebar ─────────────────
+ * The sidebar sticks to the top of whatever ancestor actually scrolls
+ * (`.wwell-ir__detail` in the host page) so the approval status is visible
+ * without scrolling through every card first.
+ */
+.ird__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: 1.75rem;
+}
+
+.ird__sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ird__submit-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+/*
+ * ── Card column ──────────────────────────────────────────────────
+ * Deliberately a vertical stack, not an auto-fit grid. Auto-fit packed
+ * cards into whatever column count the viewport happened to produce,
+ * which paired unrelated cards by coincidence and left ragged empty
+ * space next to short ones (grid has no masonry). Related content is
+ * now merged into single cards (Wellbore Design; the Program/Contacts
+ * pair below) so every section gets the width it actually needs.
+ */
+.ird__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.ird__pair {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: start;
+  gap: 1.1rem;
+}
+
+.ird__card {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.ird__card-title {
+  margin: 0 0 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: $navy;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ird__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: rgba($accent, 0.1);
+  color: $accent;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 15px;
+  }
+}
+
+/* ── Subsections within a merged card ─────────────────────────── */
+.ird__subsection + .ird__subsection {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed $border;
+}
+
+.ird__subsection-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Wellbore Design: schematic beside its data tables ───────────── */
+.ird__wellbore {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.ird__wellbore-tables {
+  min-width: 0;
+}
+
+/* ── KPI stat strip ───────────────────────────────────────────────
+ * Flexbox, not grid: items wrap and the trailing one grows to fill
+ * its row instead of leaving an empty grid track behind it.
+ */
+.ird__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  overflow: hidden;
+  background: $border;
+  border: 1px solid $border;
+  border-radius: 14px;
+}
+
+.ird__stat {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex: 1 1 190px;
+  padding: 0.9rem 1.15rem;
+  background: #ffffff;
+}
+
+.ird__stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+}
+
+.ird__stat--depth .ird__stat-icon {
+  background: rgba($stat-depth, 0.12);
+  color: $stat-depth;
+}
+
+.ird__stat--rate .ird__stat-icon {
+  background: rgba($stat-rate, 0.12);
+  color: $stat-rate;
+}
+
+.ird__stat--tds .ird__stat-icon {
+  background: rgba($stat-tds, 0.12);
+  color: $stat-tds;
+}
+
+.ird__stat--h2s .ird__stat-icon {
+  background: rgba($stat-h2s, 0.12);
+  color: $stat-h2s;
+}
+
+.ird__stat--offset .ird__stat-icon {
+  background: rgba($stat-offset, 0.12);
+  color: $stat-offset;
+}
+
+.ird__stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.ird__stat-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ird__stat-value {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.02em;
+
+  small {
+    margin-left: 3px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: $muted;
+  }
+}
+
+/* ── Key/value grid ───────────────────────────────────────────── */
+.ird__kv-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.ird__kv-grid--wide {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem 2rem;
+}
+
+.ird__kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed $border;
+
+  dt {
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $navy;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+/* ── Tables ───────────────────────────────────────────────────── */
+.ird__table-wrap {
+  overflow-x: auto;
+  border: 1px solid $border;
+  border-radius: 10px;
+}
+
+.ird__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  white-space: nowrap;
+
+  th {
+    background: #f8fafc;
+    color: $muted;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    padding: 0.55rem 0.85rem;
+    color: $navy;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.ird__table--wide th,
+.ird__table--wide td {
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.ird__table-empty {
+  text-align: center;
+  color: $muted;
+  font-style: italic;
+}
+
+.ird__remarks {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: $muted;
+  font-style: italic;
+}
+
+/* ── Attachments ──────────────────────────────────────────────── */
+.ird__attachments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ird__attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: $accent;
+  font-weight: 600;
+  width: fit-content;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: $muted;
+  }
+}
+
+.ird__empty-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: $muted;
+  font-style: italic;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ird__body {
+    grid-template-columns: 1fr;
+  }
+
+  .ird__sidebar {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .ird__wellbore {
+    grid-template-columns: 1fr;
+  }
+
+  .ird__pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ird__kv-grid--wide {
+    grid-template-columns: 1fr;
+  }
+}

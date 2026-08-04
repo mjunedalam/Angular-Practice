@@ -1,0 +1,47 @@
+.dyf__field {
+  width: 100%;
+}
+
+.dyf--span-2 {
+  grid-column: span 2;
+}
+
+.dyf__toggle,
+.dyf__file {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.dyf__toggle-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.dyf__toggle-error {
+  font-size: 0.72rem;
+  color: #dc2626;
+}
+
+.dyf--review {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dyf__label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.dyf__value {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #1e293b;
+}

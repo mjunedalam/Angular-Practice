@@ -1,0 +1,29 @@
+<div class="rpg">
+  @for (row of rows(); track row; let i = $index) {
+    <div class="rpg__row" #rowHost>
+      <span class="rpg__row-index">#{{ i + 1 }}</span>
+      <div class="rpg__row-fields">
+        @for (field of config().rowFields; track field.key) {
+          <app-dynamic-field
+            [config]="field"
+            [control]="fieldControl(row, field.key)"
+            [mode]="mode()"
+            [selectPanelClass]="selectPanelClass()"
+          />
+        }
+      </div>
+      @if (mode() === 'edit') {
+        <button type="button" mat-icon-button [attr.aria-label]="'Remove row ' + (i + 1)" (click)="removeRow(i)">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  }
+
+  @if (mode() === 'edit') {
+    <button type="button" mat-stroked-button class="rpg__add" (click)="addRow()">
+      <mat-icon>add</mat-icon>
+      {{ config().addLabel }}
+    </button>
+  }
+</div>

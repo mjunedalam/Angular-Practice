@@ -69,11 +69,25 @@ export const routes: Routes = [
       },
       {
         path: 'integrated-requirements',
-        loadComponent: () =>
-          import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
-            (m) => m.WwellIrComponent,
-          ),
+        // Store hoisted to this parent (not per-child) so 'new' shares one live store instance
+        // with the list route — otherwise a freshly created IR would vanish on navigate-back.
         providers: [WwellPlanningStore],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
+                (m) => m.WwellIrComponent,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./features/wwell-planning/wwell-ir/wwell-ir-new-page/wwell-ir-new-page.component').then(
+                (m) => m.WwellIrNewPageComponent,
+              ),
+          },
+        ],
       },
       {
         path: 'presentations',

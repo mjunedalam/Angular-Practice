@@ -169,6 +169,11 @@
   color: #94a3b8;
 }
 
+/*
+ * Stacked layout — shared by the explicit `orientation="vertical"` mode (e.g. the IR detail
+ * sidebar) and the automatic narrow-viewport fallback for the default horizontal mode
+ * (WLDA / Land-Affairs approval-table rows).
+ */
 @media (max-width: 720px) {
   .approval-timeline__rail {
     flex-direction: column;
@@ -180,6 +185,43 @@
     align-items: stretch;
     gap: 0.85rem;
     padding-bottom: 1.25rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  .approval-timeline__track {
+    width: auto;
+
+    &::after {
+      top: 28px;
+      left: 13px;
+      width: 2px;
+      height: calc(100% - 14px);
+    }
+  }
+
+  .approval-timeline__card {
+    margin-top: 0;
+    align-items: flex-start;
+    text-align: left;
+    max-width: none;
+    padding: 2px 0 0;
+  }
+}
+
+:host(.approval-timeline--vertical) {
+  .approval-timeline__rail {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .approval-timeline__item {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding-bottom: 1.5rem;
 
     &:last-child {
       padding-bottom: 0;

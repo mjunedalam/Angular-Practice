@@ -52,3 +52,49 @@ export const WWELL_CEMENTING_OPTIONS: readonly string[] = [
   'Class G + Silica Flour',
   'Class A',
 ];
+
+export const WWELL_SUPPORTING_BUSINESS_OPTIONS: readonly string[] = [
+  'Agriculture',
+  'Municipal',
+  'Industrial',
+  'Environmental',
+  'Research',
+];
+
+export const WWELL_CASING_TYPE_OPTIONS: readonly string[] = [
+  'Conductor',
+  'Surface',
+  'Intermediate',
+  'Production',
+  'Liner',
+];
+
+export const WWELL_ACIDIZATION_OPTIONS: readonly string[] = ['HCl Acid Wash', 'Mud Acid', 'None'];
+
+export const WWELL_TRANSMISSION_OPTIONS: readonly string[] = [
+  'Gravity Flow',
+  'Pumped Transmission',
+  'Pipeline',
+  'Tanker',
+];
+
+export const WWELL_LOGGING_OPTIONS: readonly string[] = ['Caliper', 'Gamma Ray', 'Resistivity', 'SP'];
+
+export const WWELL_MUD_LOGGING_OPTIONS: readonly string[] = ['Full Mud Logging', 'Cuttings Sample Only', 'None'];
+
+export const WWELL_SAMPLING_OPTIONS: readonly string[] = ['Bailer Sample', 'Pump Sample', 'Composite Sample'];
+
+export const WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS: readonly string[] = [
+  'Step-Rate Test',
+  'Constant-Rate Test',
+  'Recovery Test',
+];
+
+export const WWELL_GEOLOGIST_OPTIONS: readonly string[] = WWELL_ASSIGNEE_OPTIONS;
+
+export const WWELL_OFFSET_WELL_OPTIONS: readonly string[] = ['HAIL-100', 'HAIL-200', 'HAIL-300', 'HAIL-400'];
+
+export const WWELL_TEST_TYPE_OPTIONS: readonly { value: 'flow-test' | 'pump-test'; label: string }[] = [
+  { value: 'flow-test', label: 'Flow Test' },
+  { value: 'pump-test', label: 'Pump Test' },
+];

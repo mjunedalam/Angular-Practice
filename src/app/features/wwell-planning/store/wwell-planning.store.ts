@@ -8,6 +8,7 @@ import {
   CreateLandAffairsApprovalPayload,
   CreateWldaApprovalPayload,
   CreateWwellPlanningRequestPayload,
+  IntegratedRequirement,
 } from '@models/wwell-planning/wwell-planning.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStoreState, initialWwellPlanningState } from './wwell-planning.state';
@@ -30,6 +31,7 @@ export const WwellPlanningStore = signalStore(
       createRequestError,
       createIntegratedRequirementError,
       createApprovalError,
+      updateIntegratedRequirementStatusError,
     }) => ({
       isLoading: computed(() => requestsLoading() || approvalsLoading() || integratedRequirementsLoading()),
       activeErrors: computed(() =>
@@ -40,6 +42,7 @@ export const WwellPlanningStore = signalStore(
           createRequestError(),
           createIntegratedRequirementError(),
           createApprovalError(),
+          updateIntegratedRequirementStatusError(),
         ].filter((message): message is string => message !== null),
       ),
       hasError: computed(
@@ -49,7 +52,8 @@ export const WwellPlanningStore = signalStore(
           integratedRequirementsError() !== null ||
           createRequestError() !== null ||
           createIntegratedRequirementError() !== null ||
-          createApprovalError() !== null,
+          createApprovalError() !== null ||
+          updateIntegratedRequirementStatusError() !== null,
       ),
     }),
   ),
@@ -154,9 +158,9 @@ export const WwellPlanningStore = signalStore(
         });
       },
 
-      createIntegratedRequirement(payload: CreateIntegratedRequirementPayload): void {
+      createIntegratedRequirement(payload: CreateIntegratedRequirementPayload, files: readonly File[] = []): void {
         patchState(store, { creatingIntegratedRequirement: true, createIntegratedRequirementError: null });
-        svc.createIntegratedRequirement(payload).subscribe({
+        svc.createIntegratedRequirement(payload, files).subscribe({
           next: created =>
             patchState(store, {
               integratedRequirements: [created, ...store.integratedRequirements()],
@@ -182,6 +186,22 @@ export const WwellPlanningStore = signalStore(
             patchState(store, {
               creatingApproval: false,
               createApprovalError: errorMessage(err, 'Failed to submit WLDA approval request'),
+            }),
+        });
+      },
+
+      submitIntegratedRequirementForReview(ir: IntegratedRequirement): void {
+        patchState(store, { updatingIntegratedRequirementStatus: true, updateIntegratedRequirementStatusError: null });
+        svc.submitIntegratedRequirementForReview(ir).subscribe({
+          next: updated =>
+            patchState(store, {
+              integratedRequirements: store.integratedRequirements().map(item => (item.id === updated.id ? updated : item)),
+              updatingIntegratedRequirementStatus: false,
+            }),
+          error: (err: unknown) =>
+            patchState(store, {
+              updatingIntegratedRequirementStatus: false,
+              updateIntegratedRequirementStatusError: errorMessage(err, 'Failed to submit integrated requirement for review'),
             }),
         });
       },

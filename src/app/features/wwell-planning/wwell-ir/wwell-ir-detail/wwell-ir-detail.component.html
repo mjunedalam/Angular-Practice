@@ -1,0 +1,299 @@
+<div class="ird">
+  <header class="ird__header">
+    <div class="ird__heading">
+      <p class="ird__eyebrow">{{ ir().code }}</p>
+      <h2 class="ird__title">{{ ir().requestReference.wellName }}</h2>
+      <p class="ird__subtitle">
+        ID# {{ ir().code }}
+        @if (ir().requestReference.linkedRequestId) {
+          &middot; Request# {{ ir().requestReference.linkedRequestId }}
+        }
+      </p>
+    </div>
+
+    <span class="ird__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
+      <span class="ird__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
+      {{ statusMeta[ir().status].label }}
+    </span>
+  </header>
+
+  <div class="ird__body">
+    <div class="ird__main">
+      <div class="ird__stats">
+        <div class="ird__stat ird__stat--depth">
+          <mat-icon class="ird__stat-icon">straighten</mat-icon>
+          <div class="ird__stat-text">
+            <span class="ird__stat-label">Target Depth</span>
+            <span class="ird__stat-value">{{ ir().requestReference.targetDepthFt }}<small>ft</small></span>
+          </div>
+        </div>
+        <div class="ird__stat ird__stat--rate">
+          <mat-icon class="ird__stat-icon">speed</mat-icon>
+          <div class="ird__stat-text">
+            <span class="ird__stat-label">Estimated Rate</span>
+            <span class="ird__stat-value">{{ ir().testProgram.estimatedRateGpm ?? '—' }}<small>GPM</small></span>
+          </div>
+        </div>
+        <div class="ird__stat ird__stat--tds">
+          <mat-icon class="ird__stat-icon">opacity</mat-icon>
+          <div class="ird__stat-text">
+            <span class="ird__stat-label">Estimated TDS</span>
+            <span class="ird__stat-value">{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }}<small>ppm</small></span>
+          </div>
+        </div>
+        <div class="ird__stat ird__stat--h2s">
+          <mat-icon class="ird__stat-icon">warning</mat-icon>
+          <div class="ird__stat-text">
+            <span class="ird__stat-label">H2S</span>
+            <span class="ird__stat-value">{{ ir().hydrogeology.h2sPpm ?? '—' }}<small>ppm</small></span>
+          </div>
+        </div>
+        <div class="ird__stat ird__stat--offset">
+          <mat-icon class="ird__stat-icon">radar</mat-icon>
+          <div class="ird__stat-text">
+            <span class="ird__stat-label">Offset Wells</span>
+            <span class="ird__stat-value">{{ ir().offsetWells.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="ird__card">
+        <h3 class="ird__card-title"><mat-icon class="ird__card-icon">info</mat-icon>General Information</h3>
+        <dl class="ird__kv-grid ird__kv-grid--wide">
+          <div class="ird__kv"><dt>ID#</dt><dd>{{ ir().code }}</dd></div>
+          <div class="ird__kv"><dt>Letter#</dt><dd>{{ ir().requestReference.linkedRequestId || '—' }}</dd></div>
+          <div class="ird__kv"><dt>Water Well Name</dt><dd>{{ ir().requestReference.wellName }}</dd></div>
+          <div class="ird__kv"><dt>Client</dt><dd>{{ ir().requestReference.client }}</dd></div>
+          <div class="ird__kv"><dt>Coordinates</dt><dd>{{ ir().requestReference.coordinates }}</dd></div>
+          <div class="ird__kv"><dt>Supporting Business</dt><dd>{{ ir().requestReference.supportingBusiness }}</dd></div>
+          <div class="ird__kv">
+            <dt>Surface Elevation</dt>
+            <dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd>
+          </div>
+          <div class="ird__kv"><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer }}</dd></div>
+          <div class="ird__kv"><dt>Target Depth</dt><dd>{{ ir().requestReference.targetDepthFt }} ft</dd></div>
+          <div class="ird__kv"><dt>Last Updated</dt><dd>{{ ir().updatedDate }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="ird__card">
+        <h3 class="ird__card-title"><mat-icon class="ird__card-icon">architecture</mat-icon>Wellbore Design</h3>
+        <div class="ird__wellbore">
+          <div class="ird__wellbore-preview">
+            <app-wwell-ir-design-preview
+              [formationTops]="ir().formationTops"
+              [casing]="ir().casing"
+              [surfaceElevationFtAsl]="ir().requestReference.surfaceElevationFtAsl"
+              [targetDepthFt]="ir().requestReference.targetDepthFt"
+            />
+          </div>
+
+          <div class="ird__wellbore-tables">
+            <div class="ird__subsection">
+              <h4 class="ird__subsection-title">Formation Tops</h4>
+              <div class="ird__table-wrap">
+                <table class="ird__table">
+                  <thead>
+                    <tr>
+                      <th>Formation</th>
+                      <th>Depth (ft bgl)</th>
+                      <th>Sub-sea (ft asl)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (top of ir().formationTops; track top.name) {
+                      <tr>
+                        <td>{{ top.name }}</td>
+                        <td>{{ top.depthFt }}</td>
+                        <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="3" class="ird__table-empty">No formation tops recorded.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="ird__subsection">
+              <h4 class="ird__subsection-title">Casing</h4>
+              <div class="ird__table-wrap">
+                <table class="ird__table">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Size</th>
+                      <th>Depth (ft bgl)</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of ir().casing; track row.type + row.depthFtBgl) {
+                      <tr>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.sizeIn }}</td>
+                        <td>{{ row.depthFtBgl }}</td>
+                        <td>{{ row.remarks || '—' }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="ird__table-empty">No casing recorded.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="ird__pair">
+        <section class="ird__card">
+          <h3 class="ird__card-title"><mat-icon class="ird__card-icon">science</mat-icon>Program &amp; Hydrogeology</h3>
+
+          <div class="ird__subsection">
+            <h4 class="ird__subsection-title">Program Details</h4>
+            <dl class="ird__kv-grid">
+              <div class="ird__kv"><dt>Completion</dt><dd>{{ ir().programDetails.completion }}</dd></div>
+              <div class="ird__kv"><dt>Logging</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
+              <div class="ird__kv"><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
+              <div class="ird__kv">
+                <dt>Mud Logging</dt>
+                <dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd>
+              </div>
+              <div class="ird__kv"><dt>Transmission</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
+              <div class="ird__kv"><dt>Sampling</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
+              <div class="ird__kv"><dt>Flow Test</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="ird__subsection">
+            <h4 class="ird__subsection-title">Estimated Hydrogeology</h4>
+            <dl class="ird__kv-grid">
+              <div class="ird__kv"><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer }}</dd></div>
+              <div class="ird__kv">
+                <dt>Test Type</dt>
+                <dd>{{ ir().testProgram.testType === 'pump-test' ? 'Pump Test' : 'Flow Test' }}</dd>
+              </div>
+              <div class="ird__kv"><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
+              <div class="ird__kv"><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
+              <div class="ird__kv"><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
+              <div class="ird__kv">
+                <dt>Estimated Water Level</dt>
+                <dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd>
+              </div>
+              <div class="ird__kv">
+                <dt>Estimated Pump Depth</dt>
+                <dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="ird__card">
+          <h3 class="ird__card-title"><mat-icon class="ird__card-icon">badge</mat-icon>Contacts &amp; Attachments</h3>
+
+          <div class="ird__subsection">
+            <h4 class="ird__subsection-title">Geologist Contact</h4>
+            <dl class="ird__kv-grid">
+              <div class="ird__kv"><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary }}</dd></div>
+              <div class="ird__kv"><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="ird__subsection">
+            <h4 class="ird__subsection-title">Attachments</h4>
+            @if (ir().attachmentNames.length) {
+              <ul class="ird__attachments">
+                @for (name of ir().attachmentNames; track name) {
+                  <li class="ird__attachment">
+                    <mat-icon>attach_file</mat-icon>
+                    {{ name }}
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="ird__empty-text">No attachments uploaded.</p>
+            }
+          </div>
+        </section>
+      </div>
+
+      <section class="ird__card">
+        <h3 class="ird__card-title"><mat-icon class="ird__card-icon">share_location</mat-icon>Offset Water Wells</h3>
+        <div class="ird__table-wrap">
+          <table class="ird__table ird__table--wide">
+            <thead>
+              <tr>
+                <th>Well</th>
+                <th>Dist (km)</th>
+                <th>Location</th>
+                <th>Aquifer</th>
+                <th>TD (ft)</th>
+                <th>Dur (min)</th>
+                <th>Rate (GPM)</th>
+                <th>RPM</th>
+                <th>SWL (ft)</th>
+                <th>PWL (ft)</th>
+                <th>DD (ft)</th>
+                <th>Spec Cap</th>
+                <th>TDS (ppm)</th>
+                <th>H2S (ppm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (well of ir().offsetWells; track well.wellName) {
+                <tr>
+                  <td>{{ well.wellName }}</td>
+                  <td>{{ well.distanceKm ?? '—' }}</td>
+                  <td>{{ well.location || '—' }}</td>
+                  <td>{{ well.aquifer || '—' }}</td>
+                  <td>{{ well.totalDepthFt ?? '—' }}</td>
+                  <td>{{ well.testDurationMin ?? '—' }}</td>
+                  <td>{{ well.rateGpm ?? '—' }}</td>
+                  <td>{{ well.rpm ?? '—' }}</td>
+                  <td>{{ well.swlFt ?? '—' }}</td>
+                  <td>{{ well.pwlFt ?? '—' }}</td>
+                  <td>{{ well.drawdownFt ?? '—' }}</td>
+                  <td>{{ well.specificCapacity ?? '—' }}</td>
+                  <td>{{ well.tdsPpm ?? '—' }}</td>
+                  <td>{{ well.h2sPpm ?? '—' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="14" class="ird__table-empty">No offset wells recorded.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (ir().offsetWellsRemarks) {
+          <p class="ird__remarks">{{ ir().offsetWellsRemarks }}</p>
+        }
+      </section>
+    </div>
+
+    <aside class="ird__sidebar">
+      <section class="ird__card">
+        <app-wwell-approval-timeline [reqNo]="ir().code" [steps]="ir().chain" orientation="vertical" />
+      </section>
+
+      @if (canSubmitForReview()) {
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          class="ird__submit-btn"
+          [disabled]="submitting()"
+          (click)="submitForReview.emit(ir())"
+        >
+          <mat-icon>send</mat-icon>
+          {{ submitting() ? 'Submitting…' : 'Submit for Review' }}
+        </button>
+      }
+    </aside>
+  </div>
+</div>

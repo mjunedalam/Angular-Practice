@@ -1,0 +1,332 @@
+@use '@angular/material' as mat;
+@use '../../shared/wwell-select-panel-mixin' as wsel;
+
+/* ── wwell-ir-new-page tokens ─────────────────────────────────── */
+$navy:   #1e293b;
+$muted:  #64748b;
+$border: #e2e8f0;
+$accent: #3b82f6;
+$danger: #dc2626;
+
+/*
+ * Same rationale as wwell-ir-form.component.scss: the app only calls mat.core()
+ * globally with no real M3 theme, so every Material control here (form fields,
+ * selects, stepper, expansion panels, button toggles) would resolve unset
+ * --mat-sys-* tokens without its own scoped theme.
+ */
+.nip,
+.nip-select-panel {
+  color-scheme: light;
+
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$blue-palette,
+      tertiary: mat.$azure-palette,
+    ),
+    typography: (
+      plain-family: (Roboto, 'Helvetica Neue', sans-serif),
+      brand-family: (Roboto, 'Helvetica Neue', sans-serif),
+    ),
+    density: -1,
+  ));
+}
+
+.nip {
+  @include mat.form-field-overrides((
+    outlined-container-shape: 10px,
+  ));
+}
+
+.nip-select-panel {
+  border-radius: 10px !important;
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.12),
+    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+  @include wsel.panel($accent, $navy);
+}
+
+:host {
+  display: block;
+  height: 100%;
+  overflow: auto;
+  background: #f0f4f8;
+}
+
+.nip {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  min-height: 100%;
+  @include wsel.trigger($accent);
+}
+
+/* ── Header ───────────────────────────────────────────────────────
+ * Explicit opaque background — this was the one element on the page relying
+ * on bleed-through from the page host's light background instead of owning
+ * its own surface like `.nip__stepper` / `.nip__footer` do. That bleed-through
+ * isn't reliable (the app shell's content area sits on a dark navy backdrop,
+ * `--bg-content` in styles.scss), so the navy title text lost contrast.
+ */
+.nip__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.nip__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.nip__back {
+  margin-top: -2px;
+}
+
+.nip__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.nip__subtitle {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: $muted;
+}
+
+/* ── Stepper card ─────────────────────────────────────────────── */
+.nip__stepper {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  padding: 0.5rem 1rem 1.25rem;
+}
+
+.nip__step-content {
+  padding: 1rem 0.25rem 0;
+}
+
+/* ── Stepper header ───────────────────────────────────────────────────────
+ * Icon-above-label layout via Material's own `labelPosition="bottom"` mode.
+ * Material centers the connector line using a hardcoded assumption of a 24px
+ * icon: `top: (header-height - 24) / 2 + 12`. Our icon is deliberately bigger
+ * (40px) for a more prominent, modern look, so that formula would leave the
+ * line ~8px too high. $header-height / $icon-size below feed the same
+ * variable Material reads, and the hand-computed $line-top corrects for the
+ * bigger icon: padding-top ((header-height - 24) / 2, Material's own formula)
+ * plus half our real icon size.
+ */
+$header-height: 88px;
+$icon-size: 40px;
+$line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
+
+.nip .mat-stepper-horizontal {
+  --mat-stepper-header-height: #{$header-height};
+}
+
+.nip .mat-horizontal-stepper-header-container {
+  padding: 0.5rem 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid $border;
+}
+
+.nip .mat-step-header {
+  border-radius: 12px;
+  background-color: transparent !important;
+}
+
+.nip .mat-step-icon {
+  width: $icon-size;
+  height: $icon-size;
+  background: #e5e7eb;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 1rem;
+  transition:
+    background 200ms ease,
+    color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.nip .mat-step-icon-selected {
+  background: linear-gradient(135deg, $accent, #60a5fa);
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba($accent, 0.38);
+}
+
+.nip .mat-step-icon-state-done {
+  background: #10b981;
+  color: #fff;
+}
+
+.nip .mat-step-icon-state-error {
+  background: $danger;
+  color: #fff;
+}
+
+.nip .mat-step-label {
+  max-width: 132px;
+  white-space: normal;
+  line-height: 1.25;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $muted;
+  transition: color 150ms ease;
+}
+
+.nip .mat-step-label-selected,
+.nip .mat-step-label-active {
+  color: $navy;
+  font-weight: 800;
+}
+
+.nip .mat-stepper-horizontal-line {
+  border-top-width: 2px;
+  border-top-color: #e5e7eb;
+  top: #{$line-top} !important;
+}
+
+/* ── Review section ───────────────────────────────────────────── */
+.nip__review {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid $border;
+}
+
+.nip__review-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: $navy;
+}
+
+.nip__review-subtitle {
+  margin: 0.2rem 0 1rem;
+  font-size: 0.82rem;
+  color: $muted;
+}
+
+.nip__review-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nip .nip__review-card {
+  border: 1px solid $border !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  overflow: hidden;
+
+  &::before {
+    display: none;
+  }
+
+  &:not(.mat-expanded) .nip__review-card-header:hover {
+    background: rgba($accent, 0.04);
+  }
+}
+
+.nip__review-card-header {
+  transition: background-color 150ms ease;
+}
+
+.nip__review-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.nip__review-card-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #b45309;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+
+  &--done {
+    background: #d1fae5;
+    color: #047857;
+  }
+}
+
+.nip__review-card-edit {
+  margin-left: auto;
+  color: $accent;
+  font-weight: 700;
+  font-size: 0.78rem;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    margin-right: 2px;
+  }
+}
+
+.nip__review-card-body {
+  padding-top: 0.5rem;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.nip__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.nip .mat-mdc-form-field-required-marker {
+  color: $danger;
+}
+
+@media (max-width: 640px) {
+  .nip {
+    padding: 1rem;
+  }
+
+  .nip__footer {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1;
+    }
+  }
+}

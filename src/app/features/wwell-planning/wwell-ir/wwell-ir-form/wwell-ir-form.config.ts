@@ -1,8 +1,10 @@
-export { WWELL_CLIENT_OPTIONS as WWELL_IR_CLIENT_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_COMPLETION_OPTIONS as WWELL_IR_COMPLETION_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_DRILLING_METHOD_OPTIONS as WWELL_IR_METHOD_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_FLUID_TYPE_OPTIONS as WWELL_IR_FLUID_TYPE_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_CEMENTING_OPTIONS as WWELL_IR_CEMENTING_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
+import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
+import { WWELL_IR_CHAIN_ROLES } from '../../shared/wwell-approvals/wwell-approvals.config';
 
-/** Matches a numeric bit size with an optional inch mark, e.g. "12.25" or 12.25"". */
-export const WWELL_IR_BIT_SIZE_PATTERN = /^\d+(\.\d+)?"?$/;
+/** Pending-state chain preview shown in the IR page header before the form is submitted. */
+export const WWELL_IR_CHAIN_PREVIEW: readonly ApprovalChainStep[] = WWELL_IR_CHAIN_ROLES.map(role => ({
+  role,
+  name: 'Pending Assignment',
+  status: 'pending',
+  date: null,
+}));
