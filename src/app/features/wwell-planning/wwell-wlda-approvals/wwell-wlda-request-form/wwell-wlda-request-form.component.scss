@@ -100,24 +100,14 @@ $bg-subtle: #f8fafc;
   }
 }
 
-.wldaf__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1.25rem;
-  align-items: start;
-}
-
-.wldaf__field {
-  width: 100%;
-  border-radius: 10px;
+/* Field grid/box styling now lives in the shared dynamic-section/dynamic-field components
+   (.dys__grid / .dyf) — this dialog only themes the M3 tokens they resolve against. */
+.wldaf .dyf__field {
   transition: box-shadow 150ms ease;
+  border-radius: 10px;
 
   &:focus-within {
     box-shadow: 0 0 0 4px rgba($accent, 0.15);
-  }
-
-  &--full {
-    grid-column: 1 / -1;
   }
 }
 
@@ -136,12 +126,6 @@ $bg-subtle: #f8fafc;
   font-size: 0.8rem;
   font-weight: 700;
   color: $navy;
-}
-
-@media (max-width: 720px) {
-  .wldaf__grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {

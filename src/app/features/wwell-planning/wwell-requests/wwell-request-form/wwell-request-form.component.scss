@@ -105,52 +105,19 @@ $bg-subtle: #f8fafc;
   }
 }
 
-.wrf__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1.25rem;
-  /* Fields without a hint would otherwise be stretched (grid's default
-     align-items: stretch) to match a sibling that has one, making the two
-     side-by-side boxes in a row render at visibly different heights. */
-  align-items: start;
-}
-
-.wrf__field {
-  width: 100%;
-  border-radius: 10px;
+/* Field grid/box styling now lives in the shared dynamic-section/dynamic-field components
+   (.dys__grid / .dyf) — this dialog only themes the M3 tokens they resolve against. */
+.wrf .dyf__field {
   transition: box-shadow 150ms ease;
+  border-radius: 10px;
 
   &:focus-within {
     box-shadow: 0 0 0 4px rgba($accent, 0.15);
   }
-
-  &--full {
-    grid-column: 1 / -1;
-  }
-}
-
-.wrf__coord-group {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-}
-
-.wrf__coord-value {
-  flex: 1;
-  min-width: 0;
-}
-
-.wrf__coord-hemi {
-  flex: 0 0 60px;
-
-  .mat-mdc-select-value-text {
-    display: block;
-    text-align: center;
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .wrf__field {
+  .wrf .dyf {
     opacity: 0;
     animation: wrfFieldIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
 
@@ -185,9 +152,5 @@ $bg-subtle: #f8fafc;
     max-height: 100vh;
     height: 100vh;
     border-radius: 0;
-  }
-
-  .wrf__grid {
-    grid-template-columns: 1fr;
   }
 }

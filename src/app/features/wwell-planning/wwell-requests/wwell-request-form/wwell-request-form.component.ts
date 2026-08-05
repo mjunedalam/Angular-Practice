@@ -1,32 +1,19 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import {
   CreateWwellPlanningRequestPayload,
   WwellPlanningPriority,
   WwellPlanningRequest,
 } from '@models/wwell-planning/wwell-planning.model';
+import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
+import { WwellDynamicFieldMode } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
+import { buildSectionGroup } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
-import {
-  WWELL_REQUEST_AQUIFER_OPTIONS,
-  WWELL_REQUEST_ASSIGNEE_OPTIONS,
-  WWELL_REQUEST_BUSINESS_USE_OPTIONS,
-  WWELL_REQUEST_CLIENT_OPTIONS,
-  WWELL_REQUEST_DEPTH_PATTERN,
-  WWELL_REQUEST_LAT_HEMISPHERES,
-  WWELL_REQUEST_LAT_VALUE_PATTERN,
-  WWELL_REQUEST_LNG_HEMISPHERES,
-  WWELL_REQUEST_LNG_VALUE_PATTERN,
-  WWELL_REQUEST_PRIORITY_OPTIONS,
-  formatWwellCoordinates,
-  parseWwellCoordinates,
-} from './wwell-request-form.config';
+import { WWELL_REQUEST_FORM_SECTION } from './wwell-request-form.config';
 
 export type WwellRequestFormMode = 'create' | 'view';
 
@@ -40,6 +27,21 @@ export interface WwellRequestFormResult {
   readonly files: File[];
 }
 
+interface WwellRequestFormRawValue {
+  readonly client: string;
+  readonly wellName: string;
+  readonly initialCoordinates: string;
+  readonly supportingBusiness: string;
+  readonly proposedDepth: string;
+  readonly targetAquifer: string;
+  readonly finalCoordinates: string;
+  readonly assignedTo: string;
+  readonly priority: WwellPlanningPriority | '';
+  readonly notes: string;
+}
+
+const SELECT_PANEL_CLASS = 'wrf-select-panel';
+
 @Component({
   selector: 'app-wwell-request-form',
   standalone: true,
@@ -47,10 +49,8 @@ export interface WwellRequestFormResult {
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
-    MatSelectModule,
+    DynamicSectionComponent,
     WwellAttachmentDropzoneComponent,
     WwellFormDialogShellComponent,
   ],
@@ -64,15 +64,11 @@ export class WwellRequestFormComponent {
   private readonly dialogRef = inject(MatDialogRef<WwellRequestFormComponent, WwellRequestFormResult | undefined>);
   protected readonly data = inject<WwellRequestFormDialogData>(MAT_DIALOG_DATA);
 
-  protected readonly clientOptions = WWELL_REQUEST_CLIENT_OPTIONS;
-  protected readonly aquiferOptions = WWELL_REQUEST_AQUIFER_OPTIONS;
-  protected readonly businessUseOptions = WWELL_REQUEST_BUSINESS_USE_OPTIONS;
-  protected readonly assigneeOptions = WWELL_REQUEST_ASSIGNEE_OPTIONS;
-  protected readonly priorityOptions = WWELL_REQUEST_PRIORITY_OPTIONS;
-  protected readonly latHemiOptions = WWELL_REQUEST_LAT_HEMISPHERES;
-  protected readonly lngHemiOptions = WWELL_REQUEST_LNG_HEMISPHERES;
+  protected readonly formSection = WWELL_REQUEST_FORM_SECTION;
+  protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
   protected readonly isViewMode = this.data.mode === 'view';
+  protected readonly fieldMode: WwellDynamicFieldMode = this.isViewMode ? 'review' : 'edit';
   private files: File[] = [];
 
   protected readonly dialogTitle = this.isViewMode ? 'Request Details' : 'New Request';
@@ -82,35 +78,23 @@ export class WwellRequestFormComponent {
       : null
     : 'Create a new well request — will be routed for approvals after submission';
 
-  private readonly initialCoordinates = parseWwellCoordinates(this.data.request?.coordinates);
-
-  protected readonly form = this.fb.nonNullable.group({
-    client: [this.data.request?.client ?? '', Validators.required],
-    supporting: [this.data.request?.supporting ?? '', Validators.required],
-    latValue: [
-      this.initialCoordinates.latValue,
-      [Validators.required, Validators.pattern(WWELL_REQUEST_LAT_VALUE_PATTERN)],
-    ],
-    latHemi: this.fb.nonNullable.control(this.initialCoordinates.latHemi),
-    lngValue: [
-      this.initialCoordinates.lngValue,
-      [Validators.required, Validators.pattern(WWELL_REQUEST_LNG_VALUE_PATTERN)],
-    ],
-    lngHemi: this.fb.nonNullable.control(this.initialCoordinates.lngHemi),
-    targetAquifer: [this.data.request?.targetAquifer ?? '', Validators.required],
-    proposedDepth: [
-      this.data.request?.proposedDepth ?? '',
-      [Validators.required, Validators.pattern(WWELL_REQUEST_DEPTH_PATTERN)],
-    ],
-    businessUse: [this.data.request?.businessUse ?? '', Validators.required],
-    assignedTo: this.fb.control<string | null>(this.data.request?.assignedTo ?? null),
-    priority: this.fb.control<WwellPlanningPriority | null>(this.data.request?.priority ?? null),
-    notes: this.fb.control<string | null>(this.data.request?.notes ?? null),
-  });
+  protected readonly form = buildSectionGroup(WWELL_REQUEST_FORM_SECTION, this.fb) as FormGroup;
 
   constructor() {
-    if (this.isViewMode) {
-      this.form.disable();
+    const request = this.data.request;
+    if (request) {
+      this.form.patchValue({
+        client: request.client,
+        wellName: request.wellName,
+        initialCoordinates: request.initialCoordinates,
+        supportingBusiness: request.supportingBusiness,
+        proposedDepth: request.proposedDepth ?? '',
+        targetAquifer: request.targetAquifer ?? '',
+        finalCoordinates: request.finalCoordinates ?? '',
+        assignedTo: request.assignedTo ?? '',
+        priority: request.priority ?? '',
+        notes: request.notes ?? '',
+      });
     }
   }
 
@@ -132,22 +116,18 @@ export class WwellRequestFormComponent {
       return;
     }
 
-    const value = this.form.getRawValue();
+    const value = this.form.getRawValue() as WwellRequestFormRawValue;
     const payload: CreateWwellPlanningRequestPayload = {
       client: value.client,
-      supporting: value.supporting,
-      coordinates: formatWwellCoordinates({
-        latValue: value.latValue,
-        latHemi: value.latHemi,
-        lngValue: value.lngValue,
-        lngHemi: value.lngHemi,
-      }),
-      targetAquifer: value.targetAquifer,
-      proposedDepth: value.proposedDepth,
-      businessUse: value.businessUse,
-      assignedTo: value.assignedTo,
-      priority: value.priority,
-      notes: value.notes?.trim() || null,
+      wellName: value.wellName.toUpperCase(),
+      supportingBusiness: value.supportingBusiness,
+      initialCoordinates: value.initialCoordinates,
+      finalCoordinates: value.finalCoordinates.trim() || null,
+      targetAquifer: value.targetAquifer || null,
+      proposedDepth: value.proposedDepth || null,
+      assignedTo: value.assignedTo || null,
+      priority: value.priority || null,
+      notes: value.notes.trim() || null,
       status,
     };
 

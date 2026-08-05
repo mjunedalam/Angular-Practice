@@ -13,9 +13,12 @@
  *   ```
  *
  * The `[A]`/`[M]`/`[D]` tag mirrors `git status` porcelain codes and is
- * stripped from the path. The closing fence isn't required to sit on its own
- * line — if the dump's source file had no trailing newline, the ``` ends up
- * glued to the last content line, and this parser accounts for that.
+ * stripped from the path, but it's optional — a plain `## <path>` header
+ * works too, and the tag is then inferred (M if the file already exists on
+ * disk, A otherwise) purely for the log line. The closing fence isn't
+ * required to sit on its own line — if the dump's source file had no
+ * trailing newline, the ``` ends up glued to the last content line, and this
+ * parser accounts for that.
  *
  * Usage:
  *   node scripts/apply-doc-files.js [docPath] [--dry-run]
@@ -27,7 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const HEADER_PATTERN = /^## \[(A|M|D)\] (.+)$/;
+const HEADER_PATTERN = /^## (?:\[(A|M|D)\]\s+)?(.+)$/;
 const FENCE_OPEN_PATTERN = /^```/;
 
 function parseArgs(argv) {
@@ -88,16 +91,18 @@ function parseSections(markdown) {
 function applySections(sections, repoRoot, dryRun) {
   for (const { tag, filePath, content } of sections) {
     const absolutePath = path.join(repoRoot, filePath);
-    const verb = fs.existsSync(absolutePath) ? 'replaced' : 'created';
+    const exists = fs.existsSync(absolutePath);
+    const verb = exists ? 'replaced' : 'created';
+    const label = tag ?? (exists ? 'M' : 'A');
 
     if (dryRun) {
-      console.log(`[dry-run] [${tag}] would be ${verb === 'created' ? 'created' : 'replaced'}: ${filePath} (${content.length} bytes)`);
+      console.log(`[dry-run] [${label}] would be ${verb}: ${filePath} (${content.length} bytes)`);
       continue;
     }
 
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     fs.writeFileSync(absolutePath, content);
-    console.log(`[${tag}] ${verb}: ${filePath}`);
+    console.log(`[${label}] ${verb}: ${filePath}`);
   }
 }
 

@@ -91,9 +91,15 @@ export class DynamicSectionComponent implements AfterViewInit, OnDestroy {
   }
 
   private isFieldVisible(field: WwellFieldConfig): boolean {
-    if (!field.visibleWhen) return true;
-    const sibling = (this.control() as FormGroup).get(field.visibleWhen.field);
-    return sibling?.value === field.visibleWhen.equals;
+    const condition = field.visibleWhen;
+    if (!condition) return true;
+
+    const sibling = (this.control() as FormGroup).get(condition.field);
+    const value = sibling?.value;
+    if (condition.equals !== undefined) return value === condition.equals;
+    if (condition.oneOf) return condition.oneOf.includes(value);
+    if (condition.notOneOf) return !condition.notOneOf.includes(value);
+    return true;
   }
 
   /** Hidden fields are disabled (excluded from validity/`.value`) and reset so a stale value from the other mode never submits. */

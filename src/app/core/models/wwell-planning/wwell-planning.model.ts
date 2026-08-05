@@ -16,11 +16,15 @@ export interface WwellPlanningRequest {
   readonly requestedDate: string;
   readonly status: WwellPlanningRequestStatus;
   readonly client: string;
-  readonly supporting: string;
-  readonly coordinates: string;
-  readonly targetAquifer: string;
-  readonly proposedDepth: string;
-  readonly businessUse: string;
+  readonly wellName: string;
+  readonly supportingBusiness: string;
+  readonly initialCoordinates: string;
+  /** Only collected for Tier 2 clients — see WWELL_CLIENT_TIER_2. */
+  readonly finalCoordinates: string | null;
+  /** Only collected for Tier 1 clients — see WWELL_CLIENT_TIER_1. */
+  readonly targetAquifer: string | null;
+  /** Only collected for Tier 1 clients — see WWELL_CLIENT_TIER_1. */
+  readonly proposedDepth: string | null;
   readonly priority: WwellPlanningPriority | null;
   readonly assignedTo: string | null;
   readonly notes: string | null;
@@ -31,11 +35,12 @@ export interface CreateWwellPlanningRequestPayload
   extends Pick<
     WwellPlanningRequest,
     | 'client'
-    | 'supporting'
-    | 'coordinates'
+    | 'wellName'
+    | 'supportingBusiness'
+    | 'initialCoordinates'
+    | 'finalCoordinates'
     | 'targetAquifer'
     | 'proposedDepth'
-    | 'businessUse'
     | 'priority'
     | 'assignedTo'
     | 'notes'
@@ -82,8 +87,10 @@ export interface CreateWldaApprovalPayload {
   readonly supporting: string;
   readonly initialCoordinates: string;
   readonly finalCoordinates: string | null;
-  readonly proposedDepth: string;
-  readonly targetAquifer: string;
+  /** Only collected for Tier 1 clients — see WWELL_CLIENT_TIER_1. */
+  readonly proposedDepth: string | null;
+  /** Only collected for Tier 1 clients — see WWELL_CLIENT_TIER_1. */
+  readonly targetAquifer: string | null;
   readonly businessUse: string;
   readonly drillingMethod: string | null;
   readonly assignedTo: string | null;

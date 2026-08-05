@@ -15,10 +15,19 @@ export interface WwellFieldValidatorConfig {
   readonly min?: number;
 }
 
-/** Field is only shown (and its control enabled) while a sibling control in the same section equals this value. */
+/**
+ * Field is only shown (and its control enabled) while a sibling control in the same section
+ * matches this condition. Exactly one of `equals` | `oneOf` | `notOneOf` should be set:
+ *  - `equals`: sibling value === this value
+ *  - `oneOf`: sibling value is one of this set (e.g. a client tier)
+ *  - `notOneOf`: sibling value is absent from this set — the fallback for values outside every
+ *    named tier (e.g. a client not yet assigned to a tier keeps the default field set)
+ */
 export interface WwellFieldVisibilityCondition {
   readonly field: string;
-  readonly equals: string;
+  readonly equals?: string;
+  readonly oneOf?: readonly string[];
+  readonly notOneOf?: readonly string[];
 }
 
 export interface WwellFieldConfig {

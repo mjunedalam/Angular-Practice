@@ -41,7 +41,8 @@ export const WWELL_REQUESTS_ACTIONS_COL_ID = 'actions';
 export const wwellRequestsColumnDefs: ColDef<WwellPlanningRequest>[] = [
   { headerName: 'REQ #', field: 'id', flex: 0.9, minWidth: 110, cellStyle: { fontWeight: '700', color: '#3b82f6' } },
   { headerName: 'Client', field: 'client', flex: 0.8, minWidth: 100 },
-  { headerName: 'Supporting', field: 'supporting', flex: 1.3, minWidth: 160 },
+  { headerName: 'Well', field: 'wellName', flex: 1, minWidth: 120, cellStyle: { fontWeight: '700' } },
+  { headerName: 'Supporting Business', field: 'supportingBusiness', flex: 1.3, minWidth: 160 },
   { headerName: 'Status', field: 'status', flex: 1, minWidth: 130, cellRenderer: statusCellRenderer },
   { headerName: 'Submitted', field: 'requestedDate', flex: 0.9, minWidth: 120 },
   {

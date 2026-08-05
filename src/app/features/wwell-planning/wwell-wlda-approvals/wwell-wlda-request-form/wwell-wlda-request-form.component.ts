@@ -1,33 +1,37 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { CreateWldaApprovalPayload } from '@models/wwell-planning/wwell-planning.model';
-import {
-  WWELL_APPROVAL_COORDINATES_PATTERN,
-  WWELL_APPROVAL_WELL_NAME_PATTERN,
-  WWELL_WLDA_CHAIN_ROLES,
-} from '../../shared/wwell-approvals/wwell-approvals.config';
+import { WWELL_WLDA_CHAIN_ROLES } from '../../shared/wwell-approvals/wwell-approvals.config';
+import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
+import { buildSectionGroup } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellAttachmentDropzoneComponent } from '../../shared/wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import { WwellFormDialogShellComponent } from '../../shared/wwell-form-dialog-shell/wwell-form-dialog-shell.component';
-import {
-  WWELL_WLDA_FORM_AQUIFER_OPTIONS,
-  WWELL_WLDA_FORM_ASSIGNEE_OPTIONS,
-  WWELL_WLDA_FORM_BUSINESS_USE_OPTIONS,
-  WWELL_WLDA_FORM_CLIENT_OPTIONS,
-  WWELL_WLDA_FORM_DEPTH_PATTERN,
-  WWELL_WLDA_FORM_DRILLING_METHOD_OPTIONS,
-} from './wwell-wlda-request-form.config';
+import { WWELL_WLDA_FORM_SECTION } from './wwell-wlda-request-form.config';
 
 export interface WwellWldaRequestFormResult {
   readonly mode: 'draft' | 'submit';
   readonly payload: CreateWldaApprovalPayload;
   readonly files: File[];
 }
+
+interface WwellWldaFormRawValue {
+  readonly client: string;
+  readonly wellName: string;
+  readonly supporting: string;
+  readonly initialCoordinates: string;
+  readonly finalCoordinates: string;
+  readonly proposedDepth: string;
+  readonly targetAquifer: string;
+  readonly businessUse: string;
+  readonly drillingMethod: string;
+  readonly assignedTo: string;
+  readonly notes: string;
+}
+
+const SELECT_PANEL_CLASS = 'wldaf-select-panel';
 
 @Component({
   selector: 'app-wwell-wlda-request-form',
@@ -36,10 +40,8 @@ export interface WwellWldaRequestFormResult {
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
-    MatSelectModule,
+    DynamicSectionComponent,
     WwellAttachmentDropzoneComponent,
     WwellFormDialogShellComponent,
   ],
@@ -52,29 +54,14 @@ export class WwellWldaRequestFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<WwellWldaRequestFormComponent, WwellWldaRequestFormResult | undefined>);
 
-  protected readonly clientOptions = WWELL_WLDA_FORM_CLIENT_OPTIONS;
-  protected readonly aquiferOptions = WWELL_WLDA_FORM_AQUIFER_OPTIONS;
-  protected readonly businessUseOptions = WWELL_WLDA_FORM_BUSINESS_USE_OPTIONS;
-  protected readonly drillingMethodOptions = WWELL_WLDA_FORM_DRILLING_METHOD_OPTIONS;
-  protected readonly assigneeOptions = WWELL_WLDA_FORM_ASSIGNEE_OPTIONS;
+  protected readonly formSection = WWELL_WLDA_FORM_SECTION;
+  protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
   protected readonly chainSubtitle = `Well Location & Drilling Approval — ${WWELL_WLDA_CHAIN_ROLES.length}-step chain: ${WWELL_WLDA_CHAIN_ROLES.join(' → ')}`;
 
   private files: File[] = [];
 
-  protected readonly form = this.fb.nonNullable.group({
-    client: ['', Validators.required],
-    wellName: ['', [Validators.required, Validators.pattern(WWELL_APPROVAL_WELL_NAME_PATTERN)]],
-    supporting: ['', Validators.required],
-    initialCoordinates: ['', [Validators.required, Validators.pattern(WWELL_APPROVAL_COORDINATES_PATTERN)]],
-    finalCoordinates: this.fb.control<string | null>(null, Validators.pattern(WWELL_APPROVAL_COORDINATES_PATTERN)),
-    proposedDepth: ['', [Validators.required, Validators.pattern(WWELL_WLDA_FORM_DEPTH_PATTERN)]],
-    targetAquifer: ['', Validators.required],
-    businessUse: ['', Validators.required],
-    drillingMethod: this.fb.control<string | null>(null),
-    assignedTo: this.fb.control<string | null>(null),
-    notes: this.fb.control<string | null>(null),
-  });
+  protected readonly form = buildSectionGroup(WWELL_WLDA_FORM_SECTION, this.fb) as FormGroup;
 
   protected close(): void {
     this.dialogRef.close(undefined);
@@ -97,19 +84,19 @@ export class WwellWldaRequestFormComponent {
   }
 
   private toPayload(): CreateWldaApprovalPayload {
-    const value = this.form.getRawValue();
+    const value = this.form.getRawValue() as WwellWldaFormRawValue;
     return {
       client: value.client,
       wellName: value.wellName.toUpperCase(),
       supporting: value.supporting,
       initialCoordinates: value.initialCoordinates,
-      finalCoordinates: value.finalCoordinates?.trim() || null,
-      proposedDepth: value.proposedDepth,
-      targetAquifer: value.targetAquifer,
+      finalCoordinates: value.finalCoordinates.trim() || null,
+      proposedDepth: value.proposedDepth || null,
+      targetAquifer: value.targetAquifer || null,
       businessUse: value.businessUse,
-      drillingMethod: value.drillingMethod,
-      assignedTo: value.assignedTo,
-      notes: value.notes?.trim() || null,
+      drillingMethod: value.drillingMethod || null,
+      assignedTo: value.assignedTo || null,
+      notes: value.notes.trim() || null,
     };
   }
 }

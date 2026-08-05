@@ -1,10 +1,14 @@
 import { WwellPlanningPriority } from '@models/wwell-planning/wwell-planning.model';
-
-export { WWELL_CLIENT_OPTIONS as WWELL_REQUEST_CLIENT_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_AQUIFER_OPTIONS as WWELL_REQUEST_AQUIFER_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_BUSINESS_USE_OPTIONS as WWELL_REQUEST_BUSINESS_USE_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_ASSIGNEE_OPTIONS as WWELL_REQUEST_ASSIGNEE_OPTIONS } from '../../shared/wwell-planning-reference-data.config';
-export { WWELL_DEPTH_PATTERN as WWELL_REQUEST_DEPTH_PATTERN } from '../../shared/wwell-planning-reference-data.config';
+import { WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
+import { WWELL_APPROVAL_COORDINATES_PATTERN, WWELL_APPROVAL_WELL_NAME_PATTERN } from '../../shared/wwell-approvals/wwell-approvals.config';
+import {
+  WWELL_AQUIFER_OPTIONS,
+  WWELL_ASSIGNEE_OPTIONS,
+  WWELL_CLIENT_OPTIONS,
+  WWELL_CLIENT_TIER_2,
+  WWELL_DEPTH_PATTERN,
+  WWELL_SUPPORTING_BUSINESS_OPTIONS,
+} from '../../shared/wwell-planning-reference-data.config';
 
 export interface WwellRequestPriorityOption {
   readonly value: WwellPlanningPriority;
@@ -18,65 +22,78 @@ export const WWELL_REQUEST_PRIORITY_OPTIONS: readonly WwellRequestPriorityOption
   { value: 'urgent', label: 'Urgent' },
 ];
 
-export type WwellLatHemisphere = 'N' | 'S';
-export type WwellLngHemisphere = 'E' | 'W';
-
-export const WWELL_REQUEST_LAT_HEMISPHERES: readonly WwellLatHemisphere[] = ['N', 'S'];
-export const WWELL_REQUEST_LNG_HEMISPHERES: readonly WwellLngHemisphere[] = ['E', 'W'];
-
-/** Decimal degrees, 0–90 (sign is carried by the hemisphere select, not typed). */
-export const WWELL_REQUEST_LAT_VALUE_PATTERN = /^(90(\.0+)?|[1-8]?\d(\.\d+)?)$/;
-
-/** Decimal degrees, 0–180 (sign is carried by the hemisphere select, not typed). */
-export const WWELL_REQUEST_LNG_VALUE_PATTERN = /^(180(\.0+)?|1[0-7]\d(\.\d+)?|[1-9]?\d(\.\d+)?)$/;
-
-export interface WwellCoordinateParts {
-  readonly latValue: string;
-  readonly latHemi: WwellLatHemisphere;
-  readonly lngValue: string;
-  readonly lngHemi: WwellLngHemisphere;
-}
-
-const COORDINATE_PART_PATTERN = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*°?\s*([NnSsEeWw]?)\s*$/;
-
-function parseCoordinatePart<H extends string>(
-  part: string,
-  positiveHemi: H,
-  negativeHemi: H,
-): { value: string; hemi: H } | null {
-  const match = COORDINATE_PART_PATTERN.exec(part);
-  if (!match) return null;
-
-  const numeric = Number(match[1]);
-  if (Number.isNaN(numeric)) return null;
-
-  const letter = match[2].toUpperCase();
-  let hemi = numeric < 0 ? negativeHemi : positiveHemi;
-  if (letter === negativeHemi || letter === positiveHemi) {
-    hemi = letter as H;
-  }
-
-  return { value: `${Math.abs(numeric)}`, hemi };
-}
-
-/** Parses a free-form "24.1751°N, 47.2951°E" style string (as previously stored) into editable parts. */
-export function parseWwellCoordinates(raw: string | null | undefined): WwellCoordinateParts {
-  const fallback: WwellCoordinateParts = { latValue: '', latHemi: 'N', lngValue: '', lngHemi: 'E' };
-  if (!raw) return fallback;
-
-  const [rawLat, rawLng] = raw.split(',').map(part => part.trim());
-  if (!rawLat || !rawLng) return fallback;
-
-  const lat = parseCoordinatePart(rawLat, 'N', 'S');
-  const lng = parseCoordinatePart(rawLng, 'E', 'W');
-  if (!lat || !lng) return fallback;
-
-  return { latValue: lat.value, latHemi: lat.hemi, lngValue: lng.value, lngHemi: lng.hemi };
-}
-
-/** Formats editable coordinate parts back into the "24.1751°N, 47.2951°E" style string the API expects. */
-export function formatWwellCoordinates(parts: WwellCoordinateParts): string {
-  const { latValue, latHemi, lngValue, lngHemi } = parts;
-  if (!latValue || !lngValue) return '';
-  return `${latValue}°${latHemi}, ${lngValue}°${lngHemi}`;
-}
+/**
+ * Single source of truth for the Request dialog's fields — add a field here, not in the template.
+ *
+ * Target Depth/Aquifer vs. Final Coordinates are mutually exclusive, gated by the selected
+ * client's data tier (see WWELL_CLIENT_TIER_1 / WWELL_CLIENT_TIER_2). A hidden field still holds
+ * its grid cell (collapsed to 0 height, not removed), so every tier-conditional field is grouped
+ * after an even number of always-visible fields and sized to fill a full row on its own — that
+ * way a collapsed field's row shrinks to nothing instead of leaving a gap next to a visible
+ * sibling. Keep new conditional fields at the end of this array for the same reason.
+ */
+export const WWELL_REQUEST_FORM_SECTION: WwellFormSectionConfig = {
+  key: 'main',
+  title: null,
+  fields: [
+    { key: 'client', label: 'Client', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
+    {
+      key: 'wellName',
+      label: 'Water Well Name',
+      type: 'text',
+      placeholder: 'e.g., HAIL-500',
+      validators: { required: true, pattern: WWELL_APPROVAL_WELL_NAME_PATTERN },
+    },
+    {
+      key: 'initialCoordinates',
+      label: 'Initial Coordinates',
+      type: 'text',
+      placeholder: 'e.g., 24.1751°N, 47.2951°E',
+      validators: { required: true, pattern: WWELL_APPROVAL_COORDINATES_PATTERN },
+    },
+    {
+      key: 'supportingBusiness',
+      label: 'Supporting Business',
+      type: 'select',
+      options: WWELL_SUPPORTING_BUSINESS_OPTIONS,
+      validators: { required: true },
+    },
+    { key: 'assignedTo', label: 'Assigned To', type: 'select', options: WWELL_ASSIGNEE_OPTIONS },
+    { key: 'priority', label: 'Priority', type: 'select', options: WWELL_REQUEST_PRIORITY_OPTIONS },
+    // Tier 1 pair — always toggle together, so they either fill this row or collapse it entirely.
+    {
+      key: 'proposedDepth',
+      label: 'Target Depth',
+      type: 'text',
+      placeholder: 'e.g., 180m',
+      validators: { required: true, pattern: WWELL_DEPTH_PATTERN },
+      visibleWhen: { field: 'client', notOneOf: WWELL_CLIENT_TIER_2 },
+    },
+    {
+      key: 'targetAquifer',
+      label: 'Target Aquifer',
+      type: 'select',
+      options: WWELL_AQUIFER_OPTIONS,
+      validators: { required: true },
+      visibleWhen: { field: 'client', notOneOf: WWELL_CLIENT_TIER_2 },
+    },
+    // Tier 2 — full-width so it never has to share a row with a neighbor while collapsed.
+    {
+      key: 'finalCoordinates',
+      label: 'Final Coordinates',
+      type: 'text',
+      placeholder: 'e.g., 24.1765°N, 47.2960°E',
+      hint: 'Confirmed after site survey',
+      colSpan: 2,
+      validators: { pattern: WWELL_APPROVAL_COORDINATES_PATTERN },
+      visibleWhen: { field: 'client', oneOf: WWELL_CLIENT_TIER_2 },
+    },
+    {
+      key: 'notes',
+      label: 'Request Note',
+      type: 'textarea',
+      placeholder: 'Project background, timeline, special requirements...',
+      colSpan: 2,
+    },
+  ],
+};

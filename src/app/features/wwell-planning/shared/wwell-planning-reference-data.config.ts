@@ -2,6 +2,15 @@
 
 export const WWELL_CLIENT_OPTIONS: readonly string[] = ['BI-11', 'BI-12', 'BI-13', 'BI-14', 'BI-15'];
 
+/**
+ * Clients fall into two subsurface-data tiers that drive which fields the Request and WLDA forms
+ * collect: Tier 1 clients supply target depth/aquifer at intake; Tier 2 clients don't (that data
+ * comes later) but do supply an as-drilled final coordinate. A client outside both named tiers
+ * (e.g. BI-15) falls back to the Tier 1 field set.
+ */
+export const WWELL_CLIENT_TIER_1: readonly string[] = ['BI-11', 'BI-12'];
+export const WWELL_CLIENT_TIER_2: readonly string[] = ['BI-13', 'BI-14'];
+
 export const WWELL_AQUIFER_OPTIONS: readonly string[] = [
   'Umm Er Radhuma',
   'Wasia',
