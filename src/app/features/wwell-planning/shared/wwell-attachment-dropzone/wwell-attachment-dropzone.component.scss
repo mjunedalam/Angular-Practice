@@ -1,12 +1,15 @@
+@use '../wwell-design-tokens' as tokens;
+
 :host {
   display: block;
+  font-family: tokens.$font-family;
 }
 
-$navy: #1e293b;
-$muted: #64748b;
-$border: #e2e8f0;
-$accent: #3b82f6;
-$bg-subtle: #f8fafc;
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+$bg-subtle: tokens.$surface-alt;
 
 .wad {
   display: flex;
@@ -44,7 +47,7 @@ $bg-subtle: #f8fafc;
 }
 
 .wad__dropzone-text {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   max-width: 42ch;
   line-height: 1.4;
 }
@@ -75,7 +78,7 @@ $bg-subtle: #f8fafc;
   background: $bg-subtle;
   border: 1px solid $border;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $navy;
 }
 
@@ -94,7 +97,7 @@ $bg-subtle: #f8fafc;
 
 .wad__file-size {
   color: $muted;
-  font-size: 0.75rem;
+  font-size: 0.83rem;
   flex-shrink: 0;
 }
 
@@ -118,7 +121,7 @@ $bg-subtle: #f8fafc;
 
 .wad__no-files {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $muted;
   font-style: italic;
 }

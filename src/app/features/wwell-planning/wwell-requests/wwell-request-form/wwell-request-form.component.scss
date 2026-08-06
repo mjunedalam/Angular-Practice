@@ -1,13 +1,14 @@
 @use '@angular/material' as mat;
 @use '../../shared/wwell-select-panel-mixin' as wsel;
+@use '../../shared/wwell-design-tokens' as tokens;
 
 /* ── wwell-request-form tokens ─────────────────────────────────── */
-$navy:      #1e293b;
-$muted:     #64748b;
-$border:    #e2e8f0;
-$accent:    #3b82f6;
+$navy:      tokens.$navy-deep;
+$muted:     tokens.$muted;
+$border:    tokens.$border;
+$accent:    tokens.$accent;
 $danger:    #dc2626;
-$bg-subtle: #f8fafc;
+$bg-subtle: tokens.$surface-alt;
 
 /*
  * The app only calls mat.core() globally (no color theme is configured in
@@ -32,8 +33,8 @@ $bg-subtle: #f8fafc;
       tertiary: mat.$azure-palette,
     ),
     typography: (
-      plain-family: (Roboto, 'Helvetica Neue', sans-serif),
-      brand-family: (Roboto, 'Helvetica Neue', sans-serif),
+      plain-family: tokens.$font-family,
+      brand-family: tokens.$font-family,
     ),
     density: -1,
   ));
@@ -141,7 +142,7 @@ $bg-subtle: #f8fafc;
 }
 
 .wrf__attachments-label {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: $navy;
 }

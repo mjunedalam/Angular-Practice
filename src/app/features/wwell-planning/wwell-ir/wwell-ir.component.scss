@@ -1,12 +1,29 @@
-$navy: #1e293b;
-$muted: #64748b;
-$border: #e2e8f0;
-$accent: #3b82f6;
+@use '../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+
+// Matches the WLDA/Land-Affairs siblings' skinny master column. Rows still truncate cleanly
+// via `text-overflow: ellipsis` below.
+$master-width: 240px;
 
 :host {
   display: block;
   height: 100%;
-  background: #f0f4f8;
+  background: tokens.$page-bg;
+  font-family: tokens.$font-family;
+}
+
+/* The project has no global `box-sizing: border-box` reset, so `max-height: 100%` /
+ * `width: $master-width` on a padded/bordered box (e.g. `.wwell-ir__master`) only caps its
+ * *content* box — padding+border then get added on top, overflowing the intended size. See
+ * the identical fix + full rationale in wwell-requests.component.scss. Scoped to this
+ * component only (Angular's emulated encapsulation confines the `*` selector to this
+ * template), not a global change. */
+:host * {
+  box-sizing: border-box;
 }
 
 .wwell-ir {
@@ -31,10 +48,10 @@ $accent: #3b82f6;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  width: 300px;
+  width: $master-width;
   flex-shrink: 0;
   max-height: 100%;
-  background: #ffffff;
+  background: tokens.$surface;
   border: 1px solid #e8edf4;
   border-radius: 10px;
   padding: 0.9rem;
@@ -60,7 +77,7 @@ $accent: #3b82f6;
 
 .wwell-ir__title {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.01em;
@@ -70,13 +87,13 @@ $accent: #3b82f6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
   border-radius: 999px;
   background: rgba($accent, 0.12);
   color: $accent;
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
@@ -87,7 +104,7 @@ $accent: #3b82f6;
   flex-shrink: 0;
   border-radius: 7px;
   font-weight: 700;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   padding: 0 10px;
   box-shadow: none;
 
@@ -104,7 +121,7 @@ $accent: #3b82f6;
   align-items: center;
   gap: 6px;
   padding: 0.42rem 0.75rem;
-  background: #f8fafc;
+  background: tokens.$surface-alt;
   border: 1px solid $border;
   border-radius: 8px;
   transition: border-color 150ms ease;
@@ -118,7 +135,7 @@ $accent: #3b82f6;
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: #94a3b8;
+  color: tokens.$subtle;
   flex-shrink: 0;
 }
 
@@ -128,11 +145,11 @@ $accent: #3b82f6;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.85rem;
+  font-size: 0.93rem;
   color: $navy;
 
   &::placeholder {
-    color: #94a3b8;
+    color: tokens.$subtle;
   }
 
   &::-webkit-search-cancel-button {
@@ -144,7 +161,7 @@ $accent: #3b82f6;
   padding: 2rem 1rem;
   text-align: center;
   color: $muted;
-  font-size: 0.85rem;
+  font-size: 0.93rem;
 
   &--error {
     color: #dc2626;
@@ -170,7 +187,7 @@ $accent: #3b82f6;
   display: block;
   height: 0.6rem;
   border-radius: 4px;
-  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
   background-size: 400% 100%;
   animation: wwell-ir-shimmer 1.4s ease-in-out infinite;
 
@@ -217,6 +234,14 @@ $accent: #3b82f6;
   flex: 1;
   min-height: 0;
 
+  /* Without this, scrolling past the last row chains into `.dashboard__content`
+   * (the app shell's content region) — it's `overflow: hidden` for this route, but still
+   * has a few px of its own layout slack, just enough for the chained scroll to shove the
+   * whole shell up and flash a sliver of bare background above the fixed topbar. `contain`
+   * stops the scroll gesture dead at this list's own boundary instead of handing the
+   * leftover delta to an ancestor. */
+  overscroll-behavior-y: contain;
+
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -231,8 +256,8 @@ $accent: #3b82f6;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  padding: 0.55rem 0.65rem;
-  background: #ffffff;
+  padding: 0.6rem 0.7rem;
+  background: tokens.$surface;
   border: 1px solid transparent;
   border-left: 2px solid transparent;
   border-radius: 7px;
@@ -244,7 +269,7 @@ $accent: #3b82f6;
     box-shadow 150ms ease;
 
   &:hover {
-    background: #f8fafc;
+    background: tokens.$surface-alt;
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
   }
 
@@ -257,6 +282,24 @@ $accent: #3b82f6;
   &--active:hover {
     box-shadow: none;
   }
+
+  /* Brief pulse while the detail panel's loading shimmer plays (see `selectIr()` /
+   * `createPendingSelection`) — gives the clicked row itself a visible "working on it" cue,
+   * not just the detail pane. */
+  &--pending {
+    border-left-color: $accent;
+    animation: wwell-ir-row-pending-pulse 0.9s ease-in-out infinite;
+  }
+}
+
+@keyframes wwell-ir-row-pending-pulse {
+  0%,
+  100% {
+    background: tokens.$surface;
+  }
+  50% {
+    background: rgba($accent, 0.07);
+  }
 }
 
 .wwell-ir__row-top {
@@ -267,7 +310,7 @@ $accent: #3b82f6;
 }
 
 .wwell-ir__row-code {
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: 0.01em;
@@ -275,7 +318,7 @@ $accent: #3b82f6;
 
 .wwell-ir__row-name {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: $navy;
   white-space: nowrap;
@@ -285,7 +328,7 @@ $accent: #3b82f6;
 
 .wwell-ir__row-meta {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: $muted;
   white-space: nowrap;
   overflow: hidden;
@@ -300,9 +343,9 @@ $accent: #3b82f6;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -321,6 +364,11 @@ $accent: #3b82f6;
   align-self: stretch;
   max-height: 100%;
   overflow-y: auto;
+
+  /* Same scroll-chaining guard as `.wwell-ir__list` above — this column runs far taller
+   * than the list (offset-wells grid, wellbore tables, etc.), so it's the one most likely
+   * to get scrolled past its own end. */
+  overscroll-behavior-y: contain;
 
   /* Scrolls, but stays visually quiet — the bento cards inside are the only
    * chrome on screen; a visible track/thumb here would just be more noise. */
@@ -351,7 +399,7 @@ $accent: #3b82f6;
   justify-content: center;
   gap: 0.5rem;
   color: $muted;
-  background: #ffffff;
+  background: tokens.$surface;
   border: 1px dashed $border;
   border-radius: 12px;
   min-height: 320px;
@@ -365,7 +413,7 @@ $accent: #3b82f6;
 
   p {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.96rem;
   }
 }
 
@@ -392,6 +440,10 @@ $accent: #3b82f6;
   .wwell-ir {
     flex-direction: column;
     overflow-y: auto;
+    /* Same scroll-chaining guard as `.wwell-ir__list`/`.wwell-ir__detail` — this element
+     * takes over as the single scroll container at this breakpoint, so it needs the same
+     * protection against handing overscroll off to `.dashboard__content`. */
+    overscroll-behavior-y: contain;
   }
 
   .wwell-ir__master {

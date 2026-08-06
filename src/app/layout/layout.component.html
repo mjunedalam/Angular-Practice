@@ -21,7 +21,13 @@
     <!-- ④ Main content area ─────────────────────────────────── -->
     <main
       class="dashboard__content"
-      [class.dashboard__content--scroll-locked]="activeRoute() === 'active-wwell' || activeRoute() === 'integrated-requirements'"
+      [class.dashboard__content--scroll-locked]="
+        activeRoute() === 'active-wwell' ||
+        activeRoute() === 'integrated-requirements' ||
+        activeRoute() === 'land-affairs-approvals' ||
+        activeRoute() === 'wlda-approvals' ||
+        activeRoute() === 'requests'
+      "
     >
       <router-outlet />
     </main>

@@ -47,6 +47,8 @@
               type="button"
               class="wwell-ir__row"
               [class.wwell-ir__row--active]="ir.id === selectedId()"
+              [class.wwell-ir__row--pending]="ir.id === pendingId()"
+              [style.borderLeftColor]="chainBorderColor(ir.chain)"
               (click)="selectIr(ir.id)"
             >
               <div class="wwell-ir__row-top">
@@ -71,8 +73,10 @@
   </div>
 
   <div class="wwell-ir__detail">
-    @if (selectedIr(); as ir) {
-      <div class="wwell-ir__detail-panel" #detailHost>
+    @if (isSelecting()) {
+      <app-wwell-detail-loading />
+    } @else if (selectedIr(); as ir) {
+      <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
         <app-wwell-ir-detail [ir]="ir" [submitting]="isSubmittingForReview()" (submitForReview)="submitForReview($event)" />
       </div>
     } @else {

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
   computed,
@@ -14,11 +15,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { ApprovalChainStep, IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
+import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WwellApprovalMiniChainComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
+import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WwellIrDetailComponent } from './wwell-ir-detail/wwell-ir-detail.component';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
@@ -29,12 +33,19 @@ const SKELETON_ROW_COUNT = 6;
 @Component({
   selector: 'app-wwell-ir',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, WwellIrDetailComponent, WwellApprovalMiniChainComponent],
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    WwellIrDetailComponent,
+    WwellApprovalMiniChainComponent,
+    WwellDetailLoadingComponent,
+  ],
   templateUrl: './wwell-ir.component.html',
   styleUrl: './wwell-ir.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WwellIrComponent implements OnInit {
+export class WwellIrComponent implements OnInit, OnDestroy {
   protected readonly store = inject(WwellPlanningStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -70,6 +81,10 @@ export class WwellIrComponent implements OnInit {
   protected readonly statusMeta = WWELL_IR_STATUS_META;
 
   protected readonly skeletonRows = Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => index);
+
+  private readonly pendingSelection = createPendingSelection(WWELL_DETAIL_LOADING_MS);
+  protected readonly pendingId = this.pendingSelection.pendingId;
+  protected readonly isSelecting = this.pendingSelection.isSelecting;
 
   @ViewChild('detailHost') private readonly detailHost?: ElementRef<HTMLElement>;
   @ViewChild('listHost') private readonly listHost?: ElementRef<HTMLElement>;
@@ -127,16 +142,24 @@ export class WwellIrComponent implements OnInit {
     this.store.loadIntegratedRequirements();
   }
 
+  ngOnDestroy(): void {
+    this.pendingSelection.clear();
+  }
+
   protected onSearchChange(term: string): void {
     this.searchTerm.set(term);
   }
 
   protected selectIr(id: string): void {
-    this.selectedId.set(id);
+    this.pendingSelection.select(id, this.selectedId(), resolvedId => this.selectedId.set(resolvedId));
   }
 
   protected openNewIrPage(): void {
     this.router.navigate(['new'], { relativeTo: this.route });
+  }
+
+  protected chainBorderColor(chain: readonly ApprovalChainStep[]): string {
+    return chainCompletionColor(chain);
   }
 
   protected submitForReview(ir: IntegratedRequirement): void {

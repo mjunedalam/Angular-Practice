@@ -16,8 +16,8 @@
 }
 
 .mini-chain__dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #cbd5e1;
   flex-shrink: 0;
@@ -38,7 +38,7 @@
 }
 
 .mini-chain__line {
-  width: 14px;
+  width: 15px;
   height: 2px;
   border-radius: 999px;
   background: #e2e8f0;
@@ -65,17 +65,17 @@
 /*
  * `compact` is only ever used paired with `stretch` today (the wwell-ir list row) — sized as
  * a full-width status bar, not a shrunk copy of the default dot-and-line indicator. Dots and
- * connector both sized up a step further (13px / 4px) so the line reads as a clear connecting
- * stroke across the row instead of a thin hairline between dots.
+ * connector both sized up a step further so the line reads as a clear connecting stroke
+ * across the row instead of a thin hairline between dots.
  */
 :host(.mini-chain--compact) {
   .mini-chain__dot {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
   }
 
   .mini-chain__line {
-    width: 9px;
+    width: 10px;
     height: 4px;
     margin: 0 2px;
     background: #cbd5e1;

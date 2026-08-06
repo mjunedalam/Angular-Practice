@@ -1,0 +1,110 @@
+@use '../wwell-design-tokens' as tokens;
+
+:host {
+  display: block;
+}
+
+.wdl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.25rem;
+}
+
+.wdl__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+}
+
+.wdl__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.wdl__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.wdl__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+}
+
+.wdl__sidebar {
+  height: 220px;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 10px;
+}
+
+.wdl__bar {
+  display: block;
+  height: 0.7rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: wdl-shimmer 1.4s ease-in-out infinite;
+
+  &--eyebrow {
+    width: 18%;
+    height: 0.6rem;
+  }
+
+  &--title {
+    width: 40%;
+    height: 1.1rem;
+  }
+
+  &--subtitle {
+    width: 24%;
+  }
+
+  &--label {
+    width: 30%;
+    height: 0.6rem;
+    margin-bottom: 0.15rem;
+  }
+
+  &--line {
+    width: 90%;
+  }
+
+  &--short {
+    width: 55%;
+  }
+}
+
+@keyframes wdl-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+@media (max-width: 900px) {
+  .wdl__body {
+    grid-template-columns: 1fr;
+  }
+
+  .wdl__sidebar {
+    order: -1;
+    height: 120px;
+  }
+}

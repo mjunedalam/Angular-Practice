@@ -1,12 +1,19 @@
-<section class="wwell-approvals">
-  <header class="wwell-approvals__header">
-    <div class="wwell-approvals__heading">
-      <h1 class="wwell-approvals__title">WLDA Approvals</h1>
-      <span class="wwell-approvals__count">{{ totalCount() }}</span>
-    </div>
+<section class="wlda">
+  <div class="wlda__master">
+    <header class="wlda__header">
+      <div class="wlda__heading">
+        <h1 class="wlda__title">WLDA Approvals</h1>
+        <span class="wlda__count">{{ totalCount() }}</span>
+      </div>
 
-    <label class="wwell-approvals__search">
-      <mat-icon class="wwell-approvals__search-icon">search</mat-icon>
+      <button type="button" mat-flat-button color="primary" class="wlda__new-btn" (click)="openWldaRequestDialog()">
+        <mat-icon>add</mat-icon>
+        New Request
+      </button>
+    </header>
+
+    <label class="wlda__search">
+      <mat-icon class="wlda__search-icon">search</mat-icon>
       <input
         type="search"
         placeholder="Search by req #, client or well name&hellip;"
@@ -14,37 +21,138 @@
         (ngModelChange)="onSearchChange($event)"
       />
     </label>
-  </header>
-
-  @if (loadError()) {
-    <div class="wwell-approvals__status wwell-approvals__status--error">{{ loadError() }}</div>
-  }
-
-  <!-- ── Well Location & Drilling Approval (WLDA) ─────────────────────── -->
-  <section class="wwell-approvals__panel">
-    <header class="wwell-approvals__panel-header">
-      <h2 class="wwell-approvals__panel-title">Well Location &amp; Drilling Approval (WLDA)</h2>
-      <button type="button" mat-flat-button color="primary" (click)="openWldaRequestDialog()">
-        <mat-icon>add</mat-icon>
-        Request WLDA Approval
-      </button>
-    </header>
 
     @if (isLoading()) {
-      <div class="wwell-approvals__status">Loading WLDA approvals&hellip;</div>
-    } @else if (wldaRows().length === 0) {
-      <div class="wwell-approvals__status">No WLDA approval requests found.</div>
+      <ul class="wlda__list wlda__list--skeleton" aria-hidden="true">
+        @for (n of skeletonRows; track n) {
+          <li class="wlda__row wlda__skeleton-row">
+            <div class="wlda__row-top">
+              <span class="wlda__skeleton-bar wlda__skeleton-bar--code"></span>
+              <span class="wlda__skeleton-bar wlda__skeleton-bar--badge"></span>
+            </div>
+            <span class="wlda__skeleton-bar wlda__skeleton-bar--name"></span>
+            <span class="wlda__skeleton-bar wlda__skeleton-bar--meta"></span>
+          </li>
+        }
+      </ul>
+    } @else if (loadError()) {
+      <div class="wlda__status wlda__status--error">{{ loadError() }}</div>
+    } @else if (rows().length === 0) {
+      <div class="wlda__status">No WLDA approval requests found.</div>
     } @else {
-      <app-wwell-approval-table
-        [rows]="wldaRows()"
-        [columns]="wldaColumns"
-        [statusMeta]="statusMeta"
-        [expandedIds]="expandedIds()"
-        [downloadingIds]="downloadingIds()"
-        approvalKindLabel="WLDA"
-        (rowToggle)="toggleRow($event)"
-        (pdfDownload)="downloadWldaPdf($event)"
-      />
+      <ul class="wlda__list" #listHost>
+        @for (row of rows(); track row.id) {
+          <li>
+            <button
+              type="button"
+              class="wlda__row"
+              [class.wlda__row--active]="row.id === selectedId()"
+              [class.wlda__row--pending]="row.id === pendingId()"
+              [style.borderLeftColor]="chainBorderColor(row.chain)"
+              (click)="selectRow(row.id)"
+            >
+              <div class="wlda__row-top">
+                <span class="wlda__row-code">{{ row.reqNo }}</span>
+                <span
+                  class="wlda__badge"
+                  [style.background]="statusMeta[row.status].bg"
+                  [style.color]="statusMeta[row.status].color"
+                >
+                  <span class="wlda__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                  {{ statusMeta[row.status].label }}
+                </span>
+              </div>
+              <p class="wlda__row-name">{{ row.wellName }}</p>
+              <p class="wlda__row-meta">{{ row.client }} &middot; {{ row.date }}</p>
+              <app-wwell-approval-mini-chain class="wlda__row-chain" [steps]="row.chain" size="compact" stretch />
+            </button>
+          </li>
+        }
+      </ul>
     }
-  </section>
+  </div>
+
+  <div class="wlda__detail">
+    @if (isSelecting()) {
+      <app-wwell-detail-loading />
+    } @else if (selectedRow(); as row) {
+      <div class="wlda__detail-panel" [style.--chain-color]="chainBorderColor(row.chain)" #detailHost>
+        <header class="wlda__detail-header">
+          <div class="wlda__detail-heading">
+            <p class="wlda__eyebrow">{{ row.reqNo }}</p>
+            <h2 class="wlda__detail-title">{{ row.wellName }}</h2>
+            <p class="wlda__detail-subtitle">{{ row.client }}</p>
+          </div>
+
+          <span
+            class="wlda__badge wlda__badge--lg"
+            [style.background]="statusMeta[row.status].bg"
+            [style.color]="statusMeta[row.status].color"
+          >
+            <span class="wlda__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+            {{ statusMeta[row.status].label }}
+          </span>
+        </header>
+
+        <div class="wlda__body">
+          <div class="wlda__main">
+            <section class="wlda__card">
+              <h3 class="wlda__card-title"><mat-icon class="wlda__card-icon">info</mat-icon>Details</h3>
+              <dl class="wlda__kv-grid wlda__kv-grid--wide">
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">tag</mat-icon>Request #</dt>
+                  <dd>{{ row.reqNo }}</dd>
+                </div>
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">business</mat-icon>Client</dt>
+                  <dd>{{ row.client }}</dd>
+                </div>
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">water_drop</mat-icon>Water Well Name</dt>
+                  <dd>{{ row.wellName }}</dd>
+                </div>
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">domain</mat-icon>Supporting</dt>
+                  <dd>{{ row.supporting }}</dd>
+                </div>
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">person</mat-icon>Submitted By</dt>
+                  <dd>{{ row.submittedBy }}</dd>
+                </div>
+                <div class="wlda__kv">
+                  <dt><mat-icon class="wlda__kv-icon">event</mat-icon>Submitted Date</dt>
+                  <dd>{{ row.date }}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <aside class="wlda__sidebar">
+            <section class="wlda__card wlda__card--sidebar">
+              <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" orientation="vertical" />
+            </section>
+
+            @if (canDownloadPdf()) {
+              <button
+                type="button"
+                mat-flat-button
+                color="primary"
+                class="wlda__pdf-btn"
+                [disabled]="isDownloading(row.id)"
+                (click)="downloadWldaPdf(row)"
+              >
+                <mat-icon>picture_as_pdf</mat-icon>
+                {{ isDownloading(row.id) ? 'Preparing…' : 'Download PDF' }}
+              </button>
+            }
+          </aside>
+        </div>
+      </div>
+    } @else {
+      <div class="wlda__empty">
+        <mat-icon>description</mat-icon>
+        <p>Select a WLDA approval request to view its details.</p>
+      </div>
+    }
+  </div>
 </section>

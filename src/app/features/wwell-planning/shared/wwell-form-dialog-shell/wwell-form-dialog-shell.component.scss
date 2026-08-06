@@ -1,9 +1,11 @@
+@use '../wwell-design-tokens' as tokens;
+
 /* ── wwell-form-dialog-shell tokens ────────────────────────────── */
-$navy: #1e293b;
-$muted: #64748b;
-$border: #e2e8f0;
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
 $danger: #dc2626;
-$bg-subtle: #f8fafc;
+$bg-subtle: tokens.$surface-alt;
 
 /*
  * ViewEncapsulation.None (matching wwell-request-form.component.ts) so these
@@ -11,7 +13,16 @@ $bg-subtle: #f8fafc;
  * consuming dialog — those elements carry the consuming component's own
  * content attribute, not this component's, so emulated encapsulation
  * wouldn't otherwise let a shared selector like .wfds__actions button match.
+ *
+ * `:host` still resolves to the `app-wwell-form-dialog-shell` element itself even
+ * under `ViewEncapsulation.None` — used here for `font-family` inheritance since
+ * dialogs are portaled to `document.body` via CDK overlay, outside the page's own
+ * `:host { font-family: ... }` scope.
  */
+:host {
+  font-family: tokens.$font-family;
+}
+
 .wfds__header {
   display: flex;
   align-items: flex-start;
@@ -28,7 +39,7 @@ $bg-subtle: #f8fafc;
 
 .wfds__title {
   margin: 0 0 0.3rem;
-  font-size: 1.3rem;
+  font-size: 1.38rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.01em;
@@ -36,7 +47,7 @@ $bg-subtle: #f8fafc;
 
 .wfds__subtitle {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.93rem;
   color: $muted;
   line-height: 1.4;
 }
@@ -74,7 +85,7 @@ $bg-subtle: #f8fafc;
 }
 
 .wfds__hint {
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   color: $muted;
 }
 

@@ -1,9 +1,12 @@
-$navy: #1e293b;
-$muted: #64748b;
-$border: #e2e8f0;
+@use '../../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
 
 :host {
   display: block;
+  font-family: tokens.$font-family;
 }
 
 .preview {
@@ -13,7 +16,7 @@ $border: #e2e8f0;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: #f8fafc;
+  background: tokens.$surface-alt;
   border: 1px solid $border;
   border-radius: 12px;
 }
@@ -72,6 +75,6 @@ $border: #e2e8f0;
 }
 
 .preview__empty {
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   color: $muted;
 }

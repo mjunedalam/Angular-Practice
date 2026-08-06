@@ -1,0 +1,50 @@
+// Shared design tokens for the wwell-planning module (list/detail pages, approval
+// timeline, request/approval lists, dialogs). Single source of truth so every
+// component's local `$navy`/`$muted`/`$border`/`$accent` block references the same
+// values instead of re-declaring its own copy — keeps typography and color changes
+// module-wide instead of a per-file hunt.
+//
+// No font is actually loaded for 'DM Sans' anywhere in the app (referenced in
+// styles.scss/index.html but never linked) — it silently falls back to Arial. This
+// stack renders with the OS's own polished UI font instead, with zero extra network
+// requests, scoped to this module only (not a global app-wide change).
+$font-family:
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  'Helvetica Neue',
+  Arial,
+  sans-serif;
+
+// ── Color ────────────────────────────────────────────────────────
+$navy: #1e293b; // primary body text
+$navy-deep: #0f172a; // headings — one step darker for stronger hierarchy against body text
+$muted: #5b6b83; // secondary text — deepened from #64748b for better contrast at small sizes
+$subtle: #94a3b8; // tertiary text / icons
+$border: #e2e8f0;
+$border-soft: #eef2f7;
+
+$accent: #3b82f6;
+$accent-deep: #2563eb; // hover/active states
+$accent-soft: rgba(59, 130, 246, 0.08);
+
+$surface: #ffffff;
+$surface-alt: #f8fafc;
+$page-bg: #f0f4f8;
+
+// ── Typography scale ─────────────────────────────────────────────
+// One step up across the board ("little more bigger") vs. the previous ad-hoc values.
+$text-2xs: 0.7rem; // badges, eyebrows
+$text-xs: 0.8rem; // meta text, captions
+$text-sm: 0.88rem; // secondary body text
+$text-base: 0.95rem; // primary body text, list-row names
+$text-md: 1.05rem; // card/section sub-headings
+$text-lg: 1.3rem; // detail-panel titles
+$text-xl: 1.55rem; // page titles
+
+// ── Motion ───────────────────────────────────────────────────────
+$ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+$duration-fast: 160ms;
+$duration-base: 240ms;
+$duration-slow: 340ms;

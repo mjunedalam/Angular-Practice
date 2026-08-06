@@ -1,12 +1,19 @@
-<section class="wwell-approvals">
-  <header class="wwell-approvals__header">
-    <div class="wwell-approvals__heading">
-      <h1 class="wwell-approvals__title">Land Affairs Approvals</h1>
-      <span class="wwell-approvals__count">{{ totalCount() }}</span>
-    </div>
+<section class="wla">
+  <div class="wla__master">
+    <header class="wla__header">
+      <div class="wla__heading">
+        <h1 class="wla__title">Land Affairs Approvals</h1>
+        <span class="wla__count">{{ totalCount() }}</span>
+      </div>
 
-    <label class="wwell-approvals__search">
-      <mat-icon class="wwell-approvals__search-icon">search</mat-icon>
+      <button type="button" mat-flat-button color="primary" class="wla__new-btn" (click)="openLandAffairsRequestDialog()">
+        <mat-icon>add</mat-icon>
+        New Request
+      </button>
+    </header>
+
+    <label class="wla__search">
+      <mat-icon class="wla__search-icon">search</mat-icon>
       <input
         type="search"
         placeholder="Search by req #, client or well name&hellip;"
@@ -14,37 +21,146 @@
         (ngModelChange)="onSearchChange($event)"
       />
     </label>
-  </header>
-
-  @if (loadError()) {
-    <div class="wwell-approvals__status wwell-approvals__status--error">{{ loadError() }}</div>
-  }
-
-  <!-- ── Land Affairs ─────────────────────────────────────────────────── -->
-  <section class="wwell-approvals__panel">
-    <header class="wwell-approvals__panel-header">
-      <h2 class="wwell-approvals__panel-title">Land Affairs</h2>
-      <button type="button" mat-flat-button color="primary" (click)="openLandAffairsRequestDialog()">
-        <mat-icon>add</mat-icon>
-        Request Land Affairs Approval
-      </button>
-    </header>
 
     @if (isLoading()) {
-      <div class="wwell-approvals__status">Loading Land Affairs approvals&hellip;</div>
-    } @else if (landAffairsRows().length === 0) {
-      <div class="wwell-approvals__status">No Land Affairs approval requests found.</div>
+      <ul class="wla__list wla__list--skeleton" aria-hidden="true">
+        @for (n of skeletonRows; track n) {
+          <li class="wla__row wla__skeleton-row">
+            <div class="wla__row-top">
+              <span class="wla__skeleton-bar wla__skeleton-bar--code"></span>
+              <span class="wla__skeleton-bar wla__skeleton-bar--badge"></span>
+            </div>
+            <span class="wla__skeleton-bar wla__skeleton-bar--name"></span>
+            <span class="wla__skeleton-bar wla__skeleton-bar--meta"></span>
+          </li>
+        }
+      </ul>
+    } @else if (loadError()) {
+      <div class="wla__status wla__status--error">{{ loadError() }}</div>
+    } @else if (rows().length === 0) {
+      <div class="wla__status">No Land Affairs approval requests found.</div>
     } @else {
-      <app-wwell-approval-table
-        [rows]="landAffairsRows()"
-        [columns]="landAffairsColumns"
-        [statusMeta]="statusMeta"
-        [expandedIds]="expandedIds()"
-        [downloadingIds]="downloadingIds()"
-        approvalKindLabel="Land Affairs"
-        (rowToggle)="toggleRow($event)"
-        (pdfDownload)="downloadLandAffairsPdf($event)"
-      />
+      <ul class="wla__list" #listHost>
+        @for (row of rows(); track row.id) {
+          <li>
+            <button
+              type="button"
+              class="wla__row"
+              [class.wla__row--active]="row.id === selectedId()"
+              [class.wla__row--pending]="row.id === pendingId()"
+              [style.borderLeftColor]="chainBorderColor(row.chain)"
+              (click)="selectRow(row.id)"
+            >
+              <div class="wla__row-top">
+                <span class="wla__row-code">{{ row.reqNo }}</span>
+                <span
+                  class="wla__badge"
+                  [style.background]="statusMeta[row.status].bg"
+                  [style.color]="statusMeta[row.status].color"
+                >
+                  <span class="wla__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                  {{ statusMeta[row.status].label }}
+                </span>
+              </div>
+              <p class="wla__row-name">{{ row.wellName }}</p>
+              <p class="wla__row-meta">{{ row.client }} &middot; {{ row.date }}</p>
+              <app-wwell-approval-mini-chain class="wla__row-chain" [steps]="row.chain" size="compact" stretch />
+            </button>
+          </li>
+        }
+      </ul>
     }
-  </section>
+  </div>
+
+  <div class="wla__detail">
+    @if (isSelecting()) {
+      <app-wwell-detail-loading />
+    } @else if (selectedRow(); as row) {
+      <div class="wla__detail-panel" [style.--chain-color]="chainBorderColor(row.chain)" #detailHost>
+        <header class="wla__detail-header">
+          <div class="wla__detail-heading">
+            <p class="wla__eyebrow">{{ row.reqNo }}</p>
+            <h2 class="wla__detail-title">{{ row.wellName }}</h2>
+            <p class="wla__detail-subtitle">{{ row.client }}</p>
+          </div>
+
+          <span
+            class="wla__badge wla__badge--lg"
+            [style.background]="statusMeta[row.status].bg"
+            [style.color]="statusMeta[row.status].color"
+          >
+            <span class="wla__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+            {{ statusMeta[row.status].label }}
+          </span>
+        </header>
+
+        <div class="wla__body">
+          <div class="wla__main">
+            <section class="wla__card">
+              <h3 class="wla__card-title"><mat-icon class="wla__card-icon">info</mat-icon>Details</h3>
+              <dl class="wla__kv-grid">
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">tag</mat-icon>Request #</dt>
+                  <dd>{{ row.reqNo }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">business</mat-icon>Client</dt>
+                  <dd>{{ row.client }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">water_drop</mat-icon>Water Well Name</dt>
+                  <dd>{{ row.wellName }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">person</mat-icon>Submitted By</dt>
+                  <dd>{{ row.submittedBy }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">event</mat-icon>Submitted Date</dt>
+                  <dd>{{ row.date }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">north</mat-icon>X Coordinate</dt>
+                  <dd>{{ row.x }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">east</mat-icon>Y Coordinate</dt>
+                  <dd>{{ row.y }}</dd>
+                </div>
+                <div class="wla__kv">
+                  <dt><mat-icon class="wla__kv-icon">map</mat-icon>UTM Zone</dt>
+                  <dd>{{ row.utm }}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <aside class="wla__sidebar">
+            <section class="wla__card wla__card--sidebar">
+              <app-wwell-approval-timeline [reqNo]="row.reqNo" [steps]="row.chain" orientation="vertical" />
+            </section>
+
+            @if (canDownloadPdf()) {
+              <button
+                type="button"
+                mat-flat-button
+                color="primary"
+                class="wla__pdf-btn"
+                [disabled]="isDownloading(row.id)"
+                (click)="downloadLandAffairsPdf(row)"
+              >
+                <mat-icon>picture_as_pdf</mat-icon>
+                {{ isDownloading(row.id) ? 'Preparing…' : 'Download PDF' }}
+              </button>
+            }
+          </aside>
+        </div>
+      </div>
+    } @else {
+      <div class="wla__empty">
+        <mat-icon>description</mat-icon>
+        <p>Select a Land Affairs approval request to view its details.</p>
+      </div>
+    }
+  </div>
 </section>

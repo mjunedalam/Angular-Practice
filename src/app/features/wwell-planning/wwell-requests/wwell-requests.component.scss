@@ -1,193 +1,153 @@
+@use '../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+
+// Matches the WLDA/Land-Affairs/IR siblings' skinny master column. Rows still truncate
+// cleanly via `text-overflow: ellipsis` below.
+$master-width: 240px;
+
 :host {
   display: block;
   height: 100%;
-  overflow: auto;
-  background: #f0f4f8;
+  background: tokens.$page-bg;
+  font-family: tokens.$font-family;
 }
 
-.wwell-requests {
+/* The project has no global `box-sizing: border-box` reset, so every element here defaults
+ * to `content-box` — meaning `max-height: 100%` / `width: $master-width` on a padded/bordered
+ * box (e.g. `.wreq__master`) only caps its *content* box, then padding+border get added on
+ * top, silently overflowing the intended size. Harmless for a short list (nothing needed
+ * clamping), but with a real dataset the master column overflows `.wreq`'s available height by
+ * its own padding+border — enough to push the last row(s) out of the internally-scrollable
+ * area entirely. Scoped to this component only (Angular's emulated encapsulation confines the
+ * `*` selector to this template), not a global change. */
+:host * {
+  box-sizing: border-box;
+}
+
+.wreq {
   display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  padding: 1.5rem;
+  /* Not `stretch` (the flex default): with only a handful of rows, stretching the master
+   * column to match `.wreq`'s full 100%-height would force its white card down to fill the
+   * whole page, leaving dead empty space below the last row. Each column sizes to its own
+   * content instead, capped by `max-height: 100%` — `.wreq__detail` opts back into filling
+   * the available height via `align-self: stretch` since its content is meant to. */
+  align-items: flex-start;
+  gap: 1.25rem;
   height: 100%;
+  padding: 1.5rem;
 }
 
-/* ── Header ───────────────────────────────────────────────────── */
-.wwell-requests__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.wwell-requests__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.wwell-requests__title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1e293b;
-  letter-spacing: -0.01em;
-}
-
-.wwell-requests__count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #3b82f6;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.wwell-requests__new-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.28);
-
-  mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
-  }
-}
-
-/* ── Stat cards ───────────────────────────────────────────────── */
-.wwell-requests__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.85rem;
-}
-
-.wwell-requests__stat {
+/* ── Master column ────────────────────────────────────────────── */
+.wreq__master {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 1rem 1.15rem;
-  background: #ffffff;
-  border: 1px solid #e8edf4;
-  border-left: 4px solid #94a3b8;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 150ms ease,
-    box-shadow 150ms ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-  }
-
-  &--progress {
-    border-left-color: #3b82f6;
-  }
-
-  &--review {
-    border-left-color: #a855f7;
-  }
-
-  &--approved {
-    border-left-color: #22c55e;
-  }
-}
-
-.wwell-requests__stat-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.wwell-requests__stat-value {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #1e293b;
-  line-height: 1.1;
-}
-
-/* ── Card / toolbar ───────────────────────────────────────────── */
-.wwell-requests__card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e8edf4;
+  gap: 0.75rem;
+  width: $master-width;
+  flex-shrink: 0;
+  max-height: 100%;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border-soft;
+  border-radius: 10px;
+  padding: 0.9rem;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(59, 130, 246, 0.05);
   overflow: hidden;
 }
 
-.wwell-requests__toolbar {
+.wreq__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
   flex-wrap: wrap;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e8edf4;
+  gap: 0.5rem;
 }
 
-.wwell-requests__toolbar-title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #1e293b;
-}
-
-.wwell-requests__search {
+.wreq__heading {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0.4rem 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  min-width: 220px;
-  flex: 0 1 280px;
-  transition: border-color 150ms ease;
+  gap: 0.5rem;
+}
 
-  &:focus-within {
-    border-color: #3b82f6;
-    background: #ffffff;
+.wreq__title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wreq__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba($accent, 0.12);
+  color: $accent;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.wreq__new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0 10px;
+  box-shadow: none;
+
+  mat-icon {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
   }
 }
 
-.wwell-requests__search-icon {
+/* ── Search ───────────────────────────────────────────────────── */
+.wreq__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.42rem 0.75rem;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  border-radius: 8px;
+  transition: border-color 150ms ease;
+
+  &:focus-within {
+    border-color: $accent;
+  }
+}
+
+.wreq__search-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: #94a3b8;
+  color: tokens.$subtle;
   flex-shrink: 0;
 }
 
-.wwell-requests__search input {
+.wreq__search input {
   flex: 1;
   min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.85rem;
-  color: #1e293b;
+  font-size: 0.93rem;
+  color: $navy;
 
   &::placeholder {
-    color: #94a3b8;
+    color: tokens.$subtle;
   }
 
   &::-webkit-search-cancel-button {
@@ -195,49 +155,524 @@
   }
 }
 
-.wwell-requests__status {
+.wreq__status {
   padding: 2rem 1rem;
   text-align: center;
-  color: #64748b;
-  font-size: 0.9rem;
+  color: $muted;
+  font-size: 0.93rem;
 
   &--error {
     color: #dc2626;
   }
 }
 
-.wwell-requests__grid {
+/* ── Loading skeleton ─────────────────────────────────────────── */
+.wreq__list--skeleton {
+  overflow: hidden;
+}
+
+.wreq__skeleton-row {
+  cursor: default;
+  pointer-events: none;
+}
+
+.wreq__skeleton-bar {
   display: block;
+  height: 0.6rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: wreq-shimmer 1.4s ease-in-out infinite;
+
+  &--code {
+    width: 34%;
+  }
+
+  &--badge {
+    width: 22%;
+    height: 0.9rem;
+    border-radius: 999px;
+  }
+
+  &--name {
+    width: 62%;
+    height: 0.7rem;
+    margin-top: 0.2rem;
+  }
+
+  &--meta {
+    width: 48%;
+    margin-top: 0.15rem;
+  }
+}
+
+@keyframes wreq-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+/* ── Row list ─────────────────────────────────────────────────── */
+.wreq__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+
+  /* Skinny hidden scrollbar — rows are the only chrome here; a visible track/thumb would
+   * just be more noise on a narrow column. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Guards against scroll-chaining into `.dashboard__content` once the list hits its own
+   * end — see the identical guard in wwell-ir.component.scss for the full rationale. */
+  overscroll-behavior-y: contain;
+}
+
+.wreq__row {
   width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.65rem;
+  background: tokens.$surface;
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    background: tokens.$surface-alt;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  }
+
+  &--active {
+    background: rgba($accent, 0.06);
+    border-color: rgba($accent, 0.16);
+    border-left-color: $accent;
+  }
+
+  &--active:hover {
+    box-shadow: none;
+  }
+
+  /* Brief pulse while the detail-loading shimmer plays, so the row the user just clicked
+   * stays visually "live" instead of looking unresponsive during the short select-loading beat. */
+  &--pending {
+    animation: wreq-row-pending-pulse 0.9s ease-in-out infinite;
+  }
+}
+
+@keyframes wreq-row-pending-pulse {
+  0%,
+  100% {
+    background: tokens.$surface;
+  }
+  50% {
+    background: rgba($accent, 0.07);
+  }
+}
+
+.wreq__row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wreq__row-code {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: 0.01em;
+}
+
+.wreq__row-name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: $navy;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wreq__row-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: $muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wreq__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &--lg {
+    padding: 4px 11px;
+    font-size: 0.8rem;
+  }
+}
+
+.wreq__badge-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Detail column ────────────────────────────────────────────── */
+.wreq__detail {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  max-height: 100%;
+  overflow-y: auto;
+
+  /* Scrolls, but stays visually quiet — the cards inside are the only chrome on screen; a
+   * visible track/thumb here would just be more noise. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  overscroll-behavior-y: contain;
+}
+
+/* Deliberately no background/border/shadow here — just a padding wrapper. The neutral page
+ * background (`:host`) shows through behind the cards themselves, which is the only "card"
+ * layer left; wrapping the whole column in its own card too would nest cards inside a card
+ * and leave a visible blank box below short content. */
+.wreq__detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.25rem;
+}
+
+.wreq__detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.wreq__eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: $accent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wreq__detail-title {
+  margin: 0.15rem 0 0;
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wreq__detail-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.84rem;
+  color: $muted;
+}
+
+/* ── Body: card column + status sidebar ───────────────────────────
+ * `align-items: start` — not `stretch` — so the sidebar's height follows its own content
+ * instead of stretching to match a taller main column, which would otherwise leave visible
+ * blank space inside the sidebar card.
+ */
+.wreq__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.wreq__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.wreq__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.wreq__card {
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  transition:
+    box-shadow tokens.$duration-fast ease,
+    transform tokens.$duration-fast ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.07),
+        0 10px 24px rgba(59, 130, 246, 0.09);
+    }
+  }
+}
+
+/* Sidebar card reads as a compact rail, not a bento card. */
+.wreq__card--sidebar {
+  padding: 0.85rem 0.9rem;
+}
+
+.wreq__card-title {
+  margin: 0 0 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: $navy;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wreq__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  background: rgba($accent, 0.1);
+  color: $accent;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 21px;
+    height: 21px;
+    font-size: 13px;
+  }
+}
+
+/* ── Overview ─────────────────────────────────────────────────── */
+.wreq__overview-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.wreq__overview-desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: $muted;
+  line-height: 1.5;
+}
+
+.wreq__notes {
+  margin: 0;
+  font-size: 0.9rem;
+  color: $navy;
+  line-height: 1.5;
+}
+
+/* ── Key/value grid ───────────────────────────────────────────── */
+.wreq__kv-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 2rem;
+}
+
+.wreq__kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.89rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed $border;
+
+  dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $navy;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.wreq__kv-icon {
+  color: tokens.$subtle;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+/* ── Sidebar status list ──────────────────────────────────────────
+ * Vertical stack, not a grid — the field set is inherently uneven (priority/aquifer/depth
+ * are all nullable), so a grid would leave ragged empty cells depending on the record.
+ */
+.wreq__status-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.wreq__status-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  dt {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $navy;
+  }
+}
+
+.wreq__status-empty {
+  color: tokens.$subtle;
+  font-weight: 500;
+}
+
+.wreq__view-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.wreq__empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: $muted;
+  background: tokens.$surface;
+  border: 1px dashed $border;
+  border-radius: 12px;
+  min-height: 320px;
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.96rem;
+  }
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .wreq {
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .wreq__master {
+    width: 100%;
+    max-height: none;
+  }
+
+  .wreq__detail {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .wreq__body {
+    grid-template-columns: 1fr;
+  }
+
+  .wreq__sidebar {
+    order: -1;
+  }
+}
+
 @media (max-width: 640px) {
-  .wwell-requests {
+  .wreq {
     padding: 1rem;
   }
 
-  .wwell-requests__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .wwell-requests__new-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .wwell-requests__stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .wwell-requests__toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .wwell-requests__search {
-    flex: 1 1 auto;
-    width: 100%;
+  .wreq__kv-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,73 +1,211 @@
-<section class="wwell-requests">
-  <header class="wwell-requests__header">
-    <div class="wwell-requests__heading">
-      <h1 class="wwell-requests__title">Requests</h1>
-      <span class="wwell-requests__count">{{ totalCount() }}</span>
-    </div>
+<section class="wreq">
+  <div class="wreq__master">
+    <header class="wreq__header">
+      <div class="wreq__heading">
+        <h1 class="wreq__title">Requests</h1>
+        <span class="wreq__count">{{ totalCount() }}</span>
+      </div>
 
-    <button
-      type="button"
-      mat-flat-button
-      color="primary"
-      class="wwell-requests__new-btn"
-      [disabled]="isCreating()"
-      (click)="openNewRequestDialog()"
-    >
-      <mat-icon>add</mat-icon>
-      New Request
-    </button>
-  </header>
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        class="wreq__new-btn"
+        [disabled]="isCreating()"
+        (click)="openNewRequestDialog()"
+      >
+        <mat-icon>add</mat-icon>
+        New Request
+      </button>
+    </header>
 
-  <div class="wwell-requests__stats">
-    <div class="wwell-requests__stat">
-      <span class="wwell-requests__stat-label">Total Requests</span>
-      <span class="wwell-requests__stat-value">{{ totalCount() }}</span>
-    </div>
-    <div class="wwell-requests__stat wwell-requests__stat--progress">
-      <span class="wwell-requests__stat-label">In Progress</span>
-      <span class="wwell-requests__stat-value">{{ inProgressCount() }}</span>
-    </div>
-    <div class="wwell-requests__stat wwell-requests__stat--review">
-      <span class="wwell-requests__stat-label">In Review</span>
-      <span class="wwell-requests__stat-value">{{ inReviewCount() }}</span>
-    </div>
-    <div class="wwell-requests__stat wwell-requests__stat--approved">
-      <span class="wwell-requests__stat-label">Approved</span>
-      <span class="wwell-requests__stat-value">{{ approvedCount() }}</span>
-    </div>
-  </div>
-
-  <div class="wwell-requests__card">
-    <div class="wwell-requests__toolbar">
-      <h2 class="wwell-requests__toolbar-title">All Requests</h2>
-      <label class="wwell-requests__search">
-        <mat-icon class="wwell-requests__search-icon">search</mat-icon>
-        <input
-          type="search"
-          placeholder="Search requests&hellip;"
-          [ngModel]="searchTerm()"
-          (ngModelChange)="onSearchChange($event)"
-        />
-      </label>
-    </div>
+    <label class="wreq__search">
+      <mat-icon class="wreq__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search by req #, client or well name&hellip;"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
 
     @if (isLoading()) {
-      <div class="wwell-requests__status">Loading requests&hellip;</div>
+      <ul class="wreq__list wreq__list--skeleton" aria-hidden="true">
+        @for (n of skeletonRows; track n) {
+          <li class="wreq__row wreq__skeleton-row">
+            <div class="wreq__row-top">
+              <span class="wreq__skeleton-bar wreq__skeleton-bar--code"></span>
+              <span class="wreq__skeleton-bar wreq__skeleton-bar--badge"></span>
+            </div>
+            <span class="wreq__skeleton-bar wreq__skeleton-bar--name"></span>
+            <span class="wreq__skeleton-bar wreq__skeleton-bar--meta"></span>
+          </li>
+        }
+      </ul>
     } @else if (loadError()) {
-      <div class="wwell-requests__status wwell-requests__status--error">{{ loadError() }}</div>
+      <div class="wreq__status wreq__status--error">{{ loadError() }}</div>
     } @else if (rows().length === 0) {
-      <div class="wwell-requests__status">No requests found.</div>
+      <div class="wreq__status">No requests found.</div>
     } @else {
-      <ag-grid-angular
-        class="wwell-requests__grid"
-        style="width: 100%"
-        [theme]="gridTheme"
-        [rowData]="rows()"
-        [columnDefs]="columnDefs"
-        [gridOptions]="gridOptions"
-        (gridReady)="onGridReady($event.api)"
-        (cellClicked)="onCellClicked($event)"
-      />
+      <ul class="wreq__list" #listHost>
+        @for (row of rows(); track row.id) {
+          <li>
+            <button
+              type="button"
+              class="wreq__row"
+              [class.wreq__row--active]="row.id === selectedId()"
+              [class.wreq__row--pending]="row.id === pendingId()"
+              (click)="selectRow(row.id)"
+            >
+              <div class="wreq__row-top">
+                <span class="wreq__row-code">{{ row.id }}</span>
+                <span
+                  class="wreq__badge"
+                  [style.background]="statusMeta[row.status].bg"
+                  [style.color]="statusMeta[row.status].color"
+                >
+                  <span class="wreq__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                  {{ statusMeta[row.status].label }}
+                </span>
+              </div>
+              <p class="wreq__row-name">{{ row.wellName }}</p>
+              <p class="wreq__row-meta">{{ row.client }} &middot; {{ row.requestedDate }}</p>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="wreq__detail">
+    @if (isSelecting()) {
+      <app-wwell-detail-loading />
+    } @else if (selectedRow(); as row) {
+      <div class="wreq__detail-panel" #detailHost>
+        <header class="wreq__detail-header">
+          <div class="wreq__detail-heading">
+            <p class="wreq__eyebrow">{{ row.id }}</p>
+            <h2 class="wreq__detail-title">{{ row.wellName }}</h2>
+            <p class="wreq__detail-subtitle">{{ row.client }}</p>
+          </div>
+
+          <span
+            class="wreq__badge wreq__badge--lg"
+            [style.background]="statusMeta[row.status].bg"
+            [style.color]="statusMeta[row.status].color"
+          >
+            <span class="wreq__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+            {{ statusMeta[row.status].label }}
+          </span>
+        </header>
+
+        <div class="wreq__body">
+          <div class="wreq__main">
+            <section class="wreq__card">
+              <h3 class="wreq__card-title"><mat-icon class="wreq__card-icon">description</mat-icon>Overview</h3>
+              <p class="wreq__overview-title">{{ row.title }}</p>
+              <p class="wreq__overview-desc">{{ row.description }}</p>
+            </section>
+
+            <section class="wreq__card">
+              <h3 class="wreq__card-title"><mat-icon class="wreq__card-icon">info</mat-icon>Details</h3>
+              <dl class="wreq__kv-grid wreq__kv-grid--wide">
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">business</mat-icon>Client</dt>
+                  <dd>{{ row.client }}</dd>
+                </div>
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">water_drop</mat-icon>Water Well Name</dt>
+                  <dd>{{ row.wellName }}</dd>
+                </div>
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">domain</mat-icon>Supporting Business</dt>
+                  <dd>{{ row.supportingBusiness }}</dd>
+                </div>
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">person</mat-icon>Requested By</dt>
+                  <dd>{{ row.requestedBy }}</dd>
+                </div>
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">event</mat-icon>Requested Date</dt>
+                  <dd>{{ row.requestedDate }}</dd>
+                </div>
+                <div class="wreq__kv">
+                  <dt><mat-icon class="wreq__kv-icon">place</mat-icon>Coordinates</dt>
+                  <dd>{{ coordinatesLabel(row) }}</dd>
+                </div>
+              </dl>
+            </section>
+
+            @if (row.notes) {
+              <section class="wreq__card">
+                <h3 class="wreq__card-title"><mat-icon class="wreq__card-icon">sticky_note_2</mat-icon>Notes</h3>
+                <p class="wreq__notes">{{ row.notes }}</p>
+              </section>
+            }
+          </div>
+
+          <aside class="wreq__sidebar">
+            <section class="wreq__card wreq__card--sidebar">
+              <h3 class="wreq__card-title"><mat-icon class="wreq__card-icon">update</mat-icon>Status</h3>
+              <dl class="wreq__status-list">
+                <div class="wreq__status-row">
+                  <dt>Status</dt>
+                  <dd>
+                    <span
+                      class="wreq__badge"
+                      [style.background]="statusMeta[row.status].bg"
+                      [style.color]="statusMeta[row.status].color"
+                    >
+                      <span class="wreq__badge-dot" [style.background]="statusMeta[row.status].dot"></span>
+                      {{ statusMeta[row.status].label }}
+                    </span>
+                  </dd>
+                </div>
+                <div class="wreq__status-row">
+                  <dt>Priority</dt>
+                  <dd>
+                    @if (row.priority) {
+                      <span
+                        class="wreq__badge"
+                        [style.background]="priorityMeta[row.priority].bg"
+                        [style.color]="priorityMeta[row.priority].color"
+                      >
+                        <span class="wreq__badge-dot" [style.background]="priorityMeta[row.priority].dot"></span>
+                        {{ priorityMeta[row.priority].label }}
+                      </span>
+                    } @else {
+                      <span class="wreq__status-empty">&mdash;</span>
+                    }
+                  </dd>
+                </div>
+                <div class="wreq__status-row">
+                  <dt>Assigned To</dt>
+                  <dd>{{ row.assignedTo || 'Unassigned' }}</dd>
+                </div>
+                <div class="wreq__status-row">
+                  <dt>Target Aquifer</dt>
+                  <dd>{{ row.targetAquifer || '—' }}</dd>
+                </div>
+                <div class="wreq__status-row">
+                  <dt>Proposed Depth</dt>
+                  <dd>{{ row.proposedDepth || '—' }}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <button type="button" mat-flat-button color="primary" class="wreq__view-btn" (click)="openViewDialog(row)">
+              <mat-icon>open_in_new</mat-icon>
+              View Full Details
+            </button>
+          </aside>
+        </div>
+      </div>
+    } @else {
+      <div class="wreq__empty">
+        <mat-icon>description</mat-icon>
+        <p>Select a request to view its details.</p>
+      </div>
     }
   </div>
 </section>

@@ -1,7 +1,9 @@
-$navy: #1e293b;
-$muted: #64748b;
-$border: #e2e8f0;
-$accent: #3b82f6;
+@use '../../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
 
 $stat-depth: #3b82f6;
 $stat-rate: #0891b2;
@@ -11,6 +13,7 @@ $stat-offset: #7c3aed;
 
 :host {
   display: block;
+  font-family: tokens.$font-family;
 }
 
 .ird {
@@ -37,7 +40,7 @@ $stat-offset: #7c3aed;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  background: #ffffff;
+  background: tokens.$surface;
   border: 1px solid $border;
   border-radius: 12px;
   padding: 0.9rem 1.1rem;
@@ -64,7 +67,7 @@ $stat-offset: #7c3aed;
 
 .ird__eyebrow {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: $accent;
   text-transform: uppercase;
@@ -73,7 +76,7 @@ $stat-offset: #7c3aed;
 
 .ird__title {
   margin: 0.15rem 0 0;
-  font-size: 1.22rem;
+  font-size: 1.32rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.01em;
@@ -81,7 +84,7 @@ $stat-offset: #7c3aed;
 
 .ird__subtitle {
   margin: 0.2rem 0 0;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   color: $muted;
 }
 
@@ -89,9 +92,9 @@ $stat-offset: #7c3aed;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 11px;
+  padding: 4px 12px;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -131,7 +134,7 @@ $stat-offset: #7c3aed;
   justify-content: center;
   gap: 6px;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 
   mat-icon {
     width: 16px;
@@ -172,15 +175,34 @@ $stat-offset: #7c3aed;
 }
 
 /* Shadow matches `wwell-ir-new-page`'s card treatment — see the `.wwell-ir__master`
- * comment in the parent list component for why. */
+ * comment in the parent list component for why. Lift-on-hover gives each widget a touch of
+ * interactive depth without competing with the panel-level reveal (`buildDetailRevealTimeline`
+ * in the parent) — that plays once on mount/selection change; this only responds to hover. */
+/* `--chain-color` is set once, on the page-level `.wwell-ir__detail-panel` wrapper this
+ * component is projected into (wwell-ir.component.html) — it inherits down through the DOM
+ * (custom properties cross component view-encapsulation boundaries freely) so every card here
+ * gets the same green/amber/slate accent without each one needing its own binding. Falls back
+ * to the neutral `$border` if the property is ever unset. */
 .ird__card {
-  background: #ffffff;
-  border: 1px solid $border;
+  background: tokens.$surface;
+  border: 1.5px solid var(--chain-color, $border);
   border-radius: 10px;
   padding: 0.95rem 1.1rem;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(59, 130, 246, 0.05);
+  transition:
+    box-shadow tokens.$duration-fast ease,
+    transform tokens.$duration-fast ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.07),
+        0 10px 24px rgba(59, 130, 246, 0.09);
+    }
+  }
 }
 
 /* Approval card in the sidebar reads as a compact rail, not a bento card. */
@@ -193,7 +215,7 @@ $stat-offset: #7c3aed;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: $navy;
   text-transform: uppercase;
@@ -204,17 +226,17 @@ $stat-offset: #7c3aed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 21px;
-  height: 21px;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   background: rgba($accent, 0.1);
   color: $accent;
   flex-shrink: 0;
 
   &.mat-icon {
-    width: 21px;
-    height: 21px;
-    font-size: 13px;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
   }
 }
 
@@ -227,7 +249,7 @@ $stat-offset: #7c3aed;
 
 .ird__subsection-title {
   margin: 0 0 0.65rem;
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: $muted;
   text-transform: uppercase;
@@ -280,22 +302,22 @@ $stat-offset: #7c3aed;
   gap: 0.6rem;
   flex: 1 1 170px;
   padding: 0.7rem 0.95rem;
-  background: #ffffff;
+  background: tokens.$surface;
 }
 
 .ird__stat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   flex-shrink: 0;
 
   &.mat-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 15px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
   }
 }
 
@@ -332,7 +354,7 @@ $stat-offset: #7c3aed;
 }
 
 .ird__stat-label {
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: $muted;
   text-transform: uppercase;
@@ -340,14 +362,14 @@ $stat-offset: #7c3aed;
 }
 
 .ird__stat-value {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: $navy;
   letter-spacing: -0.02em;
 
   small {
     margin-left: 3px;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: $muted;
   }
@@ -371,7 +393,7 @@ $stat-offset: #7c3aed;
   justify-content: space-between;
   align-items: baseline;
   gap: 0.75rem;
-  font-size: 0.81rem;
+  font-size: 0.89rem;
   padding: 0.3rem 0;
   border-bottom: 1px dashed $border;
 
@@ -391,13 +413,13 @@ $stat-offset: #7c3aed;
 }
 
 .ird__kv-icon {
-  color: #94a3b8;
+  color: tokens.$subtle;
   flex-shrink: 0;
 
   &.mat-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
   }
 }
 
@@ -411,14 +433,14 @@ $stat-offset: #7c3aed;
 .ird__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.79rem;
+  font-size: 0.87rem;
   white-space: nowrap;
 
   th {
-    background: #f8fafc;
+    background: tokens.$surface-alt;
     color: $muted;
     font-weight: 700;
-    font-size: 0.68rem;
+    font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     text-align: left;
@@ -483,9 +505,9 @@ $stat-offset: #7c3aed;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #ffffff;
+  background: tokens.$surface;
   color: $muted;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -497,7 +519,7 @@ $stat-offset: #7c3aed;
 
 .ird__remarks {
   margin: 0.75rem 0 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $muted;
   font-style: italic;
 }
@@ -521,10 +543,10 @@ $stat-offset: #7c3aed;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: #f8fafc;
+  background: tokens.$surface-alt;
   border: 1px solid $border;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $navy;
   font-weight: 600;
   width: fit-content;
@@ -539,7 +561,7 @@ $stat-offset: #7c3aed;
 
 .ird__empty-text {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $muted;
   font-style: italic;
 }

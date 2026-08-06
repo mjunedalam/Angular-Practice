@@ -1,90 +1,151 @@
+@use '../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+
+// Narrower than the 300px land-affairs/wwell-ir master column — requested explicitly for
+// this page. Rows still truncate cleanly via `text-overflow: ellipsis` below.
+$master-width: 240px;
+
 :host {
   display: block;
   height: 100%;
-  overflow: auto;
-  background: #f0f4f8;
+  background: tokens.$page-bg;
+  font-family: tokens.$font-family;
 }
 
-.wwell-approvals {
+/* The project has no global `box-sizing: border-box` reset, so `max-height: 100%` /
+ * `width: $master-width` on a padded/bordered box (e.g. `.wlda__master`) only caps its
+ * *content* box — padding+border then get added on top, overflowing the intended size. See
+ * the identical fix + full rationale in wwell-requests.component.scss. Scoped to this
+ * component only (Angular's emulated encapsulation confines the `*` selector to this
+ * template), not a global change. */
+:host * {
+  box-sizing: border-box;
+}
+
+.wlda {
   display: flex;
-  flex-direction: column;
+  /* Not `stretch` (the flex default): with only a handful of rows, stretching the master
+   * column to match `.wlda`'s full 100%-height would force its white card down to fill the
+   * whole page, leaving dead empty space below the last row. Each column sizes to its own
+   * content instead, capped by `max-height: 100%` — `.wlda__detail` opts back into filling
+   * the available height via `align-self: stretch` since its content is meant to. */
+  align-items: flex-start;
   gap: 1.25rem;
+  height: 100%;
   padding: 1.5rem;
 }
 
-/* ── Header ───────────────────────────────────────────────────── */
-.wwell-approvals__header {
+/* ── Master column ────────────────────────────────────────────── */
+.wlda__master {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: $master-width;
+  flex-shrink: 0;
+  max-height: 100%;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border-soft;
+  border-radius: 10px;
+  padding: 0.9rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  overflow: hidden;
+}
+
+.wlda__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.wwell-approvals__heading {
+.wlda__heading {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.wwell-approvals__title {
+.wlda__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.08rem;
   font-weight: 800;
-  color: #1e293b;
+  color: $navy;
   letter-spacing: -0.01em;
 }
 
-.wwell-approvals__count {
+.wlda__count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
-  background: #3b82f6;
-  color: #fff;
-  font-size: 0.72rem;
+  background: rgba($accent, 0.12);
+  color: $accent;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
-.wwell-approvals__search {
-  display: flex;
+.wlda__new-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0.5rem 0.9rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  max-width: 320px;
-  width: 100%;
-  transition: border-color 150ms ease;
+  gap: 4px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0 10px;
+  box-shadow: none;
 
-  &:focus-within {
-    border-color: #3b82f6;
+  mat-icon {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
   }
 }
 
-.wwell-approvals__search-icon {
+/* ── Search ───────────────────────────────────────────────────── */
+.wlda__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.42rem 0.75rem;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  border-radius: 8px;
+  transition: border-color 150ms ease;
+
+  &:focus-within {
+    border-color: $accent;
+  }
+}
+
+.wlda__search-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: #94a3b8;
+  color: tokens.$subtle;
   flex-shrink: 0;
 }
 
-.wwell-approvals__search input {
+.wlda__search input {
   flex: 1;
   min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.85rem;
-  color: #1e293b;
+  font-size: 0.93rem;
+  color: $navy;
 
   &::placeholder {
-    color: #94a3b8;
+    color: tokens.$subtle;
   }
 
   &::-webkit-search-cancel-button {
@@ -92,64 +153,472 @@
   }
 }
 
-.wwell-approvals__status {
+.wlda__status {
   padding: 2rem 1rem;
   text-align: center;
-  color: #64748b;
-  font-size: 0.9rem;
+  color: $muted;
+  font-size: 0.93rem;
 
   &--error {
     color: #dc2626;
   }
 }
 
-/* ── Panels ───────────────────────────────────────────────────── */
-.wwell-approvals__panel {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e8edf4;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+/* ── Loading skeleton ─────────────────────────────────────────── */
+.wlda__list--skeleton {
   overflow: hidden;
 }
 
-.wwell-approvals__panel-header {
+.wlda__skeleton-row {
+  cursor: default;
+  pointer-events: none;
+}
+
+.wlda__skeleton-bar {
+  display: block;
+  height: 0.6rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: wlda-shimmer 1.4s ease-in-out infinite;
+
+  &--code {
+    width: 34%;
+  }
+
+  &--badge {
+    width: 22%;
+    height: 0.9rem;
+    border-radius: 999px;
+  }
+
+  &--name {
+    width: 62%;
+    height: 0.7rem;
+    margin-top: 0.2rem;
+  }
+
+  &--meta {
+    width: 48%;
+    margin-top: 0.15rem;
+  }
+}
+
+@keyframes wlda-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+/* ── Row list ─────────────────────────────────────────────────── */
+.wlda__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+
+  /* Skinny hidden scrollbar — rows are the only chrome here; a visible track/thumb would
+   * just be more noise on a narrow column. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Guards against scroll-chaining into `.dashboard__content` once the list hits its own
+   * end — see the identical guard in wwell-ir.component.scss for the full rationale. */
+  overscroll-behavior-y: contain;
+}
+
+.wlda__row {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.65rem;
+  background: tokens.$surface;
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    background: tokens.$surface-alt;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  }
+
+  &--active {
+    background: rgba($accent, 0.06);
+    border-color: rgba($accent, 0.16);
+    border-left-color: $accent;
+  }
+
+  &--active:hover {
+    box-shadow: none;
+  }
+
+  /* Brief pulse while the detail-loading shimmer plays, so the row the user just clicked
+   * stays visually "live" instead of looking unresponsive during the short select-loading beat. */
+  &--pending {
+    animation: wlda-row-pending-pulse 0.9s ease-in-out infinite;
+  }
+}
+
+@keyframes wlda-row-pending-pulse {
+  0%,
+  100% {
+    background: tokens.$surface;
+  }
+  50% {
+    background: rgba($accent, 0.07);
+  }
+}
+
+.wlda__row-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #eef2f7;
+  gap: 0.5rem;
 }
 
-.wwell-approvals__panel-title {
-  margin: 0;
-  font-size: 0.98rem;
+.wlda__row-code {
+  font-size: 0.82rem;
   font-weight: 800;
-  color: #1e293b;
+  color: $navy;
+  letter-spacing: 0.01em;
+}
+
+.wlda__row-name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: $navy;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wlda__row-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: $muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wlda__row-chain {
+  margin-top: 3px;
+}
+
+.wlda__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &--lg {
+    padding: 4px 11px;
+    font-size: 0.8rem;
+  }
+}
+
+.wlda__badge-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Detail column ────────────────────────────────────────────── */
+.wlda__detail {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  max-height: 100%;
+  overflow-y: auto;
+
+  /* Scrolls, but stays visually quiet — the cards inside are the only chrome on screen; a
+   * visible track/thumb here would just be more noise. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  overscroll-behavior-y: contain;
+}
+
+/* Deliberately no background/border/shadow here — just a padding wrapper. The neutral page
+ * background (`:host`) shows through behind the cards themselves, which is the only "card"
+ * layer left; wrapping the whole column in its own card too would nest cards inside a card
+ * and leave a visible blank box below short content. */
+.wlda__detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.25rem;
+}
+
+.wlda__detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.wlda__eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: $accent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wlda__detail-title {
+  margin: 0.15rem 0 0;
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wlda__detail-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.84rem;
+  color: $muted;
+}
+
+/* ── Body: card column + approval sidebar ────────────────────────
+ * `align-items: start` — not `stretch` — so the sidebar's height follows its own content
+ * (a 4-step vertical chain) instead of stretching to match a taller Details card, which
+ * would otherwise leave visible blank space inside the sidebar card.
+ */
+.wlda__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.wlda__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.wlda__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* `--chain-color` is set once on `.wlda__detail-panel` (see the template) and inherits down
+ * through every card here — see the identical pattern + full rationale in
+ * wwell-ir-detail.component.scss's `.ird__card`. */
+.wlda__card {
+  background: tokens.$surface;
+  border: 1.5px solid var(--chain-color, $border);
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+  transition:
+    box-shadow tokens.$duration-fast ease,
+    transform tokens.$duration-fast ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.07),
+        0 10px 24px rgba(59, 130, 246, 0.09);
+    }
+  }
+}
+
+/* Approval card in the sidebar reads as a compact rail, not a bento card. */
+.wlda__card--sidebar {
+  padding: 0.85rem 0.9rem;
+}
+
+.wlda__card-title {
+  margin: 0 0 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: $navy;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wlda__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  background: rgba($accent, 0.1);
+  color: $accent;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 21px;
+    height: 21px;
+    font-size: 13px;
+  }
+}
+
+/* ── Key/value grid ───────────────────────────────────────────── */
+.wlda__kv-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 2rem;
+}
+
+.wlda__kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.89rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed $border;
+
+  dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $navy;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.wlda__kv-icon {
+  color: tokens.$subtle;
+  flex-shrink: 0;
+
+  &.mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.wlda__pdf-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.wlda__empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: $muted;
+  background: tokens.$surface;
+  border: 1px dashed $border;
+  border-radius: 12px;
+  min-height: 320px;
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.96rem;
+  }
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .wlda {
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .wlda__master {
+    width: 100%;
+    max-height: none;
+  }
+
+  .wlda__detail {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .wlda__body {
+    grid-template-columns: 1fr;
+  }
+
+  .wlda__sidebar {
+    order: -1;
+  }
+}
+
 @media (max-width: 640px) {
-  .wwell-approvals {
+  .wlda {
     padding: 1rem;
   }
 
-  .wwell-approvals__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .wwell-approvals__search {
-    max-width: none;
-  }
-
-  .wwell-approvals__panel-header {
-    flex-direction: column;
-    align-items: stretch;
+  .wlda__kv-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -15,10 +15,12 @@
  * The `[A]`/`[M]`/`[D]` tag mirrors `git status` porcelain codes and is
  * stripped from the path, but it's optional — a plain `## <path>` header
  * works too, and the tag is then inferred (M if the file already exists on
- * disk, A otherwise) purely for the log line. The closing fence isn't
- * required to sit on its own line — if the dump's source file had no
- * trailing newline, the ``` ends up glued to the last content line, and this
- * parser accounts for that.
+ * disk, A otherwise) purely for the log line. The path itself may also be
+ * wrapped in a Markdown code span (`` ## `path` ``) or quotes — those
+ * wrapping marks are stripped too, rather than becoming part of the
+ * filename written to disk. The closing fence isn't required to sit on its
+ * own line — if the dump's source file had no trailing newline, the ```
+ * ends up glued to the last content line, and this parser accounts for that.
  *
  * Usage:
  *   node scripts/apply-doc-files.js [docPath] [--dry-run]
@@ -32,6 +34,28 @@ const path = require('path');
 
 const HEADER_PATTERN = /^## (?:\[(A|M|D)\]\s+)?(.+)$/;
 const FENCE_OPEN_PATTERN = /^```/;
+const WRAPPING_MARKS = [
+  ['`', '`'],
+  ['"', '"'],
+  ["'", "'"],
+];
+
+/** Strips one layer of matching wrapping marks (backticks or quotes) at a time, repeating
+ * until none remain — handles both `` `path` `` and, if ever double-wrapped, `` `'path'` ``. */
+function stripWrappingMarks(rawPath) {
+  let value = rawPath.trim();
+  let stripped = true;
+  while (stripped) {
+    stripped = false;
+    for (const [open, close] of WRAPPING_MARKS) {
+      if (value.length >= 2 && value.startsWith(open) && value.endsWith(close)) {
+        value = value.slice(1, -1).trim();
+        stripped = true;
+      }
+    }
+  }
+  return value;
+}
 
 function parseArgs(argv) {
   const args = argv.slice(2);
@@ -74,7 +98,7 @@ function parseSections(markdown) {
     const startIdx = headerIndexes[h];
     const endIdx = h + 1 < headerIndexes.length ? headerIndexes[h + 1] : lines.length;
     const [, tag, rawPath] = HEADER_PATTERN.exec(lines[startIdx]);
-    const filePath = rawPath.trim();
+    const filePath = stripWrappingMarks(rawPath);
 
     const content = extractFencedContent(lines.slice(startIdx + 1, endIdx));
     if (content === null) {
