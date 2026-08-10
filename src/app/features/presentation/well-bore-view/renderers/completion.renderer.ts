@@ -54,7 +54,10 @@ function renderOpenHoleAndScreen({
   ohLabelStart,
   animation,
 }: RenderCompletionElementsOptions): void {
-  if (!data.casings.length) return;
+  // Only skip when there's no casing data of any kind (planned or as-drilled) to anchor
+  // to — a DRLG_CSG-only well (no EXAD_GWD_IR_CASING rows) must still render OH/GP when
+  // its flags are 'Y', same as an IR-backed well.
+  if (!data.casings.length && !data.drlgCasings.length) return;
 
   const { wellDesign } = data;
   const shouldDrawOH = shouldRenderOpenHole(wellDesign);
@@ -71,7 +74,7 @@ function renderOpenHoleAndScreen({
   const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
   const liner = data.casings.find(c => c.csgType === 'Liner');
   const gpCasing = data.casings.find(c => c.csgType === 'Gravel Pack');
-  const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale, wellDesign);
+  const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
   const completionBottomDepth = resolveCompletionBottomDepth(data);
   const completionBottomPx = scale(completionBottomDepth);
   const hasGP = shouldRenderGravelPack(wellDesign) || !!gpCasing;
@@ -119,7 +122,7 @@ function renderOpenHoleAndScreen({
   }
 
   if (shouldDrawLS) {
-    const shoeDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings, wellDesign);
+    const shoeDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
     const fallbackFt = liner ? liner.csgDepth - shoeDepth : completionBottomDepth - shoeDepth;
     const screenLabel = wellDesign?.lsRemarks ?? (liner?.csgRemarks ?? `+/- ${fallbackFt.toLocaleString()} ft of Screen`);
     const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
@@ -152,7 +155,8 @@ function renderGravelPackDesign({
   animation,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
-  if (!wellDesign || !shouldRenderGravelPack(wellDesign) || !data.casings.length) return;
+  if (!wellDesign || !shouldRenderGravelPack(wellDesign)) return;
+  if (!data.casings.length && !data.drlgCasings.length) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap, gpFillRatio } = layout;
   const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);
@@ -162,7 +166,7 @@ function renderGravelPackDesign({
   const annulusWidth = Math.max(0, (gpMaxOuter - lsHW) * gpFillRatio);
   const gpOuterEdge = lsHW + annulusWidth;
   const annulusCenter = lsHW + annulusWidth / 2;
-  const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale, wellDesign);
+  const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
   const completionBottomPx = resolveCompletionBottomPx(data, scale);
 
   const clipId = 'dyn-gp-design-clip';
@@ -195,7 +199,7 @@ function renderGravelPackDesign({
   lg.append('path').attr('d', buildArrowHeadRight(lEnd, labelY, 6));
   lg.append('text')
     .attr('class', 'screen-label-text')
-    .attr('x', lEnd + 6).attr('y', labelY + 4).text(wellDesign.gpRemarks);
+    .attr('x', lEnd + 6).attr('y', labelY + 4).text(wellDesign.gpRemarks ?? 'Gravel Pack');
 
   animateLabel(lg, ohLabelStart, animation);
 }
@@ -264,7 +268,7 @@ export function renderScreenHanger({
   scale,
   hangerStart,
 }: RenderCompletionElementsOptions): void {
-  if (!data.casings.length) return;
+  if (!data.casings.length && !data.drlgCasings.length) return;
   // Liner hangers are drawn per-liner by liner.renderer (for both DRLG and IR sources).
   // This function no longer draws a hanger for the liner itself — that produced a
   // duplicate OUTER hanger set. It only draws the well-design liner-screen hanger
@@ -279,7 +283,7 @@ export function renderScreenHanger({
   const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
   const hangerG = rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
 
-  const screenY = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings, data.wellDesign));
+  const screenY = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings));
   const { left, right } = buildScreenHanger(centerX, screenY, screenHW);
   hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', left);
   hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', right);

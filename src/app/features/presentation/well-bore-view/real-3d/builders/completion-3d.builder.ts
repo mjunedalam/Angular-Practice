@@ -58,7 +58,7 @@ function buildOpenHoleAndScreen(
   if (!data.casings.length || !shouldRenderOpenHole(data.wellDesign)) return;
 
   const ohHW = resolveOhHalfWidth(data, layout);
-  const topDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings, data.wellDesign);
+  const topDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
   const bottomDepth = resolveCompletionBottomDepth(data);
   const topY = depthScale.toY(topDepth);
   const bottomY = depthScale.toY(bottomDepth);
@@ -102,7 +102,7 @@ function buildGravelPack(
   const outerR = depthScale.toRadius(lsHW + annulusWidth);
   if (outerR <= innerR) return;
 
-  const topDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings, data.wellDesign);
+  const topDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
   const bottomDepth = resolveCompletionBottomDepth(data);
   const topY = depthScale.toY(topDepth);
   const bottomY = depthScale.toY(bottomDepth);

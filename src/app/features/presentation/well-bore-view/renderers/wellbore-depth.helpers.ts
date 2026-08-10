@@ -2,8 +2,8 @@ import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
-import { computeCasingHalfWidth, parseInchSize, remarksReferenceSize } from '@shared/utils/wellbore-math.util';
-import { isLastLinerScreen, resolveAnchorLiner, resolveLinerDepths, resolveLiners } from './liner.renderer';
+import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
+import { resolveAnchorLiner, resolveLinerDepths, resolveLiners } from './liner.renderer';
 import { DepthScale } from './wellbore-renderer.types';
 
 const OVERRUN_COMPLETION_LENGTH_FT = 1200;
@@ -20,29 +20,18 @@ export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]):
 /**
  * Depth Open Hole / Gravel Pack / Pre-Perf start from:
  *   - 2+ liners: below the anchor (second-deepest) liner's bottom — the deepest liner is
- *     the screen and sits inside that zone on its own.
- *   - 1 liner, not flagged as the screen: below its bottom (same rule).
- *   - 1 liner flagged as the screen: there's no separate pipe liner above it — it's run
- *     into the open hole for its own full length, overlapping up into the casing shoe for
- *     its hanger seal. So completion elements must start at the CASING SHOE (not the
- *     liner's own top, which sits inside that overlap/seal zone, and not its bottom, which
- *     would leave it un-surrounded) so Open Hole/Gravel Pack visually contain the screen.
+ *     physically run into that open-hole continuation on its own.
+ *   - Exactly 1 liner: there's no separate pipe liner above it — a lone liner is always
+ *     run into the drilled hole below the casing shoe, so completion elements must start
+ *     at the CASING SHOE (not the liner's own bottom) to visually surround it. This is a
+ *     geometric fact, independent of EXAD_GWD_WELL_DESIGN.lsFlg — lsFlg only controls
+ *     whether the liner gets the decorative "screen" grid pattern/label (see
+ *     isLastLinerScreen in liner.renderer), not where it physically sits.
  *   - No liners: the casing shoe.
  */
-export function resolveCompletionTopDepth(
-  casings: ICasingIR[],
-  drlgCasings: IDrlgCsg[],
-  wellDesign?: IWellDesign | null,
-): number {
+export function resolveCompletionTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
   const liners = resolveLinerDepths(casings, drlgCasings);
-  if (liners.length === 0) return resolveShoeDepth(casings, drlgCasings);
-
-  if (liners.length === 1) {
-    const only = liners[0];
-    return isLastLinerScreen(only.odSz, wellDesign)
-      ? resolveShoeDepth(casings, drlgCasings)
-      : only.botDepth;
-  }
+  if (liners.length <= 1) return resolveShoeDepth(casings, drlgCasings);
 
   return liners[liners.length - 2].botDepth;
 }
@@ -51,13 +40,12 @@ export function resolveCompletionTopPx(
   casings: ICasingIR[],
   drlgCasings: IDrlgCsg[],
   scale: DepthScale,
-  wellDesign?: IWellDesign | null,
 ): number {
-  return scale(resolveCompletionTopDepth(casings, drlgCasings, wellDesign));
+  return scale(resolveCompletionTopDepth(casings, drlgCasings));
 }
 
 export function resolveCompletionBottomDepth(data: WellboreDiagramData): number {
-  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings, data.wellDesign);
+  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
   const isCurrentDepthBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
 
   const naturalBottom = isCurrentDepthBeyondTarget
@@ -75,23 +63,22 @@ function isFlagYes(flg: string | null | undefined): boolean {
   return (flg ?? '').trim().toUpperCase() === 'Y';
 }
 
-function hasText(value: string | null | undefined): boolean {
-  return !!value?.trim();
-}
+// NOTE: none of the shouldRender* gates below check *Remarks text. Remarks are free-form
+// and frequently blank/null even when the well design has explicitly opted in via the
+// flag — gating visibility on them would silently hide a feature the flag turned on.
+// Remarks are only ever used for label copy downstream, with sensible fallback text when
+// missing (see renderOpenHoleAndScreen / renderGravelPackDesign in completion.renderer).
 
 export function shouldRenderOpenHole(wellDesign: IWellDesign | null | undefined): boolean {
-  if (!isFlagYes(wellDesign?.ohFlg)) return false;
-  return parseInchSize(wellDesign?.ohRemarks) !== null;
+  return isFlagYes(wellDesign?.ohFlg);
 }
 
 export function shouldRenderGravelPack(wellDesign: IWellDesign | null | undefined): boolean {
-  if (!isFlagYes(wellDesign?.gpFlg)) return false;
-  return hasText(wellDesign?.gpRemarks);
+  return isFlagYes(wellDesign?.gpFlg);
 }
 
 export function shouldRenderLinerScreen(wellDesign: IWellDesign | null | undefined): boolean {
-  if (!isFlagYes(wellDesign?.lsFlg)) return false;
-  return hasText(wellDesign?.lsRemarks);
+  return isFlagYes(wellDesign?.lsFlg);
 }
 
 const PRE_PERF_LINER_SIZE_IN = 7;
@@ -105,10 +92,12 @@ export interface PrePerforatedLinerDepth {
 /**
  * Resolves the pre-perforated liner overlay depth range.
  *
- * All three conditions must pass:
+ * Both conditions must pass:
  *   1. EXAD_GWD_WELL_DESIGN.perforatedFlg is 'Y' (case-insensitive).
- *   2. EXAD_GWD_WELL_DESIGN.perforatedRemarks references a 7" size somewhere in its free text.
- *   3. The anchor liner (see resolveAnchorLiner) has a 7" OD.
+ *   2. The anchor liner (see resolveAnchorLiner) has a 7" OD.
+ *
+ * perforatedRemarks is free text and only affects label copy elsewhere — it must never
+ * gate visibility (see isPrePerforatedLiner in liner.renderer for the matching rationale).
  *
  * The returned depths come from that anchor liner's own top/bottom so the overlay is
  * drawn only across its interval — and, with 2+ liners, from the same liner Open Hole
@@ -120,7 +109,6 @@ export function resolvePrePerforatedLinerDepth(
   casings: ICasingIR[] = [],
 ): PrePerforatedLinerDepth | null {
   if (!isFlagYes(wellDesign?.perforatedFlg)) return null;
-  if (!remarksReferenceSize(wellDesign?.perforatedRemarks, PRE_PERF_LINER_SIZE_IN)) return null;
 
   const anchor = resolveAnchorLiner(casings, drlgCasings);
   if (!anchor || parseInchSize(anchor.odSz) !== PRE_PERF_LINER_SIZE_IN) return null;

@@ -12,7 +12,6 @@ import {
     buildScreenHanger,
     openHoleHalfWidth,
     parseInchSize,
-    remarksReferenceSize,
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
@@ -131,10 +130,13 @@ export function isLastLinerScreen(
 /**
  * Determines whether a liner qualifies as a 7" pre-perforated liner.
  *
- * All three conditions must pass:
+ * Both conditions must pass:
  *   1. The liner's own OD size (DRLG_CSG.wLnrOdSz, preferred over the planned size) is 7".
  *   2. EXAD_GWD_WELL_DESIGN.perforatedFlg is 'Y' (case-insensitive).
- *   3. EXAD_GWD_WELL_DESIGN.perforatedRemarks references a 7" size somewhere in its free text.
+ *
+ * perforatedRemarks is free text and only ever used for label copy — it must never gate
+ * visibility, otherwise perforatedFlg='Y' with a blank/missing remarks field would silently
+ * hide a feature the well design explicitly opted into.
  *
  * Mirrors the gating in wellbore-depth.helpers' resolvePrePerforatedLinerDepth (which drives
  * the dashed overlay itself); this is re-implemented locally rather than imported to avoid a
@@ -145,8 +147,7 @@ function isPrePerforatedLiner(
     wellDesign: IWellDesign | null | undefined,
 ): boolean {
     if (parseInchSize(odSz) !== SCREEN_LINER_SIZE_IN) return false;
-    if ((wellDesign?.perforatedFlg ?? '').trim().toUpperCase() !== 'Y') return false;
-    return remarksReferenceSize(wellDesign?.perforatedRemarks, SCREEN_LINER_SIZE_IN);
+    return (wellDesign?.perforatedFlg ?? '').trim().toUpperCase() === 'Y';
 }
 
 /** Attaches halfWidth + isScreen/isPrePerfLiner render flags to a depth-only liner list. */
@@ -397,15 +398,22 @@ function renderLinerLabels({
         const prePerfTag = liner.isPrePerfLiner ? ' (Pre Perf Liner)' : '';
         const actualStar = liner.hasActual ? ' *' : '';
 
+        // The screen liner (isScreen, always the last/deepest one) gets a heavier, darker
+        // label than a plain actual liner so it reads as the standout element on the diagram.
+        const primaryFill = liner.isScreen ? '#14532d' : (liner.hasActual ? '#22c55e' : '');
+        const innerFill = liner.isScreen ? '#000000' : (liner.hasActual ? '#0f2d1a' : '');
+        const innerWeight = liner.isScreen ? '900' : (liner.hasActual ? '800' : 'normal');
+
         const lg = rootG.append('g').attr('class', 'casing-label');
         lg.append('line').attr('class', 'casing-label__line')
             .attr('x1', rEdge).attr('x2', lEnd).attr('y1', midY).attr('y2', midY);
         lg.append('path').attr('class', 'casing-label__arrow')
             .attr('d', buildArrowHeadRight(lEnd, midY, 6));
-        lg.append('text').attr('class', 'casing-label__primary')
-            .attr('fill', liner.hasActual ? '#22c55e' : '')
+        const primaryLabel = lg.append('text').attr('class', 'casing-label__primary')
+            .attr('fill', primaryFill)
             .attr('x', labelX).attr('y', midY + 4)
             .text(`${liner.odSz}" Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${prePerfTag}${actualStar}`);
+        if (liner.isScreen) primaryLabel.style('font-weight', '900');
 
         animateLabel(lg, labelsStart, animation);
 
@@ -413,8 +421,8 @@ function renderLinerLabels({
             .attr('x', centerX).attr('y', midY)
             .attr('text-anchor', 'middle')
             .style('opacity', 0)
-            .attr('fill', liner.hasActual ? '#0f2d1a' : '')
-            .style('font-weight', liner.hasActual ? '800' : 'normal')
+            .attr('fill', innerFill)
+            .style('font-weight', innerWeight)
             .text(`${liner.odSz}"`)
             .transition().delay(innerDelay).duration(animation.fadeDur).ease(easeCubicInOut)
             .style('opacity', 1);
