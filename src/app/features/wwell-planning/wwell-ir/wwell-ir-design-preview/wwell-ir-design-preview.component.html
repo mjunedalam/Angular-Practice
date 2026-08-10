@@ -1,33 +1,31 @@
 <figure class="preview">
-  <svg [attr.viewBox]="viewBox" class="preview__svg" role="img" aria-label="Well design schematic">
-    <line class="preview__surface-line" x1="0" [attr.y1]="surfaceY" x2="260" [attr.y2]="surfaceY" />
-    @if (surfaceElevationFtAsl() !== null) {
-      <text class="preview__surface-label" x="4" [attr.y]="surfaceY - 8">Surface {{ surfaceElevationFtAsl() }} ft ASL</text>
-    }
-
-    <line
-      class="preview__centerline"
-      [attr.x1]="centerX"
-      [attr.y1]="surfaceY"
-      [attr.x2]="centerX"
-      [attr.y2]="surfaceY + 320"
-    />
-
-    @for (band of formationLines(); track band.name + band.depthFt) {
-      <line class="preview__formation-line" x1="0" [attr.y1]="band.y" x2="260" [attr.y2]="band.y" />
-      <text class="preview__formation-label" x="4" [attr.y]="band.y - 5">{{ band.name }} &mdash; {{ band.depthFt }} ft</text>
-    }
-
-    @for (shape of casingShapes(); track shape.type + shape.depthFtBgl) {
-      <path class="preview__casing" [attr.d]="shape.path" [attr.fill]="shape.fill" />
-      <text class="preview__casing-label" [attr.x]="centerX + 4" [attr.y]="shape.labelY - 4">
-        {{ shape.type }} {{ shape.sizeIn }}
-      </text>
-      @if (shape.remarks) {
-        <text class="preview__casing-remarks" [attr.x]="centerX + 4" [attr.y]="shape.labelY + 10">{{ shape.remarks }}</text>
+  @if ((showHeader() && (wellName() || wellCode())) || (hasWellboreData() && showExpand())) {
+    <div class="preview__toolbar">
+      <div class="preview__header-text">
+        @if (showHeader() && (wellName() || wellCode())) {
+          <span class="preview__header-eyebrow">Well Bore Design</span>
+          <h4 class="preview__header-title">{{ wellName() || wellCode() }}</h4>
+        }
+      </div>
+      @if (showHeader() && preparedDate()) {
+        <span class="preview__header-date">{{ preparedDate() }}</span>
       }
-    }
-  </svg>
+      @if (hasWellboreData() && showExpand()) {
+        <button
+          type="button"
+          mat-icon-button
+          class="preview__expand"
+          (click)="openInModal()"
+          aria-label="Open well bore design in a larger view"
+        >
+          <mat-icon>open_in_full</mat-icon>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Populated imperatively by D3 in the component's effect() — see wwell-ir-design-preview.renderer.ts -->
+  <svg #canvas class="preview__svg" role="img" aria-label="Well bore design schematic"></svg>
 
   @if (!casing().length && !formationTops().length) {
     <figcaption class="preview__empty">No casing or formation data yet.</figcaption>

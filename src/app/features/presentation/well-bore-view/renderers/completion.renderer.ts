@@ -71,7 +71,7 @@ function renderOpenHoleAndScreen({
   const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
   const liner = data.casings.find(c => c.csgType === 'Liner');
   const gpCasing = data.casings.find(c => c.csgType === 'Gravel Pack');
-  const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
+  const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale, wellDesign);
   const completionBottomDepth = resolveCompletionBottomDepth(data);
   const completionBottomPx = scale(completionBottomDepth);
   const hasGP = shouldRenderGravelPack(wellDesign) || !!gpCasing;
@@ -119,7 +119,7 @@ function renderOpenHoleAndScreen({
   }
 
   if (shouldDrawLS) {
-    const shoeDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
+    const shoeDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings, wellDesign);
     const fallbackFt = liner ? liner.csgDepth - shoeDepth : completionBottomDepth - shoeDepth;
     const screenLabel = wellDesign?.lsRemarks ?? (liner?.csgRemarks ?? `+/- ${fallbackFt.toLocaleString()} ft of Screen`);
     const scrDelay = ohLabelStart + ANIM.OVERLAY_FADE + ANIM.SEQ_GAP;
@@ -162,7 +162,7 @@ function renderGravelPackDesign({
   const annulusWidth = Math.max(0, (gpMaxOuter - lsHW) * gpFillRatio);
   const gpOuterEdge = lsHW + annulusWidth;
   const annulusCenter = lsHW + annulusWidth / 2;
-  const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
+  const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale, wellDesign);
   const completionBottomPx = resolveCompletionBottomPx(data, scale);
 
   const clipId = 'dyn-gp-design-clip';
@@ -214,7 +214,7 @@ function renderPrePerforatedLiner({
   ohStart,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
-  const prePerfDepth = resolvePrePerforatedLinerDepth(wellDesign, data.drlgCasings);
+  const prePerfDepth = resolvePrePerforatedLinerDepth(wellDesign, data.drlgCasings, data.casings);
   if (!wellDesign || !prePerfDepth) return;
 
   const { openHoleHwMargin } = layout;
@@ -279,7 +279,7 @@ export function renderScreenHanger({
   const screenHW = Math.min(innerHW, ohHW) - linerScreenInset;
   const hangerG = rootG.append('g').attr('class', 'screen-hangers').style('opacity', 0);
 
-  const screenY = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings));
+  const screenY = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings, data.wellDesign));
   const { left, right } = buildScreenHanger(centerX, screenY, screenHW);
   hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', left);
   hangerG.append('path').attr('class', 'screen-hanger').attr('stroke', '#000000').attr('stroke-width', '1.5').attr('fill', '#000000').attr('d', right);

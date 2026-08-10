@@ -58,6 +58,13 @@ svg defs pattern#gridpattern path {
 background: linear-gradient(90deg, rgba(80, 132, 240, 1) 44%, rgba(121, 207, 241, 1) 86%);
 }
 
+/* ── Well bore design preview dialog — container overrides ───────────────────── */
+.wwell-ir-design-preview-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
 /* ── File preview dialog — container overrides ──────────────────────────────── */
 .file-preview-panel .mat-mdc-dialog-surface {
   border-radius: 14px !important;

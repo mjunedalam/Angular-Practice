@@ -1,0 +1,64 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+
+.wdp {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: tokens.$surface;
+  font-family: tokens.$font-family;
+}
+
+.wdp__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 0.85rem 0.6rem 0.85rem 1.15rem;
+  background: tokens.$surface-alt;
+  border-bottom: 1px solid tokens.$border;
+}
+
+.wdp__title {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: tokens.$navy-deep;
+}
+
+.wdp__title-well {
+  font-weight: 700;
+  color: tokens.$accent-deep;
+}
+
+.wdp__title-date {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: tokens.$muted;
+  white-space: nowrap;
+}
+
+.wdp__close {
+  color: tokens.$muted;
+}
+
+.wdp__body {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+  background: tokens.$page-bg;
+}
+
+.wdp__preview {
+  width: 100%;
+  max-width: 1000px;
+}

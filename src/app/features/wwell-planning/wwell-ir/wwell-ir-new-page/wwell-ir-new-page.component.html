@@ -22,14 +22,32 @@
   >
     @for (step of schema; track step.key) {
       <mat-step [stepControl]="stepGroup(step.key)" [label]="step.label">
-        <div class="nip__step-content" #stepContent>
-          @for (section of step.sections; track section.key) {
-            <app-dynamic-section
-              [section]="section"
-              [control]="sectionControl(step.key, section.key)"
-              mode="edit"
-              [selectPanelClass]="selectPanelClass"
-            />
+        <div class="nip__step-content" [class.nip__step-content--split]="step.key === 'subsurface'" #stepContent>
+          <div class="nip__step-fields">
+            @for (section of step.sections; track section.key) {
+              <app-dynamic-section
+                [section]="section"
+                [control]="sectionControl(step.key, section.key)"
+                mode="edit"
+                [selectPanelClass]="selectPanelClass"
+              />
+            }
+          </div>
+
+          @if (step.key === 'subsurface') {
+            <div class="nip__wellbore-card nip__wellbore-card--sticky">
+              <h4 class="nip__wellbore-title"><mat-icon>architecture</mat-icon>Well Bore Design Preview</h4>
+              <p class="nip__wellbore-subtitle">Updates live as you add casing and formation tops.</p>
+              <div class="nip__wellbore-preview">
+                <app-wwell-ir-design-preview
+                  [formationTops]="wellboreFormationTops()"
+                  [casing]="wellboreCasing()"
+                  [surfaceElevationFtAsl]="wellboreSurfaceElevationFtAsl()"
+                  [targetDepthFt]="wellboreTargetDepthFt()"
+                  [wellName]="wellboreWellName()"
+                />
+              </div>
+            </div>
           }
 
           @if (step.key === 'attachments') {
@@ -53,6 +71,20 @@
                   <mat-icon>{{ summary.done === summary.total ? 'verified' : 'pending_actions' }}</mat-icon>
                   {{ summary.done }} of {{ summary.total }} complete
                 </span>
+              </div>
+
+              <div class="nip__wellbore-card">
+                <h4 class="nip__wellbore-title"><mat-icon>architecture</mat-icon>Well Bore Design Preview</h4>
+                <p class="nip__wellbore-subtitle">Built from the casing and formation tops entered in Subsurface &amp; Construction.</p>
+                <div class="nip__wellbore-preview">
+                  <app-wwell-ir-design-preview
+                    [formationTops]="wellboreFormationTops()"
+                    [casing]="wellboreCasing()"
+                    [surfaceElevationFtAsl]="wellboreSurfaceElevationFtAsl()"
+                    [targetDepthFt]="wellboreTargetDepthFt()"
+                    [wellName]="wellboreWellName()"
+                  />
+                </div>
               </div>
 
               <mat-accordion class="nip__review-grid" multi>

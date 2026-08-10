@@ -1,14 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   QueryList,
+  Signal,
   ViewChildren,
   ViewEncapsulation,
   effect,
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
@@ -17,6 +20,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
+import {
+  IntegratedRequirementCasingRow,
+  IntegratedRequirementFormationTop,
+} from '@models/wwell-planning/wwell-planning.model';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { playIfMotionAllowed } from '../../shared/dynamic-form/gsap-motion.util';
 import { buildReviewRevealTimeline } from '../../shared/dynamic-form/review-reveal.animation';
@@ -24,6 +31,7 @@ import { buildStepTransitionTimeline, WwellStepDirection } from '../../shared/dy
 import { buildWwellDynamicForm } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellApprovalMiniChainComponent } from '../../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellPlanningStore } from '../../store/wwell-planning.store';
+import { WwellIrDesignPreviewComponent } from '../wwell-ir-design-preview/wwell-ir-design-preview.component';
 import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
@@ -43,6 +51,7 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
     MatExpansionModule,
     DynamicSectionComponent,
     WwellApprovalMiniChainComponent,
+    WwellIrDesignPreviewComponent,
   ],
   templateUrl: './wwell-ir-new-page.component.html',
   styleUrl: './wwell-ir-new-page.component.scss',
@@ -73,6 +82,29 @@ export class WwellIrNewPageComponent {
 
   protected readonly form = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb);
   protected readonly isSaving = this.store.creatingIntegratedRequirement;
+
+  // Live-mirrors the form so the review step's well-bore preview redraws as casing/formation
+  // rows are added, edited, or removed back in the "Subsurface & Construction" step.
+  private readonly rawFormValue: Signal<WwellIrFormRawValue> = toSignal(this.form.valueChanges, {
+    initialValue: this.form.getRawValue() as WwellIrFormRawValue,
+  });
+
+  protected readonly wellboreCasing = computed<readonly IntegratedRequirementCasingRow[]>(() =>
+    this.rawFormValue().subsurface.casing.map(row => ({
+      type: row.type,
+      sizeIn: row.sizeIn,
+      depthFtBgl: row.depthFtBgl ?? 0,
+      remarks: row.remarks || null,
+    })),
+  );
+
+  protected readonly wellboreFormationTops = computed<readonly IntegratedRequirementFormationTop[]>(() =>
+    this.rawFormValue().subsurface.formationTops.map(row => ({ name: row.name, depthFt: row.depthFt ?? 0 })),
+  );
+
+  protected readonly wellboreTargetDepthFt = computed(() => this.rawFormValue().reference.main.targetDepthFt ?? 0);
+  protected readonly wellboreSurfaceElevationFtAsl = computed(() => this.rawFormValue().reference.main.surfaceElevationFtAsl);
+  protected readonly wellboreWellName = computed(() => this.rawFormValue().reference.main.wellName || null);
 
   protected readonly activeStepIndex = signal(0);
   @ViewChildren('stepContent') private readonly stepContents?: QueryList<ElementRef<HTMLElement>>;

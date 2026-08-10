@@ -86,15 +86,30 @@
           }
         </div>
       }
+      @case ('number') {
+        <!-- `type="number"` must be a static attribute, not `[type]`, so Angular's
+             NumberValueAccessor selector (`input[type=number][formControl]`) actually
+             matches at compile time and parses the value to a real `number` — a dynamic
+             `[type]` binding is invisible to that (template-AST-based) directive match,
+             silently falling back to the string-based DefaultValueAccessor instead. -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dyf__field">
+          <mat-label>{{ config().label }}</mat-label>
+          <input matInput type="number" [formControl]="control()" [placeholder]="config().placeholder ?? ''" />
+          @if (config().suffix) {
+            <span matTextSuffix>&nbsp;{{ config().suffix }}</span>
+          }
+          @if (config().hint && !errorMessage()) {
+            <mat-hint>{{ config().hint }}</mat-hint>
+          }
+          @if (errorMessage()) {
+            <mat-error>{{ errorMessage() }}</mat-error>
+          }
+        </mat-form-field>
+      }
       @default {
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dyf__field">
           <mat-label>{{ config().label }}</mat-label>
-          <input
-            matInput
-            [type]="config().type === 'number' ? 'number' : 'text'"
-            [formControl]="control()"
-            [placeholder]="config().placeholder ?? ''"
-          />
+          <input matInput type="text" [formControl]="control()" [placeholder]="config().placeholder ?? ''" />
           @if (config().suffix) {
             <span matTextSuffix>&nbsp;{{ config().suffix }}</span>
           }

@@ -46,15 +46,65 @@ export function resolveLiners(
     layout: DiagramLayout,
     wellDesign?: IWellDesign | null,
 ): LinerEntry[] {
-    // Source priority: IR data drives the list; DRLG data overrides depths when present.
-    return casings.length > 0
-        ? linersFromIR(casings, drlgCasings, layout, wellDesign)
-        : linersFromDrlg(drlgCasings, layout, wellDesign);
+    return attachRenderFlags(resolveLinerDepths(casings, drlgCasings), layout, wellDesign);
+}
+
+export function linersFromDrlg(
+    drlgCasings: IDrlgCsg[],
+    layout: DiagramLayout,
+    wellDesign?: IWellDesign | null,
+): LinerEntry[] {
+    return attachRenderFlags(rawLinersFromDrlg(drlgCasings), layout, wellDesign);
+}
+
+export function linersFromIR(
+    casings: ICasingIR[],
+    drlgCasings: IDrlgCsg[],
+    layout: DiagramLayout,
+    wellDesign?: IWellDesign | null,
+): LinerEntry[] {
+    return attachRenderFlags(rawLinersFromIR(casings, drlgCasings), layout, wellDesign);
 }
 
 const LINER_HW_DECREMENT = 14;
 const LINER_WALL_COLOR = '#000000';
 const SCREEN_BLANK_RATIO = 0.27;
+const SCREEN_LINER_SIZE_IN = 7;
+
+export interface RawLinerEntry {
+    readonly odSz: string;
+    readonly topDepth: number;
+    readonly botDepth: number;
+    readonly hasActual: boolean;
+}
+
+/**
+ * Depth-only liner list, sorted shallowest-first (ascending botDepth). Source priority:
+ * IR data (EXAD_GWD_IR_CASING) drives the list when present; DRLG data (as-drilled) is
+ * used on its own otherwise, and always overrides depths when both exist.
+ */
+export function resolveLinerDepths(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
+    return casings.length > 0
+        ? rawLinersFromIR(casings, drlgCasings)
+        : rawLinersFromDrlg(drlgCasings);
+}
+
+/**
+ * The liner that Open Hole / Gravel Pack / Pre-Perf completion elements are drawn
+ * relative to:
+ *   - One liner: that liner IS the anchor — completion starts below it.
+ *   - Two or more liners: the deepest liner is the screen/intake assembly that sits
+ *     *inside* the completion zone (see isLastLinerScreen), not the pipe above it —
+ *     so the second-deepest liner is the anchor instead.
+ */
+export function resolveAnchorLiner(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLinerEntry | null {
+    return pickAnchor(resolveLinerDepths(casings, drlgCasings));
+}
+
+function pickAnchor<T>(sorted: readonly T[]): T | null {
+    if (sorted.length === 0) return null;
+    return sorted.length === 1 ? sorted[0] : sorted[sorted.length - 2];
+}
 
 function assignHalfWidths(baseHalfWidth: number, count: number): number[] {
     return Array.from({ length: count }, (_, i) =>
@@ -62,40 +112,20 @@ function assignHalfWidths(baseHalfWidth: number, count: number): number[] {
     );
 }
 
-const SCREEN_LINER_SIZE_IN = 7;
-
 /**
- * Determines whether a liner qualifies as a 7" liner screen.
- *
- * All four conditions must pass:
- *   1. At least one data source (DRLG_CSG or EXAD_GWD_IR_CASING) reports a 7" OD.
- *   2. EXAD_GWD_WELL_DESIGN.lsFlg is 'Y' (case-insensitive).
- *   3. EXAD_GWD_WELL_DESIGN.lsRemarks references a 7" size somewhere in its free text.
- *   4. When both sources are available their sizes agree; a mismatch means the
- *      as-drilled and planned records refer to different liners, so do not draw a screen.
+ * The deepest liner represents the screen/intake assembly run into the open hole /
+ * gravel pack zone, so it (and only it) gets the screen visual treatment — gated on
+ * EXAD_GWD_WELL_DESIGN.lsFlg = 'Y' and the liner's own OD being 7". Exported so
+ * wellbore-depth.helpers can identify the same lone-screen case when it needs to anchor
+ * Open Hole / Gravel Pack at the casing shoe instead of below the liner (see
+ * resolveCompletionTopDepth there).
  */
-function isLinerScreen(
-    actualOdSz: string | null | undefined,   // DRLG_CSG.wLnrOdSz
-    plannedOdSz: string | null | undefined,  // EXAD_GWD_IR_CASING.csgSize
+export function isLastLinerScreen(
+    odSz: string | null | undefined,
     wellDesign: IWellDesign | null | undefined,
 ): boolean {
-    const actualSize = parseInchSize(actualOdSz);
-    const plannedSize = parseInchSize(plannedOdSz);
-
-    // Condition 1: at least one source must report a 7" liner.
-    if (actualSize !== SCREEN_LINER_SIZE_IN && plannedSize !== SCREEN_LINER_SIZE_IN) return false;
-
-    // Condition 2: lsFlg must explicitly opt-in to a liner screen.
-    if ((wellDesign?.lsFlg ?? '').trim().toUpperCase() !== 'Y') return false;
-
-    // Condition 3: lsRemarks must confirm the 7" screen size (scanned across free text).
-    if (!remarksReferenceSize(wellDesign?.lsRemarks, SCREEN_LINER_SIZE_IN)) return false;
-
-    // Condition 4: when both sizes are known they must agree — divergence means
-    // the records do not describe the same physical liner.
-    if (actualSize !== null && plannedSize !== null && actualSize !== plannedSize) return false;
-
-    return true;
+    if (parseInchSize(odSz) !== SCREEN_LINER_SIZE_IN) return false;
+    return (wellDesign?.lsFlg ?? '').trim().toUpperCase() === 'Y';
 }
 
 /**
@@ -119,17 +149,29 @@ function isPrePerforatedLiner(
     return remarksReferenceSize(wellDesign?.perforatedRemarks, SCREEN_LINER_SIZE_IN);
 }
 
-/**
- * Extracts liner entries from drlgCasings when no ICasingIR data is available.
- * Deduplicates by wLnrOdSz, sorts shallowest-first (widest hw).
- * isScreen is determined by the 7" liner screen rule (see isLinerScreen).
- */
-export function linersFromDrlg(
-    drlgCasings: IDrlgCsg[],
+/** Attaches halfWidth + isScreen/isPrePerfLiner render flags to a depth-only liner list. */
+function attachRenderFlags(
+    raw: RawLinerEntry[],
     layout: DiagramLayout,
     wellDesign?: IWellDesign | null,
 ): LinerEntry[] {
-    const dedupMap = new Map<string, { odSz: string; topDepth: number; botDepth: number }>();
+    const widths = assignHalfWidths(layout.baseHalfWidth, raw.length);
+    const lastIndex = raw.length - 1;
+
+    return raw.map((liner, i) => ({
+        ...liner,
+        halfWidth: widths[i],
+        isScreen: i === lastIndex && isLastLinerScreen(liner.odSz, wellDesign),
+        isPrePerfLiner: isPrePerforatedLiner(liner.odSz, wellDesign),
+    }));
+}
+
+/**
+ * Extracts liner entries from drlgCasings when no ICasingIR data is available.
+ * Deduplicates by wLnrOdSz, sorts shallowest-first.
+ */
+function rawLinersFromDrlg(drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
+    const dedupMap = new Map<string, RawLinerEntry>();
     for (const d of drlgCasings) {
         if (!d.wLnrOdSz || (d.wLnrBotDepth ?? 0) <= 0) continue;
         const existing = dedupMap.get(d.wLnrOdSz);
@@ -138,21 +180,12 @@ export function linersFromDrlg(
                 odSz: d.wLnrOdSz,
                 topDepth: d.wLnrTopDepth ?? d.wCsgBotDpth,
                 botDepth: d.wLnrBotDepth!,
+                hasActual: true,
             });
         }
     }
 
-    const sorted = [...dedupMap.values()].sort((a, b) => a.botDepth - b.botDepth);
-    const widths = assignHalfWidths(layout.baseHalfWidth, sorted.length);
-
-    return sorted.map((liner, i) => ({
-        ...liner,
-        halfWidth: widths[i],
-        // DRLG-only path: no planned OD to compare, so pass undefined for plannedOdSz.
-        isScreen: isLinerScreen(liner.odSz, undefined, wellDesign),
-        isPrePerfLiner: isPrePerforatedLiner(liner.odSz, wellDesign),
-        hasActual: true,
-    }));
+    return [...dedupMap.values()].sort((a, b) => a.botDepth - b.botDepth);
 }
 
 /**
@@ -163,16 +196,9 @@ export function linersFromDrlg(
  *   - EXAD_GWD_IR_CASING (planned) is the fallback for depth and the primary OD source.
  *
  * Extra DRLG_CSG liners with no corresponding IR entry are appended at the end.
- * isScreen is determined by the 7" liner screen rule (see isLinerScreen).
  */
-export function linersFromIR(
-    casings: ICasingIR[],
-    drlgCasings: IDrlgCsg[],
-    layout: DiagramLayout,
-    wellDesign?: IWellDesign | null,
-): LinerEntry[] {
+function rawLinersFromIR(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
     const irLiners = casings.filter(c => c.csgType === 'Liner');
-    if (irLiners.length === 0) return [];
 
     // Fallback top depth when no drlgCasing match exists: shoe of the deepest non-liner casing
     const lastCasingShoe = casings
@@ -181,44 +207,31 @@ export function linersFromIR(
 
     const matchedOdSizes = new Set<string>();
 
-    const irEntries = irLiners.map(csg => {
+    const irEntries: RawLinerEntry[] = irLiners.map(csg => {
         // Source priority: use DRLG_CSG depth when available; fall back to IR depth.
         const actual = drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null;
         const hasActualBot = (actual?.wLnrBotDepth ?? 0) > 0;
         const hasActualTop = (actual?.wLnrTopDepth ?? 0) > 0;
         if (actual?.wLnrOdSz) matchedOdSizes.add(actual.wLnrOdSz);
         const fallbackTopDepth = actual != null ? actual.wCsgBotDpth : lastCasingShoe;
-        const odSz = actual?.wLnrOdSz ?? csg.csgSize;
         return {
-            odSz,
+            odSz: actual?.wLnrOdSz ?? csg.csgSize,
             topDepth: hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth,
             botDepth: hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth,
             hasActual: hasActualBot,
-            // 7" rule: pass actual (DRLG) and planned (IR) OD sizes — both must agree when present.
-            isScreen: isLinerScreen(actual?.wLnrOdSz, csg.csgSize, wellDesign),
-            isPrePerfLiner: isPrePerforatedLiner(odSz, wellDesign),
         };
     });
 
-    const extraEntries = drlgCasings
+    const extraEntries: RawLinerEntry[] = drlgCasings
         .filter(d => d.wLnrOdSz != null && (d.wLnrBotDepth ?? 0) > 0 && !matchedOdSizes.has(d.wLnrOdSz!))
         .map(d => ({
             odSz: d.wLnrOdSz!,
             topDepth: d.wLnrTopDepth ?? d.wCsgBotDpth,
             botDepth: d.wLnrBotDepth!,
             hasActual: true,
-            // DRLG-only: no IR size to compare against, so plannedOdSz is undefined.
-            isScreen: isLinerScreen(d.wLnrOdSz, undefined, wellDesign),
-            isPrePerfLiner: isPrePerforatedLiner(d.wLnrOdSz, wellDesign),
         }));
 
-    const allLiners = [...irEntries, ...extraEntries].sort((a, b) => a.botDepth - b.botDepth);
-    const widths = assignHalfWidths(layout.baseHalfWidth, allLiners.length);
-
-    return allLiners.map((liner, i) => ({
-        ...liner,
-        halfWidth: widths[i],
-    }));
+    return [...irEntries, ...extraEntries].sort((a, b) => a.botDepth - b.botDepth);
 }
 
 export function renderLiners(options: RenderLinersOptions): void {

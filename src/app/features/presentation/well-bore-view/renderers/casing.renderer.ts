@@ -79,6 +79,7 @@ function renderCasings({
     layout,
     casings,
     drlgCasings,
+    wellDesign,
     centerX,
     scale,
     casingsStart,
@@ -91,7 +92,7 @@ function renderCasings({
     }
 
     const { baseHalfWidth, halfWidthIncrement, shoeCurveOffset } = layout;
-    const completionTopPx = scale(resolveCompletionTopDepth(casings, drlgCasings));
+    const completionTopPx = scale(resolveCompletionTopDepth(casings, drlgCasings, wellDesign));
 
     casings.forEach((csg, i) => {
         if (csg.csgType === 'Liner') return;

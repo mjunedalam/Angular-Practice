@@ -47,6 +47,21 @@ describe('wellbore-depth.helpers', () => {
     expect(resolveCompletionTopDepth([liner], [actualLiner])).toBe(3600);
   });
 
+  it('anchors completion top below a DRLG-only liner when IR has no Liner-typed casing', () => {
+    // Mirrors real EXAD_GWD_IR_CASING data where only structural casings are planned
+    // (no 'Liner' row), but DRLG_CSG reports an as-drilled liner.
+    const structuralCasing = WellboreTestDataUtil.casing({ csgSize: '13 3/8', csgType: 'Casing', csgDepth: 2004 });
+    const drlgLinerRow = WellboreTestDataUtil.drlgCasing({
+      wCsgOdSz: '13 3/8',
+      wCsgBotDpth: 2004,
+      wLnrOdSz: '7',
+      wLnrTopDepth: 1872,
+      wLnrBotDepth: 3146,
+    });
+
+    expect(resolveCompletionTopDepth([structuralCasing], [drlgLinerRow])).toBe(3146);
+  });
+
   it('draws completion to total depth when current depth does not exceed planned target', () => {
     const data = WellboreTestDataUtil.diagramData({
       totalDepth: WellboreTestDataUtil.plannedTargetDepthFt,
@@ -98,6 +113,7 @@ describe('wellbore-depth.helpers', () => {
     });
     const data = WellboreTestDataUtil.diagramData({
       casings: [WellboreTestDataUtil.casing({ csgSize: '9 5/8' })],
+      drlgCasings: [],
       wellDesign: WellboreTestDataUtil.wellDesign({ ohFlg: 'Y', ohRemarks: '8 1/2' }),
     });
 
