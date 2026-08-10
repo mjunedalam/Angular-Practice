@@ -1,0 +1,489 @@
+[
+  {
+    "REFERENCE": [
+      {
+        "irSeq": 2589,
+        "prewapSeq": 29313,
+        "epAnum": 94474
+      }
+    ],
+    "RIG_ACTIVITY": [
+      {
+        "drlgOpTypCd": "NEW",
+        "wDrlgTypeDesc": "NEW WELL",
+        "wWellTypeDesc": "WATER SUPPLY",
+        "biNum": "1514",
+        "biNumDesc": "EXPLORATION UNCONVENTIONAL GAS (INCLUDING BI34)",
+        "wellName": "HZEM-851",
+        "spuddate": "04/11/2024@0500",
+        "wRigCd": "JAC203",
+        "wDrlgLocDesc": "QATAR HW ROAD, 58KM BEFORE SALWA VILLAGE TURN RIGHT 38 KM S/R. ",
+        "welltype": "WATER SUPPLY  ",
+        "wDrlgTrgtDay": 50,
+        "wDrlgEndDt": "05/27/2024"
+      }
+    ],
+    "WELL_MASTER": [
+      {
+        "well": "HZEM-851",
+        "offshore": "Onshore",
+        "utmNorth": 2741385.61,
+        "utmEast": 437792.57,
+        "lon": 50.3846308,
+        "lat": 24.7856079
+      }
+    ],
+    "RIG_IDENTIFICATION": [
+      {
+        "rigname": "JACK-203",
+        "code": "JAC203",
+        "rigHeight": 28
+      }
+    ],
+    "CONTACT": [
+      {
+        "rigContNum": "+8821677713735",
+        "description": "THURAYA"
+      },
+      {
+        "rigContNum": "0135788566",
+        "description": "RIG FORMAN VSAT"
+      },
+      {
+        "rigContNum": "0135788567",
+        "description": "OTHER VSAT"
+      }
+    ],
+    "DRLG_OP_STATUS": [
+      {
+        "epANum": 94474,
+        "wActDt": "2024-05-12T00:00:00",
+        "wPrsntDpth": 3667,
+        "wCsgBotDpth": 2722,
+        "wCsgOdSz": "13 3/8",
+        "wDpthChgDis": 362,
+        "wDrlgEngName": "Elesawi, Elmahdi",
+        "wFmanName": "Massoud, Ramy Mounir",
+        "wMudCircPc": "100",
+        "wPrevDpth": 3305,
+        "wSpudOprDay": 31,
+        "wOpRmk": "ROTARY DRILL 12-1/4\" HOLE W/ 70 PCF INHIBITED PHPA POLYMER MUD.",
+        "wDrlgSmryRmk": null,
+        "wDrlgSuptName": "Habkri, Moussa Ibrahim",
+        "wLnrOdSz": null,
+        "wLnrBotDpth": null,
+        "nxt24HrPlanRmk": "ROTARY DRILL 12-1/4\" HOLE W/ INHIBITED PHPA POLYMER MUD.",
+        "fuelTypCd": "DSEL",
+        "fuelDayRem": null,
+        "fuelShipStatus": null,
+        "fuelTrckOnJob": null,
+        "fuelTrckIdle": null,
+        "rigMoveStatusCd": null,
+        "foremanExtRmk": null,
+        "rigMoveStatusDesc": null,
+        "spuddays": 31,
+        "bopdate": "04/21/2024",
+        "footage": 362,
+        "targetDepth": 6028,
+        "isFrmnExtRemarkAfterCutoff": "N"
+      }
+    ],
+    "DRLG_FM_TOPS": [
+      {
+        "epANum": 94474,
+        "wActDt": "2024-05-12T00:00:00",
+        "stLongCd": "RUS",
+        "wStDmrkDpth": 932.0,
+        "wStDmrkRmk": "14 FT SHALLOWER"
+      },
+      {
+        "epANum": 94474,
+        "wActDt": "2024-05-12T00:00:00",
+        "stLongCd": "UMER",
+        "wStDmrkDpth": 1362.0,
+        "wStDmrkRmk": "117 FT DEEPER"
+      },
+      {
+        "epANum": 94474,
+        "wActDt": "2024-05-12T00:00:00",
+        "stLongCd": "ARUM",
+        "wStDmrkDpth": 2662.0,
+        "wStDmrkRmk": "22 FT DEEPER"
+      },
+      {
+        "epANum": 94474,
+        "wActDt": "2024-05-12T00:00:00",
+        "stLongCd": "LAMS",
+        "wStDmrkDpth": 3312.0,
+        "wStDmrkRmk": "70 SHALLOWER"
+      }
+    ],
+    "DRLG_FD_TDAY": [
+      {
+        "footage": 362
+      }
+    ],
+    "ROP_DATA": [
+      {
+        "rop": 15.08
+      }
+    ],
+    "NEXT_2_WELL_ACTIVITY": [
+      {
+        "nextWellActivity": "HZEM-869",
+        "nextLocation": 98729,
+        "nextBiNum": "1514"
+      }
+    ],
+    "NEW_TARGET_DAYS": [
+      {
+        "targetDays": 43
+      }
+    ],
+    "actualRm": 4,
+    "kpiRm": 6.78,
+    "rigMoveDays": -2.78,
+    "DRLG_OP_SMRY": [
+      {
+        "wOpCd": "D",
+        "wEvntTime": "0500",
+        "wHolSz": "12 1/4",
+        "wOpRmk": "ROTARY DRILL 12-1/4\" HOLE W/ 72 PCF INHIBITED PHPA POLYMER MUD (100 % CIRC. RETURN).\n-WASH UP AND REAM DOWN TWICE EVERY CONNECTION.\n-SWEEP HOLE W/ 2 X 50 BBL'S HVP EVERY CONNECTION.",
+        "holSecTypCd": "12 1/4",
+        "wActvDrlgFlg": "N",
+        "wMajOpCd": "DRLG",
+        "wHoleStaDpth": 3305,
+        "wHoleEndDpth": 3667,
+        "wDrlgOpDttm": "2024-05-11T05:00:00",
+        "toTm": "0500"
+      }
+    ],
+    "EXAD_GWD_IR_HEADER": [
+      {
+        "dtRemarks": "Provide AramcoLink on-site to pick casing points and formation tops remotely.",
+        "mudRemarks": "Customize Mudlogging Services are required in this well from surface to TD.",
+        "loggingRemarks": "Run ZDL/CN/GR, and Resistivity logs from total depth to 100 ft above the 9-5/8; casing shoe. Continue CN/GR to surface."
+      }
+    ],
+    "EXAD_GWD_IR_TOPS": [
+      {
+        "stLongCd": "RUS",
+        "planTvdDepth": 930,
+        "planSsDepth": -484
+      },
+      {
+        "stLongCd": "UMER",
+        "planTvdDepth": 1245,
+        "planSsDepth": -799
+      },
+      {
+        "stLongCd": "ARUM",
+        "planTvdDepth": 2640,
+        "planSsDepth": -2194
+      },
+      {
+        "stLongCd": "WASI",
+        "planTvdDepth": 4165,
+        "planSsDepth": -3719
+      },
+      {
+        "stLongCd": "RUML",
+        "planTvdDepth": 4450,
+        "planSsDepth": -4004
+      },
+      {
+        "stLongCd": "AHMD",
+        "planTvdDepth": 4835,
+        "planSsDepth": -4389
+      },
+      {
+        "stLongCd": "MDDD",
+        "planTvdDepth": 5210,
+        "planSsDepth": -4764
+      },
+      {
+        "stLongCd": "SFNY",
+        "planTvdDepth": 5385,
+        "planSsDepth": -4939
+      },
+      {
+        "stLongCd": "SHUB",
+        "planTvdDepth": 6065,
+        "planSsDepth": -5619
+      }
+    ],
+    "EXAD_GWD_IR_CASING": [
+      {
+        "csgSize": "30",
+        "csgType": "Conductor",
+        "csgDepth": 100,
+        "csgRemarks": null
+      },
+      {
+        "csgSize": "24",
+        "csgType": "Casing",
+        "csgDepth": 700,
+        "csgRemarks": null
+      },
+      {
+        "csgSize": "18 5/8",
+        "csgType": "Casing",
+        "csgDepth": 950,
+        "csgRemarks": "+/- 20 ft into RUS"
+      },
+      {
+        "csgSize": "13 3/8",
+        "csgType": "Casing",
+        "csgDepth": 2660,
+        "csgRemarks": "+/- 20 ft into ARUM"
+      },
+      {
+        "csgSize": "9 5/8",
+        "csgType": "Liner",
+        "csgDepth": 5250,
+        "csgRemarks": "+/- 40 ft into MDDD"
+      }
+    ],
+    "DRLG_CSG": [
+      {
+        "wCsgOdSz": "30",
+        "wCsgBotDpth": 100.0,
+        "wLnrOdSz": null,
+        "wLnrBotDepth": null,
+        "wLnrTopDepth": null
+      },
+      {
+        "wCsgOdSz": "24",
+        "wCsgBotDpth": 672.0,
+        "wLnrOdSz": null,
+        "wLnrBotDepth": null,
+        "wLnrTopDepth": null
+      },
+      {
+        "wCsgOdSz": "18 5/8",
+        "wCsgBotDpth": 958.0,
+        "wLnrOdSz": null,
+        "wLnrBotDepth": null,
+        "wLnrTopDepth": null
+      }
+    ],
+    "EXAD_GWD_IR_HYDROGEOLOGY": [
+      {
+        "flowType": "Y",
+        "estTargetAquifier": "WASI",
+        "estStaticWaterLevel": 160,
+        "estWaterQuality": 15000,
+        "estProductivity": 500,
+        "estH2s": "0"
+      }
+    ],
+    "EXAD_GWD_IR_WATER": [
+      {
+        "offsetWaterWell": "HZEM-837",
+        "distance": 16.5,
+        "direction": "N",
+        "aquifer": "SFNY",
+        "td": 5828,
+        "flowRate": 630,
+        "rpm": 0,
+        "staticWaterLevel": 0,
+        "specificCapacity": 1.82,
+        "drawDown": 346,
+        "fieldTds": 20000,
+        "h2s": 0,
+        "testDuration": 330
+      },
+      {
+        "offsetWaterWell": "HZEM-838",
+        "distance": 16,
+        "direction": "N",
+        "aquifer": "SFNY",
+        "td": 5835,
+        "flowRate": 630,
+        "rpm": 0,
+        "staticWaterLevel": 0,
+        "specificCapacity": 1.71,
+        "drawDown": 369,
+        "fieldTds": 15880,
+        "h2s": 0,
+        "testDuration": 300
+      }
+    ],
+    "EXAD_RCD_PREWAP": [
+      {
+        "surfaceElevation": 446,
+        "estTargetDepth": 6000,
+        "targetFormation": "WASI",
+        "supportedBusiness": "HZEM block 7"
+      }
+    ],
+    "MUD_CIRC": [
+      {
+        "wPrsntDpth": 128,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 128
+      },
+      {
+        "wPrsntDpth": 345,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 217
+      },
+      {
+        "wPrsntDpth": 650,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 305
+      },
+      {
+        "wPrsntDpth": 700,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 50
+      },
+      {
+        "wPrsntDpth": 760,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 60
+      },
+      {
+        "wPrsntDpth": 880,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 120
+      },
+      {
+        "wPrsntDpth": 986,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 106
+      },
+      {
+        "wPrsntDpth": 1100,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 114
+      },
+      {
+        "wPrsntDpth": 1219,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 119
+      },
+      {
+        "wPrsntDpth": 1415,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 196
+      },
+      {
+        "wPrsntDpth": 1600,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 185
+      },
+      {
+        "wPrsntDpth": 1905,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 305
+      },
+      {
+        "wPrsntDpth": 2015,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 110
+      },
+      {
+        "wPrsntDpth": 2137,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 122
+      },
+      {
+        "wPrsntDpth": 2363,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 226
+      },
+      {
+        "wPrsntDpth": 2455,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 92
+      },
+      {
+        "wPrsntDpth": 2545,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 90
+      },
+      {
+        "wPrsntDpth": 2571,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 26
+      },
+      {
+        "wPrsntDpth": 2722,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 151
+      },
+      {
+        "wPrsntDpth": 2965,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 243
+      },
+      {
+        "wPrsntDpth": 3125,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 160
+      },
+      {
+        "wPrsntDpth": 3305,
+        "wMudCircPc": "0",
+        "wDpthChgDis": 180
+      },
+      {
+        "wPrsntDpth": 3667,
+        "wMudCircPc": "100",
+        "wDpthChgDis": 362
+      }
+    ],
+    "EXAD_GWD_WELL_TESTS": [
+      {
+        "egwt_id": 69,
+        "rsvrCd": "ALAT",
+        "hydTestTypCd": "FLOW",
+        "testStaDt": "2024-05-05T00:00:00",
+        "temp": 1,
+        "hydH2sCnc": 1,
+        "wtrSaTdsCnc": 11,
+        "rpm": null,
+        "siwhp": 11,
+        "hydPmpDpth": null,
+        "hydProdRt": 1,
+        "statWlvl": null,
+        "dyncWlvl": null,
+        "testerNetworkId": "ALMAAH1G,HABEMI0A",
+        "testerName": "Almarri, Abdulrahman Hamad;Habib, Murtadha Ibrahim",
+        "hydProduct": 0.0433,
+        "duration": 1,
+        "fwhp": 1,
+        "remarks": "remaaarks"
+      }
+    ],
+    "EXAD_GWD_DAILY_REMARKS": [
+      {
+        "area": "Western Area",
+        "status": "Drilling"
+      }
+    ],
+    "EXAD_GWD_WELL_DESIGN": [
+      {
+        "staWaterLvl": 1,
+        "swLvlTxt": "Flowing (SIWHP: 160 psi)",
+        "pumpLvl": null,
+        "ohFlg": "Y",
+        "ohRemarks": "8-1/5\" Open hole",
+        "gpFlg": null,
+        "gpRemarks": null,
+        "perforatedFlg": "N",
+        "perforatedRemarks": null,
+        "lsFlg": "Y",
+        "lsRemarks": "+/- 750 ft of 7\" screen"
+      }
+    ],
+    "PRIMARY_HOLEID": [
+      {
+        "wPrimHid": "HZEM",
+        "wPrimHidName": "HAZEM",
+        "w_prim_hid_ar_name_html": "&#x62d;&#x632;&#x645;"
+      }
+    ]
+  }
+]

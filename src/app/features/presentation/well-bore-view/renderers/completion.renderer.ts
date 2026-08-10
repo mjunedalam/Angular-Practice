@@ -14,10 +14,12 @@ import { animateLabel } from './animation.helpers';
 import {
   resolveCompletionBottomDepth,
   resolveCompletionBottomPx,
+  resolveCompletionRule,
+  resolveCompletionShoeCurvePx,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
   resolveOhHalfWidth,
-  resolvePrePerforatedLinerDepth,
+  resolvePerforatedIntervalInfo,
   shouldRenderGravelPack,
   shouldRenderLinerScreen,
   shouldRenderOpenHole,
@@ -61,11 +63,13 @@ function renderOpenHoleAndScreen({
 
   const { wellDesign } = data;
   const shouldDrawOH = shouldRenderOpenHole(wellDesign);
-  // When DRLG_CSG liners are present, liner.renderer owns all liner rendering (shapes,
-  // hangers, and the 7" screen via isScreen). The legacy completion-path screen is only
-  // drawn when there are no as-drilled liners and the well-design flags opt in.
-  const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
-  const shouldDrawLS = !hasDrlgLiners && shouldRenderLinerScreen(wellDesign);
+  // When a liner qualifies as the 7" completion target (Rule 2 / Rule 3 standard
+  // evaluation), liner.renderer owns all liner rendering (shapes, hangers, and the 7"
+  // screen via isScreen). The legacy completion-path screen is only drawn when no liner
+  // qualifies (no liner at all, or a fallback well with an ordinary liner / no 7" match)
+  // and lsFlg opts in.
+  const rule = resolveCompletionRule(data.casings, data.drlgCasings);
+  const shouldDrawLS = rule.targetLiner === null && shouldRenderLinerScreen(wellDesign);
   if (!shouldDrawOH && !shouldDrawLS) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset, gpScreenGap } = layout;
@@ -76,7 +80,10 @@ function renderOpenHoleAndScreen({
   const gpCasing = data.casings.find(c => c.csgType === 'Gravel Pack');
   const shoePx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
   const completionBottomDepth = resolveCompletionBottomDepth(data);
-  const completionBottomPx = scale(completionBottomDepth);
+  // Extend past the resolved depth so the OH border reaches the liner's own rendered
+  // shoe curve instead of stopping flat short of it (see resolveCompletionShoeCurvePx).
+  const completionBottomPx = scale(completionBottomDepth)
+    + resolveCompletionShoeCurvePx(data.casings, data.drlgCasings, layout);
   const hasGP = shouldRenderGravelPack(wellDesign) || !!gpCasing;
   const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), completionBottomPx) : completionBottomPx;
   const screenBottomPx = wellDesign
@@ -167,7 +174,10 @@ function renderGravelPackDesign({
   const gpOuterEdge = lsHW + annulusWidth;
   const annulusCenter = lsHW + annulusWidth / 2;
   const startDepthPx = resolveCompletionTopPx(data.casings, data.drlgCasings, scale);
-  const completionBottomPx = resolveCompletionBottomPx(data, scale);
+  // Extend past the resolved depth so the GP border reaches the liner's own rendered
+  // shoe curve instead of stopping flat short of it (see resolveCompletionShoeCurvePx).
+  const completionBottomPx = resolveCompletionBottomPx(data, scale)
+    + resolveCompletionShoeCurvePx(data.casings, data.drlgCasings, layout);
 
   const clipId = 'dyn-gp-design-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -204,10 +214,6 @@ function renderGravelPackDesign({
   animateLabel(lg, ohLabelStart, animation);
 }
 
-// Matches the `+4` clearance liner.renderer uses between a liner's hanger bracket and its
-// own top depth, so the perforated overlay starts flush with — not below — the hanger.
-const PRE_PERF_HANGER_CLEARANCE_PX = 4;
-
 function renderPrePerforatedLiner({
   rootG,
   defsEl,
@@ -218,21 +224,18 @@ function renderPrePerforatedLiner({
   ohStart,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
-  const prePerfDepth = resolvePrePerforatedLinerDepth(wellDesign, data.drlgCasings, data.casings);
-  if (!wellDesign || !prePerfDepth) return;
+  const perfInfo = resolvePerforatedIntervalInfo(wellDesign, data.casings, data.drlgCasings);
+  if (!wellDesign || !perfInfo) return;
 
   const { openHoleHwMargin } = layout;
   const ohHW = resolveOhHalfWidth(data, layout);
   const perfHwInset = Math.max(12, Math.min(20, openHoleHwMargin * 0.65));
   const prePerfHW = Math.max(10, ohHW - perfHwInset);
-  const topPx = scale(prePerfDepth.topDepth);
-  // Never draw past the liner's own bottom depth, and still respect the current display cap.
-  const botDepth = Math.min(prePerfDepth.botDepth, resolveCompletionBottomDepth(data));
-  const completionBottomPx = scale(botDepth);
-  // Start just after the liner hanger and run all the way to the liner's bottom — do not
-  // shorten either end.
-  const perfTopPx = Math.min(topPx + PRE_PERF_HANGER_CLEARANCE_PX, completionBottomPx);
-  const perfBottomPx = completionBottomPx;
+  // Same shared interval as Open Hole / Gravel Pack (docs/plan/logic.md Rules 1-3),
+  // extended to reach the liner's own rendered shoe curve (see resolveCompletionShoeCurvePx).
+  const perfTopPx = scale(resolveCompletionTopDepth(data.casings, data.drlgCasings));
+  const perfBottomPx = resolveCompletionBottomPx(data, scale)
+    + resolveCompletionShoeCurvePx(data.casings, data.drlgCasings, layout);
 
   const clipId = 'dyn-perf-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -248,10 +251,14 @@ function renderPrePerforatedLiner({
   perfGroup.append('path')
     .attr('class', 'pre-perf-liner')
     .attr('d', buildOpenHolePath(centerX, prePerfHW, perfTopPx, perfBottomPx));
-  // odSz comes straight from DRLG_CSG and may already carry a trailing inch mark
-  // (e.g. `7"`) — strip it so the tooltip never doubles up as `7"" Pre Perf Liner`.
-  const prePerfOdSz = prePerfDepth.odSz.replace(/["']/g, '').trim();
-  perfGroup.append('title').text(`${prePerfOdSz}" Pre Perf Liner`);
+  // linerOdSz comes straight from DRLG_CSG and may already carry a trailing inch mark
+  // (e.g. `7"`) — strip it so the tooltip never doubles up as `7"" Pre Perf Liner`. Null
+  // (Rule 1 / Rule 3 fallback — no single liner anchors the interval) falls back to a
+  // generic label.
+  const perfTitle = perfInfo.linerOdSz
+    ? `${perfInfo.linerOdSz.replace(/["']/g, '').trim()}" Pre Perf Liner`
+    : (wellDesign.perforatedRemarks ?? 'Perforated Interval');
+  perfGroup.append('title').text(perfTitle);
 
   clipRect.transition()
     .delay(ohStart)
@@ -274,8 +281,12 @@ export function renderScreenHanger({
   // duplicate OUTER hanger set. It only draws the well-design liner-screen hanger
   // (lsFlg='Y') for a screen that has no corresponding liner geometry.
   if (!shouldRenderLinerScreen(data.wellDesign)) return;
-  const hasDrlgLiners = data.drlgCasings.some(d => d.wLnrOdSz && (d.wLnrBotDepth ?? 0) > 0);
-  if (hasDrlgLiners) return;
+  // Only when no liner qualifies as the 7" completion target: liner.renderer already
+  // draws a hanger for that target liner itself (isScreen), so this generic bracket would
+  // duplicate it. When no liner qualifies (no liner at all, or a fallback well with an
+  // ordinary liner / no 7" match), there's no liner geometry for the implied screen, so
+  // this draws its hanger in place of one.
+  if (resolveCompletionRule(data.casings, data.drlgCasings).targetLiner !== null) return;
 
   const { baseHalfWidth, halfWidthIncrement, linerScreenInset } = layout;
   const innerHW = computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement);

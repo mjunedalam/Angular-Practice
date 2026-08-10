@@ -3,7 +3,7 @@ import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import { computeCasingHalfWidth, parseInchSize } from '@shared/utils/wellbore-math.util';
-import { resolveAnchorLiner, resolveLinerDepths, resolveLiners } from './liner.renderer';
+import { LinerRule, resolveLinerDepths, resolveLinerRule, resolveLiners } from './liner.renderer';
 import { DepthScale } from './wellbore-renderer.types';
 
 const OVERRUN_COMPLETION_LENGTH_FT = 1200;
@@ -17,23 +17,16 @@ export function resolveShoeDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]):
   return (actual !== null && actual.wCsgBotDpth > 0 ? actual.wCsgBotDpth : null) ?? deepest.csgDepth;
 }
 
-/**
- * Depth Open Hole / Gravel Pack / Pre-Perf start from:
- *   - 2+ liners: below the anchor (second-deepest) liner's bottom — the deepest liner is
- *     physically run into that open-hole continuation on its own.
- *   - Exactly 1 liner: there's no separate pipe liner above it — a lone liner is always
- *     run into the drilled hole below the casing shoe, so completion elements must start
- *     at the CASING SHOE (not the liner's own bottom) to visually surround it. This is a
- *     geometric fact, independent of EXAD_GWD_WELL_DESIGN.lsFlg — lsFlg only controls
- *     whether the liner gets the decorative "screen" grid pattern/label (see
- *     isLastLinerScreen in liner.renderer), not where it physically sits.
- *   - No liners: the casing shoe.
- */
-export function resolveCompletionTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+/** Central entry point for docs/plan/logic.md Rules 1-3 (see liner.renderer's resolveLinerRule). */
+export function resolveCompletionRule(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): LinerRule {
   const liners = resolveLinerDepths(casings, drlgCasings);
-  if (liners.length <= 1) return resolveShoeDepth(casings, drlgCasings);
+  const lastCasingShoe = resolveShoeDepth(casings, drlgCasings);
+  return resolveLinerRule(liners, lastCasingShoe);
+}
 
-  return liners[liners.length - 2].botDepth;
+/** Start depth Open Hole / Gravel Pack / Perforated Interval share, per Rules 1-3. */
+export function resolveCompletionTopDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+  return resolveCompletionRule(casings, drlgCasings).startDepth;
 }
 
 export function resolveCompletionTopPx(
@@ -45,18 +38,59 @@ export function resolveCompletionTopPx(
 }
 
 export function resolveCompletionBottomDepth(data: WellboreDiagramData): number {
-  const completionTopDepth = resolveCompletionTopDepth(data.casings, data.drlgCasings);
-  const isCurrentDepthBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
+  const rule = resolveCompletionRule(data.casings, data.drlgCasings);
 
-  const naturalBottom = isCurrentDepthBeyondTarget
-    ? Math.max(completionTopDepth, Math.min(data.totalDepth, completionTopDepth + OVERRUN_COMPLETION_LENGTH_FT))
-    : data.totalDepth;
+  let naturalBottom: number;
+  switch (rule.kind) {
+    case 'none':
+    case 'single-fallback': {
+      // Rule 1, and Rule 2's non-7" liner: end = total depth, extended past it while
+      // actively drilling beyond target.
+      const isCurrentDepthBeyondTarget = data.targetDepth > 0 && data.currentDepth > data.targetDepth;
+      naturalBottom = isCurrentDepthBeyondTarget
+        ? Math.max(rule.startDepth, Math.min(data.totalDepth, rule.startDepth + OVERRUN_COMPLETION_LENGTH_FT))
+        : data.totalDepth;
+      break;
+    }
+    case 'single':
+    case 'multi-target':
+      // Rule 2 / Rule 3 standard evaluation: end = the 7" target liner's own shoe depth.
+      naturalBottom = rule.structuralEndDepth ?? rule.startDepth;
+      break;
+    case 'multi-fallback': {
+      // Rule 3 fallback: end = max(current depth, target depth), clamped to [start, TD].
+      const fallbackEnd = Math.max(data.currentDepth || 0, data.targetDepth || 0);
+      naturalBottom = Math.max(rule.startDepth, Math.min(data.totalDepth, fallbackEnd));
+      break;
+    }
+  }
 
   return Math.min(naturalBottom, data.displayDepth);
 }
 
 export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: DepthScale): number {
   return scale(resolveCompletionBottomDepth(data));
+}
+
+/**
+ * Extra pixels Open Hole / Gravel Pack / Perforated Interval should extend past their
+ * resolved bottom depth so their border reaches the liner's own rendered shoe curve.
+ * buildCasingPath draws the liner's shoe as a bulge that dips shoeCurveOffset px below
+ * its flat bottom depth (see liner.renderer's renderLinerShapes) — without this, those
+ * flat-bottomed completion paths visually stop short, leaving a bare gap at the tip.
+ *
+ * Only applies when the interval's END is bounded by a liner's own shoe (Rule 2 / Rule 3
+ * standard evaluation, resolveLinerRule kind 'single' | 'multi-target'). The other kinds
+ * all terminate in open rock (total depth, or current/target depth) with no liner shoe
+ * to match at the bottom, so no curve applies there.
+ */
+export function resolveCompletionShoeCurvePx(
+  casings: ICasingIR[],
+  drlgCasings: IDrlgCsg[],
+  layout: DiagramLayout,
+): number {
+  const kind = resolveCompletionRule(casings, drlgCasings).kind;
+  return kind === 'single' || kind === 'multi-target' ? layout.shoeCurveOffset : 0;
 }
 
 function isFlagYes(flg: string | null | undefined): boolean {
@@ -81,47 +115,41 @@ export function shouldRenderLinerScreen(wellDesign: IWellDesign | null | undefin
   return isFlagYes(wellDesign?.lsFlg);
 }
 
-const PRE_PERF_LINER_SIZE_IN = 7;
-
-export interface PrePerforatedLinerDepth {
-  readonly odSz: string;
-  readonly topDepth: number;
-  readonly botDepth: number;
+export interface PerforatedIntervalInfo {
+  /** OD of the is7InchLiner target the interval is drawn around (Rule 2 / Rule 3
+   *  standard evaluation). Null in Rule 1 (no liner) and Rule 3's fallback, where the
+   *  interval isn't anchored to any single liner. */
+  readonly linerOdSz: string | null;
 }
 
 /**
- * Resolves the pre-perforated liner overlay depth range.
- *
- * Both conditions must pass:
- *   1. EXAD_GWD_WELL_DESIGN.perforatedFlg is 'Y' (case-insensitive).
- *   2. The anchor liner (see resolveAnchorLiner) has a 7" OD.
+ * Resolves whether the Perforated Interval element (EXAD_GWD_WELL_DESIGN.perforatedFlg)
+ * should render, and which liner (if any) to reference in its label.
  *
  * perforatedRemarks is free text and only affects label copy elsewhere — it must never
  * gate visibility (see isPrePerforatedLiner in liner.renderer for the matching rationale).
  *
- * The returned depths come from that anchor liner's own top/bottom so the overlay is
- * drawn only across its interval — and, with 2+ liners, from the same liner Open Hole
- * and Gravel Pack are drawn below, not the deepest (screen) liner.
+ * Per docs/plan/logic.md, perforatedFlg is drawn across the same shared interval as
+ * ohFlg/gpFlg (resolveCompletionTopDepth/resolveCompletionBottomDepth) — every liner shape
+ * (Rules 1-3) resolves to some interval, so this only gates on the flag itself.
  */
-export function resolvePrePerforatedLinerDepth(
+export function resolvePerforatedIntervalInfo(
   wellDesign: IWellDesign | null | undefined,
+  casings: ICasingIR[],
   drlgCasings: IDrlgCsg[],
-  casings: ICasingIR[] = [],
-): PrePerforatedLinerDepth | null {
+): PerforatedIntervalInfo | null {
   if (!isFlagYes(wellDesign?.perforatedFlg)) return null;
 
-  const anchor = resolveAnchorLiner(casings, drlgCasings);
-  if (!anchor || parseInchSize(anchor.odSz) !== PRE_PERF_LINER_SIZE_IN) return null;
-
-  return { odSz: anchor.odSz, topDepth: anchor.topDepth, botDepth: anchor.botDepth };
+  const rule = resolveCompletionRule(casings, drlgCasings);
+  return { linerOdSz: rule.targetLiner?.odSz ?? null };
 }
 
-export function shouldRenderPrePerforatedLiner(
+export function shouldRenderPerforatedInterval(
   wellDesign: IWellDesign | null | undefined,
-  drlgCasings: IDrlgCsg[] = [],
   casings: ICasingIR[] = [],
+  drlgCasings: IDrlgCsg[] = [],
 ): boolean {
-  return resolvePrePerforatedLinerDepth(wellDesign, drlgCasings, casings) !== null;
+  return resolvePerforatedIntervalInfo(wellDesign, casings, drlgCasings) !== null;
 }
 
 export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLayout): number {
@@ -140,15 +168,20 @@ export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLay
   );
   const outerOD = parseInchSize(structuralCasings[0]?.csgSize ?? null);
 
-  // When liners exist, OH must render strictly outside the anchor liner it surrounds and
+  // When liners exist, OH must render strictly outside the boundary liner it surrounds and
   // inside the casing it hangs from (e.g. a 12 1/4" OH must sit outside a 7" liner and
   // inside a 13 3/8" casing). Per-liner on-screen widths (anchorLiner.halfWidth, innerHW)
   // are a cosmetic decrement scheme with no fixed relationship to real inches, so scaling
   // one of them by a raw diameter ratio can overshoot the casing or undershoot the liner.
   // Instead, interpolate between the two known on-screen widths using the real diameter
   // ratio as the blend factor — this guarantees OH always lands between them.
+  // boundaryLiner (see resolveLinerRule) is the liner immediately above the completion
+  // interval's start — for Rule 3's fallback that's the deepest liner itself.
   const liners = resolveLiners(data.casings, data.drlgCasings, layout, data.wellDesign);
-  const anchorLiner = liners.length > 1 ? liners[liners.length - 2] : (liners[0] ?? null);
+  const boundary = resolveCompletionRule(data.casings, data.drlgCasings).boundaryLiner;
+  const anchorLiner = boundary !== null
+    ? liners.find(l => l.odSz === boundary.odSz && l.botDepth === boundary.botDepth) ?? null
+    : null;
 
   if (anchorLiner !== null) {
     const linerOD = parseInchSize(anchorLiner.odSz);

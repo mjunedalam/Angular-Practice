@@ -89,42 +89,94 @@ export function resolveLinerDepths(casings: ICasingIR[], drlgCasings: IDrlgCsg[]
 }
 
 /**
- * The liner that Open Hole / Gravel Pack / Pre-Perf completion elements are drawn
- * relative to:
- *   - One liner: that liner IS the anchor — completion starts below it.
- *   - Two or more liners: the deepest liner is the screen/intake assembly that sits
- *     *inside* the completion zone (see isLastLinerScreen), not the pipe above it —
- *     so the second-deepest liner is the anchor instead.
+ * docs/plan/logic.md `is7InchLiner`: a liner qualifies as the 7" completion target when
+ * its own OD (DRLG_CSG.wLnrOdSz, preferred) or planned OD (EXAD_GWD_IR_CASING.csgSize,
+ * only for csgType='Liner' rows) is 7". RawLinerEntry.odSz already resolves that same
+ * priority (actual wLnrOdSz over planned csgSize) upstream in rawLinersFromIR/
+ * rawLinersFromDrlg, and every entry here is already liner-typed, so the spec's OR
+ * condition collapses to a single size check on the resolved odSz.
  */
-export function resolveAnchorLiner(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLinerEntry | null {
-    return pickAnchor(resolveLinerDepths(casings, drlgCasings));
+export function is7InchLiner(liner: Pick<RawLinerEntry, 'odSz'>): boolean {
+    return parseInchSize(liner.odSz) === SCREEN_LINER_SIZE_IN;
 }
 
-function pickAnchor<T>(sorted: readonly T[]): T | null {
-    if (sorted.length === 0) return null;
-    return sorted.length === 1 ? sorted[0] : sorted[sorted.length - 2];
+/**
+ * Index of the liner matching is7InchLiner, searched shallowest-first — the first match
+ * wins (docs/plan/logic.md Rule 3: `liners.findIndex(is7InchLiner)`). Null when none
+ * qualify.
+ */
+function resolveTargetLinerIndex(liners: readonly RawLinerEntry[]): number | null {
+    const idx = liners.findIndex(is7InchLiner);
+    return idx === -1 ? null : idx;
+}
+
+export type LinerRuleKind = 'none' | 'single' | 'single-fallback' | 'multi-target' | 'multi-fallback';
+
+export interface LinerRule {
+    readonly kind: LinerRuleKind;
+    readonly startDepth: number;
+    /** Fixed structural bottom for 'single' and 'multi-target' (the target liner's own
+     *  shoe). Null for 'none', 'single-fallback', and 'multi-fallback' — those are bounded
+     *  by total/current/target depth, data this liner-only function doesn't have, so the
+     *  caller resolves them. */
+    readonly structuralEndDepth: number | null;
+    /** The is7InchLiner match completion elements are drawn around — gets the screen
+     *  texture when lsFlg='Y'. Null when no liner qualifies (kind is 'none',
+     *  'single-fallback', or 'multi-fallback' — those get the generic Liner Screen shape
+     *  instead, see completion.renderer's renderOpenHoleAndScreen). */
+    readonly targetLiner: RawLinerEntry | null;
+    /** The liner immediately above the interval start, used only to blend Open Hole's
+     *  on-screen width between it and the outer casing (see resolveOhHalfWidth). */
+    readonly boundaryLiner: RawLinerEntry | null;
+}
+
+/**
+ * Implements docs/plan/logic.md Rules 1-3 over a depth-only liner list: which liner (if
+ * any) is the 7" completion target, and the depth interval Open Hole / Gravel Pack /
+ * Perforated Interval share as a result.
+ */
+export function resolveLinerRule(liners: readonly RawLinerEntry[], lastCasingShoe: number): LinerRule {
+    // Rule 1: No Liner
+    if (liners.length === 0) {
+        return { kind: 'none', startDepth: lastCasingShoe, structuralEndDepth: null, targetLiner: null, boundaryLiner: null };
+    }
+
+    // Rule 2: Single Liner
+    if (liners.length === 1) {
+        const only = liners[0];
+        if (!is7InchLiner(only)) {
+            // Not the 7" screen liner: still an ordinary liner with open hole/completion
+            // below it — draw from its own shoe down to total/current/target depth, same
+            // as a no-match multi-liner well (docs/plan/logic.md leaves this case
+            // unaddressed; this mirrors Rule 3's fallback rather than drawing nothing).
+            return { kind: 'single-fallback', startDepth: only.botDepth, structuralEndDepth: null, targetLiner: null, boundaryLiner: only };
+        }
+        return { kind: 'single', startDepth: lastCasingShoe, structuralEndDepth: only.botDepth, targetLiner: only, boundaryLiner: only };
+    }
+
+    // Rule 3: Multiple Liners
+    const targetIndex = resolveTargetLinerIndex(liners);
+    if (targetIndex !== null) {
+        const target = liners[targetIndex];
+        const startDepth = targetIndex === 0 ? lastCasingShoe : liners[targetIndex - 1].botDepth;
+        return {
+            kind: 'multi-target',
+            startDepth,
+            structuralEndDepth: target.botDepth,
+            targetLiner: target,
+            boundaryLiner: targetIndex === 0 ? null : liners[targetIndex - 1],
+        };
+    }
+
+    // Fallback: multiple liners, none match 7"
+    const deepest = liners[liners.length - 1];
+    return { kind: 'multi-fallback', startDepth: deepest.botDepth, structuralEndDepth: null, targetLiner: null, boundaryLiner: deepest };
 }
 
 function assignHalfWidths(baseHalfWidth: number, count: number): number[] {
     return Array.from({ length: count }, (_, i) =>
         Math.max(22, baseHalfWidth - (i + 1) * LINER_HW_DECREMENT)
     );
-}
-
-/**
- * The deepest liner represents the screen/intake assembly run into the open hole /
- * gravel pack zone, so it (and only it) gets the screen visual treatment — gated on
- * EXAD_GWD_WELL_DESIGN.lsFlg = 'Y' and the liner's own OD being 7". Exported so
- * wellbore-depth.helpers can identify the same lone-screen case when it needs to anchor
- * Open Hole / Gravel Pack at the casing shoe instead of below the liner (see
- * resolveCompletionTopDepth there).
- */
-export function isLastLinerScreen(
-    odSz: string | null | undefined,
-    wellDesign: IWellDesign | null | undefined,
-): boolean {
-    if (parseInchSize(odSz) !== SCREEN_LINER_SIZE_IN) return false;
-    return (wellDesign?.lsFlg ?? '').trim().toUpperCase() === 'Y';
 }
 
 /**
@@ -137,10 +189,6 @@ export function isLastLinerScreen(
  * perforatedRemarks is free text and only ever used for label copy — it must never gate
  * visibility, otherwise perforatedFlg='Y' with a blank/missing remarks field would silently
  * hide a feature the well design explicitly opted into.
- *
- * Mirrors the gating in wellbore-depth.helpers' resolvePrePerforatedLinerDepth (which drives
- * the dashed overlay itself); this is re-implemented locally rather than imported to avoid a
- * circular dependency, since that module already imports resolveLiners from this file.
  */
 function isPrePerforatedLiner(
     odSz: string | null | undefined,
@@ -157,12 +205,13 @@ function attachRenderFlags(
     wellDesign?: IWellDesign | null,
 ): LinerEntry[] {
     const widths = assignHalfWidths(layout.baseHalfWidth, raw.length);
-    const lastIndex = raw.length - 1;
+    const targetIndex = resolveTargetLinerIndex(raw);
+    const lsFlgYes = (wellDesign?.lsFlg ?? '').trim().toUpperCase() === 'Y';
 
     return raw.map((liner, i) => ({
         ...liner,
         halfWidth: widths[i],
-        isScreen: i === lastIndex && isLastLinerScreen(liner.odSz, wellDesign),
+        isScreen: i === targetIndex && lsFlgYes,
         isPrePerfLiner: isPrePerforatedLiner(liner.odSz, wellDesign),
     }));
 }
