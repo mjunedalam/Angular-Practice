@@ -186,6 +186,15 @@ export function resolveOhHalfWidth(data: WellboreDiagramData, layout: DiagramLay
   if (anchorLiner !== null) {
     const linerOD = parseInchSize(anchorLiner.odSz);
     if (linerOD !== null && linerOD > 0) {
+      // No 7" target liner (single-fallback / multi-fallback): OH continues below the
+      // boundary liner's own shoe rather than surrounding it, so it's normally narrower
+      // than that liner — same telescoping-down relationship as the no-liner branch below.
+      // The blend formula further down only handles OH wider than the liner; left
+      // unguarded it clamps to 0 here and renders OH at the liner's own width instead of
+      // nested inside it.
+      if (ohDiameter < linerOD) {
+        return anchorLiner.halfWidth * (ohDiameter / linerOD);
+      }
       if (outerOD !== null && outerOD > linerOD) {
         const blend = Math.min(1, Math.max(0, (ohDiameter - linerOD) / (outerOD - linerOD)));
         return anchorLiner.halfWidth + blend * (innerHW - anchorLiner.halfWidth);
