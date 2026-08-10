@@ -401,8 +401,6 @@ function renderLinerLabels({
         // The screen liner (isScreen, always the last/deepest one) gets a heavier, darker
         // label than a plain actual liner so it reads as the standout element on the diagram.
         const primaryFill = liner.isScreen ? '#14532d' : (liner.hasActual ? '#22c55e' : '');
-        const innerFill = liner.isScreen ? '#000000' : (liner.hasActual ? '#0f2d1a' : '');
-        const innerWeight = liner.isScreen ? '900' : (liner.hasActual ? '800' : 'normal');
 
         const lg = rootG.append('g').attr('class', 'casing-label');
         lg.append('line').attr('class', 'casing-label__line')
@@ -417,15 +415,22 @@ function renderLinerLabels({
 
         animateLabel(lg, labelsStart, animation);
 
-        rootG.append('text').attr('class', 'casing-size-inner')
-            .attr('x', centerX).attr('y', midY)
-            .attr('text-anchor', 'middle')
-            .style('opacity', 0)
-            .attr('fill', innerFill)
-            .style('font-weight', innerWeight)
-            .text(`${liner.odSz}"`)
-            .transition().delay(innerDelay).duration(animation.fadeDur).ease(easeCubicInOut)
-            .style('opacity', 1);
+        // The screen liner's own grid-pattern fill plus the side callout above already
+        // identify it as "7" ... (Screen)" — the inner size text on top of that grid
+        // pattern is redundant clutter, so skip it when lsFlg='Y' flagged this as the screen.
+        if (!liner.isScreen) {
+            const innerFill = liner.hasActual ? '#0f2d1a' : '';
+            const innerWeight = liner.hasActual ? '800' : 'normal';
+            rootG.append('text').attr('class', 'casing-size-inner')
+                .attr('x', centerX).attr('y', midY)
+                .attr('text-anchor', 'middle')
+                .style('opacity', 0)
+                .attr('fill', innerFill)
+                .style('font-weight', innerWeight)
+                .text(`${liner.odSz}"`)
+                .transition().delay(innerDelay).duration(animation.fadeDur).ease(easeCubicInOut)
+                .style('opacity', 1);
+        }
 
         if (liner.topDepth > 0) {
             // TOL (top-of-liner) label on the LEFT side to avoid colliding with the
