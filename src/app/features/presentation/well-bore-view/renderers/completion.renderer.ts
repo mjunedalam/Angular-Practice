@@ -222,6 +222,8 @@ function renderPrePerforatedLiner({
   centerX,
   scale,
   ohStart,
+  ohLabelStart,
+  animation,
 }: RenderCompletionElementsOptions): void {
   const wellDesign = data.wellDesign;
   const perfInfo = resolvePerforatedIntervalInfo(wellDesign, data.casings, data.drlgCasings);
@@ -265,6 +267,29 @@ function renderPrePerforatedLiner({
     .duration(ANIM.OH_DURATION)
     .ease(easeCubicInOut)
     .attr('height', perfBottomPx - perfTopPx + 10);
+
+  // Visible on-diagram label — every sibling completion element (Open Hole, Gravel Pack,
+  // Liner Screen) gets a leader-line text label; this one previously only carried a native
+  // <title> tooltip, which is invisible until hover, so perforatedRemarks effectively never
+  // showed up even when populated. Prefer the remarks text itself over perfTitle's generic
+  // "Pre Perf Liner"/"Perforated Interval" fallback.
+  // const perfLabel = wellDesign.perforatedRemarks ?? perfTitle;
+  // const perfLY = perfTopPx + (perfBottomPx - perfTopPx) * 0.7;
+  // const perfLG = rootG.append('g').attr('class', 'perf-label');
+  // const perfLineX1 = centerX - prePerfHW;
+  // const perfLineX2 = perfLineX1 - 33;
+
+  // perfLG.append('line')
+  //   .attr('class', 'oh-label-line')
+  //   .attr('x1', perfLineX1).attr('x2', perfLineX2).attr('y1', perfLY).attr('y2', perfLY);
+  // perfLG.append('path')
+  //   .attr('class', 'oh-label-arrow')
+  //   .attr('d', buildArrowHeadLeft(perfLineX2, perfLY, 6));
+  // perfLG.append('text')
+  //   .attr('class', 'open-hole-text')
+  //   .attr('x', perfLineX2 - 6).attr('y', perfLY + 4).attr('text-anchor', 'end').text(perfLabel);
+
+  // animateLabel(perfLG, ohLabelStart, animation);
 }
 
 export function renderScreenHanger({

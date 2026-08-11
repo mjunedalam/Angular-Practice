@@ -152,6 +152,10 @@ import { LoginComponent } from '../auth/login.component';
   - Update only changed elements
   - Avoid unnecessary recalculation
 
+- Labels (wellbore diagram completion elements):
+  - Every completion overlay (Open Hole, Gravel Pack, Liner Screen, Perforated Interval) needs a visible leader-line `<text>` label — never rely solely on a native SVG `<title>` (invisible until hover, easy to miss)
+  - `*Flg`/`*Remarks` well-design fields (e.g. `ohFlg`/`ohRemarks`): the flag alone gates visibility; remarks are free text for label copy only and must never gate rendering
+
 ---
 
 ## AG Grid
