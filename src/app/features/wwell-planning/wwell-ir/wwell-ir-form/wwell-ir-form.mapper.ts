@@ -32,10 +32,12 @@ export function mapIrFormValueToSubmission(
       type: row.type,
       sizeIn: row.sizeIn,
       depthFtBgl: row.depthFtBgl ?? 0,
+      tolFtBgl: row.tolFtBgl,
       remarks: row.remarks || null,
     })),
     programDetails: {
       completion: raw.programDetails.main.completion,
+      openHoleSizeIn: raw.programDetails.main.openHoleSizeIn || null,
       acidization: raw.programDetails.main.acidization,
       transmission: raw.programDetails.main.transmission,
       developmentTesting: { ...raw.programDetails.developmentTesting },

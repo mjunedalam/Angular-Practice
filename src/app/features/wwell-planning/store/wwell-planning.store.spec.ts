@@ -25,6 +25,7 @@ function buildPayload(): CreateIntegratedRequirementPayload {
     casing: [],
     programDetails: {
       completion: 'Screened',
+      openHoleSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '' },

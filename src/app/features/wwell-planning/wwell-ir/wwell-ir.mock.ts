@@ -23,12 +23,13 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
       { name: 'Wasia-Biyadh', depthFt: 420 },
     ],
     casing: [
-      { type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, remarks: 'Driven, cemented' },
-      { type: 'Surface', sizeIn: '13.375"', depthFtBgl: 140, remarks: 'Cemented to surface' },
-      { type: 'Production', sizeIn: '8.625"', depthFtBgl: 510, remarks: 'Slotted liner 420-510' },
+      { type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Driven, cemented' },
+      { type: 'Surface', sizeIn: '13.375"', depthFtBgl: 140, tolFtBgl: null, remarks: 'Cemented to surface' },
+      { type: 'Production', sizeIn: '8.625"', depthFtBgl: 510, tolFtBgl: null, remarks: 'Slotted liner 420-510' },
     ],
     programDetails: {
       completion: 'Open Hole with Gravel Pack',
+      openHoleSizeIn: '8 1/2"',
       acidization: 'Matrix Acidizing 15% HCl',
       transmission: 'Pipeline + Pump Station',
       developmentTesting: {
@@ -100,9 +101,10 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
       coordinates: '24.6408°N, 46.7728°E',
     },
     formationTops: [{ name: 'Umm Er Radhuma', depthFt: 340 }],
-    casing: [{ type: 'Surface', sizeIn: '16"', depthFtBgl: 60, remarks: null }],
+    casing: [{ type: 'Surface', sizeIn: '16"', depthFtBgl: 60, tolFtBgl: null, remarks: null }],
     programDetails: {
       completion: 'Screened',
+      openHoleSizeIn: null,
       acidization: 'HCl Acid Wash',
       transmission: 'Pumped Transmission',
       developmentTesting: { logging: 'Gamma Ray', mudLogging: 'Cuttings Sample Only', sampling: 'Pump Sample', flowTest: 'Step-Rate Test' },
@@ -135,9 +137,10 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
       coordinates: '25.3382°N, 49.5896°E',
     },
     formationTops: [{ name: 'Biyadh', depthFt: 410 }],
-    casing: [{ type: 'Intermediate', sizeIn: '13.375"', depthFtBgl: 260, remarks: 'Cemented to surface' }],
+    casing: [{ type: 'Intermediate', sizeIn: '13.375"', depthFtBgl: 260, tolFtBgl: null, remarks: 'Cemented to surface' }],
     programDetails: {
       completion: 'Screened + Gravel Pack',
+      openHoleSizeIn: null,
       acidization: 'Mud Acid',
       transmission: 'Pipeline',
       developmentTesting: { logging: 'Resistivity', mudLogging: 'Full Mud Logging', sampling: 'Composite Sample', flowTest: 'Recovery Test' },
@@ -170,9 +173,10 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
       coordinates: '18.2465°N, 42.5117°E',
     },
     formationTops: [{ name: 'Dammam', depthFt: 180 }],
-    casing: [{ type: 'Production', sizeIn: '9.625"', depthFtBgl: 380, remarks: null }],
+    casing: [{ type: 'Production', sizeIn: '9.625"', depthFtBgl: 380, tolFtBgl: null, remarks: null }],
     programDetails: {
       completion: 'Liner + Perforated',
+      openHoleSizeIn: null,
       acidization: 'None',
       transmission: 'Gravity Flow',
       developmentTesting: { logging: 'SP', mudLogging: 'None', sampling: 'Bailer Sample', flowTest: 'Constant-Rate Test' },

@@ -17,10 +17,10 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
     },
     subsurface: {
       formationTops: [{ name: 'Saq', depthFt: 200 }],
-      casing: [{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, remarks: 'Cemented' }],
+      casing: [{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }],
     },
     programDetails: {
-      main: { completion: 'Screened', acidization: '', transmission: '' },
+      main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
       developmentTesting: { logging: 'Caliper', mudLogging: '', sampling: '', flowTest: '' },
     },
     contacts: {
@@ -52,7 +52,7 @@ describe('mapIrFormValueToSubmission', () => {
     expect(payload.status).toBe('in-progress');
     expect(payload.requestReference.wellName).toBe('HAIL-500');
     expect(payload.requestReference.linkedRequestId).toBe('REQ-00198');
-    expect(payload.casing).toEqual([{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, remarks: 'Cemented' }]);
+    expect(payload.casing).toEqual([{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }]);
     expect(payload.testProgram.testType).toBe('pump-test');
   });
 

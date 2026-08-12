@@ -38,13 +38,15 @@
             <div class="nip__wellbore-card nip__wellbore-card--sticky">
               <h4 class="nip__wellbore-title"><mat-icon>architecture</mat-icon>Well Bore Design Preview</h4>
               <p class="nip__wellbore-subtitle">Updates live as you add casing and formation tops.</p>
-              <div class="nip__wellbore-preview">
-                <app-wwell-ir-design-preview
-                  [formationTops]="wellboreFormationTops()"
-                  [casing]="wellboreCasing()"
-                  [surfaceElevationFtAsl]="wellboreSurfaceElevationFtAsl()"
-                  [targetDepthFt]="wellboreTargetDepthFt()"
-                  [wellName]="wellboreWellName()"
+              <div class="nip__wellbore-diagram-row">
+                <app-wwell-ir-depth-scale
+                  [totalDepth]="wellboreDiagramData().displayDepth"
+                  [animTrigger]="0"
+                />
+                <app-well-bore-view
+                  class="nip__wellbore-diagram"
+                  [diagramData]="wellboreDiagramData()"
+                  [animTrigger]="0"
                 />
               </div>
             </div>
@@ -76,13 +78,15 @@
               <div class="nip__wellbore-card">
                 <h4 class="nip__wellbore-title"><mat-icon>architecture</mat-icon>Well Bore Design Preview</h4>
                 <p class="nip__wellbore-subtitle">Built from the casing and formation tops entered in Subsurface &amp; Construction.</p>
-                <div class="nip__wellbore-preview">
-                  <app-wwell-ir-design-preview
-                    [formationTops]="wellboreFormationTops()"
-                    [casing]="wellboreCasing()"
-                    [surfaceElevationFtAsl]="wellboreSurfaceElevationFtAsl()"
-                    [targetDepthFt]="wellboreTargetDepthFt()"
-                    [wellName]="wellboreWellName()"
+                <div class="nip__wellbore-diagram-row">
+                  <app-wwell-ir-depth-scale
+                    [totalDepth]="wellboreDiagramData().displayDepth"
+                    [animTrigger]="0"
+                  />
+                  <app-well-bore-view
+                    class="nip__wellbore-diagram"
+                    [diagramData]="wellboreDiagramData()"
+                    [animTrigger]="0"
                   />
                 </div>
               </div>
@@ -129,6 +133,24 @@
                   </mat-expansion-panel>
                 }
               </mat-accordion>
+            </div>
+          }
+
+          @if (step.key === 'wellDesignView') {
+            <div class="nip__wellbore-card">
+              <h4 class="nip__wellbore-title"><mat-icon>architecture</mat-icon>Well Design View</h4>
+              <p class="nip__wellbore-subtitle">Full engineering wellbore diagram — casing, liner, and completion, built from the data entered above.</p>
+              <div class="nip__wellbore-diagram-row">
+                <app-wwell-ir-depth-scale
+                  [totalDepth]="wellboreDiagramData().displayDepth"
+                  [animTrigger]="0"
+                />
+                <app-well-bore-view
+                  class="nip__wellbore-diagram"
+                  [diagramData]="wellboreDiagramData()"
+                  [animTrigger]="0"
+                />
+              </div>
             </div>
           }
         </div>

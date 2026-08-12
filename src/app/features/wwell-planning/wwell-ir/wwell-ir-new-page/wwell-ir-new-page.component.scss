@@ -140,10 +140,12 @@ app-wwell-ir-new-page {
 
 /* Subsurface & Construction: form fields on the left, a live well-bore preview pinned
  * alongside on the right so it updates as casing/formation-top rows are edited — the same
- * `app-wwell-ir-design-preview` used in the final review step and on the IR detail page. */
+ * real `app-well-bore-view` diagram used in the Attachments & Review and Well Design View
+ * steps (530px, not the previous 460px: a detailed engineering diagram with small tick/label
+ * text needs more room than the old lightweight sketch did to stay legible). */
 .nip__step-content--split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 460px;
+  grid-template-columns: minmax(0, 1fr) 530px;
   align-items: start;
   gap: 1.25rem;
 }
@@ -152,28 +154,53 @@ app-wwell-ir-new-page {
   min-width: 0;
 }
 
-/* Material's stepper hardcodes `overflow: hidden` on the content container
- * (see @angular/material/stepper structural styles) to clip the horizontal
- * slide transition between steps. That also clips anything inside the active
- * step that grows *after* the step has settled — e.g. expanding a review
- * accordion — so the newly revealed content is cut off with no way to scroll
- * to it. The host element above already owns the real scroll container
- * (`overflow: auto`), so it's safe to let this inner container size to its
- * content.
+/*
+ * Root cause (confirmed via DevTools): Material renders every step's content up front and
+ * toggles `.mat-horizontal-stepper-content` between `visibility: hidden` (inactive) and
+ * `visibility: visible` (the `-current` step) as the user navigates. The Well Design View
+ * step's very first redraw — including casing.renderer.ts's clip-path "grow" reveal
+ * transition — runs while its content is still `visibility: hidden` (every step mounts
+ * immediately on page load, not just the active one). Once `visibility` flips back to
+ * `visible` on navigation, the already-finished (collapsed) clip-path state does not
+ * reliably repaint — confirmed by forcing `visibility: visible` unconditionally, which
+ * fixes it. So: stop relying on Material's hidden→visible toggle entirely and force every
+ * step's content to always be `visibility: visible`.
+ *
+ * That alone would leak the horizontally off-screen `-previous`/`-next` steps into view,
+ * since Material only moves them out of the way via `transform: translate3d(±100%,...)` —
+ * `visibility: hidden` was the thing actually hiding them, not the transform. Splitting the
+ * container's `overflow` into `overflow-x: hidden` (still clips those transformed-away
+ * steps horizontally) and `overflow-y: visible` (still lets the active step's own tall
+ * content — e.g. this page's wellbore diagrams, or a growing review accordion — render in
+ * full without being clipped) keeps both fixed at once.
+ *
+ * `!important` throughout: Material ships several rules at specificity (0,3,0)-(0,4,0)
+ * (see e.g. `.mat-stepper-horizontal:not(.mat-stepper-animating) ...-content-current`) that
+ * a plain `.nip .mat-horizontal-stepper-content` override (0,2,0) cannot reliably beat —
+ * the same reasoning already applied to `.nip .mat-step-header` elsewhere in this file.
  */
 .nip .mat-horizontal-content-container {
-  overflow: visible;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+.nip .mat-horizontal-stepper-content {
+  visibility: visible !important;
+  overflow: visible !important;
 }
 
 /* ── Stepper header ───────────────────────────────────────────────────────
  * Icon-above-label layout via Material's own `labelPosition="bottom"` mode.
+ * Deliberately slim (28px icon / 60px header, vs. Material's 24px/72px
+ * defaults elsewhere in the app) for a quieter, more refined progress strip —
+ * small filled circles and a thin connector line read as wayfinding chrome
+ * rather than competing with the actual step content below it.
+ *
  * Material centers the connector line using a hardcoded assumption of a 24px
- * icon: `top: (header-height - 24) / 2 + 12`. Our icon is deliberately bigger
- * (40px) for a more prominent, modern look, so that formula would leave the
- * line ~8px too high. $header-height / $icon-size below feed the same
- * variable Material reads, and the hand-computed $line-top corrects for the
- * bigger icon: padding-top ((header-height - 24) / 2, Material's own formula)
- * plus half our real icon size.
+ * icon: `top: (header-height - 24) / 2 + 12`. $header-height / $icon-size
+ * below feed the same variable Material reads, and the hand-computed
+ * $line-top recomputes that same formula for our actual icon size so the
+ * line still lands on the icon's vertical center whatever size it is.
  *
  * Material actually draws this connector in THREE separate pieces: the
  * `<div class="mat-stepper-horizontal-line">` between each pair of headers,
@@ -184,23 +211,23 @@ app-wwell-ir-new-page {
  * div's line right next to every circle. All three need the same `top` and
  * color to read as one continuous line.
  */
-$header-height: 88px;
-$icon-size: 40px;
+$header-height: 60px;
+$icon-size: 28px;
 $line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
-$line-idle: #e5e7eb;
+$line-idle: #e2e8f0;
 
 .nip .mat-stepper-horizontal {
   --mat-stepper-header-height: #{$header-height};
 }
 
 .nip .mat-horizontal-stepper-header-container {
-  padding: 0.5rem 0.5rem 1rem;
-  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.4rem 0.6rem;
+  margin-bottom: 0.4rem;
   border-bottom: 1px solid $border;
 }
 
 .nip .mat-step-header {
-  border-radius: 12px;
+  border-radius: 10px;
   background-color: transparent !important;
   transition: background-color 150ms ease;
 
@@ -212,10 +239,11 @@ $line-idle: #e5e7eb;
 .nip .mat-step-icon {
   width: $icon-size;
   height: $icon-size;
-  background: #e5e7eb;
+  background: #eef1f5;
   color: #94a3b8;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.78rem;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
   transition:
     background 200ms ease,
     color 200ms ease,
@@ -226,13 +254,14 @@ $line-idle: #e5e7eb;
 .nip .mat-step-icon-selected {
   background: linear-gradient(135deg, $accent, #60a5fa);
   color: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 4px 14px rgba($accent, 0.38);
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgba($accent, 0.32);
 }
 
 .nip .mat-step-icon-state-done {
   background: #10b981;
   color: #fff;
+  box-shadow: none;
 }
 
 .nip .mat-step-icon-state-error {
@@ -241,11 +270,12 @@ $line-idle: #e5e7eb;
 }
 
 .nip .mat-step-label {
-  max-width: 132px;
+  max-width: 100px;
   white-space: normal;
-  line-height: 1.25;
-  font-size: 0.9rem;
-  font-weight: 700;
+  line-height: 1.2;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: $muted;
   transition: color 150ms ease;
 }
@@ -253,11 +283,11 @@ $line-idle: #e5e7eb;
 .nip .mat-step-label-selected,
 .nip .mat-step-label-active {
   color: $navy;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .nip .mat-stepper-horizontal-line {
-  border-top-width: 2px;
+  border-top-width: 1.5px;
   border-top-color: $line-idle;
   top: #{$line-top} !important;
   transition: border-top-color 300ms ease;
@@ -268,7 +298,7 @@ $line-idle: #e5e7eb;
 .nip .mat-horizontal-stepper-header::before,
 .nip .mat-horizontal-stepper-header::after {
   top: #{$line-top} !important;
-  border-top-width: 2px;
+  border-top-width: 1.5px;
   border-top-color: $line-idle;
   transition: border-top-color 300ms ease;
 }
@@ -412,9 +442,38 @@ $pending: #b45309;
   color: $muted;
 }
 
-.nip__wellbore-preview {
-  max-width: 820px;
+/*
+ * `app-well-bore-view` (the real engineering diagram, reused as-is from the
+ * `presentation` feature) and `app-wwell-ir-depth-scale` (the wizard-local replica of
+ * `presentation/depth-scale`) both size their `<svg>` to 100%/100% of their own host with
+ * `preserveAspectRatio="none"` — they stretch to exactly fill whatever box they're given,
+ * with no intrinsic height of their own. `.nip__wellbore-diagram-row` is what gives that
+ * box a real height: aspect-ratio-locked to the diagram's fixed 1040×840 viewBox
+ * (DIAGRAM_LAYOUT's default) so the row doesn't distort the drawing, and capped/centered
+ * like the other wellbore cards on this page.
+ *
+ * `max-height` is the important part: in the 530px Subsurface sidebar this row is only
+ * ever ~430px tall (well under the cap, so it never engages — the aspect-ratio box alone
+ * governs there, unchanged). But on the full-width Attachments & Review / Well Design View
+ * cards, with nothing narrowing the row, the SAME aspect-ratio box would grow to ~840px
+ * tall — tall enough to run past this page's header + stepper chrome and off the bottom of
+ * a normal-height screen. The clamp caps it there instead; past that width the row goes
+ * mildly wider-than-tall relative to the diagram's native ratio, which both SVGs already
+ * tolerate via `preserveAspectRatio="none"`.
+ */
+.nip__wellbore-diagram-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1040px;
+  aspect-ratio: 1040 / 840;
+  max-height: 620px;
   margin: 0.75rem auto 0;
+}
+
+.nip__wellbore-diagram {
+  display: block;
+  min-width: 0;
 }
 
 .nip .nip__review-card {
@@ -529,7 +588,13 @@ $pending: #b45309;
   color: $danger;
 }
 
-@media (max-width: 1080px) {
+/*
+ * Raised from the old 1080px cutoff: the sidebar now hosts the real, detail-heavy
+ * engineering diagram (previously a self-fitting lightweight sketch), so a typical
+ * ~1366–1440px laptop viewport minus the app's own nav chrome no longer leaves enough
+ * room for both a legible diagram AND a readable casing table — stack them instead.
+ */
+@media (max-width: 1400px) {
   .nip__step-content--split {
     grid-template-columns: 1fr;
   }

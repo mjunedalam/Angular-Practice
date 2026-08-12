@@ -112,6 +112,14 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             },
             { key: 'sizeIn', label: 'Size', type: 'text', placeholder: 'e.g., 20"' },
             { key: 'depthFtBgl', label: 'Depth', type: 'number', suffix: 'ft bgl' },
+            {
+              key: 'tolFtBgl',
+              label: 'Top Of Liner (TOL)',
+              type: 'number',
+              suffix: 'ft bgl',
+              hint: 'Depth this liner hangs from',
+              visibleWhen: { field: 'type', equals: 'Liner' },
+            },
             { key: 'remarks', label: 'Remarks', type: 'text', placeholder: 'e.g., Cemented' },
           ],
         },
@@ -132,6 +140,14 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             type: 'select',
             options: WWELL_COMPLETION_OPTIONS,
             validators: { required: true },
+          },
+          {
+            key: 'openHoleSizeIn',
+            label: 'Open Hole Size',
+            type: 'text',
+            placeholder: 'e.g., 8 1/2"',
+            hint: 'Bit size below the last casing shoe',
+            visibleWhen: { field: 'completion', equals: 'Open Hole' },
           },
           { key: 'acidization', label: 'Acidization', type: 'combo', options: WWELL_ACIDIZATION_OPTIONS },
           { key: 'transmission', label: 'Transmission', type: 'combo', options: WWELL_TRANSMISSION_OPTIONS },
@@ -265,5 +281,10 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         ],
       },
     ],
+  },
+  {
+    key: 'wellDesignView',
+    label: 'Well Design View',
+    sections: [], // pure visualization step — no form fields
   },
 ];

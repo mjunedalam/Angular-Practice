@@ -20,11 +20,14 @@ export interface WwellIrRawCasingRow {
   readonly type: string;
   readonly sizeIn: string;
   readonly depthFtBgl: number | null;
+  /** Only meaningful when `type === 'Liner'` — see the `visibleWhen` gate on this field in wwell-ir-form.schema.ts. */
+  readonly tolFtBgl: number | null;
   readonly remarks: string;
 }
 
 export interface WwellIrRawProgramMain {
   readonly completion: string;
+  readonly openHoleSizeIn: string;
   readonly acidization: string;
   readonly transmission: string;
 }

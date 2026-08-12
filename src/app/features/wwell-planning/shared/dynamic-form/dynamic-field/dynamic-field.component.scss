@@ -8,6 +8,12 @@
   width: 100%;
 }
 
+/* Narrow columns (e.g. a repeatable row's "ft bgl" depth field) otherwise wrap this onto a
+ * second line inside the input, which reads as a layout bug rather than a unit label. */
+.dyf__suffix {
+  white-space: nowrap;
+}
+
 .dyf--span-2 {
   grid-column: span 2;
 }

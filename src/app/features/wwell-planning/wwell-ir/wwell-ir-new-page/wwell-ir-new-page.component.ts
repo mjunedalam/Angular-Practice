@@ -20,10 +20,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
-import {
-  IntegratedRequirementCasingRow,
-  IntegratedRequirementFormationTop,
-} from '@models/wwell-planning/wwell-planning.model';
+import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { playIfMotionAllowed } from '../../shared/dynamic-form/gsap-motion.util';
 import { buildReviewRevealTimeline } from '../../shared/dynamic-form/review-reveal.animation';
@@ -31,11 +29,12 @@ import { buildStepTransitionTimeline, WwellStepDirection } from '../../shared/dy
 import { buildWwellDynamicForm } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellApprovalMiniChainComponent } from '../../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellPlanningStore } from '../../store/wwell-planning.store';
-import { WwellIrDesignPreviewComponent } from '../wwell-ir-design-preview/wwell-ir-design-preview.component';
+import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from '../wwell-ir-form/wwell-ir-form.types';
+import { buildWellboreDiagramData } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 
 const SNACKBAR_DURATION_MS = 3000;
 const SELECT_PANEL_CLASS = 'nip-select-panel';
@@ -51,7 +50,8 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
     MatExpansionModule,
     DynamicSectionComponent,
     WwellApprovalMiniChainComponent,
-    WwellIrDesignPreviewComponent,
+    WellBoreViewComponent,
+    WwellIrDepthScaleComponent,
   ],
   templateUrl: './wwell-ir-new-page.component.html',
   styleUrl: './wwell-ir-new-page.component.scss',
@@ -76,37 +76,49 @@ export class WwellIrNewPageComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly schema = WWELL_IR_FORM_SCHEMA;
-  protected readonly reviewSteps = WWELL_IR_FORM_SCHEMA.slice(0, -1);
+  // Excludes 'attachments' (it renders the review UI itself, so it can't review itself) and
+  // 'wellDesignView' (a pure visualization step with no fields to review).
+  protected readonly reviewSteps = WWELL_IR_FORM_SCHEMA.filter(
+    step => step.key !== 'attachments' && step.key !== 'wellDesignView',
+  );
   protected readonly chainPreview = WWELL_IR_CHAIN_PREVIEW;
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
   protected readonly form = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb);
   protected readonly isSaving = this.store.creatingIntegratedRequirement;
 
-  // Live-mirrors the form so the review step's well-bore preview redraws as casing/formation
-  // rows are added, edited, or removed back in the "Subsurface & Construction" step.
+  // Live-mirrors the form so every well-bore preview (Subsurface & Construction, Attachments &
+  // Review, and the dedicated Well Design View step) redraws as casing/formation/completion
+  // data changes anywhere earlier in the wizard.
   private readonly rawFormValue: Signal<WwellIrFormRawValue> = toSignal(this.form.valueChanges, {
     initialValue: this.form.getRawValue() as WwellIrFormRawValue,
   });
 
-  protected readonly wellboreCasing = computed<readonly IntegratedRequirementCasingRow[]>(() =>
-    this.rawFormValue().subsurface.casing.map(row => ({
-      type: row.type,
-      sizeIn: row.sizeIn,
-      depthFtBgl: row.depthFtBgl ?? 0,
-      remarks: row.remarks || null,
-    })),
-  );
-
-  protected readonly wellboreFormationTops = computed<readonly IntegratedRequirementFormationTop[]>(() =>
-    this.rawFormValue().subsurface.formationTops.map(row => ({ name: row.name, depthFt: row.depthFt ?? 0 })),
-  );
-
-  protected readonly wellboreTargetDepthFt = computed(() => this.rawFormValue().reference.main.targetDepthFt ?? 0);
-  protected readonly wellboreSurfaceElevationFtAsl = computed(() => this.rawFormValue().reference.main.surfaceElevationFtAsl);
-  protected readonly wellboreWellName = computed(() => this.rawFormValue().reference.main.wellName || null);
-
   protected readonly activeStepIndex = signal(0);
+
+  /*
+   * Feeds every `app-well-bore-view` instance in this wizard — same real diagram
+   * everywhere, just adapted from the raw form value into the richer WellboreDiagramData
+   * shape.
+   *
+   * `well-bore-view`'s own redraw effect never reads its `animTrigger` input (confirmed by
+   * reading well-bore-view.component.ts — only `diagramData`/`diagramLayout`/`isFullscreen`
+   * are tracked), so it only ever redraws when `diagramData` gets a NEW object reference.
+   * Angular Material's horizontal stepper renders every step's content upfront and keeps it
+   * mounted (hidden inactive steps get `visibility: hidden` + an off-screen `transform`, not
+   * `display: none`/destroyed) — so the very first redraw (with its clip-path "grow" reveal
+   * transition, see casing.renderer.ts's `renderCasings`) runs while this step is still
+   * hidden and transformed off-screen, and has already finished — collapsed — by the time
+   * the user actually navigates here. Tracking `activeStepIndex` below forces a brand-new
+   * `WellboreDiagramData` object (and therefore a fresh redraw + reveal animation) every time
+   * the active step changes, so it's guaranteed to run once while genuinely visible. This is
+   * also a wwell-ir-local fix, per the standing rule not to modify anything under
+   * `presentation/well-bore-view/`.
+   */
+  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() => {
+    this.activeStepIndex();
+    return buildWellboreDiagramData(this.rawFormValue());
+  });
   @ViewChildren('stepContent') private readonly stepContents?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('reviewCard', { read: ElementRef }) private readonly reviewCards?: QueryList<ElementRef<HTMLElement>>;
 
@@ -126,7 +138,9 @@ export class WwellIrNewPageComponent {
     });
 
     effect(() => {
-      const isReviewStep = this.activeStepIndex() === WWELL_IR_FORM_SCHEMA.length - 1;
+      // Keyed on the 'attachments' step itself (not "last step") — Well Design View is now
+      // appended after it, so the review UI is no longer on the final step.
+      const isReviewStep = WWELL_IR_FORM_SCHEMA[this.activeStepIndex()]?.key === 'attachments';
       if (!isReviewStep || this.reviewRevealed) return;
 
       const cards = this.reviewCards?.map(card => card.nativeElement) ?? [];

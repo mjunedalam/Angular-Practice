@@ -132,6 +132,8 @@ export interface IntegratedRequirementCasingRow {
   readonly type: string;
   readonly sizeIn: string;
   readonly depthFtBgl: number;
+  /** Top-of-liner depth — only meaningful when `type === 'Liner'`. */
+  readonly tolFtBgl: number | null;
   readonly remarks: string | null;
 }
 
@@ -144,6 +146,8 @@ export interface IntegratedRequirementDevelopmentTesting {
 
 export interface IntegratedRequirementProgramDetails {
   readonly completion: string;
+  /** Bit size below the last casing shoe (e.g. `8 1/2"`) — only meaningful when completion is 'Open Hole'. */
+  readonly openHoleSizeIn: string | null;
   readonly acidization: string;
   readonly transmission: string;
   readonly developmentTesting: IntegratedRequirementDevelopmentTesting;

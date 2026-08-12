@@ -4,12 +4,23 @@
       <span class="rpg__row-index">#{{ i + 1 }}</span>
       <div class="rpg__row-fields">
         @for (field of config().rowFields; track field.key) {
-          <app-dynamic-field
-            [config]="field"
-            [control]="fieldControl(row, field.key)"
-            [mode]="mode()"
-            [selectPanelClass]="selectPanelClass()"
-          />
+          @if (field.visibleWhen) {
+            <div class="rpg__field-host" #rowFieldHost>
+              <app-dynamic-field
+                [config]="field"
+                [control]="fieldControl(row, field.key)"
+                [mode]="mode()"
+                [selectPanelClass]="selectPanelClass()"
+              />
+            </div>
+          } @else {
+            <app-dynamic-field
+              [config]="field"
+              [control]="fieldControl(row, field.key)"
+              [mode]="mode()"
+              [selectPanelClass]="selectPanelClass()"
+            />
+          }
         }
       </div>
       @if (mode() === 'edit') {

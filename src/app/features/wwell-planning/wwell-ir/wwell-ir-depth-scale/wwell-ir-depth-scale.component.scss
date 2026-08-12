@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  flex: 0 0 12%;
+  height: 100%;
+}
+
+.depth-scale-svg {
+  display: block;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-right: 1px solid rgba(15, 23, 42, 0.14);
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+:host ::ng-deep {
+  .axis-title {
+    font-size: 17px; font-weight: 900;
+    fill: #000;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .axis-line  { stroke: #000; stroke-width: 2.4; fill: none; opacity: 1; }
+  .axis-arrow { fill: #000; opacity: 1; }
+  .tick-line  { stroke: #000; stroke-width: 2.2; stroke-linecap: round; opacity: 1; }
+  .tick-label {
+    font-size: 20px;
+    font-weight: 900;
+    fill: #000; text-anchor: end;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+}

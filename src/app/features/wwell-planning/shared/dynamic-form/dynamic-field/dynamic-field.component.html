@@ -96,7 +96,7 @@
           <mat-label>{{ config().label }}</mat-label>
           <input matInput type="number" [formControl]="control()" [placeholder]="config().placeholder ?? ''" />
           @if (config().suffix) {
-            <span matTextSuffix>&nbsp;{{ config().suffix }}</span>
+            <span matTextSuffix class="dyf__suffix">&nbsp;{{ config().suffix }}</span>
           }
           @if (config().hint && !errorMessage()) {
             <mat-hint>{{ config().hint }}</mat-hint>
@@ -111,7 +111,7 @@
           <mat-label>{{ config().label }}</mat-label>
           <input matInput type="text" [formControl]="control()" [placeholder]="config().placeholder ?? ''" />
           @if (config().suffix) {
-            <span matTextSuffix>&nbsp;{{ config().suffix }}</span>
+            <span matTextSuffix class="dyf__suffix">&nbsp;{{ config().suffix }}</span>
           }
           @if (config().hint && !errorMessage()) {
             <mat-hint>{{ config().hint }}</mat-hint>
