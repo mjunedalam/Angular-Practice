@@ -167,12 +167,19 @@ app-wwell-ir-new-page {
  * step's content to always be `visibility: visible`.
  *
  * That alone would leak the horizontally off-screen `-previous`/`-next` steps into view,
- * since Material only moves them out of the way via `transform: translate3d(±100%,...)` —
- * `visibility: hidden` was the thing actually hiding them, not the transform. Splitting the
- * container's `overflow` into `overflow-x: hidden` (still clips those transformed-away
- * steps horizontally) and `overflow-y: visible` (still lets the active step's own tall
- * content — e.g. this page's wellbore diagrams, or a growing review accordion — render in
- * full without being clipped) keeps both fixed at once.
+ * since Material hides an inactive step TWO ways: `visibility: hidden`, and — on that same
+ * element — `overflow: hidden` paired with `height: 0`. Forcing `visibility: visible`
+ * unconditionally only defeats the first. The container-level split below (`overflow-x:
+ * hidden` still clips the transformed-away steps horizontally; `overflow-y: visible` still
+ * lets the active step's own tall content — e.g. this page's wellbore diagrams, or a
+ * growing review accordion — render in full) covers the transform axis, but it must NOT be
+ * paired with a blanket `overflow: visible` on every `.mat-horizontal-stepper-content`: that
+ * strips the second hiding mechanism from the *inactive* steps too, so their content (still
+ * `height: 0`, no longer clipped to it) paints at the same vertical position as the active
+ * step's real content, merely offset sideways by its own `translate3d(±100%,...)` — visible
+ * as a sliver bleeding in from whichever edge the adjacent step sits on. `overflow: visible`
+ * is therefore scoped to `-content-current` only, below — the one step that actually needs
+ * it; every inactive step keeps Material's own `overflow: hidden` as intended.
  *
  * `!important` throughout: Material ships several rules at specificity (0,3,0)-(0,4,0)
  * (see e.g. `.mat-stepper-horizontal:not(.mat-stepper-animating) ...-content-current`) that
@@ -186,6 +193,9 @@ app-wwell-ir-new-page {
 
 .nip .mat-horizontal-stepper-content {
   visibility: visible !important;
+}
+
+.nip .mat-horizontal-stepper-content-current {
   overflow: visible !important;
 }
 
