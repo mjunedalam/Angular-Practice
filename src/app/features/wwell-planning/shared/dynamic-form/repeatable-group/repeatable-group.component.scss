@@ -30,10 +30,16 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 999px;
-  background: #eef2f7;
+  background: rgba(59, 130, 246, 0.1);
   font-size: 0.74rem;
   font-weight: 800;
-  color: #64748b;
+  color: #2563eb;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.rpg__row:hover .rpg__row-index {
+  background: #3b82f6;
+  color: #fff;
 }
 
 /* `minmax(180px, 1fr)` — wide enough that a number field's "ft bgl" suffix never wraps
@@ -50,6 +56,15 @@
 
 .rpg__add {
   align-self: flex-start;
+  border-color: #93c5fd !important;
+  border-style: dashed !important;
+  color: #2563eb !important;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.06);
+    border-color: #3b82f6 !important;
+  }
 }
 
 /* Conditional row-field wrapper — GSAP animates opacity/height on this element when its

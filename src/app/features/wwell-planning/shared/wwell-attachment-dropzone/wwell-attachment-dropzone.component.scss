@@ -23,8 +23,8 @@ $bg-subtle: tokens.$surface-alt;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
   border: 1.5px dashed #93c5fd;
   border-radius: 12px;
   background: $bg-subtle;
@@ -32,17 +32,26 @@ $bg-subtle: tokens.$surface-alt;
   cursor: pointer;
   text-align: center;
   transition:
-    border-color 150ms ease,
-    background 150ms ease;
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
 
   &:hover,
   &--active {
     border-color: $accent;
     background: #eff6ff;
+    box-shadow: 0 0 0 4px rgba($accent, 0.08);
   }
 }
 
 .wad__dropzone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba($accent, 0.12);
   color: $accent;
 }
 
@@ -80,6 +89,14 @@ $bg-subtle: tokens.$surface-alt;
   border-radius: 8px;
   font-size: 0.9rem;
   color: $navy;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  }
 }
 
 .wad__file-icon {

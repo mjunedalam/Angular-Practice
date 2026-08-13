@@ -3,7 +3,7 @@ import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from '@shared/models/wwell/tops-ir.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
-import { sortCasingsByDepthDesc } from '@shared/utils/wellbore-math.util';
+import { parseInchSize } from '@shared/utils/wellbore-math.util';
 import {
   WwellIrFormRawValue,
   WwellIrRawCasingRow,
@@ -26,6 +26,25 @@ import {
 
 const LINER_TYPE = 'Liner';
 
+/**
+ * A freshly added (or still-mid-edit) Casing/Formation Top row starts out with empty/null
+ * field values — but `mat-select`/number inputs still exist and produce SOME value the moment
+ * a user makes any single selection (e.g. just picking "Liner" from the Type dropdown before
+ * touching Size or Depth). Mapping every row unconditionally meant a half-filled row already
+ * rendered a shape/label on the diagram (a "Liner @ 0" annotation with no real size or depth
+ * behind it) as soon as it existed, rather than once it actually described something real. These
+ * gates require every field the diagram actually draws from before a row counts — reused by both
+ * the Subsurface & Construction step's live preview and the Well Design View step (both call
+ * `buildWellboreDiagramData`).
+ */
+function isRenderableCasingRow(row: WwellIrRawCasingRow): boolean {
+  return !!row.type && !!row.sizeIn && row.depthFtBgl !== null && row.depthFtBgl !== undefined;
+}
+
+function isRenderableFormationTop(row: WwellIrRawFormationTop): boolean {
+  return !!row.name && row.depthFt !== null && row.depthFt !== undefined;
+}
+
 const COMPLETION_OPEN_HOLE = 'Open Hole';
 const COMPLETION_SCREENED = 'Screened';
 const COMPLETION_SCREENED_GRAVEL_PACK = 'Screened + Gravel Pack';
@@ -46,14 +65,29 @@ const MIN_SCALE_DEPTH_FT = 500;
 const LINER_ANCHOR_SENTINEL = '__wwell_ir_liner_anchor__';
 
 /**
- * `casing.renderer.ts`'s `getCasingTier` derives each casing's on-screen tier (and therefore
- * its telescoping half-width) purely from its position in this array via `indexOf` — it
- * never looks at `csgDepth` itself. That only produces correct (deepest = narrowest =
- * innermost) widths when the array is already sorted deepest-first, which is exactly what
- * `sortCasingsByDepthDesc` (a `@shared/utils` export, not part of `well-bore-view/`) does for
- * the real Presentation screen's own selector before `EXAD_GWD_IR_CASING` ever reaches this
- * same component (see README.md §1.4). Reused verbatim here so casing/liner widths come out
- * correct regardless of what order rows were entered in the wizard's Casing table.
+ * `casing.renderer.ts`'s `getCasingTier` derives each casing's on-screen half-width purely
+ * from its position in this array via `indexOf` (tier 0 = narrowest, each later tier wider) —
+ * it never reads `csgSize` for width, only for the text label. It also paints casings in this
+ * same array order, later entries on top, so whichever entry ends up widest is also drawn last
+ * — the standard "wide, shallow casing painted over a narrow, deep one" telescoping look.
+ *
+ * Sorting by SIZE (ascending — smallest first, so the largest entered size lands last/widest)
+ * is what makes width actually track the number the user typed, rather than depth order. For
+ * well-formed data (size decreasing with depth, real telescoping construction) this produces
+ * the exact same order as depth-descending would — size and depth are inversely correlated
+ * there, so there's no behavior change for the common case. It only diverges for physically
+ * inverted rows (a deeper casing entered wider than a shallower one, flagged separately by
+ * `findInvertedCasingSizeRows` in wwell-ir-casing-warnings.util.ts) — there, the wider-but-
+ * deeper entry now paints last and can fully cover the narrower-but-shallower one in their
+ * overlapping depth range, since two casings can't actually nest that way in reality either.
+ * That's an unavoidable consequence of a genuinely invalid combination, not a rendering bug —
+ * see `casing.renderer.ts` (off-limits to edit) for why: `buildCasingPath` always draws a
+ * casing as a full tube from ground level (0) to its own depth, so the only way to reflect its
+ * real entered size is via this array's order.
+ *
+ * Unparseable sizes sort as 0in (narrowest/first) — the safest fallback, since
+ * `isRenderableCasingRow` already guarantees `sizeIn` is non-empty text, just not necessarily
+ * a `parseInchSize`-recognizable number.
  */
 function mapCasings(rows: readonly WwellIrRawCasingRow[]): ICasingIR[] {
   const casings: ICasingIR[] = rows.map(row => ({
@@ -62,57 +96,48 @@ function mapCasings(rows: readonly WwellIrRawCasingRow[]): ICasingIR[] {
     csgDepth: row.depthFtBgl ?? 0,
     csgRemarks: row.remarks || null,
   }));
-  return sortCasingsByDepthDesc(casings);
+  return [...casings].sort((a, b) => (parseInchSize(a.csgSize) ?? 0) - (parseInchSize(b.csgSize) ?? 0));
 }
 
 /**
- * `liner.renderer.ts`'s `rawLinersFromIR` can only learn a liner's TOP depth from a matching
- * `drlgCasings` (as-drilled) row — with none supplied, every planned liner falls back to the
- * SAME top (the deepest structural casing's shoe), so two or more stacked liners all render
- * starting at the same point instead of hanging from one another (visible as overlapping
- * "TOL @ ..." labels).
+ * The wizard's "Top Of Liner (TOL)" field (`tolFtBgl`, shown only for Liner rows) is optional —
+ * most IR liners never get one filled in. `liner.renderer.ts`'s `rawLinersFromIR` only treats
+ * `wLnrTopDepth` as a genuine top-of-liner value (and shows the "TOL @ ..." label/tooltip row)
+ * when `LinerEntry.hasActualTop` is true, which it derives straight from whether this anchor's
+ * `wLnrTopDepth` is a real positive number — so this must leave `wLnrTopDepth` unset (`null`)
+ * whenever the user hasn't entered one, rather than silently filling it with a computed guess
+ * that would then get mislabeled as a real measured depth.
  *
- * This builds synthetic `IDrlgCsg` "anchor" entries carrying ONLY the correct chained
- * `wLnrTopDepth` per liner — never `wLnrBotDepth` or a real `wCsgOdSz` — because
- * `rawLinersFromIR` gates `hasActual` (and therefore the green-vs-silver color choice)
- * strictly on `wLnrBotDepth`, and gates the casing-actual lookup strictly on `wCsgOdSz`.
- * Leaving both unset fixes the top-depth chain while keeping every casing and liner silver.
+ * This builds synthetic `IDrlgCsg` "anchor" entries carrying ONLY `wLnrTopDepth` (when
+ * provided) per liner — never `wLnrBotDepth` or a real `wCsgOdSz` — because `rawLinersFromIR`
+ * gates `hasActual` (and therefore the green-vs-silver color choice) strictly on
+ * `wLnrBotDepth`, and gates the casing-actual lookup strictly on `wCsgOdSz`. Leaving both unset
+ * keeps every casing and liner silver.
  *
- * Chain rule (matches the physical assumption already baked into liner.renderer.ts, e.g.
- * `renderLinerShapes`'s `hangerY`): the shallowest liner hangs from the deepest structural
- * casing's shoe; each deeper liner hangs from the liner immediately above it. Casing rows
- * whose type is Conductor, Surface, Intermediate, or Production are all "structural" here —
- * anything that isn't `'Liner'`, exactly matching how casing.renderer.ts itself distinguishes
- * casing from liner (`csgType !== 'Liner'`).
+ * When TOL is left blank, `rawLinersFromIR` falls back to its own `chainTop` chaining instead:
+ * the shallowest liner hangs from the deepest structural casing's shoe; each deeper liner hangs
+ * from the liner immediately above it (matching the physical assumption already baked into
+ * `renderLinerShapes`'s `hangerY`). Casing rows whose type is Conductor, Surface, Intermediate,
+ * or Production are all "structural" here — anything that isn't `'Liner'`, exactly matching how
+ * casing.renderer.ts itself distinguishes casing from liner (`csgType !== 'Liner'`).
  *
- * A row's own `tolFtBgl` (the wizard's "Top Of Liner (TOL)" field, shown only for Liner rows)
- * overrides this auto-chained value when the user has filled it in — the chain computation
- * above becomes the fallback for rows left blank. Explicit TOLs don't otherwise perturb the
- * chain: the next liner's fallback top is still this row's own `depthFtBgl` (its shoe), not
- * its `tolFtBgl`, since a liner physically hangs from the casing/liner above it regardless of
- * how far down its own top was entered.
+ * An explicit `tolFtBgl` doesn't otherwise perturb that chain: the next liner's fallback top is
+ * still this row's own `depthFtBgl` (its shoe), not its `tolFtBgl`, since a liner physically
+ * hangs from the casing/liner above it regardless of how far down its own top was entered.
  */
 function buildLinerTopAnchors(rows: readonly WwellIrRawCasingRow[]): IDrlgCsg[] {
-  const structuralDepths = rows.filter(row => row.type !== LINER_TYPE).map(row => row.depthFtBgl ?? 0);
-  const lastCasingShoe = structuralDepths.length ? Math.max(...structuralDepths) : 0;
-
   const linersShallowToDeep = rows
     .filter(row => row.type === LINER_TYPE)
     .slice()
     .sort((a, b) => (a.depthFtBgl ?? 0) - (b.depthFtBgl ?? 0));
 
-  let anchorTop = lastCasingShoe;
-  return linersShallowToDeep.map(row => {
-    const anchor: IDrlgCsg = {
-      wCsgOdSz: LINER_ANCHOR_SENTINEL,
-      wCsgBotDpth: 0,
-      wLnrOdSz: row.sizeIn,
-      wLnrTopDepth: row.tolFtBgl ?? anchorTop,
-      wLnrBotDepth: null,
-    };
-    anchorTop = row.depthFtBgl ?? anchorTop;
-    return anchor;
-  });
+  return linersShallowToDeep.map(row => ({
+    wCsgOdSz: LINER_ANCHOR_SENTINEL,
+    wCsgBotDpth: 0,
+    wLnrOdSz: row.sizeIn,
+    wLnrTopDepth: row.tolFtBgl ?? null,
+    wLnrBotDepth: null,
+  }));
 }
 
 function mapGeologicTops(
@@ -174,16 +199,33 @@ function computeDisplayDepthFt(raw: WwellIrFormRawValue): number {
   return Math.max(...depths, MIN_SCALE_DEPTH_FT);
 }
 
+/**
+ * Gates the *entire* diagram — depth scale, ground level line, and total-depth label included,
+ * not just individual casing/formation-top shapes (see `isRenderableCasingRow`/
+ * `isRenderableFormationTop` above). Before any row is complete, `well-bore-view` still draws
+ * that scaffold around nothing: a bare 0–500ft ruler, a "GROUND LEVEL" line, and a
+ * "TOTAL DEPTH: 0 FT" label with no actual construction data behind any of it. Callers should
+ * check this first and render an empty state instead of the diagram until it's true.
+ */
+export function hasWellboreDiagramData(raw: WwellIrFormRawValue): boolean {
+  return (
+    raw.subsurface.casing.some(isRenderableCasingRow) ||
+    raw.subsurface.formationTops.some(isRenderableFormationTop)
+  );
+}
+
 export function buildWellboreDiagramData(raw: WwellIrFormRawValue): WellboreDiagramData {
   const targetDepthFt = raw.reference.main.targetDepthFt ?? 0;
+  const renderableCasings = raw.subsurface.casing.filter(isRenderableCasingRow);
+  const renderableFormationTops = raw.subsurface.formationTops.filter(isRenderableFormationTop);
 
   return {
     wellName: raw.reference.main.wellName,
     totalDepth: targetDepthFt,
     displayDepth: computeDisplayDepthFt(raw),
-    casings: mapCasings(raw.subsurface.casing),
-    drlgCasings: buildLinerTopAnchors(raw.subsurface.casing),
-    geologicTops: mapGeologicTops(raw.subsurface.formationTops, raw.reference.main.surfaceElevationFtAsl),
+    casings: mapCasings(renderableCasings),
+    drlgCasings: buildLinerTopAnchors(renderableCasings),
+    geologicTops: mapGeologicTops(renderableFormationTops, raw.reference.main.surfaceElevationFtAsl),
     hydrogeology: null,
     prewap: null,
     rigActivity: null,

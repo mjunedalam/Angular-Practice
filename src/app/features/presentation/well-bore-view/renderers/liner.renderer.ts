@@ -24,6 +24,10 @@ export interface LinerEntry {
     readonly isScreen: boolean;
     readonly isPrePerfLiner: boolean;
     readonly hasActual: boolean;
+    /** True only when `topDepth` is a genuine top-of-liner value (as-drilled DRLG_CSG data, or
+     *  an explicitly entered IR TOL) — false when it's a computed attach-point fallback (last
+     *  casing/liner shoe). Gates whether the "TOL @ ..." label/tooltip row is shown at all. */
+    readonly hasActualTop: boolean;
 }
 
 export interface RenderLinersOptions {
@@ -75,6 +79,8 @@ export interface RawLinerEntry {
     readonly topDepth: number;
     readonly botDepth: number;
     readonly hasActual: boolean;
+    /** See `LinerEntry.hasActualTop` — carried through unchanged by `attachRenderFlags`. */
+    readonly hasActualTop: boolean;
 }
 
 /**
@@ -231,11 +237,39 @@ function rawLinersFromDrlg(drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
                 topDepth: d.wLnrTopDepth ?? d.wCsgBotDpth,
                 botDepth: d.wLnrBotDepth!,
                 hasActual: true,
+                hasActualTop: (d.wLnrTopDepth ?? 0) > 0,
             });
         }
     }
 
     return [...dedupMap.values()].sort((a, b) => a.botDepth - b.botDepth);
+}
+
+/**
+ * Fallback top-of-liner anchor when no matching drlgCasing liner row exists: the shoe of
+ * the last (deepest) non-liner casing. Per casing, prefer its actual (as-drilled)
+ * DRLG_CSG shoe over its IR (planned) depth; only use the IR depth when no actual record
+ * exists for that casing.
+ *
+ * When the IR is liner-only (no non-liner casing row at all — e.g. a standalone-liner
+ * well), there's no IR casing to read a shoe from, so fall back to the deepest actual
+ * non-liner casing record instead of defaulting straight to 0.
+ */
+export function resolveLastCasingShoe(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
+    const nonLinerCasings = casings.filter(c => c.csgType !== 'Liner');
+
+    if (nonLinerCasings.length > 0) {
+        return nonLinerCasings.reduce((max, c) => {
+            const actualShoe = drlgCasings.find(d => d.wCsgOdSz === c.csgSize)?.wCsgBotDpth ?? 0;
+            return Math.max(max, actualShoe > 0 ? actualShoe : c.csgDepth);
+        }, 0);
+    }
+
+    const actualCasingOnly = drlgCasings.filter(d => !d.wLnrOdSz && d.wCsgBotDpth > 0);
+    if (actualCasingOnly.length > 0) {
+        return Math.max(...actualCasingOnly.map(d => d.wCsgBotDpth));
+    }
+    return Math.max(0, ...drlgCasings.map(d => d.wCsgBotDpth).filter(v => v > 0));
 }
 
 /**
@@ -248,27 +282,41 @@ function rawLinersFromDrlg(drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
  * Extra DRLG_CSG liners with no corresponding IR entry are appended at the end.
  */
 function rawLinersFromIR(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLinerEntry[] {
-    const irLiners = casings.filter(c => c.csgType === 'Liner');
+    // Sorted shallow-to-deep so the chaining below (each un-anchored liner hangs from the
+    // one immediately above it) walks the string in physical order, matching
+    // buildLinerTopAnchors' identical convention on the IR wizard side.
+    const irLiners = [...casings.filter(c => c.csgType === 'Liner')].sort((a, b) => a.csgDepth - b.csgDepth);
 
-    // Fallback top depth when no drlgCasing match exists: shoe of the deepest non-liner casing
-    const lastCasingShoe = casings
-        .filter(c => c.csgType !== 'Liner')
-        .reduce((max, c) => Math.max(max, c.csgDepth), 0);
+    const lastCasingShoe = resolveLastCasingShoe(casings, drlgCasings);
 
     const matchedOdSizes = new Set<string>();
 
+    // Only the shallowest liner without its own actual top falls back to lastCasingShoe.
+    // Every liner after it hangs from the liner immediately above — carried via chainTop,
+    // which always holds that previous liner's own resolved (actual-preferred, IR-fallback)
+    // botDepth — otherwise two+ stacked liners with no actual data would all render starting
+    // at the same depth (the last casing's shoe) instead of hanging from one another.
+    let chainTop = lastCasingShoe;
     const irEntries: RawLinerEntry[] = irLiners.map(csg => {
         // Source priority: use DRLG_CSG depth when available; fall back to IR depth.
         const actual = drlgCasings.find(d => d.wLnrOdSz === csg.csgSize) ?? null;
         const hasActualBot = (actual?.wLnrBotDepth ?? 0) > 0;
         const hasActualTop = (actual?.wLnrTopDepth ?? 0) > 0;
         if (actual?.wLnrOdSz) matchedOdSizes.add(actual.wLnrOdSz);
-        const fallbackTopDepth = actual != null ? actual.wCsgBotDpth : lastCasingShoe;
+        const botDepth = hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth;
+        // `actual.wCsgBotDpth` is only a meaningful fallback (a real parent-casing shoe) when
+        // it's genuinely positive — the wwell-ir wizard's synthetic anchors always hardcode it
+        // to 0 (see buildLinerTopAnchors), so this correctly falls through to chainTop for them
+        // instead of collapsing every un-anchored liner to depth 0.
+        const fallbackTopDepth = (actual?.wCsgBotDpth ?? 0) > 0 ? actual!.wCsgBotDpth : chainTop;
+        const topDepth = hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth;
+        chainTop = botDepth;
         return {
             odSz: actual?.wLnrOdSz ?? csg.csgSize,
-            topDepth: hasActualTop ? actual!.wLnrTopDepth! : fallbackTopDepth,
-            botDepth: hasActualBot ? actual!.wLnrBotDepth! : csg.csgDepth,
+            topDepth,
+            botDepth,
             hasActual: hasActualBot,
+            hasActualTop,
         };
     });
 
@@ -279,6 +327,7 @@ function rawLinersFromIR(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): RawLine
             topDepth: d.wLnrTopDepth ?? d.wCsgBotDpth,
             botDepth: d.wLnrBotDepth!,
             hasActual: true,
+            hasActualTop: (d.wLnrTopDepth ?? 0) > 0,
         }));
 
     return [...irEntries, ...extraEntries].sort((a, b) => a.botDepth - b.botDepth);
@@ -481,9 +530,12 @@ function renderLinerLabels({
                 .style('opacity', 1);
         }
 
-        if (liner.topDepth > 0) {
+        if (liner.hasActualTop) {
             // TOL (top-of-liner) label on the LEFT side to avoid colliding with the
-            // right-side OD/liner labels.
+            // right-side OD/liner labels. Only rendered when topDepth is a genuine top-of-liner
+            // value (as-drilled DRLG_CSG data, or an explicitly entered IR TOL) — never for a
+            // computed attach-point fallback (last casing/liner shoe), which would misrepresent
+            // a guess as a measured depth.
             const lEdge = centerX - liner.halfWidth;
             const tolEnd = lEdge - 56;
             const tolLg = rootG.append('g').attr('class', 'casing-label');
@@ -497,5 +549,6 @@ function renderLinerLabels({
                 .text(`TOL @ ${liner.topDepth.toLocaleString()}`);
             animateLabel(tolLg, labelsStart, animation);
         }
+
     });
 }

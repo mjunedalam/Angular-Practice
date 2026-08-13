@@ -16,7 +16,7 @@ import {
 } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { getCasingTier, resolveCompletionTopDepth } from './wellbore-depth.helpers';
-import { resolveLiners, renderLiners, LinerEntry } from './liner.renderer';
+import { resolveLastCasingShoe, resolveLiners, renderLiners, LinerEntry } from './liner.renderer';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
 const CSG_TOOLTIP_GAP = 18;
@@ -43,34 +43,12 @@ export interface RenderCasingElementsOptions {
 export function renderCasingElements(options: RenderCasingElementsOptions): void {
     const { casings, drlgCasings, layout, wellDesign, rootG, defsEl, centerX, scale, linersStart, labelsStart, animation } = options;
     const liners = resolveLiners(casings, drlgCasings, layout, wellDesign);
-    const lastCasingBotDepth = resolveLastCasingBotDepth(casings, drlgCasings);
+    const lastCasingBotDepth = resolveLastCasingShoe(casings, drlgCasings);
 
     renderCasings(options);
     renderLiners({ rootG, defsEl, layout, liners, centerX, scale, linersStart, labelsStart, animation, lastCasingBotDepth });
     renderCasingLabels(options);
     addCasingLinerTooltips(options, liners);
-}
-
-function resolveLastCasingBotDepth(casings: ICasingIR[], drlgCasings: IDrlgCsg[]): number {
-    // Find the deepest non-liner casing shoe — that is the 13 3/8" (or innermost casing) shoe
-    if (casings.length === 0) {
-        // drlgCasings only: wCsgBotDpth is the parent casing shoe; pick the shallowest
-        // non-zero value that represents the innermost casing (smallest wCsgBotDpth among actual casing records)
-        const casingOnly = drlgCasings.filter(d => !d.wLnrOdSz && d.wCsgBotDpth > 0);
-        if (casingOnly.length > 0) {
-            return Math.max(...casingOnly.map(d => d.wCsgBotDpth));
-        }
-        // fallback: deepest wCsgBotDpth across all records
-        return Math.max(...drlgCasings.map(d => d.wCsgBotDpth).filter(v => v > 0), 0);
-    }
-
-    const nonLiners = casings.filter(c => c.csgType !== 'Liner');
-    if (nonLiners.length === 0) return 0;
-
-    // Pick the non-liner casing with the deepest shoe (largest depth value)
-    const deepest = nonLiners.reduce((max, c) => c.csgDepth > max.csgDepth ? c : max, nonLiners[0]);
-    const actual = drlgCasings.find(d => d.wCsgOdSz === deepest.csgSize);
-    return (actual?.wCsgBotDpth ?? 0) > 0 ? actual!.wCsgBotDpth : deepest.csgDepth;
 }
 
 function renderCasings({
@@ -530,11 +508,16 @@ function buildCasingTooltipController(
         const accent = liner.hasActual ? '#16a34a' : '#2563eb';
         const badge = liner.hasActual ? `${typeLabel} ✓` : typeLabel;
         const typeName = liner.isPrePerfLiner ? 'Pre Perf Liner' : liner.isScreen ? 'Screen Liner' : 'Liner';
-        const rows: Row[] = [
-            { label: 'Top (TOL)', value: `${liner.topDepth.toLocaleString()} ft` },
+        const rows: Row[] = [];
+        // Only show a genuine top-of-liner value (as-drilled data, or an explicit IR TOL) —
+        // never the computed last-casing/liner-shoe attach point (see LinerEntry.hasActualTop).
+        if (liner.hasActualTop) {
+            rows.push({ label: 'Top (TOL)', value: `${liner.topDepth.toLocaleString()} ft` });
+        }
+        rows.push(
             { label: 'Bottom Depth', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
             { label: 'Length', value: `${length.toLocaleString()} ft` },
-        ];
+        );
         renderCard(`${liner.odSz}" ${typeName}`, badge, accent, rows, liner.halfWidth, mouseX, mouseY);
     };
 

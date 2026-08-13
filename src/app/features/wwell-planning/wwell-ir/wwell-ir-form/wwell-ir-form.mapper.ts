@@ -19,6 +19,7 @@ export function mapIrFormValueToSubmission(
     status,
     requestReference: {
       linkedRequestId: raw.reference.main.linkedRequestId || null,
+      letterNumber: raw.reference.main.letterNumber || null,
       client: raw.reference.main.client,
       supportingBusiness: raw.reference.main.supportingBusiness,
       wellName: raw.reference.main.wellName,
@@ -27,7 +28,12 @@ export function mapIrFormValueToSubmission(
       surfaceElevationFtAsl: raw.reference.main.surfaceElevationFtAsl,
       coordinates: raw.reference.main.coordinates,
     },
-    formationTops: raw.subsurface.formationTops.map(row => ({ name: row.name, depthFt: row.depthFt ?? 0 })),
+    formationTops: raw.subsurface.formationTops.map(row => ({
+      name: row.name,
+      depthFt: row.depthFt ?? 0,
+      subSeaFtAsl: row.subSeaFtAsl,
+      description: row.description || null,
+    })),
     casing: raw.subsurface.casing.map(row => ({
       type: row.type,
       sizeIn: row.sizeIn,

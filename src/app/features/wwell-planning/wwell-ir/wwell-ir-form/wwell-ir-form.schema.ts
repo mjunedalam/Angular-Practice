@@ -11,6 +11,7 @@ import {
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
   WWELL_GEOLOGIST_OPTIONS,
+  WWELL_LINKED_REQUEST_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
   WWELL_OFFSET_WELL_OPTIONS,
@@ -30,8 +31,9 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         key: 'main',
         title: null,
         fields: [
-          { key: 'linkedRequestId', label: 'Link to Request', type: 'text', placeholder: 'e.g., REQ-00198 — HAIL-500' },
-          { key: 'client', label: 'Client', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
+          { key: 'linkedRequestId', label: 'Link to Request', type: 'select', options: WWELL_LINKED_REQUEST_OPTIONS },
+          { key: 'letterNumber', label: 'Letter Number', type: 'text', placeholder: 'e.g., LTR-2026-0456' },
+          { key: 'client', label: 'BI Number', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
           {
             key: 'supportingBusiness',
             label: 'Supporting Business',
@@ -90,8 +92,10 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           addLabel: '+ Add Formation Top',
           minRequiredRows: 1,
           rowFields: [
-            { key: 'name', label: 'Formation', type: 'text' },
+            { key: 'name', label: 'Formation', type: 'select', options: WWELL_AQUIFER_OPTIONS },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
+            { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
+            { key: 'description', label: 'Description', type: 'text', placeholder: 'e.g., Top of Umm Er Radhuma' },
           ],
         },
       },

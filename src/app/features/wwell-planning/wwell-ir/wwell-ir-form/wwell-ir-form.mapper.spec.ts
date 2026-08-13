@@ -6,6 +6,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
     reference: {
       main: {
         linkedRequestId: 'REQ-00198',
+        letterNumber: 'LTR-2026-0456',
         client: 'BI-12',
         supportingBusiness: 'Agriculture',
         wellName: 'HAIL-500',
@@ -16,7 +17,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'Saq', depthFt: 200 }],
+      formationTops: [{ name: 'Saq', depthFt: 200, subSeaFtAsl: 780, description: 'Top of Saq' }],
       casing: [{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }],
     },
     programDetails: {

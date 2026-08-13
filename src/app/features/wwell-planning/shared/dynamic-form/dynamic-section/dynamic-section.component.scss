@@ -7,12 +7,27 @@
 }
 
 .dys__title {
-  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
   font-size: 0.8rem;
   font-weight: 800;
   color: #3b82f6;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+
+  /* Small accent tick instead of a bare label — gives the section header a
+   * point of visual origin rather than floating text, echoing the accent
+   * bar treatment used elsewhere in the module (e.g. the stepper rail). */
+  &::before {
+    content: '';
+    width: 3px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #3b82f6, #60a5fa);
+  }
 }
 
 .dys__grid {

@@ -2,6 +2,7 @@
 
 export interface WwellIrRawReference {
   readonly linkedRequestId: string;
+  readonly letterNumber: string;
   readonly client: string;
   readonly supportingBusiness: string;
   readonly wellName: string;
@@ -14,6 +15,8 @@ export interface WwellIrRawReference {
 export interface WwellIrRawFormationTop {
   readonly name: string;
   readonly depthFt: number | null;
+  readonly subSeaFtAsl: number | null;
+  readonly description: string;
 }
 
 export interface WwellIrRawCasingRow {

@@ -14,6 +14,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -27,14 +28,14 @@ import { playIfMotionAllowed } from '../../shared/dynamic-form/gsap-motion.util'
 import { buildReviewRevealTimeline } from '../../shared/dynamic-form/review-reveal.animation';
 import { buildStepTransitionTimeline, WwellStepDirection } from '../../shared/dynamic-form/step-transition.animation';
 import { buildWwellDynamicForm } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
-import { WwellApprovalMiniChainComponent } from '../../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellPlanningStore } from '../../store/wwell-planning.store';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from '../wwell-ir-form/wwell-ir-form.types';
-import { buildWellboreDiagramData } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
+import { CasingSizeWarning, findInvertedCasingSizeRows } from '../wwell-ir-form/wwell-ir-casing-warnings.util';
+import { buildWellboreDiagramData, hasWellboreDiagramData } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 
 const SNACKBAR_DURATION_MS = 3000;
 const SELECT_PANEL_CLASS = 'nip-select-panel';
@@ -48,8 +49,9 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
     MatIconModule,
     MatStepperModule,
     MatExpansionModule,
+    CdkDrag,
+    CdkDragHandle,
     DynamicSectionComponent,
-    WwellApprovalMiniChainComponent,
     WellBoreViewComponent,
     WwellIrDepthScaleComponent,
   ],
@@ -96,6 +98,17 @@ export class WwellIrNewPageComponent {
 
   protected readonly activeStepIndex = signal(0);
 
+  // Position-based fill for the custom step rail (see wwell-ir-new-page.component.scss's
+  // `.nip__rail`) — width is a percentage of the *whole* track div, but the track itself is
+  // inset by half a step's flex-width on each side (so it starts/ends at the first/last
+  // chip's center, not the track container's edge). Dividing by `schema.length` rather than
+  // `schema.length - 1` bakes that inset directly into the percentage: for n evenly-flexed
+  // steps the chip centers sit at (i + 0.5) / n, and the track's own left inset is 0.5 / n,
+  // so distance-from-left-inset-to-chip-i's-center reduces exactly to i / n.
+  protected readonly railProgressPercent = computed(
+    () => (this.activeStepIndex() / this.schema.length) * 100,
+  );
+
   /*
    * Feeds every `app-well-bore-view` instance in this wizard — same real diagram
    * everywhere, just adapted from the raw form value into the richer WellboreDiagramData
@@ -119,6 +132,29 @@ export class WwellIrNewPageComponent {
     this.activeStepIndex();
     return buildWellboreDiagramData(this.rawFormValue());
   });
+
+  // Gates the diagram card's scale/ground-level/total-depth chrome, not just individual
+  // casing/formation-top shapes — see `hasWellboreDiagramData`'s own doc comment.
+  protected readonly hasWellboreData: Signal<boolean> = computed(() =>
+    hasWellboreDiagramData(this.rawFormValue()),
+  );
+
+  // Surfaces cases where a deeper casing's entered size is larger than a shallower casing's —
+  // see `findInvertedCasingSizeRows`'s doc comment for why the diagram can never draw that
+  // combination correctly.
+  protected readonly casingSizeWarnings: Signal<readonly CasingSizeWarning[]> = computed(() =>
+    findInvertedCasingSizeRows(this.rawFormValue().subsurface.casing),
+  );
+
+  // `wellboreDiagramData().totalDepth` falls back to 0 when Target Depth (Request Reference,
+  // a required field) hasn't been filled in yet — reachable via the stepper's free (non-linear)
+  // navigation. `well-bore-view` always draws its "TOTAL DEPTH: 0 FT" label regardless (see the
+  // standing rule against editing anything under `presentation/well-bore-view/`), so this instead
+  // drives a page-local CSS hook (`.nip__wellbore-diagram-row--no-depth` in
+  // wwell-ir-new-page.component.scss) that hides that one D3-rendered label group.
+  protected readonly hasTargetDepth: Signal<boolean> = computed(
+    () => (this.rawFormValue().reference.main.targetDepthFt ?? 0) > 0,
+  );
   @ViewChildren('stepContent') private readonly stepContents?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('reviewCard', { read: ElementRef }) private readonly reviewCards?: QueryList<ElementRef<HTMLElement>>;
 

@@ -7,7 +7,9 @@ $navy:   tokens.$navy-deep;
 $muted:  tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
-$danger: #dc2626;
+$danger:  #dc2626;
+$done:    #10b981;
+$pending: #b45309;
 
 /*
  * Same rationale as wwell-ir-form.component.scss: the app only calls mat.core()
@@ -64,7 +66,7 @@ app-wwell-ir-new-page {
   display: block;
   height: 100%;
   overflow: auto;
-  background: tokens.$page-bg;
+  background: tokens.$surface;
   font-family: tokens.$font-family;
 }
 
@@ -117,10 +119,108 @@ app-wwell-ir-new-page {
   letter-spacing: -0.01em;
 }
 
-.nip__subtitle {
-  margin: 0.15rem 0 0;
-  font-size: 0.9rem;
+/* Approval chain preview — replaces a plain "Hydrogeologist → Lead Hydrogeologist →
+ * Manager" text line (and a separate abstract-dots `app-wwell-approval-mini-chain`,
+ * previously floated to the header's far side) with one labeled, connected chain: a
+ * person-icon chip per role, joined by a directional arrow. `app-wwell-approval-mini-chain`
+ * stays untouched — it's still used elsewhere (e.g. the wwell-ir list row) for a compact,
+ * label-less status indicator, a different job than this page's "what happens next" preview. */
+.nip__chain {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nip__chain-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.nip__chain-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba($muted, 0.12);
   color: $muted;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.nip__chain-role {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $muted;
+  transition: color 200ms ease;
+}
+
+.nip__chain-arrow {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: #cbd5e1;
+  margin: 0 0.55rem;
+  flex-shrink: 0;
+}
+
+.nip__chain-step[data-status='approved'] {
+  .nip__chain-icon {
+    background: $done;
+    color: #fff;
+  }
+
+  .nip__chain-role {
+    color: $navy;
+  }
+}
+
+.nip__chain-step[data-status='in-progress'] {
+  .nip__chain-icon {
+    background: $accent;
+    color: #fff;
+    animation: nip-chain-pulse 1.6s ease-in-out infinite;
+  }
+
+  .nip__chain-role {
+    color: $navy;
+    font-weight: 700;
+  }
+}
+
+.nip__chain-step[data-status='rejected'] {
+  .nip__chain-icon {
+    background: $danger;
+    color: #fff;
+  }
+
+  .nip__chain-role {
+    color: $danger;
+  }
+}
+
+@keyframes nip-chain-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba($accent, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba($accent, 0.06);
+  }
 }
 
 /* ── Stepper card ─────────────────────────────────────────────── */
@@ -131,11 +231,19 @@ app-wwell-ir-new-page {
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(59, 130, 246, 0.05);
-  padding: 0.5rem 1rem 1.25rem;
 }
 
 .nip__step-content {
   padding: 1rem 0.25rem 0;
+}
+
+/* `app-dynamic-section`/`app-dynamic-field` are shared across the wwell-planning
+ * module, so their own idle-state fills (`#f8fafc`) stay as the module default —
+ * overridden here, scoped under `.nip`, so only this page's form goes fully white
+ * without changing the shared component for every other consumer. */
+.nip .dyf__toggle-group,
+.nip .dyf--review {
+  background: tokens.$surface;
 }
 
 /* Subsurface & Construction: form fields on the left, a live well-bore preview pinned
@@ -154,38 +262,42 @@ app-wwell-ir-new-page {
   min-width: 0;
 }
 
-/*
- * Root cause (confirmed via DevTools): Material renders every step's content up front and
- * toggles `.mat-horizontal-stepper-content` between `visibility: hidden` (inactive) and
- * `visibility: visible` (the `-current` step) as the user navigates. The Well Design View
- * step's very first redraw — including casing.renderer.ts's clip-path "grow" reveal
- * transition — runs while its content is still `visibility: hidden` (every step mounts
- * immediately on page load, not just the active one). Once `visibility` flips back to
- * `visible` on navigation, the already-finished (collapsed) clip-path state does not
- * reliably repaint — confirmed by forcing `visibility: visible` unconditionally, which
- * fixes it. So: stop relying on Material's hidden→visible toggle entirely and force every
- * step's content to always be `visibility: visible`.
- *
- * That alone would leak the horizontally off-screen `-previous`/`-next` steps into view,
- * since Material hides an inactive step TWO ways: `visibility: hidden`, and — on that same
- * element — `overflow: hidden` paired with `height: 0`. Forcing `visibility: visible`
- * unconditionally only defeats the first. The container-level split below (`overflow-x:
- * hidden` still clips the transformed-away steps horizontally; `overflow-y: visible` still
- * lets the active step's own tall content — e.g. this page's wellbore diagrams, or a
- * growing review accordion — render in full) covers the transform axis, but it must NOT be
- * paired with a blanket `overflow: visible` on every `.mat-horizontal-stepper-content`: that
- * strips the second hiding mechanism from the *inactive* steps too, so their content (still
- * `height: 0`, no longer clipped to it) paints at the same vertical position as the active
- * step's real content, merely offset sideways by its own `translate3d(±100%,...)` — visible
- * as a sliver bleeding in from whichever edge the adjacent step sits on. `overflow: visible`
- * is therefore scoped to `-content-current` only, below — the one step that actually needs
- * it; every inactive step keeps Material's own `overflow: hidden` as intended.
- *
- * `!important` throughout: Material ships several rules at specificity (0,3,0)-(0,4,0)
- * (see e.g. `.mat-stepper-horizontal:not(.mat-stepper-animating) ...-content-current`) that
- * a plain `.nip .mat-horizontal-stepper-content` override (0,2,0) cannot reliably beat —
- * the same reasoning already applied to `.nip .mat-step-header` elsewhere in this file.
- */
+/* Casing rows whose size can never render at the width their label implies — see
+ * `findInvertedCasingSizeRows`'s doc comment in wwell-ir-casing-warnings.util.ts. Reuses the
+ * same amber "pending" pair as `.nip__review-summary` for a consistent warning color. */
+.nip__casing-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.nip__casing-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem;
+  background: #fef3c7;
+  border: 1px solid rgba($pending, 0.25);
+  border-radius: 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: $pending;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    margin-top: 0.1rem;
+  }
+}
+
+/* Forces visibility so the Well Design View step animates correctly (see git history).
+ * `overflow: visible` stays scoped to `-content-current` only — applying it to inactive
+ * steps too strips Material's own clipping and leaks their content in from the side. */
 .nip .mat-horizontal-content-container {
   overflow-x: hidden !important;
   overflow-y: visible !important;
@@ -199,141 +311,172 @@ app-wwell-ir-new-page {
   overflow: visible !important;
 }
 
-/* ── Stepper header ───────────────────────────────────────────────────────
- * Icon-above-label layout via Material's own `labelPosition="bottom"` mode.
- * Deliberately slim (28px icon / 60px header, vs. Material's 24px/72px
- * defaults elsewhere in the app) for a quieter, more refined progress strip —
- * small filled circles and a thin connector line read as wayfinding chrome
- * rather than competing with the actual step content below it.
- *
- * Material centers the connector line using a hardcoded assumption of a 24px
- * icon: `top: (header-height - 24) / 2 + 12`. $header-height / $icon-size
- * below feed the same variable Material reads, and the hand-computed
- * $line-top recomputes that same formula for our actual icon size so the
- * line still lands on the icon's vertical center whatever size it is.
- *
- * Material actually draws this connector in THREE separate pieces: the
- * `<div class="mat-stepper-horizontal-line">` between each pair of headers,
- * plus a `::before`/`::after` pseudo-element on each header itself (bridging
- * the header's own side padding up to its icon). Only the middle `<div>` was
- * shifted down to `$line-top` below — the pseudo-elements stayed at
- * Material's un-adjusted default `top`, so they visibly break away from the
- * div's line right next to every circle. All three need the same `top` and
- * color to read as one continuous line.
+/* ── Stepper header: custom progress rail ────────────────────────────────
+ * Material's own horizontal-stepper header is fully replaced here — hidden
+ * below — by a custom nav bound to `activeStepIndex`/`isStepValid()`
+ * (wwell-ir-new-page.component.html). Material's built-in header draws its
+ * connector out of three separate pieces (a `<div>` between each pair of
+ * headers, plus a `::before`/`::after` on each header itself) with a
+ * hardcoded 24px-icon offset assumption baked into the compiled CSS — any
+ * custom icon size requires re-deriving and re-applying that offset to all
+ * three pieces, and there's no supported way to render a single continuous
+ * progress-fill segment (only per-segment idle/done coloring). A plain
+ * absolutely-positioned track + fill div sidesteps both problems and stays
+ * correct across any icon size without touching Material internals — the
+ * `mat-stepper` underneath is kept purely for content transitions and
+ * `[stepControl]` validation, `stepper.selectedIndex = i` still drives it.
  */
-$header-height: 60px;
-$icon-size: 28px;
-$line-top: calc((#{$header-height} - 24px) / 2 + #{$icon-size} / 2);
-$line-idle: #e2e8f0;
-
-.nip .mat-stepper-horizontal {
-  --mat-stepper-header-height: #{$header-height};
-}
+$rail-idle-border: #cbd5e1; // slate-300 — visible ring against white
+$rail-idle-color: #94a3b8;
 
 .nip .mat-horizontal-stepper-header-container {
-  padding: 0.3rem 0.4rem 0.6rem;
-  margin-bottom: 0.4rem;
+  display: none;
+}
+
+.nip__rail {
+  padding: 1.1rem 1.25rem 1.4rem;
   border-bottom: 1px solid $border;
 }
 
-.nip .mat-step-header {
-  border-radius: 10px;
-  background-color: transparent !important;
-  transition: background-color 150ms ease;
+.nip__rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
 
-  &:not([aria-disabled='true']):hover {
-    background-color: rgba($accent, 0.06) !important;
+.nip__rail-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: $navy;
+}
+
+.nip__rail-count {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $accent;
+  background: rgba($accent, 0.09);
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+
+.nip__rail-track {
+  position: relative;
+}
+
+.nip__rail-track-base,
+.nip__rail-track-fill {
+  position: absolute;
+  top: 18px;
+  left: calc(50% / var(--rail-steps));
+  right: calc(50% / var(--rail-steps));
+  height: 3px;
+  border-radius: 3px;
+}
+
+.nip__rail-track-base {
+  background: #eef2f7;
+}
+
+.nip__rail-track-fill {
+  right: auto;
+  background: linear-gradient(90deg, $accent, $done);
+  transition: width 260ms tokens.$ease-out;
+}
+
+.nip__rail-steps {
+  display: flex;
+  position: relative;
+}
+
+.nip__rail-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+
+  &:focus-visible .nip__rail-chip {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
   }
 }
 
-.nip .mat-step-icon {
-  width: $icon-size;
-  height: $icon-size;
-  background: #eef1f5;
-  color: #94a3b8;
-  font-weight: 700;
-  font-size: 0.78rem;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+.nip__rail-chip {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: tokens.$surface;
+  box-shadow: inset 0 0 0 2px $rail-idle-border;
+  color: $rail-idle-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
   transition:
-    background 200ms ease,
-    color 200ms ease,
-    transform 200ms ease,
-    box-shadow 200ms ease;
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms tokens.$ease-out;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
 }
 
-.nip .mat-step-icon-selected {
-  background: linear-gradient(135deg, $accent, #60a5fa);
-  color: #fff;
-  transform: scale(1.08);
-  box-shadow: 0 3px 10px rgba($accent, 0.32);
-}
-
-.nip .mat-step-icon-state-done {
-  background: #10b981;
-  color: #fff;
+.nip__rail-step--done .nip__rail-chip {
+  background: $done;
   box-shadow: none;
-}
-
-.nip .mat-step-icon-state-error {
-  background: $danger;
   color: #fff;
 }
 
-.nip .mat-step-label {
+.nip__rail-step--selected .nip__rail-chip {
+  background: $accent;
+  box-shadow: none;
+  color: #fff;
+  transform: translateY(-3px) scale(1.1);
+}
+
+.nip__rail-label {
   max-width: 100px;
   white-space: normal;
-  line-height: 1.2;
-  font-size: 0.74rem;
+  line-height: 1.25;
+  text-align: center;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  color: $rail-idle-color;
+  transition: color 180ms ease;
+}
+
+.nip__rail-step--done .nip__rail-label {
   color: $muted;
-  transition: color 150ms ease;
 }
 
-.nip .mat-step-label-selected,
-.nip .mat-step-label-active {
+.nip__rail-step--selected .nip__rail-label {
   color: $navy;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.nip .mat-stepper-horizontal-line {
-  border-top-width: 1.5px;
-  border-top-color: $line-idle;
-  top: #{$line-top} !important;
-  transition: border-top-color 300ms ease;
-}
-
-/* The header's own bridging pieces — see the comment above $header-height
- * for why these need to match the connector `<div>` exactly. */
-.nip .mat-horizontal-stepper-header::before,
-.nip .mat-horizontal-stepper-header::after {
-  top: #{$line-top} !important;
-  border-top-width: 1.5px;
-  border-top-color: $line-idle;
-  transition: border-top-color 300ms ease;
-}
-
-/* Traveled-path progress: recolor every connector segment that sits behind a
- * completed step — the header's own trailing edge, the `<div>` after it, and
- * the following header's leading edge — so the path already walked reads as
- * a distinct accent track instead of a flat uniform gray. Driven entirely by
- * Material's own `mat-step-icon-state-done` class, so it stays in sync with
- * navigation for free and animates via the transitions above.
- */
-.nip .mat-step-header:has(.mat-step-icon-state-done)::after,
-.nip .mat-step-header:has(.mat-step-icon-state-done) + .mat-stepper-horizontal-line,
-.nip .mat-step-header:has(.mat-step-icon-state-done) + .mat-stepper-horizontal-line + .mat-step-header::before {
-  border-top-color: $accent !important;
+.nip__stepper-body {
+  background: transparent;
 }
 
 /* ── Review section ───────────────────────────────────────────── */
-$done: #10b981;
-$pending: #b45309;
-
 .nip__review {
   margin-top: 1.5rem;
   padding: 1.25rem;
-  background: linear-gradient(180deg, rgba($accent, 0.05), rgba($accent, 0));
+  background: tokens.$surface;
   border: 1px solid rgba($accent, 0.14);
   border-radius: 14px;
 }
@@ -427,29 +570,59 @@ $pending: #b45309;
   position: sticky;
   top: 0.75rem;
   margin-bottom: 0;
-}
+  /* Anchors `.nip__wellbore-drag-handle` — `cdkDrag`'s own transform-based movement is layered
+   * on top of this sticky positioning (it offsets in-place rather than switching to `absolute`),
+   * so the card still tracks scroll normally at whatever spot the user last dragged it to. */
+  position: relative;
+  /* Raised at rest, not just while dragging — reads as a floating, liftable panel (matching the
+   * grip handle) rather than a flat card that only reacts once you've already grabbed it. */
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 150ms ease;
 
-.nip__wellbore-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: $navy;
-
-  mat-icon {
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-    color: $accent;
+  &.cdk-drag-dragging {
+    box-shadow:
+      0 16px 32px rgba(15, 23, 42, 0.2),
+      0 0 0 3px rgba($accent, 0.16);
+    cursor: grabbing;
   }
 }
 
-.nip__wellbore-subtitle {
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
+.nip__wellbore-drag-handle {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba($muted, 0.08);
   color: $muted;
+  cursor: grab;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: rgba($accent, 0.12);
+    color: $accent;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 /*
@@ -478,12 +651,64 @@ $pending: #b45309;
   max-width: 1040px;
   aspect-ratio: 1040 / 840;
   max-height: 620px;
-  margin: 0.75rem auto 0;
+  /* No title/subtitle sits above this row anymore — the card's own padding
+   * (.nip__wellbore-card) supplies the top gap now, so this only needs to
+   * center horizontally, not add its own top margin on top of that. */
+  margin: 0 auto;
+}
+
+/*
+ * Hides the "TOTAL DEPTH: 0 FT" label until Target Depth (Request Reference) is actually
+ * filled in — see `hasTargetDepth`'s doc comment in wwell-ir-new-page.component.ts for why
+ * this can't just be fixed at the data layer. `.td-label` is a D3-appended `<g>` (rendered by
+ * `well-bore-view.component.ts`'s `renderTotalDepthLabel`, imperative DOM, not part of any
+ * Angular template) — it carries no Angular view-encapsulation attribute, so it's reachable by
+ * a plain descendant selector with no `::ng-deep` needed. This page compiles its own selectors
+ * unscoped too (`ViewEncapsulation.None`, see the top of this file), which is exactly why every
+ * such rule here is deliberately prefixed with `.nip` — without it this would leak globally.
+ */
+.nip .nip__wellbore-diagram-row--no-depth .td-label {
+  display: none;
 }
 
 .nip__wellbore-diagram {
   display: block;
   min-width: 0;
+}
+
+/* Stand-in for `.nip__wellbore-diagram-row` before `hasWellboreData()` goes true — same
+ * max-width/aspect-ratio footprint so the card doesn't jump in height once real casing/
+ * formation-top data flips this over to the actual diagram. */
+.nip__wellbore-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 1040px;
+  aspect-ratio: 1040 / 840;
+  max-height: 620px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border: 1.5px dashed $border;
+  border-radius: 10px;
+  background: tokens.$surface-alt;
+  text-align: center;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    max-width: 32ch;
+    font-size: 0.86rem;
+    color: $muted;
+  }
 }
 
 .nip .nip__review-card {

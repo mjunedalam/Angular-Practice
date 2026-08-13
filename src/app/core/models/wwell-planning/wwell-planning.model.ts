@@ -114,6 +114,8 @@ export type IntegratedRequirementTestType = 'flow-test' | 'pump-test';
 
 export interface IntegratedRequirementRequestReference {
   readonly linkedRequestId: string | null;
+  /** Correspondence/letter reference tied to this request — optional since older records predate the field. */
+  readonly letterNumber?: string | null;
   readonly client: string;
   readonly supportingBusiness: string;
   readonly wellName: string;
@@ -126,6 +128,9 @@ export interface IntegratedRequirementRequestReference {
 export interface IntegratedRequirementFormationTop {
   readonly name: string;
   readonly depthFt: number;
+  /** Optional since older records predate these fields. */
+  readonly subSeaFtAsl?: number | null;
+  readonly description?: string | null;
 }
 
 export interface IntegratedRequirementCasingRow {
