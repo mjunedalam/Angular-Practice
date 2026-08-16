@@ -199,6 +199,8 @@ export interface IntegratedRequirementTestProgram {
 export interface IntegratedRequirement {
   readonly id: string;
   readonly code: string;
+  /** Backend-assigned exad_gwd_ir_header.ir_seq — absent until the first successful save. */
+  readonly irSeq?: number | null;
   readonly updatedDate: string;
   readonly status: IntegratedRequirementStatus;
   readonly requestReference: IntegratedRequirementRequestReference;

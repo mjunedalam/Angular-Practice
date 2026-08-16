@@ -16,6 +16,7 @@ import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
+import { WwellIrBulkSavePayload } from './wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { WWELL_LAND_AFFAIRS_APPROVALS_MOCK, WWELL_WLDA_APPROVALS_MOCK } from './shared/wwell-approvals/wwell-approvals.mock';
 import {
   WWELL_IR_CHAIN_ROLES,
@@ -189,14 +190,19 @@ export class WwellPlanningService {
 
   createIntegratedRequirement(
     payload: CreateIntegratedRequirementPayload,
+    irBulkPayload: WwellIrBulkSavePayload,
     files: readonly File[] = [],
   ): Observable<IntegratedRequirement> {
+    const formData = this.toFormData(payload, files);
+    // exad_gwd_ir_* bulk save contract (INSERT/UPDATE/DELETE per row) — see wwell-ir-payload.model.ts.
+    formData.append('irPayload', JSON.stringify(irBulkPayload));
+
     return this.http
-      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`, this.toFormData(payload, files))
+      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`, formData)
       .pipe(
         map(res => res.data[0]),
         // TODO: remove fallback once the integrated-requirements creation endpoint is live.
-        catchError(() => of(this.buildFallbackIntegratedRequirement(payload, files))),
+        catchError(() => of(this.buildFallbackIntegratedRequirement(payload, irBulkPayload, files))),
       );
   }
 
@@ -212,12 +218,18 @@ export class WwellPlanningService {
 
   private buildFallbackIntegratedRequirement(
     payload: CreateIntegratedRequirementPayload,
+    irBulkPayload: WwellIrBulkSavePayload,
     files: readonly File[],
   ): IntegratedRequirement {
     const code = `IR-${todayIsoDate().slice(2, 4)}-${Math.floor(Math.random() * 900 + 100)}`;
+    // Mimics the real backend echoing back the same ir_seq it was given (UPDATE) or minting a
+    // fresh one (INSERT) — keeps the offline fallback exercising the same draft-resume pattern.
+    const headerRow = irBulkPayload[0].data?.[0];
+    const irSeq = headerRow?.ir_seq ?? Math.floor(Math.random() * 9000 + 1000);
     return {
       id: code,
       code,
+      irSeq,
       updatedDate: todayIsoDate(),
       status: payload.status,
       requestReference: payload.requestReference,

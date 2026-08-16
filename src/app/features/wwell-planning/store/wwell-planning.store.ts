@@ -10,6 +10,7 @@ import {
   CreateWwellPlanningRequestPayload,
   IntegratedRequirement,
 } from '@models/wwell-planning/wwell-planning.model';
+import { WwellIrBulkSavePayload } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStoreState, initialWwellPlanningState } from './wwell-planning.state';
 
@@ -158,12 +159,18 @@ export const WwellPlanningStore = signalStore(
         });
       },
 
-      createIntegratedRequirement(payload: CreateIntegratedRequirementPayload, files: readonly File[] = []): void {
+      createIntegratedRequirement(
+        payload: CreateIntegratedRequirementPayload,
+        irBulkPayload: WwellIrBulkSavePayload,
+        files: readonly File[] = [],
+      ): void {
         patchState(store, { creatingIntegratedRequirement: true, createIntegratedRequirementError: null });
-        svc.createIntegratedRequirement(payload, files).subscribe({
+        svc.createIntegratedRequirement(payload, irBulkPayload, files).subscribe({
           next: created =>
             patchState(store, {
               integratedRequirements: [created, ...store.integratedRequirements()],
+              // Falls back to whatever was already known so an UPDATE response missing irSeq never clears it.
+              draftIrSeq: created.irSeq ?? store.draftIrSeq(),
               creatingIntegratedRequirement: false,
             }),
           error: (err: unknown) =>
@@ -172,6 +179,11 @@ export const WwellPlanningStore = signalStore(
               createIntegratedRequirementError: errorMessage(err, 'Failed to create integrated requirement'),
             }),
         });
+      },
+
+      /** Call when a fresh "new IR" session starts, so it never inherits a previous draft's ir_seq. */
+      resetIntegratedRequirementDraft(): void {
+        patchState(store, { draftIrSeq: null });
       },
 
       submitWldaApproval(payload: CreateWldaApprovalPayload, files: readonly File[] = []): void {

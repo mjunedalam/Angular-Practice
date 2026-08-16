@@ -265,7 +265,9 @@ export function resolveLastCasingShoe(casings: ICasingIR[], drlgCasings: IDrlgCs
         }, 0);
     }
 
-    const actualCasingOnly = drlgCasings.filter(d => !d.wLnrOdSz && d.wCsgBotDpth > 0);
+    // Note: a row's wLnrOdSz (a liner hung off THIS casing) doesn't disqualify its own
+    // wCsgBotDpth as a real casing shoe — IDrlgCsg legitimately bundles both on one row.
+    const actualCasingOnly = drlgCasings.filter(d => d.wCsgBotDpth > 0);
     if (actualCasingOnly.length > 0) {
         return Math.max(...actualCasingOnly.map(d => d.wCsgBotDpth));
     }

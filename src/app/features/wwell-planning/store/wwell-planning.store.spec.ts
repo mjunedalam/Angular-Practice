@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { WwellIrBulkSavePayload } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStore } from './wwell-planning.store';
 
@@ -38,15 +39,52 @@ function buildPayload(): CreateIntegratedRequirementPayload {
   };
 }
 
-function buildCreated(): IntegratedRequirement {
+function buildCreated(irSeq: number | null = 9001): IntegratedRequirement {
   return {
     id: 'IR-26-999',
     code: 'IR-26-999',
+    irSeq,
     updatedDate: '2026-08-04',
     attachmentNames: [],
     chain: [],
     ...buildPayload(),
   };
+}
+
+function buildIrBulkPayload(): WwellIrBulkSavePayload {
+  return [
+    {
+      table: 'exad_gwd_ir_header',
+      data: [
+        {
+          action: 'INSERT',
+          ir_seq: null,
+          orgwab_seq: null,
+          itc_no: null,
+          screen: '',
+          tops_remarks: null,
+          publish_dt: null,
+          publish_flg: 'N',
+          curr_flg: 'Y',
+          publish_by: null,
+          cont_geologist: null,
+          sub_cont_geologist: null,
+          water_remarks: null,
+          geo_remarks: null,
+          cmpl_type: 'Screened',
+          trbs_type: null,
+          ot_rmks: null,
+          mud_rmks: null,
+          test_type: 'pump-test',
+          flow_rmks: null,
+        },
+      ],
+    },
+    { table: 'exad_gwd_ir_casing', data: null },
+    { table: 'exad_gwd_ir_hydrogeology', data: null },
+    { table: 'exad_gwd_ir_tops', data: null },
+    { table: 'exad_gwd_ir_water', data: null },
+  ];
 }
 
 describe('WwellPlanningStore - createIntegratedRequirement', () => {
@@ -65,9 +103,9 @@ describe('WwellPlanningStore - createIntegratedRequirement', () => {
     const files = [new File(['x'], 'map.pdf')];
     serviceMock.createIntegratedRequirement.mockReturnValue(of(created));
 
-    store.createIntegratedRequirement(buildPayload(), files);
+    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload(), files);
 
-    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), files);
+    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), files);
     expect(store.integratedRequirements()).toEqual([created]);
     expect(store.creatingIntegratedRequirement()).toBe(false);
     expect(store.createIntegratedRequirementError()).toBeNull();
@@ -76,17 +114,34 @@ describe('WwellPlanningStore - createIntegratedRequirement', () => {
   it('defaults files to an empty array when omitted', () => {
     serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated()));
 
-    store.createIntegratedRequirement(buildPayload());
+    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
 
-    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), []);
+    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), []);
   });
 
   it('sets createIntegratedRequirementError on failure and clears the creating flag', () => {
     serviceMock.createIntegratedRequirement.mockReturnValue(throwError(() => new Error('Network down')));
 
-    store.createIntegratedRequirement(buildPayload());
+    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
 
     expect(store.creatingIntegratedRequirement()).toBe(false);
     expect(store.createIntegratedRequirementError()).toBe('Network down');
+  });
+
+  it('remembers the returned ir_seq so a later draft save can reuse it', () => {
+    serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated(9001)));
+
+    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+
+    expect(store.draftIrSeq()).toBe(9001);
+  });
+
+  it('resetIntegratedRequirementDraft clears the remembered ir_seq for a fresh "new IR" session', () => {
+    serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated(9001)));
+    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+
+    store.resetIntegratedRequirementDraft();
+
+    expect(store.draftIrSeq()).toBeNull();
   });
 });

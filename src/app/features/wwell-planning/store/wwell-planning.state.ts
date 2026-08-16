@@ -10,6 +10,8 @@ export interface WwellPlanningStoreState {
   readonly wldaApprovals: WldaApproval[];
   readonly landAffairsApprovals: LandAffairsApproval[];
   readonly integratedRequirements: IntegratedRequirement[];
+  /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
+  readonly draftIrSeq: number | null;
   readonly requestsLoading: boolean;
   readonly approvalsLoading: boolean;
   readonly integratedRequirementsLoading: boolean;
@@ -37,6 +39,7 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   wldaApprovals: [],
   landAffairsApprovals: [],
   integratedRequirements: [],
+  draftIrSeq: null,
   requestsLoading: false,
   approvalsLoading: false,
   integratedRequirementsLoading: false,

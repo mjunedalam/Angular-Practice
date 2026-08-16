@@ -1,0 +1,111 @@
+[
+  {
+    "table": "exad_gwd_ir_header",
+    "data": [
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "orgwab_seq": 18539,
+        "itc_no": null,
+        "screen": "",
+        "tops_remarks": "Formation tops are based on nearby offset wells and GWD maps.",
+        "publish_dt": "2021-07-14T13:07:41",
+        "publish_flg": "Y",
+        "curr_flg": "Y",
+        "publish_by": "TADAMAFG",
+        "cont_geologist": 722640,
+        "sub_cont_geologist": 226915,
+        "water_remarks": "",
+        "geo_remarks": "",
+        "cmpl_type": null,
+        "trbs_type": null,
+        "ot_rmks": "",
+        "mud_rmks": "",
+        "test_type": null,
+        "flow_rmks": null
+      }
+    ]
+  },
+  {
+    "table": "exad_gwd_ir_casing",
+    "data": [
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "csg_size": "13 3/8",
+        "csg_type": "Casing",
+        "csg_depth": 1960,
+        "csg_remarks": "13-3/8\" Casing set @ 1960 ft (105 ft into ARUM)"
+      },
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "csg_size": "18 5/8",
+        "csg_type": "Casing",
+        "csg_depth": 635,
+        "csg_remarks": "18-5/8\" Casing set @ 635 ft (10 ft into DMMM)"
+      },
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "csg_size": "24",
+        "csg_type": "Conductor",
+        "csg_depth": 100,
+        "csg_remarks": "24\" Conductor set @ 100 ft"
+      },
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "csg_size": "9 5/8",
+        "csg_type": "Liner",
+        "csg_depth": 2720,
+        "csg_remarks": "9-5/8\" Liner set @ 2720 ft (20 ft into SONY)"
+      }
+    ]
+  },
+  {
+    "table": "exad_gwd_ir_hydrogeology",
+    "data": [
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "st_long_cd": "WASIA",
+        "est_sta_water_lvl": 72,
+        "est_water_quality": 3000,
+        "est_productivity": 500,
+        "flowing": null,
+        "h2s": "Not present"
+      }
+    ]
+  },
+  {
+    "table": "exad_gwd_ir_tops",
+    "data": [
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "st_long_cd": "ARUM",
+        "plan_tvd_dpth": 1855,
+        "plan_ss_dpth": 1015
+      },
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "st_long_cd": "DMMM",
+        "plan_tvd_dpth": 625,
+        "plan_ss_dpth": 215
+      },
+      {
+        "action": "INSERT",
+        "ir_seq": 8992,
+        "st_long_cd": "KHFJ",
+        "plan_tvd_dpth": 3120,
+        "plan_ss_dpth": -2280
+      }
+    ]
+  },
+  {
+    "table": "exad_gwd_ir_water",
+    "data": null
+  }
+]

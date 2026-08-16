@@ -22,6 +22,8 @@ const storeMock = {
   creatingIntegratedRequirement: jest.fn(() => false),
   createIntegratedRequirementError: jest.fn(() => null as string | null),
   createIntegratedRequirement: jest.fn(),
+  draftIrSeq: jest.fn(() => null as number | null),
+  resetIntegratedRequirementDraft: jest.fn(),
 };
 
 const snackBarMock = { open: jest.fn() };

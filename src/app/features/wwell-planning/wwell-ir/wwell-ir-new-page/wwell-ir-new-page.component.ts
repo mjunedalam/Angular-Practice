@@ -32,6 +32,7 @@ import { WwellPlanningStore } from '../../store/wwell-planning.store';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
+import { buildWwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.mapper';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from '../wwell-ir-form/wwell-ir-form.types';
 import { CasingSizeWarning, findInvertedCasingSizeRows } from '../wwell-ir-form/wwell-ir-casing-warnings.util';
@@ -163,6 +164,9 @@ export class WwellIrNewPageComponent {
   private reviewRevealed = false;
 
   constructor() {
+    // A brand-new visit to this page must never inherit a previous draft's ir_seq.
+    this.store.resetIntegratedRequirementDraft();
+
     effect(() => {
       const index = this.activeStepIndex();
       const host = this.stepContents?.get(index);
@@ -246,6 +250,8 @@ export class WwellIrNewPageComponent {
   private submitAs(status: 'draft' | 'in-progress'): void {
     const raw = this.form.getRawValue() as WwellIrFormRawValue;
     const { payload, files } = mapIrFormValueToSubmission(raw, status);
-    this.store.createIntegratedRequirement(payload, files);
+    // Reusing the remembered ir_seq turns a repeat "Save as Draft" into an UPDATE instead of a duplicate INSERT.
+    const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: this.store.draftIrSeq() });
+    this.store.createIntegratedRequirement(payload, irBulkPayload, files);
   }
 }
