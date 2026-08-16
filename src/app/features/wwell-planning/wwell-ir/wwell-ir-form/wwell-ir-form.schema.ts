@@ -5,7 +5,6 @@ import {
 } from '../../shared/wwell-approvals/wwell-approvals.config';
 import {
   WWELL_ACIDIZATION_OPTIONS,
-  WWELL_AQUIFER_OPTIONS,
   WWELL_CASING_TYPE_OPTIONS,
   WWELL_CLIENT_OPTIONS,
   WWELL_COMPLETION_OPTIONS,
@@ -20,6 +19,7 @@ import {
   WWELL_TEST_TYPE_OPTIONS,
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
+import { WWELL_IR_FORMATION_OPTIONS } from './wwell-ir-form.config';
 
 /** Single source of truth for the IR stepper — add a field here, not in a template. */
 export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
@@ -52,7 +52,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             key: 'targetAquifer',
             label: 'Target Aquifer',
             type: 'select',
-            options: WWELL_AQUIFER_OPTIONS,
+            options: WWELL_IR_FORMATION_OPTIONS,
             validators: { required: true },
           },
           {
@@ -92,7 +92,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           addLabel: '+ Add Formation Top',
           minRequiredRows: 1,
           rowFields: [
-            { key: 'name', label: 'Formation', type: 'select', options: WWELL_AQUIFER_OPTIONS },
+            { key: 'name', label: 'Formation', type: 'select', options: WWELL_IR_FORMATION_OPTIONS },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
             { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
             { key: 'description', label: 'Description', type: 'text', placeholder: 'e.g., Top of Umm Er Radhuma' },
@@ -232,7 +232,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             key: 'aquifer',
             label: 'Aquifer',
             type: 'select',
-            options: WWELL_AQUIFER_OPTIONS,
+            options: WWELL_IR_FORMATION_OPTIONS,
             validators: { required: true },
           },
           { key: 'estimatedTdsPpm', label: 'Estimated TDS', type: 'number', suffix: 'ppm' },

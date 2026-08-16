@@ -357,27 +357,25 @@ $master-width: 240px;
   flex-shrink: 0;
 }
 
-/* ── Detail column ────────────────────────────────────────────── */
+/* ── Detail column ────────────────────────────────────────────── *
+ * No longer the scroll container itself — `app-wwell-ir-detail` now bounds its own height
+ * and owns its own internal scrolling (only the active tab's content area scrolls; its header/
+ * tab-strip/sidebar stay fixed), so this column just needs to hand it a definite, non-growing
+ * height to bound against instead of scrolling on its behalf.
+ */
 .wwell-ir__detail {
   flex: 1;
   min-width: 0;
   align-self: stretch;
   max-height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  /* Same scroll-chaining guard as `.wwell-ir__list` above — this column runs far taller
-   * than the list (offset-wells grid, wellbore tables, etc.), so it's the one most likely
-   * to get scrolled past its own end. */
-  overscroll-behavior-y: contain;
-
-  /* Scrolls, but stays visually quiet — the bento cards inside are the only
-   * chrome on screen; a visible track/thumb here would just be more noise. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+.wwell-ir__detail > * {
+  flex: 1;
+  min-height: 0;
 }
 
 /*
@@ -389,6 +387,14 @@ $master-width: 240px;
  */
 .wwell-ir__detail-panel {
   padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  > app-wwell-ir-detail {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 .wwell-ir__empty {
@@ -432,9 +438,10 @@ $master-width: 240px;
  *
  * Fix: keep `.wwell-ir` at the full `height: 100%` it already has on desktop and let it scroll
  * as ONE unit (master list + detail stacked, not two nested independently-scrolling boxes —
- * nested scroll areas are their own bad-mobile-UX problem). `.ird__header`/`.ird__sidebar`'s
- * `position: sticky` rules keep working unchanged — sticky always resolves against whichever
- * ancestor actually scrolls, which is now `.wwell-ir` here instead of `.wwell-ir__detail`.
+ * nested scroll areas are their own bad-mobile-UX problem). `app-wwell-ir-detail`'s own bounded
+ * internal-scroll layout (see wwell-ir-detail.component.scss) is a desktop-only concern — undone
+ * here via `overflow: visible` so its content just flows at natural height into this shared
+ * mobile scroll instead of trying to open its own nested scrollbox.
  */
 @media (max-width: 900px) {
   .wwell-ir {
@@ -453,12 +460,27 @@ $master-width: 240px;
 
   .wwell-ir__detail {
     max-height: none;
-    overflow-y: visible;
+    overflow: visible;
   }
 }
 
 @media (max-width: 640px) {
   .wwell-ir {
     padding: 1rem;
+  }
+}
+
+/* Printing the Letter tab (see wwell-ir-detail.component.scss) needs its full, unclipped
+ * height — `.wwell-ir__detail`'s `overflow: hidden` above exists only to bound the on-screen
+ * internal-scroll layout, and would otherwise cut the letter off at whatever fit the last
+ * viewport height before print was triggered. */
+@media print {
+  .wwell-ir__detail,
+  .wwell-ir__detail-panel,
+  .wwell-ir__detail-panel > app-wwell-ir-detail {
+    display: block;
+    flex: none;
+    max-height: none;
+    overflow: visible;
   }
 }

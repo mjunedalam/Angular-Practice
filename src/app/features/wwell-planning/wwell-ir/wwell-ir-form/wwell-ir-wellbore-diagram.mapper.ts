@@ -1,4 +1,9 @@
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import {
+  IntegratedRequirement,
+  IntegratedRequirementCasingRow,
+  IntegratedRequirementFormationTop,
+} from '@models/wwell-planning/wwell-planning.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from '@shared/models/wwell/tops-ir.model';
@@ -12,9 +17,12 @@ import {
 } from './wwell-ir-form.types';
 
 /**
- * Adapts the IR wizard's raw form value into the `WellboreDiagramData` shape the shared
- * `app-well-bore-view` component (presentation/well-bore-view) expects — so the wizard can
- * embed that component unmodified as a live, always-animated "Well Design View" step.
+ * Adapts IR data into the `WellboreDiagramData` shape the shared `app-well-bore-view` component
+ * (presentation/well-bore-view) expects — so both the wizard (live, still-being-edited raw form
+ * value) and the read-only IR detail page (a submitted `IntegratedRequirement`) can embed that
+ * component unmodified: the wizard as an always-animated "Well Design View" step
+ * (`buildWellboreDiagramData`), the detail page as a static as-submitted diagram
+ * (`buildWellboreDiagramDataFromIntegratedRequirement`).
  *
  * An Integrated Requirement is always a plan, never an as-drilled record, so no `drlgCasings`
  * entry produced here ever carries a real bottom depth (`wCsgBotDpth`/`wLnrBotDepth`).
@@ -50,9 +58,8 @@ const COMPLETION_SCREENED = 'Screened';
 const COMPLETION_SCREENED_GRAVEL_PACK = 'Screened + Gravel Pack';
 const COMPLETION_LINER_PERFORATED = 'Liner + Perforated';
 
-/** Mirrors wwell-ir-design-preview.renderer.ts's MIN_SCALE_DEPTH_FT: anchors the depth
- * scale to a stable minimum so a shallow/partial entry doesn't stretch across the full
- * drawing height, and so the scale's domain is never degenerate ([0, 0]) before the
+/** Anchors the depth scale to a stable minimum so a shallow/partial entry doesn't stretch
+ * across the full drawing height, and so the scale's domain is never degenerate ([0, 0]) before the
  * (required, but non-linear-stepper-skippable) target depth field is filled in. */
 const MIN_SCALE_DEPTH_FT = 500;
 
@@ -190,13 +197,49 @@ function buildWellDesignFromForm(programMain: WwellIrRawProgramMain): IWellDesig
   };
 }
 
-function computeDisplayDepthFt(raw: WwellIrFormRawValue): number {
+function computeDisplayDepthFt(
+  targetDepthFt: number,
+  casingRows: readonly WwellIrRawCasingRow[],
+  formationRows: readonly WwellIrRawFormationTop[],
+): number {
   const depths = [
-    raw.reference.main.targetDepthFt ?? 0,
-    ...raw.subsurface.casing.map(row => row.depthFtBgl ?? 0),
-    ...raw.subsurface.formationTops.map(row => row.depthFt ?? 0),
+    targetDepthFt,
+    ...casingRows.map(row => row.depthFtBgl ?? 0),
+    ...formationRows.map(row => row.depthFt ?? 0),
   ];
   return Math.max(...depths, MIN_SCALE_DEPTH_FT);
+}
+
+/** Shared tail for both entry points below — takes already-normalized raw rows so the actual
+ *  gating/mapping (isRenderable*, mapCasings, buildLinerTopAnchors, mapGeologicTops,
+ *  buildWellDesignFromForm) is written once regardless of whether the source was a live,
+ *  still-being-edited form value or a submitted `IntegratedRequirement`. */
+function assembleWellboreDiagramData(
+  wellName: string,
+  targetDepthFt: number,
+  casingRows: readonly WwellIrRawCasingRow[],
+  formationRows: readonly WwellIrRawFormationTop[],
+  surfaceElevationFtAsl: number | null,
+  programMain: WwellIrRawProgramMain,
+): WellboreDiagramData {
+  const renderableCasings = casingRows.filter(isRenderableCasingRow);
+  const renderableFormationTops = formationRows.filter(isRenderableFormationTop);
+
+  return {
+    wellName,
+    totalDepth: targetDepthFt,
+    displayDepth: computeDisplayDepthFt(targetDepthFt, casingRows, formationRows),
+    casings: mapCasings(renderableCasings),
+    drlgCasings: buildLinerTopAnchors(renderableCasings),
+    geologicTops: mapGeologicTops(renderableFormationTops, surfaceElevationFtAsl),
+    hydrogeology: null,
+    prewap: null,
+    rigActivity: null,
+    currentDepth: 0,
+    targetDepth: targetDepthFt,
+    mudCirculation: [],
+    wellDesign: buildWellDesignFromForm(programMain),
+  };
 }
 
 /**
@@ -215,23 +258,64 @@ export function hasWellboreDiagramData(raw: WwellIrFormRawValue): boolean {
 }
 
 export function buildWellboreDiagramData(raw: WwellIrFormRawValue): WellboreDiagramData {
-  const targetDepthFt = raw.reference.main.targetDepthFt ?? 0;
-  const renderableCasings = raw.subsurface.casing.filter(isRenderableCasingRow);
-  const renderableFormationTops = raw.subsurface.formationTops.filter(isRenderableFormationTop);
+  return assembleWellboreDiagramData(
+    raw.reference.main.wellName,
+    raw.reference.main.targetDepthFt ?? 0,
+    raw.subsurface.casing,
+    raw.subsurface.formationTops,
+    raw.reference.main.surfaceElevationFtAsl,
+    raw.programDetails.main,
+  );
+}
 
-  return {
-    wellName: raw.reference.main.wellName,
-    totalDepth: targetDepthFt,
-    displayDepth: computeDisplayDepthFt(raw),
-    casings: mapCasings(renderableCasings),
-    drlgCasings: buildLinerTopAnchors(renderableCasings),
-    geologicTops: mapGeologicTops(renderableFormationTops, raw.reference.main.surfaceElevationFtAsl),
-    hydrogeology: null,
-    prewap: null,
-    rigActivity: null,
-    currentDepth: 0,
-    targetDepth: targetDepthFt,
-    mudCirculation: [],
-    wellDesign: buildWellDesignFromForm(raw.programDetails.main),
-  };
+/** `IntegratedRequirementCasingRow`/`FormationTop`/`ProgramDetails` are already-resolved
+ *  (non-nullable) counterparts of the wizard's raw row types — these just fill in the raw
+ *  shape's optional-text fields (`remarks`/`description`/`openHoleSizeIn`) with `''` in place
+ *  of `null`, since a submitted IR's `null` here means the same "nothing entered" as the
+ *  wizard's `''`. */
+function toRawCasingRows(rows: readonly IntegratedRequirementCasingRow[]): WwellIrRawCasingRow[] {
+  return rows.map(row => ({
+    type: row.type,
+    sizeIn: row.sizeIn,
+    depthFtBgl: row.depthFtBgl,
+    tolFtBgl: row.tolFtBgl,
+    remarks: row.remarks ?? '',
+  }));
+}
+
+function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]): WwellIrRawFormationTop[] {
+  return rows.map(row => ({
+    name: row.name,
+    depthFt: row.depthFt,
+    subSeaFtAsl: row.subSeaFtAsl ?? null,
+    description: row.description ?? '',
+  }));
+}
+
+/** Same emptiness gate as `hasWellboreDiagramData`, for the IR detail page. */
+export function hasWellboreDiagramDataForIntegratedRequirement(ir: IntegratedRequirement): boolean {
+  return (
+    toRawCasingRows(ir.casing).some(isRenderableCasingRow) ||
+    toRawFormationRows(ir.formationTops).some(isRenderableFormationTop)
+  );
+}
+
+/** Detail-page counterpart of `buildWellboreDiagramData` — same live `app-well-bore-view`
+ *  diagram, fed from a submitted `IntegratedRequirement` instead of the in-progress wizard
+ *  form, so the detail page shows the real engineering rendering instead of the lighter
+ *  `wwell-ir-design-preview` sketch. */
+export function buildWellboreDiagramDataFromIntegratedRequirement(ir: IntegratedRequirement): WellboreDiagramData {
+  return assembleWellboreDiagramData(
+    ir.requestReference.wellName,
+    ir.requestReference.targetDepthFt,
+    toRawCasingRows(ir.casing),
+    toRawFormationRows(ir.formationTops),
+    ir.requestReference.surfaceElevationFtAsl,
+    {
+      completion: ir.programDetails.completion,
+      openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
+      acidization: ir.programDetails.acidization,
+      transmission: ir.programDetails.transmission,
+    },
+  );
 }

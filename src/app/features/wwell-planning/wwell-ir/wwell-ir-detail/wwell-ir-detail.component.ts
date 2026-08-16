@@ -1,29 +1,32 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  OnDestroy,
-  ViewChild,
-  computed,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
 import { AgGridAngular } from 'ag-grid-angular';
+import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
+import { WwellApprovalMiniChainComponent } from '../../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellApprovalTimelineComponent } from '../../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
-import { WwellIrDesignPreviewComponent } from '../wwell-ir-design-preview/wwell-ir-design-preview.component';
+import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
+import {
+  buildWellboreDiagramDataFromIntegratedRequirement,
+  hasWellboreDiagramDataForIntegratedRequirement,
+} from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 import { WWELL_IR_STATUS_META } from '../wwell-ir.config';
 import {
-  buildGeneralInfoRows,
   buildGeologistContactRows,
   buildHydrogeologyRows,
   buildProgramDetailsRows,
+  buildRequestReferenceRows,
 } from './wwell-ir-detail-rows.util';
+import {
+  buildLetterDrillingProgramRows,
+  buildLetterProductionTestingRows,
+  buildLetterWellLocationRows,
+  letterApprovedByName,
+} from './wwell-ir-letter-rows.util';
 import {
   wwellIrOffsetWellsColumnDefs,
   wwellIrOffsetWellsGridOptions,
@@ -39,15 +42,18 @@ const SUBMITTABLE_STATUSES: readonly IntegratedRequirement['status'][] = ['draft
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTabsModule,
     AgGridAngular,
-    WwellIrDesignPreviewComponent,
+    WellBoreViewComponent,
+    WwellIrDepthScaleComponent,
     WwellApprovalTimelineComponent,
+    WwellApprovalMiniChainComponent,
   ],
   templateUrl: './wwell-ir-detail.component.html',
   styleUrl: './wwell-ir-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WwellIrDetailComponent implements AfterViewInit, OnDestroy {
+export class WwellIrDetailComponent {
   readonly ir = input.required<IntegratedRequirement>();
   readonly submitting = input(false);
 
@@ -56,10 +62,25 @@ export class WwellIrDetailComponent implements AfterViewInit, OnDestroy {
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly canSubmitForReview = computed(() => SUBMITTABLE_STATUSES.includes(this.ir().status));
 
-  protected readonly generalInfoRows = computed(() => buildGeneralInfoRows(this.ir()));
+  protected readonly requestReferenceRows = computed(() => buildRequestReferenceRows(this.ir()));
   protected readonly programDetailsRows = computed(() => buildProgramDetailsRows(this.ir()));
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
+
+  protected readonly letterWellLocationRows = computed(() => buildLetterWellLocationRows(this.ir()));
+  protected readonly letterDrillingProgramRows = computed(() => buildLetterDrillingProgramRows(this.ir()));
+  protected readonly letterProductionTestingRows = computed(() => buildLetterProductionTestingRows(this.ir()));
+  protected readonly letterApprovedBy = computed(() => letterApprovedByName(this.ir()));
+
+  // Same live `app-well-bore-view` diagram the IR wizard's "Well Design View" step uses,
+  // fed from this (already-submitted) IR instead of an in-progress form value — replaces the
+  // lighter `wwell-ir-design-preview` sketch that used to sit here.
+  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
+    buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
+  );
+  protected readonly hasWellboreData: Signal<boolean> = computed(() =>
+    hasWellboreDiagramDataForIntegratedRequirement(this.ir()),
+  );
 
   // AG Grid's `rowData` input wants a mutable array; `ir().offsetWells` is `readonly`.
   protected readonly offsetWellsRows = computed(() => [...this.ir().offsetWells]);
@@ -74,14 +95,6 @@ export class WwellIrDetailComponent implements AfterViewInit, OnDestroy {
   // with in-flight content, not a whole page being fetched.
   protected readonly offsetWellsGridReady = signal(false);
 
-  // Feeds `.ird__sidebar`'s `top: calc(var(--ird-header-h) + ...)` in the stylesheet — the
-  // sidebar and the header are both `position: sticky` against the same scroll container, so
-  // the sidebar needs the header's *live* height (title/badge wrapping can change it) to know
-  // how far down to park itself instead of sliding underneath the frozen header.
-  @ViewChild('headerEl') private readonly headerEl?: ElementRef<HTMLElement>;
-  protected readonly headerHeight = signal(0);
-  private headerResizeObserver?: ResizeObserver;
-
   protected subSeaFt(depthFt: number): number | null {
     const elevation = this.ir().requestReference.surfaceElevationFtAsl;
     return elevation === null ? null : elevation - depthFt;
@@ -89,19 +102,5 @@ export class WwellIrDetailComponent implements AfterViewInit, OnDestroy {
 
   protected onOffsetWellsGridReady(): void {
     this.offsetWellsGridReady.set(true);
-  }
-
-  ngAfterViewInit(): void {
-    const el = this.headerEl?.nativeElement;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-
-    this.headerResizeObserver = new ResizeObserver(([entry]) => {
-      if (entry) this.headerHeight.set(Math.round(entry.contentRect.height));
-    });
-    this.headerResizeObserver.observe(el);
-  }
-
-  ngOnDestroy(): void {
-    this.headerResizeObserver?.disconnect();
   }
 }

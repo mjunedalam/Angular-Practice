@@ -496,9 +496,9 @@ function renderLinerLabels({
         const prePerfTag = liner.isPrePerfLiner ? ' (Pre Perf Liner)' : '';
         const actualStar = liner.hasActual ? ' *' : '';
 
-        // The screen liner (isScreen, always the last/deepest one) gets a heavier, darker
-        // label than a plain actual liner so it reads as the standout element on the diagram.
-        const primaryFill = liner.isScreen ? '#14532d' : (liner.hasActual ? '#22c55e' : '');
+        // Any confirmed actual (as-drilled) liner gets the same green label, whether or not
+        // it's the 7" screen liner — isScreen no longer forces a separate darker shade.
+        const primaryFill = liner.hasActual ? '#22c55e' : '';
 
         const lg = rootG.append('g').attr('class', 'casing-label');
         lg.append('line').attr('class', 'casing-label__line')
