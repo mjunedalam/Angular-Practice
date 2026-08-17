@@ -58,6 +58,7 @@ export class WwellIrDetailComponent {
   readonly submitting = input(false);
 
   readonly submitForReview = output<IntegratedRequirement>();
+  readonly edit = output<IntegratedRequirement>();
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly canSubmitForReview = computed(() => SUBMITTABLE_STATUSES.includes(this.ir().status));

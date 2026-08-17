@@ -10,12 +10,22 @@ import {
   CreateWwellPlanningRequestPayload,
   IntegratedRequirement,
 } from '@models/wwell-planning/wwell-planning.model';
+import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir/wwell-ir-form/wwell-ir-detail-response.mapper';
 import { WwellIrBulkSavePayload } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStoreState, initialWwellPlanningState } from './wwell-planning.state';
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
+}
+
+/** A repeat "Save as Draft" on the same IR reuses its ir_seq (see wwell-ir-payload.mapper.ts), so
+ *  the response describes the *same* record, not a new one — replace it in place instead of
+ *  prepending a duplicate. Falls back to prepend for a genuinely new IR (irSeq not seen yet). */
+function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
+  const existingIndex = created.irSeq != null ? list.findIndex(item => item.irSeq === created.irSeq) : -1;
+  if (existingIndex === -1) return [created, ...list];
+  return list.map((item, index) => (index === existingIndex ? created : item));
 }
 
 export const WwellPlanningStore = signalStore(
@@ -33,6 +43,8 @@ export const WwellPlanningStore = signalStore(
       createIntegratedRequirementError,
       createApprovalError,
       updateIntegratedRequirementStatusError,
+      integratedRequirementDetailError,
+      integratedRequirementApprovalTimelineError,
     }) => ({
       isLoading: computed(() => requestsLoading() || approvalsLoading() || integratedRequirementsLoading()),
       activeErrors: computed(() =>
@@ -44,6 +56,8 @@ export const WwellPlanningStore = signalStore(
           createIntegratedRequirementError(),
           createApprovalError(),
           updateIntegratedRequirementStatusError(),
+          integratedRequirementDetailError(),
+          integratedRequirementApprovalTimelineError(),
         ].filter((message): message is string => message !== null),
       ),
       hasError: computed(
@@ -54,7 +68,9 @@ export const WwellPlanningStore = signalStore(
           createRequestError() !== null ||
           createIntegratedRequirementError() !== null ||
           createApprovalError() !== null ||
-          updateIntegratedRequirementStatusError() !== null,
+          updateIntegratedRequirementStatusError() !== null ||
+          integratedRequirementDetailError() !== null ||
+          integratedRequirementApprovalTimelineError() !== null,
       ),
     }),
   ),
@@ -129,9 +145,79 @@ export const WwellPlanningStore = signalStore(
       ),
     );
 
+    // Keyed by ir_seq (the real primary key once an IR is saved) — switchMap cancels a still-in-
+    // flight fetch for a previously-selected row if the user picks another one before it resolves,
+    // so a slow first response can never land after (and clobber) a faster later selection.
+    const loadIntegratedRequirementDetail = rxMethod<number>(
+      pipe(
+        tap(() => patchState(store, { integratedRequirementDetailLoading: true, integratedRequirementDetailError: null })),
+        switchMap(irSeq =>
+          svc.getIntegratedRequirementDetailBlocks(irSeq).pipe(
+            tapResponse({
+              next: blocks => {
+                const existing = store.integratedRequirements().find(item => item.irSeq === irSeq);
+                // Nothing to merge onto if the summary row isn't loaded (shouldn't happen from the
+                // normal select-a-row flow) — just clear the loading flag and leave state as-is.
+                if (!existing) {
+                  patchState(store, { integratedRequirementDetailLoading: false });
+                  return;
+                }
+                const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks);
+                patchState(store, {
+                  integratedRequirements: upsertByIrSeq(store.integratedRequirements(), merged),
+                  integratedRequirementDetailLoading: false,
+                });
+              },
+              error: (err: unknown) =>
+                patchState(store, {
+                  integratedRequirementDetailLoading: false,
+                  integratedRequirementDetailError: errorMessage(err, 'Failed to load integrated requirement detail'),
+                }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Separate call from loadIntegratedRequirementDetail above — mirrors the future real API
+    // shape (approval process gets its own endpoint), mocked client-side in the meantime. Same
+    // switchMap-cancels-a-stale-fetch reasoning applies when the selection changes quickly.
+    const loadIntegratedRequirementApprovalTimeline = rxMethod<number>(
+      pipe(
+        tap(() =>
+          patchState(store, { integratedRequirementApprovalTimelineLoading: true, integratedRequirementApprovalTimelineError: null }),
+        ),
+        switchMap(irSeq =>
+          svc.getIntegratedRequirementApprovalTimeline(irSeq).pipe(
+            tapResponse({
+              next: chain => {
+                patchState(store, {
+                  integratedRequirements: store.integratedRequirements().map(item => (item.irSeq === irSeq ? { ...item, chain } : item)),
+                  integratedRequirementApprovalTimelineLoading: false,
+                });
+              },
+              error: (err: unknown) =>
+                patchState(store, {
+                  integratedRequirementApprovalTimelineLoading: false,
+                  integratedRequirementApprovalTimelineError: errorMessage(err, 'Failed to load approval timeline'),
+                }),
+            }),
+          ),
+        ),
+      ),
+    );
+
     return {
       loadRequests(): void {
         loadRequests();
+      },
+
+      loadIntegratedRequirementDetail(irSeq: number): void {
+        loadIntegratedRequirementDetail(irSeq);
+      },
+
+      loadIntegratedRequirementApprovalTimeline(irSeq: number): void {
+        loadIntegratedRequirementApprovalTimeline(irSeq);
       },
 
       loadWldaApprovals(): void {
@@ -168,7 +254,7 @@ export const WwellPlanningStore = signalStore(
         svc.createIntegratedRequirement(payload, irBulkPayload, files).subscribe({
           next: created =>
             patchState(store, {
-              integratedRequirements: [created, ...store.integratedRequirements()],
+              integratedRequirements: upsertByIrSeq(store.integratedRequirements(), created),
               // Falls back to whatever was already known so an UPDATE response missing irSeq never clears it.
               draftIrSeq: created.irSeq ?? store.draftIrSeq(),
               creatingIntegratedRequirement: false,
@@ -184,6 +270,12 @@ export const WwellPlanningStore = signalStore(
       /** Call when a fresh "new IR" session starts, so it never inherits a previous draft's ir_seq. */
       resetIntegratedRequirementDraft(): void {
         patchState(store, { draftIrSeq: null });
+      },
+
+      /** Call when the wizard opens in edit mode for an existing IR — makes every Save/Submit on
+       *  that visit issue an UPDATE against this ir_seq instead of an INSERT. */
+      startEditingIntegratedRequirement(irSeq: number): void {
+        patchState(store, { draftIrSeq: irSeq });
       },
 
       submitWldaApproval(payload: CreateWldaApprovalPayload, files: readonly File[] = []): void {

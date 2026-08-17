@@ -19,6 +19,11 @@ export interface WwellPlanningStoreState {
   readonly creatingIntegratedRequirement: boolean;
   readonly creatingApproval: boolean;
   readonly updatingIntegratedRequirementStatus: boolean;
+  /** Fetching one IR's full detail by ir_seq (casing/tops/hydrogeology) after a list selection. */
+  readonly integratedRequirementDetailLoading: boolean;
+  /** Fetching one IR's approval chain/timeline by ir_seq — a separate call from the detail fetch
+   *  above (mocked client-side; the backend has no approval-process endpoint yet). */
+  readonly integratedRequirementApprovalTimelineLoading: boolean;
   /**
    * One error slot per async operation instead of a single shared `error` field — each
    * operation must only ever read/write its own slot, so an unrelated failure (or a
@@ -32,6 +37,8 @@ export interface WwellPlanningStoreState {
   readonly createIntegratedRequirementError: string | null;
   readonly createApprovalError: string | null;
   readonly updateIntegratedRequirementStatusError: string | null;
+  readonly integratedRequirementDetailError: string | null;
+  readonly integratedRequirementApprovalTimelineError: string | null;
 }
 
 export const initialWwellPlanningState: WwellPlanningStoreState = {
@@ -47,6 +54,8 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   creatingIntegratedRequirement: false,
   creatingApproval: false,
   updatingIntegratedRequirementStatus: false,
+  integratedRequirementDetailLoading: false,
+  integratedRequirementApprovalTimelineLoading: false,
   requestsError: null,
   approvalsError: null,
   integratedRequirementsError: null,
@@ -54,4 +63,6 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   createIntegratedRequirementError: null,
   createApprovalError: null,
   updateIntegratedRequirementStatusError: null,
+  integratedRequirementDetailError: null,
+  integratedRequirementApprovalTimelineError: null,
 };

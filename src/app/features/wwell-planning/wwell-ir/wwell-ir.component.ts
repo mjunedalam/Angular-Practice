@@ -14,20 +14,18 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { ApprovalChainStep, IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
-import { WwellApprovalMiniChainComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WwellIrDetailComponent } from './wwell-ir-detail/wwell-ir-detail.component';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
 
-const SNACKBAR_DURATION_MS = 3000;
 const SKELETON_ROW_COUNT = 6;
 
 @Component({
@@ -38,7 +36,6 @@ const SKELETON_ROW_COUNT = 6;
     MatButtonModule,
     MatIconModule,
     WwellIrDetailComponent,
-    WwellApprovalMiniChainComponent,
     WwellDetailLoadingComponent,
   ],
   templateUrl: './wwell-ir.component.html',
@@ -49,14 +46,19 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   protected readonly store = inject(WwellPlanningStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly notify = inject(NotificationService);
 
   protected readonly isLoading = this.store.integratedRequirementsLoading;
   protected readonly loadError = this.store.integratedRequirementsError;
   protected readonly isSubmittingForReview = this.store.updatingIntegratedRequirementStatus;
+  protected readonly isLoadingDetail = this.store.integratedRequirementDetailLoading;
+  protected readonly isLoadingApprovalTimeline = this.store.integratedRequirementApprovalTimelineLoading;
 
   protected readonly searchTerm = signal('');
-  protected readonly selectedId = signal<string | null>(null);
+  // ir_seq is the real primary key once an IR is saved (see wwell-planning.model.ts) — selection
+  // is keyed on it directly, not the display-only `code`/`id` string, so it can be handed straight
+  // to loadIntegratedRequirementDetail() below without a lookup.
+  protected readonly selectedIrSeq = signal<number | null>(null);
 
   protected readonly rows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -75,60 +77,87 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // Deliberately looks up the *unfiltered* store list (not `rows()`) so narrowing the search
   // never drops the current selection just because it fell outside the filtered results.
   protected readonly selectedIr = computed<IntegratedRequirement | null>(
-    () => this.store.integratedRequirements().find(ir => ir.id === this.selectedId()) ?? null,
+    () => this.store.integratedRequirements().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
   );
+
+  // Identity/order of the *visible set* of rows, not the row objects themselves — selecting a row
+  // patches that one IR's `chain` in place (loadIntegratedRequirementDetail /
+  // loadIntegratedRequirementApprovalTimeline both replace `integratedRequirements` with a new
+  // array reference), which would otherwise look identical to "the result set changed" to a plain
+  // `rows()` reference check below and replay the list-reveal animation across every row on every
+  // click. This string only changes on an actual add/remove/reorder/filter.
+  protected readonly rowsSignature = computed(() => this.rows().map(ir => ir.irSeq ?? ir.id).join('|'));
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
 
   protected readonly skeletonRows = Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => index);
 
-  private readonly pendingSelection = createPendingSelection(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<number>(WWELL_DETAIL_LOADING_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
-  protected readonly isSelecting = this.pendingSelection.isSelecting;
+  // Shows the loading UI for the cosmetic selection transition *and* the real detail fetch it
+  // now kicks off — otherwise the shimmer could resolve before the fetch does, briefly exposing
+  // stale summary-only fields (blank casing/tops) before the enriched detail lands.
+  protected readonly isSelecting = computed(
+    () => this.pendingSelection.isSelecting() || this.isLoadingDetail() || this.isLoadingApprovalTimeline(),
+  );
 
   @ViewChild('detailHost') private readonly detailHost?: ElementRef<HTMLElement>;
   @ViewChild('listHost') private readonly listHost?: ElementRef<HTMLElement>;
-  private previousSelectedId: string | null = null;
+  private previousSelectedIrSeq: number | null = null;
 
   constructor() {
     effect(() => {
       const message = this.store.createIntegratedRequirementError();
-      if (message) {
-        this.snackBar.open(message, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-      }
+      if (message) this.notify.error(message);
     });
 
     effect(() => {
       const message = this.store.updateIntegratedRequirementStatusError();
-      if (message) {
-        this.snackBar.open(message, 'Dismiss', { duration: SNACKBAR_DURATION_MS });
-      }
+      if (message) this.notify.error(message);
+    });
+
+    effect(() => {
+      const message = this.store.integratedRequirementDetailError();
+      if (message) this.notify.error(message);
+    });
+
+    effect(() => {
+      const message = this.store.integratedRequirementApprovalTimelineError();
+      if (message) this.notify.error(message);
     });
 
     // Default to the first record once the list loads — mirrors the reference app, which
     // always has something selected in the detail pane rather than starting on an empty state.
     effect(() => {
       const all = this.store.integratedRequirements();
-      if (all.length > 0 && this.selectedId() === null) {
-        this.selectedId.set(all[0].id);
+      const firstIrSeq = all[0]?.irSeq;
+      if (firstIrSeq != null && this.selectedIrSeq() === null) {
+        this.selectedIrSeq.set(firstIrSeq);
       }
     });
 
+    // Selection changed → play the reveal transition and fetch that record's real detail
+    // (casing/tops/hydrogeology) by ir_seq, its primary key.
     effect(() => {
-      const id = this.selectedId();
-      if (id === null || id === this.previousSelectedId) return;
+      const irSeq = this.selectedIrSeq();
+      if (irSeq === null || irSeq === this.previousSelectedIrSeq) return;
 
       const host = this.detailHost?.nativeElement;
       if (host) playIfMotionAllowed(buildDetailRevealTimeline(host));
-      this.previousSelectedId = id;
+      this.previousSelectedIrSeq = irSeq;
+      this.store.loadIntegratedRequirementDetail(irSeq);
+      // Separate call — the approval-process API doesn't exist yet (mocked for now), but the
+      // request shape already mirrors the real future one: one fetch per selected IR.
+      this.store.loadIntegratedRequirementApprovalTimeline(irSeq);
     });
 
     // Re-plays whenever the visible rows actually change (initial load finishing, or the
-    // search term narrowing/widening the result set) — not on every keystroke that leaves
-    // the result set untouched, since `rows()` only changes reference when it does.
+    // search term narrowing/widening the result set) — keyed on `rowsSignature()` (identity/order
+    // only), not `rows()` itself, so a selected row's detail/timeline arriving in place never
+    // replays this across the whole list — see `rowsSignature`'s comment above.
     effect(() => {
-      const currentRows = this.rows();
-      if (this.isLoading() || currentRows.length === 0) return;
+      const signature = this.rowsSignature();
+      if (this.isLoading() || signature === '') return;
 
       const host = this.listHost?.nativeElement;
       if (!host) return;
@@ -150,8 +179,25 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     this.searchTerm.set(term);
   }
 
-  protected selectIr(id: string): void {
-    this.pendingSelection.select(id, this.selectedId(), resolvedId => this.selectedId.set(resolvedId));
+  protected selectIr(irSeq: number): void {
+    this.pendingSelection.select(irSeq, this.selectedIrSeq(), resolved => this.selectedIrSeq.set(resolved));
+  }
+
+  /** Normalizes the model's `irSeq?: number | null` to a plain `number | null` for the template
+   *  (which can't express an `== null` check under the eqeqeq lint rule). */
+  protected rowIrSeq(ir: IntegratedRequirement): number | null {
+    return ir.irSeq ?? null;
+  }
+
+  protected selectIrRow(ir: IntegratedRequirement): void {
+    const irSeq = this.rowIrSeq(ir);
+    if (irSeq !== null) this.selectIr(irSeq);
+  }
+
+  protected editIr(ir: IntegratedRequirement): void {
+    const irSeq = this.rowIrSeq(ir);
+    if (irSeq === null) return;
+    this.router.navigate(['edit', irSeq], { relativeTo: this.route });
   }
 
   protected openNewIrPage(): void {

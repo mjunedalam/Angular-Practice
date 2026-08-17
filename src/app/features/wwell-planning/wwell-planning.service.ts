@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, delay, map, of } from 'rxjs';
 import {
   ApprovalChainStep,
   CreateIntegratedRequirementPayload,
@@ -16,7 +16,14 @@ import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
-import { WwellIrBulkSavePayload } from './wwell-ir/wwell-ir-form/wwell-ir-payload.model';
+import {
+  IrHeaderSummary,
+  WwellIrBulkSavePayload,
+  WwellIrDetailTableBlock,
+  WwellIrSaveResult,
+} from './wwell-ir/wwell-ir-form/wwell-ir-payload.model';
+import { mapIrHeaderSummariesToIntegratedRequirements } from './wwell-ir/wwell-ir-form/wwell-ir-summary.mapper';
+import { mockApprovalChainForIrSeq } from './wwell-ir/wwell-ir-form/wwell-ir-chain.mock';
 import { WWELL_LAND_AFFAIRS_APPROVALS_MOCK, WWELL_WLDA_APPROVALS_MOCK } from './shared/wwell-approvals/wwell-approvals.mock';
 import {
   WWELL_IR_CHAIN_ROLES,
@@ -181,11 +188,38 @@ export class WwellPlanningService {
   }
 
   getIntegratedRequirements(): Observable<IntegratedRequirement[]> {
-    return this.http.get<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`).pipe(
-      map(res => res.data),
-      // TODO: remove fallback once the integrated-requirements endpoint is live.
+    return this.http.get<ApiResponse<IrHeaderSummary>>(`${this.apiUrl}/integrated-requirements`).pipe(
+      map(res => mapIrHeaderSummariesToIntegratedRequirements(res.data)),
+      // TODO: remove both fallbacks once every environment has a reachable, seeded
+      // integrated-requirements endpoint — covers the API being unreachable (catchError below)
+      // *and* a reachable-but-empty table (a fresh/unseeded environment), so the list is never
+      // just blank.
+      map(list => (list.length > 0 ? list : [...WWELL_IR_MOCK])),
       catchError(() => of([...WWELL_IR_MOCK])),
     );
+  }
+
+  /**
+   * ir_seq is the real primary key once an IR is saved — selecting a row in the list passes it
+   * here to fetch the full { table, data } detail (casing/tops/hydrogeology) for that one record.
+   * No offline-mock fallback here (unlike the other reads above): faking detail for a specific,
+   * already-known-real record would misrepresent it rather than degrade gracefully, so a failure
+   * surfaces as a real error instead — see WwellPlanningStore.loadIntegratedRequirementDetail.
+   */
+  getIntegratedRequirementDetailBlocks(irSeq: number): Observable<readonly WwellIrDetailTableBlock[]> {
+    return this.http
+      .get<ApiResponse<WwellIrDetailTableBlock>>(`${this.apiUrl}/integrated-requirements/${irSeq}`)
+      .pipe(map(res => res.data));
+  }
+
+  /**
+   * The approval-process API is a separate call from the detail fetch above and doesn't exist yet
+   * — selecting a row fires both, this one just has nothing real to hit. Mocked client-side (with
+   * an artificial delay so it reads as its own network round-trip) until a real
+   * `GET .../integrated-requirements/{irSeq}/approval-timeline` endpoint replaces it.
+   */
+  getIntegratedRequirementApprovalTimeline(irSeq: number): Observable<readonly ApprovalChainStep[]> {
+    return of(mockApprovalChainForIrSeq(irSeq)).pipe(delay(300));
   }
 
   createIntegratedRequirement(
@@ -193,16 +227,17 @@ export class WwellPlanningService {
     irBulkPayload: WwellIrBulkSavePayload,
     files: readonly File[] = [],
   ): Observable<IntegratedRequirement> {
-    const formData = this.toFormData(payload, files);
-    // exad_gwd_ir_* bulk save contract (INSERT/UPDATE/DELETE per row) — see wwell-ir-payload.model.ts.
-    formData.append('irPayload', JSON.stringify(irBulkPayload));
-
+    // The backend only accepts the raw exad_gwd_ir_* bulk-save array as the request body (see
+    // wwell-ir-payload.model.ts / IntegratedRequirementResource.java's @Consumes(APPLICATION_JSON))
+    // — it has no multipart handling and no columns for the richer domain fields below (client,
+    // wellName, contacts, attachments...), so those stay client-side only until pkg_gwd_ir grows to
+    // carry them. Sending them today just 415s the request (wrong Content-Type, wrong body shape).
     return this.http
-      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements`, formData)
+      .post<ApiResponse<WwellIrSaveResult>>(`${this.apiUrl}/integrated-requirements`, irBulkPayload)
       .pipe(
-        map(res => res.data[0]),
-        // TODO: remove fallback once the integrated-requirements creation endpoint is live.
-        catchError(() => of(this.buildFallbackIntegratedRequirement(payload, irBulkPayload, files))),
+        map(res => this.buildIntegratedRequirementFromPayload(payload, res.data[0]?.irSeq ?? null, files)),
+        // TODO: remove fallback once every environment has a reachable integrated-requirements endpoint.
+        catchError(() => of(this.buildIntegratedRequirementFromPayload(payload, null, files))),
       );
   }
 
@@ -216,20 +251,22 @@ export class WwellPlanningService {
       );
   }
 
-  private buildFallbackIntegratedRequirement(
+  /** Builds the domain object locally from what was submitted — the backend only ever echoes
+   *  back an ir_seq (see WwellIrSaveResult), never the full IntegratedRequirement. `irSeq: null`
+   *  (offline fallback) mints a placeholder one, same as a first-time INSERT would eventually get. */
+  private buildIntegratedRequirementFromPayload(
     payload: CreateIntegratedRequirementPayload,
-    irBulkPayload: WwellIrBulkSavePayload,
+    irSeq: number | null,
     files: readonly File[],
   ): IntegratedRequirement {
-    const code = `IR-${todayIsoDate().slice(2, 4)}-${Math.floor(Math.random() * 900 + 100)}`;
-    // Mimics the real backend echoing back the same ir_seq it was given (UPDATE) or minting a
-    // fresh one (INSERT) — keeps the offline fallback exercising the same draft-resume pattern.
-    const headerRow = irBulkPayload[0].data?.[0];
-    const irSeq = headerRow?.ir_seq ?? Math.floor(Math.random() * 9000 + 1000);
+    const resolvedIrSeq = irSeq ?? Math.floor(Math.random() * 9000 + 1000);
+    // ir_seq-derived, matching mapIrHeaderSummaryToIntegratedRequirement's format — this same
+    // record must display the same code whether it was just created or reloaded from the list.
+    const code = `IR-${resolvedIrSeq}`;
     return {
       id: code,
       code,
-      irSeq,
+      irSeq: resolvedIrSeq,
       updatedDate: todayIsoDate(),
       status: payload.status,
       requestReference: payload.requestReference,

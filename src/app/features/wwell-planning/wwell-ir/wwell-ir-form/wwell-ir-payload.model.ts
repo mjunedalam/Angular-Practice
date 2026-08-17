@@ -72,3 +72,35 @@ export type WwellIrBulkSavePayload = readonly [
   WwellIrTableBlock<IrTopsRow>,
   WwellIrTableBlock<IrRow>,
 ];
+
+/** POST/PATCH response row — mirrors the backend's SaveIntegratedRequirementResult record. */
+export interface WwellIrSaveResult {
+  readonly irSeq: number | null;
+}
+
+/**
+ * GET (list) response row — mirrors the backend's IrHeaderSummary record. Backed only by
+ * exad_gwd_ir_header, so it deliberately omits the richer domain fields (client, wellName,
+ * contacts...) that table has no column for yet.
+ */
+export interface IrHeaderSummary {
+  readonly irSeq: number;
+  readonly cmplType: string | null;
+  readonly testType: string | null;
+  readonly publishFlg: 'Y' | 'N';
+  readonly createdDt: string;
+  readonly updatedDt: string | null;
+}
+
+/**
+ * GET /{irSeq} (detail) response block — same { table, data } wrapper as the bulk-save contract,
+ * but pkg_gwd_ir.get_integrated_requirement_json builds it as
+ * header/casing/tops/hydrogeology/water, NOT the WwellIrBulkSavePayload tuple's
+ * header/casing/hydrogeology/tops/water order. Always look a block up by `table`, never by index.
+ * Rows are typed loosely here (vs. IrCasingRow etc.) since which row shape applies depends on
+ * which table you're reading — narrow with the specific row interface at each read site.
+ */
+export interface WwellIrDetailTableBlock {
+  readonly table: WwellIrTableName;
+  readonly data: readonly Record<string, unknown>[] | null;
+}

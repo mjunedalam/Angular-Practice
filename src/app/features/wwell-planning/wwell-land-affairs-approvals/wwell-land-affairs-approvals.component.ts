@@ -83,7 +83,7 @@ export class WwellLandAffairsApprovalsComponent implements OnInit, OnDestroy {
     return row !== null && this.isChainComplete(row.chain);
   });
 
-  private readonly pendingSelection = createPendingSelection(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<string>(WWELL_DETAIL_LOADING_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
   protected readonly isSelecting = this.pendingSelection.isSelecting;
 

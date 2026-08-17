@@ -41,15 +41,16 @@
       <div class="wwell-ir__status">No integrated requirements found.</div>
     } @else {
       <ul class="wwell-ir__list" #listHost>
-        @for (ir of rows(); track ir.id) {
+        @for (ir of rows(); track ir.irSeq ?? ir.id) {
           <li>
             <button
               type="button"
               class="wwell-ir__row"
-              [class.wwell-ir__row--active]="ir.id === selectedId()"
-              [class.wwell-ir__row--pending]="ir.id === pendingId()"
+              [class.wwell-ir__row--active]="ir.irSeq === selectedIrSeq()"
+              [class.wwell-ir__row--pending]="ir.irSeq === pendingId()"
               [style.borderLeftColor]="chainBorderColor(ir.chain)"
-              (click)="selectIr(ir.id)"
+              [disabled]="rowIrSeq(ir) === null"
+              (click)="selectIrRow(ir)"
             >
               <div class="wwell-ir__row-top">
                 <span class="wwell-ir__row-code">{{ ir.code }}</span>
@@ -64,7 +65,6 @@
               </div>
               <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
               <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
-              <app-wwell-approval-mini-chain class="wwell-ir__row-chain" [steps]="ir.chain" size="compact" stretch />
             </button>
           </li>
         }
@@ -77,7 +77,12 @@
       <app-wwell-detail-loading />
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
-        <app-wwell-ir-detail [ir]="ir" [submitting]="isSubmittingForReview()" (submitForReview)="submitForReview($event)" />
+        <app-wwell-ir-detail
+          [ir]="ir"
+          [submitting]="isSubmittingForReview()"
+          (submitForReview)="submitForReview($event)"
+          (edit)="editIr($event)"
+        />
       </div>
     } @else {
       <div class="wwell-ir__empty">

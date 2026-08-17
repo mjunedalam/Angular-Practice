@@ -4,6 +4,7 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
   {
     id: 'IR-26-001',
     code: 'IR-26-001',
+    irSeq: 1,
     updatedDate: '2026-06-19',
     status: 'in-progress',
     requestReference: {
@@ -88,6 +89,7 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
   {
     id: 'IR-26-002',
     code: 'IR-26-002',
+    irSeq: 2,
     updatedDate: '2026-06-17',
     status: 'submit-for-review',
     requestReference: {
@@ -124,6 +126,7 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
   {
     id: 'IR-26-003',
     code: 'IR-26-003',
+    irSeq: 3,
     updatedDate: '2026-06-01',
     status: 'in-review',
     requestReference: {
@@ -160,6 +163,7 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
   {
     id: 'IR-26-004',
     code: 'IR-26-004',
+    irSeq: 4,
     updatedDate: '2026-05-22',
     status: 'approved',
     requestReference: {
@@ -191,6 +195,43 @@ export const WWELL_IR_MOCK: readonly IntegratedRequirement[] = [
       { role: 'Hydrogeologist', name: 'Eng. M. Al-Qahtani', status: 'approved', date: '2026-05-15' },
       { role: 'Lead Hydrogeologist', name: 'Eng. S. Al-Dossari', status: 'approved', date: '2026-05-18' },
       { role: 'Manager', name: 'Eng. F. Al-Harbi', status: 'approved', date: '2026-05-22' },
+    ],
+  },
+  {
+    id: 'IR-26-005',
+    code: 'IR-26-005',
+    irSeq: 5,
+    updatedDate: '2026-07-02',
+    status: 'draft',
+    requestReference: {
+      linkedRequestId: 'REQ-00249',
+      client: 'BI-14',
+      supportingBusiness: 'Agriculture',
+      wellName: 'TABK-210',
+      targetAquifer: 'Tabuk',
+      targetDepthFt: 540,
+      surfaceElevationFtAsl: 830,
+      coordinates: '28.3838°N, 36.5550°E',
+    },
+    formationTops: [{ name: 'Tabuk', depthFt: 260 }],
+    casing: [{ type: 'Surface', sizeIn: '13.375"', depthFtBgl: 150, tolFtBgl: null, remarks: null }],
+    programDetails: {
+      completion: 'Open Hole',
+      openHoleSizeIn: '8 1/2"',
+      acidization: '',
+      transmission: '',
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '' },
+    },
+    contacts: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: null },
+    offsetWells: [],
+    offsetWellsRemarks: null,
+    hydrogeology: { aquifer: 'Tabuk', estimatedTdsPpm: 950, h2sPpm: null, estimatedPumpDepthFt: null },
+    testProgram: { testType: 'flow-test', estimatedRateGpm: null, estimatedWaterLevelFt: null },
+    attachmentNames: [],
+    chain: [
+      { role: 'Hydrogeologist', name: 'Eng. A. Al-Mutairi', status: 'approved', date: '2026-06-20' },
+      { role: 'Lead Hydrogeologist', name: 'Eng. M. Al-Qahtani', status: 'rejected', date: '2026-06-25' },
+      { role: 'Manager', name: 'Pending Assignment', status: 'pending', date: null },
     ],
   },
 ];

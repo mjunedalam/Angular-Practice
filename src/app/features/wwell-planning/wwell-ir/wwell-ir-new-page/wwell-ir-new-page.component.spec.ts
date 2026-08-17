@@ -2,15 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatStepper } from '@angular/material/stepper';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellPlanningStore } from '../../store/wwell-planning.store';
 import { WwellIrNewPageComponent } from './wwell-ir-new-page.component';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 
 interface TestableWwellIrNewPage {
   stepGroup(stepKey: string): { get(key: string): FormArray };
-  submit(stepper: MatStepper): void;
+  submit(): void;
   saveAsDraft(): void;
 }
 
@@ -26,7 +25,14 @@ const storeMock = {
   resetIntegratedRequirementDraft: jest.fn(),
 };
 
-const snackBarMock = { open: jest.fn() };
+const notificationServiceMock = {
+  show: jest.fn(),
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  notifications: jest.fn(() => []),
+  dismiss: jest.fn(),
+};
 
 function findButtonByText(fixture: ComponentFixture<WwellIrNewPageComponent>, text: string): HTMLButtonElement | undefined {
   return Array.from(fixture.nativeElement.querySelectorAll('button')).find((btn): btn is HTMLButtonElement =>
@@ -44,7 +50,7 @@ describe('WwellIrNewPageComponent', () => {
       imports: [WwellIrNewPageComponent, RouterTestingModule, NoopAnimationsModule],
       providers: [
         { provide: WwellPlanningStore, useValue: storeMock },
-        { provide: MatSnackBar, useValue: snackBarMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
       ],
     }).compileComponents();
 
@@ -76,9 +82,12 @@ describe('WwellIrNewPageComponent', () => {
     expect(casingArray.length).toBe(1);
   });
 
-  it('blocks submit when required fields are missing', () => {
-    asTestable(component).submit({ selectedIndex: 0 } as MatStepper);
-    expect(storeMock.createIntegratedRequirement).not.toHaveBeenCalled();
+  it('lets Submit bypass validation and save whatever is filled in (validation gate disabled for now)', () => {
+    asTestable(component).submit();
+
+    expect(storeMock.createIntegratedRequirement).toHaveBeenCalledTimes(1);
+    const [payload] = storeMock.createIntegratedRequirement.mock.calls[0];
+    expect(payload.status).toBe('in-progress');
   });
 
   it('lets Save as Draft bypass validation', () => {

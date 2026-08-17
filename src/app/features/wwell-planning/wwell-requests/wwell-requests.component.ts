@@ -63,7 +63,7 @@ export class WwellRequestsComponent implements OnInit, OnDestroy {
 
   protected readonly totalCount = computed(() => this.store.requests().length);
 
-  private readonly pendingSelection = createPendingSelection(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<string>(WWELL_DETAIL_LOADING_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
   protected readonly isSelecting = this.pendingSelection.isSelecting;
 

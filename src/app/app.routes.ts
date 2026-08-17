@@ -87,6 +87,16 @@ export const routes: Routes = [
                 (m) => m.WwellIrNewPageComponent,
               ),
           },
+          {
+            // Same component as 'new' — the :irSeq input (bound via withComponentInputBinding())
+            // switches it into edit mode. Sibling to 'new', not nested under it, so '..' from
+            // either one lands back on the plain list, matching the existing cancel/submit navigation.
+            path: 'edit/:irSeq',
+            loadComponent: () =>
+              import('./features/wwell-planning/wwell-ir/wwell-ir-new-page/wwell-ir-new-page.component').then(
+                (m) => m.WwellIrNewPageComponent,
+              ),
+          },
         ],
       },
       {

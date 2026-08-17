@@ -127,9 +127,9 @@ $accent: tokens.$accent;
  */
 .ird__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-columns: minmax(0, 1fr) 168px;
   align-items: stretch;
-  gap: 1.5rem;
+  gap: 1.25rem;
   flex: 1;
   min-height: 0;
 }
@@ -204,7 +204,7 @@ $accent: tokens.$accent;
 
 /* Approval card in the sidebar reads as a compact rail, not a bento card. */
 .ird__sidebar .ird__card {
-  padding: 0.85rem 0.9rem;
+  padding: 0.7rem 0.65rem;
 }
 
 /*
@@ -214,6 +214,35 @@ $accent: tokens.$accent;
  * label above a field grid) instead of icon-chip cards. `mat-tab-group`'s CSS custom properties
  * are Material's own supported override point for retheming the tab strip to the app's accent.
  */
+/* Wraps the tab group so the Edit button can sit on the same visual line as the tab labels
+ * (Material's `mat-tab-group` has no built-in slot for trailing header content) — the button is
+ * positioned absolutely over the tab header's right edge rather than laid out beside it, since
+ * the header itself is Material-owned DOM this component doesn't control the width of. */
+.ird__tabs-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.ird__edit-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 48px; // matches Material's default .mat-mdc-tab-header height, so it lines up with the tab labels
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 1.1rem;
+  color: $accent;
+  font-weight: 700;
+  // Comes before `.mat-mdc-tab-header` in DOM order — a tied/unset z-index on Material's own
+  // internal tab-label layer would otherwise win the paint order and swallow pointer events here
+  // (confirmed via elementFromPoint: .mat-mdc-tab-labels was intercepting clicks at z-index: 1).
+  z-index: 5;
+}
+
 .ird__tabs {
   --mat-tab-header-active-label-text-color: #{$accent};
   --mat-tab-header-active-hover-label-text-color: #{$accent};

@@ -11,7 +11,26 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <div>
-        <h1 class="nip__title">New Integrated Requirement (IR)</h1>
+        <div class="nip__title-row">
+          <h1 class="nip__title">
+            @if (isEditMode()) {
+              Edit Integrated Requirement — {{ editingIr()?.code ?? ('IR-' + editIrSeq()) }}
+            } @else {
+              New Integrated Requirement (IR)
+            }
+          </h1>
+          @if (isDraftMode()) {
+            <span
+              class="nip__draft-badge"
+              [style.background]="draftBadge.bg"
+              [style.color]="draftBadge.color"
+              title="Saved as a draft — not yet submitted for review"
+            >
+              <span class="nip__draft-badge-dot" [style.background]="draftBadge.dot"></span>
+              Draft — not yet submitted
+            </span>
+          }
+        </div>
         <ol class="nip__chain" aria-label="3-step approval chain">
           @for (step of chainPreview; track step.role; let last = $last) {
             <li class="nip__chain-step" [attr.data-status]="step.status">
@@ -306,10 +325,10 @@
       mat-flat-button
       color="primary"
       [disabled]="isSaving()"
-      (click)="submit(stepper)"
+      (click)="submit()"
     >
-      <mat-icon>send</mat-icon>
-      Submit
+      <mat-icon>{{ isEditMode() ? 'save' : 'send' }}</mat-icon>
+      {{ isEditMode() ? 'Update Changes' : 'Submit' }}
     </button>
   </footer>
 </div>
