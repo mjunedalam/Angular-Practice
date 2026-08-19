@@ -88,7 +88,7 @@ export interface IrHeaderSummary {
   readonly cmplType: string | null;
   readonly testType: string | null;
   readonly publishFlg: 'Y' | 'N';
-  readonly createdDt: string;
+  readonly createdDt: string | null;
   readonly updatedDt: string | null;
 }
 

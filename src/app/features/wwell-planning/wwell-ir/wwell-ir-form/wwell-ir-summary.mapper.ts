@@ -1,4 +1,5 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/wwell-planning.model';
+import { todayIsoDate } from '../../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-chain.mock';
 import { IrHeaderSummary } from './wwell-ir-payload.model';
 
@@ -14,7 +15,10 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     id: code,
     code,
     irSeq: row.irSeq,
-    updatedDate: (row.updatedDt ?? row.createdDt).slice(0, 10),
+    // Neither date column is guaranteed to be populated on exad_gwd_ir_header (see the real
+    // payload that motivated this: every row came back with both createdDt and updatedDt null) —
+    // fall back to today rather than crashing the whole list map on a null .slice() call.
+    updatedDate: (row.updatedDt ?? row.createdDt ?? todayIsoDate()).slice(0, 10),
     // publish_flg is the only status-shaped signal this table carries — collapses the domain
     // model's finer-grained statuses (draft/in-progress/submit-for-review/in-review) into one.
     status: row.publishFlg === 'Y' ? 'approved' : 'in-progress',
