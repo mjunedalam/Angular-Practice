@@ -15,8 +15,6 @@ import {
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
-import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
-import { WWELL_IR_ELIGIBLE_WELLS_MOCK } from './wwell-ir/wwell-ir-eligible-wells.mock';
 import { WwellFieldOption } from './shared/dynamic-form/wwell-dynamic-form.types';
 import {
   IrEligibleWell,
@@ -191,15 +189,9 @@ export class WwellPlanningService {
   }
 
   getIntegratedRequirements(): Observable<IntegratedRequirement[]> {
-    return this.http.get<ApiResponse<IrHeaderSummary>>(`${this.apiUrl}/integrated-requirements`).pipe(
-      map(res => mapIrHeaderSummariesToIntegratedRequirements(res.data)),
-      // TODO: remove both fallbacks once every environment has a reachable, seeded
-      // integrated-requirements endpoint — covers the API being unreachable (catchError below)
-      // *and* a reachable-but-empty table (a fresh/unseeded environment), so the list is never
-      // just blank.
-      map(list => (list.length > 0 ? list : [...WWELL_IR_MOCK])),
-      catchError(() => of([...WWELL_IR_MOCK])),
-    );
+    return this.http
+      .get<ApiResponse<IrHeaderSummary>>(`${this.apiUrl}/integrated-requirements`)
+      .pipe(map(res => mapIrHeaderSummariesToIntegratedRequirements(res.data)));
   }
 
   /**
@@ -209,12 +201,9 @@ export class WwellPlanningService {
    * consume it directly (value = prewap_seq as a string, label = well_name).
    */
   getEligibleWellsForIr(): Observable<WwellFieldOption[]> {
-    return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(
-      map(res => res.data.map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
-      // Same reachable-but-empty vs. unreachable double fallback as getIntegratedRequirements().
-      map(list => (list.length > 0 ? list : [...WWELL_IR_ELIGIBLE_WELLS_MOCK])),
-      catchError(() => of([...WWELL_IR_ELIGIBLE_WELLS_MOCK])),
-    );
+    return this.http
+      .get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`)
+      .pipe(map(res => res.data.map(well => ({ value: String(well.prewapSeq), label: well.wellName }))));
   }
 
   /**
