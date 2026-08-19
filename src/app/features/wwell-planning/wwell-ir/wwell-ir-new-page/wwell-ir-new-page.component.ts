@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   ElementRef,
   QueryList,
@@ -38,7 +39,7 @@ import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
 import { WWELL_IR_STATUS_META } from '../wwell-ir.config';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
 import { buildWwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.mapper';
-import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
+import { buildWwellIrFormSchema, WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from '../wwell-ir-form/wwell-ir-form.types';
 import { CasingSizeWarning, findInvertedCasingSizeRows } from '../wwell-ir-form/wwell-ir-casing-warnings.util';
 import { buildWellboreDiagramData, hasWellboreDiagramData } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
@@ -75,17 +76,20 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
     { provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false } },
   ],
 })
-export class WwellIrNewPageComponent {
+export class WwellIrNewPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(WwellPlanningStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly notify = inject(NotificationService);
 
-  protected readonly schema = WWELL_IR_FORM_SCHEMA;
+  // Live-wired to the store's linkedRequestWells Signal so both the edit-mode picker and its
+  // review-step label lookup (see DynamicFieldComponent.reviewValue) show the same fetched wells —
+  // see buildWwellIrFormSchema's doc comment for why this can't just live in the static schema.
+  protected readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWells);
   // Excludes 'attachments' (it renders the review UI itself, so it can't review itself) and
   // 'wellDesignView' (a pure visualization step with no fields to review).
-  protected readonly reviewSteps = WWELL_IR_FORM_SCHEMA.filter(
+  protected readonly reviewSteps = this.schema.filter(
     step => step.key !== 'attachments' && step.key !== 'wellDesignView',
   );
   protected readonly chainPreview = WWELL_IR_CHAIN_PREVIEW;
@@ -260,6 +264,10 @@ export class WwellIrNewPageComponent {
       }
       this.wasSaving = saving;
     });
+  }
+
+  ngOnInit(): void {
+    this.store.loadLinkedRequestWells();
   }
 
   /**

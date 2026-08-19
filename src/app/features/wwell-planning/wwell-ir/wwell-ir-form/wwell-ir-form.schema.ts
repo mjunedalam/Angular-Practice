@@ -1,4 +1,5 @@
-import { WwellFormStepConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
+import type { Signal } from '@angular/core';
+import { WwellFieldOption, WwellFormStepConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import {
   WWELL_APPROVAL_COORDINATES_PATTERN,
   WWELL_APPROVAL_WELL_NAME_PATTERN,
@@ -10,7 +11,6 @@ import {
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
   WWELL_GEOLOGIST_OPTIONS,
-  WWELL_LINKED_REQUEST_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
   WWELL_OFFSET_WELL_OPTIONS,
@@ -31,7 +31,9 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         key: 'main',
         title: null,
         fields: [
-          { key: 'linkedRequestId', label: 'Link to Request', type: 'select', options: WWELL_LINKED_REQUEST_OPTIONS },
+          // Static [] placeholder — buildWwellIrFormSchema() below swaps this for a live Signal
+          // (backed by GET /planning/api/v1/wells/eligible-for-ir) before this schema is rendered.
+          { key: 'linkedRequestId', label: 'Link to Request', type: 'select', options: [] },
           { key: 'letterNumber', label: 'Letter Number', type: 'text', placeholder: 'e.g., LTR-2026-0456' },
           { key: 'client', label: 'BI Number', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
           {
@@ -292,3 +294,30 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
     sections: [], // pure visualization step — no form fields
   },
 ];
+
+/**
+ * Returns a copy of WWELL_IR_FORM_SCHEMA with the 'reference'/'main' section's 'linkedRequestId'
+ * field wired to `linkedRequestOptions` instead of its static `[]` placeholder. The schema array
+ * itself is a module-level constant (no injector available at definition time), so a store-backed
+ * Signal can only be attached here, once, by the component that actually has one — see
+ * WwellIrNewPageComponent's `schema` field.
+ */
+export function buildWwellIrFormSchema(
+  linkedRequestOptions: Signal<readonly WwellFieldOption[]>,
+): readonly WwellFormStepConfig[] {
+  return WWELL_IR_FORM_SCHEMA.map(step => {
+    if (step.key !== 'reference') return step;
+    return {
+      ...step,
+      sections: step.sections.map(section => {
+        if (section.key !== 'main' || !section.fields) return section;
+        return {
+          ...section,
+          fields: section.fields.map(field =>
+            field.key === 'linkedRequestId' ? { ...field, options: linkedRequestOptions } : field,
+          ),
+        };
+      }),
+    };
+  });
+}

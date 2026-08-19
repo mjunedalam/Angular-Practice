@@ -4,17 +4,21 @@ import {
   WldaApproval,
   WwellPlanningRequest,
 } from '@models/wwell-planning/wwell-planning.model';
+import { WwellFieldOption } from '../shared/dynamic-form/wwell-dynamic-form.types';
 
 export interface WwellPlanningStoreState {
   readonly requests: WwellPlanningRequest[];
   readonly wldaApprovals: WldaApproval[];
   readonly landAffairsApprovals: LandAffairsApproval[];
   readonly integratedRequirements: IntegratedRequirement[];
+  /** Wells still eligible to have an IR initiated — feeds the "New IR" wizard's "Link to Request" picker. */
+  readonly linkedRequestWells: WwellFieldOption[];
   /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
   readonly draftIrSeq: number | null;
   readonly requestsLoading: boolean;
   readonly approvalsLoading: boolean;
   readonly integratedRequirementsLoading: boolean;
+  readonly linkedRequestWellsLoading: boolean;
   readonly creatingRequest: boolean;
   readonly creatingIntegratedRequirement: boolean;
   readonly creatingApproval: boolean;
@@ -33,6 +37,7 @@ export interface WwellPlanningStoreState {
   readonly requestsError: string | null;
   readonly approvalsError: string | null;
   readonly integratedRequirementsError: string | null;
+  readonly linkedRequestWellsError: string | null;
   readonly createRequestError: string | null;
   readonly createIntegratedRequirementError: string | null;
   readonly createApprovalError: string | null;
@@ -46,10 +51,12 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   wldaApprovals: [],
   landAffairsApprovals: [],
   integratedRequirements: [],
+  linkedRequestWells: [],
   draftIrSeq: null,
   requestsLoading: false,
   approvalsLoading: false,
   integratedRequirementsLoading: false,
+  linkedRequestWellsLoading: false,
   creatingRequest: false,
   creatingIntegratedRequirement: false,
   creatingApproval: false,
@@ -59,6 +66,7 @@ export const initialWwellPlanningState: WwellPlanningStoreState = {
   requestsError: null,
   approvalsError: null,
   integratedRequirementsError: null,
+  linkedRequestWellsError: null,
   createRequestError: null,
   createIntegratedRequirementError: null,
   createApprovalError: null,

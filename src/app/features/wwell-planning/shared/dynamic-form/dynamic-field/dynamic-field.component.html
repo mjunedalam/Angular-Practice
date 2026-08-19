@@ -22,7 +22,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dyf__field">
           <mat-label>{{ config().label }}</mat-label>
           <mat-select [formControl]="control()" [panelClass]="selectPanelClass()">
-            @for (opt of config().options ?? []; track optionValue(opt)) {
+            @for (opt of resolvedOptions(); track optionValue(opt)) {
               <mat-option [value]="optionValue(opt)">{{ optionLabel(opt) }}</mat-option>
             }
           </mat-select>
@@ -39,7 +39,7 @@
           <mat-label>{{ config().label }}</mat-label>
           <input matInput [formControl]="control()" [matAutocomplete]="auto" [placeholder]="config().placeholder ?? 'Type or select from dropdown'" />
           <mat-autocomplete #auto="matAutocomplete" [class]="selectPanelClass()">
-            @for (opt of config().options ?? []; track optionValue(opt)) {
+            @for (opt of resolvedOptions(); track optionValue(opt)) {
               <mat-option [value]="optionValue(opt)">{{ optionLabel(opt) }}</mat-option>
             }
           </mat-autocomplete>
@@ -60,7 +60,7 @@
             }
           </span>
           <mat-button-toggle-group class="dyf__toggle-group" [formControl]="control()">
-            @for (opt of config().options ?? []; track optionValue(opt)) {
+            @for (opt of resolvedOptions(); track optionValue(opt)) {
               <mat-button-toggle [value]="optionValue(opt)">
                 @if (optionIcon(opt); as icon) {
                   <mat-icon class="dyf__toggle-icon">{{ icon }}</mat-icon>

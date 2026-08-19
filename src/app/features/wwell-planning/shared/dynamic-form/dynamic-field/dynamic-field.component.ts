@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { WwellAttachmentDropzoneComponent } from '../../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import {
   WwellFieldConfig,
+  resolveFieldOptions,
   wwellFieldOptionIcon,
   wwellFieldOptionLabel,
   wwellFieldOptionValue,
@@ -44,6 +45,10 @@ export class DynamicFieldComponent {
   protected readonly optionValue = wwellFieldOptionValue;
   protected readonly optionIcon = wwellFieldOptionIcon;
 
+  /** Resolves the config's `options` (static array or live Signal) once per change — every
+   *  options `@for` loop below reads this instead of `config().options` directly. */
+  protected readonly resolvedOptions = computed(() => resolveFieldOptions(this.config()));
+
   protected readonly reviewValue = computed(() => {
     const value = this.control().value;
     const cfg = this.config();
@@ -52,8 +57,8 @@ export class DynamicFieldComponent {
       const files = value as File[] | null;
       return files?.length ? `${files.length} file(s) attached` : '—';
     }
-    if ((cfg.type === 'select' || cfg.type === 'toggle-group') && cfg.options) {
-      const match = cfg.options.find(opt => wwellFieldOptionValue(opt) === value);
+    if (cfg.type === 'select' || cfg.type === 'toggle-group') {
+      const match = this.resolvedOptions().find(opt => wwellFieldOptionValue(opt) === value);
       return match ? wwellFieldOptionLabel(match) : (value || '—');
     }
     return value === null || value === undefined || value === '' ? '—' : String(value);

@@ -1,5 +1,7 @@
 /** Schema vocabulary for the wwell-planning dynamic form engine. Add a field = edit a schema array, not a template. */
 
+import type { Signal } from '@angular/core';
+
 export type WwellFieldControlType = 'text' | 'number' | 'textarea' | 'select' | 'combo' | 'toggle-group' | 'file';
 
 export interface WwellFieldOption {
@@ -37,8 +39,11 @@ export interface WwellFieldConfig {
   readonly placeholder?: string;
   readonly hint?: string;
   readonly suffix?: string;
-  /** Used by 'select' | 'combo' | 'toggle-group'. Plain strings are shown as their own label. */
-  readonly options?: readonly (string | WwellFieldOption)[];
+  /** Used by 'select' | 'combo' | 'toggle-group'. Plain strings are shown as their own label.
+   *  A Signal is resolved lazily via `resolveFieldOptions` — for options that come from a store
+   *  (e.g. the IR wizard's "Link to Request" picker) rather than being known at schema-definition
+   *  time (the schema array itself is a static, module-level constant with no injector). */
+  readonly options?: readonly (string | WwellFieldOption)[] | Signal<readonly (string | WwellFieldOption)[]>;
   readonly validators?: WwellFieldValidatorConfig;
   readonly colSpan?: 1 | 2;
   readonly visibleWhen?: WwellFieldVisibilityCondition;
@@ -80,4 +85,11 @@ export function wwellFieldOptionValue(option: string | WwellFieldOption): string
 
 export function wwellFieldOptionIcon(option: string | WwellFieldOption): string | undefined {
   return typeof option === 'string' ? undefined : option.icon;
+}
+
+/** Unwraps a field's `options` (static array or live Signal) into the array consumers iterate. */
+export function resolveFieldOptions(field: WwellFieldConfig): readonly (string | WwellFieldOption)[] {
+  const options = field.options;
+  if (!options) return [];
+  return typeof options === 'function' ? options() : options;
 }

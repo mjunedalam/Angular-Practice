@@ -94,7 +94,7 @@ export interface IrHeaderSummary {
 
 /**
  * GET /{irSeq} (detail) response block — same { table, data } wrapper as the bulk-save contract,
- * but pkg_gwd_ir.get_integrated_requirement_json builds it as
+ * but exad_agwa_queries_pkg.get_ir_data_prc builds it as
  * header/casing/tops/hydrogeology/water, NOT the WwellIrBulkSavePayload tuple's
  * header/casing/hydrogeology/tops/water order. Always look a block up by `table`, never by index.
  * Rows are typed loosely here (vs. IrCasingRow etc.) since which row shape applies depends on
@@ -103,4 +103,14 @@ export interface IrHeaderSummary {
 export interface WwellIrDetailTableBlock {
   readonly table: WwellIrTableName;
   readonly data: readonly Record<string, unknown>[] | null;
+}
+
+/**
+ * GET /wells/eligible-for-ir response row — mirrors the backend's IrWellSummary record. Backed by
+ * exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract above), for
+ * the "New IR" wizard's Request Reference "Link to Request" picker.
+ */
+export interface IrEligibleWell {
+  readonly prewapSeq: number;
+  readonly wellName: string;
 }

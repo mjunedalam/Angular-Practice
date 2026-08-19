@@ -16,7 +16,10 @@ import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { WWELL_REQUESTS_MOCK } from './wwell-requests/wwell-requests.mock';
 import { WWELL_IR_MOCK } from './wwell-ir/wwell-ir.mock';
+import { WWELL_IR_ELIGIBLE_WELLS_MOCK } from './wwell-ir/wwell-ir-eligible-wells.mock';
+import { WwellFieldOption } from './shared/dynamic-form/wwell-dynamic-form.types';
 import {
+  IrEligibleWell,
   IrHeaderSummary,
   WwellIrBulkSavePayload,
   WwellIrDetailTableBlock,
@@ -200,6 +203,21 @@ export class WwellPlanningService {
   }
 
   /**
+   * Wells still eligible to have an IR initiated (backed by exad_rcd_prewap via
+   * exad_agwa_queries_pkg.get_ir_wells_prc) — feeds the "New IR" wizard's Request Reference
+   * "Link to Request" picker. Mapped straight into WwellFieldOption so the dynamic-form field can
+   * consume it directly (value = prewap_seq as a string, label = well_name).
+   */
+  getEligibleWellsForIr(): Observable<WwellFieldOption[]> {
+    return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(
+      map(res => res.data.map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
+      // Same reachable-but-empty vs. unreachable double fallback as getIntegratedRequirements().
+      map(list => (list.length > 0 ? list : [...WWELL_IR_ELIGIBLE_WELLS_MOCK])),
+      catchError(() => of([...WWELL_IR_ELIGIBLE_WELLS_MOCK])),
+    );
+  }
+
+  /**
    * ir_seq is the real primary key once an IR is saved — selecting a row in the list passes it
    * here to fetch the full { table, data } detail (casing/tops/hydrogeology) for that one record.
    * No offline-mock fallback here (unlike the other reads above): faking detail for a specific,
@@ -230,8 +248,8 @@ export class WwellPlanningService {
     // The backend only accepts the raw exad_gwd_ir_* bulk-save array as the request body (see
     // wwell-ir-payload.model.ts / IntegratedRequirementResource.java's @Consumes(APPLICATION_JSON))
     // — it has no multipart handling and no columns for the richer domain fields below (client,
-    // wellName, contacts, attachments...), so those stay client-side only until pkg_gwd_ir grows to
-    // carry them. Sending them today just 415s the request (wrong Content-Type, wrong body shape).
+    // wellName, contacts, attachments...), so those stay client-side only until exad_agwa_iud_pkg's
+    // header table grows to carry them. Sending them today just 415s (wrong Content-Type/body shape).
     return this.http
       .post<ApiResponse<WwellIrSaveResult>>(`${this.apiUrl}/integrated-requirements`, irBulkPayload)
       .pipe(

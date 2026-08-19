@@ -5,7 +5,7 @@ import { IrHeaderSummary } from './wwell-ir-payload.model';
 /**
  * Backend list rows are backed only by exad_gwd_ir_header — the domain fields the UI displays
  * (client, wellName, contacts, casing...) have no column there yet, so they're left blank rather
- * than guessed. Extend once pkg_gwd_ir/the header table carry those fields (see IrHeaderSummary).
+ * than guessed. Extend once the header table carries those fields (see IrHeaderSummary).
  */
 export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary): IntegratedRequirement {
   const code = `IR-${row.irSeq}`;

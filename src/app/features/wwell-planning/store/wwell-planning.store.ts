@@ -36,9 +36,11 @@ export const WwellPlanningStore = signalStore(
       requestsLoading,
       approvalsLoading,
       integratedRequirementsLoading,
+      linkedRequestWellsLoading,
       requestsError,
       approvalsError,
       integratedRequirementsError,
+      linkedRequestWellsError,
       createRequestError,
       createIntegratedRequirementError,
       createApprovalError,
@@ -46,12 +48,15 @@ export const WwellPlanningStore = signalStore(
       integratedRequirementDetailError,
       integratedRequirementApprovalTimelineError,
     }) => ({
-      isLoading: computed(() => requestsLoading() || approvalsLoading() || integratedRequirementsLoading()),
+      isLoading: computed(
+        () => requestsLoading() || approvalsLoading() || integratedRequirementsLoading() || linkedRequestWellsLoading(),
+      ),
       activeErrors: computed(() =>
         [
           requestsError(),
           approvalsError(),
           integratedRequirementsError(),
+          linkedRequestWellsError(),
           createRequestError(),
           createIntegratedRequirementError(),
           createApprovalError(),
@@ -65,6 +70,7 @@ export const WwellPlanningStore = signalStore(
           requestsError() !== null ||
           approvalsError() !== null ||
           integratedRequirementsError() !== null ||
+          linkedRequestWellsError() !== null ||
           createRequestError() !== null ||
           createIntegratedRequirementError() !== null ||
           createApprovalError() !== null ||
@@ -138,6 +144,24 @@ export const WwellPlanningStore = signalStore(
                 patchState(store, {
                   integratedRequirementsLoading: false,
                   integratedRequirementsError: errorMessage(err, 'Failed to load integrated requirements'),
+                }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    const loadLinkedRequestWells = rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { linkedRequestWellsLoading: true, linkedRequestWellsError: null })),
+        switchMap(() =>
+          svc.getEligibleWellsForIr().pipe(
+            tapResponse({
+              next: linkedRequestWells => patchState(store, { linkedRequestWells, linkedRequestWellsLoading: false }),
+              error: (err: unknown) =>
+                patchState(store, {
+                  linkedRequestWellsLoading: false,
+                  linkedRequestWellsError: errorMessage(err, 'Failed to load wells eligible for IR initiation'),
                 }),
             }),
           ),
@@ -230,6 +254,10 @@ export const WwellPlanningStore = signalStore(
 
       loadIntegratedRequirements(): void {
         loadIntegratedRequirements();
+      },
+
+      loadLinkedRequestWells(): void {
+        loadLinkedRequestWells();
       },
 
       createRequest(payload: CreateWwellPlanningRequestPayload, files: readonly File[] = []): void {

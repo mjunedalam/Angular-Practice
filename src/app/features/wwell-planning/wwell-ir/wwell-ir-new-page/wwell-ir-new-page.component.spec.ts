@@ -23,6 +23,8 @@ const storeMock = {
   createIntegratedRequirement: jest.fn(),
   draftIrSeq: jest.fn(() => null as number | null),
   resetIntegratedRequirementDraft: jest.fn(),
+  linkedRequestWells: jest.fn(() => [] as { value: string; label: string }[]),
+  loadLinkedRequestWells: jest.fn(),
 };
 
 const notificationServiceMock = {

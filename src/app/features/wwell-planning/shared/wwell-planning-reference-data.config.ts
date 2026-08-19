@@ -2,14 +2,6 @@
 
 export const WWELL_CLIENT_OPTIONS: readonly string[] = ['BI-11', 'BI-12', 'BI-13', 'BI-14', 'BI-15'];
 
-/** Existing requests an IR can be linked back to. */
-export const WWELL_LINKED_REQUEST_OPTIONS: readonly string[] = [
-  'REQ-00198 — HAIL-500',
-  'REQ-00201 — HAIL-510',
-  'REQ-00204 — HAIL-520',
-  'REQ-00207 — HAIL-530',
-];
-
 /**
  * Clients fall into two subsurface-data tiers that drive which fields the Request and WLDA forms
  * collect: Tier 1 clients supply target depth/aquifer at intake; Tier 2 clients don't (that data
