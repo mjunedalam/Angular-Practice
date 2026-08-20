@@ -15,14 +15,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '@shared/components/notification/notification.service';
-import { ApprovalChainStep, IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
-import { WwellPlanningStore } from '../store/wwell-planning.store';
+import { WwellIrStore } from './store/wwell-ir.store';
 import { WwellIrDetailComponent } from './wwell-ir-detail/wwell-ir-detail.component';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
 
@@ -43,26 +44,26 @@ const SKELETON_ROW_COUNT = 6;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellIrComponent implements OnInit, OnDestroy {
-  protected readonly store = inject(WwellPlanningStore);
+  protected readonly store = inject(WwellIrStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly notify = inject(NotificationService);
 
-  protected readonly isLoading = this.store.integratedRequirementsLoading;
-  protected readonly loadError = this.store.integratedRequirementsError;
-  protected readonly isSubmittingForReview = this.store.updatingIntegratedRequirementStatus;
-  protected readonly isLoadingDetail = this.store.integratedRequirementDetailLoading;
-  protected readonly isLoadingApprovalTimeline = this.store.integratedRequirementApprovalTimelineLoading;
+  protected readonly isLoading = this.store.irsLoading;
+  protected readonly loadError = this.store.irsError;
+  protected readonly isSubmittingForReview = this.store.updatingIrStatus;
+  protected readonly isLoadingDetail = this.store.irDetailLoading;
+  protected readonly isLoadingApprovalTimeline = this.store.irApprovalTimelineLoading;
 
   protected readonly searchTerm = signal('');
-  // ir_seq is the real primary key once an IR is saved (see wwell-planning.model.ts) — selection
-  // is keyed on it directly, not the display-only `code`/`id` string, so it can be handed straight
-  // to loadIntegratedRequirementDetail() below without a lookup.
+  // ir_seq is the real primary key once an IR is saved (see integrated-requirement.model.ts) —
+  // selection is keyed on it directly, not the display-only `code`/`id` string, so it can be
+  // handed straight to loadIrDetail() below without a lookup.
   protected readonly selectedIrSeq = signal<number | null>(null);
 
   protected readonly rows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const all = this.store.integratedRequirements();
+    const all = this.store.irs();
     if (!term) return all;
 
     return all.filter(
@@ -77,13 +78,12 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // Deliberately looks up the *unfiltered* store list (not `rows()`) so narrowing the search
   // never drops the current selection just because it fell outside the filtered results.
   protected readonly selectedIr = computed<IntegratedRequirement | null>(
-    () => this.store.integratedRequirements().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
+    () => this.store.irs().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
   );
 
   // Identity/order of the *visible set* of rows, not the row objects themselves — selecting a row
-  // patches that one IR's `chain` in place (loadIntegratedRequirementDetail /
-  // loadIntegratedRequirementApprovalTimeline both replace `integratedRequirements` with a new
-  // array reference), which would otherwise look identical to "the result set changed" to a plain
+  // patches that one IR's `chain` in place (loadIrDetail / loadIrApprovalTimeline both replace
+  // `irs` with a new array reference), which would otherwise look identical to "the result set changed" to a plain
   // `rows()` reference check below and replay the list-reveal animation across every row on every
   // click. This string only changes on an actual add/remove/reorder/filter.
   protected readonly rowsSignature = computed(() => this.rows().map(ir => ir.irSeq ?? ir.id).join('|'));
@@ -107,29 +107,29 @@ export class WwellIrComponent implements OnInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      const message = this.store.createIntegratedRequirementError();
+      const message = this.store.createIrError();
       if (message) this.notify.error(message);
     });
 
     effect(() => {
-      const message = this.store.updateIntegratedRequirementStatusError();
+      const message = this.store.updateIrStatusError();
       if (message) this.notify.error(message);
     });
 
     effect(() => {
-      const message = this.store.integratedRequirementDetailError();
+      const message = this.store.irDetailError();
       if (message) this.notify.error(message);
     });
 
     effect(() => {
-      const message = this.store.integratedRequirementApprovalTimelineError();
+      const message = this.store.irApprovalTimelineError();
       if (message) this.notify.error(message);
     });
 
     // Default to the first record once the list loads — mirrors the reference app, which
     // always has something selected in the detail pane rather than starting on an empty state.
     effect(() => {
-      const all = this.store.integratedRequirements();
+      const all = this.store.irs();
       const firstIrSeq = all[0]?.irSeq;
       if (firstIrSeq != null && this.selectedIrSeq() === null) {
         this.selectedIrSeq.set(firstIrSeq);
@@ -145,10 +145,10 @@ export class WwellIrComponent implements OnInit, OnDestroy {
       const host = this.detailHost?.nativeElement;
       if (host) playIfMotionAllowed(buildDetailRevealTimeline(host));
       this.previousSelectedIrSeq = irSeq;
-      this.store.loadIntegratedRequirementDetail(irSeq);
+      this.store.loadIrDetail(irSeq);
       // Separate call — the approval-process API doesn't exist yet (mocked for now), but the
       // request shape already mirrors the real future one: one fetch per selected IR.
-      this.store.loadIntegratedRequirementApprovalTimeline(irSeq);
+      this.store.loadIrApprovalTimeline(irSeq);
     });
 
     // Re-plays whenever the visible rows actually change (initial load finishing, or the
@@ -168,7 +168,7 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.loadIntegratedRequirements();
+    this.store.loadIrs();
   }
 
   ngOnDestroy(): void {
@@ -209,6 +209,6 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   }
 
   protected submitForReview(ir: IntegratedRequirement): void {
-    this.store.submitIntegratedRequirementForReview(ir);
+    this.store.submitIrForReview(ir);
   }
 }

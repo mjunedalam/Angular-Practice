@@ -1,4 +1,4 @@
-import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 
 /** Flags a value that's actually meaningful, not just informational — e.g. a nonzero H2S
  *  reading should read as amber/danger regardless of which section it sits in. Omitted (or

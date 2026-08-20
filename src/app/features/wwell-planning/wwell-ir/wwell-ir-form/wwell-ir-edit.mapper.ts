@@ -1,4 +1,4 @@
-import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import {
   WwellIrRawCasingRow,
   WwellIrRawFormationTop,

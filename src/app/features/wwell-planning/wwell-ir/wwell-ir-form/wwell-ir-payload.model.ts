@@ -1,7 +1,11 @@
 /** Wire format for the IR bulk-save call — mirrors docs/wwell-planning/ir/ir.json 1:1 (table-per-block, row-per-action). */
 
-/** New row → INSERT. Changed persisted row → UPDATE. Removed persisted row → DELETE. */
-export type IrRowAction = 'INSERT' | 'UPDATE' | 'DELETE';
+/** New row → INSERT. Changed persisted row → UPDATE. Removed persisted row → DELETE. Persisted
+ *  row the user didn't touch this save → '' (no-op) — sent instead of a redundant UPDATE so the
+ *  backend's per-row action switch (EXAD_AGWA_IUD_PKG.save_casing/save_tops/save_hydrogeology)
+ *  simply doesn't match any branch and skips the DML, rather than re-writing a row with the exact
+ *  values it already has on every save. */
+export type IrRowAction = 'INSERT' | 'UPDATE' | 'DELETE' | '';
 
 export type WwellIrTableName =
   | 'exad_gwd_ir_header'

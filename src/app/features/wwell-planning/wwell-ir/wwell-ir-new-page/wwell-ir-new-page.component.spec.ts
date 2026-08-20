@@ -3,7 +3,7 @@ import { FormArray } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NotificationService } from '@shared/components/notification/notification.service';
-import { WwellPlanningStore } from '../../store/wwell-planning.store';
+import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrNewPageComponent } from './wwell-ir-new-page.component';
 import { WWELL_IR_FORM_SCHEMA } from '../wwell-ir-form/wwell-ir-form.schema';
 
@@ -18,11 +18,11 @@ function asTestable(component: WwellIrNewPageComponent): TestableWwellIrNewPage 
 }
 
 const storeMock = {
-  creatingIntegratedRequirement: jest.fn(() => false),
-  createIntegratedRequirementError: jest.fn(() => null as string | null),
-  createIntegratedRequirement: jest.fn(),
+  creatingIr: jest.fn(() => false),
+  createIrError: jest.fn(() => null as string | null),
+  createIr: jest.fn(),
   draftIrSeq: jest.fn(() => null as number | null),
-  resetIntegratedRequirementDraft: jest.fn(),
+  resetIrDraft: jest.fn(),
   linkedRequestWells: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
 };
@@ -51,7 +51,7 @@ describe('WwellIrNewPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WwellIrNewPageComponent, RouterTestingModule, NoopAnimationsModule],
       providers: [
-        { provide: WwellPlanningStore, useValue: storeMock },
+        { provide: WwellIrStore, useValue: storeMock },
         { provide: NotificationService, useValue: notificationServiceMock },
       ],
     }).compileComponents();
@@ -87,16 +87,16 @@ describe('WwellIrNewPageComponent', () => {
   it('lets Submit bypass validation and save whatever is filled in (validation gate disabled for now)', () => {
     asTestable(component).submit();
 
-    expect(storeMock.createIntegratedRequirement).toHaveBeenCalledTimes(1);
-    const [payload] = storeMock.createIntegratedRequirement.mock.calls[0];
+    expect(storeMock.createIr).toHaveBeenCalledTimes(1);
+    const [payload] = storeMock.createIr.mock.calls[0];
     expect(payload.status).toBe('in-progress');
   });
 
   it('lets Save as Draft bypass validation', () => {
     asTestable(component).saveAsDraft();
 
-    expect(storeMock.createIntegratedRequirement).toHaveBeenCalledTimes(1);
-    const [payload] = storeMock.createIntegratedRequirement.mock.calls[0];
+    expect(storeMock.createIr).toHaveBeenCalledTimes(1);
+    const [payload] = storeMock.createIr.mock.calls[0];
     expect(payload.status).toBe('draft');
   });
 });

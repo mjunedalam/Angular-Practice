@@ -3,7 +3,7 @@ import {
   IntegratedRequirement,
   IntegratedRequirementCasingRow,
   IntegratedRequirementFormationTop,
-} from '@models/wwell-planning/wwell-planning.model';
+} from '@models/wwell-planning/integrated-requirement.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from '@shared/models/wwell/tops-ir.model';

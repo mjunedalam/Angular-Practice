@@ -1,4 +1,4 @@
-import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
 import {
   IrCasingRow,
   IrHeaderRow,
@@ -8,8 +8,13 @@ import {
   WwellIrTableName,
 } from './wwell-ir-payload.model';
 
+/** Case-insensitive on `candidate.table`: the GET /{irSeq} detail endpoint echoes back
+ *  UPPERCASE table names (EXAD_GWD_IR_HEADER...) per exad_agwa_queries_pkg.get_ir_data_prc,
+ *  while WwellIrTableName (and the bulk-save write path) uses lowercase — a strict `===` here
+ *  never matched, so every block silently resolved to empty and wiped casing/formationTops on
+ *  every detail fetch. */
 function rowsFor<TRow>(blocks: readonly WwellIrDetailTableBlock[], table: WwellIrTableName): readonly TRow[] {
-  const block = blocks.find(candidate => candidate.table === table);
+  const block = blocks.find(candidate => candidate.table.toLowerCase() === table);
   return (block?.data as readonly TRow[] | undefined) ?? [];
 }
 

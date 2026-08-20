@@ -24,7 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatStepperModule } from '@angular/material/stepper';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
-import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { playIfMotionAllowed } from '../../shared/dynamic-form/gsap-motion.util';
@@ -32,7 +32,7 @@ import { buildReviewRevealTimeline } from '../../shared/dynamic-form/review-reve
 import { buildStepTransitionTimeline, WwellStepDirection } from '../../shared/dynamic-form/step-transition.animation';
 import { addRepeatableRow, buildWwellDynamicForm } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFieldConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
-import { WwellPlanningStore } from '../../store/wwell-planning.store';
+import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { casingRowPatch, formationTopRowPatch, mapIntegratedRequirementToFormPatch, offsetWellRowPatch } from '../wwell-ir-form/wwell-ir-edit.mapper';
 import { WWELL_IR_CHAIN_PREVIEW } from '../wwell-ir-form/wwell-ir-form.config';
@@ -78,7 +78,7 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
 })
 export class WwellIrNewPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly store = inject(WwellPlanningStore);
+  private readonly store = inject(WwellIrStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly notify = inject(NotificationService);
@@ -115,7 +115,7 @@ export class WwellIrNewPageComponent implements OnInit {
   protected readonly editingIr = computed<IntegratedRequirement | null>(() => {
     const irSeq = this.editIrSeq();
     if (irSeq === null) return null;
-    return this.store.integratedRequirements().find(ir => ir.irSeq === irSeq) ?? null;
+    return this.store.irs().find(ir => ir.irSeq === irSeq) ?? null;
   });
 
   // Keyed on `draftIrSeq` (not `editIrSeq`) so this also lights up for a brand-new IR that was
@@ -124,12 +124,12 @@ export class WwellIrNewPageComponent implements OnInit {
   protected readonly isDraftMode = computed(() => {
     const irSeq = this.store.draftIrSeq();
     if (irSeq === null) return false;
-    return this.store.integratedRequirements().find(ir => ir.irSeq === irSeq)?.status === 'draft';
+    return this.store.irs().find(ir => ir.irSeq === irSeq)?.status === 'draft';
   });
   protected readonly draftBadge = WWELL_IR_STATUS_META.draft;
 
   protected readonly form = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb);
-  protected readonly isSaving = this.store.creatingIntegratedRequirement;
+  protected readonly isSaving = this.store.creatingIr;
 
   // Live-mirrors the form so every well-bore preview (Subsurface & Construction, Attachments &
   // Review, and the dedicated Well Design View step) redraws as casing/formation/completion
@@ -215,11 +215,11 @@ export class WwellIrNewPageComponent implements OnInit {
       const irSeq = this.editIrSeq();
       if (irSeq === null) {
         // A brand-new visit to this page must never inherit a previous draft's ir_seq.
-        this.store.resetIntegratedRequirementDraft();
+        this.store.resetIrDraft();
         return;
       }
       // Every Save/Submit for the rest of this visit must UPDATE this record, not INSERT a new one.
-      this.store.startEditingIntegratedRequirement(irSeq);
+      this.store.startEditingIr(irSeq);
     });
 
     effect(() => {
@@ -255,7 +255,7 @@ export class WwellIrNewPageComponent implements OnInit {
 
     effect(() => {
       const saving = this.isSaving();
-      const error = this.store.createIntegratedRequirementError();
+      const error = this.store.createIrError();
 
       if (error) {
         this.notify.error(error);
@@ -282,7 +282,7 @@ export class WwellIrNewPageComponent implements OnInit {
     // record replaces it *in place* at its original index, so index 0 can point at a totally
     // different (and possibly stale) record.
     const savedIrSeq = this.store.draftIrSeq();
-    const code = this.store.integratedRequirements().find(ir => ir.irSeq === savedIrSeq)?.code;
+    const code = this.store.irs().find(ir => ir.irSeq === savedIrSeq)?.code;
 
     if (this.lastSubmitStatus === 'draft') {
       const verb = this.lastSubmitWasUpdate ? 'updated' : 'saved';
@@ -382,10 +382,15 @@ export class WwellIrNewPageComponent implements OnInit {
     const raw = this.form.getRawValue() as WwellIrFormRawValue;
     const { payload, files } = mapIrFormValueToSubmission(raw, status);
     const knownIrSeq = this.store.draftIrSeq();
-    // Reusing the remembered ir_seq turns a repeat "Save as Draft" into an UPDATE instead of a duplicate INSERT.
-    const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: knownIrSeq });
+    // Reusing the remembered ir_seq turns a repeat "Save as Draft" into an UPDATE instead of a
+    // duplicate INSERT. `existing` is what this record looked like as of the last save/load — the
+    // payload mapper diffs the current form against it so each casing/tops/hydrogeology row gets
+    // its own real INSERT/UPDATE/DELETE (a row added on this pass is genuinely new even though the
+    // IR itself already has an ir_seq) instead of one blanket action for the whole submission.
+    const existing = knownIrSeq === null ? null : (this.store.irs().find(ir => ir.irSeq === knownIrSeq) ?? null);
+    const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: knownIrSeq, existing });
     this.lastSubmitStatus = status;
     this.lastSubmitWasUpdate = knownIrSeq !== null;
-    this.store.createIntegratedRequirement(payload, irBulkPayload, files);
+    this.store.createIr(payload, irBulkPayload, files);
   }
 }

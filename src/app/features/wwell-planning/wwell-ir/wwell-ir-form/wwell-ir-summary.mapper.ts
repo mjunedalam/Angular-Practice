@@ -1,4 +1,4 @@
-import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
 import { todayIsoDate } from '../../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-chain.mock';
 import { IrHeaderSummary } from './wwell-ir-payload.model';

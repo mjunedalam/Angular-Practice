@@ -1,5 +1,5 @@
 import { ColDef, GridOptions, ValueFormatterParams, themeQuartz } from 'ag-grid-community';
-import { IntegratedRequirementOffsetWell } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirementOffsetWell } from '@models/wwell-planning/integrated-requirement.model';
 
 const EMPTY_VALUE = '—';
 

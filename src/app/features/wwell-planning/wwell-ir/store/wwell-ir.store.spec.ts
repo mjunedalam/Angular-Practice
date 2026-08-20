@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
-import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
-import { WwellIrBulkSavePayload } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
-import { WwellPlanningService } from '../wwell-planning.service';
-import { WwellPlanningStore } from './wwell-planning.store';
+import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
+import { WwellIrService } from '../wwell-ir.service';
+import { WwellIrStore } from './wwell-ir.store';
 
 const serviceMock = {
-  createIntegratedRequirement: jest.fn(),
+  createIr: jest.fn(),
 };
 
 function buildPayload(): CreateIntegratedRequirementPayload {
@@ -87,60 +87,60 @@ function buildIrBulkPayload(): WwellIrBulkSavePayload {
   ];
 }
 
-describe('WwellPlanningStore - createIntegratedRequirement', () => {
-  let store: InstanceType<typeof WwellPlanningStore>;
+describe('WwellIrStore - createIr', () => {
+  let store: InstanceType<typeof WwellIrStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     TestBed.configureTestingModule({
-      providers: [WwellPlanningStore, { provide: WwellPlanningService, useValue: serviceMock }],
+      providers: [WwellIrStore, { provide: WwellIrService, useValue: serviceMock }],
     });
-    store = TestBed.inject(WwellPlanningStore);
+    store = TestBed.inject(WwellIrStore);
   });
 
   it('passes files through to the service and prepends the created row on success', () => {
     const created = buildCreated();
     const files = [new File(['x'], 'map.pdf')];
-    serviceMock.createIntegratedRequirement.mockReturnValue(of(created));
+    serviceMock.createIr.mockReturnValue(of(created));
 
-    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload(), files);
+    store.createIr(buildPayload(), buildIrBulkPayload(), files);
 
-    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), files);
-    expect(store.integratedRequirements()).toEqual([created]);
-    expect(store.creatingIntegratedRequirement()).toBe(false);
-    expect(store.createIntegratedRequirementError()).toBeNull();
+    expect(serviceMock.createIr).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), files);
+    expect(store.irs()).toEqual([created]);
+    expect(store.creatingIr()).toBe(false);
+    expect(store.createIrError()).toBeNull();
   });
 
   it('defaults files to an empty array when omitted', () => {
-    serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated()));
+    serviceMock.createIr.mockReturnValue(of(buildCreated()));
 
-    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+    store.createIr(buildPayload(), buildIrBulkPayload());
 
-    expect(serviceMock.createIntegratedRequirement).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), []);
+    expect(serviceMock.createIr).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), []);
   });
 
-  it('sets createIntegratedRequirementError on failure and clears the creating flag', () => {
-    serviceMock.createIntegratedRequirement.mockReturnValue(throwError(() => new Error('Network down')));
+  it('sets createIrError on failure and clears the creating flag', () => {
+    serviceMock.createIr.mockReturnValue(throwError(() => new Error('Network down')));
 
-    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+    store.createIr(buildPayload(), buildIrBulkPayload());
 
-    expect(store.creatingIntegratedRequirement()).toBe(false);
-    expect(store.createIntegratedRequirementError()).toBe('Network down');
+    expect(store.creatingIr()).toBe(false);
+    expect(store.createIrError()).toBe('Network down');
   });
 
   it('remembers the returned ir_seq so a later draft save can reuse it', () => {
-    serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated(9001)));
+    serviceMock.createIr.mockReturnValue(of(buildCreated(9001)));
 
-    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+    store.createIr(buildPayload(), buildIrBulkPayload());
 
     expect(store.draftIrSeq()).toBe(9001);
   });
 
-  it('resetIntegratedRequirementDraft clears the remembered ir_seq for a fresh "new IR" session', () => {
-    serviceMock.createIntegratedRequirement.mockReturnValue(of(buildCreated(9001)));
-    store.createIntegratedRequirement(buildPayload(), buildIrBulkPayload());
+  it('resetIrDraft clears the remembered ir_seq for a fresh "new IR" session', () => {
+    serviceMock.createIr.mockReturnValue(of(buildCreated(9001)));
+    store.createIr(buildPayload(), buildIrBulkPayload());
 
-    store.resetIntegratedRequirementDraft();
+    store.resetIrDraft();
 
     expect(store.draftIrSeq()).toBeNull();
   });

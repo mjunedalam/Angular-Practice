@@ -1,4 +1,4 @@
-import { IntegratedRequirementStatus } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../shared/wwell-status.config';
 
 export const WWELL_IR_STATUS_META: Record<IntegratedRequirementStatus, WwellStatusMeta> = {

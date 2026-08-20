@@ -1,4 +1,4 @@
-import { IntegratedRequirement } from '@models/wwell-planning/wwell-planning.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { EMPTY_VALUE, fmtNum, fmtStr, KvRow } from './wwell-ir-detail-rows.util';
 
 /** Field groupings for the printable "Letter" tab — same underlying `IntegratedRequirement`

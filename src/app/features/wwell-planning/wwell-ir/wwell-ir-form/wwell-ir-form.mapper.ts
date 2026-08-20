@@ -2,7 +2,7 @@ import {
   CreateIntegratedRequirementPayload,
   IntegratedRequirementStatus,
   IntegratedRequirementTestType,
-} from '@models/wwell-planning/wwell-planning.model';
+} from '@models/wwell-planning/integrated-requirement.model';
 import { WwellIrFormRawValue } from './wwell-ir-form.types';
 
 export interface MappedIrSubmission {
