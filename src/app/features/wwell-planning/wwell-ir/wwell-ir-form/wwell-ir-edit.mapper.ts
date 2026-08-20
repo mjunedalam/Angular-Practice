@@ -93,5 +93,20 @@ export function casingRowPatch(row: IntegratedRequirement['casing'][number]): Ww
 }
 
 export function offsetWellRowPatch(row: IntegratedRequirement['offsetWells'][number]): WwellIrRawOffsetWell {
-  return { wellName: row.wellName };
+  return {
+    wellName: row.wellName,
+    distanceKm: row.distanceKm ?? null,
+    location: row.location ?? '',
+    aquifer: row.aquifer ?? '',
+    totalDepthFt: row.totalDepthFt ?? null,
+    testDurationMin: row.testDurationMin ?? null,
+    rateGpm: row.rateGpm ?? null,
+    rpm: row.rpm ?? null,
+    swlFt: row.swlFt ?? null,
+    pwlFt: row.pwlFt ?? null,
+    drawdownFt: row.drawdownFt ?? null,
+    specificCapacity: row.specificCapacity ?? null,
+    tdsPpm: row.tdsPpm ?? null,
+    h2sPpm: row.h2sPpm ?? null,
+  };
 }

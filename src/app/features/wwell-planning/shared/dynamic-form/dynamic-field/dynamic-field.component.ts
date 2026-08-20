@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -6,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { switchMap, startWith } from 'rxjs';
 import { WwellAttachmentDropzoneComponent } from '../../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import {
   WwellFieldConfig,
@@ -49,8 +51,26 @@ export class DynamicFieldComponent {
    *  options `@for` loop below reads this instead of `config().options` directly. */
   protected readonly resolvedOptions = computed(() => resolveFieldOptions(this.config()));
 
+  /**
+   * `control()` is a Signal input, but the bound FormControl's own `.value` mutates in place
+   * on every keystroke and is never itself signal-tracked — reading it directly inside a
+   * `computed()` (as `reviewValue` below used to) only evaluates once, at first read, and then
+   * freezes forever: the Attachments & Review step's tiles kept showing '—' even after the
+   * matching field was filled in on an earlier step. Bridging through `valueChanges` (and
+   * re-subscribing whenever a *different* control is bound) keeps this genuinely reactive.
+   */
+  // No `initialValue`/`requireSync`: reading `this.control()` synchronously in a field
+  // initializer (for an `initialValue`) fails the compiler's NG8118 check — inputs aren't bound
+  // yet at that point — and `toObservable` doesn't emit synchronously either (its effect is
+  // scheduled, not immediate), so `requireSync` throws NG0601 at construction instead. Left
+  // without either, `liveValue()` is simply `undefined` for the first tick, which `reviewValue`
+  // below already treats the same as an empty value.
+  private readonly liveValue = toSignal(
+    toObservable(this.control).pipe(switchMap(control => control.valueChanges.pipe(startWith(control.value)))),
+  );
+
   protected readonly reviewValue = computed(() => {
-    const value = this.control().value;
+    const value = this.liveValue();
     const cfg = this.config();
 
     if (cfg.type === 'file') {

@@ -13,7 +13,6 @@ import {
   WWELL_GEOLOGIST_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
-  WWELL_OFFSET_WELL_OPTIONS,
   WWELL_SAMPLING_OPTIONS,
   WWELL_SUPPORTING_BUSINESS_OPTIONS,
   WWELL_TEST_TYPE_OPTIONS,
@@ -72,11 +71,15 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             hint: 'Used for auto-calculating sub-sea depths',
           },
           {
+            // Odd field out in this section's otherwise-even count — colSpan:2 keeps it from
+            // landing alone in a row with a dangling empty cell beside it (also just genuinely
+            // useful room for a lat/long string).
             key: 'coordinates',
             label: 'Coordinates',
             type: 'text',
             placeholder: 'e.g., 27.5114°N, 41.7208°E',
             validators: { required: true, pattern: WWELL_APPROVAL_COORDINATES_PATTERN },
+            colSpan: 2,
           },
         ],
       },
@@ -141,13 +144,23 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         title: null,
         fields: [
           {
+            // colSpan:2: its only natural row-mate (Open Hole Size, right below) is hidden
+            // unless Completion is 'Open Hole', which left this alone in row 1 with a bare
+            // empty cell beside it by default. Full-width avoids that regardless of state.
             key: 'completion',
             label: 'Completion',
             type: 'select',
             options: WWELL_COMPLETION_OPTIONS,
             validators: { required: true },
+            colSpan: 2,
           },
+          { key: 'acidization', label: 'Acidization', type: 'combo', options: WWELL_ACIDIZATION_OPTIONS },
+          { key: 'transmission', label: 'Transmission', type: 'combo', options: WWELL_TRANSMISSION_OPTIONS },
           {
+            // Moved after an even count (2) of always-visible fields, matching the Estimated
+            // Hydrology section's convention — a collapsed conditional field then only ever
+            // leaves an empty cell in its own dedicated row, never one shared with an unrelated
+            // visible field.
             key: 'openHoleSizeIn',
             label: 'Open Hole Size',
             type: 'text',
@@ -155,8 +168,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             hint: 'Bit size below the last casing shoe',
             visibleWhen: { field: 'completion', equals: 'Open Hole' },
           },
-          { key: 'acidization', label: 'Acidization', type: 'combo', options: WWELL_ACIDIZATION_OPTIONS },
-          { key: 'transmission', label: 'Transmission', type: 'combo', options: WWELL_TRANSMISSION_OPTIONS },
         ],
       },
       {
@@ -195,7 +206,36 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         repeatable: {
           key: 'offsetWells',
           addLabel: '+ Add Offset Well',
-          rowFields: [{ key: 'wellName', label: 'Well', type: 'select', options: WWELL_OFFSET_WELL_OPTIONS }],
+          rowFields: [
+            { key: 'wellName', label: 'Well Name', type: 'text', placeholder: 'e.g., KHAJ-200' },
+            { key: 'distanceKm', label: 'Distance (km)', type: 'number', placeholder: 'e.g., 2.5' },
+            { key: 'location', label: 'Location', type: 'text', placeholder: 'e.g., N 2.5 km' },
+            { key: 'aquifer', label: 'Aquifer', type: 'text', placeholder: 'e.g., Wasia-Biyadh' },
+            { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'e.g., 530' },
+            { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'e.g., 1440' },
+            { key: 'rateGpm', label: 'Test Rate (GPM)', type: 'number', placeholder: 'e.g., 380' },
+            { key: 'rpm', label: 'RPM', type: 'number', placeholder: 'e.g., 1200' },
+            { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number', placeholder: 'e.g., 85' },
+            { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number', placeholder: 'e.g., 110' },
+            {
+              key: 'drawdownFt',
+              label: 'Drawdown (ft)',
+              type: 'number',
+              placeholder: 'auto',
+              hint: 'Calculated from PWL − SWL',
+              readonly: true,
+            },
+            {
+              key: 'specificCapacity',
+              label: 'Spec. Cap. (GPM/ft)',
+              type: 'number',
+              placeholder: 'auto',
+              hint: 'Calculated from Rate ÷ Drawdown',
+              readonly: true,
+            },
+            { key: 'tdsPpm', label: 'TDS (ppm)', type: 'number', placeholder: 'e.g., 1200' },
+            { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number', placeholder: 'e.g., 5' },
+          ],
         },
       },
       {

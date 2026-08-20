@@ -49,6 +49,9 @@ export interface WwellFieldConfig {
   readonly visibleWhen?: WwellFieldVisibilityCondition;
   /** Overrides the type-based empty default (e.g. pre-selecting a toggle-group option). */
   readonly defaultValue?: string | number;
+  /** Disables the control — for values derived elsewhere (e.g. a server-computed metric) rather
+   *  than typed in directly. Pair with a `placeholder` like 'auto' to signal that visually. */
+  readonly readonly?: boolean;
 }
 
 export interface WwellRepeatableRowConfig {

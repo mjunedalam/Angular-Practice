@@ -101,8 +101,6 @@ export const WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS: readonly string[] = [
 
 export const WWELL_GEOLOGIST_OPTIONS: readonly string[] = WWELL_ASSIGNEE_OPTIONS;
 
-export const WWELL_OFFSET_WELL_OPTIONS: readonly string[] = ['HAIL-100', 'HAIL-200', 'HAIL-300', 'HAIL-400'];
-
 export const WWELL_TEST_TYPE_OPTIONS: readonly { value: 'flow-test' | 'pump-test'; label: string; icon: string }[] = [
   { value: 'flow-test', label: 'Flow Test', icon: 'waves' },
   { value: 'pump-test', label: 'Pump Test', icon: 'engineering' },

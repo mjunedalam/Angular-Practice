@@ -70,6 +70,18 @@ app-wwell-ir-new-page {
   font-family: tokens.$font-family;
 }
 
+/* No app-wide `box-sizing: border-box` reset exists, so every element here is on the browser's
+ * `content-box` default — an explicit `width` (or `width: 100%`) plus `padding`/`border` adds
+ * those on top instead of eating into that width. That's what let `.nip__wellbore-empty` (100%
+ * width + 1.5rem padding) spill past its own `.nip__wellbore-card` border on both edges. Scoped
+ * to `.nip` rather than touching the global stylesheet, which is out of this page's blast radius. */
+.nip,
+.nip *,
+.nip *::before,
+.nip *::after {
+  box-sizing: border-box;
+}
+
 .nip {
   display: flex;
   flex-direction: column;

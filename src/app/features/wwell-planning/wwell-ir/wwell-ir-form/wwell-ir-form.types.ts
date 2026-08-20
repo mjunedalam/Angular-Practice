@@ -49,6 +49,20 @@ export interface WwellIrRawGeologist {
 
 export interface WwellIrRawOffsetWell {
   readonly wellName: string;
+  readonly distanceKm: number | null;
+  readonly location: string;
+  readonly aquifer: string;
+  readonly totalDepthFt: number | null;
+  readonly testDurationMin: number | null;
+  readonly rateGpm: number | null;
+  readonly rpm: number | null;
+  readonly swlFt: number | null;
+  readonly pwlFt: number | null;
+  /** Disabled/computed control — see the `readonly` flag on this field in wwell-ir-form.schema.ts. */
+  readonly drawdownFt: number | null;
+  readonly specificCapacity: number | null;
+  readonly tdsPpm: number | null;
+  readonly h2sPpm: number | null;
 }
 
 export interface WwellIrRawRemarks {

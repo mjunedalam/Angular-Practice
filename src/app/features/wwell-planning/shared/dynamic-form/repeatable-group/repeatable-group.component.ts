@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -37,6 +38,7 @@ import { buildRowEnterTimeline, buildRowExitTimeline } from './repeatable-row.an
 })
 export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly config = input.required<WwellRepeatableRowConfig>();
   readonly formArray = input.required<FormArray>();
@@ -80,10 +82,13 @@ export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.syncConditionalRowFields();
-    this.valueChangesSubscription = this.formArray().valueChanges.subscribe(() => this.syncConditionalRowFields());
+    this.valueChangesSubscription = this.formArray().valueChanges.subscribe(() => this.onFormArrayChanged());
     // Re-sync whenever the query list's elements change (row added/removed) — a freshly
     // added row's #rowFieldHost isn't queryable until after this fires.
     this.rowFieldHostsSubscription = this.rowFieldHosts?.changes.subscribe(() => this.syncConditionalRowFields());
+    // See `onFormArrayChanged`'s doc comment — the very first render can be just as stale as
+    // any later one, for the same reason, so it needs the same forced re-check.
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
@@ -93,6 +98,28 @@ export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
 
   protected rows(): FormGroup[] {
     return this.formArray().controls as FormGroup[];
+  }
+
+  /**
+   * Pushing/removing a row (or editing any field in one) mutates the `formArray` input's own
+   * `FormArray` object in place — the input's own signal reference never changes, so Angular's
+   * standard OnPush triggers (changed input, event sourced from this component's own template,
+   * a *directly template-read* signal changing) never fire for a `RepeatableGroupComponent`
+   * instance that didn't cause the mutation itself. That's invisible for the normal "edit"
+   * instance (its own "+ Add"/remove buttons are template-sourced click events, so zone.js
+   * re-checks it for free) but left every *other* instance of the same section — concretely,
+   * the read-only copy the Attachments & Review step renders for the same FormArray — stuck
+   * forever showing whatever row count existed when it first mounted. Confirmed live: filling
+   * in an Offset Water Well and opening the review step showed a completely empty section,
+   * with the underlying FormArray provably holding the right row the whole time. Forcing a
+   * synchronous `detectChanges()` here — rather than the usual `markForCheck()` — is deliberate:
+   * this component sits inside a `mat-expansion-panel`, and Material detaches a collapsed
+   * panel's content from the ambient change-detection walk, so merely flagging "needs a check"
+   * isn't enough when nothing ever walks back down to it on its own.
+   */
+  private onFormArrayChanged(): void {
+    this.syncConditionalRowFields();
+    this.cdr.detectChanges();
   }
 
   protected fieldControl(row: FormGroup, key: string): FormControl {

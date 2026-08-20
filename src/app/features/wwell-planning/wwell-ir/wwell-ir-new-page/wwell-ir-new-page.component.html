@@ -246,7 +246,8 @@
                           mat-button
                           class="nip__review-card-edit"
                           (click)="
-                            $event.stopPropagation(); stepper.selectedIndex = i
+                            $event.stopPropagation();
+                            stepper.selectedIndex = stepIndexOf(reviewStep.key)
                           "
                         >
                           <mat-icon>edit</mat-icon>

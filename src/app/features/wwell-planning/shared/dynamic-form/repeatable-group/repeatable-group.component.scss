@@ -42,15 +42,16 @@
   color: #fff;
 }
 
-/* `minmax(180px, 1fr)` — wide enough that a number field's "ft bgl" suffix never wraps
- * (see .dyf__suffix) — wraps onto additional rows on its own once a row's field count
- * (Type/Size/Depth/TOL/Remarks) no longer fits one line, rather than squeezing every
- * column down to an unreadable width. */
+/* `minmax(210px, 1fr)` — wide enough that both a number field's "ft bgl" suffix (see
+ * .dyf__suffix) and the longest row label in this module (Offset Wells' "Spec. Cap.
+ * (GPM/ft)") never truncate — wraps onto additional rows on its own once a row's field
+ * count (e.g. Offset Wells' 14, or Casing's Type/Size/Depth/TOL/Remarks) no longer fits
+ * one line, rather than squeezing every column down to an unreadable width. */
 .rpg__row-fields {
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.65rem 1rem;
 }
 

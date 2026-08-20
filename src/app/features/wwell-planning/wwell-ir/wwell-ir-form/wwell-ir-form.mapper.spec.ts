@@ -26,7 +26,24 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
     },
     contacts: {
       geologist: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: '' },
-      offsetWells: [{ wellName: 'HAIL-100' }],
+      offsetWells: [
+        {
+          wellName: 'HAIL-100',
+          distanceKm: 2.5,
+          location: 'N 2.5 km',
+          aquifer: 'Saq',
+          totalDepthFt: 530,
+          testDurationMin: 1440,
+          rateGpm: 380,
+          rpm: 1200,
+          swlFt: 85,
+          pwlFt: 110,
+          drawdownFt: null,
+          specificCapacity: null,
+          tdsPpm: 1200,
+          h2sPpm: 5,
+        },
+      ],
       remarks: { offsetWellsRemarks: '' },
     },
     hydrogeology: {

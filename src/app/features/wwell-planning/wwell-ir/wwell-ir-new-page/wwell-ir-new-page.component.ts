@@ -350,6 +350,14 @@ export class WwellIrNewPageComponent implements OnInit {
     return this.stepGroup(stepKey).valid;
   }
 
+  /** `reviewSteps` is `schema` with 'attachments'/'wellDesignView' filtered out, so its own
+   *  `$index` only happens to line up with the real stepper index while those two live at the
+   *  very end of the schema — resolving by key instead of trusting that ordering is what the
+   *  review cards' "Edit" button uses to jump back to the right step. */
+  protected stepIndexOf(stepKey: string): number {
+    return this.schema.findIndex(step => step.key === stepKey);
+  }
+
   protected reviewCompletionSummary(): { done: number; total: number } {
     const total = this.reviewSteps.length;
     const done = this.reviewSteps.filter(step => this.isStepValid(step.key)).length;
