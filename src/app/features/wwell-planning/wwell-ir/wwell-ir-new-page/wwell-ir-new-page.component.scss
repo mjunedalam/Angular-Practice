@@ -264,7 +264,15 @@ app-wwell-ir-new-page {
 }
 
 /* ── Stepper card ─────────────────────────────────────────────── */
+/* Two-column layout: a vertical step rail down the left side (`.nip__rail`), every step's
+ * fields stacked as collapsible accordion panels filling the rest of the width
+ * (`.nip__stepper-body`, holding the expand/collapse-all toolbar plus the
+ * `.nip__panels`/`mat-accordion` itself) — the whole form lives on one page, and a rail
+ * click expands + scrolls to the matching panel instead of switching an exclusively-active
+ * step. */
 .nip__stepper {
+  display: flex;
+  align-items: stretch;
   background: tokens.$surface;
   border: 1px solid $border;
   border-radius: 12px;
@@ -273,24 +281,66 @@ app-wwell-ir-new-page {
     0 4px 12px rgba(59, 130, 246, 0.05);
 }
 
+/* Horizontal padding matches `.nip__step-panel-header`'s `1.1rem` (below) so section titles,
+ * fields, and buttons line up under the panel's own title instead of sitting closer to the
+ * accent bar than the header text above them — previously `0.25rem`, chosen to maximize field
+ * width next to the rail, but that read as content jammed flush against the left edge with no
+ * breathing room. Bottom padding added to match, so the panel doesn't end flush on its last
+ * row either. */
 .nip__step-content {
-  padding: 1rem 0.25rem 0;
+  padding: 1rem 1.1rem 1.25rem;
+}
+
+/* Material's own panel-body padding (0 24px 16px) would stack on top of `.nip__step-content`'s
+ * padding above — zeroed out so that's the only padding source, keeping the fields column as
+ * wide as possible next to the (already-narrow) rail. */
+.nip .nip__step-panel .mat-expansion-panel-body {
+  padding: 0;
 }
 
 /* `app-dynamic-section`/`app-dynamic-field` are shared across the wwell-planning
- * module, so their own idle-state fills (`#f8fafc`) stay as the module default —
+ * module, so its own idle-state fill (`#f8fafc`) stays as the module default —
  * overridden here, scoped under `.nip`, so only this page's form goes fully white
- * without changing the shared component for every other consumer. */
-.nip .dyf__toggle-group,
-.nip .dyf--review {
-  background: tokens.$surface;
+ * without changing the shared component for every other consumer.
+ *
+ * `!important` is required, not decorative: `.dyf__toggle-group` is styled by
+ * dynamic-field.component.scss with plain (emulated) encapsulation, which Angular compiles
+ * to `.dyf__toggle-group[_ngcontent-ng-cXXX]` — an attribute selector, equal specificity
+ * (0,2,0) to this two-class `.nip .dyf__toggle-group` override. A specificity tie falls back
+ * to source order, and the shared component's own stylesheet happens to land later in the
+ * build than this page's — so without `!important` this rule silently loses and the toggle
+ * group stays grey. Confirmed live via CDP computed-style inspection: without `!important`
+ * here the rendered `background-color` was `rgb(248, 250, 252)`, not white. */
+.nip .dyf__toggle-group {
+  background: tokens.$surface !important;
+}
+
+/* Same rationale and same fix, for the outlined text/select/date inputs themselves —
+ * `.dyf__field`'s own idle/hover fill (`rgba($muted, 0.05/0.09)`) is set via `::ng-deep
+ * .mdc-text-field--outlined`, which compiles to `.dyf__field[_ngcontent-ng-cXXX]
+ * .mdc-text-field--outlined` — also specificity (0,3,0), also tied with the three-class
+ * selector below, also winning the tie by source order without `!important`. */
+.nip .dyf__field .mdc-text-field--outlined {
+  background: tokens.$surface !important;
+}
+
+.nip .dyf__field:hover:not(.mat-focused):not(.mat-form-field-disabled) .mdc-text-field--outlined {
+  background: tokens.$surface !important;
+}
+
+/* Same "shared component, page-local bump" pattern as the white-background overrides above —
+ * `.dys__title`'s module-default 0.8rem eyebrow label ("FORMATION TOPS", "CASING", "GEOLOGIST
+ * CONTACT", ...) reads a touch small against this page's otherwise-generous field sizing. */
+.nip .dys__title {
+  font-size: 0.86rem;
+  letter-spacing: 0.05em;
 }
 
 /* Subsurface & Construction: form fields on the left, a live well-bore preview pinned
  * alongside on the right so it updates as casing/formation-top rows are edited — the same
- * real `app-well-bore-view` diagram used in the Attachments & Review and Well Design View
- * steps (530px, not the previous 460px: a detailed engineering diagram with small tick/label
- * text needs more room than the old lightweight sketch did to stay legible). */
+ * real `app-well-bore-view` diagram used in the Well Design View step (530px, not the
+ * previous 460px: a detailed engineering diagram with small tick/label text needs more room
+ * than the old lightweight sketch did to stay legible). */
 .nip__step-content--split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 530px;
@@ -304,7 +354,8 @@ app-wwell-ir-new-page {
 
 /* Casing rows whose size can never render at the width their label implies — see
  * `findInvertedCasingSizeRows`'s doc comment in wwell-ir-casing-warnings.util.ts. Reuses the
- * same amber "pending" pair as `.nip__review-summary` for a consistent warning color. */
+ * same amber "pending" pair as `.nip__step-panel-badge`'s idle state for a consistent warning
+ * color. */
 .nip__casing-warnings {
   display: flex;
   flex-direction: column;
@@ -335,113 +386,99 @@ app-wwell-ir-new-page {
   }
 }
 
-/* Forces visibility so the Well Design View step animates correctly (see git history).
- * `overflow: visible` stays scoped to `-content-current` only — applying it to inactive
- * steps too strips Material's own clipping and leaks their content in from the side. */
-.nip .mat-horizontal-content-container {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-}
-
-.nip .mat-horizontal-stepper-content {
-  visibility: visible !important;
-}
-
-.nip .mat-horizontal-stepper-content-current {
-  overflow: visible !important;
-}
-
-/* ── Stepper header: custom progress rail ────────────────────────────────
- * Material's own horizontal-stepper header is fully replaced here — hidden
- * below — by a custom nav bound to `activeStepIndex`/`isStepValid()`
- * (wwell-ir-new-page.component.html). Material's built-in header draws its
- * connector out of three separate pieces (a `<div>` between each pair of
- * headers, plus a `::before`/`::after` on each header itself) with a
- * hardcoded 24px-icon offset assumption baked into the compiled CSS — any
- * custom icon size requires re-deriving and re-applying that offset to all
- * three pieces, and there's no supported way to render a single continuous
- * progress-fill segment (only per-segment idle/done coloring). A plain
- * absolutely-positioned track + fill div sidesteps both problems and stays
- * correct across any icon size without touching Material internals — the
- * `mat-stepper` underneath is kept purely for content transitions and
- * `[stepControl]` validation, `stepper.selectedIndex = i` still drives it.
+/* ── Stepper rail: vertical step list ─────────────────────────────────────
+ * A compact vertical nav bound to `expandedStepKeys()`/`isStepValid()`
+ * (wwell-ir-new-page.component.html): a chip-and-label button per step,
+ * stacked top to bottom, with a short connector segment between each
+ * consecutive pair (colored done/idle individually — no continuous
+ * progress-fill track to keep aligned against variable-height, wrapping
+ * labels). Kept deliberately thin — its only job is triggering `openStep()`
+ * (expand + scroll) — so the accordion panels next to it get the width.
  */
 $rail-idle-border: #cbd5e1; // slate-300 — visible ring against white
 $rail-idle-color: #94a3b8;
 
-.nip .mat-horizontal-stepper-header-container {
-  display: none;
-}
-
+/* Frozen in place while the accordion panels scroll past it — `align-self: flex-start`
+ * stops it stretching to `.nip__stepper`'s full (now page-length) height first, so `sticky`
+ * has a shorter element that can actually pin near the top of the scrolling ancestor
+ * (`app-wwell-ir-new-page`'s own `overflow: auto`, same one `.nip__footer` already sticks
+ * against). `max-height`/`overflow-y` are a safety net for very short viewports only — at
+ * this width all 7 steps normally fit without the rail needing to scroll internally. An
+ * explicit (tinted, distinct-from-the-white-panels) background isn't just a nav/content
+ * separation cue — it's required once the rail is sticky, so scrolled panel content
+ * doesn't show through underneath it. */
 .nip__rail {
-  padding: 1.1rem 1.25rem 1.4rem;
-  border-bottom: 1px solid $border;
+  flex-shrink: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  width: 144px;
+  padding: 0.9rem 0.65rem;
+  background: tokens.$surface-alt;
+  border-right: 1px solid $border;
+  border-radius: 12px 0 0 12px;
 }
 
 .nip__rail-head {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
   margin-bottom: 1.1rem;
 }
 
 .nip__rail-title {
-  font-size: 0.92rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: $navy;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .nip__rail-count {
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: 0.64rem;
   font-weight: 700;
   color: $accent;
   background: rgba($accent, 0.09);
-  padding: 0.2rem 0.65rem;
+  padding: 0.12rem 0.42rem;
   border-radius: 999px;
 }
 
-.nip__rail-track {
-  position: relative;
+.nip__rail-progress {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba($accent, 0.12);
+  overflow: hidden;
 }
 
-.nip__rail-track-base,
-.nip__rail-track-fill {
-  position: absolute;
-  top: 18px;
-  left: calc(50% / var(--rail-steps));
-  right: calc(50% / var(--rail-steps));
-  height: 3px;
-  border-radius: 3px;
-}
-
-.nip__rail-track-base {
-  background: #eef2f7;
-}
-
-.nip__rail-track-fill {
-  right: auto;
+.nip__rail-progress-fill {
+  height: 100%;
+  border-radius: 999px;
   background: linear-gradient(90deg, $accent, $done);
-  transition: width 260ms tokens.$ease-out;
+  transition: width 300ms tokens.$ease-out;
 }
 
 .nip__rail-steps {
   display: flex;
-  position: relative;
+  flex-direction: column;
 }
 
 .nip__rail-step {
-  flex: 1;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
   font: inherit;
+  text-align: left;
 
   &:focus-visible .nip__rail-chip {
     outline: 2px solid $accent;
@@ -449,19 +486,32 @@ $rail-idle-color: #94a3b8;
   }
 }
 
+.nip__rail-connector {
+  width: 1px;
+  height: 1.5rem;
+  margin: 0.08rem 0 0.08rem 10px;
+  border-radius: 1px;
+  background: #eef2f7;
+  transition: background-color 260ms tokens.$ease-out;
+
+  &--done {
+    background: linear-gradient(180deg, $accent, $done);
+  }
+}
+
 .nip__rail-chip {
-  width: 32px;
-  height: 32px;
+  width: 21px;
+  height: 21px;
   flex-shrink: 0;
   border-radius: 50%;
   background: tokens.$surface;
-  box-shadow: inset 0 0 0 2px $rail-idle-border;
+  box-shadow: inset 0 0 0 1.5px $rail-idle-border;
   color: $rail-idle-color;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 0.64rem;
   transition:
     background 180ms ease,
     box-shadow 180ms ease,
@@ -469,9 +519,9 @@ $rail-idle-color: #94a3b8;
     transform 180ms tokens.$ease-out;
 
   mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
   }
 }
 
@@ -485,15 +535,16 @@ $rail-idle-color: #94a3b8;
   background: $accent;
   box-shadow: none;
   color: #fff;
-  transform: translateY(-3px) scale(1.1);
+  transform: scale(1.1);
 }
 
 .nip__rail-label {
-  max-width: 100px;
+  flex: 1;
+  min-width: 0;
   white-space: normal;
-  line-height: 1.25;
-  text-align: center;
-  font-size: 0.75rem;
+  line-height: 1.15;
+  text-align: left;
+  font-size: 0.68rem;
   font-weight: 600;
   color: $rail-idle-color;
   transition: color 180ms ease;
@@ -508,94 +559,159 @@ $rail-idle-color: #94a3b8;
   font-weight: 800;
 }
 
+/* ── Step panels: one collapsible accordion panel per form step, stacked on
+ * one page — replaces the old one-active-step-at-a-time stepper body.
+ * Strips Material's own panel chrome (shadow/margin/radius) in favor of the
+ * same flat-card-plus-accent-bar treatment used elsewhere on this page. */
 .nip__stepper-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.1rem;
   background: transparent;
 }
 
-/* ── Review section ───────────────────────────────────────────── */
-.nip__review {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: tokens.$surface;
-  border: 1px solid rgba($accent, 0.14);
-  border-radius: 14px;
-}
-
-.nip__review-head {
+.nip__panels-toolbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.1rem;
+  justify-content: flex-end;
+  margin-bottom: 0.65rem;
 }
 
-.nip__review-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-}
-
-.nip__review-icon {
+.nip__panels-toggle {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: linear-gradient(135deg, $accent, #60a5fa);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba($accent, 0.32);
-
-  mat-icon {
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-  }
-}
-
-.nip__review-title {
-  margin: 0;
-  font-size: 1.08rem;
-  font-weight: 800;
-  color: $navy;
-}
-
-.nip__review-subtitle {
-  margin: 0.2rem 0 0;
-  font-size: 0.9rem;
-  color: $muted;
-}
-
-.nip__review-summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid $border;
   border-radius: 999px;
-  font-size: 0.86rem;
+  background: tokens.$surface;
+  color: $navy;
+  font: inherit;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: $pending;
-  background: #fef3c7;
-  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 
   mat-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;
+    color: $accent;
   }
 
-  &--done {
-    color: #047857;
-    background: #d1fae5;
+  &:hover {
+    background: rgba($accent, 0.06);
+    border-color: rgba($accent, 0.35);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
   }
 }
 
-.nip__review-grid {
+.nip__panels {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
+  background: transparent;
+}
+
+.nip .nip__step-panel {
+  position: relative;
+  border: 1px solid $border !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 2px 6px rgba(15, 23, 42, 0.03) !important;
+  overflow: hidden;
+  background: tokens.$surface;
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+
+  /* Status accent bar — pending amber, complete green. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: $pending;
+    transition: background-color 200ms ease;
+  }
+
+  &--done::after {
+    background: $done;
+  }
+
+  &:not(.mat-expanded):hover {
+    border-color: rgba($accent, 0.22) !important;
+    box-shadow:
+      0 2px 6px rgba(15, 23, 42, 0.06),
+      0 8px 20px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  &:not(.mat-expanded) .nip__step-panel-header:hover {
+    background: rgba($accent, 0.04);
+  }
+
+  &.mat-expanded {
+    border-color: rgba($accent, 0.35) !important;
+    box-shadow:
+      0 4px 12px rgba(15, 23, 42, 0.06),
+      0 12px 28px rgba(15, 23, 42, 0.08) !important;
+  }
+}
+
+.nip .nip__step-panel-header {
+  padding: 0.85rem 1.1rem;
+  height: auto !important;
+  transition: background-color 150ms ease;
+}
+
+.nip__step-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 700;
+  font-size: 0.96rem;
+  letter-spacing: -0.005em;
+  color: $navy;
+}
+
+.nip__step-panel-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: tokens.$surface;
+  box-shadow: inset 0 0 0 1.5px $rail-idle-border;
+  color: $rail-idle-color;
+  font-weight: 800;
+  font-size: 0.72rem;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+
+  &--done {
+    background: $done;
+    box-shadow: none;
+    color: #fff;
+  }
 }
 
 .nip__wellbore-card {
@@ -677,9 +793,9 @@ $rail-idle-color: #94a3b8;
  *
  * `max-height` is the important part: in the 530px Subsurface sidebar this row is only
  * ever ~430px tall (well under the cap, so it never engages — the aspect-ratio box alone
- * governs there, unchanged). But on the full-width Attachments & Review / Well Design View
- * cards, with nothing narrowing the row, the SAME aspect-ratio box would grow to ~840px
- * tall — tall enough to run past this page's header + stepper chrome and off the bottom of
+ * governs there, unchanged). But on the full-width Well Design View card, with nothing
+ * narrowing the row, the SAME aspect-ratio box would grow to ~840px
+ * tall — tall enough to run past this page's header + rail chrome and off the bottom of
  * a normal-height screen. The clamp caps it there instead; past that width the row goes
  * mildly wider-than-tall relative to the diagram's native ratio, which both SVGs already
  * tolerate via `preserveAspectRatio="none"`.
@@ -716,133 +832,45 @@ $rail-idle-color: #94a3b8;
   min-width: 0;
 }
 
-/* Stand-in for `.nip__wellbore-diagram-row` before `hasWellboreData()` goes true — same
- * max-width/aspect-ratio footprint so the card doesn't jump in height once real casing/
- * formation-top data flips this over to the actual diagram. */
+/* Stand-in for `.nip__wellbore-diagram-row` before `hasWellboreData()` goes true. Previously
+ * matched the real diagram's full `aspect-ratio: 1040/840` footprint (up to 620px tall) so
+ * the card wouldn't "jump" in height once data arrived — but that reserved a huge mostly-dead
+ * box on first load, especially in the Subsurface & Construction sidebar where the sibling
+ * left column (before any casing/formation-top rows are added) is barely 150px tall: the
+ * panel ballooned to match the empty card instead, with its accent bar trailing off into
+ * blank space below it. A modest, content-driven `min-height` (just enough to comfortably fit
+ * the icon + message) reads as an intentional placeholder instead of a broken layout — the
+ * height DOES still grow once real data swaps this for the actual diagram, but that's an
+ * expected, deliberate transition moment, not a jarring one. */
 .nip__wellbore-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.85rem;
   width: 100%;
-  max-width: 1040px;
-  aspect-ratio: 1040 / 840;
-  max-height: 620px;
+  min-height: 240px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.75rem;
   border: 1.5px dashed $border;
   border-radius: 10px;
   background: tokens.$surface-alt;
   text-align: center;
 
   mat-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 28px;
+    width: 34px;
+    height: 34px;
+    font-size: 34px;
     color: #cbd5e1;
   }
 
   p {
     margin: 0;
-    max-width: 32ch;
-    font-size: 0.86rem;
+    max-width: 34ch;
+    font-size: 0.94rem;
+    line-height: 1.55;
     color: $muted;
   }
-}
-
-.nip .nip__review-card {
-  position: relative;
-  border: 1px solid $border !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  background: tokens.$surface;
-  transition:
-    box-shadow 180ms ease,
-    border-color 180ms ease;
-
-  &::before {
-    display: none;
-  }
-
-  /* Status accent bar — pending amber, complete green. */
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 3px;
-    background: $pending;
-  }
-
-  &--done::after {
-    background: $done;
-  }
-
-  &:not(.mat-expanded) .nip__review-card-header:hover {
-    background: rgba($accent, 0.04);
-  }
-
-  &.mat-expanded {
-    border-color: rgba($accent, 0.35) !important;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
-  }
-}
-
-.nip__review-card-header {
-  transition: background-color 150ms ease;
-}
-
-.nip__review-card-title {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 700;
-  color: $navy;
-}
-
-.nip__review-card-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: #fef3c7;
-  color: #b45309;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease;
-
-  mat-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
-  }
-
-  &--done {
-    background: #d1fae5;
-    color: #047857;
-  }
-}
-
-.nip__review-card-edit {
-  margin-left: auto;
-  color: $accent;
-  font-weight: 700;
-  font-size: 0.86rem;
-
-  mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    margin-right: 2px;
-  }
-}
-
-.nip__review-card-body {
-  padding: 0.75rem 0.25rem 0.25rem;
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */
@@ -876,6 +904,21 @@ $rail-idle-color: #94a3b8;
 
   .nip__wellbore-card--sticky {
     position: static;
+  }
+}
+
+/* Below this width there isn't room for a fixed-width sidebar next to the form fields —
+ * stack the vertical step rail above the content instead, full-width, so its chip/label
+ * rows stay legible rather than being squeezed into the leftover space. */
+@media (max-width: 780px) {
+  .nip__stepper {
+    flex-direction: column;
+  }
+
+  .nip__rail {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid $border;
   }
 }
 

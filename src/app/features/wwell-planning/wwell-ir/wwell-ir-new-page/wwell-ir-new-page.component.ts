@@ -17,19 +17,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
-import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { MatStepperModule } from '@angular/material/stepper';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
-import { playIfMotionAllowed } from '../../shared/dynamic-form/gsap-motion.util';
-import { buildReviewRevealTimeline } from '../../shared/dynamic-form/review-reveal.animation';
-import { buildStepTransitionTimeline, WwellStepDirection } from '../../shared/dynamic-form/step-transition.animation';
 import { addRepeatableRow, buildWwellDynamicForm } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFieldConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
@@ -53,7 +48,6 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
-    MatStepperModule,
     MatExpansionModule,
     CdkDrag,
     CdkDragHandle,
@@ -67,14 +61,6 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
   // Required for the scoped M3 theme (and the portaled select/autocomplete panel it targets) to
   // actually reach those elements — see wwell-ir-new-page.component.scss for the full rationale.
   encapsulation: ViewEncapsulation.None,
-  providers: [
-    // Default indicator logic shows a pencil (not a checkmark) for any completed-but-editable,
-    // non-active step — and *every* step here is editable (we never set [editable]="false", since
-    // that flag also gates CdkStepper's backward-navigation, which we still need). This "guideline"
-    // mode instead shows: done (green check) whenever completed and not the active step, regardless
-    // of editable — exactly what we want, without touching navigability.
-    { provide: STEPPER_GLOBAL_OPTIONS, useValue: { displayDefaultIndicatorType: false } },
-  ],
 })
 export class WwellIrNewPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -87,11 +73,8 @@ export class WwellIrNewPageComponent implements OnInit {
   // review-step label lookup (see DynamicFieldComponent.reviewValue) show the same fetched wells —
   // see buildWwellIrFormSchema's doc comment for why this can't just live in the static schema.
   protected readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWells);
-  // Excludes 'attachments' (it renders the review UI itself, so it can't review itself) and
-  // 'wellDesignView' (a pure visualization step with no fields to review).
-  protected readonly reviewSteps = this.schema.filter(
-    step => step.key !== 'attachments' && step.key !== 'wellDesignView',
-  );
+  // Excludes 'wellDesignView' — a pure visualization step with no fields to ever be "done".
+  protected readonly progressSteps = this.schema.filter(step => step.key !== 'wellDesignView');
   protected readonly chainPreview = WWELL_IR_CHAIN_PREVIEW;
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
@@ -138,17 +121,11 @@ export class WwellIrNewPageComponent implements OnInit {
     initialValue: this.form.getRawValue() as WwellIrFormRawValue,
   });
 
-  protected readonly activeStepIndex = signal(0);
-
-  // Position-based fill for the custom step rail (see wwell-ir-new-page.component.scss's
-  // `.nip__rail`) — width is a percentage of the *whole* track div, but the track itself is
-  // inset by half a step's flex-width on each side (so it starts/ends at the first/last
-  // chip's center, not the track container's edge). Dividing by `schema.length` rather than
-  // `schema.length - 1` bakes that inset directly into the percentage: for n evenly-flexed
-  // steps the chip centers sit at (i + 0.5) / n, and the track's own left inset is 0.5 / n,
-  // so distance-from-left-inset-to-chip-i's-center reduces exactly to i / n.
-  protected readonly railProgressPercent = computed(
-    () => (this.activeStepIndex() / this.schema.length) * 100,
+  // Which step panels are currently expanded — a real (multi-open) accordion now, rather than
+  // one exclusively-active step, so this is a set rather than a single index. Starts with just
+  // the first step open, matching the wizard's old "one step visible at a time" starting point.
+  protected readonly expandedStepKeys = signal<ReadonlySet<string>>(
+    new Set(this.schema.length ? [this.schema[0].key] : []),
   );
 
   /*
@@ -159,19 +136,19 @@ export class WwellIrNewPageComponent implements OnInit {
    * `well-bore-view`'s own redraw effect never reads its `animTrigger` input (confirmed by
    * reading well-bore-view.component.ts — only `diagramData`/`diagramLayout`/`isFullscreen`
    * are tracked), so it only ever redraws when `diagramData` gets a NEW object reference.
-   * Angular Material's horizontal stepper renders every step's content upfront and keeps it
-   * mounted (hidden inactive steps get `visibility: hidden` + an off-screen `transform`, not
+   * Angular Material's expansion panel renders every panel's content upfront and keeps it
+   * mounted (a collapsed panel's content is `visibility: hidden` + zero-height, not
    * `display: none`/destroyed) — so the very first redraw (with its clip-path "grow" reveal
-   * transition, see casing.renderer.ts's `renderCasings`) runs while this step is still
-   * hidden and transformed off-screen, and has already finished — collapsed — by the time
-   * the user actually navigates here. Tracking `activeStepIndex` below forces a brand-new
-   * `WellboreDiagramData` object (and therefore a fresh redraw + reveal animation) every time
-   * the active step changes, so it's guaranteed to run once while genuinely visible. This is
-   * also a wwell-ir-local fix, per the standing rule not to modify anything under
-   * `presentation/well-bore-view/`.
+   * transition, see casing.renderer.ts's `renderCasings`) can run while a panel is still
+   * collapsed, and has already finished — collapsed — by the time the user actually expands
+   * it. Tracking `expandedStepKeys` below forces a brand-new `WellboreDiagramData` object
+   * (and therefore a fresh redraw + reveal animation) every time any panel's expanded state
+   * changes, so the Subsurface/Well Design View diagrams are guaranteed to redraw once while
+   * genuinely visible. This is also a wwell-ir-local fix, per the standing rule not to modify
+   * anything under `presentation/well-bore-view/`.
    */
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() => {
-    this.activeStepIndex();
+    this.expandedStepKeys();
     return buildWellboreDiagramData(this.rawFormValue());
   });
 
@@ -189,20 +166,19 @@ export class WwellIrNewPageComponent implements OnInit {
   );
 
   // `wellboreDiagramData().totalDepth` falls back to 0 when Target Depth (Request Reference,
-  // a required field) hasn't been filled in yet — reachable via the stepper's free (non-linear)
-  // navigation. `well-bore-view` always draws its "TOTAL DEPTH: 0 FT" label regardless (see the
+  // a required field) hasn't been filled in yet — reachable since every panel can be expanded
+  // in any order. `well-bore-view` always draws its "TOTAL DEPTH: 0 FT" label regardless (see the
   // standing rule against editing anything under `presentation/well-bore-view/`), so this instead
   // drives a page-local CSS hook (`.nip__wellbore-diagram-row--no-depth` in
   // wwell-ir-new-page.component.scss) that hides that one D3-rendered label group.
   protected readonly hasTargetDepth: Signal<boolean> = computed(
     () => (this.rawFormValue().reference.main.targetDepthFt ?? 0) > 0,
   );
-  @ViewChildren('stepContent') private readonly stepContents?: QueryList<ElementRef<HTMLElement>>;
-  @ViewChildren('reviewCard', { read: ElementRef }) private readonly reviewCards?: QueryList<ElementRef<HTMLElement>>;
+  // One entry per schema step, in schema order — lets `openStep()` scroll straight to the
+  // panel a rail click targets.
+  @ViewChildren('stepPanel', { read: ElementRef }) private readonly stepPanels?: QueryList<ElementRef<HTMLElement>>;
 
-  private previousStepIndex = 0;
   private wasSaving = false;
-  private reviewRevealed = false;
   // Which submitAs() call is currently in flight, and whether it targeted an already-saved draft
   // (UPDATE) or a brand-new one (INSERT) — the success effect below reads both to decide the
   // notification wording and whether to stay on this page or exit the wizard.
@@ -228,29 +204,6 @@ export class WwellIrNewPageComponent implements OnInit {
       if (!ir) return;
       this.populateFormForEdit(ir);
       this.editFormPopulated = true;
-    });
-
-    effect(() => {
-      const index = this.activeStepIndex();
-      const host = this.stepContents?.get(index);
-      if (!host) return;
-
-      const direction: WwellStepDirection = index >= this.previousStepIndex ? 'forward' : 'backward';
-      playIfMotionAllowed(buildStepTransitionTimeline(host.nativeElement, direction));
-      this.previousStepIndex = index;
-    });
-
-    effect(() => {
-      // Keyed on the 'attachments' step itself (not "last step") — Well Design View is now
-      // appended after it, so the review UI is no longer on the final step.
-      const isReviewStep = WWELL_IR_FORM_SCHEMA[this.activeStepIndex()]?.key === 'attachments';
-      if (!isReviewStep || this.reviewRevealed) return;
-
-      const cards = this.reviewCards?.map(card => card.nativeElement) ?? [];
-      if (!cards.length) return;
-
-      playIfMotionAllowed(buildReviewRevealTimeline(cards));
-      this.reviewRevealed = true;
     });
 
     effect(() => {
@@ -350,26 +303,42 @@ export class WwellIrNewPageComponent implements OnInit {
     return this.stepGroup(stepKey).valid;
   }
 
-  /** `reviewSteps` is `schema` with 'attachments'/'wellDesignView' filtered out, so its own
-   *  `$index` only happens to line up with the real stepper index while those two live at the
-   *  very end of the schema — resolving by key instead of trusting that ordering is what the
-   *  review cards' "Edit" button uses to jump back to the right step. */
-  protected stepIndexOf(stepKey: string): number {
-    return this.schema.findIndex(step => step.key === stepKey);
-  }
-
-  protected reviewCompletionSummary(): { done: number; total: number } {
-    const total = this.reviewSteps.length;
-    const done = this.reviewSteps.filter(step => this.isStepValid(step.key)).length;
+  protected completionSummary(): { done: number; total: number } {
+    const total = this.progressSteps.length;
+    const done = this.progressSteps.filter(step => this.isStepValid(step.key)).length;
     return { done, total };
   }
 
-  protected onReviewCardOpened(index: number): void {
-    this.reviewCards?.get(index)?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  protected isStepExpanded(stepKey: string): boolean {
+    return this.expandedStepKeys().has(stepKey);
   }
 
-  protected onStepSelectionChange(index: number): void {
-    this.activeStepIndex.set(index);
+  protected setStepExpanded(stepKey: string, expanded: boolean): void {
+    this.expandedStepKeys.update(current => {
+      const next = new Set(current);
+      if (expanded) {
+        next.add(stepKey);
+      } else {
+        next.delete(stepKey);
+      }
+      return next;
+    });
+  }
+
+  /** Rail click: expands the target panel (accordion stays multi-open — this never collapses
+   *  any other already-open panel) and scrolls its header into view. */
+  protected openStep(stepKey: string): void {
+    this.setStepExpanded(stepKey, true);
+    const index = this.schema.findIndex(step => step.key === stepKey);
+    this.stepPanels?.get(index)?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  protected allStepsExpanded(): boolean {
+    return this.schema.every(step => this.expandedStepKeys().has(step.key));
+  }
+
+  protected toggleAllSteps(): void {
+    this.expandedStepKeys.set(this.allStepsExpanded() ? new Set() : new Set(this.schema.map(step => step.key)));
   }
 
   protected cancel(): void {

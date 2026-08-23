@@ -47,267 +47,195 @@
   </header>
 
   <div class="nip__stepper">
-    <nav class="nip__rail" aria-label="Form steps">
+    <nav class="nip__rail" aria-label="Form sections">
       <div class="nip__rail-head">
-        <span class="nip__rail-title">{{
-          schema[activeStepIndex()].label
-        }}</span>
-        <span class="nip__rail-count"
-          >Step {{ activeStepIndex() + 1 }} of {{ schema.length }}</span
-        >
-      </div>
-      <div class="nip__rail-track" [style.--rail-steps]="schema.length">
-        <div class="nip__rail-track-base"></div>
-        <div
-          class="nip__rail-track-fill"
-          [style.width.%]="railProgressPercent()"
-        ></div>
-        <div class="nip__rail-steps">
-          @for (step of schema; track step.key; let i = $index) {
-            <button
-              type="button"
-              class="nip__rail-step"
-              [class.nip__rail-step--done]="
-                i !== activeStepIndex() && isStepValid(step.key)
-              "
-              [class.nip__rail-step--selected]="i === activeStepIndex()"
-              [attr.aria-current]="i === activeStepIndex() ? 'step' : null"
-              (click)="stepper.selectedIndex = i"
-            >
-              <span class="nip__rail-chip">
-                @if (i !== activeStepIndex() && isStepValid(step.key)) {
-                  <mat-icon>check</mat-icon>
-                } @else {
-                  {{ i + 1 }}
-                }
-              </span>
-              <span class="nip__rail-label">{{ step.label }}</span>
-            </button>
-          }
+        <span class="nip__rail-title">Sections</span>
+        @let completion = completionSummary();
+        <span class="nip__rail-count">{{ completion.done }}/{{ completion.total }} done</span>
+        <div class="nip__rail-progress">
+          <div
+            class="nip__rail-progress-fill"
+            [style.width.%]="(completion.done / completion.total) * 100"
+          ></div>
         </div>
+      </div>
+      <div class="nip__rail-steps">
+        @for (step of schema; track step.key; let i = $index; let last = $last) {
+          <button
+            type="button"
+            class="nip__rail-step"
+            [class.nip__rail-step--done]="isStepValid(step.key)"
+            [class.nip__rail-step--selected]="isStepExpanded(step.key)"
+            [attr.aria-current]="isStepExpanded(step.key) ? 'step' : null"
+            (click)="openStep(step.key)"
+          >
+            <span class="nip__rail-chip">
+              @if (isStepValid(step.key)) {
+                <mat-icon>check</mat-icon>
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+            <span class="nip__rail-label">{{ step.label }}</span>
+          </button>
+          @if (!last) {
+            <div
+              class="nip__rail-connector"
+              [class.nip__rail-connector--done]="isStepValid(step.key)"
+            ></div>
+          }
+        }
       </div>
     </nav>
 
-    <mat-stepper
-      class="nip__stepper-body"
-      [linear]="false"
-      labelPosition="bottom"
-      (selectionChange)="onStepSelectionChange($event.selectedIndex)"
-      #stepper
-    >
-      @for (step of schema; track step.key) {
-        <mat-step [stepControl]="stepGroup(step.key)" [label]="step.label">
-          <div
-            class="nip__step-content"
-            [class.nip__step-content--split]="step.key === 'subsurface'"
-            #stepContent
+    <div class="nip__stepper-body">
+      <div class="nip__panels-toolbar">
+        <button
+          type="button"
+          class="nip__panels-toggle"
+          (click)="toggleAllSteps()"
+        >
+          <mat-icon>{{ allStepsExpanded() ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+          {{ allStepsExpanded() ? 'Collapse all' : 'Expand all' }}
+        </button>
+      </div>
+
+      <mat-accordion class="nip__panels" multi>
+        @for (step of schema; track step.key; let i = $index) {
+          <mat-expansion-panel
+            class="nip__step-panel"
+            [class.nip__step-panel--done]="isStepValid(step.key)"
+            [expanded]="isStepExpanded(step.key)"
+            (opened)="setStepExpanded(step.key, true)"
+            (closed)="setStepExpanded(step.key, false)"
+            #stepPanel
           >
-            <div class="nip__step-fields">
-              @for (section of step.sections; track section.key) {
-                <app-dynamic-section
-                  [section]="section"
-                  [control]="sectionControl(step.key, section.key)"
-                  mode="edit"
-                  [selectPanelClass]="selectPanelClass"
-                />
-
-                @if (section.key === "casing" && casingSizeWarnings().length) {
-                  <ul class="nip__casing-warnings">
-                    @for (warning of casingSizeWarnings(); track warning.rowIndex) {
-                      <li class="nip__casing-warning">
-                        <mat-icon>warning</mat-icon>
-                        <span>
-                          Casing #{{ warning.rowIndex + 1 }} ({{ warning.size }}) is
-                          deeper and wider than Casing #{{
-                            warning.conflictsWithRowIndex + 1
-                          }}
-                          ({{ warning.conflictsWithSize }}) — the diagram below will draw
-                          it over that shallower casing, which may hide it. Two casings
-                          can't actually nest that way in a real well.
-                        </span>
-                      </li>
-                    }
-                  </ul>
-                }
-              }
-            </div>
-
-            @if (step.key === "subsurface") {
-              <div
-                class="nip__wellbore-card nip__wellbore-card--sticky"
-                cdkDrag
-                cdkDragBoundary=".nip__stepper-body"
-              >
-                <button
-                  type="button"
-                  class="nip__wellbore-drag-handle"
-                  cdkDragHandle
-                  aria-label="Drag to reposition the wellbore preview"
+            <mat-expansion-panel-header class="nip__step-panel-header">
+              <mat-panel-title class="nip__step-panel-title">
+                <span
+                  class="nip__step-panel-badge"
+                  [class.nip__step-panel-badge--done]="isStepValid(step.key)"
                 >
-                  <mat-icon>drag_indicator</mat-icon>
-                </button>
-                @if (hasWellboreData()) {
-                  <div
-                    class="nip__wellbore-diagram-row"
-                    [class.nip__wellbore-diagram-row--no-depth]="!hasTargetDepth()"
-                  >
-                    <app-wwell-ir-depth-scale
-                      [totalDepth]="wellboreDiagramData().displayDepth"
-                      [animTrigger]="0"
-                    />
-                    <app-well-bore-view
-                      class="nip__wellbore-diagram"
-                      [diagramData]="wellboreDiagramData()"
-                      [animTrigger]="0"
-                    />
-                  </div>
-                } @else {
-                  <div class="nip__wellbore-empty">
-                    <mat-icon>architecture</mat-icon>
-                    <p>
-                      Add a casing or formation top row below — with type,
-                      size, and depth filled in — to preview the wellbore
-                      diagram.
-                    </p>
-                  </div>
+                  @if (isStepValid(step.key)) {
+                    <mat-icon>check</mat-icon>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                </span>
+                {{ step.label }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div
+              class="nip__step-content"
+              [class.nip__step-content--split]="step.key === 'subsurface'"
+            >
+              <div class="nip__step-fields">
+                @for (section of step.sections; track section.key) {
+                  <app-dynamic-section
+                    [section]="section"
+                    [control]="sectionControl(step.key, section.key)"
+                    mode="edit"
+                    [selectPanelClass]="selectPanelClass"
+                  />
+
+                  @if (section.key === "casing" && casingSizeWarnings().length) {
+                    <ul class="nip__casing-warnings">
+                      @for (warning of casingSizeWarnings(); track warning.rowIndex) {
+                        <li class="nip__casing-warning">
+                          <mat-icon>warning</mat-icon>
+                          <span>
+                            Casing #{{ warning.rowIndex + 1 }} ({{ warning.size }}) is
+                            deeper and wider than Casing #{{
+                              warning.conflictsWithRowIndex + 1
+                            }}
+                            ({{ warning.conflictsWithSize }}) — the diagram below will draw
+                            it over that shallower casing, which may hide it. Two casings
+                            can't actually nest that way in a real well.
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  }
                 }
               </div>
-            }
 
-            @if (step.key === "attachments") {
-              <div class="nip__review">
-                <div class="nip__review-head">
-                  <div class="nip__review-heading">
-                    <span class="nip__review-icon">
-                      <mat-icon>fact_check</mat-icon>
-                    </span>
-                    <div>
-                      <h3 class="nip__review-title">
-                        Review before you submit
-                      </h3>
-                      <p class="nip__review-subtitle">
-                        Check each section below — use Edit to jump back and fix
-                        anything.
+              @if (step.key === "subsurface") {
+                <div
+                  class="nip__wellbore-card nip__wellbore-card--sticky"
+                  cdkDrag
+                  cdkDragBoundary=".nip__stepper-body"
+                >
+                  <button
+                    type="button"
+                    class="nip__wellbore-drag-handle"
+                    cdkDragHandle
+                    aria-label="Drag to reposition the wellbore preview"
+                  >
+                    <mat-icon>drag_indicator</mat-icon>
+                  </button>
+                  @if (hasWellboreData()) {
+                    <div
+                      class="nip__wellbore-diagram-row"
+                      [class.nip__wellbore-diagram-row--no-depth]="!hasTargetDepth()"
+                    >
+                      <app-wwell-ir-depth-scale
+                        [totalDepth]="wellboreDiagramData().displayDepth"
+                        [animTrigger]="0"
+                      />
+                      <app-well-bore-view
+                        class="nip__wellbore-diagram"
+                        [diagramData]="wellboreDiagramData()"
+                        [animTrigger]="0"
+                      />
+                    </div>
+                  } @else {
+                    <div class="nip__wellbore-empty">
+                      <mat-icon>architecture</mat-icon>
+                      <p>
+                        Add a casing or formation top row below — with type,
+                        size, and depth filled in — to preview the wellbore
+                        diagram.
                       </p>
                     </div>
-                  </div>
-
-                  @let summary = reviewCompletionSummary();
-                  <span
-                    class="nip__review-summary"
-                    [class.nip__review-summary--done]="
-                      summary.done === summary.total
-                    "
-                  >
-                    <mat-icon>{{
-                      summary.done === summary.total
-                        ? "verified"
-                        : "pending_actions"
-                    }}</mat-icon>
-                    {{ summary.done }} of {{ summary.total }} complete
-                  </span>
-                </div>
-
-                <mat-accordion class="nip__review-grid" multi>
-                  @for (
-                    reviewStep of reviewSteps;
-                    track reviewStep.key;
-                    let i = $index
-                  ) {
-                    <mat-expansion-panel
-                      class="nip__review-card"
-                      [class.nip__review-card--done]="
-                        isStepValid(reviewStep.key)
-                      "
-                      #reviewCard
-                      (opened)="onReviewCardOpened(i)"
-                    >
-                      <mat-expansion-panel-header
-                        class="nip__review-card-header"
-                      >
-                        <mat-panel-title class="nip__review-card-title">
-                          <span
-                            class="nip__review-card-badge"
-                            [class.nip__review-card-badge--done]="
-                              isStepValid(reviewStep.key)
-                            "
-                          >
-                            <mat-icon>{{
-                              isStepValid(reviewStep.key)
-                                ? "check"
-                                : "priority_high"
-                            }}</mat-icon>
-                          </span>
-                          {{ reviewStep.label }}
-                        </mat-panel-title>
-
-                        <button
-                          type="button"
-                          mat-button
-                          class="nip__review-card-edit"
-                          (click)="
-                            $event.stopPropagation();
-                            stepper.selectedIndex = stepIndexOf(reviewStep.key)
-                          "
-                        >
-                          <mat-icon>edit</mat-icon>
-                          Edit
-                        </button>
-                      </mat-expansion-panel-header>
-
-                      <div class="nip__review-card-body">
-                        @for (
-                          section of reviewStep.sections;
-                          track section.key
-                        ) {
-                          <app-dynamic-section
-                            [section]="section"
-                            [control]="
-                              sectionControl(reviewStep.key, section.key)
-                            "
-                            mode="review"
-                          />
-                        }
-                      </div>
-                    </mat-expansion-panel>
                   }
-                </mat-accordion>
-              </div>
-            }
+                </div>
+              }
 
-            @if (step.key === "wellDesignView") {
-              <div class="nip__wellbore-card">
-                @if (hasWellboreData()) {
-                  <div
-                    class="nip__wellbore-diagram-row"
-                    [class.nip__wellbore-diagram-row--no-depth]="!hasTargetDepth()"
-                  >
-                    <app-wwell-ir-depth-scale
-                      [totalDepth]="wellboreDiagramData().displayDepth"
-                      [animTrigger]="0"
-                    />
-                    <app-well-bore-view
-                      class="nip__wellbore-diagram"
-                      [diagramData]="wellboreDiagramData()"
-                      [animTrigger]="0"
-                    />
-                  </div>
-                } @else {
-                  <div class="nip__wellbore-empty">
-                    <mat-icon>architecture</mat-icon>
-                    <p>
-                      Wellbore diagram will appear here once casing or
-                      formation top details are added in Subsurface &amp;
-                      Construction.
-                    </p>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </mat-step>
-      }
-    </mat-stepper>
+              @if (step.key === "wellDesignView") {
+                <div class="nip__wellbore-card">
+                  @if (hasWellboreData()) {
+                    <div
+                      class="nip__wellbore-diagram-row"
+                      [class.nip__wellbore-diagram-row--no-depth]="!hasTargetDepth()"
+                    >
+                      <app-wwell-ir-depth-scale
+                        [totalDepth]="wellboreDiagramData().displayDepth"
+                        [animTrigger]="0"
+                      />
+                      <app-well-bore-view
+                        class="nip__wellbore-diagram"
+                        [diagramData]="wellboreDiagramData()"
+                        [animTrigger]="0"
+                      />
+                    </div>
+                  } @else {
+                    <div class="nip__wellbore-empty">
+                      <mat-icon>architecture</mat-icon>
+                      <p>
+                        Wellbore diagram will appear here once casing or
+                        formation top details are added in Subsurface &amp;
+                        Construction.
+                      </p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </div>
   </div>
 
   <footer class="nip__footer">

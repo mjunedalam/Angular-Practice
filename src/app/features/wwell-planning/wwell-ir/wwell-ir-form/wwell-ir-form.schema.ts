@@ -100,7 +100,16 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             { key: 'name', label: 'Formation', type: 'select', options: WWELL_IR_FORMATION_OPTIONS },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
             { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
-            { key: 'description', label: 'Description', type: 'text', placeholder: 'e.g., Top of Umm Er Radhuma' },
+            {
+              // colSpan:2 (== full row width in a repeatable row's variable-column grid, see
+              // `.dyf--span-2`'s doc comment) — the 4th field in a row that otherwise fits 3
+              // columns would land alone in a cramped 1-column-wide row without this.
+              key: 'description',
+              label: 'Description',
+              type: 'text',
+              placeholder: 'e.g., Top of Umm Er Radhuma',
+              colSpan: 2,
+            },
           ],
         },
       },
@@ -129,7 +138,15 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               hint: 'Depth this liner hangs from',
               visibleWhen: { field: 'type', equals: 'Liner' },
             },
-            { key: 'remarks', label: 'Remarks', type: 'text', placeholder: 'e.g., Cemented' },
+            {
+              // colSpan:2 — same "don't orphan the trailing free-text field" fix as
+              // Formation Tops' Description above.
+              key: 'remarks',
+              label: 'Remarks',
+              type: 'text',
+              placeholder: 'e.g., Cemented',
+              colSpan: 2,
+            },
           ],
         },
       },

@@ -59,8 +59,14 @@ $danger: #dc2626;
   white-space: nowrap;
 }
 
+/* `1 / -1` (not `span 2`) so this also does the right thing inside a repeatable row's
+ * variable-column grid (`.rpg__row-fields`, `repeat(auto-fit, minmax(210px, 1fr))` — 2, 3,
+ * or more columns depending on width), not just `.dys__grid`'s fixed 2 columns. `span 2` of
+ * a 3-column row leaves a dangling empty third column next to it; `1 / -1` always reaches the
+ * true last column instead. Identical result in a 2-column grid (span 2 of 2 === 1 / -1), so
+ * this changes nothing for the section-level 2-col consumers already using `colSpan: 2`. */
 .dyf--span-2 {
-  grid-column: span 2;
+  grid-column: 1 / -1;
 }
 
 .dyf__toggle,
