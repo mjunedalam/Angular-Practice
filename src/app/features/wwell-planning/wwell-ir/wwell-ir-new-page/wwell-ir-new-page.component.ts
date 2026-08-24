@@ -83,8 +83,6 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
   // review-step label lookup (see DynamicFieldComponent.reviewValue) show the same fetched wells —
   // see buildWwellIrFormSchema's doc comment for why this can't just live in the static schema.
   protected readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWells);
-  // Excludes 'wellDesignView' — a pure visualization step with no fields to ever be "done".
-  protected readonly progressSteps = this.schema.filter(step => step.key !== 'wellDesignView');
   protected readonly chainPreview = WWELL_IR_CHAIN_PREVIEW;
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
@@ -406,12 +404,6 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
 
   protected isStepValid(stepKey: string): boolean {
     return this.stepGroup(stepKey).valid;
-  }
-
-  protected completionSummary(): { done: number; total: number } {
-    const total = this.progressSteps.length;
-    const done = this.progressSteps.filter(step => this.isStepValid(step.key)).length;
-    return { done, total };
   }
 
   protected isStepExpanded(stepKey: string): boolean {

@@ -48,17 +48,6 @@
 
   <div class="nip__stepper">
     <nav class="nip__rail" aria-label="Form sections">
-      <div class="nip__rail-head">
-        <span class="nip__rail-title">Sections</span>
-        @let completion = completionSummary();
-        <span class="nip__rail-count">{{ completion.done }}/{{ completion.total }} done</span>
-        <div class="nip__rail-progress">
-          <div
-            class="nip__rail-progress-fill"
-            [style.width.%]="(completion.done / completion.total) * 100"
-          ></div>
-        </div>
-      </div>
       <div class="nip__rail-steps" #railSteps [style.height.px]="railStepsHeight()">
         @for (step of schema; track step.key; let i = $index; let last = $last) {
           <button

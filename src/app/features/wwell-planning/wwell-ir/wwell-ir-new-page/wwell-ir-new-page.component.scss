@@ -421,54 +421,12 @@ $rail-idle-color: #94a3b8;
   align-self: flex-start;
   position: sticky;
   top: 1rem;
-  
+  overflow-x: hidden;
   width: 92px;
   padding: 0.9rem 0.5rem;
   background: tokens.$surface-alt;
   border-right: 1px solid $border;
   border-radius: 12px 0 0 12px;
-}
-
-.nip__rail-head {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.4rem;
-  margin-bottom: 1.1rem;
-}
-
-.nip__rail-title {
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: $navy;
-  line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.nip__rail-count {
-  flex-shrink: 0;
-  font-size: 0.64rem;
-  font-weight: 700;
-  color: $accent;
-  background: rgba($accent, 0.09);
-  padding: 0.12rem 0.42rem;
-  border-radius: 999px;
-}
-
-.nip__rail-progress {
-  width: 100%;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba($accent, 0.12);
-  overflow: hidden;
-}
-
-.nip__rail-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, $accent, $done);
-  transition: width 300ms tokens.$ease-out;
 }
 
 /* `position: relative` anchors every `.nip__rail-step`/`.nip__rail-connector` below, which are
@@ -935,17 +893,6 @@ $rail-idle-color: #94a3b8;
     overflow-x: auto;
     border-right: none;
     border-bottom: 1px solid $border;
-  }
-
-  .nip__rail-head {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .nip__rail-progress {
-    width: 88px;
   }
 
   /* Live sync is desktop-only (see `railStepsHeight`/`isNarrowRail` in the .ts) — back to plain
