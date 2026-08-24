@@ -19,7 +19,14 @@ function errorMessage(err: unknown, fallback: string): string {
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
   const existingIndex = created.irSeq != null ? list.findIndex(item => item.irSeq === created.irSeq) : -1;
   if (existingIndex === -1) return [created, ...list];
-  return list.map((item, index) => (index === existingIndex ? created : item));
+  // `created` is rebuilt client-side from what was just submitted (see
+  // WwellIrService.buildIrFromPayload) — it has no way to know the record's real approval chain
+  // (that's a separate, still-mocked endpoint; see loadIrApprovalTimeline), so every resave mints
+  // a brand new "just initiated" chain. Harmless for a first-time INSERT (nothing to preserve
+  // yet), but a repeat save on an already-in-progress/approved record — including every single
+  // inline section edit on the detail page — would otherwise wipe out its real chain state on
+  // every save. Keep whichever chain this record already had.
+  return list.map((item, index) => (index === existingIndex ? { ...created, chain: item.chain } : item));
 }
 
 export const WwellIrStore = signalStore(
@@ -144,9 +151,13 @@ export const WwellIrStore = signalStore(
         loadLinkedRequestWells();
       },
 
-      createIr(payload: CreateIntegratedRequirementPayload, irBulkPayload: WwellIrBulkSavePayload, files: readonly File[] = []): void {
+      createIr(
+        payload: CreateIntegratedRequirementPayload,
+        irBulkPayload: WwellIrBulkSavePayload,
+        attachmentNames: readonly string[] = [],
+      ): void {
         patchState(store, { creatingIr: true, createIrError: null });
-        svc.createIr(payload, irBulkPayload, files).subscribe({
+        svc.createIr(payload, irBulkPayload, attachmentNames).subscribe({
           next: created =>
             patchState(store, {
               irs: upsertByIrSeq(store.irs(), created),

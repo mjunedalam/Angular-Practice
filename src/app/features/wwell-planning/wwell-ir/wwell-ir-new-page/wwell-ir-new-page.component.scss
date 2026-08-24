@@ -288,7 +288,7 @@ app-wwell-ir-new-page {
  * breathing room. Bottom padding added to match, so the panel doesn't end flush on its last
  * row either. */
 .nip__step-content {
-  padding: 1rem 1.1rem 1.25rem;
+  padding: 1.25rem 1.35rem 1.6rem;
 }
 
 /* Material's own panel-body padding (0 24px 16px) would stack on top of `.nip__step-content`'s
@@ -332,7 +332,7 @@ app-wwell-ir-new-page {
  * `.dys__title`'s module-default 0.8rem eyebrow label ("FORMATION TOPS", "CASING", "GEOLOGIST
  * CONTACT", ...) reads a touch small against this page's otherwise-generous field sizing. */
 .nip .dys__title {
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   letter-spacing: 0.05em;
 }
 
@@ -399,23 +399,31 @@ $rail-idle-border: #cbd5e1; // slate-300 — visible ring against white
 $rail-idle-color: #94a3b8;
 
 /* Frozen in place while the accordion panels scroll past it — `align-self: flex-start`
- * stops it stretching to `.nip__stepper`'s full (now page-length) height first, so `sticky`
- * has a shorter element that can actually pin near the top of the scrolling ancestor
+ * stops it stretching to `.nip__stepper`'s full height first, so `sticky` has a shorter
+ * element that can actually pin near the top of the scrolling ancestor
  * (`app-wwell-ir-new-page`'s own `overflow: auto`, same one `.nip__footer` already sticks
- * against). `max-height`/`overflow-y` are a safety net for very short viewports only — at
- * this width all 7 steps normally fit without the rail needing to scroll internally. An
- * explicit (tinted, distinct-from-the-white-panels) background isn't just a nav/content
- * separation cue — it's required once the rail is sticky, so scrolled panel content
- * doesn't show through underneath it. */
+ * against). An explicit (tinted, distinct-from-the-white-panels) background isn't just a
+ * nav/content separation cue — it's required once the rail is sticky, so scrolled panel
+ * content doesn't show through underneath it.
+ *
+ * No `max-height`/`overflow-y` here (there used to be one, sized for the OLD short/fixed-
+ * height rail): `.nip__rail-steps` is now bound to `railStepsHeight()` — deliberately as
+ * tall as the real panel column, since a number has to sit level with its own (possibly
+ * far-down-the-page) panel header (see `syncRailOffsets` in the .ts). Capping the rail's
+ * own height to the viewport re-introduced exactly that: a second, independent scrollbar
+ * clipping the rail into its own tiny window on almost any normal-height screen, forcing a
+ * separate scroll just to see steps 5–7. Leaving this uncapped lets `position: sticky`
+ * behave the way it already does for a too-tall sticky element — it pins at `top: 1rem`
+ * and naturally un-sticks once the page scrolls past its end — so rail and panels scroll
+ * as one, in lockstep, exactly like every number already tracks its own panel. */
 .nip__rail {
   flex-shrink: 0;
   align-self: flex-start;
   position: sticky;
   top: 1rem;
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
-  width: 144px;
-  padding: 0.9rem 0.65rem;
+  
+  width: 92px;
+  padding: 0.9rem 0.5rem;
   background: tokens.$surface-alt;
   border-right: 1px solid $border;
   border-radius: 12px 0 0 12px;
@@ -463,36 +471,71 @@ $rail-idle-color: #94a3b8;
   transition: width 300ms tokens.$ease-out;
 }
 
+/* `position: relative` anchors every `.nip__rail-step`/`.nip__rail-connector` below, which are
+ * absolutely positioned at desktop widths so their number can be pushed to line up with its
+ * panel's live header position (see `syncRailOffsets` in wwell-ir-new-page.component.ts) instead
+ * of just sitting at a fixed, evenly-spaced flex position. Reverts to a plain flex row at the
+ * ≤780px breakpoint below, where there's no panel-relative position worth tracking. */
 .nip__rail-steps {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
+/*
+ * Numbered-timeline rail: each step is now just its chip (no label — hover/focus reveals the
+ * step name via the native `title`/`aria-label` on the button instead). `isolation: isolate`
+ * keeps the hover glow (below) from being clipped by `.nip__rail`'s `overflow-y: auto`.
+ *
+ * `top: var(--rail-top, ...)` is a live pixel offset set from the component (in px, centered on
+ * this step's panel header) — `transition: top` is what turns each JS-driven measurement (one
+ * per animation frame while a panel opens/closes, see the ResizeObserver rationale in the .ts)
+ * into what reads as one continuous, smoothly-sliding push rather than a series of small jumps.
+ */
 .nip__rail-step {
-  width: 100%;
+  position: absolute;
+  top: var(--rail-top, 0px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: top 120ms tokens.$ease-out;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0;
+  justify-content: center;
+  padding: 0.2rem;
   border: none;
   background: none;
   cursor: pointer;
   font: inherit;
-  text-align: left;
+  isolation: isolate;
 
   &:focus-visible .nip__rail-chip {
     outline: 2px solid $accent;
     outline-offset: 2px;
   }
+
+  &:hover .nip__rail-chip {
+    transform: translateY(-1px);
+  }
 }
 
+/* The connecting line — a single continuous track down the rail's center. Its `top`/`height` are
+ * also live (spanning exactly from this chip's edge to the next chip's edge, both centers pulled
+ * from the same synced offsets as `.nip__rail-step` above), so the spine stays unbroken between
+ * numbers that are independently sliding to track their own panel. */
 .nip__rail-connector {
-  width: 1px;
-  height: 1.5rem;
-  margin: 0.08rem 0 0.08rem 10px;
+  position: absolute;
+  left: 50%;
+  top: var(--rail-connector-top, 0px);
+  height: var(--rail-connector-height, 0px);
+  width: 2px;
+  transform: translateX(-50%);
   border-radius: 1px;
-  background: #eef2f7;
-  transition: background-color 260ms tokens.$ease-out;
+  background: linear-gradient(180deg, rgba($rail-idle-border, 0.9), rgba($rail-idle-border, 0.35));
+  transition:
+    background 260ms tokens.$ease-out,
+    top 120ms tokens.$ease-out,
+    height 120ms tokens.$ease-out;
 
   &--done {
     background: linear-gradient(180deg, $accent, $done);
@@ -500,18 +543,21 @@ $rail-idle-color: #94a3b8;
 }
 
 .nip__rail-chip {
-  width: 21px;
-  height: 21px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: 50%;
   background: tokens.$surface;
-  box-shadow: inset 0 0 0 1.5px $rail-idle-border;
+  box-shadow:
+    inset 0 0 0 1.5px $rail-idle-border,
+    0 1px 2px rgba(15, 23, 42, 0.05);
   color: $rail-idle-color;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
   transition:
     background 180ms ease,
     box-shadow 180ms ease,
@@ -519,44 +565,27 @@ $rail-idle-color: #94a3b8;
     transform 180ms tokens.$ease-out;
 
   mat-icon {
-    width: 12px;
-    height: 12px;
-    font-size: 12px;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
   }
 }
 
 .nip__rail-step--done .nip__rail-chip {
   background: $done;
-  box-shadow: none;
+  box-shadow:
+    0 2px 5px rgba($done, 0.35),
+    0 0 0 3px rgba($done, 0.12);
   color: #fff;
 }
 
 .nip__rail-step--selected .nip__rail-chip {
   background: $accent;
-  box-shadow: none;
+  box-shadow:
+    0 3px 8px rgba($accent, 0.4),
+    0 0 0 5px rgba($accent, 0.14);
   color: #fff;
-  transform: scale(1.1);
-}
-
-.nip__rail-label {
-  flex: 1;
-  min-width: 0;
-  white-space: normal;
-  line-height: 1.15;
-  text-align: left;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: $rail-idle-color;
-  transition: color 180ms ease;
-}
-
-.nip__rail-step--done .nip__rail-label {
-  color: $muted;
-}
-
-.nip__rail-step--selected .nip__rail-label {
-  color: $navy;
-  font-weight: 800;
+  transform: scale(1.12);
 }
 
 /* ── Step panels: one collapsible accordion panel per form step, stacked on
@@ -617,14 +646,14 @@ $rail-idle-color: #94a3b8;
 .nip__panels {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.1rem;
   background: transparent;
 }
 
 .nip .nip__step-panel {
   position: relative;
   border: 1px solid $border !important;
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
     0 2px 6px rgba(15, 23, 42, 0.03) !important;
@@ -667,51 +696,31 @@ $rail-idle-color: #94a3b8;
   }
 }
 
+/* Explicit `!important` white, not just relying on `.nip__step-panel`'s own background showing
+ * through: MDC's expansion header paints its own surface color (from the scoped M3 theme's
+ * generated — and, per M3's tonal-surface design, faintly hue-tinted, not literally #fff —
+ * `surface` token) UNDER the header specifically, at equal specificity to a plain class rule, so
+ * it wins the tie by source order without this. Confirmed via the same class of bug already
+ * documented above for `.dyf__toggle-group`/`.dyf__field`. */
 .nip .nip__step-panel-header {
-  padding: 0.85rem 1.1rem;
+  padding: 1.05rem 1.35rem;
   height: auto !important;
+  background: tokens.$surface !important;
   transition: background-color 150ms ease;
+}
+
+.nip .nip__step-panel.mat-expanded .nip__step-panel-header {
+  border-bottom: 1px solid $border;
 }
 
 .nip__step-panel-title {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  font-weight: 700;
-  font-size: 0.96rem;
+  font-weight: 800;
+  font-size: 1.1rem;
   letter-spacing: -0.005em;
   color: $navy;
-}
-
-.nip__step-panel-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: tokens.$surface;
-  box-shadow: inset 0 0 0 1.5px $rail-idle-border;
-  color: $rail-idle-color;
-  font-weight: 800;
-  font-size: 0.72rem;
-  transition:
-    background-color 150ms ease,
-    box-shadow 150ms ease,
-    color 150ms ease;
-
-  mat-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
-  }
-
-  &--done {
-    background: $done;
-    box-shadow: none;
-    color: #fff;
-  }
 }
 
 .nip__wellbore-card {
@@ -910,6 +919,11 @@ $rail-idle-color: #94a3b8;
 /* Below this width there isn't room for a fixed-width sidebar next to the form fields —
  * stack the vertical step rail above the content instead, full-width, so its chip/label
  * rows stay legible rather than being squeezed into the leftover space. */
+/* Below this width there isn't room for a fixed-width rail beside the panels — stack it above
+ * them instead, full-width. Now that each step is just a numbered chip (no label to wrap), the
+ * chips read far better as one horizontal strip than as a tall single-column list spanning the
+ * full width, so the rail's own internal axis flips to match: chips left-to-right, connectors
+ * horizontal instead of vertical. */
 @media (max-width: 780px) {
   .nip__stepper {
     flex-direction: column;
@@ -917,8 +931,44 @@ $rail-idle-color: #94a3b8;
 
   .nip__rail {
     width: 100%;
+    max-height: none;
+    overflow-x: auto;
     border-right: none;
     border-bottom: 1px solid $border;
+  }
+
+  .nip__rail-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .nip__rail-progress {
+    width: 88px;
+  }
+
+  /* Live sync is desktop-only (see `railStepsHeight`/`isNarrowRail` in the .ts) — back to plain
+   * flex flow here, so the JS-driven `top`/`height` custom properties (still being set, just
+   * unused) don't leave stray absolutely-positioned chips behind. */
+  .nip__rail-steps {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .nip__rail-step {
+    position: static;
+    top: auto;
+    transform: none;
+  }
+
+  .nip__rail-connector {
+    position: static;
+    top: auto;
+    height: auto;
+    width: 1.35rem;
+    transform: none;
   }
 }
 

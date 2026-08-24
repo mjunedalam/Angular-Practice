@@ -1,16 +1,69 @@
+@use '@angular/material' as mat;
 @use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-select-panel-mixin' as wsel;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
 
-:host {
+/*
+ * `:host` is a no-op under ViewEncapsulation.None (see this component's own doc comment on why
+ * it's set) — no shadow boundary left to scope it against — so these rules target the
+ * `app-wwell-ir-detail` tag selector directly instead. Same fix as wwell-ir-new-page.component.ts
+ * (encapsulation: None there too, for the same reason: `.ird-select-panel` below needs to reach a
+ * mat-select's CDK-portaled overlay panel, which renders into <body> outside this component's own
+ * view).
+ */
+app-wwell-ir-detail {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
   font-family: tokens.$font-family;
+}
+
+/*
+ * The app only calls mat.core() globally with no full M3 color theme (see wwell-ir-new-page's
+ * identical block) — every Material control this page renders (the inline-edit forms' selects,
+ * inputs, textareas) would otherwise resolve unset --mat-sys-* tokens. `.ird-select-panel` covers
+ * a select's portaled panel specifically (see the encapsulation comment above); `.ird` covers
+ * everything else rendered inline in this component's own template.
+ */
+.ird,
+.ird-select-panel {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$blue-palette,
+        tertiary: mat.$azure-palette,
+      ),
+      typography: (
+        plain-family: tokens.$font-family,
+        brand-family: tokens.$font-family,
+      ),
+      density: -1,
+    )
+  );
+}
+
+.ird {
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 10px,
+    )
+  );
+}
+
+.ird-select-panel {
+  border-radius: 10px !important;
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.12),
+    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+  @include wsel.panel($accent, $navy);
 }
 
 .ird {
@@ -308,6 +361,49 @@ $accent: tokens.$accent;
   letter-spacing: 0.06em;
 }
 
+/* ── Per-section inline edit ──────────────────────────────────────
+ * Each `.ird__doc-section` can flip independently into an editable state (its own pencil button,
+ * its own Save/Cancel row) — any number of sections can be mid-edit across the page at once,
+ * since each one owns its own form/edit-state instance (see SectionEditState in
+ * wwell-ir-section-edit.util.ts) rather than sharing one page-level "editing" flag.
+ */
+.ird__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+
+  .ird__doc-section-title {
+    margin: 0;
+  }
+}
+
+.ird__section-edit-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+  color: $muted;
+
+  &:hover {
+    color: $accent;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.ird__section-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
 .ird__doc-grid {
   margin: 0;
   display: grid;
@@ -581,7 +677,7 @@ $accent: tokens.$accent;
    * only rasterizes whatever's currently scrolled into view, not the full multi-page letter
    * underneath it. Undo the bounded-height chain for print so the browser lays everything out
    * at its natural (unclipped) height instead. */
-  :host,
+  app-wwell-ir-detail,
   .ird,
   .ird__body,
   .ird__main,
@@ -941,6 +1037,61 @@ $accent: tokens.$accent;
   font-size: 0.9rem;
   color: $muted;
   font-style: italic;
+}
+
+/* Edit-mode-only variants: a remove (×) button per chip, plus a fresh-pick indicator for files
+ * added this session (not yet part of the saved `attachmentNames` list). */
+.ird__attachments--edit .ird__attachment {
+  padding-right: 0.35rem;
+}
+
+.ird__attachment--new {
+  border-style: dashed;
+  border-color: $accent;
+}
+
+.ird__attachment-remove {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin-left: 0.15rem;
+  color: $muted;
+
+  &:hover {
+    color: #b91c1c;
+  }
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+.ird__attachment-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px dashed $border;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $accent;
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    border-color: $accent;
+    background: tokens.$surface-alt;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */

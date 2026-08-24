@@ -1,11 +1,14 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   ElementRef,
   QueryList,
   Signal,
+  ViewChild,
   ViewChildren,
   ViewEncapsulation,
   effect,
@@ -62,12 +65,19 @@ const SELECT_PANEL_CLASS = 'nip-select-panel';
   // actually reach those elements — see wwell-ir-new-page.component.scss for the full rationale.
   encapsulation: ViewEncapsulation.None,
 })
-export class WwellIrNewPageComponent implements OnInit {
+export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(WwellIrStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly notify = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
+  // The scrollable ancestor for `.nip__rail`'s `position: sticky` (see the SCSS's own rationale
+  // comment) — this component's host tag itself, per `app-wwell-ir-new-page { overflow: auto }`.
+  // Needed as a scroll-sync source below: once the rail is pinned by `sticky`, every panel below
+  // it keeps scrolling underneath while the rail doesn't move in the viewport, so the rail↔panel
+  // offset used for the live sync (see `syncRailOffsets`) changes on scroll, not just on resize.
+  private readonly hostEl = inject(ElementRef<HTMLElement>);
 
   // Live-wired to the store's linkedRequestWells Signal so both the edit-mode picker and its
   // review-step label lookup (see DynamicFieldComponent.reviewValue) show the same fetched wells —
@@ -127,6 +137,34 @@ export class WwellIrNewPageComponent implements OnInit {
   protected readonly expandedStepKeys = signal<ReadonlySet<string>>(
     new Set(this.schema.length ? [this.schema[0].key] : []),
   );
+
+  // ── Live rail↔accordion sync ──────────────────────────────────────────────
+  // Each rail number's vertical center, in px relative to `.nip__rail-steps`' own top — bound to
+  // `--rail-top` (wwell-ir-new-page.component.scss) so a number sits level with its panel's
+  // header no matter how tall every OTHER (possibly-expanded) panel above it currently is.
+  // Seeded with an evenly-spaced guess so there's no 0/0 flash before the first real measurement
+  // in `ngAfterViewInit` lands (which happens before the browser's first paint in practice).
+  private readonly RAIL_CHIP_RADIUS = 17; // half of `.nip__rail-chip`'s 34px diameter
+  protected readonly railOffsets = signal<readonly number[]>(
+    this.schema.map((_, i) => i * 56 + this.RAIL_CHIP_RADIUS),
+  );
+  // Explicit height for `.nip__rail-steps`, whose children become `position: absolute` on desktop
+  // (see the SCSS) and would otherwise collapse it to zero. `null` on the narrow/horizontal
+  // layout, where the rail reverts to plain flex flow and must NOT be pinned to a fixed height.
+  protected readonly railStepsHeight = computed<number | null>(() => {
+    if (this.isNarrowRail()) return null;
+    const offsets = this.railOffsets();
+    return offsets.length ? offsets[offsets.length - 1] + this.RAIL_CHIP_RADIUS + 4 : null;
+  });
+  // Mirrors the SCSS's own 780px rail breakpoint — flipped from the same rAF-throttled
+  // resize handler that already drives `syncRailOffsets`, rather than a second listener.
+  protected readonly isNarrowRail = signal(
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 780px)').matches,
+  );
+
+  @ViewChild('railSteps', { read: ElementRef }) private readonly railStepsEl?: ElementRef<HTMLElement>;
+  private resizeObserver?: ResizeObserver;
+  private railSyncScheduled = false;
 
   /*
    * Feeds every `app-well-bore-view` instance in this wizard — same real diagram
@@ -221,6 +259,73 @@ export class WwellIrNewPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.loadLinkedRequestWells();
+  }
+
+  /**
+   * Wires up the "push down/up in real time" rail sync: a `ResizeObserver` per panel catches
+   * every frame of its expand/collapse height animation (an M3 `mat-expansion-panel` animates
+   * height via a CSS transition, which continuously resizes the element — this fires throughout,
+   * not just once at the end), a scroll listener re-measures once the rail's own `position:
+   * sticky` detaches it from the panels' normal scroll flow, and a resize listener covers both
+   * viewport-width layout flips and content reflow. All three funnel through the same
+   * rAF-throttled `scheduleRailSync` so a burst of ResizeObserver callbacks during one animation
+   * never does more than one measurement per frame.
+   */
+  ngAfterViewInit(): void {
+    const controller = new AbortController();
+    this.destroyRef.onDestroy(() => controller.abort());
+
+    this.resizeObserver = new ResizeObserver(() => this.scheduleRailSync());
+    this.stepPanels?.forEach(panel => this.resizeObserver?.observe(panel.nativeElement));
+    this.destroyRef.onDestroy(() => this.resizeObserver?.disconnect());
+
+    this.hostEl.nativeElement.addEventListener('scroll', () => this.scheduleRailSync(), {
+      passive: true,
+      signal: controller.signal,
+    });
+    window.addEventListener('resize', () => this.scheduleRailSync(), {
+      passive: true,
+      signal: controller.signal,
+    });
+
+    this.syncRailOffsets();
+  }
+
+  private scheduleRailSync(): void {
+    if (this.railSyncScheduled) return;
+    this.railSyncScheduled = true;
+    requestAnimationFrame(() => {
+      this.railSyncScheduled = false;
+      this.syncRailOffsets();
+    });
+  }
+
+  private syncRailOffsets(): void {
+    this.isNarrowRail.set(window.matchMedia('(max-width: 780px)').matches);
+
+    const panels = this.stepPanels;
+    const railEl = this.railStepsEl?.nativeElement;
+    if (!panels?.length || !railEl) return;
+
+    const railRect = railEl.getBoundingClientRect();
+    const offsets = panels.map(panelRef => {
+      const header = panelRef.nativeElement.querySelector('.nip__step-panel-header');
+      const rect = (header ?? panelRef.nativeElement).getBoundingClientRect();
+      return rect.top + rect.height / 2 - railRect.top;
+    });
+    this.railOffsets.set(offsets);
+  }
+
+  /** Center of the vertical bar segment between rail number `index` and `index + 1`. */
+  protected connectorTop(index: number): number {
+    return this.railOffsets()[index] + this.RAIL_CHIP_RADIUS;
+  }
+
+  protected connectorHeight(index: number): number {
+    const offsets = this.railOffsets();
+    const top = offsets[index] + this.RAIL_CHIP_RADIUS;
+    const bottom = offsets[index + 1] - this.RAIL_CHIP_RADIUS;
+    return Math.max(0, bottom - top);
   }
 
   /**
@@ -368,6 +473,6 @@ export class WwellIrNewPageComponent implements OnInit {
     const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: knownIrSeq, existing });
     this.lastSubmitStatus = status;
     this.lastSubmitWasUpdate = knownIrSeq !== null;
-    this.store.createIr(payload, irBulkPayload, files);
+    this.store.createIr(payload, irBulkPayload, files.map(file => file.name));
   }
 }

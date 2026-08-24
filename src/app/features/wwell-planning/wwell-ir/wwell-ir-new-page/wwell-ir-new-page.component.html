@@ -59,7 +59,7 @@
           ></div>
         </div>
       </div>
-      <div class="nip__rail-steps">
+      <div class="nip__rail-steps" #railSteps [style.height.px]="railStepsHeight()">
         @for (step of schema; track step.key; let i = $index; let last = $last) {
           <button
             type="button"
@@ -67,6 +67,9 @@
             [class.nip__rail-step--done]="isStepValid(step.key)"
             [class.nip__rail-step--selected]="isStepExpanded(step.key)"
             [attr.aria-current]="isStepExpanded(step.key) ? 'step' : null"
+            [attr.aria-label]="step.label"
+            [title]="step.label"
+            [style.--rail-top]="railOffsets()[i] + 'px'"
             (click)="openStep(step.key)"
           >
             <span class="nip__rail-chip">
@@ -76,12 +79,13 @@
                 {{ i + 1 }}
               }
             </span>
-            <span class="nip__rail-label">{{ step.label }}</span>
           </button>
           @if (!last) {
             <div
               class="nip__rail-connector"
               [class.nip__rail-connector--done]="isStepValid(step.key)"
+              [style.--rail-connector-top]="connectorTop(i) + 'px'"
+              [style.--rail-connector-height]="connectorHeight(i) + 'px'"
             ></div>
           }
         }
@@ -101,7 +105,7 @@
       </div>
 
       <mat-accordion class="nip__panels" multi>
-        @for (step of schema; track step.key; let i = $index) {
+        @for (step of schema; track step.key) {
           <mat-expansion-panel
             class="nip__step-panel"
             [class.nip__step-panel--done]="isStepValid(step.key)"
@@ -112,16 +116,6 @@
           >
             <mat-expansion-panel-header class="nip__step-panel-header">
               <mat-panel-title class="nip__step-panel-title">
-                <span
-                  class="nip__step-panel-badge"
-                  [class.nip__step-panel-badge--done]="isStepValid(step.key)"
-                >
-                  @if (isStepValid(step.key)) {
-                    <mat-icon>check</mat-icon>
-                  } @else {
-                    {{ i + 1 }}
-                  }
-                </span>
                 {{ step.label }}
               </mat-panel-title>
             </mat-expansion-panel-header>

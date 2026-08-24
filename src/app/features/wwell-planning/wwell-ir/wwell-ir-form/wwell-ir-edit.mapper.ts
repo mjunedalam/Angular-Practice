@@ -1,5 +1,6 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import {
+  WwellIrFormRawValue,
   WwellIrRawCasingRow,
   WwellIrRawFormationTop,
   WwellIrRawGeologist,
@@ -108,5 +109,35 @@ export function offsetWellRowPatch(row: IntegratedRequirement['offsetWells'][num
     specificCapacity: row.specificCapacity ?? null,
     tdsPpm: row.tdsPpm ?? null,
     h2sPpm: row.h2sPpm ?? null,
+  };
+}
+
+/**
+ * Full inverse of mapIrFormValueToSubmission — unlike mapIntegratedRequirementToFormPatch above
+ * (simple fields only, for patching an already-built wizard FormGroup), this rebuilds a complete
+ * WwellIrFormRawValue standalone, repeatable rows included. Used by the IR detail page's
+ * per-section inline edit (wwell-ir-detail.component.ts): saving one section's edits still needs
+ * to resubmit every *other* section's current (untouched) values alongside it, since
+ * buildWwellIrBulkSavePayload/mapIrFormValueToSubmission both take the form's full raw value, not
+ * a partial patch. Attachments have no such round-trip (a File can't be rebuilt from a saved
+ * name), so that slot is always empty here — callers pass the final attachment name list to
+ * WwellIrStore.createIr directly instead.
+ */
+export function mapIntegratedRequirementToRawFormValue(ir: IntegratedRequirement): WwellIrFormRawValue {
+  const patch = mapIntegratedRequirementToFormPatch(ir);
+  return {
+    reference: { main: patch.reference.main },
+    subsurface: {
+      formationTops: ir.formationTops.map(formationTopRowPatch),
+      casing: ir.casing.map(casingRowPatch),
+    },
+    programDetails: patch.programDetails,
+    contacts: {
+      geologist: patch.contacts.geologist,
+      offsetWells: ir.offsetWells.map(offsetWellRowPatch),
+      remarks: patch.contacts.remarks,
+    },
+    hydrogeology: patch.hydrogeology,
+    attachments: { files: { locationMap: [], initiationRequest: [] } },
   };
 }

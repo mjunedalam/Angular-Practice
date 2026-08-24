@@ -66,7 +66,7 @@ export class WwellIrService {
   createIr(
     payload: CreateIntegratedRequirementPayload,
     irBulkPayload: WwellIrBulkSavePayload,
-    files: readonly File[] = [],
+    attachmentNames: readonly string[] = [],
   ): Observable<IntegratedRequirement> {
     // The backend only accepts the raw exad_gwd_ir_* bulk-save array as the request body (see
     // wwell-ir-payload.model.ts / IntegratedRequirementResource.java's @Consumes(APPLICATION_JSON))
@@ -76,9 +76,9 @@ export class WwellIrService {
     return this.http
       .post<ApiResponse<WwellIrSaveResult>>(`${this.apiUrl}/integrated-requirements`, irBulkPayload)
       .pipe(
-        map(res => this.buildIrFromPayload(payload, res.data[0]?.irSeq ?? null, files)),
+        map(res => this.buildIrFromPayload(payload, res.data[0]?.irSeq ?? null, attachmentNames)),
         // TODO: remove fallback once every environment has a reachable integrated-requirements endpoint.
-        catchError(() => of(this.buildIrFromPayload(payload, null, files))),
+        catchError(() => of(this.buildIrFromPayload(payload, null, attachmentNames))),
       );
   }
 
@@ -98,7 +98,7 @@ export class WwellIrService {
   private buildIrFromPayload(
     payload: CreateIntegratedRequirementPayload,
     irSeq: number | null,
-    files: readonly File[],
+    attachmentNames: readonly string[],
   ): IntegratedRequirement {
     const resolvedIrSeq = irSeq ?? Math.floor(Math.random() * 9000 + 1000);
     // ir_seq-derived, matching mapIrHeaderSummaryToIntegratedRequirement's format — this same
@@ -119,7 +119,7 @@ export class WwellIrService {
       offsetWellsRemarks: payload.offsetWellsRemarks,
       hydrogeology: payload.hydrogeology,
       testProgram: payload.testProgram,
-      attachmentNames: files.map(file => file.name),
+      attachmentNames,
       chain: buildInitialApprovalChain(WWELL_IR_CHAIN_ROLES, 'You'),
     };
   }
