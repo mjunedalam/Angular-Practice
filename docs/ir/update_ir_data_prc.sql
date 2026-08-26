@@ -36,7 +36,7 @@ BEGIN
   WHERE t.table_name = 'EXAD_GWD_IR_HEADER';
 
   IF w_ir_seq IS NULL AND w_in_action = 'INSERT' THEN
-    -- w_ir_seq is null; -- This is new IR - Get the new sequence number
+    SELECT exad_gwd_ir_seq.NEXTVAL INTO w_ir_seq FROM dual;
   END IF;
 
   -- Merge into IR Header
@@ -125,7 +125,7 @@ BEGIN
       h.water_remarks,
       h.gen_remarks,
       h.cmpl_type,
-      h.trns_type,
+      h.trns_typf,
       h.dt_rmks,
       h.mud_rmks,
       h.test_type,
@@ -180,13 +180,14 @@ BEGIN
         h.water_remarks     = t.water_remarks,
         h.gen_remarks       = t.gen_remarks,
         h.cmpl_type         = t.cmpl_type,
-        h.trns_type         = t.trns_type,
+        h.trns_typf         = t.trns_type,
         h.dt_rmks           = t.dt_rmks,
         h.mud_rmks          = t.mud_rmks,
         h.test_type         = t.test_type,
         h.flow_rmks         = t.flow_rmks;
 
   exad_util_pkg.do_commit(p_do_commit);
+  p_return_value := JSON_OBJECT('status' VALUE 'SUCCESS', 'ir_seq' VALUE w_ir_seq);
 
 EXCEPTION
   WHEN OTHERS THEN

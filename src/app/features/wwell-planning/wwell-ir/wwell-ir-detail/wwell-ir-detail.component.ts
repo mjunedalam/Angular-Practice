@@ -149,7 +149,7 @@ export class WwellIrDetailComponent implements OnInit {
   // Live-option copy of the wizard's schema (its `linkedRequestId` select needs the same
   // store-backed eligible-wells list the wizard uses) — see buildWwellIrFormSchema's own doc
   // comment. Built once; `loadLinkedRequestWells()` below keeps the underlying signal fresh.
-  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWells);
+  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions);
 
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
   protected readonly programMainSection = findSection(this.schema, 'programDetails', 'main');

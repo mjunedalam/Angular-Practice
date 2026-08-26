@@ -14,6 +14,10 @@ import {
   IrTopsRow,
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
+import {
+  WWELL_GEOLOGIST_ID_BY_NAME,
+  WWELL_TRANSMISSION_CODE_BY_LABEL,
+} from '../../shared/wwell-planning-reference-data.config';
 
 /**
  * Carries the previously-assigned ir_seq (if any) so a repeat save UPDATEs instead of
@@ -238,6 +242,29 @@ function buildHydrogeologyRows(
   return rows;
 }
 
+/** exad_gwd_ir_header.tops_remarks is a single column, but Formation Tops is a repeatable row
+ *  list each with its own "Remarks" text — join whatever's there instead of keeping only one row's
+ *  text and silently dropping the rest. */
+function buildTopsRemarks(rows: readonly WwellIrRawFormationTop[]): string | null {
+  const remarks = rows.map(row => row.description?.trim()).filter((text): text is string => !!text);
+  return remarks.length ? remarks.join('; ') : null;
+}
+
+/** TEMPORARY: resolves a geologist's display name to the numeric id
+ *  exad_gwd_ir_header.cont_geologist/sub_cont_geologist actually expects — see
+ *  WWELL_GEOLOGIST_ID_BY_NAME's doc comment for why this is a stopgap. */
+function resolveGeologistId(name: string): number | null {
+  return name ? (WWELL_GEOLOGIST_ID_BY_NAME[name] ?? null) : null;
+}
+
+/** exad_gwd_ir_header.trns_typf is VARCHAR2(10) — too short for the full Transmission label, so a
+ *  known option maps to its short code; anything else (free-typed 'combo' text) is truncated to
+ *  fit rather than silently dropped by Oracle's lax JSON_TABLE conversion. */
+function resolveTransmissionCode(value: string): string | null {
+  if (!value) return null;
+  return WWELL_TRANSMISSION_CODE_BY_LABEL[value] ?? value.slice(0, 10);
+}
+
 /** Bridges the wizard's raw form value to the exad_gwd_ir_* bulk-save wire format — see wwell-ir-payload.model.ts. */
 export function buildWwellIrBulkSavePayload(
   raw: WwellIrFormRawValue,
@@ -249,22 +276,22 @@ export function buildWwellIrBulkSavePayload(
   const header: IrHeaderRow = {
     action: headerAction,
     ir_seq: irSeq,
-    // Fields with no source in this form yet — left explicit so the next person adding them
-    // knows exactly what's still missing, instead of guessing at a silently-wrong mapping.
-    orgwab_seq: null,
-    itc_no: null,
+    prewap_seq: raw.reference.main.linkedRequestId ? Number(raw.reference.main.linkedRequestId) : null,
+    ltr_no: raw.reference.main.letterNumber || null,
     screen: '',
-    tops_remarks: null,
+    tops_remarks: buildTopsRemarks(raw.subsurface.formationTops),
     publish_dt: null,
     publish_flg: 'N', // flips once the approval workflow publishes this record, not at authoring time
     curr_flg: 'Y',
     publish_by: null,
-    cont_geologist: null, // form stores geologist name, not the numeric employee id this column expects
-    sub_cont_geologist: null,
+    cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistPrimary),
+    sub_cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistSecondary),
     water_remarks: null,
     geo_remarks: null,
-    cmpl_type: raw.programDetails.main.completion || null,
-    trbs_type: null,
+    completion: raw.programDetails.main.completion || null,
+    cmpl_type: null,
+    acidization: raw.programDetails.main.acidization || null,
+    trns_type: resolveTransmissionCode(raw.programDetails.main.transmission),
     ot_rmks: null,
     mud_rmks: null,
     test_type: raw.hydrogeology.main.testType || null,

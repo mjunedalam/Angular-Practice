@@ -23,7 +23,8 @@ const storeMock = {
   createIr: jest.fn(),
   draftIrSeq: jest.fn(() => null as number | null),
   resetIrDraft: jest.fn(),
-  linkedRequestWells: jest.fn(() => [] as { value: string; label: string }[]),
+  linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
+  linkedRequestWellOptions: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
 };
 

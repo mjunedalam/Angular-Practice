@@ -1,10 +1,12 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
-import { WwellFieldOption } from '../../shared/dynamic-form/wwell-dynamic-form.types';
+import { IrEligibleWell } from '../wwell-ir-form/wwell-ir-payload.model';
 
 export interface WwellIrStoreState {
   readonly irs: IntegratedRequirement[];
-  /** Wells still eligible to have an IR initiated — feeds the "New IR" wizard's "Link to Request" picker. */
-  readonly linkedRequestWells: WwellFieldOption[];
+  /** Wells still eligible to have an IR initiated — feeds the "New IR" wizard's "Link to Request"
+   *  picker (see the store's `linkedRequestWellOptions` computed for its trimmed option view) and
+   *  the auto-populate lookup once one is selected. */
+  readonly linkedRequestWells: IrEligibleWell[];
   /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
   readonly draftIrSeq: number | null;
   readonly irsLoading: boolean;

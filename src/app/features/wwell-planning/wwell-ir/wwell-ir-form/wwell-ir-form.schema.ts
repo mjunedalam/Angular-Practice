@@ -105,7 +105,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               // `.dyf--span-2`'s doc comment) — the 4th field in a row that otherwise fits 3
               // columns would land alone in a cramped 1-column-wide row without this.
               key: 'description',
-              label: 'Description',
+              label: 'Remarks',
               type: 'text',
               placeholder: 'e.g., Top of Umm Er Radhuma',
               colSpan: 2,

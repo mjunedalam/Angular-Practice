@@ -79,10 +79,10 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
   // offset used for the live sync (see `syncRailOffsets`) changes on scroll, not just on resize.
   private readonly hostEl = inject(ElementRef<HTMLElement>);
 
-  // Live-wired to the store's linkedRequestWells Signal so both the edit-mode picker and its
+  // Live-wired to the store's linkedRequestWellOptions Signal so both the edit-mode picker and its
   // review-step label lookup (see DynamicFieldComponent.reviewValue) show the same fetched wells —
   // see buildWwellIrFormSchema's doc comment for why this can't just live in the static schema.
-  protected readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWells);
+  protected readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions);
   protected readonly chainPreview = WWELL_IR_CHAIN_PREVIEW;
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
 
@@ -128,6 +128,10 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
   private readonly rawFormValue: Signal<WwellIrFormRawValue> = toSignal(this.form.valueChanges, {
     initialValue: this.form.getRawValue() as WwellIrFormRawValue,
   });
+
+  // Isolated from rawFormValue so the auto-populate effect below only re-runs when the linked
+  // request actually changes, not on every keystroke elsewhere in the form.
+  private readonly linkedRequestId: Signal<string> = computed(() => this.rawFormValue().reference.main.linkedRequestId);
 
   // Which step panels are currently expanded — a real (multi-open) accordion now, rather than
   // one exclusively-active step, so this is a set rather than a single index. Starts with just
@@ -240,6 +244,12 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
       if (!ir) return;
       this.populateFormForEdit(ir);
       this.editFormPopulated = true;
+    });
+
+    effect(() => {
+      const linkedRequestId = this.linkedRequestId();
+      if (!linkedRequestId) return;
+      this.applyLinkedRequestWell(linkedRequestId);
     });
 
     effect(() => {
@@ -366,6 +376,23 @@ export class WwellIrNewPageComponent implements OnInit, AfterViewInit {
 
   protected sectionControl(stepKey: string, sectionKey: string): FormGroup | FormArray {
     return this.stepGroup(stepKey).get(sectionKey) as FormGroup | FormArray;
+  }
+
+  /** Fills whichever Request Reference fields the selected "Link to Request" well actually has
+   *  data for (Water Well Name, Surface Elevation, Coordinates) — exad_rcd_prewap has no BI
+   *  Number/Supporting Business/Target Aquifer/Target Depth, so those stay untouched. A no-op if
+   *  the well isn't found (e.g. its options haven't loaded yet, or edit mode is loading a record
+   *  for a well that's no longer in the eligible list). */
+  private applyLinkedRequestWell(linkedRequestId: string): void {
+    const well = this.store.linkedRequestWells().find(candidate => String(candidate.prewapSeq) === linkedRequestId);
+    if (!well) return;
+
+    const patch: Record<string, string | number> = { wellName: well.wellName };
+    if (well.surfaceElevation != null) patch['surfaceElevationFtAsl'] = well.surfaceElevation;
+    if (well.surfaceNorth != null && well.surfaceEast != null) {
+      patch['coordinates'] = `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
+    }
+    this.stepGroup('reference').get('main')?.patchValue(patch);
   }
 
   /** Fills every simple field from the saved record, then grows+fills each repeatable section's

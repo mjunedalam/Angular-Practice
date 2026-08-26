@@ -60,7 +60,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     })),
     programDetails: {
       ...existing.programDetails,
-      completion: header?.cmpl_type ?? existing.programDetails.completion,
+      completion: header?.completion ?? header?.cmpl_type ?? existing.programDetails.completion,
     },
     hydrogeology: hydroRow
       ? {

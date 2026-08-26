@@ -32,8 +32,12 @@ function upsertByIrSeq(list: readonly IntegratedRequirement[], created: Integrat
 export const WwellIrStore = signalStore(
   withState<WwellIrStoreState>(initialWwellIrState),
 
-  withComputed(({ irsLoading, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
+  withComputed(({ irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
     isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
+    /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
+     *  see wwell-ir-new-page.component.ts's `applyLinkedRequestWell` for where the full record
+     *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
+    linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
     activeErrors: computed(() =>
       [irsError(), linkedRequestWellsError(), createIrError(), updateIrStatusError(), irDetailError(), irApprovalTimelineError()].filter(
         (message): message is string => message !== null,

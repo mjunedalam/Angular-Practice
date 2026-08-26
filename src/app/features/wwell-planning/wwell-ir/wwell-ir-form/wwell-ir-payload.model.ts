@@ -21,20 +21,27 @@ interface IrRow {
 }
 
 export interface IrHeaderRow extends IrRow {
-  readonly orgwab_seq: number | null;
-  readonly itc_no: string | null;
+  readonly prewap_seq: number | null;
+  readonly ltr_no: string | null;
   readonly screen: string;
   readonly tops_remarks: string | null;
   readonly publish_dt: string | null;
   readonly publish_flg: 'Y' | 'N';
   readonly curr_flg: 'Y' | 'N';
   readonly publish_by: string | null;
+  /** exad_gwd_ir_header.cont_geologist/sub_cont_geologist are NUMBER(3) — resolved from the form's
+   *  geologist name via the TEMPORARY WWELL_GEOLOGIST_ID_BY_NAME stopgap map (see
+   *  wwell-planning-reference-data.config.ts) until a real employee-id lookup exists. */
   readonly cont_geologist: number | null;
   readonly sub_cont_geologist: number | null;
   readonly water_remarks: string | null;
   readonly geo_remarks: string | null;
+  /** Free-text completion selection (exad_gwd_ir_header.completion, VARCHAR2(4000)) — NOT
+   *  cmpl_type, which is VARCHAR2(10) and too short to hold values like "Screened + Gravel Pack". */
+  readonly completion: string | null;
   readonly cmpl_type: string | null;
-  readonly trbs_type: string | null;
+  readonly acidization: string | null;
+  readonly trns_type: string | null;
   readonly ot_rmks: string | null;
   readonly mud_rmks: string | null;
   readonly test_type: string | null;
@@ -110,11 +117,23 @@ export interface WwellIrDetailTableBlock {
 }
 
 /**
- * GET /wells/eligible-for-ir response row — mirrors the backend's IrWellSummary record. Backed by
- * exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract above), for
- * the "New IR" wizard's Request Reference "Link to Request" picker.
+ * GET /wells/eligible-for-ir response row — mirrors the backend's IrWellEligibilitySummary record.
+ * Backed by exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract
+ * above), for the "New IR" wizard's Request Reference "Link to Request" picker — selecting one
+ * auto-populates whichever Request Reference fields this record actually has data for (Water Well
+ * Name, Surface Elevation, Coordinates); see wwell-ir-new-page.component.ts's
+ * `applyLinkedRequestWell`. BI Number/Supporting Business/Target Aquifer/Target Depth have no
+ * source here (exad_rcd_prewap doesn't carry them) and stay manually entered.
  */
 export interface IrEligibleWell {
   readonly prewapSeq: number;
   readonly wellName: string;
+  readonly surfaceNorth: number | null;
+  readonly surfaceEast: number | null;
+  readonly surfaceElevation: number | null;
+  readonly primaryHoleId: string | null;
+  readonly wellNumber: string | null;
+  readonly utmZone: string | null;
+  readonly wellType: string | null;
+  readonly wellClassification: string | null;
 }

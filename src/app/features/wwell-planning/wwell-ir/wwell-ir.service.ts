@@ -5,7 +5,6 @@ import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
-import { WwellFieldOption } from '../shared/dynamic-form/wwell-dynamic-form.types';
 import { WWELL_IR_CHAIN_ROLES } from '../shared/wwell-approvals/wwell-approvals.config';
 import { buildInitialApprovalChain, todayIsoDate } from '../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-form/wwell-ir-chain.mock';
@@ -31,13 +30,12 @@ export class WwellIrService {
   /**
    * Wells still eligible to have an IR initiated (backed by exad_rcd_prewap via
    * exad_agwa_queries_pkg.get_ir_wells_prc) — feeds the "New IR" wizard's Request Reference
-   * "Link to Request" picker. Mapped straight into WwellFieldOption so the dynamic-form field can
-   * consume it directly (value = prewap_seq as a string, label = well_name).
+   * "Link to Request" picker. Returns the full record (not just {value,label}) so selecting one
+   * can also auto-populate Water Well Name/Surface Elevation/Coordinates — see WwellIrStore's
+   * `linkedRequestWellOptions` computed for the trimmed picker-option view derived from this.
    */
-  getEligibleWellsForIr(): Observable<WwellFieldOption[]> {
-    return this.http
-      .get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`)
-      .pipe(map(res => res.data.map(well => ({ value: String(well.prewapSeq), label: well.wellName }))));
+  getEligibleWellsForIr(): Observable<IrEligibleWell[]> {
+    return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(map(res => res.data));
   }
 
   /**
