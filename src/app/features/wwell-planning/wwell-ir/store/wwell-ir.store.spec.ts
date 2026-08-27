@@ -62,6 +62,8 @@ function buildIrBulkPayload(): WwellIrBulkSavePayload {
           prewap_seq: null,
           ltr_no: null,
           screen: '',
+          sampling: null,
+          logging: null,
           tops_remarks: null,
           publish_dt: null,
           publish_flg: 'N',
@@ -100,14 +102,14 @@ describe('WwellIrStore - createIr', () => {
     store = TestBed.inject(WwellIrStore);
   });
 
-  it('passes files through to the service and prepends the created row on success', () => {
+  it('passes attachment names through to the service and prepends the created row on success', () => {
     const created = buildCreated();
-    const files = [new File(['x'], 'map.pdf')];
+    const attachmentNames = ['map.pdf'];
     serviceMock.createIr.mockReturnValue(of(created));
 
-    store.createIr(buildPayload(), buildIrBulkPayload(), files);
+    store.createIr(buildPayload(), buildIrBulkPayload(), attachmentNames);
 
-    expect(serviceMock.createIr).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), files);
+    expect(serviceMock.createIr).toHaveBeenCalledWith(buildPayload(), buildIrBulkPayload(), attachmentNames);
     expect(store.irs()).toEqual([created]);
     expect(store.creatingIr()).toBe(false);
     expect(store.createIrError()).toBeNull();
@@ -130,20 +132,11 @@ describe('WwellIrStore - createIr', () => {
     expect(store.createIrError()).toBe('Network down');
   });
 
-  it('remembers the returned ir_seq so a later draft save can reuse it', () => {
+  it('remembers the returned ir_seq — WwellIrComponent.createNewIr() reads this to select the just-created draft', () => {
     serviceMock.createIr.mockReturnValue(of(buildCreated(9001)));
 
     store.createIr(buildPayload(), buildIrBulkPayload());
 
     expect(store.draftIrSeq()).toBe(9001);
-  });
-
-  it('resetIrDraft clears the remembered ir_seq for a fresh "new IR" session', () => {
-    serviceMock.createIr.mockReturnValue(of(buildCreated(9001)));
-    store.createIr(buildPayload(), buildIrBulkPayload());
-
-    store.resetIrDraft();
-
-    expect(store.draftIrSeq()).toBeNull();
   });
 });

@@ -80,9 +80,8 @@ export interface WwellIrRawHydrology {
   readonly estimatedPumpDepthFt: number | null;
 }
 
-export interface WwellIrRawFiles {
-  readonly locationMap: File[];
-  readonly initiationRequest: File[];
+export interface WwellIrRawFileField {
+  readonly file: File[];
 }
 
 export interface WwellIrFormRawValue {
@@ -101,5 +100,8 @@ export interface WwellIrFormRawValue {
     readonly remarks: WwellIrRawRemarks;
   };
   readonly hydrogeology: { readonly main: WwellIrRawHydrology };
-  readonly attachments: { readonly files: WwellIrRawFiles };
+  readonly attachments: {
+    readonly locationMap: WwellIrRawFileField;
+    readonly initiationRequest: WwellIrRawFileField;
+  };
 }

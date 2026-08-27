@@ -24,6 +24,8 @@ export interface IrHeaderRow extends IrRow {
   readonly prewap_seq: number | null;
   readonly ltr_no: string | null;
   readonly screen: string;
+  readonly sampling: string | null;
+  readonly logging: string | null;
   readonly tops_remarks: string | null;
   readonly publish_dt: string | null;
   readonly publish_flg: 'Y' | 'N';
@@ -119,9 +121,9 @@ export interface WwellIrDetailTableBlock {
 /**
  * GET /wells/eligible-for-ir response row — mirrors the backend's IrWellEligibilitySummary record.
  * Backed by exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract
- * above), for the "New IR" wizard's Request Reference "Link to Request" picker — selecting one
+ * above), for the IR editor's Request Reference "Link to Request" picker — selecting one
  * auto-populates whichever Request Reference fields this record actually has data for (Water Well
- * Name, Surface Elevation, Coordinates); see wwell-ir-new-page.component.ts's
+ * Name, Surface Elevation, Coordinates); see wwell-ir-editor.component.ts's
  * `applyLinkedRequestWell`. BI Number/Supporting Business/Target Aquifer/Target Depth have no
  * source here (exad_rcd_prewap doesn't carry them) and stay manually entered.
  */

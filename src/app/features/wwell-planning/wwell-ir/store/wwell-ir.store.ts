@@ -35,7 +35,7 @@ export const WwellIrStore = signalStore(
   withComputed(({ irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
     isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
     /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
-     *  see wwell-ir-new-page.component.ts's `applyLinkedRequestWell` for where the full record
+     *  see wwell-ir-editor.component.ts's `applyLinkedRequestWell` for where the full record
      *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
     linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
     activeErrors: computed(() =>
@@ -171,17 +171,6 @@ export const WwellIrStore = signalStore(
             }),
           error: (err: unknown) => patchState(store, { creatingIr: false, createIrError: errorMessage(err, 'Failed to create integrated requirement') }),
         });
-      },
-
-      /** Call when a fresh "new IR" session starts, so it never inherits a previous draft's ir_seq. */
-      resetIrDraft(): void {
-        patchState(store, { draftIrSeq: null });
-      },
-
-      /** Call when the wizard opens in edit mode for an existing IR — makes every Save/Submit on
-       *  that visit issue an UPDATE against this ir_seq instead of an INSERT. */
-      startEditingIr(irSeq: number): void {
-        patchState(store, { draftIrSeq: irSeq });
       },
 
       submitIrForReview(ir: IntegratedRequirement): void {

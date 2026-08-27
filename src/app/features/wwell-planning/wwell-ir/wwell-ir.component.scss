@@ -157,6 +157,78 @@ $master-width: 240px;
   }
 }
 
+/* ── Lifecycle toggle + status chips: one skinny, horizontally-scrolling line ────── */
+.wwell-ir__filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.wwell-ir__lifecycle-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  line-height: 0;
+  color: $accent;
+  cursor: pointer;
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+
+  &--inactive {
+    color: tokens.$subtle;
+  }
+}
+
+.wwell-ir__status-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wwell-ir__status-chip {
+  flex-shrink: 0;
+  border: 1px solid $border;
+  background: tokens.$surface;
+  border-radius: 999px;
+  padding: 0.14rem 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: $muted;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    border-color: rgba($accent, 0.4);
+    color: $navy;
+  }
+
+  &--active {
+    background: rgba($accent, 0.12);
+    border-color: rgba($accent, 0.35);
+    color: $accent;
+  }
+}
+
 .wwell-ir__status {
   padding: 2rem 1rem;
   text-align: center;
@@ -354,10 +426,10 @@ $master-width: 240px;
 }
 
 /* ── Detail column ────────────────────────────────────────────── *
- * No longer the scroll container itself — `app-wwell-ir-detail` now bounds its own height
- * and owns its own internal scrolling (only the active tab's content area scrolls; its header/
- * tab-strip/sidebar stay fixed), so this column just needs to hand it a definite, non-growing
- * height to bound against instead of scrolling on its behalf.
+ * No longer the scroll container itself — `app-wwell-ir-editor` now bounds its own height
+ * and owns its own internal scrolling (only `.ire__body` scrolls; its header/footer stay
+ * fixed), so this column just needs to hand it a definite, non-growing height to bound
+ * against instead of scrolling on its behalf.
  */
 .wwell-ir__detail {
   flex: 1;
@@ -387,7 +459,7 @@ $master-width: 240px;
   flex-direction: column;
   min-height: 0;
 
-  > app-wwell-ir-detail {
+  > app-wwell-ir-editor {
     flex: 1;
     min-height: 0;
   }
@@ -466,14 +538,13 @@ $master-width: 240px;
   }
 }
 
-/* Printing the Letter tab (see wwell-ir-detail.component.scss) needs its full, unclipped
- * height — `.wwell-ir__detail`'s `overflow: hidden` above exists only to bound the on-screen
- * internal-scroll layout, and would otherwise cut the letter off at whatever fit the last
- * viewport height before print was triggered. */
+/* Printing needs the editor's full, unclipped height — `.wwell-ir__detail`'s `overflow: hidden`
+ * above exists only to bound the on-screen internal-scroll layout, and would otherwise cut
+ * content off at whatever fit the last viewport height before print was triggered. */
 @media print {
   .wwell-ir__detail,
   .wwell-ir__detail-panel,
-  .wwell-ir__detail-panel > app-wwell-ir-detail {
+  .wwell-ir__detail-panel > app-wwell-ir-editor {
     display: block;
     flex: none;
     max-height: none;

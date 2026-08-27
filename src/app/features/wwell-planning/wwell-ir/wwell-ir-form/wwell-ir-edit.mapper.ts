@@ -22,11 +22,11 @@ export interface WwellIrEditFormPatch {
 }
 
 /**
- * Inverse of mapIrFormValueToSubmission (wwell-ir-form.mapper.ts) — rebuilds the wizard's simple
- * (non-repeatable) field values from an already-saved IntegratedRequirement, for the edit flow.
- * Repeatable rows (formationTops/casing/offsetWells) aren't included here since patching a
- * FormArray also needs to grow it first — see populateRepeatableSection in
- * wwell-ir-new-page.component.ts, which uses the row builders below instead.
+ * Inverse of mapIrFormValueToSubmission (wwell-ir-form.mapper.ts) — rebuilds the editor's simple
+ * (non-repeatable) field values from an already-saved IntegratedRequirement. Repeatable rows
+ * (formationTops/casing/offsetWells) aren't included here since patching a FormArray also needs
+ * to grow it first — see populateRepeatableSection in wwell-ir-editor.component.ts, which uses
+ * the row builders below instead.
  */
 export function mapIntegratedRequirementToFormPatch(ir: IntegratedRequirement): WwellIrEditFormPatch {
   return {
@@ -38,7 +38,11 @@ export function mapIntegratedRequirementToFormPatch(ir: IntegratedRequirement): 
         supportingBusiness: ir.requestReference.supportingBusiness,
         wellName: ir.requestReference.wellName,
         targetAquifer: ir.requestReference.targetAquifer,
-        targetDepthFt: ir.requestReference.targetDepthFt,
+        // A brand-new draft is created with a blank form submitted through the required-number
+        // fallback in mapIrFormValueToSubmission (targetDepthFt ?? 0), so a freshly-created record
+        // comes back with 0 here rather than a true "not yet entered" value — redisplay it as
+        // empty rather than a misleading pre-filled "0".
+        targetDepthFt: ir.requestReference.targetDepthFt || null,
         surfaceElevationFtAsl: ir.requestReference.surfaceElevationFtAsl,
         coordinates: ir.requestReference.coordinates,
       },
@@ -114,10 +118,10 @@ export function offsetWellRowPatch(row: IntegratedRequirement['offsetWells'][num
 
 /**
  * Full inverse of mapIrFormValueToSubmission — unlike mapIntegratedRequirementToFormPatch above
- * (simple fields only, for patching an already-built wizard FormGroup), this rebuilds a complete
- * WwellIrFormRawValue standalone, repeatable rows included. Used by the IR detail page's
- * per-section inline edit (wwell-ir-detail.component.ts): saving one section's edits still needs
- * to resubmit every *other* section's current (untouched) values alongside it, since
+ * (simple fields only, for patching an already-built section FormGroup), this rebuilds a complete
+ * WwellIrFormRawValue standalone, repeatable rows included. Used by the IR editor's per-section
+ * inline edit (wwell-ir-editor.component.ts): saving one section's edits still needs to resubmit
+ * every *other* section's current (untouched) values alongside it, since
  * buildWwellIrBulkSavePayload/mapIrFormValueToSubmission both take the form's full raw value, not
  * a partial patch. Attachments have no such round-trip (a File can't be rebuilt from a saved
  * name), so that slot is always empty here — callers pass the final attachment name list to
@@ -138,6 +142,6 @@ export function mapIntegratedRequirementToRawFormValue(ir: IntegratedRequirement
       remarks: patch.contacts.remarks,
     },
     hydrogeology: patch.hydrogeology,
-    attachments: { files: { locationMap: [], initiationRequest: [] } },
+    attachments: { locationMap: { file: [] }, initiationRequest: { file: [] } },
   };
 }

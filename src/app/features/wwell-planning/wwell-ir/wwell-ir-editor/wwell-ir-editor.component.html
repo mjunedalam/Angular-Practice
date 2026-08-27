@@ -1,0 +1,694 @@
+<div class="ire">
+  <header class="ire__header">
+    <div class="ire__heading">
+      <p class="ire__eyebrow">{{ ir().code }}</p>
+      <h2 class="ire__title">{{ ir().requestReference.wellName || "Untitled Well" }}</h2>
+    </div>
+    <div class="ire__header-actions">
+      <div class="ire__view-toggle" role="group" aria-label="View mode">
+        <button
+          type="button"
+          class="ire__view-toggle-btn"
+          [class.ire__view-toggle-btn--active]="viewMode() === 'sections'"
+          aria-label="Sections view"
+          title="Sections view"
+          (click)="setViewMode('sections')"
+        >
+          <mat-icon>view_list</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="ire__view-toggle-btn"
+          [class.ire__view-toggle-btn--active]="viewMode() === 'timeline'"
+          aria-label="Timeline view"
+          title="Timeline view"
+          (click)="setViewMode('timeline')"
+        >
+          <mat-icon>timeline</mat-icon>
+        </button>
+      </div>
+      @if (viewMode() === 'timeline') {
+        <button
+          type="button"
+          mat-icon-button
+          class="ire__tl-toggle-all-btn"
+          [attr.aria-label]="allTimelineStepsExpanded() ? 'Collapse all sections' : 'Expand all sections'"
+          [title]="allTimelineStepsExpanded() ? 'Collapse all' : 'Expand all'"
+          (click)="toggleAllTimelineSteps()"
+        >
+          <mat-icon>{{ allTimelineStepsExpanded() ? "unfold_less" : "unfold_more" }}</mat-icon>
+        </button>
+        <button
+          type="button"
+          mat-icon-button
+          class="ire__tl-toggle-all-btn"
+          [class.ire__tl-toggle-all-btn--active]="previewSidebarOpen()"
+          [attr.aria-label]="previewSidebarOpen() ? 'Hide wellbore preview' : 'Show wellbore preview'"
+          [title]="previewSidebarOpen() ? 'Hide wellbore preview' : 'Show wellbore preview'"
+          (click)="togglePreviewSidebar()"
+        >
+          <mat-icon>{{ previewSidebarOpen() ? "view_sidebar" : "dock_to_left" }}</mat-icon>
+        </button>
+      }
+      <span
+        class="ire__badge"
+        [style.background]="statusMeta[ir().status].bg"
+        [style.color]="statusMeta[ir().status].color"
+      >
+        <span class="ire__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
+        {{ statusMeta[ir().status].label }}
+      </span>
+    </div>
+  </header>
+
+  <div class="ire__body" #body [class.ire__body--timeline]="viewMode() === 'timeline'">
+    @if (viewMode() === 'sections') {
+      <nav class="ire__rail" aria-label="IR sections">
+        <p class="ire__rail-title">IR Sections</p>
+        <ul class="ire__rail-list">
+          @for (group of railGroups; track group.key) {
+          <li class="ire__rail-group">
+            <button
+              type="button"
+              class="ire__rail-group-btn"
+              [class.ire__rail-group-btn--active]="group.leaf && isLeafActive(group.leaf.key)"
+              (click)="scrollToGroupStart(group)"
+            >
+              <mat-icon class="ire__rail-group-icon">{{ group.icon }}</mat-icon>
+              <span class="ire__rail-number">{{ group.number }}</span>
+              <span class="ire__rail-label">{{ group.label }}</span>
+            </button>
+            @if (group.children) {
+              <ul class="ire__rail-children">
+                @for (child of group.children; track child.key) {
+                  <li>
+                    <button
+                      type="button"
+                      class="ire__rail-child-btn"
+                      [class.ire__rail-child-btn--active]="isLeafActive(child.key)"
+                      (click)="scrollToLeaf(child.key)"
+                    >
+                      <span class="ire__rail-number">{{ child.number }}</span>
+                      <span class="ire__rail-label">{{ child.label }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+
+    <div class="ire__sections" [class.ire__sections--timeline]="viewMode() === 'timeline'">
+      <!-- 1.0 Wellbore Details -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('wellbore') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('wellbore')">
+          @if (timelineStepStatus('wellbore') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <section #sectionEl id="ire-sec-wellbore" class="ire__section">
+        <div class="ire__section-head" (click)="toggleTimelineStep('wellbore')">
+          <h2 class="ire__section-title">1.0 Wellbore Details</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('wellbore') === 'completed'">
+              {{ timelineStepStatus("wellbore") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+          @if (!requestReferenceEdit.isEditing() && isTimelineStepExpanded('wellbore')) {
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Wellbore Details" (click)="$event.stopPropagation(); requestReferenceEdit.open()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('wellbore')) {
+          @if (requestReferenceEdit.control(); as ctrl) {
+            <app-dynamic-section [section]="referenceMainSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="requestReferenceEdit.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveRequestReference()">
+                {{ isSaving() ? "Saving…" : "Save" }}
+              </button>
+            </div>
+          } @else {
+            <dl class="ire__view-grid">
+              @for (row of requestReferenceRows(); track row.label) {
+                <div class="ire__view-field" [attr.data-tone]="row.tone">
+                  <dt>{{ row.label }}</dt>
+                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        }
+      </section>
+      </div>
+      </div>
+
+      <!-- 2.0 General -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('general') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('general')">
+          @if (timelineStepStatus('general') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <div class="ire__group">
+        <div class="ire__section-head" (click)="toggleTimelineStep('general')">
+          <h2 class="ire__section-title">2.0 General</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('general') === 'completed'">
+              {{ timelineStepStatus("general") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('general')) {
+        <!-- 2.1 Program Details -->
+        <section #sectionEl id="ire-sec-program-main" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">2.1 Program Details</h3>
+            @if (!programMainEdit.isEditing()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" (click)="programMainEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+
+          @if (programMainEdit.control(); as ctrl) {
+            <app-dynamic-section [section]="programMainSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="programMainEdit.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveProgramMain()">
+                {{ isSaving() ? "Saving…" : "Save" }}
+              </button>
+            </div>
+          } @else {
+            <dl class="ire__view-grid">
+              @for (row of programMainRows(); track row.label) {
+                <div class="ire__view-field" [attr.data-tone]="row.tone">
+                  <dt>{{ row.label }}</dt>
+                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </section>
+
+        <!-- 2.2 Development & Testing -->
+        <section #sectionEl id="ire-sec-program-dev" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">2.2 Development &amp; Testing</h3>
+            @if (!programDevEdit.isEditing()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Development & Testing" (click)="programDevEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+
+          @if (programDevEdit.control(); as ctrl) {
+            <app-dynamic-section [section]="programDevSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="programDevEdit.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveProgramDev()">
+                {{ isSaving() ? "Saving…" : "Save" }}
+              </button>
+            </div>
+          } @else {
+            <dl class="ire__view-grid">
+              @for (row of programDevRows(); track row.label) {
+                <div class="ire__view-field" [attr.data-tone]="row.tone">
+                  <dt>{{ row.label }}</dt>
+                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </section>
+
+        <!-- 2.3 Geologist Contact -->
+        <section #sectionEl id="ire-sec-geologist" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">2.3 Geologist Contact</h3>
+            @if (!geologistContactEdit.isEditing()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Geologist Contact" (click)="geologistContactEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+
+          @if (geologistContactEdit.control(); as ctrl) {
+            <app-dynamic-section [section]="geologistSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="geologistContactEdit.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveGeologistContact()">
+                {{ isSaving() ? "Saving…" : "Save" }}
+              </button>
+            </div>
+          } @else {
+            <dl class="ire__view-grid">
+              @for (row of geologistContactRows(); track row.label) {
+                <div class="ire__view-field" [attr.data-tone]="row.tone">
+                  <dt>{{ row.label }}</dt>
+                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </section>
+        }
+      </div>
+      </div>
+      </div>
+
+      <!-- 3.0 Horizons -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('horizons') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('horizons')">
+          @if (timelineStepStatus('horizons') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <section #sectionEl id="ire-sec-horizons" class="ire__section">
+        <div class="ire__section-head" (click)="toggleTimelineStep('horizons')">
+          <h2 class="ire__section-title">3.0 Horizons</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('horizons') === 'completed'">
+              {{ timelineStepStatus("horizons") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+          @if (!formationTopsEdit.isEditing() && isTimelineStepExpanded('horizons')) {
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="$event.stopPropagation(); formationTopsEdit.open()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('horizons')) {
+        @if (formationTopsEdit.control(); as ctrl) {
+          <app-dynamic-section [section]="formationTopsSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+          <div class="ire__edit-actions">
+            <button type="button" mat-button (click)="formationTopsEdit.close()">Cancel</button>
+            <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveFormationTops()">
+              {{ isSaving() ? "Saving…" : "Save" }}
+            </button>
+          </div>
+        } @else {
+          <div class="ire__view-table-wrap">
+            <table class="ire__view-table">
+              <thead>
+                <tr>
+                  <th>Formation</th>
+                  <th>Description</th>
+                  <th>Depth (ft bgl)</th>
+                  <th>Sub-sea (ft asl)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (top of ir().formationTops; track top.name) {
+                  <tr>
+                    <td>{{ top.name }}</td>
+                    <td>{{ top.description || "—" }}</td>
+                    <td>{{ top.depthFt }}</td>
+                    <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="ire__view-table-empty">No formation tops recorded.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        }
+      </section>
+      </div>
+      </div>
+
+      <!-- 4.0 Casing -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('casing') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('casing')">
+          @if (timelineStepStatus('casing') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <section #sectionEl id="ire-sec-casing" class="ire__section">
+        <div class="ire__section-head" (click)="toggleTimelineStep('casing')">
+          <h2 class="ire__section-title">4.0 Casing</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('casing') === 'completed'">
+              {{ timelineStepStatus("casing") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+          @if (!casingEdit.isEditing() && isTimelineStepExpanded('casing')) {
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Casing" (click)="$event.stopPropagation(); casingEdit.open()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('casing')) {
+        @if (casingEdit.control(); as ctrl) {
+          <app-dynamic-section [section]="casingSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+          <div class="ire__edit-actions">
+            <button type="button" mat-button (click)="casingEdit.close()">Cancel</button>
+            <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveCasing()">
+              {{ isSaving() ? "Saving…" : "Save" }}
+            </button>
+          </div>
+        } @else {
+          <div class="ire__view-table-wrap">
+            <table class="ire__view-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Size</th>
+                  <th>Depth (ft bgl)</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of ir().casing; track row.type + row.depthFtBgl) {
+                  <tr>
+                    <td>{{ row.type }}</td>
+                    <td>{{ row.sizeIn }}</td>
+                    <td>{{ row.depthFtBgl }}</td>
+                    <td>{{ row.remarks || "—" }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="ire__view-table-empty">No casing recorded.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (casingSizeWarnings().length) {
+            <ul class="ire__casing-warnings">
+              @for (warning of casingSizeWarnings(); track warning.rowIndex) {
+                <li class="ire__casing-warning">
+                  <mat-icon>warning</mat-icon>
+                  <span>
+                    Casing #{{ warning.rowIndex + 1 }} ({{ warning.size }}) is deeper and wider than
+                    Casing #{{ warning.conflictsWithRowIndex + 1 }} ({{ warning.conflictsWithSize }}) — the
+                    diagram will draw it over that shallower casing, which may hide it.
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        }
+        }
+      </section>
+      </div>
+      </div>
+
+      <!-- Wellbore preview — read-only, always derived from the persisted record. Sections view
+           keeps it inline right here between Casing and Hydrogeology, unchanged. Timeline view
+           doesn't render it inline at all — it isn't tied to any one lifecycle step, so it's
+           pinned in a sticky sidebar instead (see `wellborePreviewTpl` usage further down),
+           staying visible no matter which step is open or how far the steps are scrolled. -->
+      @if (viewMode() === 'sections') {
+        <ng-container [ngTemplateOutlet]="wellborePreviewTpl" />
+      }
+
+      <ng-template #wellborePreviewTpl>
+        <section class="ire__section ire__wellbore-card">
+          <h2 class="ire__section-title">Wellbore Preview</h2>
+          @if (hasWellboreData()) {
+            <div class="ire__wellbore-diagram-row" [class.ire__wellbore-diagram-row--no-depth]="!hasTargetDepth()">
+              @if (viewMode() === 'timeline') {
+                <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+                <app-well-bore-view class="ire__wellbore-diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+              } @else {
+                <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" />
+                <app-well-bore-view class="ire__wellbore-diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" />
+              }
+            </div>
+          } @else {
+            <div class="ire__wellbore-empty">
+              <mat-icon>architecture</mat-icon>
+              <p>Add a casing or formation top row — with type, size, and depth filled in — to preview the wellbore diagram.</p>
+            </div>
+          }
+        </section>
+      </ng-template>
+
+      <!-- 5.0 Hydrogeology -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('hydrogeology') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('hydrogeology')">
+          @if (timelineStepStatus('hydrogeology') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <section #sectionEl id="ire-sec-hydrogeology" class="ire__section">
+        <div class="ire__section-head" (click)="toggleTimelineStep('hydrogeology')">
+          <h2 class="ire__section-title">5.0 Hydrogeology</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('hydrogeology') === 'completed'">
+              {{ timelineStepStatus("hydrogeology") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+          @if (!hydrogeologyEdit.isEditing() && isTimelineStepExpanded('hydrogeology')) {
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Hydrogeology" (click)="$event.stopPropagation(); hydrogeologyEdit.open()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('hydrogeology')) {
+        @if (hydrogeologyEdit.control(); as ctrl) {
+          <app-dynamic-section [section]="hydrogeologySection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+          <div class="ire__edit-actions">
+            <button type="button" mat-button (click)="hydrogeologyEdit.close()">Cancel</button>
+            <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveHydrogeology()">
+              {{ isSaving() ? "Saving…" : "Save" }}
+            </button>
+          </div>
+        } @else {
+          <dl class="ire__view-grid">
+            @for (row of hydrogeologyRows(); track row.label) {
+              <div class="ire__view-field" [attr.data-tone]="row.tone">
+                <dt>{{ row.label }}</dt>
+                <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+              </div>
+            }
+          </dl>
+        }
+        }
+      </section>
+      </div>
+      </div>
+
+      <!-- 6.0 Area Water Wells -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('areaWaterWells') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('areaWaterWells')">
+          @if (timelineStepStatus('areaWaterWells') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <div class="ire__group">
+        <div class="ire__section-head" (click)="toggleTimelineStep('areaWaterWells')">
+          <h2 class="ire__section-title">6.0 Area Water Wells</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('areaWaterWells') === 'completed'">
+              {{ timelineStepStatus("areaWaterWells") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('areaWaterWells')) {
+        <!-- 6.1 / 6.2 Area Water Wells + Remarks — one shared edit unit, matching the domain model (offsetWellsRemarks lives beside offsetWells on the same record). -->
+        <section #sectionEl id="ire-sec-offset-wells" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">6.1 Area Water Wells</h3>
+            @if (!offsetWellsEdit.isEditing()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells" (click)="offsetWellsEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+
+          @if (offsetWellsEdit.control(); as ctrl) {
+            <app-dynamic-section
+              [section]="offsetWellsSection"
+              [control]="offsetWellsArrayControl(ctrl)"
+              mode="edit"
+              [selectPanelClass]="selectPanelClass"
+            />
+          } @else {
+            <div class="ire__view-table-wrap">
+              <table class="ire__view-table">
+                <thead>
+                  <tr>
+                    <th>Well</th>
+                    <th>Aquifer</th>
+                    <th>Distance (km)</th>
+                    <th>Rate (GPM)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of ir().offsetWells; track row.wellName) {
+                    <tr>
+                      <td>{{ row.wellName }}</td>
+                      <td>{{ row.aquifer || "—" }}</td>
+                      <td>{{ row.distanceKm ?? "—" }}</td>
+                      <td>{{ row.rateGpm ?? "—" }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="ire__view-table-empty">No offset wells recorded.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+
+        <section #sectionEl id="ire-sec-offset-remarks" class="ire__section ire__section--sub">
+          <h3 class="ire__subsection-title">6.2 Remarks</h3>
+
+          @if (offsetWellsEdit.control(); as ctrl) {
+            <app-dynamic-section
+              [section]="offsetRemarksSection"
+              [control]="offsetWellsRemarksControl(ctrl)"
+              mode="edit"
+              [selectPanelClass]="selectPanelClass"
+            />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="offsetWellsEdit.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveOffsetWells()">
+                {{ isSaving() ? "Saving…" : "Save" }}
+              </button>
+            </div>
+          } @else if (ir().offsetWellsRemarks) {
+            <p class="ire__remarks">{{ ir().offsetWellsRemarks }}</p>
+          } @else {
+            <p class="ire__empty-text">No remarks.</p>
+          }
+        </section>
+        }
+      </div>
+      </div>
+      </div>
+
+      <!-- 7.0 Attachments -->
+      <div class="ire__tl-row">
+      <div class="ire__tl-rail">
+        <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('attachments') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('attachments')">
+          @if (timelineStepStatus('attachments') === 'completed') {
+            <mat-icon>check</mat-icon>
+          }
+        </span>
+      </div>
+      <div class="ire__tl-content">
+      <section #sectionEl id="ire-sec-attachments" class="ire__section">
+        <div class="ire__section-head" (click)="toggleTimelineStep('attachments')">
+          <h2 class="ire__section-title">7.0 Attachments</h2>
+          @if (viewMode() === 'timeline') {
+            <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('attachments') === 'completed'">
+              {{ timelineStepStatus("attachments") === "completed" ? "Completed" : "Pending" }}
+            </span>
+          }
+          @if (!attachmentsEditing() && isTimelineStepExpanded('attachments')) {
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Attachments" (click)="$event.stopPropagation(); openAttachmentsEdit()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (isTimelineStepExpanded('attachments')) {
+        @if (attachmentsEditing()) {
+          <ul class="ire__attachments ire__attachments--edit">
+            @for (name of attachmentsDraftNames(); track name) {
+              <li class="ire__attachment">
+                <mat-icon>attach_file</mat-icon>
+                {{ name }}
+                <button type="button" mat-icon-button class="ire__attachment-remove" aria-label="Remove attachment" (click)="removeAttachmentName(name)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </li>
+            }
+            @for (file of attachmentsNewFiles(); track file) {
+              <li class="ire__attachment ire__attachment--new">
+                <mat-icon>attach_file</mat-icon>
+                {{ file.name }}
+                <button type="button" mat-icon-button class="ire__attachment-remove" aria-label="Remove attachment" (click)="removeNewAttachmentFile(file)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </li>
+            }
+          </ul>
+
+          <label class="ire__attachment-add">
+            <mat-icon>add</mat-icon>
+            Add files
+            <input type="file" multiple hidden (change)="onAttachmentFilesPicked($event)" />
+          </label>
+
+          <div class="ire__edit-actions">
+            <button type="button" mat-button (click)="closeAttachmentsEdit()">Cancel</button>
+            <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="saveAttachments()">
+              {{ isSaving() ? "Saving…" : "Save" }}
+            </button>
+          </div>
+        } @else if (ir().attachmentNames.length) {
+          <ul class="ire__attachments">
+            @for (name of ir().attachmentNames; track name) {
+              <li class="ire__attachment">
+                <mat-icon>attach_file</mat-icon>
+                {{ name }}
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ire__empty-text">No attachments uploaded.</p>
+        }
+        }
+      </section>
+      </div>
+      </div>
+    </div>
+
+    <!-- Stays in the DOM for all of Timeline view (not gated on previewSidebarOpen) so hiding it
+         is a pure CSS transition (see --hidden below) instead of an instant destroy/recreate. -->
+    @if (viewMode() === 'timeline') {
+      <aside class="ire__tl-preview-sidebar" [class.ire__tl-preview-sidebar--hidden]="!previewSidebarOpen()">
+        <div class="ire__tl-preview-anim">
+          <ng-container [ngTemplateOutlet]="wellborePreviewTpl" />
+        </div>
+      </aside>
+    }
+  </div>
+
+  @if (canSubmitForReview()) {
+    <footer class="ire__footer">
+      <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="submitForReview()">
+        <mat-icon>send</mat-icon>
+        Submit for Review
+      </button>
+    </footer>
+  }
+</div>

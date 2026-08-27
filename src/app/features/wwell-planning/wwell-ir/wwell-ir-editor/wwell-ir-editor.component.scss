@@ -1,0 +1,1046 @@
+@use '@angular/material' as mat;
+@use '../../shared/wwell-select-panel-mixin' as wsel;
+@use '../../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+$warning: #b45309;
+
+// `:host` is a no-op under ViewEncapsulation.None (see the component's own comment) — the tag
+// selector is what actually reaches this element. Bounds the component's own height end to end
+// so only `.ire__body` scrolls internally; header/rail-label/footer stay fixed chrome, same
+// pattern as app-wwell-ir-detail (wwell-ir-detail.component.scss).
+app-wwell-ir-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  font-family: tokens.$font-family;
+}
+
+// Same rationale as wwell-ir-new-page/wwell-ir-detail's identical block — the app only calls
+// mat.core() globally with no full M3 theme, so every Material control here (selects, inputs,
+// toggle groups) needs its own scoped theme, including a select's portaled overlay panel (CDK
+// renders it into <body>, hence the separate `.ire-select-panel` target).
+.ire,
+.ire-select-panel {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$blue-palette,
+        tertiary: mat.$azure-palette,
+      ),
+      typography: (
+        plain-family: tokens.$font-family,
+        brand-family: tokens.$font-family,
+      ),
+      density: -4,
+    )
+  );
+}
+
+.ire {
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 10px,
+    )
+  );
+}
+
+.ire-select-panel {
+  border-radius: 10px !important;
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.12),
+    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+  @include wsel.panel($accent, $navy);
+}
+
+.ire,
+.ire *,
+.ire *::before,
+.ire *::after {
+  box-sizing: border-box;
+}
+
+.ire {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  @include wsel.trigger($accent);
+}
+
+/* ── Header: fixed chrome, never scrolls ─────────────────────────────────── */
+.ire__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.ire__eyebrow {
+  margin: 0 0 1px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $accent;
+}
+
+.ire__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.ire__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ire__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ire__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* ── Sections/Timeline view toggle ────────────────────────────────
+ * A plain segmented control — no @angular/material/button-toggle import needed for two states. */
+.ire__view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.ire__view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  padding: 0;
+  color: $muted;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &:hover {
+    color: $navy;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 1px;
+  }
+}
+
+.ire__view-toggle-btn--active {
+  background: tokens.$surface;
+  color: $accent;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+
+  &:hover {
+    color: $accent;
+  }
+}
+
+.ire__tl-toggle-all-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+  color: $muted;
+
+  &:hover {
+    color: $accent;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.ire__tl-toggle-all-btn--active {
+  color: $accent;
+  background: tokens.$accent-soft;
+  border-radius: 50%;
+}
+
+/* ── Body: IR SECTIONS rail + the always-rendered form ───────────────────── */
+.ire__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+/* ── Rail ─────────────────────────────────────────────────────────────────
+ * A plain nested nav list, not the old wizard's absolutely-positioned chip timeline — nothing
+ * here needs to track a panel's live Y-position (see SectionRailController's doc comment: every
+ * section is always rendered, so there's no accordion resize to chase). `position: sticky`
+ * against `.ire__body` (its scrolling ancestor) is enough to keep it in view.
+ */
+.ire__rail {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  width: 196px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0.65rem 0.5rem;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.ire__rail-title {
+  margin: 0 0 0.4rem 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $muted;
+}
+
+.ire__rail-list,
+.ire__rail-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ire__rail-list {
+  gap: 0.15rem;
+}
+
+.ire__rail-group-btn,
+.ire__rail-child-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: none;
+  border-left: 3px solid transparent;
+  background: none;
+  border-radius: 7px;
+  padding: 0.32rem 0.4rem 0.32rem calc(0.4rem - 3px);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: $navy;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    background: rgba($accent, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: -2px;
+  }
+}
+
+.ire__rail-group-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+  color: $muted;
+  flex-shrink: 0;
+}
+
+.ire__rail-number {
+  flex-shrink: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: $muted;
+}
+
+.ire__rail-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ire__rail-group-btn--active,
+.ire__rail-child-btn--active {
+  background: rgba($accent, 0.12);
+  border-left-color: $accent;
+
+  .ire__rail-number,
+  .ire__rail-label {
+    color: $accent;
+  }
+
+  .ire__rail-group-icon {
+    color: $accent;
+  }
+}
+
+.ire__rail-children {
+  margin: 0.05rem 0 0.2rem 1.3rem;
+  padding-left: 0.4rem;
+  border-left: 1px solid $border;
+}
+
+.ire__rail-child-btn {
+  padding: 0.24rem 0.4rem;
+
+  .ire__rail-label {
+    font-weight: 500;
+  }
+}
+
+/* ── Sections column ──────────────────────────────────────────────────────── */
+.ire__sections {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-bottom: 0.5rem;
+}
+
+.ire__section,
+.ire__group {
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 16px rgba(15, 23, 42, 0.05);
+  // Keeps a scrolled-to section's heading clear of the sticky app chrome above `.ire__body`.
+  scroll-margin-top: 0.5rem;
+}
+
+.ire__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ire__group .ire__section--sub {
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid $border;
+  margin: 0.65rem 0 0;
+  padding: 0.65rem 0 0;
+
+  &:first-of-type {
+    margin-top: 0.5rem;
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.ire__section-title {
+  position: relative;
+  margin: 0 0 0.5rem;
+  padding-left: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: $navy;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    bottom: 0.1em;
+    width: 3px;
+    border-radius: 999px;
+    background: $accent;
+  }
+}
+
+.ire__group > .ire__section-head {
+  margin-bottom: 0;
+}
+
+/* ── Timeline view ─────────────────────────────────────────────────
+ * `.ire__tl-row`/`.ire__tl-rail`/`.ire__tl-content` wrap every top-level section unconditionally
+ * in the template (see wwell-ir-editor.component.html) so switching view modes never re-creates
+ * a section's SectionEditState or its scroll-spy anchor. In "sections" mode (the default) they
+ * collapse to `display: contents` — invisible to layout — so today's plain `.ire__sections` flex
+ * list renders exactly as before. Only `.ire__sections--timeline` turns them into an actual
+ * dot + connecting-line stepper, using the same light-surface tokens as the rest of the page. */
+.ire__tl-row,
+.ire__tl-content {
+  display: contents;
+}
+
+.ire__tl-rail {
+  display: none;
+}
+
+.ire__body--timeline {
+  align-items: stretch;
+}
+
+.ire__sections--timeline {
+  padding-left: 0.1rem;
+
+  .ire__tl-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .ire__tl-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 22px;
+    flex-shrink: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 22px;
+      bottom: -0.65rem;
+      left: 50%;
+      width: 2px;
+      background: $border;
+      transform: translateX(-50%);
+    }
+  }
+
+  .ire__tl-row:last-child .ire__tl-rail::after {
+    display: none;
+  }
+
+  .ire__tl-content {
+    display: block;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ire__section-head,
+  .ire__group > .ire__section-head {
+    cursor: pointer;
+    user-select: none;
+  }
+}
+
+/* ── Timeline preview panel ────────────────────────────────────────
+ * The Wellbore Preview isn't tied to any one lifecycle step, so Timeline view pins it here
+ * instead of leaving it in the scrolling step list — `position: sticky` against `.ire__body`
+ * (its scrolling ancestor), same pattern the Sections rail already uses, so it stays in view no
+ * matter which step is open or how far the steps are scrolled. It's a normal flex sibling of the
+ * steps column, never `position: fixed` — it must never sit as a floating overlay on top of the
+ * steps content, only ever occupy its own reserved width alongside it.
+ *
+ * Hiding it animates that reserved `width` down to 0 (rather than removing it from the DOM, or
+ * just fading it in place) specifically so the steps column visibly reclaims the freed space as
+ * it collapses, instead of leaving a blank gap where the panel used to be. The inner
+ * `.ire__tl-preview-anim` wrapper holds its own width fixed and fades/slides out on a faster,
+ * independent transition, so the content is already gone by the time the outer collapse would
+ * otherwise start clipping it mid-shape.
+ */
+.ire__tl-preview-sidebar {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  width: 320px;
+  max-height: 100%;
+  overflow: hidden;
+  transition: width tokens.$duration-base tokens.$ease-out;
+
+  &.ire__tl-preview-sidebar--hidden {
+    width: 0;
+  }
+}
+
+.ire__tl-preview-anim {
+  width: 320px;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition:
+    opacity tokens.$duration-fast tokens.$ease-out,
+    transform tokens.$duration-fast tokens.$ease-out;
+}
+
+.ire__tl-preview-sidebar--hidden .ire__tl-preview-anim {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.ire__tl-preview-sidebar .ire__wellbore-card {
+  scroll-margin-top: 0.5rem;
+}
+
+// No min-width/overflow tricks needed here: the sidebar passes a proportionally smaller
+// DiagramLayout (see previewDiagramLayout in wwell-ir-editor.component.ts) so the diagram's own
+// text stays legible while its geometry genuinely fits this narrower box — the row just renders
+// at the sidebar's actual content width like it does everywhere else.
+.ire__tl-preview-sidebar .ire__wellbore-diagram-row {
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  // Only the resting (open) width shrinks here — the hidden-state override above always collapses
+  // to 0 regardless of breakpoint, so it isn't repeated in this media query.
+  .ire__tl-preview-sidebar {
+    width: 260px;
+  }
+
+  .ire__tl-preview-anim {
+    width: 260px;
+  }
+}
+
+.ire__tl-dot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+  background: tokens.$surface;
+  border: 2px solid $border;
+  flex-shrink: 0;
+
+  mat-icon {
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+    color: tokens.$surface;
+  }
+}
+
+.ire__tl-dot--done {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.ire__tl-dot--active {
+  border-color: $accent;
+  box-shadow: 0 0 0 3px rgba($accent, 0.16);
+}
+
+.ire__tl-status {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $muted;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  white-space: nowrap;
+}
+
+.ire__tl-status--done {
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.08);
+  border-color: rgba(21, 128, 61, 0.22);
+}
+
+.ire__subsection-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+/* ── Per-section inline edit ──────────────────────────────────────
+ * Each section flips independently into an editable state (its own pencil button, its own
+ * Save/Cancel row) — any number of sections can be mid-edit at once, since each one owns its
+ * own form/edit-state instance (see SectionEditState in wwell-ir-section-edit.util.ts) rather
+ * than sharing one page-level "editing" flag. */
+.ire__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+
+  .ire__section-title,
+  .ire__subsection-title {
+    margin: 0;
+  }
+}
+
+.ire__edit-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+  color: $muted;
+
+  &:hover {
+    color: $accent;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.ire__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+/* ── View-mode read display ───────────────────────────────────────
+ * `[data-tone]` (bound from KvRow.tone — e.g. a nonzero H2S reading) flags a field whose value
+ * is actually a problem, not just data. `.ire__view-value--badge` (KvRow.badge) renders a value
+ * as a small pill for fields whose value is one of a fixed set of options, so it reads faster
+ * than plain text at a glance. */
+.ire__view-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem 1.25rem;
+}
+
+.ire__view-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  dt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: $navy;
+  }
+
+  &[data-tone='warning'] dd {
+    color: $warning;
+  }
+
+  &[data-tone='danger'] dd {
+    color: #b91c1c;
+  }
+
+  &[data-tone='success'] dd {
+    color: #15803d;
+  }
+}
+
+.ire__view-value--badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.ire__view-table-wrap {
+  overflow-x: auto;
+  border: 1px solid $border;
+  border-radius: 8px;
+}
+
+.ire__view-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  white-space: nowrap;
+
+  th {
+    background: tokens.$surface-alt;
+    color: $muted;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    padding: 0.4rem 0.6rem;
+    color: $navy;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.ire__view-table-empty {
+  text-align: center;
+  color: $muted;
+  font-style: italic;
+}
+
+.ire__remarks,
+.ire__empty-text {
+  margin: 0;
+  font-size: 0.86rem;
+  color: $muted;
+  font-style: italic;
+}
+
+/* ── Attachments ────────────────────────────────────────────────── */
+.ire__attachments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Plain metadata, not a link — `attachmentNames` is filenames only (no file/URL data behind it
+ * yet), so this deliberately reads as neutral navy text, not accent blue. */
+.ire__attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.65rem;
+  background: tokens.$surface-alt;
+  border: 1px solid $border;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  color: $navy;
+  font-weight: 600;
+  width: fit-content;
+
+  mat-icon {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+    color: $muted;
+  }
+}
+
+.ire__attachments--edit .ire__attachment {
+  padding-right: 0.3rem;
+}
+
+.ire__attachment--new {
+  border-style: dashed;
+  border-color: $accent;
+}
+
+.ire__attachment-remove {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-left: 0.15rem;
+  color: $muted;
+
+  &:hover {
+    color: #b91c1c;
+  }
+
+  mat-icon {
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+  }
+}
+
+.ire__attachment-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border: 1.5px dashed $border;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $accent;
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    border-color: $accent;
+    background: tokens.$surface-alt;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+/* ── Casing size warnings — same treatment as the old wizard's ──────────────── */
+.ire__casing-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ire__casing-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem;
+  background: #fef3c7;
+  border: 1px solid rgba($warning, 0.25);
+  border-radius: 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: $warning;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    margin-top: 0.1rem;
+  }
+}
+
+/* ── Wellbore preview: its own full-width section below Horizons + Casing ───────────────────
+ * The master-detail pane only has ~1000px total to split between the rail and the form, so a
+ * fixed-width diagram sitting beside the field columns (the old wizard's full-page layout) starved
+ * the fields down to ~250px and clipped them — see wwell-ir-editor.component.html's git history.
+ * Stacking below instead gives both the fields and the diagram the section's full width. */
+.ire__wellbore-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ire__wellbore-diagram-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1040 / 840;
+  max-height: 340px;
+  margin: 0 auto;
+}
+
+// See wwell-ir-new-page.component.scss's identical rule for why this hook exists — hides the
+// D3-rendered "TOTAL DEPTH: 0 FT" label until Target Depth is actually filled in.
+.ire .ire__wellbore-diagram-row--no-depth .td-label {
+  display: none;
+}
+
+.ire__wellbore-diagram {
+  display: block;
+  min-width: 0;
+}
+
+.ire__wellbore-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 140px;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 1.5px dashed $border;
+  border-radius: 10px;
+  background: tokens.$surface-alt;
+  text-align: center;
+
+  mat-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 26px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    max-width: 32ch;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: $muted;
+  }
+}
+
+/* ── Footer: fixed chrome, never scrolls ─────────────────────────────────── */
+.ire__footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.ire .mat-mdc-form-field-required-marker {
+  color: #dc2626;
+}
+
+/* ── Tighter field density, scoped to this component only ───────────────────
+ * The shared dynamic-form building blocks (dyf__field, dys__grid, rpg__row) are reused by other
+ * consumer forms (wwell-request-form, wwell-wlda-request-form) with their own spacing needs, so
+ * their own stylesheets are left untouched — these ::ng-deep overrides only apply where `.ire`
+ * wraps them, keeping the "skinny" treatment local to the IR editor. */
+.ire ::ng-deep {
+  .dys {
+    margin-bottom: 0.65rem;
+  }
+
+  .dys__grid {
+    gap: 0.5rem 0.85rem;
+  }
+
+  .rpg {
+    gap: 0.45rem;
+  }
+
+  .rpg__row {
+    padding: 0.5rem 0.65rem;
+    border-radius: 9px;
+  }
+
+  .rpg__row-fields {
+    gap: 0.4rem 0.7rem;
+  }
+
+  .rpg__row-index {
+    width: 1.3rem;
+    height: 1.3rem;
+    margin-top: 0.2rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .ire__body {
+    flex-direction: column;
+    overflow-y: visible;
+  }
+
+  .ire__rail {
+    position: static;
+    width: 100%;
+    max-height: none;
+  }
+
+  .ire__rail-children {
+    margin-left: 1.2rem;
+  }
+
+  // `.ire__body` just switched to a column flex — everything stacks full-width, so a width
+  // collapse (the desktop hide/show mechanism above) can't reclaim any space here. `order: -1`
+  // keeps it above the steps list, same placement it always had; the hidden state below collapses
+  // `max-height` instead, since that's the axis that actually frees up room in a stacked layout.
+  .ire__tl-preview-sidebar {
+    position: static;
+    width: 100%;
+    max-height: none;
+    overflow: hidden;
+    order: -1;
+    transition: max-height tokens.$duration-base tokens.$ease-out;
+
+    &.ire__tl-preview-sidebar--hidden {
+      width: 100%;
+      max-height: 0;
+    }
+  }
+
+  .ire__tl-preview-anim {
+    width: 100%;
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ire {
+    padding: 0.6rem;
+  }
+
+  .ire__footer {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1;
+    }
+  }
+}

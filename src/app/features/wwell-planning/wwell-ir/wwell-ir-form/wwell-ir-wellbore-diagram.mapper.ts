@@ -292,24 +292,37 @@ function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]):
   }));
 }
 
-/** Same emptiness gate as `hasWellboreDiagramData`, for the IR detail page. */
-export function hasWellboreDiagramDataForIntegratedRequirement(ir: IntegratedRequirement): boolean {
-  return (
-    toRawCasingRows(ir.casing).some(isRenderableCasingRow) ||
-    toRawFormationRows(ir.formationTops).some(isRenderableFormationTop)
-  );
+/** Same emptiness gate as `hasWellboreDiagramData`, for the IR editor/detail page. `liveCasingRows`/
+ *  `liveFormationRows` let the editor substitute its Casing/Formation Tops sections' in-progress
+ *  FormArray values while those sections are open for editing — pass `null`/omit for either one
+ *  still reads straight from `ir`. */
+export function hasWellboreDiagramDataForIntegratedRequirement(
+  ir: IntegratedRequirement,
+  liveCasingRows?: readonly WwellIrRawCasingRow[] | null,
+  liveFormationRows?: readonly WwellIrRawFormationTop[] | null,
+): boolean {
+  const casingRows = liveCasingRows ?? toRawCasingRows(ir.casing);
+  const formationRows = liveFormationRows ?? toRawFormationRows(ir.formationTops);
+  return casingRows.some(isRenderableCasingRow) || formationRows.some(isRenderableFormationTop);
 }
 
-/** Detail-page counterpart of `buildWellboreDiagramData` — same live `app-well-bore-view`
- *  diagram, fed from a submitted `IntegratedRequirement` instead of the in-progress wizard
- *  form, so the detail page shows the real engineering rendering instead of the lighter
- *  `wwell-ir-design-preview` sketch. */
-export function buildWellboreDiagramDataFromIntegratedRequirement(ir: IntegratedRequirement): WellboreDiagramData {
+/** Detail/editor-page counterpart of `buildWellboreDiagramData` — same live `app-well-bore-view`
+ *  diagram, fed from a submitted `IntegratedRequirement` instead of the in-progress wizard form,
+ *  so those pages show the real engineering rendering instead of the lighter
+ *  `wwell-ir-design-preview` sketch. See `hasWellboreDiagramDataForIntegratedRequirement` above
+ *  for what `liveCasingRows`/`liveFormationRows` are for — the editor passes its Casing/Formation
+ *  Tops sections' live FormArray values while they're open, so the preview updates as rows are
+ *  added/edited instead of only once that section is saved. */
+export function buildWellboreDiagramDataFromIntegratedRequirement(
+  ir: IntegratedRequirement,
+  liveCasingRows?: readonly WwellIrRawCasingRow[] | null,
+  liveFormationRows?: readonly WwellIrRawFormationTop[] | null,
+): WellboreDiagramData {
   return assembleWellboreDiagramData(
     ir.requestReference.wellName,
     ir.requestReference.targetDepthFt,
-    toRawCasingRows(ir.casing),
-    toRawFormationRows(ir.formationTops),
+    liveCasingRows ?? toRawCasingRows(ir.casing),
+    liveFormationRows ?? toRawFormationRows(ir.formationTops),
     ir.requestReference.surfaceElevationFtAsl,
     {
       completion: ir.programDetails.completion,

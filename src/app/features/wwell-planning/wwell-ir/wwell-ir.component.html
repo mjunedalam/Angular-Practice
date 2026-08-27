@@ -6,7 +6,14 @@
         <span class="wwell-ir__count">{{ rows().length }}</span>
       </div>
 
-      <button type="button" mat-flat-button color="primary" class="wwell-ir__new-btn" (click)="openNewIrPage()">
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        class="wwell-ir__new-btn"
+        [disabled]="store.creatingIr()"
+        (click)="createNewIr()"
+      >
         <mat-icon>add</mat-icon>
         New IR
       </button>
@@ -21,6 +28,34 @@
         (ngModelChange)="onSearchChange($event)"
       />
     </label>
+
+    <div class="wwell-ir__filter-bar">
+      <button
+        type="button"
+        class="wwell-ir__lifecycle-toggle"
+        [class.wwell-ir__lifecycle-toggle--inactive]="lifecycleFilter() === 'inactive'"
+        [attr.aria-label]="lifecycleFilter() === 'active' ? 'Showing active records — click for inactive' : 'Showing inactive records — click for active'"
+        [attr.title]="lifecycleFilter() === 'active' ? 'Active' : 'Inactive'"
+        (click)="toggleLifecycleFilter()"
+      >
+        <mat-icon>{{ lifecycleFilter() === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+      </button>
+
+      @if (lifecycleFilter() === 'active') {
+        <div class="wwell-ir__status-chips" role="group" aria-label="Status filter">
+          @for (status of statusChips; track status) {
+            <button
+              type="button"
+              class="wwell-ir__status-chip"
+              [class.wwell-ir__status-chip--active]="statusFilter() === status"
+              (click)="setStatusFilter(status)"
+            >
+              {{ statusChipLabel(status) }} &middot; {{ statusChipCount(status) }}
+            </button>
+          }
+        </div>
+      }
+    </div>
 
     @if (isLoading()) {
       <ul class="wwell-ir__list wwell-ir__list--skeleton" aria-hidden="true">
@@ -77,12 +112,7 @@
       <app-wwell-detail-loading />
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
-        <app-wwell-ir-detail
-          [ir]="ir"
-          [submitting]="isSubmittingForReview()"
-          (submitForReview)="submitForReview($event)"
-          (edit)="editIr($event)"
-        />
+        <app-wwell-ir-editor [ir]="ir" />
       </div>
     } @else {
       <div class="wwell-ir__empty">

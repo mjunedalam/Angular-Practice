@@ -10,13 +10,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
-import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
@@ -24,29 +23,40 @@ import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.
 import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellIrStore } from './store/wwell-ir.store';
-import { WwellIrDetailComponent } from './wwell-ir-detail/wwell-ir-detail.component';
+import { WwellIrEditorComponent } from './wwell-ir-editor/wwell-ir-editor.component';
+import { buildWwellDynamicForm } from '../shared/dynamic-form/wwell-dynamic-form.builder';
+import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
+import { buildWwellIrBulkSavePayload } from './wwell-ir-form/wwell-ir-payload.mapper';
+import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
+import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
 
 const SKELETON_ROW_COUNT = 6;
 
+/** Coarse lifecycle split for the master list's top toggle — "Active" is every status before the
+ *  record leaves the author's hands, "Inactive" is the one terminal status. Kept separate from the
+ *  finer-grained `statusFilter` chips below (which only make sense to show *within* Active, since
+ *  Inactive only ever has one possible status). */
+type WwellIrLifecycleFilter = 'active' | 'inactive';
+
+const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
+  'draft',
+  'in-progress',
+  'submit-for-review',
+  'in-review',
+];
+
 @Component({
   selector: 'app-wwell-ir',
   standalone: true,
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    WwellIrDetailComponent,
-    WwellDetailLoadingComponent,
-  ],
+  imports: [FormsModule, MatButtonModule, MatIconModule, WwellIrEditorComponent, WwellDetailLoadingComponent],
   templateUrl: './wwell-ir.component.html',
   styleUrl: './wwell-ir.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellIrComponent implements OnInit, OnDestroy {
   protected readonly store = inject(WwellIrStore);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
   private readonly notify = inject(NotificationService);
 
   protected readonly isLoading = this.store.irsLoading;
@@ -61,12 +71,29 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // handed straight to loadIrDetail() below without a lookup.
   protected readonly selectedIrSeq = signal<number | null>(null);
 
+  protected readonly lifecycleFilter = signal<WwellIrLifecycleFilter>('active');
+  protected readonly statusFilter = signal<IntegratedRequirementStatus | 'all'>('all');
+  // Sub-filter chips shown only in the Active bucket — Inactive is exactly one status
+  // (approved), so there's nothing left to narrow further once that's selected.
+  protected readonly statusChips: readonly (IntegratedRequirementStatus | 'all')[] = ['all', ...WWELL_IR_ACTIVE_STATUSES];
+
+  // Scoped by the lifecycle toggle only (not the status chip or search term) so chip counts stay
+  // stable while the user narrows further — each chip shows how many rows *it* would reveal, not
+  // how many remain after some other filter already trimmed the set.
+  private readonly lifecycleScopedIrs = computed(() => {
+    const all = this.store.irs();
+    return this.lifecycleFilter() === 'inactive'
+      ? all.filter(ir => ir.status === 'approved')
+      : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
+  });
+
   protected readonly rows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const all = this.store.irs();
-    if (!term) return all;
+    const status = this.statusFilter();
+    const scoped = this.lifecycleScopedIrs().filter(ir => status === 'all' || ir.status === status);
+    if (!term) return scoped;
 
-    return all.filter(
+    return scoped.filter(
       ir =>
         ir.code.toLowerCase().includes(term) ||
         ir.requestReference.wellName.toLowerCase().includes(term) ||
@@ -105,10 +132,29 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   @ViewChild('listHost') private readonly listHost?: ElementRef<HTMLElement>;
   private previousSelectedIrSeq: number | null = null;
 
+  // Scopes the "select the just-created draft" effect below to createNewIr()'s own call —
+  // WwellIrEditorComponent also drives store.creatingIr() (for its own Save/Submit actions on the
+  // *already*-selected record), and without this flag a save completing there could clobber a
+  // selection the user already moved on to.
+  private wasCreatingNewIr = false;
+  private isCreatingNewIr = false;
+
   constructor() {
     effect(() => {
       const message = this.store.createIrError();
       if (message) this.notify.error(message);
+    });
+
+    effect(() => {
+      const creating = this.store.creatingIr();
+      if (this.wasCreatingNewIr && !creating && this.isCreatingNewIr) {
+        this.isCreatingNewIr = false;
+        if (!this.store.createIrError()) {
+          const newIrSeq = this.store.draftIrSeq();
+          if (newIrSeq !== null) this.selectedIrSeq.set(newIrSeq);
+        }
+      }
+      this.wasCreatingNewIr = creating;
     });
 
     effect(() => {
@@ -126,11 +172,12 @@ export class WwellIrComponent implements OnInit, OnDestroy {
       if (message) this.notify.error(message);
     });
 
-    // Default to the first record once the list loads — mirrors the reference app, which
-    // always has something selected in the detail pane rather than starting on an empty state.
+    // Default to the first *visible* record once the list loads — mirrors the reference app,
+    // which always has something selected in the detail pane rather than starting on an empty
+    // state. Reads `rows()` (lifecycle/status/search-scoped), not the raw store list, so the
+    // default selection is never a row the Active/Inactive toggle is currently hiding.
     effect(() => {
-      const all = this.store.irs();
-      const firstIrSeq = all[0]?.irSeq;
+      const firstIrSeq = this.rows()[0]?.irSeq;
       if (firstIrSeq != null && this.selectedIrSeq() === null) {
         this.selectedIrSeq.set(firstIrSeq);
       }
@@ -179,6 +226,31 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     this.searchTerm.set(term);
   }
 
+  /** Switching lifecycle bucket resets the status chip back to "All" — a chip selected in the old
+   *  bucket (e.g. "In Review") would otherwise carry over into Inactive, where it can never match
+   *  anything, silently showing an empty list. */
+  protected setLifecycleFilter(filter: WwellIrLifecycleFilter): void {
+    this.lifecycleFilter.set(filter);
+    this.statusFilter.set('all');
+  }
+
+  protected toggleLifecycleFilter(): void {
+    this.setLifecycleFilter(this.lifecycleFilter() === 'active' ? 'inactive' : 'active');
+  }
+
+  protected setStatusFilter(status: IntegratedRequirementStatus | 'all'): void {
+    this.statusFilter.set(status);
+  }
+
+  protected statusChipLabel(status: IntegratedRequirementStatus | 'all'): string {
+    return status === 'all' ? 'All' : this.statusMeta[status].label;
+  }
+
+  protected statusChipCount(status: IntegratedRequirementStatus | 'all'): number {
+    const scoped = this.lifecycleScopedIrs();
+    return status === 'all' ? scoped.length : scoped.filter(ir => ir.status === status).length;
+  }
+
   protected selectIr(irSeq: number): void {
     this.pendingSelection.select(irSeq, this.selectedIrSeq(), resolved => this.selectedIrSeq.set(resolved));
   }
@@ -194,21 +266,18 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     if (irSeq !== null) this.selectIr(irSeq);
   }
 
-  protected editIr(ir: IntegratedRequirement): void {
-    const irSeq = this.rowIrSeq(ir);
-    if (irSeq === null) return;
-    this.router.navigate(['edit', irSeq], { relativeTo: this.route });
-  }
-
-  protected openNewIrPage(): void {
-    this.router.navigate(['new'], { relativeTo: this.route });
+  /** Creates a blank draft in place and selects it — no route change. WwellIrEditorComponent
+   *  (rendered once the new record's status makes it selected+editable, see isEditableStatus)
+   *  then owns everything about actually filling it in. */
+  protected createNewIr(): void {
+    const raw = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb).getRawValue() as WwellIrFormRawValue;
+    const { payload } = mapIrFormValueToSubmission(raw, 'draft');
+    const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: null, existing: null });
+    this.isCreatingNewIr = true;
+    this.store.createIr(payload, irBulkPayload, []);
   }
 
   protected chainBorderColor(chain: readonly ApprovalChainStep[]): string {
     return chainCompletionColor(chain);
-  }
-
-  protected submitForReview(ir: IntegratedRequirement): void {
-    this.store.submitIrForReview(ir);
   }
 }

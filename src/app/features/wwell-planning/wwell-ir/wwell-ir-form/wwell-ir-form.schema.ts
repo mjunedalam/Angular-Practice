@@ -326,16 +326,23 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
     ],
   },
   {
+    // Split into two single-field sections (rather than one 'files' section holding both) so each
+    // becomes its own scrollable IR SECTIONS nav target (7.0 Location Map / 8.0 Initiation
+    // Request) — see wwell-ir-section-rail.config.ts.
     key: 'attachments',
     label: 'Attachments & Review',
     sections: [
       {
-        key: 'files',
-        title: 'Required Attachments',
+        key: 'locationMap',
+        title: 'Location Map',
+        fields: [{ key: 'file', label: 'Location Map', type: 'file', placeholder: 'Click to attach file...' }],
+      },
+      {
+        key: 'initiationRequest',
+        title: 'Initiation Request',
         fields: [
-          { key: 'locationMap', label: 'Location Map', type: 'file', placeholder: 'Click to attach file...' },
           {
-            key: 'initiationRequest',
+            key: 'file',
             label: 'Initiation Request',
             type: 'file',
             placeholder: 'Click to attach file...',
@@ -345,11 +352,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
       },
     ],
   },
-  {
-    key: 'wellDesignView',
-    label: 'Well Design View',
-    sections: [], // pure visualization step — no form fields
-  },
 ];
 
 /**
@@ -357,7 +359,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
  * field wired to `linkedRequestOptions` instead of its static `[]` placeholder. The schema array
  * itself is a module-level constant (no injector available at definition time), so a store-backed
  * Signal can only be attached here, once, by the component that actually has one — see
- * WwellIrNewPageComponent's `schema` field.
+ * WwellIrEditorComponent's `schema` field.
  */
 export function buildWwellIrFormSchema(
   linkedRequestOptions: Signal<readonly WwellFieldOption[]>,

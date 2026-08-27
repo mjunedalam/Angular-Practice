@@ -279,6 +279,8 @@ export function buildWwellIrBulkSavePayload(
     prewap_seq: raw.reference.main.linkedRequestId ? Number(raw.reference.main.linkedRequestId) : null,
     ltr_no: raw.reference.main.letterNumber || null,
     screen: '',
+    sampling: raw.programDetails.developmentTesting.sampling || null,
+    logging: raw.programDetails.developmentTesting.logging || null,
     tops_remarks: buildTopsRemarks(raw.subsurface.formationTops),
     publish_dt: null,
     publish_flg: 'N', // flips once the approval workflow publishes this record, not at authoring time
@@ -293,9 +295,9 @@ export function buildWwellIrBulkSavePayload(
     acidization: raw.programDetails.main.acidization || null,
     trns_type: resolveTransmissionCode(raw.programDetails.main.transmission),
     ot_rmks: null,
-    mud_rmks: null,
+    mud_rmks: raw.programDetails.developmentTesting.mudLogging || null,
     test_type: raw.hydrogeology.main.testType || null,
-    flow_rmks: null,
+    flow_rmks: raw.programDetails.developmentTesting.flowTest || null,
   };
 
   const casing = buildCasingRows(raw.subsurface.casing, irSeq, existing?.casing);

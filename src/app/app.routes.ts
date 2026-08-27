@@ -69,36 +69,14 @@ export const routes: Routes = [
         providers: [WwellPlanningStore],
       },
       {
+        // New/edit no longer route anywhere — WwellIrComponent creates a draft in place and
+        // authors it inline (WwellIrEditorComponent) in the same master-detail view.
         path: 'integrated-requirements',
-        // Store hoisted to this parent (not per-child) so 'new' shares one live store instance
-        // with the list route — otherwise a freshly created IR would vanish on navigate-back.
         providers: [WwellIrStore],
-        children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
-                (m) => m.WwellIrComponent,
-              ),
-          },
-          {
-            path: 'new',
-            loadComponent: () =>
-              import('./features/wwell-planning/wwell-ir/wwell-ir-new-page/wwell-ir-new-page.component').then(
-                (m) => m.WwellIrNewPageComponent,
-              ),
-          },
-          {
-            // Same component as 'new' — the :irSeq input (bound via withComponentInputBinding())
-            // switches it into edit mode. Sibling to 'new', not nested under it, so '..' from
-            // either one lands back on the plain list, matching the existing cancel/submit navigation.
-            path: 'edit/:irSeq',
-            loadComponent: () =>
-              import('./features/wwell-planning/wwell-ir/wwell-ir-new-page/wwell-ir-new-page.component').then(
-                (m) => m.WwellIrNewPageComponent,
-              ),
-          },
-        ],
+        loadComponent: () =>
+          import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
+            (m) => m.WwellIrComponent,
+          ),
       },
       {
         path: 'presentations',
