@@ -23,8 +23,12 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     // model's finer-grained statuses (draft/in-progress/submit-for-review/in-review) into one.
     status: row.publishFlg === 'Y' ? 'approved' : 'in-progress',
     requestReference: {
-      linkedRequestId: null,
-      letterNumber: null,
+      // prewap_seq/ltr_no are real exad_gwd_ir_header columns (unlike wellName/coordinates/etc.
+      // below) — read straight off the list row so a record's "Link to Request" (and therefore,
+      // via WwellIrStore.hydratedIrs, its Water Well Name/Coordinates/Surface Elevation) is known
+      // immediately from the list, not only once its detail is fetched.
+      linkedRequestId: row.prewapSeq != null ? String(row.prewapSeq) : null,
+      letterNumber: row.ltrNo ?? null,
       client: '',
       supportingBusiness: '',
       wellName: '',

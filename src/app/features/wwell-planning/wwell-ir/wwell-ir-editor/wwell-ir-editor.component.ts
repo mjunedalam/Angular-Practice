@@ -4,7 +4,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  OnInit,
   QueryList,
   Signal,
   ViewChild,
@@ -17,15 +16,19 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
+import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
+import { defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
@@ -54,6 +57,12 @@ import {
   buildRequestReferenceRows,
 } from './wwell-ir-detail-rows.util';
 import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from './wwell-ir-preview-diagram-layout';
+import {
+  findLinkedWell,
+  formatLinkedWellCoordinates,
+  linkedWellHasCoordinates,
+  linkedWellHasElevation,
+} from '../wwell-ir-form/wwell-ir-linked-well.util';
 import { SectionEditState, buildAndPatchArray, buildAndPatchGroup } from './wwell-ir-section-edit.util';
 import { SectionRailController } from './wwell-ir-section-rail.util';
 import { WWELL_IR_SECTION_RAIL, WwellIrRailGroup, wwellIrRailLeaves } from './wwell-ir-section-rail.config';
@@ -107,12 +116,14 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   // rationale.
   encapsulation: ViewEncapsulation.None,
 })
-export class WwellIrEditorComponent implements OnInit, AfterViewInit {
+export class WwellIrEditorComponent implements AfterViewInit {
   readonly ir = input.required<IntegratedRequirement>();
 
   private readonly fb = inject(FormBuilder);
   protected readonly store = inject(WwellIrStore);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly notify = inject(NotificationService);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly isSaving = this.store.creatingIr;
@@ -240,6 +251,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     // its populated fields immediately instead of waiting for a valueChanges emission that already
     // happened during patchValue() above, before anything was subscribed to hear it.
     const linkedRequestId = group.get('linkedRequestId')?.value as string | null;
+    console.log('[IR:link] requestReferenceEdit — section opened', { irId: this.ir().id, linkedRequestId });
     if (linkedRequestId) this.applyLinkedRequestWell(group, linkedRequestId);
     return group;
   });
@@ -302,6 +314,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       if (!ctrl) return;
       const linkedRequestIdControl = ctrl.get('linkedRequestId');
       const subscription = linkedRequestIdControl?.valueChanges.subscribe((linkedRequestId: string) => {
+        console.log('[IR:link] "Link to Request" select — valueChanges fired', { linkedRequestId });
         if (linkedRequestId) this.applyLinkedRequestWell(ctrl, linkedRequestId);
       });
       onCleanup(() => subscription?.unsubscribe());
@@ -322,10 +335,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       if (this.previousIrId !== null && id !== this.previousIrId) this.closeAllSections();
       this.previousIrId = id;
     });
-  }
-
-  ngOnInit(): void {
-    this.store.loadLinkedRequestWells();
   }
 
   ngAfterViewInit(): void {
@@ -370,20 +379,26 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
    *  requestReferenceEdit above) — re-locks the same fields to the same values, so it's a no-op
    *  data-wise there. */
   private applyLinkedRequestWell(referenceGroup: FormGroup, linkedRequestId: string): void {
-    const well = this.store.linkedRequestWells().find(candidate => String(candidate.prewapSeq) === linkedRequestId);
-    if (!well) return;
+    console.log('[IR:link] applyLinkedRequestWell — start', { linkedRequestId, eligibleWellsLoaded: this.store.linkedRequestWells().length });
+    const well = findLinkedWell(linkedRequestId, this.store.linkedRequestWells());
+    if (!well) {
+      console.log('[IR:link] applyLinkedRequestWell — no matching eligible well, aborting patch', { linkedRequestId });
+      return;
+    }
 
-    const hasElevation = well.surfaceElevation != null;
-    const hasCoordinates = well.surfaceNorth != null && well.surfaceEast != null;
+    const hasElevation = linkedWellHasElevation(well);
+    const hasCoordinates = linkedWellHasCoordinates(well);
 
     const patch: Record<string, string | number> = { wellName: well.wellName };
-    if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation;
-    if (hasCoordinates) patch['coordinates'] = `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
+    if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation as number;
+    if (hasCoordinates) patch['coordinates'] = formatLinkedWellCoordinates(well);
+    console.log('[IR:link] applyLinkedRequestWell — patching form group', { patch, hasElevation, hasCoordinates });
     referenceGroup.patchValue(patch);
 
     referenceGroup.get('wellName')?.disable();
     this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
     this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
+    console.log('[IR:link] applyLinkedRequestWell — done', { rawValue: referenceGroup.getRawValue() });
   }
 
   /** Locks/unlocks one Request Reference field depending on whether the currently-linked request
@@ -392,6 +407,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private setLinkedFieldLock(group: FormGroup, key: string, locked: boolean): void {
     const control = group.get(key);
     if (!control) return;
+    console.log('[IR:link] setLinkedFieldLock', { key, locked });
     if (locked) control.disable();
     else control.enable();
   }
@@ -402,6 +418,107 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
   protected offsetWellsRemarksControl(ctrl: FormGroup): FormGroup {
     return ctrl.get('remarks') as FormGroup;
+  }
+
+  /** Per-row delete from the read-only table (Casing/Formation Tops/Offset Wells), without first
+   *  clicking the section's own pencil: asks for confirmation (the row's key fields are shown in
+   *  the dialog so the user knows exactly what they're removing), then — only once confirmed —
+   *  opens the section (building its FormArray fresh from the currently-persisted rows, in the
+   *  same order the read-only table shows them — see buildAndPatchArray — so `index` lines up
+   *  1:1) and immediately removes that row, and confirms the removal with a toast. The user lands
+   *  in edit mode with everything else — including adding new rows — still available before the
+   *  one global Save button; buildWwellIrBulkSavePayload's `existing`-diff (see
+   *  wwell-ir-payload.mapper.ts) is what turns this missing row into a real DELETE action, kept
+   *  rows into UPDATE/no-op, and any newly-added row into INSERT, all in the same save. */
+  protected deleteCasingRow(index: number): void {
+    const row = this.ir().casing[index];
+    this.confirmThenDelete('Delete casing row?', [
+      { label: 'Type', value: row.type },
+      { label: 'Size', value: row.sizeIn },
+      { label: 'Depth', value: `${row.depthFtBgl} ft bgl` },
+    ], () => {
+      this.casingEdit.open();
+      this.casingEdit.control()?.removeAt(index);
+      this.notify.info('Casing row removed — click Save to apply.');
+    });
+  }
+
+  protected deleteFormationTopRow(index: number): void {
+    const row = this.ir().formationTops[index];
+    this.confirmThenDelete('Delete formation top?', [
+      { label: 'Formation', value: row.name },
+      { label: 'Depth', value: `${row.depthFt} ft bgl` },
+    ], () => {
+      this.formationTopsEdit.open();
+      this.formationTopsEdit.control()?.removeAt(index);
+      this.notify.info('Formation top removed — click Save to apply.');
+    });
+  }
+
+  protected deleteOffsetWellRow(index: number): void {
+    const row = this.ir().offsetWells[index];
+    this.confirmThenDelete('Delete offset well?', [
+      { label: 'EP A Num', value: String(row.epANum) },
+      { label: 'Aquifer', value: row.aquifer || '—' },
+    ], () => {
+      this.offsetWellsEdit.open();
+      const ctrl = this.offsetWellsEdit.control();
+      if (ctrl) this.offsetWellsArrayControl(ctrl).removeAt(index);
+      this.notify.info('Offset well removed — click Save to apply.');
+    });
+  }
+
+  /** Clears every field in Program Details (2.1) back to blank — a flat, non-repeatable section
+   *  has no "row" to delete (see this section's own read-only view, which has no Actions column),
+   *  so this is its equivalent destructive action. Opens the section for editing (if not already)
+   *  with the reset values already applied, leaving the global Save button as the one place that
+   *  actually persists it — same "review before Save" pattern as the row deletes above. */
+  protected resetProgramMainSection(): void {
+    this.confirmThenAct({ title: 'Reset Program Details?', confirmLabel: 'Reset' }, () =>
+      this.resetFlatSection(this.programMainEdit, this.programMainSection, 'Program Details'),
+    );
+  }
+
+  protected resetProgramDevSection(): void {
+    this.confirmThenAct({ title: 'Reset Development & Testing?', confirmLabel: 'Reset' }, () =>
+      this.resetFlatSection(this.programDevEdit, this.programDevSection, 'Development & Testing'),
+    );
+  }
+
+  protected resetGeologistSection(): void {
+    this.confirmThenAct({ title: 'Reset Geologist Contact?', confirmLabel: 'Reset' }, () =>
+      this.resetFlatSection(this.geologistContactEdit, this.geologistSection, 'Geologist Contact'),
+    );
+  }
+
+  private resetFlatSection(edit: SectionEditState<FormGroup, unknown>, section: WwellFormSectionConfig, label: string): void {
+    edit.open();
+    const ctrl = edit.control();
+    if (!ctrl) return;
+    const defaults: Record<string, unknown> = {};
+    (section.fields ?? []).forEach(field => {
+      defaults[field.key] = defaultValueFor(field);
+    });
+    ctrl.patchValue(defaults);
+    this.notify.info(`${label} cleared — click Save to apply.`);
+  }
+
+  /** Shared confirm-before-destructive-action gate for the row deletes above and the section
+   *  resets above — `onConfirmed` only ever runs once the user actually confirms. */
+  private confirmThenAct(
+    config: { title: string; rows?: { label: string; value: string }[]; confirmLabel: string },
+    onConfirmed: () => void,
+  ): void {
+    this.confirmDialog
+      .open({ title: config.title, rows: config.rows ?? [], confirmLabel: config.confirmLabel, severity: 'danger' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(confirmed => {
+        if (confirmed) onConfirmed();
+      });
+  }
+
+  private confirmThenDelete(title: string, rows: { label: string; value: string }[], onConfirmed: () => void): void {
+    this.confirmThenAct({ title, rows, confirmLabel: 'Delete' }, onConfirmed);
   }
 
   private currentRawFormValue(): WwellIrFormRawValue {

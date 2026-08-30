@@ -115,10 +115,15 @@ export interface WwellIrSaveResult {
 /**
  * GET (list) response row — mirrors the backend's IrHeaderSummary record. Backed only by
  * exad_gwd_ir_header, so it deliberately omits the richer domain fields (client, wellName,
- * contacts...) that table has no column for yet.
+ * contacts...) that table has no column for yet. `prewapSeq`/`ltrNo` DO have real columns
+ * (exad_gwd_ir_header.prewap_seq/ltr_no) — see wwell-ir-summary.mapper.ts, which reads them into
+ * `linkedRequestId`/`letterNumber` so a row's "Link to Request" is known from the list itself,
+ * not only after its detail is fetched.
  */
 export interface IrHeaderSummary {
   readonly irSeq: number;
+  readonly prewapSeq: number | null;
+  readonly ltrNo: string | null;
   readonly cmplType: string | null;
   readonly testType: string | null;
   readonly publishFlg: 'Y' | 'N';

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, input, signal, viewChild } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -57,6 +57,11 @@ export class DynamicFieldComponent {
    *  `resolvedOptions()` unfiltered. */
   protected readonly optionSearchTerm = signal('');
 
+  /** The searchable-select panel's filter `<input>` — queried instead of using the `autofocus`
+   *  attribute (flagged by @angular-eslint/template/no-autofocus and unreliable for content
+   *  that mounts into a CDK overlay after the panel opens). */
+  private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
   protected readonly filteredOptions = computed(() => {
     const term = this.optionSearchTerm().trim().toLowerCase();
     if (!term) return this.resolvedOptions();
@@ -64,9 +69,14 @@ export class DynamicFieldComponent {
   });
 
   /** Clears the filter on close so reopening the panel always starts from the full list instead
-   *  of whatever was last typed. */
+   *  of whatever was last typed. On open, focuses the filter input once the overlay panel has
+   *  attached — a plain template `autofocus` fires before that element exists in the DOM. */
   protected onSelectOpenedChange(opened: boolean): void {
-    if (!opened) this.optionSearchTerm.set('');
+    if (!opened) {
+      this.optionSearchTerm.set('');
+      return;
+    }
+    setTimeout(() => this.searchInput()?.nativeElement.focus());
   }
 
   protected onOptionSearchInput(event: Event): void {

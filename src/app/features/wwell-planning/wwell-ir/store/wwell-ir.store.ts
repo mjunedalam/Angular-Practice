@@ -6,6 +6,7 @@ import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
+import { hydrateIrsRequestReference } from '../wwell-ir-form/wwell-ir-linked-well.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
@@ -43,12 +44,21 @@ function upsertByIrSeq(list: readonly IntegratedRequirement[], created: Integrat
 export const WwellIrStore = signalStore(
   withState<WwellIrStoreState>(initialWwellIrState),
 
-  withComputed(({ irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
+  withComputed(({ irs, irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
     isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
     /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
      *  see wwell-ir-editor.component.ts's `applyLinkedRequestWell` for where the full record
      *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
     linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
+    /** `irs` with every record's Water Well Name/Coordinates/Surface Elevation re-derived live
+     *  from `linkedRequestWells` via its `linkedRequestId` — see wwell-ir-linked-well.util.ts's
+     *  doc comment for why those three fields are never trusted from `irs` itself (no backing
+     *  column on exad_gwd_ir_header, so nothing cached there survives a browser reload). Every
+     *  consumer (WwellIrComponent's list/selection) reads this instead of `irs` directly. */
+    hydratedIrs: computed(() => {
+      console.log('[IR:link] WwellIrStore.hydratedIrs — recomputing', { irsCount: irs().length, linkedRequestWellsCount: linkedRequestWells().length });
+      return hydrateIrsRequestReference(irs(), linkedRequestWells());
+    }),
     activeErrors: computed(() =>
       [irsError(), linkedRequestWellsError(), createIrError(), updateIrStatusError(), irDetailError(), irApprovalTimelineError()].filter(
         (message): message is string => message !== null,
@@ -82,16 +92,24 @@ export const WwellIrStore = signalStore(
 
     const loadLinkedRequestWells = rxMethod<void>(
       pipe(
-        tap(() => patchState(store, { linkedRequestWellsLoading: true, linkedRequestWellsError: null })),
+        tap(() => {
+          console.log('[IR:link] loadLinkedRequestWells — fetching GET /wells/eligible-for-ir');
+          patchState(store, { linkedRequestWellsLoading: true, linkedRequestWellsError: null });
+        }),
         switchMap(() =>
           svc.getEligibleWellsForIr().pipe(
             tapResponse({
-              next: linkedRequestWells => patchState(store, { linkedRequestWells, linkedRequestWellsLoading: false }),
-              error: (err: unknown) =>
+              next: linkedRequestWells => {
+                console.log('[IR:link] loadLinkedRequestWells — response received', { count: linkedRequestWells.length, linkedRequestWells });
+                patchState(store, { linkedRequestWells, linkedRequestWellsLoading: false });
+              },
+              error: (err: unknown) => {
+                console.log('[IR:link] loadLinkedRequestWells — request failed', err);
                 patchState(store, {
                   linkedRequestWellsLoading: false,
                   linkedRequestWellsError: errorMessage(err, 'Failed to load wells eligible for IR initiation'),
-                }),
+                });
+              },
             }),
           ),
         ),

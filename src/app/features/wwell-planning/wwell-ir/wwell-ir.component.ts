@@ -96,7 +96,7 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // stable while the user narrows further — each chip shows how many rows *it* would reveal, not
   // how many remain after some other filter already trimmed the set.
   private readonly lifecycleScopedIrs = computed(() => {
-    const all = this.store.irs();
+    const all = this.store.hydratedIrs();
     return this.lifecycleFilter() === 'inactive'
       ? all.filter(ir => ir.status === 'approved')
       : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
@@ -124,9 +124,12 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   protected readonly pendingDraftIr = signal<IntegratedRequirement | null>(null);
 
   // Deliberately looks up the *unfiltered* store list (not `rows()`) so narrowing the search
-  // never drops the current selection just because it fell outside the filtered results.
+  // never drops the current selection just because it fell outside the filtered results. Reads
+  // `hydratedIrs` (not `irs` directly) so the editor this feeds always gets Water Well
+  // Name/Coordinates/Surface Elevation freshly re-derived from the live eligible-wells list, not
+  // whatever (possibly stale, possibly blank-after-reload) value happens to be cached in `irs`.
   protected readonly selectedIr = computed<IntegratedRequirement | null>(
-    () => this.pendingDraftIr() ?? this.store.irs().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
+    () => this.pendingDraftIr() ?? this.store.hydratedIrs().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
   );
 
   // Identity/order of the *visible set* of rows, not the row objects themselves — selecting a row
@@ -272,6 +275,11 @@ export class WwellIrComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.loadIrs();
+    // Started here (not lazily in the editor once a record is selected) so `hydratedIrs`
+    // (selectedIr's source — see its own comment) has a real shot at already carrying each
+    // record's Water Well Name/Coordinates/Surface Elevation by the time the first selection
+    // resolves, instead of racing it.
+    this.store.loadLinkedRequestWells();
   }
 
   ngOnDestroy(): void {

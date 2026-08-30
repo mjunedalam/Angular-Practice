@@ -1,5 +1,13 @@
-import { buildWwellIrBulkSavePayload } from './wwell-ir-payload.mapper';
+import {
+  IntegratedRequirementCasingRow,
+  IntegratedRequirementFormationTop,
+  IntegratedRequirementHydrogeology,
+  IntegratedRequirementOffsetWell,
+  IntegratedRequirementTestProgram,
+} from '@models/wwell-planning/integrated-requirement.model';
+import { buildWwellIrBulkSavePayload, WwellIrSaveContext } from './wwell-ir-payload.mapper';
 import { WwellIrFormRawValue } from './wwell-ir-form.types';
+import { IrCasingRow, IrTopsRow, IrWaterRow } from './wwell-ir-payload.model';
 
 function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawValue {
   return {
@@ -99,5 +107,195 @@ describe('buildWwellIrBulkSavePayload', () => {
 
     expect(water.table).toBe('exad_gwd_ir_water');
     expect(water.data).toBeNull();
+  });
+});
+
+/** Every repeatable section's `existing`-diff branch (see buildCasingRows/buildTopsRows/
+ *  buildWaterRows in wwell-ir-payload.mapper.ts) needs a full `existing` record, even when a
+ *  given test only cares about one section — the other four fall back to inert empty/blank
+ *  values so they never contribute rows of their own to the assertions below. */
+function buildExistingBase(
+  overrides: Partial<{
+    casing: readonly IntegratedRequirementCasingRow[];
+    formationTops: readonly IntegratedRequirementFormationTop[];
+    offsetWells: readonly IntegratedRequirementOffsetWell[];
+    hydrogeology: IntegratedRequirementHydrogeology;
+    testProgram: IntegratedRequirementTestProgram;
+  }> = {},
+): NonNullable<WwellIrSaveContext['existing']> {
+  return {
+    casing: [],
+    formationTops: [],
+    offsetWells: [],
+    hydrogeology: { aquifer: '', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: null },
+    testProgram: { testType: 'pump-test', estimatedRateGpm: null, estimatedWaterLevelFt: null },
+    ...overrides,
+  };
+}
+
+describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/delete combinations)', () => {
+  it('casing: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE — all in one save', () => {
+    const existing = buildExistingBase({
+      casing: [
+        { type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' },
+        { type: 'Surface', sizeIn: '13 3/8"', depthFtBgl: 500, tolFtBgl: null, remarks: null },
+      ],
+    });
+
+    const raw = buildRaw({
+      subsurface: {
+        formationTops: [],
+        casing: [
+          // Same natural key (type + size) and same writable fields as the existing Conductor
+          // row — the user left this one alone this save.
+          { type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' },
+          // No matching existing row — the user added this one.
+          { type: 'Production', sizeIn: '9 5/8"', depthFtBgl: 900, tolFtBgl: null, remarks: 'New run' },
+          // The Surface row from `existing` is simply absent — the user removed it in the UI.
+        ],
+      },
+    });
+
+    const [, casing] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
+    const rows = casing.data as IrCasingRow[];
+
+    expect(rows).toHaveLength(3);
+    expect(rows.find(row => row.csg_type === 'Conductor')).toMatchObject({ action: '', ir_seq: 7001 });
+    expect(rows.find(row => row.csg_type === 'Production')).toMatchObject({ action: 'INSERT', ir_seq: null });
+    expect(rows.find(row => row.csg_type === 'Surface')).toMatchObject({ action: 'DELETE', ir_seq: 7001 });
+  });
+
+  it('casing: tags a kept row UPDATE once one of its writable fields actually changed', () => {
+    const existing = buildExistingBase({
+      casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' }],
+    });
+    const raw = buildRaw({
+      subsurface: {
+        formationTops: [],
+        casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 120, tolFtBgl: null, remarks: 'Cemented' }],
+      },
+    });
+
+    const [, casing] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
+    const rows = casing.data as IrCasingRow[];
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ action: 'UPDATE', ir_seq: 7001, csg_depth: 120 });
+  });
+
+  it('formationTops: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE', () => {
+    const existing = buildExistingBase({
+      formationTops: [
+        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, description: 'orig' },
+        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360, description: null },
+      ],
+    });
+    const raw = buildRaw({
+      subsurface: {
+        casing: [],
+        formationTops: [
+          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, description: 'orig' },
+          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260, description: 'new top' },
+        ],
+      },
+    });
+
+    const [, , , tops] = buildWwellIrBulkSavePayload(raw, { irSeq: 7002, existing });
+    const rows = tops.data as IrTopsRow[];
+
+    expect(rows).toHaveLength(3);
+    expect(rows.find(row => row.st_long_cd === 'ARUM')).toMatchObject({ action: '', ir_seq: 7002 });
+    expect(rows.find(row => row.st_long_cd === 'BIYADH')).toMatchObject({ action: 'INSERT', ir_seq: null });
+    expect(rows.find(row => row.st_long_cd === 'RUS')).toMatchObject({ action: 'DELETE', ir_seq: 7002 });
+  });
+
+  it('offsetWells: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE', () => {
+    const existing = buildExistingBase({
+      offsetWells: [
+        {
+          epANum: 100,
+          distanceKm: 2.5,
+          location: 'N 2.5 km',
+          aquifer: 'Saq',
+          totalDepthFt: 530,
+          testDurationMin: 1440,
+          rateGpm: 380,
+          rpm: 1200,
+          swlFt: 85,
+          pwlFt: 110,
+          drawdownFt: 25,
+          specificCapacity: 15.2,
+          tdsPpm: 1200,
+          h2sPpm: 5,
+        },
+        {
+          epANum: 200,
+          distanceKm: 4.1,
+          location: 'S 4.1 km',
+          aquifer: 'Wasia',
+          totalDepthFt: 610,
+          testDurationMin: 1440,
+          rateGpm: 300,
+          rpm: 1100,
+          swlFt: 90,
+          pwlFt: 130,
+          drawdownFt: 40,
+          specificCapacity: 7.5,
+          tdsPpm: 1500,
+          h2sPpm: 3,
+        },
+      ],
+    });
+    const raw = buildRaw({
+      contacts: {
+        geologist: buildRaw().contacts.geologist,
+        remarks: buildRaw().contacts.remarks,
+        offsetWells: [
+          // Row 100 kept, identical to `existing` — the user left this one alone this save.
+          {
+            epANum: 100,
+            distanceKm: 2.5,
+            location: 'N 2.5 km',
+            aquifer: 'Saq',
+            totalDepthFt: 530,
+            testDurationMin: 1440,
+            rateGpm: 380,
+            rpm: 1200,
+            swlFt: 85,
+            pwlFt: 110,
+            drawdownFt: 25,
+            specificCapacity: 15.2,
+            tdsPpm: 1200,
+            h2sPpm: 5,
+          },
+          // No matching existing row — the user added this one.
+          {
+            epANum: 300,
+            distanceKm: 1.2,
+            location: 'E 1.2 km',
+            aquifer: 'Biyadh',
+            totalDepthFt: 480,
+            testDurationMin: 720,
+            rateGpm: 210,
+            rpm: 900,
+            swlFt: 60,
+            pwlFt: 95,
+            drawdownFt: 35,
+            specificCapacity: 6,
+            tdsPpm: 900,
+            h2sPpm: 1,
+          },
+          // Row 200 from `existing` is simply absent — the user removed it in the UI.
+        ],
+      },
+    });
+
+    const [, , , , water] = buildWwellIrBulkSavePayload(raw, { irSeq: 7003, existing });
+    const rows = water.data as IrWaterRow[];
+
+    expect(rows).toHaveLength(3);
+    expect(rows.find(row => row.ep_a_num === 100)).toMatchObject({ action: '', ir_seq: 7003 });
+    expect(rows.find(row => row.ep_a_num === 300)).toMatchObject({ action: 'INSERT', ir_seq: null });
+    expect(rows.find(row => row.ep_a_num === 200)).toMatchObject({ action: 'DELETE', ir_seq: 7003 });
   });
 });
