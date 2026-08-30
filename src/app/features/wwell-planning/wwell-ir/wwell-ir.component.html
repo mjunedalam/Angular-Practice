@@ -42,7 +42,7 @@
       </button>
 
       @if (lifecycleFilter() === 'active') {
-        <div class="wwell-ir__status-chips" role="group" aria-label="Status filter">
+        <div class="wwell-ir__status-chips" role="group" aria-label="Status filter" appWwellCollapseAnimate>
           @for (status of statusChips; track status) {
             <button
               type="button"
@@ -75,35 +75,44 @@
     } @else if (rows().length === 0) {
       <div class="wwell-ir__status">No integrated requirements found.</div>
     } @else {
-      <ul class="wwell-ir__list" #listHost>
-        @for (ir of rows(); track ir.irSeq ?? ir.id) {
-          <li>
-            <button
-              type="button"
-              class="wwell-ir__row"
-              [class.wwell-ir__row--active]="ir.irSeq === selectedIrSeq()"
-              [class.wwell-ir__row--pending]="ir.irSeq === pendingId()"
-              [style.borderLeftColor]="chainBorderColor(ir.chain)"
-              [disabled]="rowIrSeq(ir) === null"
-              (click)="selectIrRow(ir)"
-            >
-              <div class="wwell-ir__row-top">
-                <span class="wwell-ir__row-code">{{ ir.code }}</span>
-                <span
-                  class="wwell-ir__badge"
-                  [style.background]="statusMeta[ir.status].bg"
-                  [style.color]="statusMeta[ir.status].color"
-                >
-                  <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
-                  {{ statusMeta[ir.status].label }}
-                </span>
-              </div>
-              <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
-              <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
-            </button>
-          </li>
-        }
-      </ul>
+      <cdk-virtual-scroll-viewport
+        [itemSize]="rowItemSize"
+        class="wwell-ir__viewport"
+        #listHost
+        role="list"
+        aria-label="Integrated requirements"
+      >
+        <div
+          *cdkVirtualFor="let ir of rows(); trackBy: trackByIrRow"
+          class="wwell-ir__row-item"
+          [style.height.px]="rowItemSize"
+          role="listitem"
+        >
+          <button
+            type="button"
+            class="wwell-ir__row"
+            [class.wwell-ir__row--active]="ir.irSeq === selectedIrSeq()"
+            [class.wwell-ir__row--pending]="ir.irSeq === pendingId()"
+            [style.borderLeftColor]="chainBorderColor(ir.chain)"
+            [disabled]="rowIrSeq(ir) === null"
+            (click)="selectIrRow(ir)"
+          >
+            <div class="wwell-ir__row-top">
+              <span class="wwell-ir__row-code">{{ ir.code }}</span>
+              <span
+                class="wwell-ir__badge"
+                [style.background]="statusMeta[ir.status].bg"
+                [style.color]="statusMeta[ir.status].color"
+              >
+                <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
+                {{ statusMeta[ir.status].label }}
+              </span>
+            </div>
+            <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
+            <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
+          </button>
+        </div>
+      </cdk-virtual-scroll-viewport>
     }
   </div>
 

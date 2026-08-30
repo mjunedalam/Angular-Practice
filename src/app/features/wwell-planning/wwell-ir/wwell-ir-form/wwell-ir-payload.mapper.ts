@@ -3,15 +3,23 @@ import {
   IntegratedRequirementCasingRow,
   IntegratedRequirementFormationTop,
   IntegratedRequirementHydrogeology,
+  IntegratedRequirementOffsetWell,
   IntegratedRequirementTestProgram,
 } from '@models/wwell-planning/integrated-requirement.model';
-import { WwellIrFormRawValue, WwellIrRawCasingRow, WwellIrRawFormationTop, WwellIrRawHydrology } from './wwell-ir-form.types';
+import {
+  WwellIrFormRawValue,
+  WwellIrRawCasingRow,
+  WwellIrRawFormationTop,
+  WwellIrRawHydrology,
+  WwellIrRawOffsetWell,
+} from './wwell-ir-form.types';
 import {
   IrCasingRow,
   IrHeaderRow,
   IrHydrogeologyRow,
   IrRowAction,
   IrTopsRow,
+  IrWaterRow,
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
 import {
@@ -31,7 +39,10 @@ import {
  */
 export interface WwellIrSaveContext {
   readonly irSeq: number | null;
-  readonly existing?: Pick<IntegratedRequirement, 'casing' | 'formationTops' | 'hydrogeology' | 'testProgram'> | null;
+  readonly existing?: Pick<
+    IntegratedRequirement,
+    'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells'
+  > | null;
 }
 
 const NEW_IR_CONTEXT: WwellIrSaveContext = { irSeq: null, existing: null };
@@ -242,6 +253,96 @@ function buildHydrogeologyRows(
   return rows;
 }
 
+const isBlankOffsetWell = (row: WwellIrRawOffsetWell): boolean => row.epANum == null && !row.aquifer;
+
+/** Natural key exad_gwd_ir_water is matched on — (ir_seq, ep_a_num) is its primary key. */
+const waterKey = (epANum: number): string => String(epANum);
+
+/** Only the columns save_water's UPDATE branch writes — ep_a_num is the match key itself. */
+const waterRowUnchanged = (existingRow: IntegratedRequirementOffsetWell, row: WwellIrRawOffsetWell): boolean =>
+  (existingRow.distanceKm ?? null) === row.distanceKm &&
+  (existingRow.location ?? null) === (row.location || null) &&
+  (existingRow.aquifer ?? null) === (row.aquifer || null) &&
+  (existingRow.totalDepthFt ?? null) === row.totalDepthFt &&
+  (existingRow.testDurationMin ?? null) === row.testDurationMin &&
+  (existingRow.rateGpm ?? null) === row.rateGpm &&
+  (existingRow.rpm ?? null) === row.rpm &&
+  (existingRow.swlFt ?? null) === row.swlFt &&
+  (existingRow.pwlFt ?? null) === row.pwlFt &&
+  (existingRow.drawdownFt ?? null) === row.drawdownFt &&
+  (existingRow.specificCapacity ?? null) === row.specificCapacity &&
+  (existingRow.tdsPpm ?? null) === row.tdsPpm &&
+  (existingRow.h2sPpm ?? null) === row.h2sPpm;
+
+/** `temp` is the one exad_gwd_ir_water column the form has no field for — always sent null. */
+const toWaterRow = (row: WwellIrRawOffsetWell, action: IrRowAction, irSeq: number | null): IrWaterRow => ({
+  action,
+  ir_seq: irSeq,
+  ep_a_num: row.epANum ?? 0,
+  distanct: row.distanceKm,
+  direction: row.location || null,
+  aquifer: row.aquifer,
+  td: row.totalDepthFt,
+  rate: row.rateGpm,
+  rpm: row.rpm,
+  swl: row.swlFt,
+  final_pwl: row.pwlFt,
+  drawdown: row.drawdownFt,
+  spec_capacity: row.specificCapacity,
+  temp: null,
+  field_tds: row.tdsPpm,
+  test_duration: row.testDurationMin,
+  h2s: row.h2sPpm,
+});
+
+function buildWaterRows(
+  raw: readonly WwellIrRawOffsetWell[],
+  irSeq: number | null,
+  existing: readonly IntegratedRequirementOffsetWell[] | null | undefined,
+): IrWaterRow[] {
+  const currentRows = raw.filter(row => !isBlankOffsetWell(row));
+
+  if (existing == null) {
+    const action = resolveRowAction(irSeq);
+    return currentRows.map(row => toWaterRow(row, action, irSeq));
+  }
+
+  const existingByKey = new Map(existing.map(row => [waterKey(row.epANum), row]));
+  const keptKeys = new Set<string>();
+
+  const upserts: IrWaterRow[] = currentRows.map(row => {
+    const key = waterKey(row.epANum ?? 0);
+    const existingRow = existingByKey.get(key);
+    if (existingRow) keptKeys.add(key);
+    const action: IrRowAction = existingRow ? (waterRowUnchanged(existingRow, row) ? '' : 'UPDATE') : 'INSERT';
+    return toWaterRow(row, action, existingRow ? irSeq : null);
+  });
+
+  const deletes: IrWaterRow[] = existing
+    .filter(row => !keptKeys.has(waterKey(row.epANum)))
+    .map(row => toWaterRow(offsetWellToRaw(row), 'DELETE', irSeq));
+
+  return [...upserts, ...deletes];
+}
+
+/** Domain → raw shape, so a DELETE row is built by the same toWaterRow() as every other action. */
+const offsetWellToRaw = (row: IntegratedRequirementOffsetWell): WwellIrRawOffsetWell => ({
+  epANum: row.epANum,
+  distanceKm: row.distanceKm ?? null,
+  location: row.location ?? '',
+  aquifer: row.aquifer ?? '',
+  totalDepthFt: row.totalDepthFt ?? null,
+  testDurationMin: row.testDurationMin ?? null,
+  rateGpm: row.rateGpm ?? null,
+  rpm: row.rpm ?? null,
+  swlFt: row.swlFt ?? null,
+  pwlFt: row.pwlFt ?? null,
+  drawdownFt: row.drawdownFt ?? null,
+  specificCapacity: row.specificCapacity ?? null,
+  tdsPpm: row.tdsPpm ?? null,
+  h2sPpm: row.h2sPpm ?? null,
+});
+
 /** exad_gwd_ir_header.tops_remarks is a single column, but Formation Tops is a repeatable row
  *  list each with its own "Remarks" text — join whatever's there instead of keeping only one row's
  *  text and silently dropping the rest. */
@@ -257,7 +358,7 @@ function resolveGeologistId(name: string): number | null {
   return name ? (WWELL_GEOLOGIST_ID_BY_NAME[name] ?? null) : null;
 }
 
-/** exad_gwd_ir_header.trns_typf is VARCHAR2(10) — too short for the full Transmission label, so a
+/** exad_gwd_ir_header.trns_type is VARCHAR2(10) — too short for the full Transmission label, so a
  *  known option maps to its short code; anything else (free-typed 'combo' text) is truncated to
  *  fit rather than silently dropped by Oracle's lax JSON_TABLE conversion. */
 function resolveTransmissionCode(value: string): string | null {
@@ -289,12 +390,12 @@ export function buildWwellIrBulkSavePayload(
     cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistPrimary),
     sub_cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistSecondary),
     water_remarks: null,
-    geo_remarks: null,
+    gen_remarks: null,
     completion: raw.programDetails.main.completion || null,
     cmpl_type: null,
     acidization: raw.programDetails.main.acidization || null,
     trns_type: resolveTransmissionCode(raw.programDetails.main.transmission),
-    ot_rmks: null,
+    dt_rmks: null,
     mud_rmks: raw.programDetails.developmentTesting.mudLogging || null,
     test_type: raw.hydrogeology.main.testType || null,
     flow_rmks: raw.programDetails.developmentTesting.flowTest || null,
@@ -303,12 +404,13 @@ export function buildWwellIrBulkSavePayload(
   const casing = buildCasingRows(raw.subsurface.casing, irSeq, existing?.casing);
   const tops = buildTopsRows(raw.subsurface.formationTops, irSeq, existing?.formationTops);
   const hydrogeology = buildHydrogeologyRows(raw.hydrogeology.main, irSeq, existing);
+  const water = buildWaterRows(raw.contacts.offsetWells, irSeq, existing?.offsetWells);
 
   return [
     { table: 'exad_gwd_ir_header', data: [header] },
     { table: 'exad_gwd_ir_casing', data: casing.length ? casing : null },
     { table: 'exad_gwd_ir_hydrogeology', data: hydrogeology.length ? hydrogeology : null },
     { table: 'exad_gwd_ir_tops', data: tops.length ? tops : null },
-    { table: 'exad_gwd_ir_water', data: null }, // not captured by this form yet
+    { table: 'exad_gwd_ir_water', data: water.length ? water : null },
   ];
 }

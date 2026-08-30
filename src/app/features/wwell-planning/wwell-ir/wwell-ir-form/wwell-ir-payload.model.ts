@@ -37,14 +37,14 @@ export interface IrHeaderRow extends IrRow {
   readonly cont_geologist: number | null;
   readonly sub_cont_geologist: number | null;
   readonly water_remarks: string | null;
-  readonly geo_remarks: string | null;
+  readonly gen_remarks: string | null;
   /** Free-text completion selection (exad_gwd_ir_header.completion, VARCHAR2(4000)) — NOT
    *  cmpl_type, which is VARCHAR2(10) and too short to hold values like "Screened + Gravel Pack". */
   readonly completion: string | null;
   readonly cmpl_type: string | null;
   readonly acidization: string | null;
   readonly trns_type: string | null;
-  readonly ot_rmks: string | null;
+  readonly dt_rmks: string | null;
   readonly mud_rmks: string | null;
   readonly test_type: string | null;
   readonly flow_rmks: string | null;
@@ -70,6 +70,27 @@ export interface IrHydrogeologyRow extends IrRow {
   readonly est_productivity: number | null;
   readonly flowing: string | null;
   readonly h2s: string | null;
+}
+
+/** The "Area Water Wells" (offset wells) section — exad_gwd_ir_water, see docs/ir/p2-ir.md.
+ *  Keyed by (ir_seq, ep_a_num); that table has no well-name column, so `epANum` is the only
+ *  identifier persisted for a row. `temp` has no form field yet and is always sent null. */
+export interface IrWaterRow extends IrRow {
+  readonly ep_a_num: number;
+  readonly distanct: number | null;
+  readonly direction: string | null;
+  readonly aquifer: string;
+  readonly td: number | null;
+  readonly rate: number | null;
+  readonly rpm: number | null;
+  readonly swl: number | null;
+  readonly final_pwl: number | null;
+  readonly drawdown: number | null;
+  readonly spec_capacity: number | null;
+  readonly temp: number | null;
+  readonly field_tds: number | null;
+  readonly test_duration: number | null;
+  readonly h2s: number | null;
 }
 
 export interface WwellIrTableBlock<TRow extends IrRow = IrRow> {

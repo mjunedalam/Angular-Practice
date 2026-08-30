@@ -28,7 +28,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       geologist: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: '' },
       offsetWells: [
         {
-          wellName: 'HAIL-100',
+          epANum: 100,
           distanceKm: 2.5,
           location: 'N 2.5 km',
           aquifer: 'Saq',

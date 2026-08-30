@@ -53,7 +53,7 @@ export function mapIrFormValueToSubmission(
       geologistSecondary: raw.contacts.geologist.geologistSecondary || null,
     },
     offsetWells: raw.contacts.offsetWells.map(row => ({
-      wellName: row.wellName,
+      epANum: row.epANum ?? 0,
       distanceKm: row.distanceKm,
       location: row.location || null,
       aquifer: row.aquifer || null,

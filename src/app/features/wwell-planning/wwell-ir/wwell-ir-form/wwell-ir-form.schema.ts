@@ -32,7 +32,17 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         fields: [
           // Static [] placeholder — buildWwellIrFormSchema() below swaps this for a live Signal
           // (backed by GET /planning/api/v1/wells/eligible-for-ir) before this schema is rendered.
-          { key: 'linkedRequestId', label: 'Link to Request', type: 'select', options: [] },
+          // Required: it maps to exad_gwd_ir_header.prewap_seq, which is NOT NULL in production
+          // (docs/ir/EXAD_GWD_IR_HEADER.md) — without this the save fails at the database with
+          // ORA-01400 instead of telling the user which field is missing.
+          {
+            key: 'linkedRequestId',
+            label: 'Link to Request',
+            type: 'select',
+            options: [],
+            validators: { required: true },
+            searchable: true,
+          },
           { key: 'letterNumber', label: 'Letter Number', type: 'text', placeholder: 'e.g., LTR-2026-0456' },
           { key: 'client', label: 'BI Number', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
           {
@@ -224,10 +234,11 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           key: 'offsetWells',
           addLabel: '+ Add Offset Well',
           rowFields: [
-            { key: 'wellName', label: 'Well Name', type: 'text', placeholder: 'e.g., KHAJ-200' },
+            { key: 'epANum', label: 'EP A Num', type: 'number', placeholder: 'e.g., 200', validators: { required: true } },
             { key: 'distanceKm', label: 'Distance (km)', type: 'number', placeholder: 'e.g., 2.5' },
             { key: 'location', label: 'Location', type: 'text', placeholder: 'e.g., N 2.5 km' },
-            { key: 'aquifer', label: 'Aquifer', type: 'text', placeholder: 'e.g., Wasia-Biyadh' },
+            // exad_gwd_ir_water.aquifer is NOT NULL (docs/ir/p2-ir.md), same reasoning as linkedRequestId above.
+            { key: 'aquifer', label: 'Aquifer', type: 'text', placeholder: 'e.g., Wasia-Biyadh', validators: { required: true } },
             { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'e.g., 530' },
             { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'e.g., 1440' },
             { key: 'rateGpm', label: 'Test Rate (GPM)', type: 'number', placeholder: 'e.g., 380' },

@@ -48,7 +48,7 @@ export interface WwellIrRawGeologist {
 }
 
 export interface WwellIrRawOffsetWell {
-  readonly wellName: string;
+  readonly epANum: number | null;
   readonly distanceKm: number | null;
   readonly location: string;
   readonly aquifer: string;

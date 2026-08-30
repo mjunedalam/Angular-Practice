@@ -1,20 +1,25 @@
 import { DiagramLayout } from '@models/well-design/wellbore-diagram.model';
 
 /**
- * Compact `DiagramLayout` for the Timeline view's Wellbore Preview sidebar (a narrow, fixed-width
- * panel — see `.ire__tl-preview-sidebar` in wwell-ir-editor.component.scss). `WellBoreViewComponent`
- * and `WwellIrDepthScaleComponent` draw every label at a fixed font-size in *viewBox* units (see
+ * Compact `DiagramLayout` for the wwell-ir Wellbore Preview card — used both inline in Sections
+ * view and in the Timeline view's sidebar (a narrower, fixed-width panel — see
+ * `.ire__tl-preview-sidebar` in wwell-ir-editor.component.scss). `WellBoreViewComponent` and
+ * `WwellIrDepthScaleComponent` draw every label (and every hover tooltip — casing/liner, geo-top
+ * remark, water level, mud-circulation — see the renderers under
+ * `features/presentation/well-bore-view/renderers/`) at a fixed font-size in *viewBox* units (see
  * well-bore-view.component.scss / wwell-ir-depth-scale.component.scss) — those font-sizes are the
  * same regardless of `DiagramLayout`, so the on-screen text size is really driven by how many
  * viewBox units the container's CSS width has to divide across (`containerPx / wellboreViewWidth`).
- * Sections view gets a legible ratio because its container is ~600px wide against the default
- * 1040-unit layout (≈0.58). The sidebar is intentionally much narrower — rather than widening it
- * (which would crowd the Timeline steps column) or shrinking the SVG's *container* further (which
- * is what made the old text unreadable), this shrinks the *coordinate space* itself by 25% (every
- * geometric constant scaled together, so the diagram's shape is untouched) — enough to noticeably
- * grow the same fixed-size fonts relative to the diagram, without touching any shared rendering
- * code (just a different config value through the `diagramLayout` input both components already
- * accept — same extension point `FULLSCREEN_DIAGRAM_LAYOUT` uses for the opposite case).
+ * Even the inline card in Sections view — capped by `.ire__wellbore-diagram-row`'s
+ * `max-height: 340px` against a 1040×840 aspect ratio — only renders at ~420px wide, well short of
+ * the ~600px this layout's own comments once assumed, which made every label and tooltip look
+ * undersized there too. Rather than widening the box (which would disturb the surrounding page) or
+ * shrinking the SVG's *container* further (which is what made the old sidebar text unreadable),
+ * this shrinks the *coordinate space* itself by 25% (every geometric constant scaled together, so
+ * the diagram's shape is untouched) — enough to noticeably grow the same fixed-size fonts relative
+ * to the diagram, without touching any shared rendering code (just a different config value through
+ * the `diagramLayout` input both components already accept — same extension point
+ * `FULLSCREEN_DIAGRAM_LAYOUT` uses for the opposite case).
  *
  * Not scaled further than this: several labels are centered/right-anchored fixed-width (or
  * fixed-offset) text that doesn't shrink with the layout — e.g. `static-chrome.renderer.ts`'s

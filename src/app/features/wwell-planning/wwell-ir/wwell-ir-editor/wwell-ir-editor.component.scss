@@ -301,11 +301,11 @@ app-wwell-ir-editor {
   }
 }
 
-.ire__rail-group-icon {
-  width: 17px;
-  height: 17px;
-  font-size: 17px;
-  color: $muted;
+.ire__rail-group-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $muted;
   flex-shrink: 0;
 }
 
@@ -335,8 +335,8 @@ app-wwell-ir-editor {
     color: $accent;
   }
 
-  .ire__rail-group-icon {
-    color: $accent;
+  .ire__rail-group-dot {
+    background: $accent;
   }
 }
 
@@ -535,12 +535,18 @@ app-wwell-ir-editor {
   scroll-margin-top: 0.5rem;
 }
 
-// No min-width/overflow tricks needed here: the sidebar passes a proportionally smaller
-// DiagramLayout (see previewDiagramLayout in wwell-ir-editor.component.ts) so the diagram's own
-// text stays legible while its geometry genuinely fits this narrower box — the row just renders
-// at the sidebar's actual content width like it does everywhere else.
+// The base `.ire__wellbore-diagram-row` rule below pins `min-width`/`max-width` to a fixed 600px
+// (see its own comment) so the *inline* Sections-view card never shrinks past a legible size —
+// but the sidebar is deliberately narrower than that (~260-320px, see `.ire__tl-preview-sidebar`
+// above) and already gets its own legibility fix, a proportionally smaller `DiagramLayout` (see
+// `previewDiagramLayout` in wwell-ir-editor.component.ts) that keeps the diagram's fixed-size
+// text legible while its geometry genuinely fits this narrower box. Reset both back to `none`
+// here so the sidebar keeps rendering at its own actual content width instead of being forced to
+// 600px and clipped by `.ire__tl-preview-anim`'s `overflow-x: hidden` above.
 .ire__tl-preview-sidebar .ire__wellbore-diagram-row {
   margin: 0;
+  min-width: 0;
+  max-width: none;
 }
 
 @media (max-width: 1100px) {
@@ -886,15 +892,46 @@ app-wwell-ir-editor {
   display: flex;
   flex-direction: column;
   align-items: center;
+  // `.ire__wellbore-diagram-row` below now has a `min-width` that can exceed this card's own
+  // width on a narrow (e.g. mobile) viewport — scope the horizontal scroll to just this card
+  // instead of letting the diagram's real width push out `.ire__section`/the page.
+  overflow-x: auto;
 }
 
+// Sized and shaped to match `previewDiagramLayout` (wwell-ir-preview-diagram-layout.ts)
+// exactly — `780 / 650`, not the old default layout's `1040 / 840` — so the SVG's own viewBox
+// aspect ratio equals this box's CSS aspect ratio 1:1. With `preserveAspectRatio="none"` (see
+// well-bore-view.component.ts / wwell-ir-depth-scale.component.ts) any mismatch between the two
+// stretches the drawing non-uniformly; matching them keeps it undistorted at any box size.
+// `max-height: 500px` deliberately isn't a headroom guess: at this exact 780:650 ratio it's what
+// lets `max-width: 600px` bind too (500 × 780/650 = 600) — the box uses its full available width
+// instead of being height-capped down to ~420px the way the old 340px max-height forced it to be.
+// A bigger box is what actually fixes the diagram's small text/tooltips: everything here (labels,
+// tooltips, casing widths, spacing) is drawn in fixed viewBox units and scales *together* off of
+// `containerPx / wellboreViewWidth` — so growing the container is the one lever that reliably
+// grows all of it at once, in proportion, with zero risk of a label overlapping its neighbor (the
+// spacing around it grew by the exact same factor). Deliberately NOT layering a further font-size
+// bump on top of this in CSS: a bump changes only the text, not the fixed-viewBox-unit spacing
+// around it (leader-line offsets, tooltip row heights, tick spacing), so it re-introduces the
+// exact overlap this proportional box-resize was meant to avoid — confirmed live, see git history
+// on this file for the reverted attempt.
+//
+// `min-width` matches `max-width` on purpose — this box was `width: 100%` with no floor, so on
+// any viewport narrower than ~600px (a phone, this card's own narrower breakpoints) it shrank
+// straight back past the ~0.4 ratio that made everything unreadable in the first place, since
+// nothing above ever guaranteed the box a legible *minimum* size, only a maximum one. Pinning
+// both to 600px makes the box's on-screen size (and therefore every label/tooltip's size)
+// constant everywhere — full stop, not "as big as the viewport happens to allow" — and lets
+// `.ire__wellbore-card`'s `overflow-x: auto` above take over exactly when the viewport can't fit
+// it, the same trade a dense data table or diagram makes on mobile everywhere else in this app.
 .ire__wellbore-diagram-row {
   display: flex;
   align-items: stretch;
   width: 100%;
+  min-width: 600px;
   max-width: 600px;
-  aspect-ratio: 1040 / 840;
-  max-height: 340px;
+  aspect-ratio: 780 / 650;
+  max-height: 500px;
   margin: 0 auto;
 }
 
@@ -951,6 +988,18 @@ app-wwell-ir-editor {
   border: 1px solid $border;
   border-radius: 10px;
   box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+}
+
+// Keeps the Save button's own width stable whether it's showing the save icon or the
+// in-flight spinner, so the footer never reflows/jumps the instant a save starts.
+.ire__save-btn .mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ire__save-spinner {
+  display: inline-flex;
 }
 
 .ire .mat-mdc-form-field-required-marker {

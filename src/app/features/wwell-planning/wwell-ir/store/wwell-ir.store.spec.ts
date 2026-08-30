@@ -7,6 +7,7 @@ import { WwellIrStore } from './wwell-ir.store';
 
 const serviceMock = {
   createIr: jest.fn(),
+  getIrDetailBlocks: jest.fn(),
 };
 
 function buildPayload(): CreateIntegratedRequirementPayload {
@@ -72,12 +73,12 @@ function buildIrBulkPayload(): WwellIrBulkSavePayload {
           cont_geologist: 101,
           sub_cont_geologist: null,
           water_remarks: null,
-          geo_remarks: null,
+          gen_remarks: null,
           completion: 'Screened',
           cmpl_type: null,
           acidization: null,
           trns_type: null,
-          ot_rmks: null,
+          dt_rmks: null,
           mud_rmks: null,
           test_type: 'pump-test',
           flow_rmks: null,
@@ -96,6 +97,10 @@ describe('WwellIrStore - createIr', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // createIr's success path always kicks off a silent refreshIrDetail(irSeq) afterwards (see
+    // WwellIrStore) — an empty detail response merges back onto `existing` as a no-op (every
+    // field falls back to what's already there), so it doesn't disturb these assertions.
+    serviceMock.getIrDetailBlocks.mockReturnValue(of([]));
     TestBed.configureTestingModule({
       providers: [WwellIrStore, { provide: WwellIrService, useValue: serviceMock }],
     });

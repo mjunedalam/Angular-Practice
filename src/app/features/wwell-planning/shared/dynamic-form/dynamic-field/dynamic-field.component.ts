@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -50,6 +50,28 @@ export class DynamicFieldComponent {
   /** Resolves the config's `options` (static array or live Signal) once per change — every
    *  options `@for` loop below reads this instead of `config().options` directly. */
   protected readonly resolvedOptions = computed(() => resolveFieldOptions(this.config()));
+
+  /** Backs the filter input a `searchable: true` 'select' field projects into its own mat-select
+   *  panel (see the template) — mat-select has no built-in search. Stays '' for every other
+   *  field, since nothing renders an input to change it, so `filteredOptions` below is then just
+   *  `resolvedOptions()` unfiltered. */
+  protected readonly optionSearchTerm = signal('');
+
+  protected readonly filteredOptions = computed(() => {
+    const term = this.optionSearchTerm().trim().toLowerCase();
+    if (!term) return this.resolvedOptions();
+    return this.resolvedOptions().filter(opt => this.optionLabel(opt).toLowerCase().includes(term));
+  });
+
+  /** Clears the filter on close so reopening the panel always starts from the full list instead
+   *  of whatever was last typed. */
+  protected onSelectOpenedChange(opened: boolean): void {
+    if (!opened) this.optionSearchTerm.set('');
+  }
+
+  protected onOptionSearchInput(event: Event): void {
+    this.optionSearchTerm.set((event.target as HTMLInputElement).value);
+  }
 
   /**
    * `control()` is a Signal input, but the bound FormControl's own `.value` mutates in place

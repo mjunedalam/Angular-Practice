@@ -99,7 +99,7 @@ export function casingRowPatch(row: IntegratedRequirement['casing'][number]): Ww
 
 export function offsetWellRowPatch(row: IntegratedRequirement['offsetWells'][number]): WwellIrRawOffsetWell {
   return {
-    wellName: row.wellName,
+    epANum: row.epANum,
     distanceKm: row.distanceKm ?? null,
     location: row.location ?? '',
     aquifer: row.aquifer ?? '',

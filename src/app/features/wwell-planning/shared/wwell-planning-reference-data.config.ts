@@ -87,7 +87,7 @@ export const WWELL_TRANSMISSION_OPTIONS: readonly string[] = [
   'Tanker',
 ];
 
-/** exad_gwd_ir_header.trns_typf is VARCHAR2(10) — too short for these labels (up to 19 chars) —
+/** exad_gwd_ir_header.trns_type is VARCHAR2(10) — too short for these labels (up to 19 chars) —
  *  so the wire payload sends this short code instead of the full label. */
 export const WWELL_TRANSMISSION_CODE_BY_LABEL: Readonly<Record<string, string>> = {
   'Gravity Flow': 'GF',

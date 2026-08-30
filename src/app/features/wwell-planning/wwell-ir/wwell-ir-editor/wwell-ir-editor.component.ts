@@ -20,10 +20,11 @@ import { NgTemplateOutlet } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { NotificationService } from '@shared/components/notification/notification.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
+import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
@@ -73,11 +74,16 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
  * both the old routed wizard (`wwell-ir-new-page`) and the separate read-only viewer
  * (`wwell-ir-detail`). Every section defaults to a compact read display; clicking its pencil
  * opens just that section for editing (via SectionEditState) without disturbing the rest of the
- * page, and saving persists immediately rather than waiting on a page-wide Save button. The IR
- * SECTIONS rail scrolls straight to any section, editing or not.
+ * page. The IR SECTIONS rail scrolls straight to any section, editing or not.
  *
- * `WwellIrComponent.createNewIr()` mints a blank draft up front and selects it, so this component
- * never creates a record itself — it always binds to an already-persisted `ir`.
+ * There is exactly one Save — the global button in the footer (see saveAll()). Sections have no
+ * Save of their own: any number can be open at once, and one click persists all of them together
+ * in a single request, so filling in a new IR is never a sequence of per-section round-trips.
+ *
+ * `WwellIrComponent.createNewIr()` opens a blank, purely local draft (`ir().irSeq === null`, no
+ * backend call yet) and selects it, so `ir` isn't always an already-persisted record here — it
+ * only becomes one on that first save, which reuses the exact same
+ * saveMergedRaw()/buildWwellIrBulkSavePayload `irSeq: null → INSERT` route as any first-time save.
  */
 @Component({
   selector: 'app-wwell-ir-editor',
@@ -86,9 +92,11 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
     NgTemplateOutlet,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     DynamicSectionComponent,
     WellBoreViewComponent,
     WwellIrDepthScaleComponent,
+    WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir-editor.component.html',
   styleUrl: './wwell-ir-editor.component.scss',
@@ -104,16 +112,12 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
   private readonly fb = inject(FormBuilder);
   protected readonly store = inject(WwellIrStore);
-  private readonly notify = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
-  // WwellIrStore.createIr has one shared `creatingIr` flag for every caller — every section's
-  // Save button disables together rather than tracking per-section in-flight state, since a
-  // second save should never race the first against the same record anyway.
   protected readonly isSaving = this.store.creatingIr;
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
-  // "Submit for Review" is the one action still gated by status — it only makes sense before the
+  // "Submit for Review" is the one action gated by status — it only makes sense before the
   // record has already left the author's hands. Every section's inline edit, by contrast, is
   // available regardless of status (see saveMergedRaw's status-fallback comment below).
   protected readonly canSubmitForReview = computed(() => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status));
@@ -216,9 +220,9 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     hasWellboreDiagramDataForIntegratedRequirement(this.ir(), this.casingEdit.liveValue(), this.formationTopsEdit.liveValue()),
   );
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
-  // Timeline view's sidebar renders the same preview at a fraction of Sections view's width — see
-  // wwell-ir-preview-diagram-layout.ts for why a smaller *coordinate space* (not a smaller
-  // container) is what keeps its fixed-viewBox-unit text legible without widening the sidebar.
+  // Used by both the Sections view's inline Wellbore Preview card and the Timeline view's sidebar
+  // — see wwell-ir-preview-diagram-layout.ts for why a smaller *coordinate space* (not a smaller
+  // container) is what keeps fixed-viewBox-unit labels and tooltips legible in either box.
   protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
   protected readonly casingSizeWarnings: Signal<readonly CasingSizeWarning[]> = computed(() =>
     findInvertedCasingSizeRows(this.ir().casing.map(casingRowPatch)),
@@ -226,9 +230,19 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
   // ── Per-section inline-edit state — lazily built from the *current* record only once its
   // pencil is clicked, so opening a section always starts from the latest saved values. ─────────
-  protected readonly requestReferenceEdit = new SectionEditState(() =>
-    buildAndPatchGroup(this.referenceMainSection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).reference.main),
-  );
+  protected readonly requestReferenceEdit = new SectionEditState(() => {
+    const group = buildAndPatchGroup(
+      this.referenceMainSection,
+      this.fb,
+      mapIntegratedRequirementToFormPatch(this.ir()).reference.main,
+    );
+    // Record already has a linked request (opened for edit, not just picked this session) — lock
+    // its populated fields immediately instead of waiting for a valueChanges emission that already
+    // happened during patchValue() above, before anything was subscribed to hear it.
+    const linkedRequestId = group.get('linkedRequestId')?.value as string | null;
+    if (linkedRequestId) this.applyLinkedRequestWell(group, linkedRequestId);
+    return group;
+  });
   protected readonly programMainEdit = new SectionEditState(() =>
     buildAndPatchGroup(this.programMainSection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).programDetails.main),
   );
@@ -272,6 +286,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   // The internally-scrolling region (header/footer stay fixed) — see wwell-ir-editor.component.scss.
   @ViewChild('body', { read: ElementRef }) private readonly bodyEl?: ElementRef<HTMLElement>;
 
+  // Tracks which record this editor instance is currently showing — see the identity-change
+  // effect below, which is the only reader/writer of this outside the constructor.
+  private previousIrId: string | null = null;
+
   constructor() {
     // The "Link to Request" select lives inside requestReferenceEdit's own lazily-built
     // FormGroup (a fresh instance every time that section's pencil is clicked — see
@@ -287,6 +305,22 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
         if (linkedRequestId) this.applyLinkedRequestWell(ctrl, linkedRequestId);
       });
       onCleanup(() => subscription?.unsubscribe());
+    });
+
+    // WwellIrComponent reuses this same editor instance across selections — its `@else if
+    // (selectedIr(); as ir)` branch never changes just because the *bound* record does (switching
+    // list rows, or opening a blank "New IR" draft), so nothing here gets recreated for free. A
+    // section already open at that moment keeps the FormGroup it already built — SectionEditState
+    // .open() is a no-op once editing (see its own doc comment) — so without this, an open
+    // section keeps showing the *previous* record's values after the identity underneath it
+    // changes. Closing everything forces every section back to its read display, which re-derives
+    // fresh from whatever `ir()` now is on next open. Compares `id` (not the object reference,
+    // which also changes on every in-place update from a save) so an update to the *same* record
+    // never closes sections the user still has open mid-edit.
+    effect(() => {
+      const id = this.ir().id;
+      if (this.previousIrId !== null && id !== this.previousIrId) this.closeAllSections();
+      this.previousIrId = id;
     });
   }
 
@@ -328,17 +362,38 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
    *  Aquifer/Target Depth have no source there (exad_rcd_prewap doesn't carry them) and stay
    *  manually entered. Purely a client-side lookup against the already-loaded eligible-wells
    *  list (see store.loadLinkedRequestWells()) — selecting a link never itself triggers a
-   *  network call. */
+   *  network call.
+   *
+   *  Whichever fields the link actually supplies are then locked read-only: they track the source
+   *  request record, so letting someone edit or clear them here would silently diverge from (or
+   *  desync) that source. Also reused at initial section-open for an already-linked record (see
+   *  requestReferenceEdit above) — re-locks the same fields to the same values, so it's a no-op
+   *  data-wise there. */
   private applyLinkedRequestWell(referenceGroup: FormGroup, linkedRequestId: string): void {
     const well = this.store.linkedRequestWells().find(candidate => String(candidate.prewapSeq) === linkedRequestId);
     if (!well) return;
 
+    const hasElevation = well.surfaceElevation != null;
+    const hasCoordinates = well.surfaceNorth != null && well.surfaceEast != null;
+
     const patch: Record<string, string | number> = { wellName: well.wellName };
-    if (well.surfaceElevation != null) patch['surfaceElevationFtAsl'] = well.surfaceElevation;
-    if (well.surfaceNorth != null && well.surfaceEast != null) {
-      patch['coordinates'] = `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
-    }
+    if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation;
+    if (hasCoordinates) patch['coordinates'] = `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
     referenceGroup.patchValue(patch);
+
+    referenceGroup.get('wellName')?.disable();
+    this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
+    this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
+  }
+
+  /** Locks/unlocks one Request Reference field depending on whether the currently-linked request
+   *  actually supplied it — switching to a different linked request that lacks, say, coordinates
+   *  hands that field back for manual entry rather than leaving it stuck disabled and empty. */
+  private setLinkedFieldLock(group: FormGroup, key: string, locked: boolean): void {
+    const control = group.get(key);
+    if (!control) return;
+    if (locked) control.disable();
+    else control.enable();
   }
 
   protected offsetWellsArrayControl(ctrl: FormGroup): FormArray {
@@ -353,11 +408,15 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     return mapIntegratedRequirementToRawFormValue(this.ir());
   }
 
-  /** Shared save path for every section: re-derives the payload/bulk-save arrays from the
-   *  *current* record with just one section's slice overlaid, so an in-flight edit on another
-   *  still-open section is never read (it saves separately, whenever its own Save fires) and a
-   *  section nobody touched this time round is resent unchanged (and diffed to a DML no-op by
-   *  buildWwellIrBulkSavePayload's `existing` comparison) rather than dropped.
+  /** Shared save path: re-derives the payload/bulk-save arrays from the *current* record with the
+   *  open sections' slices overlaid, so a section nobody touched this time round is resent
+   *  unchanged (and diffed to a DML no-op by buildWwellIrBulkSavePayload's `existing` comparison)
+   *  rather than dropped.
+   *
+   *  Deliberately fires no success toast — the request is still in flight here, so anything shown
+   *  now would claim success before the backend has answered (and would still show next to the
+   *  error toast when the save actually fails). WwellIrComponent reports the real outcome once
+   *  store.creatingIr() settles.
    *
    *  Status handling: the save payload type only ever accepts 'draft' | 'in-progress' (see
    *  CreateIntegratedRequirementPayload) — there's no contract for "edit this field but keep it
@@ -371,78 +430,71 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const { payload } = mapIrFormValueToSubmission(raw, status);
     const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: current.irSeq ?? null, existing: current });
     this.store.createIr(payload, irBulkPayload, attachmentNames ?? current.attachmentNames);
-    this.notify.info('Saved.');
   }
 
-  protected saveRequestReference(): void {
-    const ctrl = this.requestReferenceEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, reference: { main: ctrl.getRawValue() } });
+  /** Global footer "Save" — merges every currently-open section's live form value (plus
+   *  attachments, if that's open too) into a single raw value and saves it in one call, instead of
+   *  requiring the user to click each open section's own Save button separately. A section that
+   *  isn't open contributes its existing saved value unchanged, exactly as it would for any one
+   *  section's own save (see saveMergedRaw / currentRawFormValue). This is also what turns a brand
+   *  new local-only draft (ir().irSeq === null) into a real backend record on the very first click,
+   *  even if the user never opened a single section. */
+  protected saveAll(): void {
+    let raw = this.currentRawFormValue();
+
+    const referenceCtrl = this.requestReferenceEdit.control();
+    if (referenceCtrl) raw = { ...raw, reference: { main: referenceCtrl.getRawValue() } };
+
+    const programMainCtrl = this.programMainEdit.control();
+    if (programMainCtrl) raw = { ...raw, programDetails: { ...raw.programDetails, main: programMainCtrl.getRawValue() } };
+
+    const programDevCtrl = this.programDevEdit.control();
+    if (programDevCtrl) {
+      raw = { ...raw, programDetails: { ...raw.programDetails, developmentTesting: programDevCtrl.getRawValue() } };
+    }
+
+    const geologistCtrl = this.geologistContactEdit.control();
+    if (geologistCtrl) raw = { ...raw, contacts: { ...raw.contacts, geologist: geologistCtrl.getRawValue() } };
+
+    const hydrogeologyCtrl = this.hydrogeologyEdit.control();
+    if (hydrogeologyCtrl) raw = { ...raw, hydrogeology: { main: hydrogeologyCtrl.getRawValue() } };
+
+    const formationTopsCtrl = this.formationTopsEdit.control();
+    if (formationTopsCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, formationTops: formationTopsCtrl.getRawValue() } };
+
+    const casingCtrl = this.casingEdit.control();
+    if (casingCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, casing: casingCtrl.getRawValue() } };
+
+    const offsetWellsCtrl = this.offsetWellsEdit.control();
+    if (offsetWellsCtrl) {
+      raw = {
+        ...raw,
+        contacts: {
+          ...raw.contacts,
+          offsetWells: this.offsetWellsArrayControl(offsetWellsCtrl).getRawValue(),
+          remarks: this.offsetWellsRemarksControl(offsetWellsCtrl).getRawValue(),
+        },
+      };
+    }
+
+    const attachmentNames = this.attachmentsEditing()
+      ? [...this.attachmentsDraftNames(), ...this.attachmentsNewFiles().map(file => file.name)]
+      : undefined;
+
+    this.saveMergedRaw(raw, attachmentNames);
+    this.closeAllSections();
+  }
+
+  private closeAllSections(): void {
     this.requestReferenceEdit.close();
-  }
-
-  protected saveProgramMain(): void {
-    const ctrl = this.programMainEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, programDetails: { ...raw.programDetails, main: ctrl.getRawValue() } });
     this.programMainEdit.close();
-  }
-
-  protected saveProgramDev(): void {
-    const ctrl = this.programDevEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, programDetails: { ...raw.programDetails, developmentTesting: ctrl.getRawValue() } });
     this.programDevEdit.close();
-  }
-
-  protected saveGeologistContact(): void {
-    const ctrl = this.geologistContactEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, contacts: { ...raw.contacts, geologist: ctrl.getRawValue() } });
     this.geologistContactEdit.close();
-  }
-
-  protected saveHydrogeology(): void {
-    const ctrl = this.hydrogeologyEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, hydrogeology: { main: ctrl.getRawValue() } });
     this.hydrogeologyEdit.close();
-  }
-
-  protected saveFormationTops(): void {
-    const ctrl = this.formationTopsEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, subsurface: { ...raw.subsurface, formationTops: ctrl.getRawValue() } });
     this.formationTopsEdit.close();
-  }
-
-  protected saveCasing(): void {
-    const ctrl = this.casingEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({ ...raw, subsurface: { ...raw.subsurface, casing: ctrl.getRawValue() } });
     this.casingEdit.close();
-  }
-
-  protected saveOffsetWells(): void {
-    const ctrl = this.offsetWellsEdit.control();
-    if (!ctrl) return;
-    const raw = this.currentRawFormValue();
-    this.saveMergedRaw({
-      ...raw,
-      contacts: {
-        ...raw.contacts,
-        offsetWells: this.offsetWellsArrayControl(ctrl).getRawValue(),
-        remarks: this.offsetWellsRemarksControl(ctrl).getRawValue(),
-      },
-    });
     this.offsetWellsEdit.close();
+    this.closeAttachmentsEdit();
   }
 
   protected openAttachmentsEdit(): void {
@@ -468,12 +520,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const picked = input.files ? Array.from(input.files) : [];
     this.attachmentsNewFiles.update(files => [...files, ...picked]);
     input.value = '';
-  }
-
-  protected saveAttachments(): void {
-    const finalNames = [...this.attachmentsDraftNames(), ...this.attachmentsNewFiles().map(file => file.name)];
-    this.saveMergedRaw(this.currentRawFormValue(), finalNames);
-    this.closeAttachmentsEdit();
   }
 
   protected submitForReview(): void {

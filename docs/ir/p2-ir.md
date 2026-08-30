@@ -1,0 +1,92 @@
+### Table: `EXAD_GWD_IR_WATER`
+
+| COLUMN_NAME | DATA_TYPE | DATA_LENGTH | NULLABLE |
+| --- | --- | --- | --- |
+| **IR_SEQ** | NUMBER | 22 | N |
+| **EP_A_NUM** | NUMBER | 22 | N |
+| **DISTANCT** | NUMBER | 22 | Y |
+| **DIRECTION** | VARCHAR2 | 10 | Y |
+| **AQUIFER** | VARCHAR2 | 10 | N |
+| **TD** | NUMBER | 22 | Y |
+| **RATE** | NUMBER | 22 | Y |
+| **RPM** | NUMBER | 22 | Y |
+| **SWL** | NUMBER | 22 | Y |
+| **FINAL_PWL** | NUMBER | 22 | Y |
+| **DRAWDOWN** | NUMBER | 22 | Y |
+| **SPEC_CAPACITY** | NUMBER | 22 | Y |
+| **TEMP** | NUMBER | 22 | Y |
+| **FIELD_TDS** | NUMBER | 22 | Y |
+| **EP_CR_DATA_DT** | DATE | 7 | Y |
+| **EP_LT_DATA_MOD_DT** | DATE | 7 | Y |
+| **EP_LT_DMQ_CD** | VARCHAR2 | 30 | Y |
+| **EP_CR_DATA_CD** | VARCHAR2 | 30 | Y |
+| **TEST_DURATION** | NUMBER | 22 | Y |
+| **H2S** | NUMBER | 22 | Y |
+
+# EXAD_GWD_IR_HYDROGEOLOGY
+
+| COLUMN_NAME | DATA_TYPE | DATA_LENGTH | NULLABLE |
+| :--- | :--- | :--- | :--- |
+| IR_SEQ | NUMBER | 22 | N |
+| ST_LONG_CD | VARCHAR2 | 10 | N |
+| EST_STA_WATER_LVL | NUMBER | 22 | Y |
+| EST_WATER_QUALITY | NUMBER | 22 | Y |
+| EST_PRODUCTIVITY | NUMBER | 22 | Y |
+| FLOWING | CHAR | 1 | Y |
+| EP_CR_DATA_DT | DATE | 7 | Y |
+| EP_LT_DATA_MOD_DT | DATE | 7 | Y |
+| EP_LT_DMQ_CD | VARCHAR2 | 30 | Y |
+| EP_CR_DATA_CD | VARCHAR2 | 30 | Y |
+| H2S | VARCHAR2 | 2000 | Y |
+
+# EXAD_GWD_IR_TOPS
+
+| COLUMN_NAME | DATA_TYPE | DATA_LENGTH | NULLABLE |
+| :--- | :--- | :--- | :--- |
+| IR_SEQ | NUMBER | 22 | N |
+| ST_LONG_CD | VARCHAR2 | 10 | N |
+| PLAN_TVD_DPTH | NUMBER | 22 | Y |
+| PLAN_SS_DPTH | NUMBER | 22 | Y |
+| EP_CR_DATA_DT | DATE | 7 | Y |
+| EP_LT_DATA_MOD_DT | DATE | 7 | Y |
+| EP_LT_DMQ_CD | VARCHAR2 | 30 | Y |
+| EP_CR_DATA_CD | VARCHAR2 | 30 | Y |
+
+# EXAD_GWD_IR_CASING
+
+| COLUMN_NAME | DATA_TYPE | DATA_LENGTH | NULLABLE |
+| :--- | :--- | :--- | :--- |
+| IR_SEQ | NUMBER | 22 | N |
+| CSG_SIZE | VARCHAR2 | 20 | N |
+| CSG_TYPE | VARCHAR2 | 50 | Y |
+| CSG_DEPTH | NUMBER | 22 | Y |
+| CSG_REMARKS | VARCHAR2 | 200 | Y |
+| EP_CR_DATA_DT | DATE | 7 | Y |
+| EP_LT_DATA_MOD_DT | DATE | 7 | Y |
+| EP_LT_DMQ_CD | VARCHAR2 | 30 | Y |
+| EP_CR_DATA_CD | VARCHAR2 | 30 | Y |
+
+# EXAD_GWD_WELL_DESIGN
+
+| COLUMN_NAME | DATA_TYPE | DATA_LENGTH | NULLABLE |
+| :--- | :--- | :--- | :--- |
+| WD_SEQ | NUMBER | 22 | N |
+| PREWAP_SEQ | NUMBER | 22 | Y |
+| STA_WATER_LVL | NUMBER | 22 | Y |
+| SW_LVL_TXT | VARCHAR2 | 100 | Y |
+| TDS | NUMBER | 22 | Y |
+| COMPLETION_TYPE | VARCHAR2 | 20 | Y |
+| W_PRIM_HID | VARCHAR2 | 4 | Y |
+| W_NUM | NUMBER | 22 | Y |
+| PUMP_LVL | NUMBER | 22 | Y |
+| PUMP_LVL_TXT | VARCHAR2 | 100 | Y |
+| NOTES | VARCHAR2 | 200 | Y |
+| PUBLISH_DT | DATE | 7 | Y |
+| PUBLISH_FLG | VARCHAR2 | 1 | Y |
+| CURR_FLG | VARCHAR2 | 1 | Y |
+| PUBLISH_BY | VARCHAR2 | 30 | Y |
+| EP_CR_DATA_DT | DATE | 7 | Y |
+| EP_LT_DATA_MOD_DT | DATE | 7 | Y |
+| EP_LT_DMQ_CD | VARCHAR2 | 30 | Y |
+| EP_CR_DATA_CD | VARCHAR2 | 30 | Y |
+| OH_FLG | CHAR | 1 | Y |

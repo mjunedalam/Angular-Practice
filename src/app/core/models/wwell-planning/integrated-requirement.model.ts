@@ -55,7 +55,10 @@ export interface IntegratedRequirementContacts {
 }
 
 export interface IntegratedRequirementOffsetWell {
-  readonly wellName: string;
+  /** exad_gwd_ir_water.ep_a_num — the offset well's numeric id, and (with ir_seq) the natural key
+   *  the save proc matches rows on. That table has no well-name column: production identifies the
+   *  well numerically and resolves its display name elsewhere. See docs/ir/p2-ir.md. */
+  readonly epANum: number;
   /** Everything below is historical test-result data — usually enriched after creation, not captured at intake. */
   readonly distanceKm?: number | null;
   readonly location?: string | null;

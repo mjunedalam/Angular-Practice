@@ -49,6 +49,11 @@ export interface WwellFieldConfig {
   readonly visibleWhen?: WwellFieldVisibilityCondition;
   /** Overrides the type-based empty default (e.g. pre-selecting a toggle-group option). */
   readonly defaultValue?: string | number;
+  /** 'select' only — adds a filter input inside the option panel, narrowing `options` as the user
+   *  types. For a picker backed by a long or live-fetched list (e.g. the IR wizard's "Link to
+   *  Request", backed by every well eligible for IR initiation) where scrolling an unfiltered
+   *  mat-select is impractical; the short, hand-picked lists most 'select' fields use don't need it. */
+  readonly searchable?: boolean;
   /** Disables the control — for values derived elsewhere (e.g. a server-computed metric) rather
    *  than typed in directly. Pair with a `placeholder` like 'auto' to signal that visually. */
   readonly readonly?: boolean;

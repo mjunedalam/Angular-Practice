@@ -25,10 +25,15 @@ export class LayoutComponent {
   protected readonly sidenavCollapsed = signal<boolean>(false);
   protected readonly activeRoute      = signal<string>('home');
 
+  private static readonly AUTO_COLLAPSE_ROUTES = new Set([
+    'water-wells-overview',
+    'integrated-requirements',
+  ]);
+
   constructor() {
     const initialSegment = this.routeSegment(this.router.url);
     this.activeRoute.set(initialSegment);
-    if (initialSegment === 'water-wells-overview') {
+    if (LayoutComponent.AUTO_COLLAPSE_ROUTES.has(initialSegment)) {
       this.sidenavCollapsed.set(true);
     }
 
@@ -38,7 +43,7 @@ export class LayoutComponent {
       .subscribe((e) => {
         const segment = this.routeSegment(e.urlAfterRedirects);
         this.activeRoute.set(segment);
-        if (segment === 'water-wells-overview') {
+        if (LayoutComponent.AUTO_COLLAPSE_ROUTES.has(segment)) {
           this.sidenavCollapsed.set(true);
         }
       });

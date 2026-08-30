@@ -23,6 +23,11 @@
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   pointer-events: all;
+  // A plain class rule (not an inline `[style.animation]`, which used to live here) so
+  // `.notification-leaving` below — added at the same time, as a second class — can actually
+  // override it: an inline style always wins over any class rule regardless of what's added
+  // later, which silently no-opped the leave animation when this was still inline.
+  animation: slide-in 0.25s ease forwards;
 
   &.error {
     background-color: #dc2626;
@@ -76,4 +81,13 @@
     opacity: 0;
     transform: translateX(100%);
   }
+}
+
+/* Applied via `[animate.leave]` (see notification.component.html) right when a toast is about to
+ * be removed — whether that's the auto-dismiss timeout or the ✕ button — so Angular waits for
+ * this to finish before detaching the node. Replaces the old approach of pre-scheduling a
+ * `fade-out` via inline `[style.animation]` timed against `durationMs - 400`: that only ever
+ * covered the timeout path, so clicking ✕ removed the toast instantly with no animation at all. */
+.notification-leaving {
+  animation: fade-out 0.28s ease forwards;
 }

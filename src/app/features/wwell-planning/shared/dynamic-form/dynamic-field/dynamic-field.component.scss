@@ -196,6 +196,52 @@ $danger: #dc2626;
   color: #94a3b8;
 }
 
+/* Projected into a searchable 'select' field's own mat-select panel (see the template) — Angular's
+ * emulated encapsulation stamps this component's scope attribute onto projected content itself,
+ * not onto whatever element ends up hosting it, so these rules reach it even though MatSelect
+ * portals the whole panel out to <body>, well outside this component's own view. */
+.dyf__select-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: #fff;
+  border-bottom: 1px solid $border;
+}
+
+.dyf__select-search-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+  flex-shrink: 0;
+  color: $muted;
+}
+
+.dyf__select-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.92rem;
+  color: $navy;
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.dyf__select-empty {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: $muted;
+}
+
 .dyf__value {
   margin: 0;
   font-size: 0.98rem;

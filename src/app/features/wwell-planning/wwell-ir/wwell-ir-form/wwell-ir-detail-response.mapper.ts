@@ -1,12 +1,40 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
+import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 import {
   IrCasingRow,
   IrHeaderRow,
   IrHydrogeologyRow,
   IrTopsRow,
+  IrWaterRow,
   WwellIrDetailTableBlock,
   WwellIrTableName,
 } from './wwell-ir-payload.model';
+
+/** Inverse of wwell-ir-payload.mapper.ts's resolveTransmissionCode: exad_gwd_ir_header.trns_type
+ *  is VARCHAR2(10), too short for the full label, so a known label is stored as its short code
+ *  ('Pipeline' → 'PL'). Decode it back to the label the form's option list expects, otherwise the
+ *  select has no matching option and silently renders blank. Anything unrecognised (free-typed
+ *  text that was truncated to fit) is passed through as-is. */
+function decodeTransmission(code: string | null | undefined): string | null {
+  if (!code) return null;
+  const label = Object.keys(WWELL_TRANSMISSION_CODE_BY_LABEL).find(key => WWELL_TRANSMISSION_CODE_BY_LABEL[key] === code);
+  return label ?? code;
+}
+
+/** Every IrXxxRow interface in wwell-ir-payload.model.ts (IrHeaderRow, IrCasingRow, IrTopsRow,
+ *  IrHydrogeologyRow, IrWaterRow) uses lowercase snake_case field names mirroring the Oracle
+ *  column names — but Oracle's own default column casing (and whatever exad_agwa_queries_pkg's
+ *  get_ir_data_prc happens to emit) isn't guaranteed to be lowercase, so a row can come back with
+ *  the same fields in UPPERCASE or MixedCase. Since every field this file reads is lowercase by
+ *  contract, lowercasing every key up front makes each row match regardless of how the backend
+ *  cased it — the same fix as `rowsFor`'s table-name comparison below, applied to row field names. */
+function normalizeRowKeys<TRow>(row: Record<string, unknown>): TRow {
+  const normalized: Record<string, unknown> = {};
+  for (const key of Object.keys(row)) {
+    normalized[key.toLowerCase()] = row[key];
+  }
+  return normalized as TRow;
+}
 
 /** Case-insensitive on `candidate.table`: the GET /{irSeq} detail endpoint echoes back
  *  UPPERCASE table names (EXAD_GWD_IR_HEADER...) per exad_agwa_queries_pkg.get_ir_data_prc,
@@ -15,7 +43,7 @@ import {
  *  every detail fetch. */
 function rowsFor<TRow>(blocks: readonly WwellIrDetailTableBlock[], table: WwellIrTableName): readonly TRow[] {
   const block = blocks.find(candidate => candidate.table.toLowerCase() === table);
-  return (block?.data as readonly TRow[] | undefined) ?? [];
+  return (block?.data ?? []).map(row => normalizeRowKeys<TRow>(row));
 }
 
 /** Inverse of the `h2s: '${ppm} ppm'` formatting in wwell-ir-payload.mapper.ts. */
@@ -46,6 +74,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const casingRows = rowsFor<IrCasingRow>(blocks, 'exad_gwd_ir_casing');
   const topsRows = rowsFor<IrTopsRow>(blocks, 'exad_gwd_ir_tops');
   const hydroRow = rowsFor<IrHydrogeologyRow>(blocks, 'exad_gwd_ir_hydrogeology')[0] as IrHydrogeologyRow | undefined;
+  const waterRows = rowsFor<IrWaterRow>(blocks, 'exad_gwd_ir_water');
 
   return {
     ...existing,
@@ -64,6 +93,24 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       depthFt: row.plan_tvd_dpth,
       subSeaFtAsl: row.plan_ss_dpth ?? null,
     })),
+    // exad_gwd_ir_water has no well-name column — epANum is the only identifier that round-trips
+    // (see IrWaterRow / docs/ir/p2-ir.md). `temp` has no form field, so it is simply not read.
+    offsetWells: waterRows.map(row => ({
+      epANum: row.ep_a_num,
+      distanceKm: row.distanct ?? null,
+      location: row.direction ?? null,
+      aquifer: row.aquifer ?? null,
+      totalDepthFt: row.td ?? null,
+      testDurationMin: row.test_duration ?? null,
+      rateGpm: row.rate ?? null,
+      rpm: row.rpm ?? null,
+      swlFt: row.swl ?? null,
+      pwlFt: row.final_pwl ?? null,
+      drawdownFt: row.drawdown ?? null,
+      specificCapacity: row.spec_capacity ?? null,
+      tdsPpm: row.field_tds ?? null,
+      h2sPpm: row.h2s ?? null,
+    })),
     // tolFtBgl has no column yet (buildWwellIrBulkSavePayload never writes it either) — stays null.
     casing: casingRows.map(row => ({
       type: row.csg_type,
@@ -75,6 +122,11 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     programDetails: {
       ...existing.programDetails,
       completion: header?.completion ?? header?.cmpl_type ?? existing.programDetails.completion,
+      // Both are written by buildWwellIrBulkSavePayload but were never read back here, so
+      // Transmission/Acidization rendered blank after any reload even though the values were in
+      // the DB the whole time — the same class of gap that hid Logging/Sampling before.
+      acidization: header?.acidization ?? existing.programDetails.acidization,
+      transmission: decodeTransmission(header?.trns_type) ?? existing.programDetails.transmission,
       developmentTesting: {
         logging: header?.logging ?? existing.programDetails.developmentTesting.logging,
         mudLogging: header?.mud_rmks ?? existing.programDetails.developmentTesting.mudLogging,

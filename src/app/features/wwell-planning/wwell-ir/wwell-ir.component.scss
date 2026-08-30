@@ -29,13 +29,17 @@ $master-width: 240px;
 .wwell-ir {
   display: flex;
   /*
-   * Not `stretch` (the flex default): with only a handful of rows, stretching the master
-   * column to match `.wwell-ir`'s full 100%-height would force its white card down to fill
-   * the whole page, leaving dead empty space below the last row. Each column instead sizes
-   * to its own content, capped by `max-height: 100%` — `.wwell-ir__detail` opts back into
-   * filling the available height via `align-self: stretch` since its content is meant to.
+   * `stretch` (the flex default) — both columns always match `.wwell-ir`'s full height. This used
+   * to be `flex-start` (each column sized to its own content) specifically to avoid stretching the
+   * master column's white card down past its last row when there were only a few of them. But that
+   * traded one visual problem for a worse one: with few/zero rows the master card shrank to a tiny
+   * stub sitting next to the full-height detail column, an obviously broken-looking mismatch
+   * instead of the harmless whitespace it was meant to avoid. `.wwell-ir__master`'s own inner
+   * `.wwell-ir__viewport`/`.wwell-ir__status` (flex: 1) absorb the extra height themselves — see
+   * their own comments — so the empty space now lives *inside* a properly-sized card instead of
+   * showing up as a short card beside a tall one.
    */
-  align-items: flex-start;
+  align-items: stretch;
   gap: 1.25rem;
   height: 100%;
   padding: 1.5rem;
@@ -229,7 +233,15 @@ $master-width: 240px;
   }
 }
 
+/* `flex: 1` + centering (not just padded text) so the empty/error state actually fills whatever
+ * height `.wwell-ir__master` now stretches to (see that rule's own comment) instead of sitting as
+ * a short block pinned to the top with dead space below it. */
 .wwell-ir__status {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2rem 1rem;
   text-align: center;
   color: $muted;
@@ -320,6 +332,45 @@ $master-width: 240px;
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ── Virtualized row list ─────────────────────────────────────────
+ * cdk-virtual-scroll-viewport (see wwell-ir.component.html) only ever keeps the rows currently
+ * in/near view mounted in the DOM — everything else exists purely as data, not markup — so a list
+ * of hundreds of IRs costs the same to render as a list of ten. It replaces `.wwell-ir__list`
+ * (still used as-is above by the plain, never-virtualized loading skeleton) for the real rows.
+ * `flex: 1`/`min-height: 0` give it the same "fill the master card" sizing `.wwell-ir__list` had;
+ * the rest (hidden scrollbar, scroll-chaining guard) is duplicated rather than shared because the
+ * viewport also needs `display: block` (its own required layout mode) undisturbed — see the
+ * skeleton `<ul>`'s `display: flex` above, which would otherwise have to be split out anyway.
+ */
+.wwell-ir__viewport {
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* One virtualized row's slot — pinned to exactly `rowItemSize` (wwell-ir.component.ts) so the
+ * viewport's index * itemSize positioning math stays exact; `.wwell-ir__row` below fills whatever
+ * that leaves after this bottom gap, replacing the plain list's `gap` (meaningless here — the
+ * viewport's content wrapper positions rows by absolute offset, not flex layout). */
+.wwell-ir__row-item {
+  padding-bottom: 0.3rem;
+}
+
+.wwell-ir__row-item .wwell-ir__row {
+  height: 100%;
+  /* Defensive only: the fixed row-item height above is sized with a small margin over the row's
+   * real content height (three text lines + padding + border), so this should never actually
+   * clip anything — it just guarantees a rendering-metric surprise stays invisible instead of
+   * spilling into the next row. */
+  overflow: hidden;
 }
 
 .wwell-ir__row {

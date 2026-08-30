@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
@@ -9,7 +10,17 @@ import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model'
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
+/** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
+ *  returns that envelope on both success and error) over Angular's generic "Http failure
+ *  response for ..." text, so a specific backend validation error (e.g. an Oracle constraint
+ *  message) reaches the user instead of a vague fallback. */
 function errorMessage(err: unknown, fallback: string): string {
+  if (err instanceof HttpErrorResponse) {
+    const body: unknown = err.error;
+    const backendMessage = body && typeof body === 'object' ? (body as { message?: unknown }).message : undefined;
+    if (typeof backendMessage === 'string' && backendMessage) return backendMessage;
+    return err.message || fallback;
+  }
   return err instanceof Error ? err.message : fallback;
 }
 
@@ -115,6 +126,34 @@ export const WwellIrStore = signalStore(
       ),
     );
 
+    // Fires right after a save settles (see createIr below) to replace the client-side optimistic
+    // echo (WwellIrService.buildIrFromPayload — built from what was *submitted*, not what the
+    // database actually stored: server-computed defaults, triggers, or a concurrent edit would all
+    // be invisible until this runs) with the real persisted row. Deliberately does not touch
+    // `irDetailLoading` — unlike loadIrDetail above, it must never flip WwellIrComponent's
+    // `isSelecting()` (which swaps the whole detail panel for a loading skeleton): the user just
+    // watched this exact record save, so re-showing it as a blank loading state a moment later
+    // would be jarring, not reassuring. A failure here is silent by design — the save itself
+    // already succeeded and is already reflected via the optimistic echo, so a background refresh
+    // hiccup shouldn't surface as if the save had failed.
+    const refreshIrDetail = rxMethod<number>(
+      pipe(
+        switchMap(irSeq =>
+          svc.getIrDetailBlocks(irSeq).pipe(
+            tapResponse({
+              next: blocks => {
+                const existing = store.irs().find(item => item.irSeq === irSeq);
+                if (!existing) return;
+                const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks);
+                patchState(store, { irs: upsertByIrSeq(store.irs(), merged) });
+              },
+              error: () => undefined,
+            }),
+          ),
+        ),
+      ),
+    );
+
     // Separate call from loadIrDetail above — mirrors the future real API shape (approval process
     // gets its own endpoint), mocked client-side in the meantime. Same switchMap-cancels-a-stale-
     // fetch reasoning applies when the selection changes quickly.
@@ -162,13 +201,18 @@ export const WwellIrStore = signalStore(
       ): void {
         patchState(store, { creatingIr: true, createIrError: null });
         svc.createIr(payload, irBulkPayload, attachmentNames).subscribe({
-          next: created =>
+          next: created => {
             patchState(store, {
               irs: upsertByIrSeq(store.irs(), created),
               // Falls back to whatever was already known so an UPDATE response missing irSeq never clears it.
               draftIrSeq: created.irSeq ?? store.draftIrSeq(),
               creatingIr: false,
-            }),
+            });
+            // Every save (create or update) immediately shows the optimistic echo above, then
+            // quietly swaps in the real persisted row once it lands — see refreshIrDetail's own
+            // comment for why this never blocks or reloads the visible UI.
+            if (created.irSeq != null) refreshIrDetail(created.irSeq);
+          },
           error: (err: unknown) => patchState(store, { creatingIr: false, createIrError: errorMessage(err, 'Failed to create integrated requirement') }),
         });
       },
