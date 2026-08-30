@@ -6,7 +6,6 @@ import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
-import { hydrateIrsRequestReference } from '../wwell-ir-form/wwell-ir-linked-well.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
@@ -44,23 +43,14 @@ function upsertByIrSeq(list: readonly IntegratedRequirement[], created: Integrat
 export const WwellIrStore = signalStore(
   withState<WwellIrStoreState>(initialWwellIrState),
 
-  withComputed(({ irs, irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError }) => ({
+  withComputed(({ irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError, deleteIrError }) => ({
     isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
     /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
      *  see wwell-ir-editor.component.ts's `applyLinkedRequestWell` for where the full record
      *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
     linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
-    /** `irs` with every record's Water Well Name/Coordinates/Surface Elevation re-derived live
-     *  from `linkedRequestWells` via its `linkedRequestId` — see wwell-ir-linked-well.util.ts's
-     *  doc comment for why those three fields are never trusted from `irs` itself (no backing
-     *  column on exad_gwd_ir_header, so nothing cached there survives a browser reload). Every
-     *  consumer (WwellIrComponent's list/selection) reads this instead of `irs` directly. */
-    hydratedIrs: computed(() => {
-      console.log('[IR:link] WwellIrStore.hydratedIrs — recomputing', { irsCount: irs().length, linkedRequestWellsCount: linkedRequestWells().length });
-      return hydrateIrsRequestReference(irs(), linkedRequestWells());
-    }),
     activeErrors: computed(() =>
-      [irsError(), linkedRequestWellsError(), createIrError(), updateIrStatusError(), irDetailError(), irApprovalTimelineError()].filter(
+      [irsError(), linkedRequestWellsError(), createIrError(), updateIrStatusError(), irDetailError(), irApprovalTimelineError(), deleteIrError()].filter(
         (message): message is string => message !== null,
       ),
     ),
@@ -71,7 +61,8 @@ export const WwellIrStore = signalStore(
         createIrError() !== null ||
         updateIrStatusError() !== null ||
         irDetailError() !== null ||
-        irApprovalTimelineError() !== null,
+        irApprovalTimelineError() !== null ||
+        deleteIrError() !== null,
     ),
   })),
 
@@ -241,6 +232,17 @@ export const WwellIrStore = signalStore(
           next: updated => patchState(store, { irs: store.irs().map(item => (item.id === updated.id ? updated : item)), updatingIrStatus: false }),
           error: (err: unknown) =>
             patchState(store, { updatingIrStatus: false, updateIrStatusError: errorMessage(err, 'Failed to submit integrated requirement for review') }),
+        });
+      },
+
+      /** Deletes the whole IR (header row, cascading to casing/tops/hydrogeology/water — see
+       *  WwellIrService.deleteIr) and drops it from `irs` on success. `irSeq` must already be a
+       *  persisted record's — there's nothing to delete server-side for a local-only draft. */
+      deleteIr(irSeq: number): void {
+        patchState(store, { deletingIr: true, deleteIrError: null });
+        svc.deleteIr(irSeq).subscribe({
+          next: () => patchState(store, { irs: store.irs().filter(item => item.irSeq !== irSeq), deletingIr: false }),
+          error: (err: unknown) => patchState(store, { deletingIr: false, deleteIrError: errorMessage(err, 'Failed to delete integrated requirement') }),
         });
       },
     };

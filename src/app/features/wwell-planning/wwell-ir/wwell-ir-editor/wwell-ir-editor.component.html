@@ -777,6 +777,23 @@
   </div>
 
   <footer class="ire__footer">
+    @if (hasSavedIrSeq()) {
+      <button
+        type="button"
+        mat-stroked-button
+        color="warn"
+        class="ire__delete-btn"
+        [disabled]="isSaving() || isDeleting()"
+        (click)="deleteIr()"
+      >
+        @if (isDeleting()) {
+          <mat-spinner diameter="16" class="ire__save-spinner" />
+        } @else {
+          <mat-icon>delete_forever</mat-icon>
+        }
+        Delete IR
+      </button>
+    }
     <button type="button" mat-stroked-button color="primary" class="ire__save-btn" [disabled]="isSaving()" (click)="saveAll()">
       @if (isSaving()) {
         <mat-spinner diameter="16" class="ire__save-spinner" />

@@ -24,9 +24,10 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     status: row.publishFlg === 'Y' ? 'approved' : 'in-progress',
     requestReference: {
       // prewap_seq/ltr_no are real exad_gwd_ir_header columns (unlike wellName/coordinates/etc.
-      // below) — read straight off the list row so a record's "Link to Request" (and therefore,
-      // via WwellIrStore.hydratedIrs, its Water Well Name/Coordinates/Surface Elevation) is known
-      // immediately from the list, not only once its detail is fetched.
+      // below) — read straight off the list row so a record's "Link to Request" is known
+      // immediately from the list. Water Well Name/Coordinates/Surface Elevation stay blank until
+      // detail is fetched (see mergeIrDetailBlocksIntoIntegratedRequirement's exad_rcd_prewap
+      // block) — the list endpoint has no join for them.
       linkedRequestId: row.prewapSeq != null ? String(row.prewapSeq) : null,
       letterNumber: row.ltrNo ?? null,
       client: '',

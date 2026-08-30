@@ -4,6 +4,7 @@ import {
   IrCasingRow,
   IrHeaderRow,
   IrHydrogeologyRow,
+  IrLinkedWellRow,
   IrTopsRow,
   IrWaterRow,
   WwellIrDetailTableBlock,
@@ -56,15 +57,22 @@ function parseH2sPpm(h2s: string | null | undefined): number | null {
 /**
  * Enriches an already-known IntegratedRequirement (e.g. from the GET-all summary list) with the
  * real casing/tops/hydrogeology/program data from a GET /{irSeq} detail fetch. Merges onto
- * `existing` rather than building from scratch because most domain-only fields (client, wellName,
- * supportingBusiness, targetAquifer, targetDepthFt, surfaceElevationFtAsl, coordinates, contacts,
- * offsetWells, attachments...) have no backing column on exad_gwd_ir_header — see
- * wwell-ir-summary.mapper.ts for the same limitation on the list side, and
- * docs/ir/EXAD_GWD_IR_HEADER.md for the table's real column set. `linkedRequestId`/`letterNumber`
- * (prewap_seq/ltr_no) and the Development & Testing fields (sampling/logging/mud_rmks/flow_rmks)
- * DO have real columns, so those are read back from `header` below rather than left to the
- * optimistic echo. Field mappings mirror buildWwellIrBulkSavePayload in wwell-ir-payload.mapper.ts
- * exactly (this is that function's inverse) — keep the two in sync if either changes.
+ * `existing` rather than building from scratch because most domain-only fields (client,
+ * supportingBusiness, targetAquifer, targetDepthFt, contacts, offsetWells, attachments...) have no
+ * backing column on exad_gwd_ir_header — see wwell-ir-summary.mapper.ts for the same limitation on
+ * the list side, and docs/ir/EXAD_GWD_IR_HEADER.md for the table's real column set.
+ * `linkedRequestId`/`letterNumber` (prewap_seq/ltr_no) and the Development & Testing fields
+ * (sampling/logging/mud_rmks/flow_rmks) DO have real columns, so those are read back from `header`
+ * below rather than left to the optimistic echo. Field mappings mirror buildWwellIrBulkSavePayload
+ * in wwell-ir-payload.mapper.ts exactly (this is that function's inverse) — keep the two in sync
+ * if either changes.
+ *
+ * wellName/surfaceElevationFtAsl/coordinates come from the new `exad_rcd_prewap` block
+ * (get_ir_data_prc, agwa-planning backend) — a live join on the header's own prewap_seq — rather
+ * than from `wwell-ir-linked-well.util.ts`'s eligible-wells lookup: that lookup can only ever
+ * resolve a well that does NOT yet have an IR (get_ir_wells_prc's own eligibility filter), so it
+ * structurally can never succeed for an IR that's already been saved with a link. This block is
+ * the actual source of truth for those three fields once a record's detail has been fetched once.
  */
 export function mergeIrDetailBlocksIntoIntegratedRequirement(
   existing: IntegratedRequirement,
@@ -75,18 +83,27 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const topsRows = rowsFor<IrTopsRow>(blocks, 'exad_gwd_ir_tops');
   const hydroRow = rowsFor<IrHydrogeologyRow>(blocks, 'exad_gwd_ir_hydrogeology')[0] as IrHydrogeologyRow | undefined;
   const waterRows = rowsFor<IrWaterRow>(blocks, 'exad_gwd_ir_water');
+  const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
 
   return {
     ...existing,
     requestReference: {
       ...existing.requestReference,
       // prewap_seq/ltr_no are the only two Request Reference columns exad_gwd_ir_header actually
-      // has (see docs/ir/EXAD_GWD_IR_HEADER.md) — everything else on this section (wellName,
-      // client, targetAquifer...) has no backing column and stays whatever `existing` already
-      // carries (the optimistic save-time echo), same limitation this function's own doc comment
-      // above describes.
+      // has (see docs/ir/EXAD_GWD_IR_HEADER.md) — everything else on this section that has no
+      // backing column there (client, targetAquifer...) stays whatever `existing` already carries
+      // (the optimistic save-time echo).
       linkedRequestId: header?.prewap_seq != null ? String(header.prewap_seq) : existing.requestReference.linkedRequestId,
       letterNumber: header?.ltr_no ?? existing.requestReference.letterNumber,
+      // Live off the new exad_rcd_prewap block (see this function's own doc comment above) — a
+      // record with no linked request has no `linkedWell` row and falls through to whatever
+      // `existing` already had (blank, for a never-linked IR).
+      wellName: linkedWell?.well_name ?? existing.requestReference.wellName,
+      surfaceElevationFtAsl: linkedWell?.surface_elevation ?? existing.requestReference.surfaceElevationFtAsl,
+      coordinates:
+        linkedWell?.surface_north != null && linkedWell?.surface_east != null
+          ? `${linkedWell.surface_north}°N, ${linkedWell.surface_east}°E`
+          : existing.requestReference.coordinates,
     },
     formationTops: topsRows.map(row => ({
       name: row.st_long_cd,

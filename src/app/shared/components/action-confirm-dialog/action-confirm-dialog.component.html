@@ -1,0 +1,75 @@
+<div class="acd-dialog" [attr.data-severity]="severity" role="dialog"
+     [attr.aria-labelledby]="'acd-title'"
+     [attr.aria-describedby]="data.subtitle ? 'acd-subtitle' : null">
+
+  <!-- ── Header ── -->
+  <div class="acd-header">
+    @if (severity === 'danger') {
+      <svg class="acd-header__icon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 11v6M14 11v6" stroke-linecap="round"/>
+      </svg>
+    } @else if (severity === 'warning') {
+      <svg class="acd-header__icon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+              stroke-linejoin="round"/>
+        <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
+        <line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round"/>
+      </svg>
+    } @else {
+      <svg class="acd-header__icon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 8v.01M11 11h1v5h1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    }
+    <div class="acd-header__copy">
+      <h2 class="acd-header__title" id="acd-title">{{ data.title }}</h2>
+      @if (data.subtitle) {
+        <p class="acd-header__subtitle" id="acd-subtitle">{{ data.subtitle }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- ── Body: optional label/value rows ── -->
+  @if (rows.length) {
+    <div class="acd-body">
+      <dl class="acd-rows">
+        @for (row of rows; track row.label) {
+          <div class="acd-row">
+            <dt class="acd-row__label">{{ row.label }}</dt>
+            <dd class="acd-row__value">{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  }
+
+  <!-- ── Footer ── -->
+  <div class="acd-footer">
+    <span class="acd-footer__hint">
+      @if (hint) {
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor"
+             stroke-width="1.5" aria-hidden="true">
+          <circle cx="7" cy="7" r="6"/>
+          <path d="M7 4.5v3M7 9.5h.01" stroke-linecap="round"/>
+        </svg>
+        {{ hint }}
+      }
+    </span>
+    <div class="acd-footer__actions">
+      <button class="acd-btn acd-btn--cancel" (click)="cancel()" type="button"
+              aria-label="Cancel and close dialog">
+        {{ cancelLabel }}
+      </button>
+      <button class="acd-btn acd-btn--confirm" (click)="confirm()" type="button"
+              [attr.aria-label]="confirmLabel">
+        {{ confirmLabel }}
+      </button>
+    </div>
+  </div>
+
+</div>

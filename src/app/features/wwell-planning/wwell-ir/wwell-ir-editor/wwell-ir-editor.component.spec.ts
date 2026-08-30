@@ -47,12 +47,15 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
 
 const creatingIrSignal = signal(false);
 const createIrErrorSignal = signal<string | null>(null);
+const deletingIrSignal = signal(false);
 
 const storeMock = {
   creatingIr: creatingIrSignal,
   createIrError: createIrErrorSignal,
   createIr: jest.fn(),
   submitIrForReview: jest.fn(),
+  deletingIr: deletingIrSignal,
+  deleteIr: jest.fn(),
   linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
   linkedRequestWellOptions: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
@@ -94,6 +97,7 @@ describe('WwellIrEditorComponent', () => {
     jest.clearAllMocks();
     creatingIrSignal.set(false);
     createIrErrorSignal.set(null);
+    deletingIrSignal.set(false);
   });
 
   afterEach(() => fixture?.destroy());

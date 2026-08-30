@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
-import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
+import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
@@ -122,11 +122,16 @@ export class WwellIrEditorComponent implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   protected readonly store = inject(WwellIrStore);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly confirmDialog = inject(ActionConfirmDialogService);
   private readonly notify = inject(NotificationService);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly isSaving = this.store.creatingIr;
+  protected readonly isDeleting = this.store.deletingIr;
+  // `irSeq` is `number | null | undefined` on the model (optional + nullable) — normalized here
+  // (mirrors WwellIrComponent's rowIrSeq) so the template's Delete IR gate can compare with a
+  // plain `!== null`, since Angular template expressions have no `!=`/loose-equality operator.
+  protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
   // "Submit for Review" is the one action gated by status — it only makes sense before the
   // record has already left the author's hands. Every section's inline edit, by contrast, is
@@ -519,6 +524,27 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   private confirmThenDelete(title: string, rows: { label: string; value: string }[], onConfirmed: () => void): void {
     this.confirmThenAct({ title, rows, confirmLabel: 'Delete' }, onConfirmed);
+  }
+
+  /** Deletes the whole IR from the backend (header row — casing/tops/hydrogeology/water cascade
+   *  server-side via FK, see WwellIrService.deleteIr) after confirmation. Only reachable once the
+   *  record is actually persisted (`ir().irSeq !== null`, gated in the template) — a local-only
+   *  draft has nothing to delete server-side. WwellIrComponent reacts to store.deletingIr()
+   *  settling to notify and fall back the selection once this record disappears from `irs`. */
+  protected deleteIr(): void {
+    const irSeq = this.ir().irSeq;
+    if (irSeq === null || irSeq === undefined) return;
+    this.confirmThenAct(
+      {
+        title: 'Delete this Integrated Requirement?',
+        rows: [
+          { label: 'IR', value: this.ir().code },
+          { label: 'Well', value: this.ir().requestReference.wellName || 'Untitled Well' },
+        ],
+        confirmLabel: 'Delete',
+      },
+      () => this.store.deleteIr(irSeq),
+    );
   }
 
   private currentRawFormValue(): WwellIrFormRawValue {

@@ -13,6 +13,8 @@ export interface WwellIrStoreState {
   readonly linkedRequestWellsLoading: boolean;
   readonly creatingIr: boolean;
   readonly updatingIrStatus: boolean;
+  /** Deleting a whole IR (header + cascaded casing/tops/hydrogeology/water) by ir_seq. */
+  readonly deletingIr: boolean;
   /** Fetching one IR's full detail by ir_seq (casing/tops/hydrogeology) after a list selection. */
   readonly irDetailLoading: boolean;
   /** Fetching one IR's approval chain/timeline by ir_seq — a separate call from the detail fetch
@@ -30,6 +32,7 @@ export interface WwellIrStoreState {
   readonly updateIrStatusError: string | null;
   readonly irDetailError: string | null;
   readonly irApprovalTimelineError: string | null;
+  readonly deleteIrError: string | null;
 }
 
 export const initialWwellIrState: WwellIrStoreState = {
@@ -40,6 +43,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   linkedRequestWellsLoading: false,
   creatingIr: false,
   updatingIrStatus: false,
+  deletingIr: false,
   irDetailLoading: false,
   irApprovalTimelineLoading: false,
   irsError: null,
@@ -48,4 +52,5 @@ export const initialWwellIrState: WwellIrStoreState = {
   updateIrStatusError: null,
   irDetailError: null,
   irApprovalTimelineError: null,
+  deleteIrError: null,
 };

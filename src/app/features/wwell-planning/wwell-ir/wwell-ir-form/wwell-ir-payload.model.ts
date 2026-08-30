@@ -12,7 +12,8 @@ export type WwellIrTableName =
   | 'exad_gwd_ir_casing'
   | 'exad_gwd_ir_hydrogeology'
   | 'exad_gwd_ir_tops'
-  | 'exad_gwd_ir_water';
+  | 'exad_gwd_ir_water'
+  | 'exad_rcd_prewap';
 
 interface IrRow {
   readonly action: IrRowAction;
@@ -91,6 +92,25 @@ export interface IrWaterRow extends IrRow {
   readonly field_tds: number | null;
   readonly test_duration: number | null;
   readonly h2s: number | null;
+}
+
+/** The IR's linked well, read live off exad_rcd_prewap by the header's own prewap_seq —
+ *  see get_ir_data_prc's own comment (agwa-planning backend) for why get_ir_wells_prc (the
+ *  "eligible for a new IR" list) can never supply this once the IR exists: eligibility means "no
+ *  IR references this prewap_seq yet", which stops being true the instant this IR is saved.
+ *  Read-only — no `action`/`ir_seq` (unlike IrRow), since exad_rcd_prewap is never written
+ *  through the IR bulk-save contract. */
+export interface IrLinkedWellRow {
+  readonly prewap_seq: number;
+  readonly well_name: string;
+  readonly primary_hole_id: string | null;
+  readonly well_number: string | null;
+  readonly surface_north: number | null;
+  readonly surface_east: number | null;
+  readonly surface_elevation: number | null;
+  readonly utm_zone: string | null;
+  readonly well_type: string | null;
+  readonly well_class: string | null;
 }
 
 export interface WwellIrTableBlock<TRow extends IrRow = IrRow> {

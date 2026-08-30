@@ -133,6 +133,20 @@ export class WwellIrService {
       );
   }
 
+  /**
+   * Deletes the whole IR (header row) by ir_seq. exad_agwa_iud_pkg.save_header's DELETE arm
+   * removes just that one row; casing/tops/hydrogeology/water cascade automatically via their
+   * `ir_seq ... ON DELETE CASCADE` FK (01-schema.sql), so nothing else needs to be sent — no
+   * per-block bulk-save payload here, unlike createIr() above.
+   */
+  deleteIr(irSeq: number): Observable<void> {
+    return this.http
+      .delete<ApiResponse<never>>(`${this.apiUrl}/integrated-requirements/${irSeq}`, {
+        context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
+      })
+      .pipe(map(() => undefined));
+  }
+
   submitIrForReview(ir: IntegratedRequirement): Observable<IntegratedRequirement> {
     return this.http
       .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements/${ir.id}/submit-for-review`, {})

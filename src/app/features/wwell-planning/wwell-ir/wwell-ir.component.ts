@@ -96,7 +96,7 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // stable while the user narrows further — each chip shows how many rows *it* would reveal, not
   // how many remain after some other filter already trimmed the set.
   private readonly lifecycleScopedIrs = computed(() => {
-    const all = this.store.hydratedIrs();
+    const all = this.store.irs();
     return this.lifecycleFilter() === 'inactive'
       ? all.filter(ir => ir.status === 'approved')
       : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
@@ -124,12 +124,12 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   protected readonly pendingDraftIr = signal<IntegratedRequirement | null>(null);
 
   // Deliberately looks up the *unfiltered* store list (not `rows()`) so narrowing the search
-  // never drops the current selection just because it fell outside the filtered results. Reads
-  // `hydratedIrs` (not `irs` directly) so the editor this feeds always gets Water Well
-  // Name/Coordinates/Surface Elevation freshly re-derived from the live eligible-wells list, not
-  // whatever (possibly stale, possibly blank-after-reload) value happens to be cached in `irs`.
+  // never drops the current selection just because it fell outside the filtered results.
+  // Water Well Name/Coordinates/Surface Elevation arrive on the record itself once its detail has
+  // been fetched (see mergeIrDetailBlocksIntoIntegratedRequirement's exad_rcd_prewap block) — no
+  // separate hydration pass needed here.
   protected readonly selectedIr = computed<IntegratedRequirement | null>(
-    () => this.pendingDraftIr() ?? this.store.hydratedIrs().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
+    () => this.pendingDraftIr() ?? this.store.irs().find(ir => ir.irSeq === this.selectedIrSeq()) ?? null,
   );
 
   // Identity/order of the *visible set* of rows, not the row objects themselves — selecting a row
@@ -166,6 +166,7 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   @ViewChild('listHost', { read: ElementRef }) private readonly listHost?: ElementRef<HTMLElement>;
   private previousSelectedIrSeq: number | null = null;
   private wasCreatingIr = false;
+  private wasDeletingIr = false;
 
   constructor() {
     effect(() => {
@@ -227,6 +228,32 @@ export class WwellIrComponent implements OnInit, OnDestroy {
       if (message) this.notify.error(message);
     });
 
+    effect(() => {
+      const message = this.store.deleteIrError();
+      if (message) this.notify.error(message);
+    });
+
+    // Reports success once a delete settles — the editor's own Delete IR button shows a spinner
+    // while in flight (see wwell-ir-editor.component.html's isDeleting()), so nothing needs
+    // announcing at click time. A failure is already toasted by the effect above.
+    effect(() => {
+      const deleting = this.store.deletingIr();
+      const settled = this.wasDeletingIr && !deleting;
+      this.wasDeletingIr = deleting;
+      if (!settled || this.store.deleteIrError()) return;
+
+      this.notify.info('Integrated requirement deleted.');
+
+      // The deleted record is already gone from store.irs() by this point (WwellIrStore.deleteIr
+      // removes it on success) — if it was the one open, fall back to null so the "default to
+      // first visible record" effect below picks whatever the list now shows first (or leaves the
+      // panel empty if nothing remains), the same path a fresh session start already uses.
+      if (this.selectedIrSeq() !== null && !this.store.irs().some(ir => ir.irSeq === this.selectedIrSeq())) {
+        this.selectedIrSeq.set(null);
+        this.previousSelectedIrSeq = null;
+      }
+    });
+
     // Default to the first *visible* record once the list loads — mirrors the reference app,
     // which always has something selected in the detail pane rather than starting on an empty
     // state. Reads `rows()` (lifecycle/status/search-scoped), not the raw store list, so the
@@ -255,6 +282,14 @@ export class WwellIrComponent implements OnInit, OnDestroy {
       // Separate call — the approval-process API doesn't exist yet (mocked for now), but the
       // request shape already mirrors the real future one: one fetch per selected IR.
       this.store.loadIrApprovalTimeline(irSeq);
+      // Re-fetched on every selection, not just once at ngOnInit — this backs the editor's own
+      // "Link to Request" dropdown and its live auto-populate-on-pick (see
+      // wwell-ir-editor.component.ts's applyLinkedRequestWell / wwell-ir-linked-well.util.ts),
+      // used when the user picks a NEW link on the opened record. Eligibility can change
+      // server-side between selections in a long-lived session (another user initiates an IR for
+      // a well, a well newly becomes eligible...) — no cached/one-time snapshot, always the
+      // current server state for whichever record is being opened.
+      this.store.loadLinkedRequestWells();
     });
 
     // Re-plays whenever the visible rows actually change (initial load finishing, or the
@@ -275,10 +310,9 @@ export class WwellIrComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.loadIrs();
-    // Started here (not lazily in the editor once a record is selected) so `hydratedIrs`
-    // (selectedIr's source — see its own comment) has a real shot at already carrying each
-    // record's Water Well Name/Coordinates/Surface Elevation by the time the first selection
-    // resolves, instead of racing it.
+    // Started here (not lazily in the editor once a record is selected) so the "Link to Request"
+    // dropdown/picker (see loadLinkedRequestWells's other call site, on selection change below)
+    // has options ready by the time the first record's editor renders, instead of racing it.
     this.store.loadLinkedRequestWells();
   }
 
