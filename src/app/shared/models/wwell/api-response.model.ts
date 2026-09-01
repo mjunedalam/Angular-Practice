@@ -12,8 +12,8 @@ export interface ApiResponse<T> {
     statusCode: number;
     error: boolean;
     message: string;
-    data: T[];
     meta?: ApiResponseMeta;
+    data: T[];
 }
 
 export interface WellDetailsResponse {
