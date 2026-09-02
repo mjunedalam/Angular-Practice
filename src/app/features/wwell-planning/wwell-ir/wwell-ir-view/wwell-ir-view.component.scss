@@ -1,0 +1,172 @@
+@use '@angular/material' as mat;
+@use '../../shared/wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  font-family: tokens.$font-family;
+}
+
+// Same rationale as wwell-ir-editor.component.scss's identical block — the app only calls
+// mat.core() globally with no full M3 theme, so `mat-stroked-button`/`mat-icon` here need their
+// own scoped theme. A plain class (not ViewEncapsulation.None) is enough: `@include mat.theme`
+// only sets CSS custom properties, which inherit through emulated-encapsulation boundaries same
+// as any other property.
+.irv {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$blue-palette,
+        tertiary: mat.$azure-palette,
+      ),
+      typography: (
+        plain-family: tokens.$font-family,
+        brand-family: tokens.$font-family,
+      ),
+      density: -2,
+    )
+  );
+}
+
+.irv {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 0.75rem;
+}
+
+/* ── Header: mirrors wwell-ir-editor's `.ire__header` so swapping edit ⇄ view in the same
+ * detail-panel slot never jars — same card chrome, same eyebrow/title/badge language. ── */
+.irv__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.irv__eyebrow {
+  margin: 0 0 1px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $accent;
+}
+
+.irv__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.irv__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.irv__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.irv__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.irv__edit-btn {
+  flex-shrink: 0;
+}
+
+/* ── Flat tab bar — Details / Well Design / Letter ───────────────────────── */
+.irv__tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.25rem;
+  background: tokens.$surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.3rem;
+}
+
+.irv__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: $muted;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: tokens.$surface-alt;
+    color: $navy;
+  }
+
+  &--active {
+    background: rgba($accent, 0.1);
+    color: $accent;
+
+    &:hover {
+      background: rgba($accent, 0.14);
+    }
+  }
+}
+
+.irv__tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -42,7 +42,13 @@ import {
 import { CasingSizeWarning, findInvertedCasingSizeRows } from '../wwell-ir-form/wwell-ir-casing-warnings.util';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
 import { buildWwellIrFormSchema } from '../wwell-ir-form/wwell-ir-form.schema';
-import { WwellIrFormRawValue, WwellIrRawCasingRow, WwellIrRawFormationTop } from '../wwell-ir-form/wwell-ir-form.types';
+import {
+  WwellIrFormRawValue,
+  WwellIrRawCasingRow,
+  WwellIrRawFormationTop,
+  WwellIrRawHydrology,
+  WwellIrRawProgramMain,
+} from '../wwell-ir-form/wwell-ir-form.types';
 import { buildWwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.mapper';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
@@ -228,9 +234,18 @@ export class WwellIrEditorComponent implements AfterViewInit {
   // via SectionEditState.liveValue — so the diagram builds/updates as rows are added, not only
   // once that section is saved (matching how the old wizard's live preview worked off raw form
   // values). `liveValue()` is `null` whenever that section isn't being edited, which both mapper
-  // calls treat as "fall back to `ir()`".
+  // calls treat as "fall back to `ir()`". Program Details (Completion) and Estimated Hydrology
+  // (static water level / SIWHP / pump depth) get the same live treatment — picking a different
+  // Completion or test type while either section is open now moves the diagram immediately,
+  // instead of only after Save.
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
-    buildWellboreDiagramDataFromIntegratedRequirement(this.ir(), this.casingEdit.liveValue(), this.formationTopsEdit.liveValue()),
+    buildWellboreDiagramDataFromIntegratedRequirement(
+      this.ir(),
+      this.casingEdit.liveValue(),
+      this.formationTopsEdit.liveValue(),
+      this.programMainEdit.liveValue(),
+      this.hydrogeologyEdit.liveValue(),
+    ),
   );
   protected readonly hasWellboreData: Signal<boolean> = computed(() =>
     hasWellboreDiagramDataForIntegratedRequirement(this.ir(), this.casingEdit.liveValue(), this.formationTopsEdit.liveValue()),
@@ -260,7 +275,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     if (linkedRequestId) this.applyLinkedRequestWell(group, linkedRequestId);
     return group;
   });
-  protected readonly programMainEdit = new SectionEditState(() =>
+  protected readonly programMainEdit = new SectionEditState<FormGroup, WwellIrRawProgramMain>(() =>
     buildAndPatchGroup(this.programMainSection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).programDetails.main),
   );
   protected readonly programDevEdit = new SectionEditState(() =>
@@ -273,7 +288,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly geologistContactEdit = new SectionEditState(() =>
     buildAndPatchGroup(this.geologistSection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).contacts.geologist),
   );
-  protected readonly hydrogeologyEdit = new SectionEditState(() =>
+  protected readonly hydrogeologyEdit = new SectionEditState<FormGroup, WwellIrRawHydrology>(() =>
     buildAndPatchGroup(this.hydrogeologySection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).hydrogeology.main),
   );
   protected readonly formationTopsEdit = new SectionEditState<FormArray, WwellIrRawFormationTop[]>(() =>

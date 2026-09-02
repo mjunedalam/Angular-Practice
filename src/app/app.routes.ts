@@ -70,7 +70,10 @@ export const routes: Routes = [
       },
       {
         // New/edit no longer route anywhere — WwellIrComponent creates a draft in place and
-        // authors it inline (WwellIrEditorComponent) in the same master-detail view.
+        // authors it inline (WwellIrEditorComponent) in the same master-detail view. The
+        // read-only "View" stepper is the same story: a display mode toggled in place on the
+        // detail panel (see WwellIrComponent's `detailMode`), not a separate route — the master
+        // list stays visible and clickable the whole time.
         path: 'integrated-requirements',
         providers: [WwellIrStore],
         loadComponent: () =>

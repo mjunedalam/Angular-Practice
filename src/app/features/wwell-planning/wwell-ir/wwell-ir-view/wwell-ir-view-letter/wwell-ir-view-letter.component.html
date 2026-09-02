@@ -1,0 +1,187 @@
+<article class="letter">
+  <header class="letter__masthead">
+    <div>
+      <p class="letter__org">Groundwater Division</p>
+      <h3 class="letter__doc-title">Integrated Requirements Letter</h3>
+    </div>
+    <dl class="letter__meta">
+      <div>
+        <dt>Date</dt>
+        <dd>{{ ir().updatedDate }}</dd>
+      </div>
+      <div>
+        <dt>IR #</dt>
+        <dd>{{ ir().code }}</dd>
+      </div>
+      @if (ir().requestReference.letterNumber; as letterNumber) {
+        <div>
+          <dt>Letter #</dt>
+          <dd>{{ letterNumber }}</dd>
+        </div>
+      }
+    </dl>
+  </header>
+
+  <p class="letter__subject">
+    <strong>Subject:</strong> Integrated Requirements for Water Well {{ ir().requestReference.wellName || '—' }}
+  </p>
+
+  <p class="letter__intro">
+    This letter outlines the integrated drilling and completion requirements for water well
+    {{ ir().requestReference.wellName || '—' }}, supporting {{ ir().requestReference.supportingBusiness || '—' }}
+    operations for client {{ ir().requestReference.client || '—' }}.
+  </p>
+
+  <section class="letter__section">
+    <h4>1. Well Location</h4>
+    <dl class="letter__kv">
+      <div><dt>Coordinates</dt><dd>{{ ir().requestReference.coordinates || '—' }}</dd></div>
+      <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
+      <div><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer || '—' }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="letter__section">
+    <h4>2. Drilling Program</h4>
+    <dl class="letter__kv">
+      <div>
+        <dt>Completion Design</dt>
+        <dd>
+          {{ ir().programDetails.completion || '—' }}
+          @if (isOpenHole() && ir().programDetails.openHoleSizeIn) {
+            ({{ ir().programDetails.openHoleSizeIn }})
+          }
+        </dd>
+      </div>
+      <div><dt>Logging Program</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
+      <div><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
+      <div><dt>Mud Logging</dt><dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="letter__section">
+    <h4>3. Formation Tops</h4>
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Formation</th>
+            <th>Depth (ft bgl)</th>
+            <th>Sub-sea (ft asl)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (top of ir().formationTops; track top.name) {
+            <tr>
+              <td>{{ top.name }}</td>
+              <td>{{ top.depthFt }}</td>
+              <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="letter__table-empty">No formation tops recorded.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="letter__section">
+    <h4>4. Casing Program</h4>
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Depth (ft bgl)</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of ir().casing; track row.type + row.depthFtBgl) {
+            <tr>
+              <td>{{ row.type }}</td>
+              <td>{{ row.sizeIn }}</td>
+              <td>{{ row.depthFtBgl }}</td>
+              <td>{{ row.remarks || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="letter__table-empty">No casing recorded.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="letter__section">
+    <h4>5. Production &amp; Testing</h4>
+    <dl class="letter__kv">
+      <div><dt>Transmission Method</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
+      <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
+      <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="letter__section">
+    <h4>6. Estimated Hydrogeology</h4>
+    <dl class="letter__kv">
+      <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
+      @if (isFlowTest()) {
+        <div><dt>SIWHP</dt><dd>{{ ir().testProgram.siwhpPsi ?? '—' }} psi</dd></div>
+      } @else {
+        <div><dt>Estimated Water Level</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd></div>
+        <div><dt>Estimated Pump Depth</dt><dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd></div>
+      }
+      <div><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
+      <div><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
+      <div><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
+    </dl>
+  </section>
+
+  <section class="letter__section">
+    <h4>7. Geologist Contact</h4>
+    <dl class="letter__kv">
+      <div><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary || '—' }}</dd></div>
+      <div><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
+    </dl>
+  </section>
+
+  <p class="letter__closing">
+    This integrated requirements letter is issued in accordance with GWD standards. All drilling operations must
+    comply with the specifications outlined above. Any deviations require prior written approval from the
+    Groundwater Division.
+  </p>
+
+  <div class="letter__signoff">
+    <div class="letter__signoff-block">
+      <span class="letter__signoff-label">Prepared by:</span>
+      <span class="letter__signoff-value">{{ ir().contacts.geologistPrimary || '—' }}</span>
+      <span class="letter__signoff-role">Hydrogeologist</span>
+    </div>
+    <div class="letter__signoff-block">
+      <span class="letter__signoff-label">Approved by:</span>
+      @if (finalApprover()?.status === 'approved') {
+        <span class="letter__signoff-value">{{ finalApprover()!.name }}</span>
+        <span class="letter__signoff-role">{{ finalApprover()!.role }}</span>
+      } @else {
+        <span class="letter__signoff-value letter__signoff-value--pending">Pending approval</span>
+      }
+    </div>
+  </div>
+
+  <section class="letter__attachments">
+    <h4>Attachments</h4>
+    @if (ir().attachmentNames.length) {
+      <ul class="letter__attachments-list">
+        @for (name of ir().attachmentNames; track name) {
+          <li>
+            <mat-icon>attach_file</mat-icon>
+            <span>{{ name }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="letter__attachments-empty">No attachments uploaded.</p>
+    }
+  </section>
+</article>

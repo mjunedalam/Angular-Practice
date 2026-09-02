@@ -1,0 +1,97 @@
+<div class="ir-details">
+  <app-wwell-ir-view-kv-card title="General Information" [rows]="generalInfoRows()" />
+  <app-wwell-ir-view-kv-card title="Program Details" [rows]="programDetailsRows()" />
+  <app-wwell-ir-view-kv-card title="Geologist Contact" [rows]="geologistContactRows()" />
+
+  <section class="ir-details__attachments">
+    <h3 class="ir-details__section-title">Attachments</h3>
+    @if (ir().attachmentNames.length) {
+      <ul class="ir-details__attachments-list">
+        @for (name of ir().attachmentNames; track name) {
+          <li class="ir-details__attachment">
+            <mat-icon>attach_file</mat-icon>
+            <span>{{ name }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="ir-details__empty">No attachments uploaded.</p>
+    }
+  </section>
+
+  <section class="ir-details__offset-wells">
+    <h3 class="ir-details__section-title">Offset Water Wells</h3>
+    <div class="ir-details__table-wrap">
+      <table class="ir-details__table">
+        <thead>
+          <tr>
+            <th>Well</th>
+            <th>Dist (km)</th>
+            <th>Location</th>
+            <th>Aquifer</th>
+            <th>TD</th>
+            <th>Dur (min)</th>
+            <th>Rate (GPM)</th>
+            <th>RPM</th>
+            <th>SWL</th>
+            <th>PWL</th>
+            <th>DD</th>
+            <th>Spec Cap</th>
+            <th>TDS</th>
+            <th>H2S</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of ir().offsetWells; track row.epANum) {
+            <tr>
+              <td>{{ row.epANum }}</td>
+              <td>{{ row.distanceKm ?? '—' }}</td>
+              <td>{{ row.location || '—' }}</td>
+              <td>{{ row.aquifer || '—' }}</td>
+              <td>{{ row.totalDepthFt ?? '—' }}</td>
+              <td>{{ row.testDurationMin ?? '—' }}</td>
+              <td>{{ row.rateGpm ?? '—' }}</td>
+              <td>{{ row.rpm ?? '—' }}</td>
+              <td>{{ row.swlFt ?? '—' }}</td>
+              <td>{{ row.pwlFt ?? '—' }}</td>
+              <td>{{ row.drawdownFt ?? '—' }}</td>
+              <td>{{ row.specificCapacity ?? '—' }}</td>
+              <td>{{ row.tdsPpm ?? '—' }}</td>
+              <td>{{ row.h2sPpm ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="14" class="ir-details__table-empty">No offset water wells recorded.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (ir().offsetWellsRemarks) {
+      <p class="ir-details__remarks">{{ ir().offsetWellsRemarks }}</p>
+    }
+  </section>
+
+  <app-wwell-ir-view-kv-card title="Estimated Hydrogeology" [rows]="hydrogeologyRows()" />
+
+  <section class="ir-details__approval">
+    <h3 class="ir-details__section-title">
+      <mat-icon>gavel</mat-icon>
+      Approval
+    </h3>
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      class="ir-details__approval-btn"
+      [disabled]="!canRequestApproval() || isSubmitting()"
+      (click)="requestApproval()"
+    >
+      <mat-icon>send</mat-icon>
+      {{ isSubmitting() ? 'Submitting…' : 'Request Approval' }}
+    </button>
+    @if (!canRequestApproval()) {
+      <p class="ir-details__approval-note">Already submitted &mdash; see the approval workflow panel for status.</p>
+    }
+  </section>
+</div>

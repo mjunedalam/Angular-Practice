@@ -361,6 +361,7 @@ $master-width: 240px;
  * that leaves after this bottom gap, replacing the plain list's `gap` (meaningless here — the
  * viewport's content wrapper positions rows by absolute offset, not flex layout). */
 .wwell-ir__row-item {
+  position: relative;
   padding-bottom: 0.3rem;
 }
 
@@ -371,6 +372,34 @@ $master-width: 240px;
    * clip anything — it just guarantees a rendering-metric surprise stays invisible instead of
    * spilling into the next row. */
   overflow: hidden;
+  /* Room for `.wwell-ir__view-btn` below, pinned in the same bottom-right corner — otherwise a
+   * long client/well name in `.wwell-ir__row-meta` could run underneath it. */
+  padding-right: 2.1rem;
+}
+
+/* Pinned bottom-right rather than top-right — `.wwell-ir__row-top` already has the status badge
+ * in that corner, and this sits right on top of `.wwell-ir__row`'s own click target. Always
+ * visible (not hover-only) so it's reachable on touch, where there's no hover to reveal it. */
+.wwell-ir__view-btn {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 28px;
+  color: $muted;
+
+  ::ng-deep .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  &:hover {
+    color: $accent;
+  }
 }
 
 .wwell-ir__row {
@@ -510,10 +539,140 @@ $master-width: 240px;
   flex-direction: column;
   min-height: 0;
 
-  > app-wwell-ir-editor {
+  > app-wwell-ir-editor,
+  > .wwell-ir__view-layout {
     flex: 1;
     min-height: 0;
   }
+}
+
+/* ── View mode — read-only stepper + approval-workflow sidebar, side by side ────── */
+.wwell-ir__view-layout {
+  display: flex;
+  gap: 0.9rem;
+  min-height: 0;
+}
+
+.wwell-ir__view-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Skinny — matches the width `app-wwell-approval-timeline`'s own vertical/compact variant was
+ * actually designed around (see that component's "~168px column" comment); the previous 280px
+ * here fought that sizing instead of using it. `align-items: stretch` (flex default, from
+ * `.wwell-ir__view-layout`) is what makes this match `.wwell-ir__view-main`'s full height. */
+.wwell-ir__view-sidebar {
+  flex-shrink: 0;
+  width: 200px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Same card language as `.irv__header`/`.kv-card` (10px radius, #e8edf4 border, identical
+ * shadow) so the sidebar reads as one family with the rest of the view instead of a bolted-on
+ * panel — only the top accent strip (chain-status color, replacing the old flat left border) and
+ * the richer header below are new. */
+.wwell-ir__approval-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: tokens.$surface;
+  border: 1px solid #e8edf4;
+  border-radius: 10px;
+  padding: 1.1rem 0.9rem 0.9rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--chain-color, #{$accent});
+  }
+}
+
+/* The timeline itself grows to fill whatever height the card has (rather than the card
+ * shrink-wrapping to a short chain and leaving the border short of `.wwell-ir__view-main`'s
+ * height) and scrolls internally if a long chain ever exceeds the available space. */
+.wwell-ir__approval-card app-wwell-approval-timeline {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wwell-ir__approval-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid tokens.$border-soft;
+}
+
+.wwell-ir__approval-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: tokens.$accent-soft;
+  color: $accent;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.wwell-ir__approval-head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.wwell-ir__approval-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: $navy;
+  letter-spacing: -0.01em;
+}
+
+.wwell-ir__approval-progress {
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+  color: $muted;
+}
+
+.wwell-ir__approval-mock-chip {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: tokens.$surface-alt;
+  color: tokens.$subtle;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: default;
 }
 
 .wwell-ir__empty {
@@ -580,6 +739,14 @@ $master-width: 240px;
   .wwell-ir__detail {
     max-height: none;
     overflow: visible;
+  }
+
+  .wwell-ir__view-layout {
+    flex-direction: column;
+  }
+
+  .wwell-ir__view-sidebar {
+    width: 100%;
   }
 }
 

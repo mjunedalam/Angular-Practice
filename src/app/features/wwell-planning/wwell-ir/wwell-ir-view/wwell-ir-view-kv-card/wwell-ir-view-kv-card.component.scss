@@ -1,0 +1,104 @@
+@use '../../../shared/wwell-design-tokens' as tokens;
+
+$navy-deep: tokens.$navy-deep;
+$muted: tokens.$muted;
+$subtle: tokens.$subtle;
+$border-soft: tokens.$border-soft;
+$surface: tokens.$surface;
+$surface-alt: tokens.$surface-alt;
+$accent: tokens.$accent;
+
+:host {
+  display: block;
+}
+
+.kv-card {
+  background: $surface;
+  border: 1px solid #e8edf4;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.kv-card__title {
+  margin: 0 0 0.75rem;
+  font-size: tokens.$text-xs;
+  font-weight: 700;
+  color: $accent;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Column-major two-column layout — see the component's `rowCount` doc comment for why this isn't
+// plain row-major auto-placement.
+.kv-card__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--kv-rows, 1), auto);
+  column-gap: 2rem;
+  row-gap: 0.6rem;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .kv-card__grid {
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.kv-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  dt {
+    font-size: tokens.$text-2xs;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $subtle;
+  }
+
+  dd {
+    margin: 0;
+    font-size: tokens.$text-sm;
+    color: $navy-deep;
+    overflow-wrap: break-word;
+  }
+
+  &[data-tone='warning'] dd {
+    color: #b45309;
+    font-weight: 600;
+  }
+
+  &[data-tone='danger'] dd {
+    color: #b91c1c;
+    font-weight: 600;
+  }
+
+  &[data-tone='success'] dd {
+    color: #15803d;
+    font-weight: 600;
+  }
+}
+
+.kv-card__value--badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: $surface-alt;
+  color: $navy-deep;
+  font-weight: 600;
+  font-size: tokens.$text-xs;
+}
+
+.kv-card__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: $muted;
+  font-size: tokens.$text-sm;
+}

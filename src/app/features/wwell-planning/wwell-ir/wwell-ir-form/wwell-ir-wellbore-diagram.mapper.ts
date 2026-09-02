@@ -13,6 +13,7 @@ import {
   WwellIrFormRawValue,
   WwellIrRawCasingRow,
   WwellIrRawFormationTop,
+  WwellIrRawHydrology,
   WwellIrRawProgramMain,
 } from './wwell-ir-form.types';
 
@@ -161,6 +162,33 @@ function mapGeologicTops(
   });
 }
 
+const FLOW_TEST_TYPE = 'flow-test';
+
+/**
+ * Derives the water-level fields `water-level.renderer.ts`'s `renderWaterLevel` reads —
+ * `wellDesign.staWaterLvl` (a bare number, the actual depth it draws the line at) and
+ * `wellDesign.swLvlTxt` (free text: presence of "flow" anywhere in it is that renderer's own
+ * flag for "this is a flowing well, not a static level" — see its `isFlowing` check — and for a
+ * flowing well it also re-parses the psi value straight back out of this same string via
+ * `parseSiwhpPsi`, rather than taking a separate numeric field).
+ *
+ * Mirrors the Estimated Hydrology step's own test-type split (see `buildHydrogeologyRows` in
+ * wwell-ir-detail-rows.util.ts): a flow test's wellhead pressure (SIWHP) draws as an above-ground
+ * riser, a pump test's estimated water level draws as a below-ground line — the renderer can only
+ * ever draw one of the two per well, same as the form only ever collects one.
+ */
+function buildWaterLevelFields(hydrology: WwellIrRawHydrology): Pick<IWellDesign, 'staWaterLvl' | 'swLvlTxt'> {
+  if (hydrology.testType === FLOW_TEST_TYPE) {
+    return hydrology.siwhpPsi !== null
+      ? { staWaterLvl: null, swLvlTxt: `Flowing — SIWHP: ${hydrology.siwhpPsi} psi` }
+      : { staWaterLvl: null, swLvlTxt: null };
+  }
+
+  return hydrology.estimatedWaterLevelFt !== null
+    ? { staWaterLvl: hydrology.estimatedWaterLevelFt, swLvlTxt: `Static WL: ${hydrology.estimatedWaterLevelFt} ft` }
+    : { staWaterLvl: null, swLvlTxt: null };
+}
+
 /**
  * Derives completion-element flags/remarks from the "Completion" dropdown (Program
  * Details step) plus, for Open Hole, the conditionally-shown "Open Hole Size" field.
@@ -172,8 +200,14 @@ function mapGeologicTops(
  * "Liner + Perforated" only actually renders once a Casing-table Liner row is exactly 7"
  * OD — that 7" convention is hardcoded inside liner.renderer.ts (PRE_PERF_LINER_SIZE_IN)
  * and is intentionally left untouched here.
+ *
+ * Water level / pump depth (`pump-and-depth.renderer.ts`'s `renderPump`, gated on `pumpLvl`)
+ * come from the Estimated Hydrology step instead — see `buildWaterLevelFields` above.
+ * `estimatedPumpDepthFt` is only ever populated for a pump test (see the field's own
+ * `visibleWhen` in wwell-ir-form.schema.ts), so it's naturally `null` — no pump drawn — on a
+ * flow-test record.
  */
-function buildWellDesignFromForm(programMain: WwellIrRawProgramMain): IWellDesign {
+function buildWellDesignFromForm(programMain: WwellIrRawProgramMain, hydrology: WwellIrRawHydrology): IWellDesign {
   const completion = programMain.completion;
   const isOpenHole = completion === COMPLETION_OPEN_HOLE;
   const isGravelPack = completion === COMPLETION_SCREENED_GRAVEL_PACK;
@@ -183,9 +217,8 @@ function buildWellDesignFromForm(programMain: WwellIrRawProgramMain): IWellDesig
   return {
     name: null,
     prewapSeq: null,
-    staWaterLvl: null,
-    swLvlTxt: null,
-    pumpLvl: null,
+    ...buildWaterLevelFields(hydrology),
+    pumpLvl: hydrology.estimatedPumpDepthFt,
     ohFlg: isOpenHole ? 'Y' : 'N',
     ohRemarks: isOpenHole ? (programMain.openHoleSizeIn || null) : null,
     gpFlg: isGravelPack ? 'Y' : 'N',
@@ -221,6 +254,7 @@ function assembleWellboreDiagramData(
   formationRows: readonly WwellIrRawFormationTop[],
   surfaceElevationFtAsl: number | null,
   programMain: WwellIrRawProgramMain,
+  hydrology: WwellIrRawHydrology,
 ): WellboreDiagramData {
   const renderableCasings = casingRows.filter(isRenderableCasingRow);
   const renderableFormationTops = formationRows.filter(isRenderableFormationTop);
@@ -238,7 +272,7 @@ function assembleWellboreDiagramData(
     currentDepth: 0,
     targetDepth: targetDepthFt,
     mudCirculation: [],
-    wellDesign: buildWellDesignFromForm(programMain),
+    wellDesign: buildWellDesignFromForm(programMain, hydrology),
   };
 }
 
@@ -265,6 +299,7 @@ export function buildWellboreDiagramData(raw: WwellIrFormRawValue): WellboreDiag
     raw.subsurface.formationTops,
     raw.reference.main.surfaceElevationFtAsl,
     raw.programDetails.main,
+    raw.hydrogeology.main,
   );
 }
 
@@ -292,6 +327,31 @@ function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]):
   }));
 }
 
+function toRawProgramMain(ir: IntegratedRequirement): WwellIrRawProgramMain {
+  return {
+    completion: ir.programDetails.completion,
+    openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
+    acidization: ir.programDetails.acidization,
+    transmission: ir.programDetails.transmission,
+  };
+}
+
+/** `IntegratedRequirementHydrogeology`/`TestProgram` are two separate domain groups that the
+ *  wizard's single "Estimated Hydrology" step (and its one flat `WwellIrRawHydrology` raw shape —
+ *  see wwell-ir-form.types.ts) collects together — recombine them here the same way. */
+function toRawHydrology(ir: IntegratedRequirement): WwellIrRawHydrology {
+  return {
+    testType: ir.testProgram.testType,
+    aquifer: ir.hydrogeology.aquifer,
+    siwhpPsi: ir.testProgram.siwhpPsi ?? null,
+    estimatedTdsPpm: ir.hydrogeology.estimatedTdsPpm,
+    estimatedRateGpm: ir.testProgram.estimatedRateGpm,
+    h2sPpm: ir.hydrogeology.h2sPpm,
+    estimatedWaterLevelFt: ir.testProgram.estimatedWaterLevelFt,
+    estimatedPumpDepthFt: ir.hydrogeology.estimatedPumpDepthFt,
+  };
+}
+
 /** Same emptiness gate as `hasWellboreDiagramData`, for the IR editor/detail page. `liveCasingRows`/
  *  `liveFormationRows` let the editor substitute its Casing/Formation Tops sections' in-progress
  *  FormArray values while those sections are open for editing — pass `null`/omit for either one
@@ -312,11 +372,19 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
  *  `wwell-ir-design-preview` sketch. See `hasWellboreDiagramDataForIntegratedRequirement` above
  *  for what `liveCasingRows`/`liveFormationRows` are for — the editor passes its Casing/Formation
  *  Tops sections' live FormArray values while they're open, so the preview updates as rows are
- *  added/edited instead of only once that section is saved. */
+ *  added/edited instead of only once that section is saved.
+ *
+ *  `liveProgramMain`/`liveHydrology` are the same idea for Program Details (Completion — the
+ *  element flags in `buildWellDesignFromForm`) and Estimated Hydrology (static water level / SIWHP
+ *  / pump depth): without these, picking a different Completion or test type while that section is
+ *  open wouldn't move the diagram until the whole record was saved, unlike casing/formation-top
+ *  edits, which already updated it live. */
 export function buildWellboreDiagramDataFromIntegratedRequirement(
   ir: IntegratedRequirement,
   liveCasingRows?: readonly WwellIrRawCasingRow[] | null,
   liveFormationRows?: readonly WwellIrRawFormationTop[] | null,
+  liveProgramMain?: WwellIrRawProgramMain | null,
+  liveHydrology?: WwellIrRawHydrology | null,
 ): WellboreDiagramData {
   return assembleWellboreDiagramData(
     ir.requestReference.wellName,
@@ -324,11 +392,7 @@ export function buildWellboreDiagramDataFromIntegratedRequirement(
     liveCasingRows ?? toRawCasingRows(ir.casing),
     liveFormationRows ?? toRawFormationRows(ir.formationTops),
     ir.requestReference.surfaceElevationFtAsl,
-    {
-      completion: ir.programDetails.completion,
-      openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
-      acidization: ir.programDetails.acidization,
-      transmission: ir.programDetails.transmission,
-    },
+    liveProgramMain ?? toRawProgramMain(ir),
+    liveHydrology ?? toRawHydrology(ir),
   );
 }

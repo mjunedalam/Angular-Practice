@@ -1,0 +1,75 @@
+<div class="ir-well-design">
+  <section class="ir-well-design__diagram-card">
+    <h3 class="ir-well-design__title">Well Bore Design</h3>
+    @if (hasWellboreData()) {
+      <div class="ir-well-design__diagram-row" [class.ir-well-design__diagram-row--no-depth]="!hasTargetDepth()">
+        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+        <app-well-bore-view class="ir-well-design__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+      </div>
+    } @else {
+      <p class="ir-well-design__empty">No casing or formation top data recorded for this well.</p>
+    }
+  </section>
+
+  <section class="ir-well-design__table-card">
+    <h3 class="ir-well-design__title">Formation Tops</h3>
+    <div class="ir-well-design__table-wrap">
+      <table class="ir-well-design__table">
+        <thead>
+          <tr>
+            <th>Formation</th>
+            <th>Description</th>
+            <th>Depth (ft bgl)</th>
+            <th>Sub-sea (ft asl)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (top of ir().formationTops; track top.name) {
+            <tr>
+              <td>{{ top.name }}</td>
+              <td>{{ top.description || '—' }}</td>
+              <td>{{ top.depthFt }}</td>
+              <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="ir-well-design__table-empty">No formation tops recorded.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ir-well-design__table-card">
+    <h3 class="ir-well-design__title">Casing Design</h3>
+    <div class="ir-well-design__table-wrap">
+      <table class="ir-well-design__table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Depth (ft bgl)</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of ir().casing; track row.type + row.depthFtBgl) {
+            <tr>
+              <td>{{ row.type }}</td>
+              <td>{{ row.sizeIn }}</td>
+              <td>{{ row.depthFtBgl }}</td>
+              <td>{{ row.remarks || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="ir-well-design__table-empty">No casing recorded.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <app-wwell-ir-view-kv-card title="Estimated Hydrology" [rows]="hydrogeologyRows()" />
+</div>

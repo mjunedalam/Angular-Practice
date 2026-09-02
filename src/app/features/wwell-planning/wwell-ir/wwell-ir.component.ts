@@ -20,18 +20,28 @@ import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwel
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
+import { WwellApprovalTimelineComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WwellCollapseAnimateDirective } from '../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellIrStore } from './store/wwell-ir.store';
 import { WwellIrEditorComponent } from './wwell-ir-editor/wwell-ir-editor.component';
+import { WwellIrViewComponent } from './wwell-ir-view/wwell-ir-view.component';
 import { buildWwellDynamicForm } from '../shared/dynamic-form/wwell-dynamic-form.builder';
 import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-draft.util';
 import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
 import { WWELL_IR_STATUS_META } from './wwell-ir.config';
+
+/** Which surface WwellIrEditorComponent's slot in the detail panel currently shows for the
+ *  selected record — 'edit' is the existing view-with-inline-edit surface, 'view' is the
+ *  read-only stepper (WwellIrViewComponent). Deliberately independent of *which* record is
+ *  selected (see `viewIr`/`setDetailMode` below) so browsing other rows while viewing one keeps
+ *  showing each newly-selected record in view mode too, instead of bouncing back to edit on
+ *  every click. */
+type WwellIrDetailMode = 'edit' | 'view';
 
 const SKELETON_ROW_COUNT = 6;
 
@@ -63,6 +73,8 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     MatButtonModule,
     MatIconModule,
     WwellIrEditorComponent,
+    WwellIrViewComponent,
+    WwellApprovalTimelineComponent,
     WwellDetailLoadingComponent,
     WwellCollapseAnimateDirective,
   ],
@@ -85,6 +97,9 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // selection is keyed on it directly, not the display-only `code`/`id` string, so it can be
   // handed straight to loadIrDetail() below without a lookup.
   protected readonly selectedIrSeq = signal<number | null>(null);
+
+  /** Sticky across selection changes — see WwellIrDetailMode's own doc comment. */
+  protected readonly detailMode = signal<WwellIrDetailMode>('edit');
 
   protected readonly lifecycleFilter = signal<WwellIrLifecycleFilter>('active');
   protected readonly statusFilter = signal<IntegratedRequirementStatus | 'all'>('all');
@@ -340,8 +355,12 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     this.statusFilter.set(status);
   }
 
+  // Chips only ever render within the Active lifecycle bucket (see the template's
+  // `@if (lifecycleFilter() === 'active')` gate) — "All" here already only ever means "every
+  // active-status record", never the inactive/approved ones the toggle hides. Labeling it
+  // "Active" instead of the bare, easy-to-misread "All" makes that scope explicit.
   protected statusChipLabel(status: IntegratedRequirementStatus | 'all'): string {
-    return status === 'all' ? 'All' : this.statusMeta[status].label;
+    return status === 'all' ? 'Active' : this.statusMeta[status].label;
   }
 
   protected statusChipCount(status: IntegratedRequirementStatus | 'all'): number {
@@ -367,6 +386,22 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     if (irSeq !== null) this.selectIr(irSeq);
   }
 
+  /** The row's "view" (eye) icon — selects the record exactly like selectIrRow above, plus
+   *  switches the detail panel to the read-only stepper. Staying in view mode afterwards (rather
+   *  than resetting on every selection change) is what lets the master list double as a way to
+   *  browse several records' read-only views in a row, without an extra click back into view
+   *  mode each time. */
+  protected viewIr(irSeq: number): void {
+    this.detailMode.set('view');
+    this.selectIr(irSeq);
+  }
+
+  /** WwellIrViewComponent's own "Edit" button — switches the currently-open record's detail
+   *  panel back to the inline-edit surface. */
+  protected setDetailMode(mode: WwellIrDetailMode): void {
+    this.detailMode.set(mode);
+  }
+
   /** `cdkVirtualFor`'s identity function — same identity rule as the old `@for`'s `track`
    *  expression, just spelled as a function since `*cdkVirtualFor` (a plain structural directive,
    *  not the `@for` built-in control flow) takes `trackBy` instead of an inline `track` expression. */
@@ -386,6 +421,9 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     this.pendingDraftIr.set(draft);
     this.selectedIrSeq.set(null);
     this.previousSelectedIrSeq = null;
+    // A brand-new draft has nothing committed to view read-only yet — always open it for editing,
+    // regardless of whatever mode the previously-open record was left in.
+    this.detailMode.set('edit');
 
     const host = this.detailHost?.nativeElement;
     if (host) playIfMotionAllowed(buildDetailRevealTimeline(host));
@@ -393,5 +431,10 @@ export class WwellIrComponent implements OnInit, OnDestroy {
 
   protected chainBorderColor(chain: readonly ApprovalChainStep[]): string {
     return chainCompletionColor(chain);
+  }
+
+  /** Powers the approval-workflow sidebar's "N of M approved" progress line (view mode only). */
+  protected approvedStepCount(chain: readonly ApprovalChainStep[]): number {
+    return chain.filter(step => step.status === 'approved').length;
   }
 }

@@ -1,0 +1,48 @@
+<div class="irv">
+  <header class="irv__header">
+    <div class="irv__heading">
+      <p class="irv__eyebrow">{{ ir().code }}</p>
+      <h2 class="irv__title">{{ ir().requestReference.wellName || 'Untitled Well' }}</h2>
+    </div>
+    <div class="irv__header-actions">
+      <span class="irv__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
+        <span class="irv__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
+        {{ statusMeta[ir().status].label }}
+      </span>
+      <button type="button" mat-stroked-button class="irv__edit-btn" (click)="editRequested.emit()">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+    </div>
+  </header>
+
+  <nav class="irv__tabs" role="tablist" aria-label="Integrated requirement view">
+    @for (tab of tabs; track tab.key) {
+      <button
+        type="button"
+        role="tab"
+        class="irv__tab"
+        [class.irv__tab--active]="activeTab() === tab.key"
+        [attr.aria-selected]="activeTab() === tab.key"
+        (click)="setTab(tab.key)"
+      >
+        <mat-icon>{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <div class="irv__tab-panel">
+    @switch (activeTab()) {
+      @case ('details') {
+        <app-wwell-ir-view-details [ir]="ir()" [linkedRequestWellOptions]="linkedRequestWellOptions()" />
+      }
+      @case ('well-design') {
+        <app-wwell-ir-view-well-design [ir]="ir()" />
+      }
+      @case ('letter') {
+        <app-wwell-ir-view-letter [ir]="ir()" />
+      }
+    }
+  </div>
+</div>

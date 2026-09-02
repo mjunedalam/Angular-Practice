@@ -1,0 +1,126 @@
+@use '../../../shared/wwell-design-tokens' as tokens;
+
+:host {
+  display: block;
+}
+
+// Plain vertical stack of full-width cards — same pattern as the Details step's `.ir-details`
+// (see that file's own comment for why: no outer multi-column grid fighting each card's own
+// internal layout).
+.ir-well-design {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ir-well-design__diagram-card,
+.ir-well-design__table-card {
+  background: tokens.$surface;
+  border: 1px solid #e8edf4;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+// `.ir-well-design__diagram-row` below has a fixed `min-width` that can exceed this card's own
+// width on a narrow viewport — scope the horizontal scroll to just this card instead of letting
+// the diagram's real width push out the rest of the tab.
+.ir-well-design__diagram-card {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Matches `.kv-card__title`/`.ir-details__section-title` — same uppercase/accent card-title
+// language across every step of the view, not just Details.
+.ir-well-design__title {
+  margin: 0 0 0.75rem;
+  font-size: tokens.$text-xs;
+  font-weight: 700;
+  color: tokens.$accent;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// `app-wwell-ir-depth-scale`/`app-well-bore-view` both size their own SVG to `height: 100%` of
+// this row (see those components' own host styles: `flex: 0 0 12%; height: 100%` and `flex: 1`
+// respectively) — a percentage height only resolves against an ancestor with a *definite* height,
+// which `max-height` alone never provides. `aspect-ratio` is what supplies that definite height
+// here, derived from the row's fixed width — without it, "height: 100%" was resolving against an
+// indeterminate box and the SVGs fell back to their own unbounded intrinsic size, spilling past
+// the card (`app-well-bore-view` draws in fixed viewBox units at 780×650 — see
+// WWELL_IR_PREVIEW_DIAGRAM_LAYOUT — with no CSS clamp of its own). Sized and pinned to match that
+// exact 780:650 ratio, mirroring wwell-ir-editor.component.scss's identical, already-working
+// `.ire__wellbore-diagram-row` rule — see that file's own comment for the full sizing rationale.
+.ir-well-design__diagram-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 600px;
+  max-width: 600px;
+  aspect-ratio: 780 / 650;
+  max-height: 500px;
+  margin: 0 auto;
+}
+
+// Hides the D3-rendered "TOTAL DEPTH: 0 FT" label until a target depth actually exists.
+.ir-well-design__diagram-row--no-depth ::ng-deep .td-label {
+  display: none;
+}
+
+.ir-well-design__diagram {
+  display: block;
+  min-width: 0;
+}
+
+.ir-well-design__empty {
+  margin: 0;
+  color: tokens.$muted;
+  font-size: tokens.$text-sm;
+}
+
+.ir-well-design__table-wrap {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.ir-well-design__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: tokens.$text-sm;
+
+  th {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    color: tokens.$subtle;
+    font-size: tokens.$text-2xs;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid tokens.$border;
+  }
+
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid tokens.$border-soft;
+    color: tokens.$navy;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.ir-well-design__table-empty {
+  text-align: center;
+  color: tokens.$muted;
+  padding: 0.9rem 0.6rem;
+}

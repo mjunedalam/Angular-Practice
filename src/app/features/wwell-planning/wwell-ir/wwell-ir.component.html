@@ -19,16 +19,6 @@
       </button>
     </header>
 
-    <label class="wwell-ir__search">
-      <mat-icon class="wwell-ir__search-icon">search</mat-icon>
-      <input
-        type="search"
-        placeholder="Search by code, well, request or client&hellip;"
-        [ngModel]="searchTerm()"
-        (ngModelChange)="onSearchChange($event)"
-      />
-    </label>
-
     <div class="wwell-ir__filter-bar">
       <button
         type="button"
@@ -56,6 +46,16 @@
         </div>
       }
     </div>
+
+    <label class="wwell-ir__search">
+      <mat-icon class="wwell-ir__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search by code, well, request or client&hellip;"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </label>
 
     @if (isLoading()) {
       <ul class="wwell-ir__list wwell-ir__list--skeleton" aria-hidden="true">
@@ -111,6 +111,19 @@
             <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
             <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
           </button>
+
+          @if (rowIrSeq(ir); as irSeq) {
+            <button
+              type="button"
+              mat-icon-button
+              class="wwell-ir__view-btn"
+              aria-label="View integrated requirement"
+              title="View"
+              (click)="$event.stopPropagation(); viewIr(irSeq)"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+          }
         </div>
       </cdk-virtual-scroll-viewport>
     }
@@ -121,7 +134,33 @@
       <app-wwell-detail-loading />
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
-        <app-wwell-ir-editor [ir]="ir" />
+        @if (detailMode() === 'view') {
+          <div class="wwell-ir__view-layout">
+            <app-wwell-ir-view
+              class="wwell-ir__view-main"
+              [ir]="ir"
+              [linkedRequestWellOptions]="store.linkedRequestWellOptions()"
+              (editRequested)="setDetailMode('edit')"
+            />
+            <aside class="wwell-ir__view-sidebar">
+              <div class="wwell-ir__approval-card">
+                <header class="wwell-ir__approval-head">
+                  <span class="wwell-ir__approval-icon">
+                    <mat-icon>verified</mat-icon>
+                  </span>
+                  <div class="wwell-ir__approval-head-text">
+                    <h2 class="wwell-ir__approval-title">Approval Workflow</h2>
+                    <p class="wwell-ir__approval-progress">{{ approvedStepCount(ir.chain) }} of {{ ir.chain.length }} approved</p>
+                  </div>
+                  <span class="wwell-ir__approval-mock-chip" title="Not yet wired to a real approval-process API">Mocked</span>
+                </header>
+                <app-wwell-approval-timeline [steps]="ir.chain" [orientation]="'vertical'" />
+              </div>
+            </aside>
+          </div>
+        } @else {
+          <app-wwell-ir-editor [ir]="ir" />
+        }
       </div>
     } @else {
       <div class="wwell-ir__empty">
