@@ -26,6 +26,7 @@ export function buildIntegratedRequirementFromPayload(
     status: payload.status,
     requestReference: payload.requestReference,
     formationTops: payload.formationTops,
+    topsRemarks: payload.topsRemarks,
     casing: payload.casing,
     programDetails: payload.programDetails,
     contacts: payload.contacts,

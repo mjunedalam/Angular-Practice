@@ -13,10 +13,14 @@ export type WwellIrTableName =
   | 'exad_gwd_ir_hydrogeology'
   | 'exad_gwd_ir_tops'
   | 'exad_gwd_ir_water'
+  | 'exad_gwd_well_design'
   | 'exad_rcd_prewap';
 
-interface IrRow {
+interface IrActionRow {
   readonly action: IrRowAction;
+}
+
+interface IrRow extends IrActionRow {
   /** null until the backend assigns one on first save; echo it back on every later save. */
   readonly ir_seq: number | null;
 }
@@ -70,6 +74,7 @@ export interface IrHydrogeologyRow extends IrRow {
   readonly est_water_quality: number | null;
   readonly est_productivity: number | null;
   readonly flowing: string | null;
+  readonly siwhp: number | null;
   readonly h2s: string | null;
 }
 
@@ -99,32 +104,55 @@ export interface IrWaterRow extends IrRow {
  *  "eligible for a new IR" list) can never supply this once the IR exists: eligibility means "no
  *  IR references this prewap_seq yet", which stops being true the instant this IR is saved.
  *  Read-only — no `action`/`ir_seq` (unlike IrRow), since exad_rcd_prewap is never written
- *  through the IR bulk-save contract. */
+ *  through the IR bulk-save contract.
+ *
+ *  Unlike IrEligibleWell (fed by get_ir_wells_prc, which aliases these to friendly camelCase
+ *  names), get_ir_data_prc emits this block as a raw `SELECT p.* FROM exad_rcd_prewap` — no
+ *  aliasing at all — so the field names here are the table's actual Oracle columns, confirmed
+ *  against a real response payload: PREWAP_SEQ, W_PRIM_HID, W_NUM, SURFACEN, SURFACEE,
+ *  SV_SURF_ELEVF, SV_UTM_ZN, WELL_TYPE, WELL_CLASS (normalizeRowKeys lowercases the casing but
+ *  does not rename anything). There is no well-name column at all — get_ir_wells_prc.sql builds
+ *  one the same way this row's reader must: `w_prim_hid || '_' || w_num`. `EXPL_WB_NAME` also
+ *  exists on this table but is an unrelated exploration-well identifier, not this water well's
+ *  name — do not read it for wellName. */
 export interface IrLinkedWellRow {
   readonly prewap_seq: number;
-  readonly well_name: string;
-  readonly primary_hole_id: string | null;
-  readonly well_number: string | null;
-  readonly surface_north: number | null;
-  readonly surface_east: number | null;
-  readonly surface_elevation: number | null;
-  readonly utm_zone: string | null;
+  readonly w_prim_hid: string | null;
+  readonly w_num: string | null;
+  readonly surfacen: number | null;
+  readonly surfacee: number | null;
+  /** Feet ASL — get_ir_wells_prc.sql aliases this same column as `surfaceelevation`. */
+  readonly sv_surf_elevf: number | null;
+  /** NUMBER, not a "38N"-style zone string — confirmed against a live USER_TAB_COLUMNS dump. */
+  readonly sv_utm_zn: number | null;
   readonly well_type: string | null;
   readonly well_class: string | null;
 }
 
-export interface WwellIrTableBlock<TRow extends IrRow = IrRow> {
+/** exad_gwd_well_design — keyed by its own wd_seq, NOT ir_seq (see 01-schema.sql, agwa-planning
+ *  backend: that table links to a well only via prewap_seq). Only pump_lvl (Estimated Pump Depth)
+ *  is mapped through the IR bulk-save contract — every other column on that ~25-column table
+ *  (oh_flg, gp_flg, design_rpt...) belongs to a separate Well Design workflow this app doesn't
+ *  touch, so those are simply never sent. */
+export interface IrWellDesignRow extends IrActionRow {
+  readonly wd_seq: number | null;
+  readonly prewap_seq: number | null;
+  readonly pump_lvl: number | null;
+}
+
+export interface WwellIrTableBlock<TRow extends IrActionRow = IrRow> {
   readonly table: WwellIrTableName;
   readonly data: readonly TRow[] | null;
 }
 
-/** Fixed 5-table shape the backend expects per save — add a slot here when a new table joins the contract. */
+/** Fixed 6-table shape the backend expects per save — add a slot here when a new table joins the contract. */
 export type WwellIrBulkSavePayload = readonly [
   WwellIrTableBlock<IrHeaderRow>,
   WwellIrTableBlock<IrCasingRow>,
   WwellIrTableBlock<IrHydrogeologyRow>,
   WwellIrTableBlock<IrTopsRow>,
   WwellIrTableBlock<IrRow>,
+  WwellIrTableBlock<IrWellDesignRow>,
 ];
 
 /** POST/PATCH response row — mirrors the backend's SaveIntegratedRequirementResult record. */

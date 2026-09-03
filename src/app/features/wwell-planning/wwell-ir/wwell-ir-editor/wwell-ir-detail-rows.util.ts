@@ -26,16 +26,20 @@ export function fmtStr(value: string | null | undefined): string {
   return value ? value : EMPTY_VALUE;
 }
 
-/** `linkedRequestId` is the raw prewap_seq (e.g. "5008") — resolve it to the well name shown in
- *  the "Link to Request" picker itself (WwellIrStore.linkedRequestWellOptions) so the view row
- *  reads the same way the dropdown did. Falls back to the raw id if the well has dropped out of
- *  the eligible-wells list (e.g. already linked elsewhere) rather than showing nothing. */
+/** `linkedRequestId` is the raw prewap_seq (e.g. "5008") — resolve it to the well name. Prefers
+ *  `r.wellName` (populated from exad_rcd_prewap on a saved IR, or by the picker on a fresh one)
+ *  over the "eligible for a new IR" wellOptions lookup: get_ir_wells_prc.sql's eligibility filter
+ *  excludes any well that already has an IR header, so the instant this IR is saved its own
+ *  linked well permanently drops out of that list and the lookup can never succeed again — the
+ *  wellOptions param only still helps a brand-new, not-yet-saved draft. Falls back to the raw id
+ *  if neither source has a name yet, rather than showing nothing. */
 function resolveLinkedRequestLabel(
   linkedRequestId: string | null,
+  wellName: string,
   wellOptions: readonly { readonly value: string; readonly label: string }[],
 ): string {
   if (!linkedRequestId) return EMPTY_VALUE;
-  return wellOptions.find(option => option.value === linkedRequestId)?.label ?? linkedRequestId;
+  return wellName || wellOptions.find(option => option.value === linkedRequestId)?.label || linkedRequestId;
 }
 
 /** Mirrors the IR wizard's "Request Reference" step (wwell-ir-form.schema.ts) field-for-field,
@@ -46,7 +50,7 @@ export function buildRequestReferenceRows(
 ): readonly KvRow[] {
   const r = ir.requestReference;
   return [
-    { label: 'Link to Request', value: resolveLinkedRequestLabel(r.linkedRequestId, linkedRequestWellOptions) },
+    { label: 'Link to Request', value: resolveLinkedRequestLabel(r.linkedRequestId, r.wellName, linkedRequestWellOptions) },
     { label: 'Letter Number', value: fmtStr(r.letterNumber) },
     { label: 'BI Number', value: fmtStr(r.client) },
     { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },

@@ -26,6 +26,7 @@ function buildPayload(): CreateIntegratedRequirementPayload {
       coordinates: '27.5114°N, 41.7208°E',
     },
     formationTops: [],
+    topsRemarks: null,
     casing: [],
     programDetails: {
       completion: 'Screened',
@@ -79,6 +80,7 @@ function buildIrBulkPayload(): WwellIrBulkSavePayload {
     { table: 'exad_gwd_ir_hydrogeology', data: null },
     { table: 'exad_gwd_ir_tops', data: null },
     { table: 'exad_gwd_ir_water', data: null },
+    { table: 'exad_gwd_well_design', data: null },
   ];
 }
 

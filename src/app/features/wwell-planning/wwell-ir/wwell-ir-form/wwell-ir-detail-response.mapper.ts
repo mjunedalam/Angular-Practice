@@ -8,6 +8,7 @@ import {
   IrLinkedWellRow,
   IrTopsRow,
   IrWaterRow,
+  IrWellDesignRow,
   WwellIrDetailTableBlock,
   WwellIrTableName,
 } from './wwell-ir-payload.model';
@@ -94,9 +95,13 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const hydroRow = rowsFor<IrHydrogeologyRow>(blocks, 'exad_gwd_ir_hydrogeology')[0] as IrHydrogeologyRow | undefined;
   const waterRows = rowsFor<IrWaterRow>(blocks, 'exad_gwd_ir_water');
   const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
+  const wellDesignRow = rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design')[0] as IrWellDesignRow | undefined;
 
   return {
     ...existing,
+    // exad_gwd_well_design is keyed by wd_seq, not ir_seq — carried forward only so a later save's
+    // Estimated Pump Depth UPDATE matches this same row instead of INSERTing a duplicate.
+    wellDesignSeq: wellDesignRow?.wd_seq ?? existing.wellDesignSeq,
     requestReference: {
       ...existing.requestReference,
       // prewap_seq/ltr_no are the only two Request Reference columns exad_gwd_ir_header actually
@@ -109,12 +114,14 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       letterNumber: header?.ltr_no ?? existing.requestReference.letterNumber,
       // Live off the new exad_rcd_prewap block (see this function's own doc comment above) — a
       // record with no linked request has no `linkedWell` row and falls through to whatever
-      // `existing` already had (blank, for a never-linked IR).
-      wellName: linkedWell?.well_name ?? existing.requestReference.wellName,
-      surfaceElevationFtAsl: linkedWell?.surface_elevation ?? existing.requestReference.surfaceElevationFtAsl,
+      // `existing` already had (blank, for a never-linked IR). exad_rcd_prewap has no well-name
+      // column — built the same way get_ir_wells_prc.sql does it (w_prim_hid || '_' || w_num), so
+      // this reads the same as the "eligible wells" picker's own label.
+      wellName: linkedWell ? `${linkedWell.w_prim_hid ?? ''}_${linkedWell.w_num ?? ''}` : existing.requestReference.wellName,
+      surfaceElevationFtAsl: linkedWell?.sv_surf_elevf ?? existing.requestReference.surfaceElevationFtAsl,
       coordinates:
-        linkedWell?.surface_north != null && linkedWell?.surface_east != null
-          ? `${linkedWell.surface_north}°N, ${linkedWell.surface_east}°E`
+        linkedWell?.surfacen != null && linkedWell?.surfacee != null
+          ? `${linkedWell.surfacen}°N, ${linkedWell.surfacee}°E`
           : existing.requestReference.coordinates,
     },
     formationTops: topsRows.map(row => ({
@@ -122,6 +129,9 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       depthFt: row.plan_tvd_dpth,
       subSeaFtAsl: row.plan_ss_dpth ?? null,
     })),
+    // Written by buildWwellIrBulkSavePayload but never read back here before — same class of gap
+    // fixed for Transmission/Acidization above.
+    topsRemarks: header?.tops_remarks ?? existing.topsRemarks,
     // exad_gwd_ir_water has no well-name column — epANum is the only identifier that round-trips
     // (see IrWaterRow / docs/ir/p2-ir.md). `temp` has no form field, so it is simply not read.
     offsetWells: waterRows.map(row => ({
@@ -174,8 +184,8 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
           aquifer: hydroRow.st_long_cd,
           estimatedTdsPpm: hydroRow.est_water_quality,
           h2sPpm: parseH2sPpm(hydroRow.h2s),
-          // Not persisted anywhere in the wire contract yet — carry forward whatever was known.
-          estimatedPumpDepthFt: existing.hydrogeology.estimatedPumpDepthFt,
+          // exad_gwd_well_design.pump_lvl, not exad_gwd_ir_hydrogeology — see wellDesignSeq above.
+          estimatedPumpDepthFt: wellDesignRow?.pump_lvl ?? existing.hydrogeology.estimatedPumpDepthFt,
         }
       : existing.hydrogeology,
     testProgram: {
@@ -183,6 +193,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       testType: (header?.test_type as IntegratedRequirementTestType | null | undefined) ?? existing.testProgram.testType,
       estimatedRateGpm: hydroRow?.est_productivity ?? existing.testProgram.estimatedRateGpm,
       estimatedWaterLevelFt: hydroRow?.est_sta_water_lvl ?? existing.testProgram.estimatedWaterLevelFt,
+      siwhpPsi: hydroRow?.siwhp ?? existing.testProgram.siwhpPsi,
     },
   };
 }

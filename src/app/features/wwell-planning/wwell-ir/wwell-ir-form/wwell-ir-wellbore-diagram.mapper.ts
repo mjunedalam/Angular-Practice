@@ -323,7 +323,6 @@ function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]):
     name: row.name,
     depthFt: row.depthFt,
     subSeaFtAsl: row.subSeaFtAsl ?? null,
-    remarks: row.remarks ?? '',
   }));
 }
 

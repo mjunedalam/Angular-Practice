@@ -21,7 +21,7 @@ export function wwellIrTimelineStepStatus(ir: IntegratedRequirement, groupKey: s
     }
 
     case 'horizons':
-      return ir.formationTops.length > 0 ? 'completed' : 'pending';
+      return ir.formationTops.length > 0 || !!ir.topsRemarks?.trim() ? 'completed' : 'pending';
 
     case 'casing':
       return ir.casing.length > 0 ? 'completed' : 'pending';

@@ -20,6 +20,7 @@ import {
   IrRowAction,
   IrTopsRow,
   IrWaterRow,
+  IrWellDesignRow,
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
 import {
@@ -41,7 +42,7 @@ export interface WwellIrSaveContext {
   readonly irSeq: number | null;
   readonly existing?: Pick<
     IntegratedRequirement,
-    'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells'
+    'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells' | 'wellDesignSeq'
   > | null;
 }
 
@@ -55,7 +56,7 @@ const isBlankCasingRow = (row: WwellIrRawCasingRow): boolean =>
   !row.type && !row.sizeIn && !row.remarks && row.depthFtBgl == null;
 
 const isBlankFormationTop = (row: WwellIrRawFormationTop): boolean =>
-  !row.name && !row.remarks && row.depthFt == null && row.subSeaFtAsl == null;
+  !row.name && row.depthFt == null && row.subSeaFtAsl == null;
 
 /** Natural keys the backend's UPDATE/DELETE branches match repeatable rows by (see
  *  EXAD_AGWA_IUD_PKG.save_casing/save_tops in 05-agwa-iud-package.sql) — a row whose key isn't
@@ -176,8 +177,10 @@ function buildTopsRows(
 }
 
 /** True when nothing save_hydrogeology's UPDATE branch would actually write has changed —
- *  est_sta_water_lvl/est_productivity come from the form's (and domain model's) testProgram
- *  section, not hydrogeology, so both are needed to tell "unchanged" from "changed". */
+ *  est_sta_water_lvl/est_productivity/siwhp come from the form's (and domain model's) testProgram
+ *  section, not hydrogeology, so both are needed to tell "unchanged" from "changed". testType is
+ *  included because it alone drives the `flowing` column (see buildHydrogeologyRows below) even
+ *  though testType itself is persisted on the header row, not here. */
 const hydrogeologyRowUnchanged = (
   existingHydro: IntegratedRequirementHydrogeology,
   existingTestProgram: IntegratedRequirementTestProgram,
@@ -186,7 +189,13 @@ const hydrogeologyRowUnchanged = (
   existingTestProgram.estimatedWaterLevelFt === raw.estimatedWaterLevelFt &&
   existingHydro.estimatedTdsPpm === raw.estimatedTdsPpm &&
   existingTestProgram.estimatedRateGpm === raw.estimatedRateGpm &&
-  existingHydro.h2sPpm === raw.h2sPpm;
+  existingHydro.h2sPpm === raw.h2sPpm &&
+  (existingTestProgram.siwhpPsi ?? null) === raw.siwhpPsi &&
+  existingTestProgram.testType === raw.testType;
+
+/** 'flow-test' → 'Y', 'pump-test' → 'N' — exad_gwd_ir_hydrogeology.flowing mirrors the same
+ *  Test Type choice the header's own test_type column stores, denormalized onto this row too. */
+const flowingFlag = (testType: string): 'Y' | 'N' => (testType === 'flow-test' ? 'Y' : 'N');
 
 /** Only ever 0 or 1 row (the form has a single hydrogeology section, not a repeatable list), keyed
  *  by aquifer (st_long_cd) the same way the backend matches it — so switching to a different
@@ -209,7 +218,8 @@ function buildHydrogeologyRows(
         est_sta_water_lvl: raw.estimatedWaterLevelFt,
         est_water_quality: raw.estimatedTdsPpm,
         est_productivity: raw.estimatedRateGpm,
-        flowing: null,
+        flowing: flowingFlag(raw.testType),
+        siwhp: raw.siwhpPsi,
         h2s: raw.h2sPpm != null ? `${raw.h2sPpm} ppm` : null,
       },
     ];
@@ -227,6 +237,7 @@ function buildHydrogeologyRows(
       est_water_quality: null,
       est_productivity: null,
       flowing: null,
+      siwhp: null,
       h2s: null,
     });
   }
@@ -245,7 +256,8 @@ function buildHydrogeologyRows(
       est_sta_water_lvl: raw.estimatedWaterLevelFt,
       est_water_quality: raw.estimatedTdsPpm,
       est_productivity: raw.estimatedRateGpm,
-      flowing: null,
+      flowing: flowingFlag(raw.testType),
+      siwhp: raw.siwhpPsi,
       h2s: raw.h2sPpm != null ? `${raw.h2sPpm} ppm` : null,
     });
   }
@@ -343,14 +355,6 @@ const offsetWellToRaw = (row: IntegratedRequirementOffsetWell): WwellIrRawOffset
   h2sPpm: row.h2sPpm ?? null,
 });
 
-/** exad_gwd_ir_header.tops_remarks is a single column, but Formation Tops is a repeatable row
- *  list each with its own "Remarks" text — join whatever's there instead of keeping only one row's
- *  text and silently dropping the rest. */
-function buildTopsRemarks(rows: readonly WwellIrRawFormationTop[]): string | null {
-  const remarks = rows.map(row => row.remarks?.trim()).filter((text): text is string => !!text);
-  return remarks.length ? remarks.join('; ') : null;
-}
-
 /** TEMPORARY: resolves a geologist's display name to the numeric id
  *  exad_gwd_ir_header.cont_geologist/sub_cont_geologist actually expects — see
  *  WWELL_GEOLOGIST_ID_BY_NAME's doc comment for why this is a stopgap. */
@@ -366,6 +370,28 @@ function resolveTransmissionCode(value: string): string | null {
   return WWELL_TRANSMISSION_CODE_BY_LABEL[value] ?? value.slice(0, 10);
 }
 
+/** Only Estimated Pump Depth (pump_lvl) is mapped onto exad_gwd_well_design so far — see
+ *  IrWellDesignRow's own doc comment for why every other column on that table is left alone.
+ *  Unlike every other block above, this table is keyed by wd_seq (not ir_seq): with no wd_seq yet
+ *  known (no detail fetch has resolved one), a row is only worth INSERTing once there's an actual
+ *  value to save and a linked request to hang it off of — otherwise there is nothing to persist yet. */
+function buildWellDesignRow(
+  pumpDepthFt: number | null,
+  prewapSeq: number | null,
+  existingWellDesignSeq: number | null | undefined,
+  existingPumpDepthFt: number | null | undefined,
+): IrWellDesignRow | null {
+  const wdSeq = existingWellDesignSeq ?? null;
+
+  if (wdSeq != null) {
+    const action: IrRowAction = (existingPumpDepthFt ?? null) === pumpDepthFt ? '' : 'UPDATE';
+    return { action, wd_seq: wdSeq, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt };
+  }
+
+  if (pumpDepthFt == null || prewapSeq == null) return null;
+  return { action: 'INSERT', wd_seq: null, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt };
+}
+
 /** Bridges the wizard's raw form value to the exad_gwd_ir_* bulk-save wire format — see wwell-ir-payload.model.ts. */
 export function buildWwellIrBulkSavePayload(
   raw: WwellIrFormRawValue,
@@ -373,16 +399,17 @@ export function buildWwellIrBulkSavePayload(
 ): WwellIrBulkSavePayload {
   const { irSeq, existing } = context;
   const headerAction = resolveRowAction(irSeq);
+  const prewapSeq = raw.reference.main.linkedRequestId ? Number(raw.reference.main.linkedRequestId) : null;
 
   const header: IrHeaderRow = {
     action: headerAction,
     ir_seq: irSeq,
-    prewap_seq: raw.reference.main.linkedRequestId ? Number(raw.reference.main.linkedRequestId) : null,
+    prewap_seq: prewapSeq,
     ltr_no: raw.reference.main.letterNumber || null,
     screen: '',
     sampling: raw.programDetails.developmentTesting.sampling || null,
     logging: raw.programDetails.developmentTesting.logging || null,
-    tops_remarks: buildTopsRemarks(raw.subsurface.formationTops),
+    tops_remarks: raw.subsurface.remarks.topsRemarks || null,
     publish_dt: null,
     publish_flg: 'N', // flips once the approval workflow publishes this record, not at authoring time
     curr_flg: 'Y',
@@ -405,6 +432,12 @@ export function buildWwellIrBulkSavePayload(
   const tops = buildTopsRows(raw.subsurface.formationTops, irSeq, existing?.formationTops);
   const hydrogeology = buildHydrogeologyRows(raw.hydrogeology.main, irSeq, existing);
   const water = buildWaterRows(raw.contacts.offsetWells, irSeq, existing?.offsetWells);
+  const wellDesign = buildWellDesignRow(
+    raw.hydrogeology.main.estimatedPumpDepthFt,
+    prewapSeq,
+    existing?.wellDesignSeq,
+    existing?.hydrogeology.estimatedPumpDepthFt,
+  );
 
   return [
     { table: 'exad_gwd_ir_header', data: [header] },
@@ -412,5 +445,6 @@ export function buildWwellIrBulkSavePayload(
     { table: 'exad_gwd_ir_hydrogeology', data: hydrogeology.length ? hydrogeology : null },
     { table: 'exad_gwd_ir_tops', data: tops.length ? tops : null },
     { table: 'exad_gwd_ir_water', data: water.length ? water : null },
+    { table: 'exad_gwd_well_design', data: wellDesign ? [wellDesign] : null },
   ];
 }

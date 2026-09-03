@@ -25,8 +25,9 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: '' }],
+      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 }],
       casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' }],
+      remarks: { topsRemarks: '' },
     },
     programDetails: {
       main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
@@ -88,11 +89,28 @@ describe('buildWwellIrBulkSavePayload', () => {
     expect(hydrogeology.data).toBeNull();
   });
 
+  it('sets hydrogeology.flowing to Y for a flow test and writes siwhp straight through', () => {
+    const raw = buildRaw({
+      hydrogeology: { main: { ...buildRaw().hydrogeology.main, testType: 'flow-test', siwhpPsi: 42 } },
+    });
+
+    const [, , hydrogeology] = buildWwellIrBulkSavePayload(raw);
+
+    expect(hydrogeology.data?.[0]).toMatchObject({ flowing: 'Y', siwhp: 42 });
+  });
+
+  it('sets hydrogeology.flowing to N for a pump test', () => {
+    const [, , hydrogeology] = buildWwellIrBulkSavePayload(buildRaw());
+
+    expect(hydrogeology.data?.[0]).toMatchObject({ flowing: 'N' });
+  });
+
   it('drops fully-blank repeatable rows so an empty draft does not send junk INSERTs', () => {
     const blankRaw = buildRaw({
       subsurface: {
-        formationTops: [{ name: '', depthFt: null, subSeaFtAsl: null, remarks: '' }],
+        formationTops: [{ name: '', depthFt: null, subSeaFtAsl: null }],
         casing: [{ type: '', sizeIn: '', depthFtBgl: null, tolFtBgl: null, remarks: '' }],
+        remarks: { topsRemarks: '' },
       },
     });
 
@@ -108,6 +126,32 @@ describe('buildWwellIrBulkSavePayload', () => {
     expect(water.table).toBe('exad_gwd_ir_water');
     expect(water.data).toBeNull();
   });
+
+  it('writes the single Formation Tops remarks field straight to header.tops_remarks', () => {
+    const raw = buildRaw({ subsurface: { ...buildRaw().subsurface, remarks: { topsRemarks: 'Regional cap rock present' } } });
+
+    const [header] = buildWwellIrBulkSavePayload(raw);
+
+    expect(header.data?.[0].tops_remarks).toBe('Regional cap rock present');
+  });
+
+  it('omits the well_design row when Estimated Pump Depth is blank and no design row exists yet', () => {
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(buildRaw());
+
+    expect(wellDesign.table).toBe('exad_gwd_well_design');
+    expect(wellDesign.data).toBeNull();
+  });
+
+  it('inserts a well_design row once Estimated Pump Depth is entered against a linked request', () => {
+    const raw = buildRaw({
+      reference: { main: { ...buildRaw().reference.main, linkedRequestId: '1198' } },
+      hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 350 } },
+    });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw);
+
+    expect(wellDesign.data?.[0]).toMatchObject({ action: 'INSERT', wd_seq: null, prewap_seq: 1198, pump_lvl: 350 });
+  });
 });
 
 /** Every repeatable section's `existing`-diff branch (see buildCasingRows/buildTopsRows/
@@ -121,6 +165,7 @@ function buildExistingBase(
     offsetWells: readonly IntegratedRequirementOffsetWell[];
     hydrogeology: IntegratedRequirementHydrogeology;
     testProgram: IntegratedRequirementTestProgram;
+    wellDesignSeq: number | null;
   }> = {},
 ): NonNullable<WwellIrSaveContext['existing']> {
   return {
@@ -153,6 +198,7 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
           { type: 'Production', sizeIn: '9 5/8"', depthFtBgl: 900, tolFtBgl: null, remarks: 'New run' },
           // The Surface row from `existing` is simply absent — the user removed it in the UI.
         ],
+        remarks: { topsRemarks: '' },
       },
     });
 
@@ -173,6 +219,7 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
       subsurface: {
         formationTops: [],
         casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 120, tolFtBgl: null, remarks: 'Cemented' }],
+        remarks: { topsRemarks: '' },
       },
     });
 
@@ -186,17 +233,18 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
   it('formationTops: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE', () => {
     const existing = buildExistingBase({
       formationTops: [
-        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: 'orig' },
-        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360, remarks: null },
+        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 },
+        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360 },
       ],
     });
     const raw = buildRaw({
       subsurface: {
         casing: [],
         formationTops: [
-          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: 'orig' },
-          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260, remarks: 'new top' },
+          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 },
+          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260 },
         ],
+        remarks: { topsRemarks: '' },
       },
     });
 
@@ -297,5 +345,29 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
     expect(rows.find(row => row.ep_a_num === 100)).toMatchObject({ action: '', ir_seq: 7003 });
     expect(rows.find(row => row.ep_a_num === 300)).toMatchObject({ action: 'INSERT', ir_seq: null });
     expect(rows.find(row => row.ep_a_num === 200)).toMatchObject({ action: 'DELETE', ir_seq: 7003 });
+  });
+
+  it('well_design: keeps an existing row a no-op when Estimated Pump Depth is unchanged', () => {
+    const existing = buildExistingBase({
+      wellDesignSeq: 9500,
+      hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
+    });
+    const raw = buildRaw({ hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 350 } } });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
+
+    expect(wellDesign.data?.[0]).toMatchObject({ action: '', wd_seq: 9500 });
+  });
+
+  it('well_design: tags an existing row UPDATE once Estimated Pump Depth changes', () => {
+    const existing = buildExistingBase({
+      wellDesignSeq: 9500,
+      hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
+    });
+    const raw = buildRaw({ hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 400 } } });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
+
+    expect(wellDesign.data?.[0]).toMatchObject({ action: 'UPDATE', wd_seq: 9500, pump_lvl: 400 });
   });
 });

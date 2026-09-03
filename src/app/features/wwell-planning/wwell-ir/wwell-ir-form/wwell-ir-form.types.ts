@@ -16,7 +16,6 @@ export interface WwellIrRawFormationTop {
   readonly name: string;
   readonly depthFt: number | null;
   readonly subSeaFtAsl: number | null;
-  readonly remarks: string;
 }
 
 export interface WwellIrRawCasingRow {
@@ -77,6 +76,12 @@ export interface WwellIrRawRemarks {
   readonly offsetWellsRemarks: string;
 }
 
+/** Single Formation Tops remarks field (maps to `topsRemarks`/exad_gwd_ir_header.tops_remarks) —
+ *  applies to the whole Horizons section, not any one row. Mirrors `WwellIrRawRemarks` above. */
+export interface WwellIrRawTopsRemarks {
+  readonly topsRemarks: string;
+}
+
 export interface WwellIrRawHydrology {
   readonly testType: string;
   readonly aquifer: string;
@@ -97,6 +102,7 @@ export interface WwellIrFormRawValue {
   readonly subsurface: {
     readonly formationTops: WwellIrRawFormationTop[];
     readonly casing: WwellIrRawCasingRow[];
+    readonly remarks: WwellIrRawTopsRemarks;
   };
   readonly programDetails: {
     readonly main: WwellIrRawProgramMain;

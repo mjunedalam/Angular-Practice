@@ -53,6 +53,7 @@ import {
   WwellIrRawProgramDetails,
   WwellIrRawProgramMain,
   WwellIrRawRemarks,
+  WwellIrRawTopsRemarks,
 } from '../wwell-ir-form/wwell-ir-form.types';
 import { buildWwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.mapper';
 import {
@@ -239,6 +240,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected readonly programSection = findSection(this.schema, 'programDetails', 'main');
   protected readonly geologistSection = findSection(this.schema, 'contacts', 'geologist');
   protected readonly formationTopsSection = findSection(this.schema, 'subsurface', 'formationTops');
+  protected readonly topsRemarksSection = findSection(this.schema, 'subsurface', 'remarks');
   protected readonly casingSection = findSection(this.schema, 'subsurface', 'casing');
   protected readonly hydrogeologySection = findSection(this.schema, 'hydrogeology', 'main');
   protected readonly offsetWellsSection = findSection(this.schema, 'contacts', 'offsetWells');
@@ -287,7 +289,11 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     };
   });
   protected readonly hasWellboreData: Signal<boolean> = computed(() =>
-    hasWellboreDiagramDataForIntegratedRequirement(this.ir(), this.casingEdit.liveValue(), this.formationTopsEdit.liveValue()),
+    hasWellboreDiagramDataForIntegratedRequirement(
+      this.ir(),
+      this.casingEdit.liveValue(),
+      this.formationTopsEdit.liveValue(),
+    ),
   );
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
   // Used by both the Sections view's inline Wellbore Preview card and the Timeline view's sidebar
@@ -324,8 +330,15 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected readonly hydrogeologyEdit = new SectionEditState<FormGroup, WwellIrRawHydrology>(() =>
     buildAndPatchGroup(this.hydrogeologySection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).hydrogeology.main),
   );
+  // Horizons rows (3.1) and the single "applies to all" remarks field (3.2) are independent edit
+  // units — unlike offsetWellsEdit below, opening one's pencil must not also flip the other into
+  // its edit form (each has its own pencil and its own Cancel), even though saveAll() below still
+  // merges whichever of the two are open into the same save call.
   protected readonly formationTopsEdit = new SectionEditState<FormArray, WwellIrRawFormationTop[]>(() =>
     buildAndPatchArray(this.formationTopsSection, this.fb, this.ir().formationTops, formationTopRowPatch),
+  );
+  protected readonly topsRemarksEdit = new SectionEditState<FormGroup, WwellIrRawTopsRemarks>(() =>
+    buildAndPatchGroup(this.topsRemarksSection, this.fb, { topsRemarks: this.ir().topsRemarks ?? '' }),
   );
   protected readonly casingEdit = new SectionEditState<FormArray, WwellIrRawCasingRow[]>(() =>
     buildAndPatchArray(this.casingSection, this.fb, this.ir().casing, casingRowPatch),
@@ -474,6 +487,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.geologistContactEdit.isEditing() ||
       this.hydrogeologyEdit.isEditing() ||
       this.formationTopsEdit.isEditing() ||
+      this.topsRemarksEdit.isEditing() ||
       this.casingEdit.isEditing() ||
       this.offsetWellsEdit.isEditing() ||
       this.attachmentsEditing(),
@@ -852,6 +866,9 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const formationTopsCtrl = this.formationTopsEdit.control();
     if (formationTopsCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, formationTops: formationTopsCtrl.getRawValue() } };
 
+    const topsRemarksCtrl = this.topsRemarksEdit.control();
+    if (topsRemarksCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, remarks: topsRemarksCtrl.getRawValue() } };
+
     const casingCtrl = this.casingEdit.control();
     if (casingCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, casing: casingCtrl.getRawValue() } };
 
@@ -881,6 +898,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.geologistContactEdit.close();
     this.hydrogeologyEdit.close();
     this.formationTopsEdit.close();
+    this.topsRemarksEdit.close();
     this.casingEdit.close();
     this.offsetWellsEdit.close();
     this.closeAttachmentsEdit();

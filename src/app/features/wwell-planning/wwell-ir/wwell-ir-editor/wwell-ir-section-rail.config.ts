@@ -47,7 +47,10 @@ export const WWELL_IR_SECTION_RAIL: readonly WwellIrRailGroup[] = [
     number: '3.0',
     label: 'Horizons',
     icon: 'layers',
-    leaf: { key: 'horizons', number: '3.0', label: 'Horizons', stepKey: 'subsurface', sectionKey: 'formationTops' },
+    children: [
+      { key: 'horizons', number: '3.1', label: 'Horizons', stepKey: 'subsurface', sectionKey: 'formationTops' },
+      { key: 'horizonsRemarks', number: '3.2', label: 'Remarks', stepKey: 'subsurface', sectionKey: 'remarks' },
+    ],
   },
   {
     key: 'casing',

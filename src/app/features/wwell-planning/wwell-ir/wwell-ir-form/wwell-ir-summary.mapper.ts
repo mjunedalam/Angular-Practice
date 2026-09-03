@@ -39,6 +39,7 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
       coordinates: '',
     },
     formationTops: [],
+    topsRemarks: null,
     casing: [],
     programDetails: {
       completion: row.cmplType ?? '',

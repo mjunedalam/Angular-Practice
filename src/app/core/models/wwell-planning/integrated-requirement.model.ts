@@ -19,9 +19,8 @@ export interface IntegratedRequirementRequestReference {
 export interface IntegratedRequirementFormationTop {
   readonly name: string;
   readonly depthFt: number;
-  /** Optional since older records predate these fields. */
+  /** Optional since older records predate this field. */
   readonly subSeaFtAsl?: number | null;
-  readonly remarks?: string | null;
 }
 
 export interface IntegratedRequirementCasingRow {
@@ -99,10 +98,18 @@ export interface IntegratedRequirement {
   readonly code: string;
   /** Backend-assigned exad_gwd_ir_header.ir_seq — absent until the first successful save. */
   readonly irSeq?: number | null;
+  /** Backend-assigned exad_gwd_well_design.wd_seq for this well's design record — that table is
+   *  keyed by wd_seq/prewap_seq, not ir_seq (see docs/ir/p2-ir.md), so it can't be derived from
+   *  irSeq. Known only once a detail fetch has resolved one; threaded through purely so a later
+   *  save of Estimated Pump Depth UPDATEs that same row instead of INSERTing a duplicate. */
+  readonly wellDesignSeq?: number | null;
   readonly updatedDate: string;
   readonly status: IntegratedRequirementStatus;
   readonly requestReference: IntegratedRequirementRequestReference;
   readonly formationTops: readonly IntegratedRequirementFormationTop[];
+  /** Single free-text note applying to all Formation Tops rows together (exad_gwd_ir_header.tops_remarks
+   *  — a single column, not one per row). Mirrors `offsetWellsRemarks` below. */
+  readonly topsRemarks: string | null;
   readonly casing: readonly IntegratedRequirementCasingRow[];
   readonly programDetails: IntegratedRequirementProgramDetails;
   readonly contacts: IntegratedRequirementContacts;
@@ -119,6 +126,7 @@ export interface CreateIntegratedRequirementPayload
     IntegratedRequirement,
     | 'requestReference'
     | 'formationTops'
+    | 'topsRemarks'
     | 'casing'
     | 'programDetails'
     | 'contacts'

@@ -9,10 +9,12 @@ import {
   WwellIrRawProgramMain,
   WwellIrRawReference,
   WwellIrRawRemarks,
+  WwellIrRawTopsRemarks,
 } from './wwell-ir-form.types';
 
 export interface WwellIrEditFormPatch {
   readonly reference: { readonly main: WwellIrRawReference };
+  readonly subsurface: { readonly remarks: WwellIrRawTopsRemarks };
   readonly programDetails: {
     readonly main: WwellIrRawProgramMain;
     readonly developmentTesting: IntegratedRequirement['programDetails']['developmentTesting'];
@@ -46,6 +48,9 @@ export function mapIntegratedRequirementToFormPatch(ir: IntegratedRequirement): 
         surfaceElevationFtAsl: ir.requestReference.surfaceElevationFtAsl,
         coordinates: ir.requestReference.coordinates,
       },
+    },
+    subsurface: {
+      remarks: { topsRemarks: ir.topsRemarks ?? '' },
     },
     programDetails: {
       main: {
@@ -83,7 +88,6 @@ export function formationTopRowPatch(row: IntegratedRequirement['formationTops']
     name: row.name,
     depthFt: row.depthFt,
     subSeaFtAsl: row.subSeaFtAsl ?? null,
-    remarks: row.remarks ?? '',
   };
 }
 
@@ -134,6 +138,7 @@ export function mapIntegratedRequirementToRawFormValue(ir: IntegratedRequirement
     subsurface: {
       formationTops: ir.formationTops.map(formationTopRowPatch),
       casing: ir.casing.map(casingRowPatch),
+      remarks: patch.subsurface.remarks,
     },
     programDetails: patch.programDetails,
     contacts: {

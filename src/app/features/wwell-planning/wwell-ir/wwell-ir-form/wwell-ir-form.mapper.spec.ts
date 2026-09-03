@@ -17,8 +17,9 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'Saq', depthFt: 200, subSeaFtAsl: 780, remarks: 'Top of Saq' }],
+      formationTops: [{ name: 'Saq', depthFt: 200, subSeaFtAsl: 780 }],
       casing: [{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }],
+      remarks: { topsRemarks: 'Top of Saq' },
     },
     programDetails: {
       main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
@@ -71,6 +72,7 @@ describe('mapIrFormValueToSubmission', () => {
     expect(payload.requestReference.wellName).toBe('HAIL-500');
     expect(payload.requestReference.linkedRequestId).toBe('REQ-00198');
     expect(payload.casing).toEqual([{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }]);
+    expect(payload.topsRemarks).toBe('Top of Saq');
     expect(payload.testProgram.testType).toBe('pump-test');
   });
 
@@ -87,6 +89,13 @@ describe('mapIrFormValueToSubmission', () => {
     expect(payload.contacts.geologistSecondary).toBeNull();
     expect(payload.offsetWellsRemarks).toBeNull();
     expect(payload.requestReference.linkedRequestId).toBe('REQ-00198');
+  });
+
+  it('normalizes a blank Formation Tops remarks field to null', () => {
+    const raw = buildRaw({ subsurface: { ...buildRaw().subsurface, remarks: { topsRemarks: '' } } });
+    const { payload } = mapIrFormValueToSubmission(raw, 'draft');
+
+    expect(payload.topsRemarks).toBeNull();
   });
 
   it('preserves the requested status, including draft', () => {

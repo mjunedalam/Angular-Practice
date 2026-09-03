@@ -26,6 +26,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
       coordinates: '27.5114°N, 41.7208°E',
     },
     formationTops: [],
+    topsRemarks: null,
     casing: [],
     programDetails: {
       completion: 'Open Hole',

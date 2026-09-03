@@ -124,3 +124,92 @@
   color: tokens.$muted;
   padding: 0.9rem 0.6rem;
 }
+
+// Small label + edit-pencil row above the remarks note/textarea — same "Edit Section" pencil
+// language as the editor's own section heads (see wwell-ir-editor.component.scss's `.ire__edit-btn`).
+.ir-well-design__remarks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0.4rem;
+}
+
+.ir-well-design__remarks-label {
+  font-size: tokens.$text-xs;
+  font-weight: 700;
+  color: tokens.$subtle;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ir-well-design__remarks-edit-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+  color: tokens.$muted;
+
+  &:hover {
+    color: tokens.$accent;
+  }
+
+  ::ng-deep .mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// Mirrors `.ir-details__remarks` — the "applies to all" Formation Tops remarks note shown below
+// the table, same treatment as Offset Wells' own remarks note on the Details step. Roomier
+// padding and a bigger, better-spaced font than the compact card body text elsewhere on this
+// page, since this is meant to read as a genuine note, not a dense data row.
+.ir-well-design__remarks {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+  border-radius: 8px;
+  color: tokens.$navy;
+  font-size: tokens.$text-base;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.ir-well-design__remarks--empty {
+  color: tokens.$muted;
+  font-style: italic;
+}
+
+.ir-well-design__remarks-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ir-well-design__remarks-textarea {
+  width: 100%;
+  min-height: 5rem;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid tokens.$border;
+  border-radius: 8px;
+  background: tokens.$surface;
+  color: tokens.$navy;
+  font: inherit;
+  font-size: tokens.$text-base;
+  line-height: 1.55;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: tokens.$accent;
+    box-shadow: 0 0 0 3px tokens.$accent-soft;
+  }
+}
+
+.ir-well-design__remarks-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

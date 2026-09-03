@@ -273,7 +273,7 @@
         </span>
       </div>
       <div class="ire__tl-content">
-      <section #sectionEl id="ire-sec-horizons" class="ire__section">
+      <div class="ire__group">
         <div
           class="ire__section-head"
           role="button"
@@ -288,83 +288,120 @@
               {{ timelineStepStatus("horizons") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
-          @if (!formationTopsEdit.visible() && isTimelineStepExpanded('horizons')) {
-            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="$event.stopPropagation(); formationTopsEdit.open()">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
         </div>
 
         @if (isTimelineStepExpanded('horizons')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
-        @if (formationTopsEdit.visible() && formationTopsEdit.control(); as ctrl) {
-          <div class="ire__edit-block" appWwellCollapseAnimate>
-            <app-dynamic-section [section]="formationTopsSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
-            <div class="ire__edit-actions">
-              <button type="button" mat-button (click)="formationTopsEdit.close()">Cancel</button>
+        <!-- 3.1 Horizons and 3.2 Remarks are independent edit units — opening one's pencil must not
+             flip the other into its edit form (see formationTopsEdit's own doc comment in the .ts). -->
+        <section #sectionEl id="ire-sec-horizons" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">3.1 Horizons</h3>
+            @if (!formationTopsEdit.visible()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="formationTopsEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+
+          @if (formationTopsEdit.visible() && formationTopsEdit.control(); as ctrl) {
+            <div class="ire__edit-block" appWwellCollapseAnimate>
+              <app-dynamic-section
+                [section]="formationTopsSection"
+                [control]="ctrl"
+                mode="edit"
+                [selectPanelClass]="selectPanelClass"
+              />
+              <div class="ire__edit-actions">
+                <button type="button" mat-button (click)="formationTopsEdit.close()">Cancel</button>
+              </div>
             </div>
-          </div>
-        } @else {
-          <div class="ire__view-table-wrap" appWwellCollapseAnimate>
-            <table class="ire__view-table">
-              <thead>
-                <tr>
-                  <th>Formation</th>
-                  <th>Remarks</th>
-                  <th>Depth (ft bgl)</th>
-                  <th>Sub-sea (ft asl)</th>
-                  <th class="ire__view-table-actions-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (top of formationTopsRows(); track top.name; let i = $index) {
-                  <tr appWwellCollapseAnimate>
-                    @if (formationTopsInlineEdit.isEditing(i) && formationTopsRowGroup(i); as rowGroup) {
-                      <td>
-                        <app-dynamic-field [config]="formationTopsFieldConfig('name')" [control]="rowFieldControl(rowGroup, 'name')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                      </td>
-                      <td>
-                        <app-dynamic-field [config]="formationTopsFieldConfig('remarks')" [control]="rowFieldControl(rowGroup, 'remarks')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                      </td>
-                      <td>
-                        <app-dynamic-field [config]="formationTopsFieldConfig('depthFt')" [control]="rowFieldControl(rowGroup, 'depthFt')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                      </td>
-                      <td>{{ subSeaFt(rowFieldControl(rowGroup, 'depthFt').value) ?? "—" }}</td>
-                      <td class="ire__row-actions">
-                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save formation top" [disabled]="rowGroup.invalid" (click)="saveFormationTopRowInline()">
-                          <mat-icon>check</mat-icon>
-                        </button>
-                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Cancel formation top edit" (click)="cancelFormationTopRowInline()">
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </td>
-                    } @else {
-                      <td>{{ top.name }}</td>
-                      <td>{{ top.remarks || "—" }}</td>
-                      <td>{{ top.depthFt }}</td>
-                      <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
-                      <td class="ire__row-actions">
-                        <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" (click)="editFormationTopRowInline(i)">
-                          <mat-icon>edit</mat-icon>
-                        </button>
-                        <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete formation top ' + top.name" (click)="deleteFormationTopRow(i)">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </td>
-                    }
-                  </tr>
-                } @empty {
+          } @else {
+            <div class="ire__view-table-wrap" appWwellCollapseAnimate>
+              <table class="ire__view-table">
+                <thead>
                   <tr>
-                    <td colspan="5" class="ire__view-table-empty">No formation tops recorded.</td>
+                    <th>Formation</th>
+                    <th>Depth (ft bgl)</th>
+                    <th>Sub-sea (ft asl)</th>
+                    <th class="ire__view-table-actions-col">Actions</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @for (top of formationTopsRows(); track top.name; let i = $index) {
+                    <tr appWwellCollapseAnimate>
+                      @if (formationTopsInlineEdit.isEditing(i) && formationTopsRowGroup(i); as rowGroup) {
+                        <td>
+                          <app-dynamic-field [config]="formationTopsFieldConfig('name')" [control]="rowFieldControl(rowGroup, 'name')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td>
+                          <app-dynamic-field [config]="formationTopsFieldConfig('depthFt')" [control]="rowFieldControl(rowGroup, 'depthFt')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td>{{ subSeaFt(rowFieldControl(rowGroup, 'depthFt').value) ?? "—" }}</td>
+                        <td class="ire__row-actions">
+                          <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save formation top" [disabled]="rowGroup.invalid" (click)="saveFormationTopRowInline()">
+                            <mat-icon>check</mat-icon>
+                          </button>
+                          <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Cancel formation top edit" (click)="cancelFormationTopRowInline()">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        </td>
+                      } @else {
+                        <td>{{ top.name }}</td>
+                        <td>{{ top.depthFt }}</td>
+                        <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
+                        <td class="ire__row-actions">
+                          <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" (click)="editFormationTopRowInline(i)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete formation top ' + top.name" (click)="deleteFormationTopRow(i)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </td>
+                      }
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="ire__view-table-empty">No formation tops recorded.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+
+        <section #sectionEl id="ire-sec-horizons-remarks" class="ire__section ire__section--sub">
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">3.2 Remarks</h3>
+            @if (!topsRemarksEdit.visible()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Formation Tops Remarks" (click)="topsRemarksEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
           </div>
-        }
+
+          @if (topsRemarksEdit.visible() && topsRemarksEdit.control(); as ctrl) {
+            <div class="ire__edit-block" appWwellCollapseAnimate>
+              <app-dynamic-section
+                [section]="topsRemarksSection"
+                [control]="ctrl"
+                mode="edit"
+                [selectPanelClass]="selectPanelClass"
+              />
+              <div class="ire__edit-actions">
+                <button type="button" mat-button (click)="topsRemarksEdit.close()">Cancel</button>
+              </div>
+            </div>
+          } @else if (ir().topsRemarks) {
+            <p class="ire__remarks" appWwellCollapseAnimate>{{ ir().topsRemarks }}</p>
+          } @else {
+            <p class="ire__empty-text" appWwellCollapseAnimate>No remarks.</p>
+          }
+        </section>
         </div>
         }
-      </section>
+      </div>
       </div>
       </div>
 

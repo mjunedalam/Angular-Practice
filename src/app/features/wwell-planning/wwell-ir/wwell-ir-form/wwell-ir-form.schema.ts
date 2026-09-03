@@ -111,18 +111,24 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             { key: 'name', label: 'Formation', type: 'select', options: WWELL_IR_FORMATION_OPTIONS },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
             { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
-            {
-              // colSpan:2 (== full row width in a repeatable row's variable-column grid, see
-              // `.dyf--span-2`'s doc comment) — the 4th field in a row that otherwise fits 3
-              // columns would land alone in a cramped 1-column-wide row without this.
-              key: 'remarks',
-              label: 'Remarks',
-              type: 'text',
-              placeholder: 'e.g., Top of Umm Er Radhuma',
-              colSpan: 2,
-            },
           ],
         },
+      },
+      {
+        // One remarks field for the whole Horizons section (maps to the single
+        // exad_gwd_ir_header.tops_remarks column) rather than one per formation-top row — mirrors
+        // the Offset Wells / Area Water Wells 'remarks' section below.
+        key: 'remarks',
+        title: null,
+        fields: [
+          {
+            key: 'topsRemarks',
+            label: 'Formation Tops Remarks (applies to all)',
+            type: 'textarea',
+            placeholder: 'General notes about formation tops...',
+            colSpan: 2,
+          },
+        ],
       },
       {
         key: 'casing',
