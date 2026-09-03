@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -14,7 +15,10 @@ import { FormBuilder, FormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Observable, from, of, switchMap, take } from 'rxjs';
+import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { ComponentCanDeactivate } from '@guards/unsaved-changes.guard';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
@@ -23,10 +27,12 @@ import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.
 import { WwellApprovalTimelineComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WwellCollapseAnimateDirective } from '../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
-import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellIrStore } from './store/wwell-ir.store';
 import { WwellIrEditorComponent } from './wwell-ir-editor/wwell-ir-editor.component';
+import { WwellIrEditorLoadingComponent } from './wwell-ir-editor-loading/wwell-ir-editor-loading.component';
 import { WwellIrViewComponent } from './wwell-ir-view/wwell-ir-view.component';
 import { buildWwellDynamicForm } from '../shared/dynamic-form/wwell-dynamic-form.builder';
 import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-draft.util';
@@ -76,20 +82,21 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     WwellIrViewComponent,
     WwellApprovalTimelineComponent,
     WwellDetailLoadingComponent,
+    WwellIrEditorLoadingComponent,
     WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir.component.html',
   styleUrl: './wwell-ir.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WwellIrComponent implements OnInit, OnDestroy {
+export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   protected readonly store = inject(WwellIrStore);
   private readonly fb = inject(FormBuilder);
   private readonly notify = inject(NotificationService);
+  private readonly confirmDialog = inject(ActionConfirmDialogService);
 
   protected readonly isLoading = this.store.irsLoading;
   protected readonly loadError = this.store.irsError;
-  protected readonly isSubmittingForReview = this.store.updatingIrStatus;
   protected readonly isLoadingDetail = this.store.irDetailLoading;
 
   protected readonly searchTerm = signal('');
@@ -162,7 +169,7 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // WWELL_IR_ROW_ITEM_SIZE_PX's own comment for why these must stay pinned together.
   protected readonly rowItemSize = WWELL_IR_ROW_ITEM_SIZE_PX;
 
-  private readonly pendingSelection = createPendingSelection<number>(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<number>(WWELL_LOAD_DELAY_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
   // Shows the loading UI for the cosmetic selection transition *and* the real detail fetch it
   // now kicks off — otherwise the shimmer could resolve before the fetch does, briefly exposing
@@ -179,6 +186,10 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   // component instance by default, not its native element, which used to be the (unstated)
   // default back when this ref lived on a plain <ul>.
   @ViewChild('listHost', { read: ElementRef }) private readonly listHost?: ElementRef<HTMLElement>;
+  // Only rendered while detailMode() === 'edit' (see the template's `@else` branch) — undefined
+  // whenever the detail panel is showing the read-only view stepper or the empty state, which is
+  // exactly when there's nothing open to lose (see canDeactivate()'s guard below).
+  @ViewChild(WwellIrEditorComponent) private readonly editorRef?: WwellIrEditorComponent;
   private previousSelectedIrSeq: number | null = null;
   private wasCreatingIr = false;
   private wasDeletingIr = false;
@@ -196,9 +207,10 @@ export class WwellIrComponent implements OnInit, OnDestroy {
     //
     // On success, a save that completes while pendingDraftIr is set means *this* draft just got
     // its first real backend row — swap from the local-only draft over to the now-real,
-    // ir_seq-keyed record (which store.createIr has already put in `irs`, and already kicked off a
-    // silent background refresh of — see WwellIrStore.refreshIrDetail). Future saves then UPDATE
-    // instead of re-INSERTing.
+    // ir_seq-keyed record. By the time `creatingIr` flips false, store.createIr has already
+    // waited out a real follow-up GET and merged it into `irs` (no optimistic echo — see that
+    // method's own doc comment), so this is already the confirmed, persisted record. Future saves
+    // then UPDATE instead of re-INSERTing.
     effect(() => {
       const creating = this.store.creatingIr();
       const settled = this.wasCreatingIr && !creating;
@@ -212,9 +224,9 @@ export class WwellIrComponent implements OnInit, OnDestroy {
         this.pendingDraftIr.set(null);
         // Deliberately sets `previousSelectedIrSeq` before selecting, so the "selection changed"
         // effect below no-ops for this transition instead of calling loadIrDetail (redundant —
-        // refreshIrDetail above already covers it — and it would flip isLoadingDetail(), swapping
-        // the whole detail panel to the loading skeleton right after the user just watched this
-        // exact record save).
+        // store.createIr's own follow-up GET already covers it — and it would flip
+        // isLoadingDetail(), swapping the whole detail panel to the loading skeleton right after
+        // the user just watched this exact record save).
         this.previousSelectedIrSeq = savedIrSeq;
         this.selectedIrSeq.set(savedIrSeq);
         // The one fetch a brand-new record still needs: its local draft never had a real approval
@@ -369,8 +381,13 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   }
 
   protected selectIr(irSeq: number): void {
-    // Selecting a real row discards whatever unsaved local draft was open — nothing was ever
-    // persisted for it, so there's nothing to preserve.
+    this.guardNavigation(() => this.performSelectIr(irSeq));
+  }
+
+  /** Selecting a real row discards whatever unsaved local draft was open — nothing was ever
+   *  persisted for it, so there's nothing to preserve (see guardNavigation()'s own comment for why
+   *  a section *with* real edits is asked about before this ever runs). */
+  private performSelectIr(irSeq: number): void {
     this.pendingDraftIr.set(null);
     this.pendingSelection.select(irSeq, this.selectedIrSeq(), resolved => this.selectedIrSeq.set(resolved));
   }
@@ -392,8 +409,14 @@ export class WwellIrComponent implements OnInit, OnDestroy {
    *  browse several records' read-only views in a row, without an extra click back into view
    *  mode each time. */
   protected viewIr(irSeq: number): void {
-    this.detailMode.set('view');
-    this.selectIr(irSeq);
+    // Switching to the read-only stepper destroys this editor instance (see the template's
+    // `@if (detailMode() === 'view')` branch) even when `irSeq` is the record already open here —
+    // so this needs the same guard as an actual selection change, not just performSelectIr's own
+    // "discard a blank draft" case.
+    this.guardNavigation(() => {
+      this.detailMode.set('view');
+      this.performSelectIr(irSeq);
+    });
   }
 
   /** WwellIrViewComponent's own "Edit" button — switches the currently-open record's detail
@@ -414,6 +437,10 @@ export class WwellIrComponent implements OnInit, OnDestroy {
    *  binds to it exactly like any persisted record; its first real Save (a section's own, or the
    *  global "Save" button) is what actually creates the backend row. */
   protected createNewIr(): void {
+    this.guardNavigation(() => this.performCreateNewIr());
+  }
+
+  private performCreateNewIr(): void {
     const raw = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb).getRawValue() as WwellIrFormRawValue;
     const { payload } = mapIrFormValueToSubmission(raw, 'draft');
     const draft = buildIntegratedRequirementFromPayload(payload, { id: 'draft', code: 'New IR', irSeq: null }, []);
@@ -436,5 +463,63 @@ export class WwellIrComponent implements OnInit, OnDestroy {
   /** Powers the approval-workflow sidebar's "N of M approved" progress line (view mode only). */
   protected approvedStepCount(chain: readonly ApprovalChainStep[]): number {
     return chain.filter(step => step.status === 'approved').length;
+  }
+
+  // ── Unsaved-changes guard — backs three separate "leaving the currently-open record" paths with
+  // one prompt: switching the selected row / opening "New IR" / clicking the view (eye) icon (all
+  // via guardNavigation below), and a real Angular route change away from this page entirely (via
+  // canDeactivate(), wired up as the 'integrated-requirements' route's CanDeactivate guard — see
+  // app.routes.ts and unsaved-changes.guard.ts). Browser tab close/refresh is covered separately by
+  // the beforeunload listener below, which can't run this same async dialog flow.
+
+  /** Router entry point (ComponentCanDeactivate) — resolves `true` once it's safe to actually leave
+   *  the route: immediately if nothing is unsaved, after a confirmed Discard, or after a confirmed
+   *  Save has settled. `false` means stay (Cancel, or a save that failed). */
+  canDeactivate(): Observable<boolean> {
+    const editor = this.editorRef;
+    if (!editor?.hasUnsavedChanges()) return of(true);
+
+    return this.confirmDialog
+      .openWithResult({
+        title: 'Unsaved changes',
+        subtitle: 'This Integrated Requirement has section edits that haven’t been saved yet. Save them before leaving?',
+        confirmLabel: 'Save & Leave',
+        discardLabel: 'Discard Changes',
+        cancelLabel: 'Stay Here',
+        severity: 'warning',
+      })
+      .pipe(
+        switchMap(result => {
+          if (result === 'cancel') return of(false);
+          if (result === 'discard') {
+            editor.discardUnsavedChanges();
+            return of(true);
+          }
+          return from(editor.saveUnsavedChangesAndWait());
+        }),
+      );
+  }
+
+  /** In-page equivalent of canDeactivate() — same prompt/save/discard flow, but for switching what
+   *  this page itself shows (selecting another row, opening a blank "New IR", or the view-icon's
+   *  mode switch) rather than leaving the route. `action` only runs once it's actually safe to
+   *  proceed. */
+  private guardNavigation(action: () => void): void {
+    this.canDeactivate()
+      .pipe(take(1))
+      .subscribe(canLeave => {
+        if (canLeave) action();
+      });
+  }
+
+  /** Native browser navigation (tab close, refresh, typed URL) bypasses the Router entirely, so
+   *  canDeactivate() never runs for it — this is the one place that has to use the browser's own
+   *  confirmation prompt instead (no custom dialog is possible here; per spec, `returnValue` must be
+   *  set and the browser supplies its own generic copy). */
+  @HostListener('window:beforeunload', ['$event'])
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (!this.editorRef?.hasUnsavedChanges()) return;
+    event.preventDefault();
+    event.returnValue = '';
   }
 }

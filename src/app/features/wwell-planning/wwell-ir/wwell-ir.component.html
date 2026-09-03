@@ -131,7 +131,14 @@
 
   <div class="wwell-ir__detail">
     @if (isSelecting()) {
-      <app-wwell-detail-loading />
+      <!-- 'edit' is the default/sticky detail mode (see WwellIrDetailMode's own doc comment), so
+           most selections land on the editor's rail+section+table layout, not the read-only
+           stepper — the shimmer below matches whichever one is about to render. -->
+      @if (detailMode() === 'view') {
+        <app-wwell-detail-loading />
+      } @else {
+        <app-wwell-ir-editor-loading />
+      }
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
         @if (detailMode() === 'view') {

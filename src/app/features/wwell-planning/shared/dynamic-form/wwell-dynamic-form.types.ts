@@ -2,7 +2,15 @@
 
 import type { Signal } from '@angular/core';
 
-export type WwellFieldControlType = 'text' | 'number' | 'textarea' | 'select' | 'combo' | 'toggle-group' | 'file';
+export type WwellFieldControlType =
+  | 'text'
+  | 'number'
+  | 'textarea'
+  | 'select'
+  | 'combo'
+  | 'rich-textarea'
+  | 'toggle-group'
+  | 'file';
 
 export interface WwellFieldOption {
   readonly value: string;

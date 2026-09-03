@@ -69,6 +69,9 @@
           }
         </mat-form-field>
       }
+      @case ('rich-textarea') {
+        <app-wwell-rich-textarea [config]="config()" [control]="control()" [selectPanelClass]="selectPanelClass()" />
+      }
       @case ('toggle-group') {
         <div class="dyf__toggle">
           <span class="dyf__toggle-label">

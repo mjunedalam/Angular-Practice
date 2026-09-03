@@ -108,6 +108,17 @@ export const WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS: readonly string[] = [
   'Recovery Test',
 ];
 
+export const WWELL_DEVELOPMENT_TESTING_OPTIONS: readonly string[] = [
+  'Step Drawdown Test',
+  'Constant Rate Test',
+  'Recovery Test',
+  'Aquifer Performance Test (APT)',
+  'Slug Test',
+  'Bailer Test',
+  'Air Lift Development',
+  'Surge Block Development',
+];
+
 export const WWELL_GEOLOGIST_OPTIONS: readonly string[] = WWELL_ASSIGNEE_OPTIONS;
 
 /** TEMPORARY stopgap: exad_gwd_ir_header.cont_geologist/sub_cont_geologist are NUMBER(3), but

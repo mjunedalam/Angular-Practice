@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { switchMap, startWith } from 'rxjs';
 import { WwellAttachmentDropzoneComponent } from '../../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
+import { WwellRichTextareaComponent } from '../rich-textarea/wwell-rich-textarea.component';
 import {
   WwellFieldConfig,
   resolveFieldOptions,
@@ -31,6 +32,7 @@ export type WwellDynamicFieldMode = 'edit' | 'review';
     MatAutocompleteModule,
     MatIconModule,
     WwellAttachmentDropzoneComponent,
+    WwellRichTextareaComponent,
   ],
   templateUrl: './dynamic-field.component.html',
   styleUrl: './dynamic-field.component.scss',

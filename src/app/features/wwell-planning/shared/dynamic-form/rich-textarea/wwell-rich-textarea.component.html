@@ -1,0 +1,71 @@
+<div class="wrt" [class.wrt--disabled]="control().disabled">
+  <div class="wrt__head">
+    <span class="wrt__label">
+      {{ config().label }}
+      @if (config().validators?.required) {
+        <span class="wrt__required">*</span>
+      }
+    </span>
+  </div>
+
+  <div class="wrt__field">
+    @if (hasOptions()) {
+      <button
+        type="button"
+        class="wrt__dropdown-btn"
+        aria-label="Select from dropdown"
+        [disabled]="control().disabled"
+        [matMenuTriggerFor]="optionsMenu"
+        [matMenuTriggerRestoreFocus]="false"
+      >
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+      <mat-menu #optionsMenu="matMenu" [class]="selectPanelClass()">
+        <div class="wrt__option-list">
+          @for (opt of resolvedOptions(); track optionValue(opt)) {
+            <mat-checkbox
+              class="wrt__option"
+              [checked]="isOptionChecked(opt)"
+              (change)="toggleOption(opt, $event)"
+              (click)="$event.stopPropagation()"
+            >
+              {{ optionLabel(opt) }}
+            </mat-checkbox>
+          }
+        </div>
+      </mat-menu>
+    }
+
+    <div class="wrt__box-scroll">
+      <div
+        #box
+        class="wrt__box"
+        [class.wrt__box--no-dropdown]="!hasOptions()"
+        [attr.contenteditable]="control().disabled ? null : true"
+        [attr.data-placeholder]="config().placeholder ?? 'Type or select from dropdown'"
+        (input)="onBoxInput()"
+      ></div>
+
+      @if (currentLines().length > 0) {
+        <div class="wrt__line-removers">
+          @for (line of currentLines(); track $index) {
+            <button
+              type="button"
+              class="wrt__line-remove"
+              [attr.aria-label]="'Remove: ' + line"
+              title="Remove this line"
+              [disabled]="control().disabled"
+              (click)="removeLine($index)"
+            >
+              <mat-icon aria-hidden="true">delete</mat-icon>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (config().hint) {
+    <p class="wrt__hint">{{ config().hint }}</p>
+  }
+</div>

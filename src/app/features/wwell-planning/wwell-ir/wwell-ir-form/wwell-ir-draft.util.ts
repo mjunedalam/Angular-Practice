@@ -12,8 +12,9 @@ export interface IntegratedRequirementIdentity {
 }
 
 /** Builds the domain object from a submitted payload plus its identity — shared by
- *  WwellIrService.buildIrFromPayload (a real save's response) and createNewIr()'s local-only
- *  draft (never sent to the backend), so both stay in sync as the payload shape evolves. */
+ *  WwellIrStore.createIr (the merge base for a brand-new record, before real GET data overrides
+ *  whatever it can — see mergeIrDetailBlocksIntoIntegratedRequirement) and createNewIr()'s
+ *  local-only draft (never sent to the backend), so both stay in sync as the payload shape evolves. */
 export function buildIntegratedRequirementFromPayload(
   payload: CreateIntegratedRequirementPayload,
   identity: IntegratedRequirementIdentity,

@@ -2,13 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, delay, map, of, throwError } from 'rxjs';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
-import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { todayIsoDate } from '../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-form/wwell-ir-chain.mock';
-import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-draft.util';
 import { IrEligibleWell, IrHeaderSummary, WwellIrBulkSavePayload, WwellIrDetailTableBlock, WwellIrSaveResult } from './wwell-ir-form/wwell-ir-payload.model';
 import { mapIrHeaderSummariesToIntegratedRequirements } from './wwell-ir-form/wwell-ir-summary.mapper';
 
@@ -90,11 +89,16 @@ export class WwellIrService {
     return of(mockApprovalChainForIrSeq(irSeq)).pipe(delay(300));
   }
 
-  createIr(
-    payload: CreateIntegratedRequirementPayload,
-    irBulkPayload: WwellIrBulkSavePayload,
-    attachmentNames: readonly string[] = [],
-  ): Observable<IntegratedRequirement> {
+  /**
+   * Returns only the real, backend-confirmed `ir_seq` — never a client-fabricated
+   * `IntegratedRequirement` (that was this method's old `buildIrFromPayload`-based "optimistic
+   * echo," removed because it kept showing whatever the user had just typed for fields with no
+   * backing column at all — client, targetAquifer, targetDepthFt... (see
+   * mergeIrDetailBlocksIntoIntegratedRequirement's doc comment for the full list) — with nothing to
+   * ever correct it except a full page reload. WwellIrStore.createIr now follows this up with a
+   * real GET (getIrDetailBlocks) and merges that onto the record's last known-real state instead.
+   */
+  createIr(irBulkPayload: WwellIrBulkSavePayload): Observable<number | null> {
     // The backend only accepts the raw exad_gwd_ir_* bulk-save array as the request body (see
     // wwell-ir-payload.model.ts / IntegratedRequirementResource.java's @Consumes(APPLICATION_JSON))
     // — it has no multipart handling and no columns for the richer domain fields below (client,
@@ -125,10 +129,10 @@ export class WwellIrService {
         context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
       })
       .pipe(
-        map(res => this.buildIrFromPayload(payload, res.data[0]?.irSeq ?? knownIrSeq, attachmentNames)),
+        map(res => res.data[0]?.irSeq ?? knownIrSeq),
         catchError((err: unknown) => {
           const realIrSeq = extractIrSeqFromMisreportedSuccess(err);
-          return realIrSeq !== null ? of(this.buildIrFromPayload(payload, realIrSeq, attachmentNames)) : throwError(() => err);
+          return realIrSeq !== null ? of(realIrSeq) : throwError(() => err);
         }),
       );
   }
@@ -155,22 +159,5 @@ export class WwellIrService {
         // TODO: remove fallback once the submit-for-review endpoint is live.
         catchError(() => of({ ...ir, status: 'submit-for-review' as const, updatedDate: todayIsoDate() })),
       );
-  }
-
-  /** Builds the domain object locally from what was submitted — the backend only ever echoes
-   *  back an ir_seq (see WwellIrSaveResult), never the full IntegratedRequirement. `irSeq` is
-   *  already fully resolved by the caller before this runs (the response's own value on INSERT,
-   *  the already-known `knownIrSeq` on UPDATE — see createIr() above), so it's used as-is: no
-   *  client-minted placeholder, since a fake identity here is exactly what caused the resave to
-   *  re-INSERT under a new fake id instead of UPDATE-ing the original row. */
-  private buildIrFromPayload(
-    payload: CreateIntegratedRequirementPayload,
-    irSeq: number | null,
-    attachmentNames: readonly string[],
-  ): IntegratedRequirement {
-    // ir_seq-derived, matching mapIrHeaderSummaryToIntegratedRequirement's format — this same
-    // record must display the same code whether it was just created or reloaded from the list.
-    const code = `IR-${irSeq}`;
-    return buildIntegratedRequirementFromPayload(payload, { id: code, code, irSeq }, attachmentNames);
   }
 }

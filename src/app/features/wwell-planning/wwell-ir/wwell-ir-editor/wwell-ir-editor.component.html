@@ -63,7 +63,7 @@
 
   <div class="ire__body" #body [class.ire__body--timeline]="viewMode() === 'timeline'">
     @if (viewMode() === 'sections') {
-      <nav class="ire__rail" aria-label="IR sections">
+      <nav class="ire__rail" aria-label="IR sections" appWwellCollapseAnimate>
         <p class="ire__rail-title">IR Sections</p>
         <ul class="ire__rail-list">
           @for (group of railGroups; track group.key) {
@@ -188,32 +188,32 @@
 
         @if (isTimelineStepExpanded('general')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
-        <!-- 2.1 Program Details -->
+        <!-- 2.1 Program Details (includes Development & Testing — one combined edit/save unit) -->
         <section #sectionEl id="ire-sec-program-main" class="ire__section ire__section--sub">
           <div class="ire__section-head">
             <h3 class="ire__subsection-title">2.1 Program Details</h3>
-            @if (!programMainEdit.isEditing()) {
+            @if (!programEdit.isEditing()) {
               <div class="ire__section-actions">
-                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" (click)="programMainEdit.open()">
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" (click)="programEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Reset Program Details" (click)="resetProgramMainSection()">
+                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Reset Program Details" (click)="resetProgramSection()">
                   <mat-icon>restart_alt</mat-icon>
                 </button>
               </div>
             }
           </div>
 
-          @if (programMainEdit.control(); as ctrl) {
+          @if (programEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
-              <app-dynamic-section [section]="programMainSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+              <app-dynamic-section [section]="programSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
               <div class="ire__edit-actions">
-                <button type="button" mat-button (click)="programMainEdit.close()">Cancel</button>
+                <button type="button" mat-button (click)="programEdit.close()">Cancel</button>
               </div>
             </div>
           } @else {
             <dl class="ire__view-grid" appWwellCollapseAnimate>
-              @for (row of programMainRows(); track row.label) {
+              @for (row of programRows(); track row.label) {
                 <div class="ire__view-field" [attr.data-tone]="row.tone">
                   <dt>{{ row.label }}</dt>
                   <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
@@ -223,45 +223,10 @@
           }
         </section>
 
-        <!-- 2.2 Development & Testing -->
-        <section #sectionEl id="ire-sec-program-dev" class="ire__section ire__section--sub">
-          <div class="ire__section-head">
-            <h3 class="ire__subsection-title">2.2 Development &amp; Testing</h3>
-            @if (!programDevEdit.isEditing()) {
-              <div class="ire__section-actions">
-                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Development & Testing" (click)="programDevEdit.open()">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Reset Development & Testing" (click)="resetProgramDevSection()">
-                  <mat-icon>restart_alt</mat-icon>
-                </button>
-              </div>
-            }
-          </div>
-
-          @if (programDevEdit.control(); as ctrl) {
-            <div class="ire__edit-block" appWwellCollapseAnimate>
-              <app-dynamic-section [section]="programDevSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
-              <div class="ire__edit-actions">
-                <button type="button" mat-button (click)="programDevEdit.close()">Cancel</button>
-              </div>
-            </div>
-          } @else {
-            <dl class="ire__view-grid" appWwellCollapseAnimate>
-              @for (row of programDevRows(); track row.label) {
-                <div class="ire__view-field" [attr.data-tone]="row.tone">
-                  <dt>{{ row.label }}</dt>
-                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
-                </div>
-              }
-            </dl>
-          }
-        </section>
-
-        <!-- 2.3 Geologist Contact -->
+        <!-- 2.2 Geologist Contact -->
         <section #sectionEl id="ire-sec-geologist" class="ire__section ire__section--sub">
           <div class="ire__section-head">
-            <h3 class="ire__subsection-title">2.3 Geologist Contact</h3>
+            <h3 class="ire__subsection-title">2.2 Geologist Contact</h3>
             @if (!geologistContactEdit.isEditing()) {
               <div class="ire__section-actions">
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Geologist Contact" (click)="geologistContactEdit.open()">
@@ -323,7 +288,7 @@
               {{ timelineStepStatus("horizons") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
-          @if (!formationTopsEdit.isEditing() && isTimelineStepExpanded('horizons')) {
+          @if (!formationTopsEdit.visible() && isTimelineStepExpanded('horizons')) {
             <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="$event.stopPropagation(); formationTopsEdit.open()">
               <mat-icon>edit</mat-icon>
             </button>
@@ -332,7 +297,7 @@
 
         @if (isTimelineStepExpanded('horizons')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
-        @if (formationTopsEdit.control(); as ctrl) {
+        @if (formationTopsEdit.visible() && formationTopsEdit.control(); as ctrl) {
           <div class="ire__edit-block" appWwellCollapseAnimate>
             <app-dynamic-section [section]="formationTopsSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
             <div class="ire__edit-actions">
@@ -345,27 +310,48 @@
               <thead>
                 <tr>
                   <th>Formation</th>
-                  <th>Description</th>
+                  <th>Remarks</th>
                   <th>Depth (ft bgl)</th>
                   <th>Sub-sea (ft asl)</th>
                   <th class="ire__view-table-actions-col">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                @for (top of ir().formationTops; track top.name; let i = $index) {
-                  <tr>
-                    <td>{{ top.name }}</td>
-                    <td>{{ top.description || "—" }}</td>
-                    <td>{{ top.depthFt }}</td>
-                    <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
-                    <td class="ire__row-actions">
-                      <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" (click)="formationTopsEdit.open()">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete formation top ' + top.name" (click)="deleteFormationTopRow(i)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </td>
+                @for (top of formationTopsRows(); track top.name; let i = $index) {
+                  <tr appWwellCollapseAnimate>
+                    @if (formationTopsInlineEdit.isEditing(i) && formationTopsRowGroup(i); as rowGroup) {
+                      <td>
+                        <app-dynamic-field [config]="formationTopsFieldConfig('name')" [control]="rowFieldControl(rowGroup, 'name')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>
+                        <app-dynamic-field [config]="formationTopsFieldConfig('remarks')" [control]="rowFieldControl(rowGroup, 'remarks')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>
+                        <app-dynamic-field [config]="formationTopsFieldConfig('depthFt')" [control]="rowFieldControl(rowGroup, 'depthFt')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>{{ subSeaFt(rowFieldControl(rowGroup, 'depthFt').value) ?? "—" }}</td>
+                      <td class="ire__row-actions">
+                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save formation top" [disabled]="rowGroup.invalid" (click)="saveFormationTopRowInline()">
+                          <mat-icon>check</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Cancel formation top edit" (click)="cancelFormationTopRowInline()">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </td>
+                    } @else {
+                      <td>{{ top.name }}</td>
+                      <td>{{ top.remarks || "—" }}</td>
+                      <td>{{ top.depthFt }}</td>
+                      <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
+                      <td class="ire__row-actions">
+                        <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" (click)="editFormationTopRowInline(i)">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete formation top ' + top.name" (click)="deleteFormationTopRow(i)">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </td>
+                    }
                   </tr>
                 } @empty {
                   <tr>
@@ -407,7 +393,7 @@
               {{ timelineStepStatus("casing") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
-          @if (!casingEdit.isEditing() && isTimelineStepExpanded('casing')) {
+          @if (!casingEdit.visible() && isTimelineStepExpanded('casing')) {
             <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Casing" (click)="$event.stopPropagation(); casingEdit.open()">
               <mat-icon>edit</mat-icon>
             </button>
@@ -416,7 +402,7 @@
 
         @if (isTimelineStepExpanded('casing')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
-        @if (casingEdit.control(); as ctrl) {
+        @if (casingEdit.visible() && casingEdit.control(); as ctrl) {
           <div class="ire__edit-block" appWwellCollapseAnimate>
             <app-dynamic-section [section]="casingSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
             <div class="ire__edit-actions">
@@ -436,20 +422,43 @@
                 </tr>
               </thead>
               <tbody>
-                @for (row of ir().casing; track row.type + row.depthFtBgl; let i = $index) {
-                  <tr>
-                    <td>{{ row.type }}</td>
-                    <td>{{ row.sizeIn }}</td>
-                    <td>{{ row.depthFtBgl }}</td>
-                    <td>{{ row.remarks || "—" }}</td>
-                    <td class="ire__row-actions">
-                      <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit casing row ' + (i + 1)" (click)="casingEdit.open()">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete casing row ' + (i + 1)" (click)="deleteCasingRow(i)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </td>
+                @for (row of casingRows(); track row.type + row.depthFtBgl; let i = $index) {
+                  <tr appWwellCollapseAnimate>
+                    @if (casingInlineEdit.isEditing(i) && casingRowGroup(i); as rowGroup) {
+                      <td>
+                        <app-dynamic-field [config]="casingFieldConfig('type')" [control]="rowFieldControl(rowGroup, 'type')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>
+                        <app-dynamic-field [config]="casingFieldConfig('sizeIn')" [control]="rowFieldControl(rowGroup, 'sizeIn')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>
+                        <app-dynamic-field [config]="casingFieldConfig('depthFtBgl')" [control]="rowFieldControl(rowGroup, 'depthFtBgl')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td>
+                        <app-dynamic-field [config]="casingFieldConfig('remarks')" [control]="rowFieldControl(rowGroup, 'remarks')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                      </td>
+                      <td class="ire__row-actions">
+                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save casing row" [disabled]="rowGroup.invalid" (click)="saveCasingRowInline()">
+                          <mat-icon>check</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Cancel casing row edit" (click)="cancelCasingRowInline()">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </td>
+                    } @else {
+                      <td>{{ row.type }}</td>
+                      <td>{{ row.sizeIn }}</td>
+                      <td>{{ row.depthFtBgl }}</td>
+                      <td>{{ row.remarks || "—" }}</td>
+                      <td class="ire__row-actions">
+                        <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit casing row ' + (i + 1)" (click)="editCasingRowInline(i)">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete casing row ' + (i + 1)" (click)="deleteCasingRow(i)">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </td>
+                    }
                   </tr>
                 } @empty {
                   <tr>
@@ -597,14 +606,14 @@
         <section #sectionEl id="ire-sec-offset-wells" class="ire__section ire__section--sub">
           <div class="ire__section-head">
             <h3 class="ire__subsection-title">6.1 Area Water Wells</h3>
-            @if (!offsetWellsEdit.isEditing()) {
+            @if (!offsetWellsEdit.visible()) {
               <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells" (click)="offsetWellsEdit.open()">
                 <mat-icon>edit</mat-icon>
               </button>
             }
           </div>
 
-          @if (offsetWellsEdit.control(); as ctrl) {
+          @if (offsetWellsEdit.visible() && offsetWellsEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
               <app-dynamic-section
                 [section]="offsetWellsSection"
@@ -626,20 +635,43 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (row of ir().offsetWells; track row.epANum; let i = $index) {
-                    <tr>
-                      <td>{{ row.epANum }}</td>
-                      <td>{{ row.aquifer || "—" }}</td>
-                      <td>{{ row.distanceKm ?? "—" }}</td>
-                      <td>{{ row.rateGpm ?? "—" }}</td>
-                      <td class="ire__row-actions">
-                        <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + row.epANum" (click)="offsetWellsEdit.open()">
-                          <mat-icon>edit</mat-icon>
-                        </button>
-                        <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete offset well ' + row.epANum" (click)="deleteOffsetWellRow(i)">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </td>
+                  @for (row of offsetWellsRows(); track row.epANum; let i = $index) {
+                    <tr appWwellCollapseAnimate>
+                      @if (offsetWellsInlineEdit.isEditing(i) && offsetWellsRowGroup(i); as rowGroup) {
+                        <td>
+                          <app-dynamic-field [config]="offsetWellsFieldConfig('epANum')" [control]="rowFieldControl(rowGroup, 'epANum')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td>
+                          <app-dynamic-field [config]="offsetWellsFieldConfig('aquifer')" [control]="rowFieldControl(rowGroup, 'aquifer')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td>
+                          <app-dynamic-field [config]="offsetWellsFieldConfig('distanceKm')" [control]="rowFieldControl(rowGroup, 'distanceKm')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td>
+                          <app-dynamic-field [config]="offsetWellsFieldConfig('rateGpm')" [control]="rowFieldControl(rowGroup, 'rateGpm')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                        </td>
+                        <td class="ire__row-actions">
+                          <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save offset well" [disabled]="rowGroup.invalid" (click)="saveOffsetWellRowInline()">
+                            <mat-icon>check</mat-icon>
+                          </button>
+                          <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Cancel offset well edit" (click)="cancelOffsetWellRowInline()">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        </td>
+                      } @else {
+                        <td>{{ row.epANum }}</td>
+                        <td>{{ row.aquifer || "—" }}</td>
+                        <td>{{ row.distanceKm ?? "—" }}</td>
+                        <td>{{ row.rateGpm ?? "—" }}</td>
+                        <td class="ire__row-actions">
+                          <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + row.epANum" (click)="editOffsetWellRowInline(i)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete offset well ' + row.epANum" (click)="deleteOffsetWellRow(i)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </td>
+                      }
                     </tr>
                   } @empty {
                     <tr>
@@ -655,7 +687,7 @@
         <section #sectionEl id="ire-sec-offset-remarks" class="ire__section ire__section--sub">
           <h3 class="ire__subsection-title">6.2 Remarks</h3>
 
-          @if (offsetWellsEdit.control(); as ctrl) {
+          @if (offsetWellsEdit.visible() && offsetWellsEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
               <app-dynamic-section
                 [section]="offsetRemarksSection"
@@ -783,7 +815,7 @@
         mat-stroked-button
         color="warn"
         class="ire__delete-btn"
-        [disabled]="isSaving() || isDeleting()"
+        [disabled]="anyFooterActionPending()"
         (click)="deleteIr()"
       >
         @if (isDeleting()) {
@@ -794,7 +826,14 @@
         Delete IR
       </button>
     }
-    <button type="button" mat-stroked-button color="primary" class="ire__save-btn" [disabled]="isSaving()" (click)="saveAll()">
+    <button
+      type="button"
+      mat-stroked-button
+      color="primary"
+      class="ire__save-btn"
+      [disabled]="anyFooterActionPending()"
+      (click)="saveAll()"
+    >
       @if (isSaving()) {
         <mat-spinner diameter="16" class="ire__save-spinner" />
       } @else {
@@ -803,8 +842,18 @@
       Save
     </button>
     @if (canSubmitForReview()) {
-      <button type="button" mat-flat-button color="primary" [disabled]="isSaving()" (click)="submitForReview()">
-        <mat-icon>send</mat-icon>
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        [disabled]="anyFooterActionPending()"
+        (click)="submitForReview()"
+      >
+        @if (isSubmittingForReview()) {
+          <mat-spinner diameter="16" class="ire__save-spinner" />
+        } @else {
+          <mat-icon>send</mat-icon>
+        }
         Submit for Review
       </button>
     }

@@ -67,6 +67,10 @@ $accent: tokens.$accent;
     font-size: tokens.$text-sm;
     color: $navy-deep;
     overflow-wrap: break-word;
+    // A remarks field's saved value can carry real line breaks (e.g. Development/Testing,
+    // Sampling) — without this, `\n` renders as a plain space and a 3-line remark collapses
+    // back into one run-on line.
+    white-space: pre-line;
   }
 
   &[data-tone='warning'] dd {

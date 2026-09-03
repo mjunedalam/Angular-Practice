@@ -149,6 +149,32 @@
   padding: 0.75rem;
 }
 
+// Same sizing rationale as wwell-ir-view-well-design.component.scss's `.ir-well-design__diagram-row`
+// (see that file's own comment): `app-wwell-ir-depth-scale`/`app-well-bore-view` both resolve
+// `height: 100%` against this row, so `aspect-ratio` must supply the definite height a percentage
+// needs — derived here from a narrower fixed width (460px) than the Well Design tab's 600px, to
+// stay comfortably inside the letter's own 780px card without crowding its 2.25rem side padding.
+.letter__diagram-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 460px;
+  max-width: 460px;
+  aspect-ratio: 780 / 650;
+  max-height: 400px;
+  margin: 0 auto;
+}
+
+// Hides the D3-rendered "TOTAL DEPTH: 0 FT" label until a target depth actually exists.
+.letter__diagram-row--no-depth ::ng-deep .td-label {
+  display: none;
+}
+
+.letter__diagram {
+  display: block;
+  min-width: 0;
+}
+
 .letter__closing {
   margin: 1.5rem 0;
   padding: 0.9rem 1rem;

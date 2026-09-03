@@ -83,7 +83,7 @@ export function formationTopRowPatch(row: IntegratedRequirement['formationTops']
     name: row.name,
     depthFt: row.depthFt,
     subSeaFtAsl: row.subSeaFtAsl ?? null,
-    description: row.description ?? '',
+    remarks: row.remarks ?? '',
   };
 }
 

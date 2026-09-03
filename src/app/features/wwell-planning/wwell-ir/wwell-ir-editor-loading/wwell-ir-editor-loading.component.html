@@ -1,0 +1,67 @@
+<div class="irel" aria-hidden="true">
+  <div class="irel__header">
+    <div class="irel__heading">
+      <span class="irel__bar irel__bar--eyebrow"></span>
+      <span class="irel__bar irel__bar--title"></span>
+    </div>
+    <div class="irel__header-actions">
+      <span class="irel__chip irel__chip--icon"></span>
+      <span class="irel__chip irel__chip--icon"></span>
+      <span class="irel__chip irel__chip--badge"></span>
+    </div>
+  </div>
+
+  <div class="irel__body">
+    <nav class="irel__rail">
+      <span class="irel__bar irel__bar--rail-title"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item irel__rail-item--child"></span>
+      <span class="irel__rail-item irel__rail-item--child"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item"></span>
+      <span class="irel__rail-item irel__rail-item--child"></span>
+      <span class="irel__rail-item irel__rail-item--child"></span>
+      <span class="irel__rail-item"></span>
+    </nav>
+
+    <div class="irel__sections">
+      <div class="irel__card">
+        <span class="irel__bar irel__bar--card-title"></span>
+        <div class="irel__grid">
+          @for (n of [1, 2, 3, 4, 5]; track n) {
+            <div class="irel__field">
+              <span class="irel__bar irel__bar--label"></span>
+              <span class="irel__bar irel__bar--value"></span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="irel__card">
+        <span class="irel__bar irel__bar--card-title"></span>
+        <div class="irel__grid">
+          @for (n of [1, 2, 3, 4]; track n) {
+            <div class="irel__field">
+              <span class="irel__bar irel__bar--label"></span>
+              <span class="irel__bar irel__bar--value"></span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @for (n of [1, 2, 3]; track n) {
+        <div class="irel__card">
+          <span class="irel__bar irel__bar--card-title"></span>
+          <div class="irel__table">
+            <div class="irel__table-head"></div>
+            <div class="irel__table-row"></div>
+            <div class="irel__table-row"></div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

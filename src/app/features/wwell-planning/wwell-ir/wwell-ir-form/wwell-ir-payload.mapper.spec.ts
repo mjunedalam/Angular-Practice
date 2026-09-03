@@ -25,12 +25,12 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, description: '' }],
+      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: '' }],
       casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' }],
     },
     programDetails: {
       main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
-      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '' },
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: {
       geologist: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: '' },
@@ -91,7 +91,7 @@ describe('buildWwellIrBulkSavePayload', () => {
   it('drops fully-blank repeatable rows so an empty draft does not send junk INSERTs', () => {
     const blankRaw = buildRaw({
       subsurface: {
-        formationTops: [{ name: '', depthFt: null, subSeaFtAsl: null, description: '' }],
+        formationTops: [{ name: '', depthFt: null, subSeaFtAsl: null, remarks: '' }],
         casing: [{ type: '', sizeIn: '', depthFtBgl: null, tolFtBgl: null, remarks: '' }],
       },
     });
@@ -186,16 +186,16 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
   it('formationTops: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE', () => {
     const existing = buildExistingBase({
       formationTops: [
-        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, description: 'orig' },
-        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360, description: null },
+        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: 'orig' },
+        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360, remarks: null },
       ],
     });
     const raw = buildRaw({
       subsurface: {
         casing: [],
         formationTops: [
-          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, description: 'orig' },
-          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260, description: 'new top' },
+          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015, remarks: 'orig' },
+          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260, remarks: 'new top' },
         ],
       },
     });

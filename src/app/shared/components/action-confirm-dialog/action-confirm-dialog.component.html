@@ -65,6 +65,12 @@
               aria-label="Cancel and close dialog">
         {{ cancelLabel }}
       </button>
+      @if (discardLabel) {
+        <button class="acd-btn acd-btn--discard" (click)="discard()" type="button"
+                [attr.aria-label]="discardLabel">
+          {{ discardLabel }}
+        </button>
+      }
       <button class="acd-btn acd-btn--confirm" (click)="confirm()" type="button"
               [attr.aria-label]="confirmLabel">
         {{ confirmLabel }}

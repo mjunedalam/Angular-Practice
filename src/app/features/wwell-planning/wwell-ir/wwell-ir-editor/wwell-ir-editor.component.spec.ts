@@ -32,7 +32,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
       openHoleSizeIn: null,
       acidization: '',
       transmission: '',
-      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '' },
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: null },
     offsetWells: [],
@@ -48,6 +48,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
 const creatingIrSignal = signal(false);
 const createIrErrorSignal = signal<string | null>(null);
 const deletingIrSignal = signal(false);
+const updatingIrStatusSignal = signal(false);
 
 const storeMock = {
   creatingIr: creatingIrSignal,
@@ -56,6 +57,7 @@ const storeMock = {
   submitIrForReview: jest.fn(),
   deletingIr: deletingIrSignal,
   deleteIr: jest.fn(),
+  updatingIrStatus: updatingIrStatusSignal,
   linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
   linkedRequestWellOptions: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
@@ -91,6 +93,14 @@ describe('WwellIrEditorComponent', () => {
     fixture = TestBed.createComponent(WwellIrEditorComponent);
     fixture.componentRef.setInput('ir', buildIr(overrides));
     fixture.detectChanges();
+    // ngOnInit defaults the editor to Timeline view (see its own "defaults to Timeline view on
+    // load" test below) — every other test here exercises section read/edit logic that has
+    // nothing to do with which view mode is active, so they're pinned to the always-everything-
+    // visible Sections layout rather than depending on whatever the current default happens to be.
+    // Goes through the real toggle button (setViewMode/viewMode are protected) like a user would.
+    const sectionsViewBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Sections view"]');
+    sectionsViewBtn.click();
+    fixture.detectChanges();
   }
 
   beforeEach(() => {
@@ -98,6 +108,7 @@ describe('WwellIrEditorComponent', () => {
     creatingIrSignal.set(false);
     createIrErrorSignal.set(null);
     deletingIrSignal.set(false);
+    updatingIrStatusSignal.set(false);
   });
 
   afterEach(() => fixture?.destroy());
@@ -105,6 +116,26 @@ describe('WwellIrEditorComponent', () => {
   it('should create', async () => {
     await setup();
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('defaults to Timeline view on load', async () => {
+    // Deliberately bypasses setup()'s own forced switch to Sections (see its comment) to observe
+    // the raw post-ngOnInit state.
+    await TestBed.configureTestingModule({
+      imports: [WwellIrEditorComponent, NoopAnimationsModule],
+      providers: [
+        { provide: WwellIrStore, useValue: storeMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(WwellIrEditorComponent);
+    fixture.componentRef.setInput('ir', buildIr());
+    fixture.detectChanges();
+
+    const timelineViewBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Timeline view"]');
+    expect(timelineViewBtn.classList).toContain('ire__view-toggle-btn--active');
+    expect(fixture.nativeElement.querySelector('.ire__rail')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.ire__tl-row')).not.toBeNull();
   });
 
   it('renders one IR SECTIONS rail group per top-level entry, and one section anchor per leaf', async () => {

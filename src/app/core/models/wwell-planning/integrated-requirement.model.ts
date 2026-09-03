@@ -21,7 +21,7 @@ export interface IntegratedRequirementFormationTop {
   readonly depthFt: number;
   /** Optional since older records predate these fields. */
   readonly subSeaFtAsl?: number | null;
-  readonly description?: string | null;
+  readonly remarks?: string | null;
 }
 
 export interface IntegratedRequirementCasingRow {
@@ -38,6 +38,10 @@ export interface IntegratedRequirementDevelopmentTesting {
   readonly mudLogging: string;
   readonly sampling: string;
   readonly flowTest: string;
+  /** General Development/Testing remarks (exad_gwd_ir_header.dt_rmks) — a catch-all note for the
+   *  whole Development/Testing group, distinct from logging/mudLogging/sampling/flowTest's own
+   *  per-topic remarks. */
+  readonly remarks: string;
 }
 
 export interface IntegratedRequirementProgramDetails {

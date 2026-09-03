@@ -10,6 +10,7 @@ import {
   WWELL_CLIENT_OPTIONS,
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
+  WWELL_DEVELOPMENT_TESTING_OPTIONS,
   WWELL_GEOLOGIST_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
@@ -114,7 +115,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               // colSpan:2 (== full row width in a repeatable row's variable-column grid, see
               // `.dyf--span-2`'s doc comment) — the 4th field in a row that otherwise fits 3
               // columns would land alone in a cramped 1-column-wide row without this.
-              key: 'description',
+              key: 'remarks',
               label: 'Remarks',
               type: 'text',
               placeholder: 'e.g., Top of Umm Er Radhuma',
@@ -150,7 +151,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             },
             {
               // colSpan:2 — same "don't orphan the trailing free-text field" fix as
-              // Formation Tops' Description above.
+              // Formation Tops' Remarks above.
               key: 'remarks',
               label: 'Remarks',
               type: 'text',
@@ -167,44 +168,56 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
     label: 'Program Details',
     sections: [
       {
+        // One combined section — Program Details (completion/acidization/transmission) and
+        // Development & Testing (logging/mudLogging/sampling/flowTest/remarks) used to be two
+        // separately edited/saved sections; merged into one so they read as a single block
+        // (matching the reference GWD/AGWA screen) instead of two stacked cards.
+        //
+        // Every field here is full-width (`colSpan: 2`), stacked one per row — a 2-column grid
+        // made sense for the old single-line combo inputs, but these are big resizable textareas
+        // now (see WwellRichTextareaComponent) that can legitimately hold several lines each;
+        // sitting two per row would either cramp them or waste half the row's height. Plain
+        // top-to-bottom order, not interleaved — there's no column pairing left to preserve.
         key: 'main',
         title: null,
         fields: [
+          // Same control as its siblings below (dropdown-checkbox + big textarea) rather than a
+          // strict `select`, per explicit request for visual/behavioral consistency across the
+          // whole section. `openHoleSizeIn`'s `visibleWhen` and the wellbore diagram's completion
+          // switch (wwell-ir-wellbore-diagram.mapper.ts) both still match on an EXACT string equal
+          // to one of WWELL_COMPLETION_OPTIONS — that holds as long as exactly one option is
+          // checked (the expected case), but checking more than one now produces a multi-line
+          // value that matches none of them, same trade-off every other field here already accepts.
           {
-            // colSpan:2: its only natural row-mate (Open Hole Size, right below) is hidden
-            // unless Completion is 'Open Hole', which left this alone in row 1 with a bare
-            // empty cell beside it by default. Full-width avoids that regardless of state.
             key: 'completion',
             label: 'Completion',
-            type: 'select',
+            type: 'rich-textarea',
             options: WWELL_COMPLETION_OPTIONS,
             validators: { required: true },
             colSpan: 2,
           },
-          { key: 'acidization', label: 'Acidization', type: 'combo', options: WWELL_ACIDIZATION_OPTIONS },
-          { key: 'transmission', label: 'Transmission', type: 'combo', options: WWELL_TRANSMISSION_OPTIONS },
           {
-            // Moved after an even count (2) of always-visible fields, matching the Estimated
-            // Hydrology section's convention — a collapsed conditional field then only ever
-            // leaves an empty cell in its own dedicated row, never one shared with an unrelated
-            // visible field.
             key: 'openHoleSizeIn',
             label: 'Open Hole Size',
             type: 'text',
             placeholder: 'e.g., 8 1/2"',
             hint: 'Bit size below the last casing shoe',
             visibleWhen: { field: 'completion', equals: 'Open Hole' },
+            colSpan: 2,
           },
-        ],
-      },
-      {
-        key: 'developmentTesting',
-        title: 'Development / Testing',
-        fields: [
-          { key: 'logging', label: 'Logging', type: 'combo', options: WWELL_LOGGING_OPTIONS },
-          { key: 'mudLogging', label: 'Mud Logging', type: 'combo', options: WWELL_MUD_LOGGING_OPTIONS },
-          { key: 'sampling', label: 'Sampling', type: 'combo', options: WWELL_SAMPLING_OPTIONS },
-          { key: 'flowTest', label: 'Flow Test', type: 'combo', options: WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS },
+          { key: 'acidization', label: 'Acidization', type: 'rich-textarea', options: WWELL_ACIDIZATION_OPTIONS, colSpan: 2 },
+          { key: 'transmission', label: 'Transmission', type: 'rich-textarea', options: WWELL_TRANSMISSION_OPTIONS, colSpan: 2 },
+          { key: 'logging', label: 'Logging', type: 'rich-textarea', options: WWELL_LOGGING_OPTIONS, colSpan: 2 },
+          { key: 'mudLogging', label: 'Mud Logging', type: 'rich-textarea', options: WWELL_MUD_LOGGING_OPTIONS, colSpan: 2 },
+          { key: 'sampling', label: 'Sampling', type: 'rich-textarea', options: WWELL_SAMPLING_OPTIONS, colSpan: 2 },
+          { key: 'flowTest', label: 'Flow Test', type: 'rich-textarea', options: WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS, colSpan: 2 },
+          {
+            key: 'remarks',
+            label: 'Development/Testing',
+            type: 'rich-textarea',
+            options: WWELL_DEVELOPMENT_TESTING_OPTIONS,
+            colSpan: 2,
+          },
         ],
       },
     ],

@@ -1,5 +1,6 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
+import { stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
 import {
   IrCasingRow,
   IrHeaderRow,
@@ -54,6 +55,15 @@ function parseH2sPpm(h2s: string | null | undefined): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+/** `stripLegacyIrHtml` version of the `raw ?? fallback` pattern used throughout this merge: falls
+ *  back to `fallback` only when the backend genuinely sent nothing (`null`/`undefined`) for this
+ *  column, same as a bare `??` would — an explicitly-cleared column (`''`) is a real value and
+ *  must still win over `fallback`, not be treated as "missing" just because stripping an empty
+ *  string also yields `''`. */
+function resolveLegacyText(raw: string | null | undefined, fallback: string): string {
+  return raw != null ? stripLegacyIrHtml(raw) : fallback;
+}
+
 /**
  * Enriches an already-known IntegratedRequirement (e.g. from the GET-all summary list) with the
  * real casing/tops/hydrogeology/program data from a GET /{irSeq} detail fetch. Merges onto
@@ -63,7 +73,7 @@ function parseH2sPpm(h2s: string | null | undefined): number | null {
  * the list side, and docs/ir/EXAD_GWD_IR_HEADER.md for the table's real column set.
  * `linkedRequestId`/`letterNumber` (prewap_seq/ltr_no) and the Development & Testing fields
  * (sampling/logging/mud_rmks/flow_rmks) DO have real columns, so those are read back from `header`
- * below rather than left to the optimistic echo. Field mappings mirror buildWwellIrBulkSavePayload
+ * below rather than left as `existing` had them. Field mappings mirror buildWwellIrBulkSavePayload
  * in wwell-ir-payload.mapper.ts exactly (this is that function's inverse) — keep the two in sync
  * if either changes.
  *
@@ -91,8 +101,10 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       ...existing.requestReference,
       // prewap_seq/ltr_no are the only two Request Reference columns exad_gwd_ir_header actually
       // has (see docs/ir/EXAD_GWD_IR_HEADER.md) — everything else on this section that has no
-      // backing column there (client, targetAquifer...) stays whatever `existing` already carries
-      // (the optimistic save-time echo).
+      // backing column there (client, targetAquifer...) stays whatever `existing` already carries.
+      // WwellIrStore.createIr passes the record's own pre-save state as `existing`, not whatever
+      // was just typed, so an edit to one of these fields correctly reverts rather than appearing
+      // to have saved when there is nowhere real to persist it.
       linkedRequestId: header?.prewap_seq != null ? String(header.prewap_seq) : existing.requestReference.linkedRequestId,
       letterNumber: header?.ltr_no ?? existing.requestReference.letterNumber,
       // Live off the new exad_rcd_prewap block (see this function's own doc comment above) — a
@@ -138,17 +150,23 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     })),
     programDetails: {
       ...existing.programDetails,
-      completion: header?.completion ?? header?.cmpl_type ?? existing.programDetails.completion,
+      // Older records saved these six remarks columns as raw `<HTML>...` markup (a legacy rich-
+      // text control's "Save As HTML" dump) instead of plain text — stripLegacyIrHtml() is a no-op
+      // on anything that isn't that markup, so this is safe whether the record is old or new. See
+      // that util's own doc comment for why running it here (the one place these columns become
+      // IntegratedRequirement fields) is also what keeps a later re-save plain-text-only.
+      completion: resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion),
       // Both are written by buildWwellIrBulkSavePayload but were never read back here, so
       // Transmission/Acidization rendered blank after any reload even though the values were in
       // the DB the whole time — the same class of gap that hid Logging/Sampling before.
-      acidization: header?.acidization ?? existing.programDetails.acidization,
+      acidization: resolveLegacyText(header?.acidization, existing.programDetails.acidization),
       transmission: decodeTransmission(header?.trns_type) ?? existing.programDetails.transmission,
       developmentTesting: {
-        logging: header?.logging ?? existing.programDetails.developmentTesting.logging,
-        mudLogging: header?.mud_rmks ?? existing.programDetails.developmentTesting.mudLogging,
-        sampling: header?.sampling ?? existing.programDetails.developmentTesting.sampling,
-        flowTest: header?.flow_rmks ?? existing.programDetails.developmentTesting.flowTest,
+        logging: resolveLegacyText(header?.logging, existing.programDetails.developmentTesting.logging),
+        mudLogging: resolveLegacyText(header?.mud_rmks, existing.programDetails.developmentTesting.mudLogging),
+        sampling: resolveLegacyText(header?.sampling, existing.programDetails.developmentTesting.sampling),
+        flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest),
+        remarks: resolveLegacyText(header?.dt_rmks, existing.programDetails.developmentTesting.remarks),
       },
     },
     hydrogeology: hydroRow

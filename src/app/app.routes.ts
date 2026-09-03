@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@guards/auth.guard';
 import { roleGuard } from '@guards/role.guard';
+import { unsavedChangesGuard } from '@guards/unsaved-changes.guard';
 import { EmailStore } from '@store/email/email.store';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresentationStore } from './features/presentation/store/presentation.store';
@@ -76,6 +77,7 @@ export const routes: Routes = [
         // list stays visible and clickable the whole time.
         path: 'integrated-requirements',
         providers: [WwellIrStore],
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
             (m) => m.WwellIrComponent,

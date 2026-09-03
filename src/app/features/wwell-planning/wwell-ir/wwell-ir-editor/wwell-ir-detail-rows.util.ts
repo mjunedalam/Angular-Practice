@@ -90,6 +90,7 @@ export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[]
     { label: 'Mud Logging', value: fmtStr(d.mudLogging), badge: true },
     { label: 'Sampling', value: fmtStr(d.sampling), badge: true },
     { label: 'Flow Test', value: fmtStr(d.flowTest), badge: true },
+    { label: 'Development/Testing', value: fmtStr(d.remarks) },
   ];
 }
 

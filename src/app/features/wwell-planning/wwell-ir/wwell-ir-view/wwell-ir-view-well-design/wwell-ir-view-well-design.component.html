@@ -18,7 +18,7 @@
         <thead>
           <tr>
             <th>Formation</th>
-            <th>Description</th>
+            <th>Remarks</th>
             <th>Depth (ft bgl)</th>
             <th>Sub-sea (ft asl)</th>
           </tr>
@@ -27,7 +27,7 @@
           @for (top of ir().formationTops; track top.name) {
             <tr>
               <td>{{ top.name }}</td>
-              <td>{{ top.description || '—' }}</td>
+              <td>{{ top.remarks || '—' }}</td>
               <td>{{ top.depthFt }}</td>
               <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
             </tr>

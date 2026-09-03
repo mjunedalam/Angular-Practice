@@ -4,6 +4,12 @@
       <p class="irv__eyebrow">{{ ir().code }}</p>
       <h2 class="irv__title">{{ ir().requestReference.wellName || 'Untitled Well' }}</h2>
     </div>
+    <div class="irv__progress" [attr.aria-label]="sectionProgress().completed + ' of ' + sectionProgress().total + ' sections complete'">
+      <span class="irv__progress-label">{{ sectionProgress().completed }}/{{ sectionProgress().total }} sections</span>
+      <div class="irv__progress-track">
+        <div class="irv__progress-fill" [style.width.%]="sectionProgress().percent"></div>
+      </div>
+    </div>
     <div class="irv__header-actions">
       <span class="irv__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
         <span class="irv__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>

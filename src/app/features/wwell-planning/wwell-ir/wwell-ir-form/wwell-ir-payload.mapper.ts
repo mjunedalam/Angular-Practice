@@ -55,7 +55,7 @@ const isBlankCasingRow = (row: WwellIrRawCasingRow): boolean =>
   !row.type && !row.sizeIn && !row.remarks && row.depthFtBgl == null;
 
 const isBlankFormationTop = (row: WwellIrRawFormationTop): boolean =>
-  !row.name && !row.description && row.depthFt == null && row.subSeaFtAsl == null;
+  !row.name && !row.remarks && row.depthFt == null && row.subSeaFtAsl == null;
 
 /** Natural keys the backend's UPDATE/DELETE branches match repeatable rows by (see
  *  EXAD_AGWA_IUD_PKG.save_casing/save_tops in 05-agwa-iud-package.sql) — a row whose key isn't
@@ -347,7 +347,7 @@ const offsetWellToRaw = (row: IntegratedRequirementOffsetWell): WwellIrRawOffset
  *  list each with its own "Remarks" text — join whatever's there instead of keeping only one row's
  *  text and silently dropping the rest. */
 function buildTopsRemarks(rows: readonly WwellIrRawFormationTop[]): string | null {
-  const remarks = rows.map(row => row.description?.trim()).filter((text): text is string => !!text);
+  const remarks = rows.map(row => row.remarks?.trim()).filter((text): text is string => !!text);
   return remarks.length ? remarks.join('; ') : null;
 }
 
@@ -395,7 +395,7 @@ export function buildWwellIrBulkSavePayload(
     cmpl_type: null,
     acidization: raw.programDetails.main.acidization || null,
     trns_type: resolveTransmissionCode(raw.programDetails.main.transmission),
-    dt_rmks: null,
+    dt_rmks: raw.programDetails.developmentTesting.remarks || null,
     mud_rmks: raw.programDetails.developmentTesting.mudLogging || null,
     test_type: raw.hydrogeology.main.testType || null,
     flow_rmks: raw.programDetails.developmentTesting.flowTest || null,

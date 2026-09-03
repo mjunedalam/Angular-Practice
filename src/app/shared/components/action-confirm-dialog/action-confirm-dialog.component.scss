@@ -211,6 +211,20 @@ $danger-soft: rgba(220, 38, 38, 0.1);
   }
 }
 
+.acd-btn--discard {
+  background: $surface;
+  border-color: $danger;
+  color: $danger;
+
+  &:hover {
+    background: $danger-soft;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px $danger-soft;
+  }
+}
+
 /* ── Severity variants ────────────────────────────────────────── */
 .acd-dialog[data-severity='warning'] {
   .acd-header__icon {

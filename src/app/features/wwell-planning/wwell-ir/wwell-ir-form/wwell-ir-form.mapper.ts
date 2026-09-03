@@ -32,7 +32,7 @@ export function mapIrFormValueToSubmission(
       name: row.name,
       depthFt: row.depthFt ?? 0,
       subSeaFtAsl: row.subSeaFtAsl,
-      description: row.description || null,
+      remarks: row.remarks || null,
     })),
     casing: raw.subsurface.casing.map(row => ({
       type: row.type,

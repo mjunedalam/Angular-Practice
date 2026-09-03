@@ -39,14 +39,7 @@ export const WWELL_IR_SECTION_RAIL: readonly WwellIrRailGroup[] = [
     icon: 'tune',
     children: [
       { key: 'programMain', number: '2.1', label: 'Program Details', stepKey: 'programDetails', sectionKey: 'main' },
-      {
-        key: 'programDev',
-        number: '2.2',
-        label: 'Development & Testing',
-        stepKey: 'programDetails',
-        sectionKey: 'developmentTesting',
-      },
-      { key: 'geologist', number: '2.3', label: 'Geologist Contact', stepKey: 'contacts', sectionKey: 'geologist' },
+      { key: 'geologist', number: '2.2', label: 'Geologist Contact', stepKey: 'contacts', sectionKey: 'geologist' },
     ],
   },
   {

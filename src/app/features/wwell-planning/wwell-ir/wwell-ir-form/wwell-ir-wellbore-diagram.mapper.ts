@@ -305,7 +305,7 @@ export function buildWellboreDiagramData(raw: WwellIrFormRawValue): WellboreDiag
 
 /** `IntegratedRequirementCasingRow`/`FormationTop`/`ProgramDetails` are already-resolved
  *  (non-nullable) counterparts of the wizard's raw row types — these just fill in the raw
- *  shape's optional-text fields (`remarks`/`description`/`openHoleSizeIn`) with `''` in place
+ *  shape's optional-text fields (`remarks`/`openHoleSizeIn`) with `''` in place
  *  of `null`, since a submitted IR's `null` here means the same "nothing entered" as the
  *  wizard's `''`. */
 function toRawCasingRows(rows: readonly IntegratedRequirementCasingRow[]): WwellIrRawCasingRow[] {
@@ -323,7 +323,7 @@ function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]):
     name: row.name,
     depthFt: row.depthFt,
     subSeaFtAsl: row.subSeaFtAsl ?? null,
-    description: row.description ?? '',
+    remarks: row.remarks ?? '',
   }));
 }
 

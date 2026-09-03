@@ -25,7 +25,8 @@ import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WWELL_APPROVAL_STATUS_META, chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WwellApprovalMiniChainComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-mini-chain.component';
 import { WwellApprovalTimelineComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
-import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellWldaRequestFormComponent, WwellWldaRequestFormResult } from './wwell-wlda-request-form/wwell-wlda-request-form.component';
 
@@ -80,7 +81,7 @@ export class WwellWldaApprovalsComponent implements OnInit, OnDestroy {
     return row !== null && this.isChainComplete(row.chain);
   });
 
-  private readonly pendingSelection = createPendingSelection<string>(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<string>(WWELL_LOAD_DELAY_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
   protected readonly isSelecting = this.pendingSelection.isSelecting;
 

@@ -87,6 +87,38 @@ $accent: tokens.$accent;
   flex-shrink: 0;
 }
 
+/* ── Section-completeness stat: mirrors the editor's Timeline-view completion rule
+ * (wwellIrTimelineStepStatus) so this reading never disagrees with what Timeline mode shows. ── */
+.irv__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 128px;
+  flex-shrink: 0;
+}
+
+.irv__progress-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $muted;
+  white-space: nowrap;
+}
+
+.irv__progress-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: tokens.$surface-alt;
+  overflow: hidden;
+}
+
+.irv__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: $accent;
+  transition: width 300ms ease;
+}
+
 .irv__badge {
   display: inline-flex;
   align-items: center;

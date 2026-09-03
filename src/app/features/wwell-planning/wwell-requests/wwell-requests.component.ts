@@ -19,7 +19,8 @@ import { WwellPlanningRequest } from '@models/wwell-planning/wwell-planning.mode
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
-import { WWELL_DETAIL_LOADING_MS, WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WWELL_REQUEST_PRIORITY_META, WWELL_REQUEST_STATUS_META } from './wwell-requests.config';
@@ -63,7 +64,7 @@ export class WwellRequestsComponent implements OnInit, OnDestroy {
 
   protected readonly totalCount = computed(() => this.store.requests().length);
 
-  private readonly pendingSelection = createPendingSelection<string>(WWELL_DETAIL_LOADING_MS);
+  private readonly pendingSelection = createPendingSelection<string>(WWELL_LOAD_DELAY_MS);
   protected readonly pendingId = this.pendingSelection.pendingId;
   protected readonly isSelecting = this.pendingSelection.isSelecting;
 

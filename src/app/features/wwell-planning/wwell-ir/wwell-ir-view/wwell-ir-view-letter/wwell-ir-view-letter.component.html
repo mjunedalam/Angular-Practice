@@ -60,7 +60,19 @@
   </section>
 
   <section class="letter__section">
-    <h4>3. Formation Tops</h4>
+    <h4>3. Well Bore Diagram</h4>
+    @if (hasWellboreData()) {
+      <div class="letter__diagram-row" [class.letter__diagram-row--no-depth]="!hasTargetDepth()">
+        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+        <app-well-bore-view class="letter__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+      </div>
+    } @else {
+      <p class="letter__table-empty">No casing or formation top data recorded for this well.</p>
+    }
+  </section>
+
+  <section class="letter__section">
+    <h4>4. Formation Tops</h4>
     <div class="letter__table-wrap">
       <table class="letter__table">
         <thead>
@@ -86,7 +98,7 @@
   </section>
 
   <section class="letter__section">
-    <h4>4. Casing Program</h4>
+    <h4>5. Casing Program</h4>
     <div class="letter__table-wrap">
       <table class="letter__table">
         <thead>
@@ -114,7 +126,7 @@
   </section>
 
   <section class="letter__section">
-    <h4>5. Production &amp; Testing</h4>
+    <h4>6. Production &amp; Testing</h4>
     <dl class="letter__kv">
       <div><dt>Transmission Method</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
       <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
@@ -123,7 +135,7 @@
   </section>
 
   <section class="letter__section">
-    <h4>6. Estimated Hydrogeology</h4>
+    <h4>7. Estimated Hydrogeology</h4>
     <dl class="letter__kv">
       <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
       @if (isFlowTest()) {
@@ -139,7 +151,7 @@
   </section>
 
   <section class="letter__section">
-    <h4>7. Geologist Contact</h4>
+    <h4>8. Geologist Contact</h4>
     <dl class="letter__kv">
       <div><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary || '—' }}</dd></div>
       <div><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>

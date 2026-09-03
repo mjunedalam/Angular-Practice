@@ -17,12 +17,12 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'Saq', depthFt: 200, subSeaFtAsl: 780, description: 'Top of Saq' }],
+      formationTops: [{ name: 'Saq', depthFt: 200, subSeaFtAsl: 780, remarks: 'Top of Saq' }],
       casing: [{ type: 'Conductor', sizeIn: '20"', depthFtBgl: 30, tolFtBgl: null, remarks: 'Cemented' }],
     },
     programDetails: {
       main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
-      developmentTesting: { logging: 'Caliper', mudLogging: '', sampling: '', flowTest: '' },
+      developmentTesting: { logging: 'Caliper', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: {
       geologist: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: '' },

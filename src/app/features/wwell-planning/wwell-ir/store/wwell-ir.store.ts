@@ -3,9 +3,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { pipe, switchMap, tap } from 'rxjs';
+import { catchError, delay, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import {
+  WWELL_DELETE_DELAY_MS,
+  WWELL_SAVE_DELAY_MS,
+  WWELL_UPDATE_DELAY_MS,
+} from '@models/wwell-planning/wwell-planning-loading.constants';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
+import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
@@ -30,13 +36,12 @@ function errorMessage(err: unknown, fallback: string): string {
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
   const existingIndex = created.irSeq != null ? list.findIndex(item => item.irSeq === created.irSeq) : -1;
   if (existingIndex === -1) return [created, ...list];
-  // `created` is rebuilt client-side from what was just submitted (see
-  // WwellIrService.buildIrFromPayload) — it has no way to know the record's real approval chain
-  // (that's a separate, still-mocked endpoint; see loadIrApprovalTimeline), so every resave mints
-  // a brand new "just initiated" chain. Harmless for a first-time INSERT (nothing to preserve
-  // yet), but a repeat save on an already-in-progress/approved record — including every single
-  // inline section edit on the detail page — would otherwise wipe out its real chain state on
-  // every save. Keep whichever chain this record already had.
+  // A brand-new record's `created` (see createIr's own buildIntegratedRequirementFromPayload
+  // fallback) has no way to know the record's real approval chain (that's a separate, still-mocked
+  // endpoint; see loadIrApprovalTimeline), so it always starts a fresh "just initiated" chain.
+  // Harmless for a first-time INSERT (nothing to preserve yet), but would otherwise wipe out an
+  // already-in-progress/approved record's real chain on every subsequent save. Keep whichever
+  // chain this record already had.
   return list.map((item, index) => (index === existingIndex ? { ...created, chain: item.chain } : item));
 }
 
@@ -135,34 +140,6 @@ export const WwellIrStore = signalStore(
       ),
     );
 
-    // Fires right after a save settles (see createIr below) to replace the client-side optimistic
-    // echo (WwellIrService.buildIrFromPayload — built from what was *submitted*, not what the
-    // database actually stored: server-computed defaults, triggers, or a concurrent edit would all
-    // be invisible until this runs) with the real persisted row. Deliberately does not touch
-    // `irDetailLoading` — unlike loadIrDetail above, it must never flip WwellIrComponent's
-    // `isSelecting()` (which swaps the whole detail panel for a loading skeleton): the user just
-    // watched this exact record save, so re-showing it as a blank loading state a moment later
-    // would be jarring, not reassuring. A failure here is silent by design — the save itself
-    // already succeeded and is already reflected via the optimistic echo, so a background refresh
-    // hiccup shouldn't surface as if the save had failed.
-    const refreshIrDetail = rxMethod<number>(
-      pipe(
-        switchMap(irSeq =>
-          svc.getIrDetailBlocks(irSeq).pipe(
-            tapResponse({
-              next: blocks => {
-                const existing = store.irs().find(item => item.irSeq === irSeq);
-                if (!existing) return;
-                const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks);
-                patchState(store, { irs: upsertByIrSeq(store.irs(), merged) });
-              },
-              error: () => undefined,
-            }),
-          ),
-        ),
-      ),
-    );
-
     // Separate call from loadIrDetail above — mirrors the future real API shape (approval process
     // gets its own endpoint), mocked client-side in the meantime. Same switchMap-cancels-a-stale-
     // fetch reasoning applies when the selection changes quickly.
@@ -203,36 +180,81 @@ export const WwellIrStore = signalStore(
         loadLinkedRequestWells();
       },
 
+      /**
+       * No optimistic echo: the backend only ever confirms an `ir_seq` (see WwellIrSaveResult),
+       * so this waits out a real follow-up GET (getIrDetailBlocks) and merges *that* onto the
+       * record's last known-real state before `irs` ever changes — never onto whatever was just
+       * typed. A field with no backing column at all (client, targetAquifer, targetDepthFt... see
+       * mergeIrDetailBlocksIntoIntegratedRequirement's own doc comment) simply won't reflect the
+       * edit once this settles, since there is nowhere real to read it back from — better an
+       * honest revert than a value that only looks saved until the next reload.
+       *
+       * `creatingIr` stays true for both round-trips (POST, then GET), so the spinner is what
+       * covers the extra latency — nothing renders in between.
+       */
       createIr(
         payload: CreateIntegratedRequirementPayload,
         irBulkPayload: WwellIrBulkSavePayload,
         attachmentNames: readonly string[] = [],
       ): void {
         patchState(store, { creatingIr: true, createIrError: null });
-        svc.createIr(payload, irBulkPayload, attachmentNames).subscribe({
-          next: created => {
-            patchState(store, {
-              irs: upsertByIrSeq(store.irs(), created),
-              // Falls back to whatever was already known so an UPDATE response missing irSeq never clears it.
-              draftIrSeq: created.irSeq ?? store.draftIrSeq(),
-              creatingIr: false,
-            });
-            // Every save (create or update) immediately shows the optimistic echo above, then
-            // quietly swaps in the real persisted row once it lands — see refreshIrDetail's own
-            // comment for why this never blocks or reloads the visible UI.
-            if (created.irSeq != null) refreshIrDetail(created.irSeq);
-          },
-          error: (err: unknown) => patchState(store, { creatingIr: false, createIrError: errorMessage(err, 'Failed to create integrated requirement') }),
-        });
+        svc
+          .createIr(irBulkPayload)
+          .pipe(
+            delay(WWELL_SAVE_DELAY_MS),
+            switchMap(irSeq => {
+              if (irSeq === null) return of({ irSeq, blocks: null });
+              return svc.getIrDetailBlocks(irSeq).pipe(
+                map(blocks => ({ irSeq, blocks })),
+                // The save itself already succeeded here — a hiccup on this second, read-only
+                // call must not read as "the save failed" (see the `blocks === null` branch below).
+                catchError(() => of({ irSeq, blocks: null })),
+              );
+            }),
+          )
+          .subscribe({
+            next: ({ irSeq, blocks }) => {
+              if (irSeq === null) {
+                // No identity to file this under at all — shouldn't happen for a genuine backend
+                // success, so there's nothing to merge or select; just stop spinning.
+                patchState(store, { creatingIr: false });
+                return;
+              }
+              if (blocks === null) {
+                // Confirmed saved (a real ir_seq came back) but the follow-up detail fetch failed
+                // — record the real identity so a resave correctly UPDATEs instead of re-INSERTing,
+                // but leave `irs` untouched rather than show anything unconfirmed.
+                patchState(store, {
+                  draftIrSeq: irSeq,
+                  creatingIr: false,
+                  createIrError: 'Saved, but the latest data failed to reload — refresh to see it.',
+                });
+                return;
+              }
+              const existing = store.irs().find(item => item.irSeq === irSeq);
+              const base =
+                existing ?? buildIntegratedRequirementFromPayload(payload, { id: `IR-${irSeq}`, code: `IR-${irSeq}`, irSeq }, attachmentNames);
+              const merged = mergeIrDetailBlocksIntoIntegratedRequirement(base, blocks);
+              patchState(store, {
+                irs: upsertByIrSeq(store.irs(), merged),
+                draftIrSeq: irSeq,
+                creatingIr: false,
+              });
+            },
+            error: (err: unknown) => patchState(store, { creatingIr: false, createIrError: errorMessage(err, 'Failed to create integrated requirement') }),
+          });
       },
 
       submitIrForReview(ir: IntegratedRequirement): void {
         patchState(store, { updatingIrStatus: true, updateIrStatusError: null });
-        svc.submitIrForReview(ir).subscribe({
-          next: updated => patchState(store, { irs: store.irs().map(item => (item.id === updated.id ? updated : item)), updatingIrStatus: false }),
-          error: (err: unknown) =>
-            patchState(store, { updatingIrStatus: false, updateIrStatusError: errorMessage(err, 'Failed to submit integrated requirement for review') }),
-        });
+        svc
+          .submitIrForReview(ir)
+          .pipe(delay(WWELL_UPDATE_DELAY_MS))
+          .subscribe({
+            next: updated => patchState(store, { irs: store.irs().map(item => (item.id === updated.id ? updated : item)), updatingIrStatus: false }),
+            error: (err: unknown) =>
+              patchState(store, { updatingIrStatus: false, updateIrStatusError: errorMessage(err, 'Failed to submit integrated requirement for review') }),
+          });
       },
 
       /** Deletes the whole IR (header row, cascading to casing/tops/hydrogeology/water — see
@@ -240,10 +262,13 @@ export const WwellIrStore = signalStore(
        *  persisted record's — there's nothing to delete server-side for a local-only draft. */
       deleteIr(irSeq: number): void {
         patchState(store, { deletingIr: true, deleteIrError: null });
-        svc.deleteIr(irSeq).subscribe({
-          next: () => patchState(store, { irs: store.irs().filter(item => item.irSeq !== irSeq), deletingIr: false }),
-          error: (err: unknown) => patchState(store, { deletingIr: false, deleteIrError: errorMessage(err, 'Failed to delete integrated requirement') }),
-        });
+        svc
+          .deleteIr(irSeq)
+          .pipe(delay(WWELL_DELETE_DELAY_MS))
+          .subscribe({
+            next: () => patchState(store, { irs: store.irs().filter(item => item.irSeq !== irSeq), deletingIr: false }),
+            error: (err: unknown) => patchState(store, { deletingIr: false, deleteIrError: errorMessage(err, 'Failed to delete integrated requirement') }),
+          });
       },
     };
   }),

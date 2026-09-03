@@ -710,6 +710,10 @@ app-wwell-ir-editor {
     font-size: 0.86rem;
     font-weight: 600;
     color: $navy;
+    // A remarks field's saved value can carry real line breaks (e.g. Development/Testing,
+    // Sampling) — without this, `\n` renders as a plain space and a 3-line remark collapses
+    // back into one run-on line.
+    white-space: pre-line;
   }
 
   &[data-tone='warning'] dd {

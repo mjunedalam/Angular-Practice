@@ -1,0 +1,223 @@
+@use '../../wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$border: tokens.$border;
+$accent: tokens.$accent;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.wrt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.wrt__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wrt__label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.wrt__required {
+  margin-left: 0.15rem;
+  color: #dc2626;
+}
+
+/* Bordered "▼ | text" control — the dropdown button and the writable box share one outline so
+ * they read as a single field, matching the reference screen's combo-box chrome. Plain white
+ * throughout (not just on focus) per spec — only the border changes color on focus. */
+.wrt__field {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  transition:
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+
+  &:focus-within {
+    border-color: $accent;
+    box-shadow: 0 0 0 3px rgba($accent, 0.14);
+  }
+}
+
+.wrt__dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-right: 1.5px solid $border;
+  background: #fff;
+  color: $muted;
+  cursor: pointer;
+  transition: color 150ms ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    color: $accent;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+/* Checkbox list projected into the dropdown's portaled mat-menu panel — Angular's emulated
+ * encapsulation stamps this component's scope attribute onto projected content itself, not onto
+ * whatever element ends up hosting it, so these rules reach it even though MatMenu portals the
+ * whole panel out to <body>. `<mat-menu>`'s own panel template has an unconditional
+ * `(click)="closed.emit('click')"` on its root element (see @angular/material/menu) — ANY click
+ * anywhere inside the panel bubbles up and closes it, not just a `mat-menu-item` click. The
+ * template's `(click)="$event.stopPropagation()"` on each `<mat-checkbox>` is what stops that
+ * bubble, so checking several options in one open actually keeps the panel open until a real
+ * outside click (or Escape) closes it. */
+.wrt__option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.35rem 0.85rem;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.wrt__option {
+  font-size: 0.88rem;
+
+  ::ng-deep .mdc-label {
+    color: $navy;
+  }
+}
+
+/* Wraps the writable box and its per-line remove-icon column in one shared scroll region — a
+ * single `overflow-y` here (not one on each side separately) is what keeps the Nth icon lined up
+ * with the Nth text line while scrolling a box with many lines; two independently-scrolling
+ * siblings would drift apart the moment either one scrolled.
+ *
+ * `resize: vertical` puts a drag handle on this element (not the contenteditable directly) so the
+ * box and its remove-icon column always resize together, staying the same height. `overflow: auto`
+ * is required for `resize` to take effect at all — it's already needed here for the scrolling
+ * behavior above. No `max-height`: a resize handle capped by a max-height can't actually resize
+ * past it, which would defeat the point for anyone with a lot of text to work with. */
+.wrt__box-scroll {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  // "Big" per spec — enough for several lines of remarks to be visible at once, not just a
+  // single-line-tall combo input pretending to be a textarea.
+  min-height: 7rem;
+  overflow: auto;
+  resize: vertical;
+}
+
+.wrt__box {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: $navy;
+  outline: none;
+
+  &--no-dropdown {
+    padding-left: 0.75rem;
+  }
+
+  div {
+    min-height: 1.4em;
+  }
+
+  &:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  &[contenteditable='false'] {
+    color: $muted;
+    cursor: not-allowed;
+  }
+}
+
+/* One remove button per current line, in the same top-to-bottom order — see
+ * `WwellRichTextareaComponent.currentLines`. Lives outside the contenteditable box entirely
+ * (never injected into its DOM) so removing a line can never corrupt `innerText` extraction or
+ * fight the caret while the user is mid-keystroke elsewhere in the box. */
+.wrt__line-removers {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding: 0.5rem 0.4rem 0.5rem 0;
+  font-size: 0.92rem;
+}
+
+$danger: #dc2626;
+$danger-hover: #b91c1c;
+
+.wrt__line-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6em;
+  min-height: 1.4em;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  // Red always, not just on hover — a delete affordance that needs a hover to even read as
+  // destructive is easy to miss until it's too late.
+  color: $danger;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  mat-icon {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($danger, 0.12);
+    color: $danger-hover;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.wrt--disabled .wrt__field {
+  background: rgba($muted, 0.08);
+}
+
+.wrt__hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: $muted;
+}

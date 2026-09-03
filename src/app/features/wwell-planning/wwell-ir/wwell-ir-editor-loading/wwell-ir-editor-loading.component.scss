@@ -1,0 +1,231 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+
+// Mirrors app-wwell-ir-editor's own `.ire` sizing (wwell-ir-editor.component.scss) so swapping
+// shimmer → real content never shifts the surrounding layout.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.irel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.6rem;
+  padding: 0.75rem;
+}
+
+/* ── Header — mirrors .ire__header ───────────────────────────────────────── */
+.irel__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+}
+
+.irel__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.irel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.irel__chip {
+  border-radius: 999px;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+
+  &--icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  &--badge {
+    width: 88px;
+    height: 22px;
+  }
+}
+
+/* ── Body: rail + sections, mirrors .ire__body ───────────────────────────── */
+.irel__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 0.7rem;
+}
+
+.irel__rail {
+  flex-shrink: 0;
+  width: 196px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 10px;
+  padding: 0.65rem 0.5rem;
+}
+
+.irel__rail-item {
+  display: block;
+  height: 1.4rem;
+  width: 88%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: irel-shimmer 1.4s ease-in-out infinite;
+
+  &--child {
+    width: 76%;
+    height: 1.15rem;
+    margin-left: 0.9rem;
+  }
+}
+
+.irel__sections {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* ── Section card — mirrors .ire__section ────────────────────────────────── */
+.irel__card {
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Read-display grid — mirrors .ire__view-grid / .ire__view-field ─────── */
+.irel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem 1.25rem;
+}
+
+.irel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* ── Table — mirrors .ire__view-table-wrap / .ire__view-table ───────────── */
+.irel__table {
+  border: 1px solid tokens.$border;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.irel__table-head {
+  height: 28px;
+  background: tokens.$surface-alt;
+  border-bottom: 1px solid tokens.$border;
+}
+
+.irel__table-row {
+  height: 34px;
+  border-bottom: 1px solid tokens.$border-soft;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+/* ── Shared shimmer bar ───────────────────────────────────────────────────
+ * Same gradient/animation as app-wwell-detail-loading's `.wdl__bar` (kept as a separate keyframe
+ * name — `irel-shimmer` vs `wdl-shimmer` — since the two components can be in the DOM at once
+ * across different pages/tabs and Angular doesn't scope `@keyframes` names). */
+.irel__bar {
+  display: block;
+  height: 0.7rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: irel-shimmer 1.4s ease-in-out infinite;
+
+  &--eyebrow {
+    width: 70px;
+    height: 0.6rem;
+  }
+
+  &--title {
+    width: 220px;
+    height: 1.1rem;
+  }
+
+  &--rail-title {
+    width: 60%;
+    height: 0.6rem;
+    margin-bottom: 0.15rem;
+  }
+
+  &--card-title {
+    width: 32%;
+    height: 0.85rem;
+  }
+
+  &--label {
+    width: 55%;
+    height: 0.55rem;
+  }
+
+  &--value {
+    width: 75%;
+    height: 0.8rem;
+  }
+}
+
+@keyframes irel-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .irel__rail {
+    width: 160px;
+  }
+}
+
+@media (max-width: 900px) {
+  .irel__body {
+    flex-direction: column;
+  }
+
+  .irel__rail {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .irel__rail-item {
+    width: 46%;
+  }
+
+  .irel__rail-item--child {
+    margin-left: 0;
+  }
+}

@@ -16,7 +16,7 @@ export interface WwellIrRawFormationTop {
   readonly name: string;
   readonly depthFt: number | null;
   readonly subSeaFtAsl: number | null;
-  readonly description: string;
+  readonly remarks: string;
 }
 
 export interface WwellIrRawCasingRow {
@@ -40,7 +40,15 @@ export interface WwellIrRawDevelopmentTesting {
   readonly mudLogging: string;
   readonly sampling: string;
   readonly flowTest: string;
+  readonly remarks: string;
 }
+
+/** Flat shape of the IR editor's merged "Program Details" FormGroup — Program Details
+ *  (completion/acidization/transmission) and Development & Testing (logging/mudLogging/sampling/
+ *  flowTest/remarks) are one combined, one-pencil-edit section there (see
+ *  wwell-ir-editor.component.ts's `programEdit`) even though they still split back into `main`/
+ *  `developmentTesting` on the way to `WwellIrFormRawValue`. */
+export type WwellIrRawProgramDetails = WwellIrRawProgramMain & WwellIrRawDevelopmentTesting;
 
 export interface WwellIrRawGeologist {
   readonly geologistPrimary: string;

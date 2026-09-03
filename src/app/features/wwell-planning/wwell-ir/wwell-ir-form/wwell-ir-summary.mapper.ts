@@ -45,7 +45,7 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
       openHoleSizeIn: null,
       acidization: '',
       transmission: '',
-      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '' },
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: { geologistPrimary: '', geologistSecondary: null },
     offsetWells: [],
