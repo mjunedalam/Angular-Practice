@@ -260,6 +260,7 @@
            t.est_water_quality,
            t.est_productivity,
            t.flowing,
+           t.siwhp,
            t.h2s
                   FROM /*exad_agwa_json_data j,*/
                        json_table(w_json,
@@ -272,22 +273,24 @@
                                       est_sta_water_lvl NUMBER PATH '$.est_sta_water_lvl',
                                       est_water_quality NUMBER PATH '$.est_water_quality',
                                       est_productivity NUMBER PATH  '$.est_productivity',
-                                      flowing VARCHAR2(1) PATH '$.flowing', 
+                                      flowing VARCHAR2(1) PATH '$.flowing',
+                                      siwhp NUMBER PATH '$.siwhp',
                                       h2s VARCHAR2(2000) PATH '$.h2s'))) t
                  WHERE upper(t.table_name) = 'EXAD_GWD_IR_HYDROGEOLOGY'
                    AND upper(t.action) IN ('INSERT', 'UPDATE')) t
          ON (h.ir_seq = w_ir_seq and h.st_long_cd = t.st_long_cd)
          WHEN NOT MATCHED THEN
            INSERT
-             (h.ir_seq, h.st_long_cd, h.est_sta_water_lvl, h.est_water_quality, h.est_productivity, h.flowing, h.h2s)
+             (h.ir_seq, h.st_long_cd, h.est_sta_water_lvl, h.est_water_quality, h.est_productivity, h.flowing, h.siwhp, h.h2s)
            VALUES
-             (w_ir_seq, t.st_long_cd, t.est_sta_water_lvl, t.est_water_quality, t.est_productivity, t.flowing, t.h2s)
+             (w_ir_seq, t.st_long_cd, t.est_sta_water_lvl, t.est_water_quality, t.est_productivity, t.flowing, t.siwhp, t.h2s)
          WHEN MATCHED THEN
-           UPDATE 
+           UPDATE
            SET h.est_sta_water_lvl = t.est_sta_water_lvl,
               h.est_water_quality = t.est_water_quality,
               h.est_productivity = t.est_productivity,
               h.flowing = t.flowing,
+              h.siwhp = t.siwhp,
               h.h2s = t.h2s;
     
        -- Delete existing records             
@@ -479,14 +482,14 @@
   
        -- Merge & delete  - Well Design
         -- Check for new Well Design
-        SELECT t.wd_seq, t.action into w_wd_seq, w_ir_action
+        SELECT MAX(t.wd_seq), MAX(t.action) into w_wd_seq, w_ir_action
           FROM  json_table(w_json,
                           '$[*]'
                           COLUMNS(table_name VARCHAR2(30) PATH '$.table',
                                   NESTED PATH '$.data[*]'
                                   COLUMNS(action VARCHAR2(30) PATH '$.action',
                                           wd_seq NUMBER(22) PATH  '$.wd_seq'))) t
-         WHERE upper(t.table_name) = 'EXAD_GWD_IR_WATER' ;
+         WHERE upper(t.table_name) = 'EXAD_GWD_WELL_DESIGN' ;
         
         if w_wd_seq is null and w_ir_action = 'INSERT' then
           SELECT exad_gwd_sq01.nextval INTO w_wd_seq FROM dual;
