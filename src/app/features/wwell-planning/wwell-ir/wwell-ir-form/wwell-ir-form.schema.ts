@@ -11,7 +11,6 @@ import {
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
   WWELL_DEVELOPMENT_TESTING_OPTIONS,
-  WWELL_GEOLOGIST_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
   WWELL_SAMPLING_OPTIONS,
@@ -236,14 +235,17 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         key: 'geologist',
         title: 'Geologist Contact',
         fields: [
+          // Static [] placeholder — buildWwellIrFormSchema() below swaps this for a live Signal
+          // (backed by GET /planning/api/v1/gwd-ops-members) before this schema is rendered.
           {
             key: 'geologistPrimary',
             label: 'Primary',
             type: 'select',
-            options: WWELL_GEOLOGIST_OPTIONS,
+            options: [],
             validators: { required: true },
+            searchable: true,
           },
-          { key: 'geologistSecondary', label: 'Secondary', type: 'select', options: WWELL_GEOLOGIST_OPTIONS },
+          { key: 'geologistSecondary', label: 'Secondary', type: 'select', options: [], searchable: true },
         ],
       },
       {
@@ -386,27 +388,45 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
 
 /**
  * Returns a copy of WWELL_IR_FORM_SCHEMA with the 'reference'/'main' section's 'linkedRequestId'
- * field wired to `linkedRequestOptions` instead of its static `[]` placeholder. The schema array
- * itself is a module-level constant (no injector available at definition time), so a store-backed
- * Signal can only be attached here, once, by the component that actually has one — see
- * WwellIrEditorComponent's `schema` field.
+ * field wired to `linkedRequestOptions`, and the 'contacts'/'geologist' section's
+ * 'geologistPrimary'/'geologistSecondary' fields wired to `geologistOptions` — each replacing its
+ * static `[]` placeholder. The schema array itself is a module-level constant (no injector
+ * available at definition time), so a store-backed Signal can only be attached here, once, by the
+ * component that actually has one — see WwellIrEditorComponent's `schema` field.
  */
 export function buildWwellIrFormSchema(
   linkedRequestOptions: Signal<readonly WwellFieldOption[]>,
+  geologistOptions: Signal<readonly string[]>,
 ): readonly WwellFormStepConfig[] {
   return WWELL_IR_FORM_SCHEMA.map(step => {
-    if (step.key !== 'reference') return step;
-    return {
-      ...step,
-      sections: step.sections.map(section => {
-        if (section.key !== 'main' || !section.fields) return section;
-        return {
-          ...section,
-          fields: section.fields.map(field =>
-            field.key === 'linkedRequestId' ? { ...field, options: linkedRequestOptions } : field,
-          ),
-        };
-      }),
-    };
+    if (step.key === 'reference') {
+      return {
+        ...step,
+        sections: step.sections.map(section => {
+          if (section.key !== 'main' || !section.fields) return section;
+          return {
+            ...section,
+            fields: section.fields.map(field =>
+              field.key === 'linkedRequestId' ? { ...field, options: linkedRequestOptions } : field,
+            ),
+          };
+        }),
+      };
+    }
+    if (step.key === 'contacts') {
+      return {
+        ...step,
+        sections: step.sections.map(section => {
+          if (section.key !== 'geologist' || !section.fields) return section;
+          return {
+            ...section,
+            fields: section.fields.map(field =>
+              field.key === 'geologistPrimary' || field.key === 'geologistSecondary' ? { ...field, options: geologistOptions } : field,
+            ),
+          };
+        }),
+      };
+    }
+    return step;
   });
 }

@@ -62,6 +62,9 @@ const storeMock = {
   linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
   linkedRequestWellOptions: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
+  geologistOptions: jest.fn(() => [] as string[]),
+  geologistEmpNumByName: jest.fn(() => ({}) as Readonly<Record<string, number>>),
+  loadGwdOpsMembers: jest.fn(),
 };
 
 const notificationServiceMock = {

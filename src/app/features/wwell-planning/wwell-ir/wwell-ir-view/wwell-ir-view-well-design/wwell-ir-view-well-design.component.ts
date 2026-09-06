@@ -97,7 +97,11 @@ export class WwellIrViewWellDesignComponent {
     const status: Extract<IntegratedRequirementStatus, 'draft' | 'in-progress'> =
       current.status === 'draft' || current.status === 'in-progress' ? current.status : 'in-progress';
     const { payload } = mapIrFormValueToSubmission(updatedRaw, status);
-    const irBulkPayload = buildWwellIrBulkSavePayload(updatedRaw, { irSeq: current.irSeq ?? null, existing: current });
+    const irBulkPayload = buildWwellIrBulkSavePayload(updatedRaw, {
+      irSeq: current.irSeq ?? null,
+      existing: current,
+      geologistEmpNumByName: this.store.geologistEmpNumByName(),
+    });
     this.store.createIr(payload, irBulkPayload, current.attachmentNames);
     this.editingRemarks.set(false);
   }

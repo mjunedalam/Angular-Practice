@@ -230,9 +230,9 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Live-wired to the store's linkedRequestWellOptions Signal — same reasoning as the old
-  // wizard's own `schema` field (see buildWwellIrFormSchema's doc comment).
-  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions);
+  // Live-wired to the store's linkedRequestWellOptions/geologistOptions Signals — same reasoning
+  // as the old wizard's own `schema` field (see buildWwellIrFormSchema's doc comment).
+  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions, this.store.geologistOptions);
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
   // One combined section — Program Details and Development & Testing are edited/saved together
   // now (see programEdit below) — see wwell-ir-form.schema.ts's own comment on this section for
@@ -805,7 +805,11 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const status: Extract<IntegratedRequirementStatus, 'draft' | 'in-progress'> =
       current.status === 'draft' || current.status === 'in-progress' ? current.status : 'in-progress';
     const { payload } = mapIrFormValueToSubmission(raw, status);
-    const irBulkPayload = buildWwellIrBulkSavePayload(raw, { irSeq: current.irSeq ?? null, existing: current });
+    const irBulkPayload = buildWwellIrBulkSavePayload(raw, {
+      irSeq: current.irSeq ?? null,
+      existing: current,
+      geologistEmpNumByName: this.store.geologistEmpNumByName(),
+    });
     this.store.createIr(payload, irBulkPayload, attachmentNames ?? current.attachmentNames);
   }
 

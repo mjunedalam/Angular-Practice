@@ -48,28 +48,68 @@ function upsertByIrSeq(list: readonly IntegratedRequirement[], created: Integrat
 export const WwellIrStore = signalStore(
   withState<WwellIrStoreState>(initialWwellIrState),
 
-  withComputed(({ irsLoading, linkedRequestWells, linkedRequestWellsLoading, irsError, linkedRequestWellsError, createIrError, updateIrStatusError, irDetailError, irApprovalTimelineError, deleteIrError }) => ({
-    isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
-    /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
-     *  see wwell-ir-editor.component.ts's `applyLinkedRequestWell` for where the full record
-     *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
-    linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
-    activeErrors: computed(() =>
-      [irsError(), linkedRequestWellsError(), createIrError(), updateIrStatusError(), irDetailError(), irApprovalTimelineError(), deleteIrError()].filter(
-        (message): message is string => message !== null,
+  withComputed(
+    ({
+      irsLoading,
+      linkedRequestWells,
+      linkedRequestWellsLoading,
+      gwdOpsMembers,
+      irsError,
+      linkedRequestWellsError,
+      gwdOpsMembersError,
+      createIrError,
+      updateIrStatusError,
+      irDetailError,
+      irApprovalTimelineError,
+      deleteIrError,
+    }) => ({
+      isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
+      /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
+       *  see wwell-ir-editor.component.ts's `applyLinkedRequestWell` for where the full record
+       *  (looked up from linkedRequestWells by this same value) drives the auto-populate. */
+      linkedRequestWellOptions: computed(() => linkedRequestWells().map(well => ({ value: String(well.prewapSeq), label: well.wellName }))),
+      /** FULL_NAME option list for the Geologist Contact "Primary"/"Secondary" pickers — value and
+       *  label are the same string; the real EMPNUM to persist is resolved separately via
+       *  `geologistEmpNumByName` below at save time. */
+      geologistOptions: computed(() => gwdOpsMembers().map(member => member.fullName)),
+      /** FULL_NAME → EMPNUM, threaded into buildWwellIrBulkSavePayload's WwellIrSaveContext so
+       *  cont_geologist/sub_cont_geologist persist the real employee number, not a display name. */
+      geologistEmpNumByName: computed<Readonly<Record<string, number>>>(() =>
+        Object.fromEntries(gwdOpsMembers().map(member => [member.fullName, member.empNum])),
       ),
-    ),
-    hasError: computed(
-      () =>
-        irsError() !== null ||
-        linkedRequestWellsError() !== null ||
-        createIrError() !== null ||
-        updateIrStatusError() !== null ||
-        irDetailError() !== null ||
-        irApprovalTimelineError() !== null ||
-        deleteIrError() !== null,
-    ),
-  })),
+      /** Inverse of geologistEmpNumByName - EMPNUM → FULL_NAME, so a detail/list fetch that comes
+       *  back with exad_gwd_ir_header.cont_geologist/sub_cont_geologist (a raw EMPNUM) can be
+       *  redisplayed as the name the Geologist Contact picker showed when it was saved. Without
+       *  this, mergeIrDetailBlocksIntoIntegratedRequirement has no way to turn that EMPNUM back
+       *  into a name and the field renders blank even though the correct value is in the DB. */
+      geologistNameByEmpNum: computed<Readonly<Record<number, string>>>(() =>
+        Object.fromEntries(gwdOpsMembers().map(member => [member.empNum, member.fullName])),
+      ),
+      activeErrors: computed(() =>
+        [
+          irsError(),
+          linkedRequestWellsError(),
+          gwdOpsMembersError(),
+          createIrError(),
+          updateIrStatusError(),
+          irDetailError(),
+          irApprovalTimelineError(),
+          deleteIrError(),
+        ].filter((message): message is string => message !== null),
+      ),
+      hasError: computed(
+        () =>
+          irsError() !== null ||
+          linkedRequestWellsError() !== null ||
+          gwdOpsMembersError() !== null ||
+          createIrError() !== null ||
+          updateIrStatusError() !== null ||
+          irDetailError() !== null ||
+          irApprovalTimelineError() !== null ||
+          deleteIrError() !== null,
+      ),
+    }),
+  ),
 
   withMethods((store, svc = inject(WwellIrService)) => {
     const loadIrs = rxMethod<void>(
@@ -112,6 +152,23 @@ export const WwellIrStore = signalStore(
       ),
     );
 
+    // Stable reference data (not tied to a specific IR selection, unlike loadLinkedRequestWells) —
+    // loaded once at list-page init, see WwellIrComponent.ngOnInit.
+    const loadGwdOpsMembers = rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { gwdOpsMembersLoading: true, gwdOpsMembersError: null })),
+        switchMap(() =>
+          svc.getGwdOpsMembers().pipe(
+            tapResponse({
+              next: gwdOpsMembers => patchState(store, { gwdOpsMembers, gwdOpsMembersLoading: false }),
+              error: (err: unknown) =>
+                patchState(store, { gwdOpsMembersLoading: false, gwdOpsMembersError: errorMessage(err, 'Failed to load GWD ops members') }),
+            }),
+          ),
+        ),
+      ),
+    );
+
     // Keyed by ir_seq (the real primary key once an IR is saved) — switchMap cancels a still-in-
     // flight fetch for a previously-selected row if the user picks another one before it resolves,
     // so a slow first response can never land after (and clobber) a faster later selection.
@@ -129,7 +186,7 @@ export const WwellIrStore = signalStore(
                   patchState(store, { irDetailLoading: false });
                   return;
                 }
-                const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks);
+                const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks, store.geologistNameByEmpNum());
                 patchState(store, { irs: upsertByIrSeq(store.irs(), merged), irDetailLoading: false });
               },
               error: (err: unknown) =>
@@ -178,6 +235,10 @@ export const WwellIrStore = signalStore(
 
       loadLinkedRequestWells(): void {
         loadLinkedRequestWells();
+      },
+
+      loadGwdOpsMembers(): void {
+        loadGwdOpsMembers();
       },
 
       /**
@@ -234,7 +295,7 @@ export const WwellIrStore = signalStore(
               const existing = store.irs().find(item => item.irSeq === irSeq);
               const base =
                 existing ?? buildIntegratedRequirementFromPayload(payload, { id: `IR-${irSeq}`, code: `IR-${irSeq}`, irSeq }, attachmentNames);
-              const merged = mergeIrDetailBlocksIntoIntegratedRequirement(base, blocks);
+              const merged = mergeIrDetailBlocksIntoIntegratedRequirement(base, blocks, store.geologistNameByEmpNum());
               patchState(store, {
                 irs: upsertByIrSeq(store.irs(), merged),
                 draftIrSeq: irSeq,

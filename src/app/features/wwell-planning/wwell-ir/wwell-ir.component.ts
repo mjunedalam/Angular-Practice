@@ -341,6 +341,9 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     // dropdown/picker (see loadLinkedRequestWells's other call site, on selection change below)
     // has options ready by the time the first record's editor renders, instead of racing it.
     this.store.loadLinkedRequestWells();
+    // Geologist Contact picker's option list — stable reference data, unlike linkedRequestWells
+    // above, so it's only loaded once here rather than re-fetched on every IR selection.
+    this.store.loadGwdOpsMembers();
   }
 
   ngOnDestroy(): void {

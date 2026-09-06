@@ -23,10 +23,7 @@ import {
   IrWellDesignRow,
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
-import {
-  WWELL_GEOLOGIST_ID_BY_NAME,
-  WWELL_TRANSMISSION_CODE_BY_LABEL,
-} from '../../shared/wwell-planning-reference-data.config';
+import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 
 /**
  * Carries the previously-assigned ir_seq (if any) so a repeat save UPDATEs instead of
@@ -44,6 +41,10 @@ export interface WwellIrSaveContext {
     IntegratedRequirement,
     'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells' | 'wellDesignSeq'
   > | null;
+  /** Live FULL_NAME → EMPNUM map (GET /gwd-ops-members, see WwellIrStore's
+   *  `geologistEmpNumByName`) used to resolve cont_geologist/sub_cont_geologist below. Only omitted
+   *  by tests that don't exercise geologist resolution — every real save call site supplies it. */
+  readonly geologistEmpNumByName?: Readonly<Record<string, number>>;
 }
 
 const NEW_IR_CONTEXT: WwellIrSaveContext = { irSeq: null, existing: null };
@@ -355,11 +356,11 @@ const offsetWellToRaw = (row: IntegratedRequirementOffsetWell): WwellIrRawOffset
   h2sPpm: row.h2sPpm ?? null,
 });
 
-/** TEMPORARY: resolves a geologist's display name to the numeric id
- *  exad_gwd_ir_header.cont_geologist/sub_cont_geologist actually expects — see
- *  WWELL_GEOLOGIST_ID_BY_NAME's doc comment for why this is a stopgap. */
-function resolveGeologistId(name: string): number | null {
-  return name ? (WWELL_GEOLOGIST_ID_BY_NAME[name] ?? null) : null;
+/** Resolves a geologist's display name (FULL_NAME, as picked from the Geologist Contact dropdown)
+ *  to the real EMPNUM exad_gwd_ir_header.cont_geologist/sub_cont_geologist expects, via the live
+ *  map built from GET /gwd-ops-members — see WwellIrSaveContext.geologistEmpNumByName. */
+function resolveGeologistId(name: string, empNumByName: Readonly<Record<string, number>> | undefined): number | null {
+  return name && empNumByName ? (empNumByName[name] ?? null) : null;
 }
 
 /** exad_gwd_ir_header.trns_type is VARCHAR2(10) — too short for the full Transmission label, so a
@@ -414,8 +415,8 @@ export function buildWwellIrBulkSavePayload(
     publish_flg: 'N', // flips once the approval workflow publishes this record, not at authoring time
     curr_flg: 'Y',
     publish_by: null,
-    cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistPrimary),
-    sub_cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistSecondary),
+    cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistPrimary, context.geologistEmpNumByName),
+    sub_cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistSecondary, context.geologistEmpNumByName),
     water_remarks: null,
     gen_remarks: null,
     completion: raw.programDetails.main.completion || null,

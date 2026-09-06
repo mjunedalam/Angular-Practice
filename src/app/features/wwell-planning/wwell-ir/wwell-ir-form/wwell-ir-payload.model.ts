@@ -36,9 +36,9 @@ export interface IrHeaderRow extends IrRow {
   readonly publish_flg: 'Y' | 'N';
   readonly curr_flg: 'Y' | 'N';
   readonly publish_by: string | null;
-  /** exad_gwd_ir_header.cont_geologist/sub_cont_geologist are NUMBER(3) — resolved from the form's
-   *  geologist name via the TEMPORARY WWELL_GEOLOGIST_ID_BY_NAME stopgap map (see
-   *  wwell-planning-reference-data.config.ts) until a real employee-id lookup exists. */
+  /** exad_gwd_ir_header.cont_geologist/sub_cont_geologist are NUMBER(8) — resolved from the form's
+   *  selected FULL_NAME to the real EMPNUM via a live map built from GET /gwd-ops-members (see
+   *  WwellIrStore's `geologistEmpNumByName` and wwell-ir-payload.mapper.ts's resolveGeologistId). */
   readonly cont_geologist: number | null;
   readonly sub_cont_geologist: number | null;
   readonly water_remarks: string | null;
@@ -212,4 +212,26 @@ export interface IrEligibleWell {
   readonly utmZone: string | null;
   readonly wellType: string | null;
   readonly wellClassification: string | null;
+}
+
+/**
+ * GET /gwd-ops-members raw response row — backed by exad_agwa_queries_pkg.get_gwd_ops_member_prc,
+ * itself a thin wrapper around a production-only utility package (EXAD_UTIL_QUERIES_PKG.
+ * emp_in_hierarchy). The Java side maps that cursor generically (GwdOpsMemberMapper.java), so these
+ * keys are whatever the real production proc returns rather than a fixed DTO — only the two fields
+ * the IR editor's Geologist Contact picker actually needs are declared here.
+ */
+export interface GwdOpsMemberRaw {
+  readonly FULL_NAME: string;
+  readonly EMPNUM: number;
+}
+
+/** Domain shape for the Geologist Contact "Primary"/"Secondary" picker — see mapGwdOpsMemberRaw. */
+export interface GwdOpsMember {
+  readonly fullName: string;
+  readonly empNum: number;
+}
+
+export function mapGwdOpsMemberRaw(raw: GwdOpsMemberRaw): GwdOpsMember {
+  return { fullName: raw.FULL_NAME, empNum: raw.EMPNUM };
 }

@@ -49,6 +49,22 @@ function rowsFor<TRow>(blocks: readonly WwellIrDetailTableBlock[], table: WwellI
   return (block?.data ?? []).map(row => normalizeRowKeys<TRow>(row));
 }
 
+/** Inverse of resolveGeologistId in wwell-ir-payload.mapper.ts: cont_geologist/sub_cont_geologist
+ *  come back as a raw EMPNUM, not the name the picker showed - resolve it through the same
+ *  FULL_NAME/EMPNUM reference data (WwellIrStore.geologistNameByEmpNum) used to build the picker's
+ *  own options. Falls back to `fallback` (the caller's `existing` value) when the header has no
+ *  value for this column yet, or the EMPNUM isn't found in the current ops-members list (e.g. a
+ *  fetch that hasn't completed, or a since-removed employee) - same as every other lookup below,
+ *  an unresolved value should keep whatever was last known rather than go blank. */
+function resolveGeologistName(
+  empNum: number | null | undefined,
+  geologistNameByEmpNum: Readonly<Record<number, string>>,
+  fallback: string | null,
+): string | null {
+  if (empNum == null) return fallback;
+  return geologistNameByEmpNum[empNum] ?? fallback;
+}
+
 /** Inverse of the `h2s: '${ppm} ppm'` formatting in wwell-ir-payload.mapper.ts. */
 function parseH2sPpm(h2s: string | null | undefined): number | null {
   if (!h2s) return null;
@@ -88,6 +104,7 @@ function resolveLegacyText(raw: string | null | undefined, fallback: string): st
 export function mergeIrDetailBlocksIntoIntegratedRequirement(
   existing: IntegratedRequirement,
   blocks: readonly WwellIrDetailTableBlock[],
+  geologistNameByEmpNum: Readonly<Record<number, string>> = {},
 ): IntegratedRequirement {
   const header = rowsFor<IrHeaderRow>(blocks, 'exad_gwd_ir_header')[0] as IrHeaderRow | undefined;
   const casingRows = rowsFor<IrCasingRow>(blocks, 'exad_gwd_ir_casing');
@@ -132,6 +149,16 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     // Written by buildWwellIrBulkSavePayload but never read back here before — same class of gap
     // fixed for Transmission/Acidization above.
     topsRemarks: header?.tops_remarks ?? existing.topsRemarks,
+    // Same class of gap as Transmission/Acidization/Logging/Sampling below: cont_geologist/
+    // sub_cont_geologist are written on every save (wwell-ir-payload.mapper.ts) but were never read
+    // back here, so the Geologist Contact section rendered blank on every reselect/reload even
+    // though the correct EMPNUM was in the DB the whole time. See resolveGeologistName above.
+    contacts: {
+      geologistPrimary:
+        resolveGeologistName(header?.cont_geologist, geologistNameByEmpNum, existing.contacts.geologistPrimary) ??
+        existing.contacts.geologistPrimary,
+      geologistSecondary: resolveGeologistName(header?.sub_cont_geologist, geologistNameByEmpNum, existing.contacts.geologistSecondary),
+    },
     // exad_gwd_ir_water has no well-name column — epANum is the only identifier that round-trips
     // (see IrWaterRow / docs/ir/p2-ir.md). `temp` has no form field, so it is simply not read.
     offsetWells: waterRows.map(row => ({

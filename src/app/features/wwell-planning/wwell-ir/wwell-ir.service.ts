@@ -8,7 +8,16 @@ import { ExternalConfigService } from 'src/app/shared/services/external-config.s
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { todayIsoDate } from '../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-form/wwell-ir-chain.mock';
-import { IrEligibleWell, IrHeaderSummary, WwellIrBulkSavePayload, WwellIrDetailTableBlock, WwellIrSaveResult } from './wwell-ir-form/wwell-ir-payload.model';
+import {
+  GwdOpsMember,
+  GwdOpsMemberRaw,
+  IrEligibleWell,
+  IrHeaderSummary,
+  WwellIrBulkSavePayload,
+  WwellIrDetailTableBlock,
+  WwellIrSaveResult,
+  mapGwdOpsMemberRaw,
+} from './wwell-ir-form/wwell-ir-payload.model';
 import { mapIrHeaderSummariesToIntegratedRequirements } from './wwell-ir-form/wwell-ir-summary.mapper';
 
 /**
@@ -64,6 +73,15 @@ export class WwellIrService {
    */
   getEligibleWellsForIr(): Observable<IrEligibleWell[]> {
     return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(map(res => res.data));
+  }
+
+  /**
+   * GWD ops-member/assignee lookup (exad_agwa_queries_pkg.get_gwd_ops_member_prc) — feeds the IR
+   * editor's Geologist Contact "Primary"/"Secondary" pickers with real display names instead of the
+   * old hardcoded WWELL_GEOLOGIST_OPTIONS list.
+   */
+  getGwdOpsMembers(): Observable<GwdOpsMember[]> {
+    return this.http.get<ApiResponse<GwdOpsMemberRaw>>(`${this.apiUrl}/gwd-ops-members`).pipe(map(res => res.data.map(mapGwdOpsMemberRaw)));
   }
 
   /**

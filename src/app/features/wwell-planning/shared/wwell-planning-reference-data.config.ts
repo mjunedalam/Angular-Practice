@@ -119,18 +119,6 @@ export const WWELL_DEVELOPMENT_TESTING_OPTIONS: readonly string[] = [
   'Surge Block Development',
 ];
 
-export const WWELL_GEOLOGIST_OPTIONS: readonly string[] = WWELL_ASSIGNEE_OPTIONS;
-
-/** TEMPORARY stopgap: exad_gwd_ir_header.cont_geologist/sub_cont_geologist are NUMBER(3), but
- *  there's no real employee directory/id lookup wired up yet — only these mock display names.
- *  Replace with a real name→id (or better, an id-based picker) once that lookup exists. */
-export const WWELL_GEOLOGIST_ID_BY_NAME: Readonly<Record<string, number>> = {
-  'Eng. A. Al-Mutairi': 101,
-  'Eng. S. Al-Dossari': 102,
-  'Eng. F. Al-Harbi': 103,
-  'Eng. M. Al-Qahtani': 104,
-};
-
 export const WWELL_TEST_TYPE_OPTIONS: readonly { value: 'flow-test' | 'pump-test'; label: string; icon: string }[] = [
   { value: 'flow-test', label: 'Flow Test', icon: 'waves' },
   { value: 'pump-test', label: 'Pump Test', icon: 'engineering' },

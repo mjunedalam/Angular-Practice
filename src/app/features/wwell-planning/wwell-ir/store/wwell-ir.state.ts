@@ -1,5 +1,5 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
-import { IrEligibleWell } from '../wwell-ir-form/wwell-ir-payload.model';
+import { GwdOpsMember, IrEligibleWell } from '../wwell-ir-form/wwell-ir-payload.model';
 
 export interface WwellIrStoreState {
   readonly irs: IntegratedRequirement[];
@@ -7,10 +7,14 @@ export interface WwellIrStoreState {
    *  picker (see the store's `linkedRequestWellOptions` computed for its trimmed option view) and
    *  the auto-populate lookup once one is selected. */
   readonly linkedRequestWells: IrEligibleWell[];
+  /** GWD ops members — feeds the IR editor's Geologist Contact "Primary"/"Secondary" pickers (see
+   *  the store's `geologistOptions` computed for the trimmed FULL_NAME option view). */
+  readonly gwdOpsMembers: GwdOpsMember[];
   /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
   readonly draftIrSeq: number | null;
   readonly irsLoading: boolean;
   readonly linkedRequestWellsLoading: boolean;
+  readonly gwdOpsMembersLoading: boolean;
   readonly creatingIr: boolean;
   readonly updatingIrStatus: boolean;
   /** Deleting a whole IR (header + cascaded casing/tops/hydrogeology/water) by ir_seq. */
@@ -28,6 +32,7 @@ export interface WwellIrStoreState {
    */
   readonly irsError: string | null;
   readonly linkedRequestWellsError: string | null;
+  readonly gwdOpsMembersError: string | null;
   readonly createIrError: string | null;
   readonly updateIrStatusError: string | null;
   readonly irDetailError: string | null;
@@ -38,9 +43,11 @@ export interface WwellIrStoreState {
 export const initialWwellIrState: WwellIrStoreState = {
   irs: [],
   linkedRequestWells: [],
+  gwdOpsMembers: [],
   draftIrSeq: null,
   irsLoading: false,
   linkedRequestWellsLoading: false,
+  gwdOpsMembersLoading: false,
   creatingIr: false,
   updatingIrStatus: false,
   deletingIr: false,
@@ -48,6 +55,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   irApprovalTimelineLoading: false,
   irsError: null,
   linkedRequestWellsError: null,
+  gwdOpsMembersError: null,
   createIrError: null,
   updateIrStatusError: null,
   irDetailError: null,
