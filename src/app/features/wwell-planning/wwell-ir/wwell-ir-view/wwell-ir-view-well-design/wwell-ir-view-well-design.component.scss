@@ -50,20 +50,22 @@
 // this row (see those components' own host styles: `flex: 0 0 12%; height: 100%` and `flex: 1`
 // respectively) — a percentage height only resolves against an ancestor with a *definite* height,
 // which `max-height` alone never provides. `aspect-ratio` is what supplies that definite height
-// here, derived from the row's fixed width — without it, "height: 100%" was resolving against an
-// indeterminate box and the SVGs fell back to their own unbounded intrinsic size, spilling past
-// the card (`app-well-bore-view` draws in fixed viewBox units at 780×650 — see
-// WWELL_IR_PREVIEW_DIAGRAM_LAYOUT — with no CSS clamp of its own). Sized and pinned to match that
-// exact 780:650 ratio, mirroring wwell-ir-editor.component.scss's identical, already-working
-// `.ire__wellbore-diagram-row` rule — see that file's own comment for the full sizing rationale.
+// here, derived from the row's fixed width. Ratioed to the real `DIAGRAM_LAYOUT` viewBox
+// (116+1040 wide : 840 tall — see wwell-ir-view-well-design.component.ts's `diagramLayout`), not
+// the editor wizard's shrunk preview layout — that smaller `drawingHeight` packed the diagram's
+// fixed-size casing labels too close together (colliding secondary lines, and the longest labels
+// clipping past the SVG's own right edge). `.ir-well-design__diagram-card`'s own `overflow-x: auto`
+// is the safety net if this ever exceeds the card's width on a narrow viewport. `gap` gives the
+// depth-scale column visible breathing room from the wellbore graphic instead of the two sitting
+// flush against each other.
 .ir-well-design__diagram-row {
   display: flex;
   align-items: stretch;
+  gap: 1rem;
   width: 100%;
-  min-width: 600px;
-  max-width: 600px;
-  aspect-ratio: 780 / 650;
-  max-height: 500px;
+  min-width: 680px;
+  max-width: 680px;
+  aspect-ratio: 1156 / 840;
   margin: 0 auto;
 }
 

@@ -6,6 +6,7 @@
 
 .depth-scale-svg {
   display: block;
+  box-sizing: border-box;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border-right: 1px solid rgba(15, 23, 42, 0.14);
   border-top-left-radius: 18px;

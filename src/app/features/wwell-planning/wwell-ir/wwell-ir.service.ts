@@ -98,6 +98,25 @@ export class WwellIrService {
   }
 
   /**
+   * Downloads the formal "Integrated Requirements" letter as a PDF — rendered server-side
+   * (Qute + openhtmltopdf, agwa-planning's IrLetterService) from the same detail data
+   * getIrDetailBlocks() above already reads, so the PDF always reflects the last-saved record
+   * rather than whatever the Letter tab's own client-side view currently has in memory.
+   */
+  /** POST (not GET) because the wellbore diagram is rendered client-side (the same D3/SVG
+   *  components the Letter tab already shows) and its PNG snapshot rides along as the request
+   *  body — the backend has no drawing logic of its own for it anymore. `wellboreImageBase64` is
+   *  omitted when the IR has no casing/tops data or the client-side capture failed; the letter
+   *  still renders, just without that section. */
+  downloadLetterPdf(irSeq: number, wellboreImageBase64?: string): Observable<Blob> {
+    return this.http.post(
+      `${this.apiUrl}/integrated-requirements/${irSeq}/letter-pdf`,
+      { wellboreImageBase64: wellboreImageBase64 ?? null },
+      { responseType: 'blob' },
+    );
+  }
+
+  /**
    * The approval-process API is a separate call from the detail fetch above and doesn't exist yet
    * — selecting a row fires both, this one just has nothing real to hit. Mocked client-side (with
    * an artificial delay so it reads as its own network round-trip) until a real

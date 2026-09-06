@@ -17,6 +17,17 @@
   line-height: 1.55;
 }
 
+.letter__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 0.4rem;
+  }
+}
+
 .letter__masthead {
   display: flex;
   justify-content: space-between;
@@ -152,16 +163,22 @@
 // Same sizing rationale as wwell-ir-view-well-design.component.scss's `.ir-well-design__diagram-row`
 // (see that file's own comment): `app-wwell-ir-depth-scale`/`app-well-bore-view` both resolve
 // `height: 100%` against this row, so `aspect-ratio` must supply the definite height a percentage
-// needs — derived here from a narrower fixed width (460px) than the Well Design tab's 600px, to
-// stay comfortably inside the letter's own 780px card without crowding its 2.25rem side padding.
+// needs. Sized/ratioed to the real `DIAGRAM_LAYOUT` viewBox (116+1040 wide : 840 tall — see
+// wwell-ir-view-letter.component.ts's `diagramLayout`), not the wizard's shrunk preview layout —
+// 620px comfortably fits the letter's 780px card (708px usable past its 2.25rem side padding)
+// while keeping close to the reference component's own on-screen scale (~0.53px per viewBox unit),
+// which is what actually fixed the casing-label collisions and right-edge clipping (a smaller
+// `drawingHeight` packed the same fixed-size label text into less vertical/horizontal room).
+// `gap` gives the depth-scale column visible breathing room from the wellbore graphic instead of
+// the two sitting flush against each other.
 .letter__diagram-row {
   display: flex;
   align-items: stretch;
+  gap: 1rem;
   width: 100%;
-  min-width: 460px;
-  max-width: 460px;
-  aspect-ratio: 780 / 650;
-  max-height: 400px;
+  min-width: 620px;
+  max-width: 620px;
+  aspect-ratio: 1156 / 840;
   margin: 0 auto;
 }
 

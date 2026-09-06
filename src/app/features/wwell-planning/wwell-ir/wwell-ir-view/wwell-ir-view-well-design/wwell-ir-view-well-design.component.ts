@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, Signal, computed, inject, input, si
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { WellBoreViewComponent } from '../../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrStore } from '../../store/wwell-ir.store';
 import { buildHydrogeologyRows } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
-import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import { mapIntegratedRequirementToRawFormValue } from '../../wwell-ir-form/wwell-ir-edit.mapper';
 import { mapIrFormValueToSubmission } from '../../wwell-ir-form/wwell-ir-form.mapper';
 import { buildWwellIrBulkSavePayload } from '../../wwell-ir-form/wwell-ir-payload.mapper';
@@ -49,7 +48,10 @@ export class WwellIrViewWellDesignComponent {
 
   private readonly store = inject(WwellIrStore);
 
-  protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
+  // The real `well-bore-view` layout, not the editor wizard's 25%-shrunk preview constant — see
+  // `.ir-well-design__diagram-row` in the stylesheet and wwell-ir-view-letter.component.ts's
+  // identical change for why (label collisions/clipping from the shrunk `drawingHeight`).
+  protected readonly diagramLayout = DIAGRAM_LAYOUT;
 
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
     buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),

@@ -1,15 +1,20 @@
-import { ChangeDetectionStrategy, Component, Signal, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, inject, input, signal, viewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { WellBoreViewComponent } from '../../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrDepthScaleComponent } from '../../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
-import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
+import { WwellIrService } from '../../wwell-ir.service';
+import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
 const OPEN_HOLE_COMPLETION = 'Open Hole';
 
@@ -27,7 +32,14 @@ const OPEN_HOLE_COMPLETION = 'Open Hole';
 @Component({
   selector: 'app-wwell-ir-view-letter',
   standalone: true,
-  imports: [MatIconModule, WellBoreViewComponent, WwellIrDepthScaleComponent],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    WellBoreViewComponent,
+    WwellIrDepthScaleComponent,
+  ],
   templateUrl: './wwell-ir-view-letter.component.html',
   styleUrl: './wwell-ir-view-letter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,10 +47,62 @@ const OPEN_HOLE_COMPLETION = 'Open Hole';
 export class WwellIrViewLetterComponent {
   readonly ir = input.required<IntegratedRequirement>();
 
+  private readonly wwellIrService = inject(WwellIrService);
+  private readonly notify = inject(NotificationService);
+
+  protected readonly downloadingPdf = signal(false);
+  // Only a persisted record has anything for the backend to render (see IrLetterService, which
+  // re-fetches the detail by ir_seq) — a local-only "New IR" draft has never reached the backend.
+  protected readonly canDownloadPdf = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
+
+  private readonly wellboreDiagramRow = viewChild<ElementRef<HTMLElement>>('wellboreDiagramRow');
+
+  protected async downloadPdf(): Promise<void> {
+    const irSeq = this.ir().irSeq;
+    if (irSeq === null || irSeq === undefined || this.downloadingPdf()) return;
+
+    this.downloadingPdf.set(true);
+    const wellboreImageBase64 = await this.captureWellboreImage();
+    this.wwellIrService.downloadLetterPdf(irSeq, wellboreImageBase64).subscribe({
+      next: blob => {
+        this.downloadingPdf.set(false);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${this.ir().code}-letter.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.downloadingPdf.set(false);
+        this.notify.error('Failed to download the integrated requirement letter PDF.');
+      },
+    });
+  }
+
+  /** Snapshots the already-rendered wellbore diagram (see wwell-ir-wellbore-snapshot.util.ts) so it
+   *  rides along in the PDF request. Degrades gracefully — a missing/no-data diagram or a capture
+   *  failure just means the letter downloads without that section, not a failed download. */
+  private async captureWellboreImage(): Promise<string | undefined> {
+    if (!this.hasWellboreData()) return undefined;
+    const row = this.wellboreDiagramRow()?.nativeElement;
+    if (!row) return undefined;
+    try {
+      return (await captureWellboreSnapshot(row)) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   protected readonly isOpenHole = computed(() => this.ir().programDetails.completion === OPEN_HOLE_COMPLETION);
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');
 
-  protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
+  // The real `well-bore-view` layout (not the wizard's 25%-shrunk preview constant) — the letter
+  // card is wide enough to afford it, and the shrunk layout's smaller `drawingHeight` was packing
+  // casing shoe labels too close together to read (colliding secondary lines) and clipping the
+  // longest labels past the SVG's own right edge (see `.letter__diagram-row` in the stylesheet for
+  // the matching container width/aspect-ratio change).
+  protected readonly diagramLayout = DIAGRAM_LAYOUT;
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
     buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
   );

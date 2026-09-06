@@ -1,4 +1,21 @@
 <article class="letter">
+  <div class="letter__toolbar">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="!canDownloadPdf() || downloadingPdf()"
+      [matTooltip]="canDownloadPdf() ? '' : 'Save this integrated requirement before downloading the letter'"
+      (click)="downloadPdf()"
+    >
+      @if (downloadingPdf()) {
+        <mat-spinner diameter="16" />
+      } @else {
+        <mat-icon>picture_as_pdf</mat-icon>
+      }
+      Download PDF
+    </button>
+  </div>
+
   <header class="letter__masthead">
     <div>
       <p class="letter__org">Groundwater Division</p>
@@ -62,9 +79,9 @@
   <section class="letter__section">
     <h4>3. Well Bore Diagram</h4>
     @if (hasWellboreData()) {
-      <div class="letter__diagram-row" [class.letter__diagram-row--no-depth]="!hasTargetDepth()">
-        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
-        <app-well-bore-view class="letter__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
+      <div class="letter__diagram-row" #wellboreDiagramRow [class.letter__diagram-row--no-depth]="!hasTargetDepth()">
+        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="diagramLayout" />
+        <app-well-bore-view class="letter__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="diagramLayout" />
       </div>
     } @else {
       <p class="letter__table-empty">No casing or formation top data recorded for this well.</p>
