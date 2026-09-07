@@ -197,22 +197,16 @@ export class WwellTestComponent {
 
     if (this.isPublished()) {
       const wt = this.form.getRawValue();
+      // Required/Optional matrix: docs/plan/wwell-test-fields-validation.md
       if (isMissing(wt['rsvrCd']))         missing.push('Aquifer');
       if (isMissing(wt['temp']))           missing.push('Temperature');
       if (isMissing(wt['hydH2sCnc']))      missing.push('H2S');
-      if (isMissing(wt['wtrSaTdsCnc']))    missing.push('TDS');
       if (isMissing(wt['hydProdRt']))      missing.push('Test Rate');
-      if (isMissing(wt['testerNetworkId'])) missing.push('Conducted By');
       if (isMissing(wt['duration']))       missing.push('Test Duration');
 
-      if (this.isFlowTest()) {
-        if (isMissing(wt['siwhp'])) missing.push('SIWHP');
-        if (isMissing(wt['fwhp']))  missing.push('FWHP');
-      } else {
+      if (!this.isFlowTest()) {
         if (isMissing(wt['rpm']))        missing.push('RPM');
         if (isMissing(wt['hydPmpDpth'])) missing.push('Pump Depth');
-        if (isMissing(wt['statWlvl']))   missing.push('SWL');
-        if (isMissing(wt['dyncWlvl']))   missing.push('DWL');
       }
     }
 

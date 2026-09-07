@@ -1,0 +1,198 @@
+# Work Log
+
+Running log of what was actually done, session by session. Newest entry at the bottom — append, don't rewrite history.
+
+---
+
+## 2026-09-03 (Thursday)
+
+**IR editor — loading states, unsaved-changes guard, rich remarks fields**
+
+- Added `unsaved-changes.guard.ts` (`CanDeactivateFn`) so navigating away from the wwell-ir
+  master-detail page with unsaved edits (an open section, an unsaved "New IR" draft) prompts
+  Save / Discard / Stay instead of silently discarding — `WwellIrComponent.canDeactivate()` is the
+  reference implementation.
+- Added `wwell-ir-editor-loading` (skeleton component) and a `wwell-detail-loading` cleanup, plus
+  new loading-delay constants (`wwell-planning-loading.constants.ts`) so save/update/delete round
+  trips show a deliberate skeleton instead of a layout jump.
+- Added `WwellRichTextareaComponent` — a "dropdown + big textarea" control for the IR Program
+  Details remarks fields (Acidization, Transmission, Logging, Mud Logging, Sampling, Flow Test,
+  Development/Testing), which carry long multi-line legacy remarks that a plain `<select>` can't
+  hold.
+- Reworked `wwell-ir.store.ts`, `wwell-ir-editor.component.ts`, `wwell-ir-section-edit.util.ts`,
+  and `wwell-ir-detail-response.mapper.ts` around per-section edit/save state.
+- First cut of the geologist name→id stopgap in `wwell-planning-reference-data.config.ts`
+  (`WWELL_GEOLOGIST_ID_BY_NAME`) — later replaced entirely, see 2026-09-06.
+- Captured several real backend proc signatures under `docs/ir/` (`get_gwd_ops_member_prc.sql`,
+  `get_wf_next_id_fnc.sql`, `update_ir_sap_wf_prc.sql`, `error.sql`) and a large `update_ir_data_prc.sql`
+  refresh.
+
+**Later the same day:** extended `wwell-ir-view-well-design` with an editable view, adjusted
+`wwell-ir-form.schema.ts`/`wwell-ir-payload.mapper.ts`/`wwell-ir-payload.model.ts` for the header
+row's fuller field set, and expanded `wwell-ir-payload.mapper.spec.ts` coverage.
+
+Also asked (no code change): how to bump a package's pinned version given `npm dist-tags` showing
+a newer release than package.json has, and why an `overrides` entry (e.g. `js-yaml: 4.3.0`) might
+be pinned below the latest dist-tag rather than just tracking `latest`.
+
+---
+
+## 2026-09-06
+
+**GWD ops members → Geologist Contact dropdown, end to end**
+
+- Backend (`~/Downloads/Misc/agwa-planning`, not the `code-with-quarkus 3` scaffold):
+  `04-agwa-queries-package.sql`'s local dev mock for `get_gwd_ops_member_prc` returned only 3 fake
+  rows (`emp_id`/`emp_name`/`job_title`). Replaced it with two real rows (Meshari Abu Rashid, Nawaf
+  Alansari) using the full production column set (`FULL_NAME`, `EMPNUM`, `EMP_EMAIL`, `TELEPHONE`,
+  etc.), captured from an actual `/planning/api/v1/gwd-ops-members` response. Applied live via
+  `sqlplus` against the already-running Oracle container (no volume recreation needed) and verified
+  by invoking the procedure directly.
+- Frontend — wired the Geologist Contact "Primary"/"Secondary" pickers to that endpoint, following
+  the existing "Link to Request" live-Signal pattern instead of a new one:
+  - `wwell-ir-payload.model.ts` — added `GwdOpsMember`/`GwdOpsMemberRaw` + mapper.
+  - `wwell-ir.service.ts` — `getGwdOpsMembers()`.
+  - `wwell-ir.state.ts` / `wwell-ir.store.ts` — state, `loadGwdOpsMembers()`, and a
+    `geologistOptions` computed (FULL_NAME list) shared by both dropdowns.
+  - `wwell-ir-form.schema.ts` / `wwell-ir-editor.component.ts` / `wwell-ir.component.ts` — schema
+    wiring and load-once-at-init.
+  - Removed the now-dead static `WWELL_GEOLOGIST_OPTIONS` list.
+- **Bug found and fixed while wiring the save path:** the existing "TEMPORARY stopgap"
+  (`WWELL_GEOLOGIST_ID_BY_NAME`, added 2026-09-03) claimed
+  `exad_gwd_ir_header.cont_geologist`/`sub_cont_geologist` were `NUMBER(3)`, too small for a real
+  employee number, and mapped display names to small fabricated ids instead. Checked the actual
+  schema (`01-schema.sql`) and the authoritative `docs/ir/EXAD_GWD_IR_HEADER.md` — the column is
+  really `NUMBER(8)`, which fits a real `EMPNUM` fine. Removed the stopgap map entirely and replaced
+  it with a live `FULL_NAME → EMPNUM` map (`WwellIrStore.geologistEmpNumByName`, sourced from the
+  same GWD ops members fetch) threaded through `WwellIrSaveContext` into
+  `buildWwellIrBulkSavePayload`, so a save now persists the geologist's real EMPNUM.
+- Verified throughout: `tsc --noEmit` clean, ESLint clean, all 37 `wwell-ir` Jest tests passing
+  (fixed 2 that broke from the store-mock missing the new signals).
+
+**Later the same day: IR letter → PDF, rendered server-side (Qute + openhtmltopdf)**
+
+User shared screenshots of the legacy JasperReports "Integrated Requirements" letter template
+(GWD letterhead, Well Location table, Area Water Well table, approval sign-off table, CC/Letterbook
+footer) and asked for a matching downloadable PDF, backend-driven, built in
+`~/Downloads/Misc/agwa-planning` (chosen over `code-with-quarkus 3` since agwa-planning already
+owns the full IR REST API/DB — `code-with-quarkus 3` has no IR domain classes at all, only an
+untyped JSON passthrough in its unrelated morning-report feature).
+
+- **Backend** (agwa-planning): new `GET /planning/api/v1/integrated-requirements/{irSeq}/letter-pdf`
+  on `IntegratedRequirementResource`, backed by:
+  - `service/IrLetterService.java` — reuses the existing `getByIrSeq()` detail call (same
+    `{table,data}` blocks the JSON detail endpoint already returns) rather than a new mapper/proc.
+    Resolves the geologist name via the existing GWD ops-members lookup, the approver name/title
+    via `publish_by`/`publish_flg`/`publish_dt` matched against ops-members by `NETWORK_ID`, and
+    "generated by" via the requesting user's own JWT identity.
+  - `template/IrLetterTemplate.java` + `templates/irLetter.html` — a Qute HTML template (first one
+    in this project; mirrors `code-with-quarkus 3`'s `mr.html` convention). CSS lives inside a
+    Qute `{| ... |}` unparsed block — plain `<style>{...}</style>` breaks Qute's parser, which
+    otherwise tries to read literal CSS curly braces as expressions.
+  - `pdf/HtmlToPdfRenderer.java` — new `openhtmltopdf-core`/`openhtmltopdf-pdfbox:1.0.10`
+    dependency (nothing pre-existing did HTML→PDF in either backend). **Real bug hit and fixed:**
+    those artifacts need `pdfbox`+`fontbox` on the same version (2.0.24), but something deeper in
+    the Quarkus/Camel dependency graph pulls in `fontbox:3.0.4`, which Maven's nearest-wins
+    mediation picked over the matching 2.0.24 — threw
+    `NoSuchMethodError: TTFParser.parse(InputStream)` at PDF-render time. Fixed with an explicit
+    `fontbox:2.0.24` entry in `<dependencyManagement>`.
+  - `util/LegacyIrTextUtil.java` — Java port of the Angular `stripLegacyIrHtml` (regex-based, not a
+    DOMParser port) for the header's legacy `<HTML>...</HTML>`-dump remarks columns.
+  - `planning.letter.division-head-name` config property — no "division head" sign-off column
+    exists anywhere in this schema, so that one field is a configurable placeholder rather than
+    invented data, consistent with how this project has always flagged genuine gaps.
+  - Adding the new dependency killed the running `quarkus:dev` process (a pom.xml dependency change
+    can't hot-swap into a live JVM's classpath, only a full restart can) — restarted it, then
+    verified the endpoint live via `curl` with the shared mock JWT: real 2-page PDF,
+    `application/pdf`, correct data pulled from IR-9006.
+- **Frontend**: `wwell-ir.service.ts` gained `downloadLetterPdf(irSeq)` (blob GET); the existing
+  `WwellIrViewLetterComponent` (the client-side-only "Letter" tab) got a "Download PDF" toolbar
+  button that calls it and saves the blob via a synthetic `<a download>` click.
+- Verified live end-to-end via gstack browse (mock JWT injected into `localStorage['agwa_token']`
+  to get past the SSO login wall): clicked into IR-9006 → Letter tab → Download PDF, confirmed a
+  real `GET .../9006/letter-pdf → 200` network call and zero console errors. Also confirmed
+  `tsc --noEmit`, `ng lint`, and all 37 `wwell-ir` Jest tests clean (no new tests added, per the
+  standing "skip new tests during wwell-ir redesign" direction).
+
+**Later still: rich test IR + wellbore diagram, Casing Program table, and an APPROVED/REJECTED/PENDING
+status stamp on the letter PDF (backend-only, agwa-planning)**
+
+User asked for one new, richly-populated IR test record (3+ formation tops, 5 casing rows, full
+Program Details/Hydrogeology), then — after sharing a real production-rendered example of this
+letter (an Outlook email stamped "APPROVED") — pointed out the wellbore/casing diagram was entirely
+missing from the downloaded PDF, and asked for the letter's look to be brought in line with that
+reference: bigger sans-serif font, bold in more places, and a visible APPROVED/REJECTED/PENDING
+status indicator.
+
+- Created IR-9022 via the bulk-save POST. Hit `ORA-01400` on `st_long_cd` — Oracle's `JSON_TABLE`
+  silently returns `NULL` (not an error) when a JSON string value overflows a declared
+  `VARCHAR2(10)` column, so a full aquifer name ("Umm Er Radhuma") got silently dropped and then
+  failed the NOT NULL check downstream. Fixed by using the short formation codes from
+  `WWELL_IR_FORMATION_OPTIONS` instead of full names.
+- `sap_wf_id`/`sap_wf_status` (added 2026-09-03 for the SAP workflow PATCH) were being written but
+  never read back — added both to `get_ir_data_prc`'s header projection and reapplied live.
+  Stamped IR-9022 → APPROVED, IR-9006 → REJECTED, left IR-9004 unstamped to exercise the
+  `publish_flg`-derived PENDING fallback.
+- New `pdf/WellboreDiagramBuilder.java` — pure Java geometry (parses casing sizes like `12 5/8"`,
+  depth-scales everything into a fixed-size box) producing plain data records that
+  `IrLetterData`/`irLetter.html` render as absolutely-positioned CSS div rectangles/dashed
+  lines/labels — deliberately not embedded SVG, to avoid a second Batik-dependency version-conflict
+  risk on top of the one already hit with pdfbox/fontbox. Casing rows are emitted widest-first so
+  normal DOM paint order alone produces the correct telescoping-pipe look (no z-index needed).
+- Added a real "Casing Program:" table (Type/Size/Depth/Remarks) — the reference photo showed this
+  section actually renders as a table in production, correcting an earlier read of the original
+  cropped JRXML screenshot. Casing rows are now sorted by depth ascending for a top-down read.
+- Restyled `irLetter.html`: sans-serif font stack at a larger base size (was Times New Roman
+  10.5pt), section headings now italic/underlined/navy (were plain bold black), table headers now
+  navy with white text (were light grey). Bolded the well name once in a reworded intro sentence,
+  rather than string-matching/re-injecting markup into the free-text `gen_remarks` field.
+- **Real bug caught by actually rendering and viewing the PDF pages, not just checking HTTP 200:**
+  the wellbore diagram was getting split mid-box across a page break on first render. Fixed with
+  `page-break-inside: avoid` on its container — works even with absolutely-positioned children,
+  since the container's own box is still subject to normal page-break flow-fitting.
+- Verified live across all three status paths (IR-9022 APPROVED, IR-9006 REJECTED, IR-9004 PENDING
+  fallback) by actually reading the rendered PDF pages — installed `pypdf` to split multi-page PDFs
+  since no PDF/image CLI tool (poppler, ImageMagick, pdftk, qpdf) is installed on this Mac; macOS's
+  built-in `sips -s format png` rasterizes whichever single page it's given. Confirmed correct stamp
+  color/label, correct diagram geometry on both a 5-casing and a 2-casing record, and the page-break
+  fix holding in all three.
+
+**Later still: swapped PDF engine to iText, and the wellbore diagram is now a real UI snapshot**
+
+User feedback: the CSS-div wellbore schematic "not look good"; asked to switch the backend's PDF
+library to iText for "more features", and pointed out the app already has a much richer D3/SVG
+wellbore diagram (the same one on the Well Design tab, already shown in the Letter tab's own
+"3. Well Bore Diagram" section) that should be rendered in the UI and snapshotted into the report
+instead of a server-side redraw. Also asked that tables and the diagram never split across a page.
+
+- **Backend** (agwa-planning): swapped `openhtmltopdf` for iText's pdfHTML add-on
+  (`com.itextpdf:html2pdf:6.3.3` — confirmed via research before implementing, including that it
+  supports the CSS Fragmentation `break-inside`/`page-break-inside: avoid` properties more reliably
+  than openhtmltopdf did). User was told upfront that iText defaults to AGPL v3 licensing (vs.
+  openhtmltopdf's more permissive one) and chose to proceed; also chose an engine-only swap (keep
+  the existing Qute+CSS template) over a full native iText rewrite. `WellboreDiagramBuilder.java`
+  (the CSS-div geometry builder) is deleted entirely — the diagram is now a client-captured PNG
+  embedded via a plain `<img>` tag. The letter endpoint changed from `GET` to `POST` since the
+  image now rides along in the request body.
+  - Real bug: with no custom font config, pdfHTML doesn't reliably fall back to a sans-serif look
+    from generic CSS keywords the way a browser does — it silently rendered everything in a serif
+    face. Fixed by leading every font stack with the literal name `Helvetica` (one of iText's
+    built-in standard fonts, always available).
+- **Frontend**: added a `wwell-ir-wellbore-snapshot.util.ts` that captures the Letter tab's already
+  -rendered depth-scale + wellbore SVGs into one PNG (canvas composite), sent as base64 in the
+  Download PDF request. Two real bugs found via live testing, not just type-checking: (1) a nested
+  icon `<svg>` inside the diagram was wrongly captured as a third panel — fixed by only capturing
+  SVGs with no `<svg>` ancestor; (2) the D3-rendered "TOTAL DEPTH: 0 FT" label (meant to stay hidden
+  when there's no target depth) was leaking into the capture because the CSS property that hides it
+  (`display: none`) wasn't in the snapshot's inlined-style property list — fixed by adding it.
+  Documented, accepted limitation: a capture taken within ~1-2s of the tab first mounting can catch
+  the diagram's one-time entrance animation mid-flight; not fixed (would touch every renderer file
+  for an edge case unlikely to matter in practice).
+- Verified live end-to-end via gstack browse: real Download PDF click → network log confirmed a
+  ~236KB POST response (vs. ~6-7KB before, proving a real image rode along); since gstack can't
+  retrieve a browser-triggered blob download directly, closed the loop by running the identical
+  capture-then-POST logic inside the live page's own JS context and writing the PDF response
+  straight to disk — byte-identical size to the real click. Read the resulting PDF pages directly:
+  the actual live-rendered wellbore diagram (gradient casing pipes, static water level, geologic
+  horizon ticks, leader-line labels) appears exactly as shown on-screen, ghost label gone. Backend
+  `test-compile` and frontend `tsc`/`eslint`/all 37 `wwell-ir` Jest tests clean throughout.
