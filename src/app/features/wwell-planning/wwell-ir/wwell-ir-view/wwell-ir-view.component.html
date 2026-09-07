@@ -22,21 +22,51 @@
     </div>
   </header>
 
-  <nav class="irv__tabs" role="tablist" aria-label="Integrated requirement view">
-    @for (tab of tabs; track tab.key) {
-      <button
-        type="button"
-        role="tab"
-        class="irv__tab"
-        [class.irv__tab--active]="activeTab() === tab.key"
-        [attr.aria-selected]="activeTab() === tab.key"
-        (click)="setTab(tab.key)"
+  <div class="irv__tabs-row">
+    <nav class="irv__tabs" role="tablist" aria-label="Integrated requirement view">
+      @for (tab of tabs; track tab.key) {
+        <button
+          type="button"
+          role="tab"
+          class="irv__tab"
+          [class.irv__tab--active]="activeTab() === tab.key"
+          [attr.aria-selected]="activeTab() === tab.key"
+          (click)="setTab(tab.key)"
+        >
+          <mat-icon>{{ tab.icon }}</mat-icon>
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+
+    @if (activeTab() === 'letter') {
+      <!-- Tooltip lives on this wrapping span, not the button itself: a disabled native <button>
+           doesn't dispatch hover events in Chrome/Firefox, so a matTooltip bound directly to it
+           never shows — which is exactly the state (irSeq not saved yet) where the tooltip matters
+           most, to explain *why* the button is greyed out. The span has no disabled state of its
+           own, so it always receives the hover and shows whichever message currently applies.
+           matTooltipClass keys into the global override in styles.scss — the tooltip's overlay
+           renders as a direct child of <body>, outside `.irv`'s scoped theme, so it needs styling
+           that doesn't depend on that theme's CSS custom properties reaching it. -->
+      <span
+        class="irv__letter-download-wrap"
+        [matTooltip]="canDownloadPdf() ? 'Download IR report' : 'Save this integrated requirement before downloading the IR report'"
+        matTooltipClass="irv-download-tooltip"
+        matTooltipPosition="below"
       >
-        <mat-icon>{{ tab.icon }}</mat-icon>
-        {{ tab.label }}
-      </button>
+        <button type="button" class="irv__letter-download" [disabled]="!canDownloadPdf() || downloadingPdf()" (click)="downloadPdf()">
+          @if (downloadingPdf()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <span class="irv__letter-download-glyph">
+              <mat-icon>description</mat-icon>
+              <mat-icon class="irv__letter-download-badge">file_download</mat-icon>
+            </span>
+          }
+        </button>
+      </span>
     }
-  </nav>
+  </div>
 
   <div class="irv__tab-panel">
     @switch (activeTab()) {

@@ -112,6 +112,37 @@ transition: 0.3s ease;
     0 2px 8px rgba(0, 0, 0, 0.45) !important;
 }
 
+// ── IR view: "Download IR report" tooltip ───────────────────────────────────
+// CDK overlay tooltips render as a direct child of <body>, outside the wwell-ir-view
+// component's own DOM subtree — so the scoped `mat.theme(...)` CSS custom properties
+// defined on `.irv` (see wwell-ir-view.component.scss) never reach them by inheritance,
+// and the tooltip falls back to unstyled text. Same fix as `.sidenav-lock-tooltip`
+// above: style it directly, globally, keyed off `matTooltipClass`.
+.mat-mdc-tooltip.irv-download-tooltip .mdc-tooltip__surface {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0.1px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  max-width: 220px !important;
+  white-space: normal !important;
+  text-align: left !important;
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.25),
+    0 8px 20px rgba(15, 23, 42, 0.35) !important;
+}
+
 .wells-value{
   background: #87ceeb;
   border-color: #38bdf8;

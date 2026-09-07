@@ -17,17 +17,6 @@
   line-height: 1.55;
 }
 
-.letter__toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.75rem;
-
-  mat-spinner {
-    display: inline-block;
-    margin-right: 0.4rem;
-  }
-}
-
 .letter__masthead {
   display: flex;
   justify-content: space-between;

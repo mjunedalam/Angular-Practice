@@ -142,9 +142,88 @@ $accent: tokens.$accent;
   flex-shrink: 0;
 }
 
-/* ── Flat tab bar — Details / Well Design / Letter ───────────────────────── */
-.irv__tabs {
+/* ── Tabs row — the flat tab bar plus, only while the Letter tab is open, the Download PDF
+ * button in the same top-right corner it used to occupy inside the Letter tab's own (scrolling)
+ * content. Hoisting it here means it stays in view and in the same spot regardless of scroll
+ * position or which tab is active. ── */
+.irv__tabs-row {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.irv__letter-download-wrap {
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.irv__letter-download {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid $border;
+  border-radius: 10px;
+  background: tokens.$surface;
+  color: $muted;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  mat-spinner {
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
+    background: tokens.$surface-alt;
+    border-color: $accent;
+    color: $accent;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.irv__letter-download-glyph {
+  position: relative;
+  display: inline-flex;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.irv__letter-download-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 50%;
+  background: tokens.$surface;
+  color: $accent;
+  box-shadow: 0 0 0 1.5px tokens.$surface;
+}
+
+/* ── Flat tab bar — Details / Well Design / Letter ─────────────────────────
+ * `flex: 1` (not `flex-shrink: 0`) so the pill's own background/border stretches to fill the
+ * whole row instead of hugging its three buttons and leaving a bare gap before the download
+ * button — the tabs stay left-aligned inside it, but the bar itself now reads as one continuous
+ * block the full width of the panel. ── */
+.irv__tabs {
+  flex: 1;
   display: flex;
   gap: 0.25rem;
   background: tokens.$surface;

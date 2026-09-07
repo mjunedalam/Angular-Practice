@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104">
+  <defs>
+    <linearGradient id="dropGradient" x1="10" y1="98" x2="60" y2="4" gradientUnits="userSpaceOnUse">
+      <stop offset=".31" stop-color="#61acff"/>
+      <stop offset="1" stop-color="#0a43c5"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="98" y1="8" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset=".31" stop-color="#61acff"/>
+      <stop offset="1" stop-color="#0a43c5"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#dropGradient)" d="M52,3
+    C60,10 62,20 54,32
+    C48,40 46,44 48,50
+    C54,58 66,60 78,58
+    C88,68 82,90 54,99
+    C28,101 8,87 6,61
+    C4,37 20,17 52,3
+    Z"/>
+  <path fill="url(#flameGradient)" d="M58,24
+    C68,8 84,-2 98,12
+    C106,26 100,42 80,50
+    C76,52 72,52 70,50
+    C62,42 54,34 58,24
+    Z"/>
+</svg>
