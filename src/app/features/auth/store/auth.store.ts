@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 
@@ -7,6 +7,8 @@ import { JwtService } from 'src/app/core/services/jwt/jwt.service';
 import { LoaderService } from 'src/app/shared/components/global-loader/loader.service';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { RbacStore } from '@store/rbac/rbac.store';
+import { SKIP_AUTO_LOGOUT } from '@interceptors/error.interceptor';
+import { extractHttpErrorMessage } from '@core/utils/http-error.util';
 import { AuthState, initialState, selectDisplayUsername, selectIsTokenExpired, selectLastLogin, selectUserEmail } from './auth.selectors';
 
 export const AuthStore = signalStore(
@@ -31,7 +33,14 @@ export const AuthStore = signalStore(
       loading.startLogin('Contacting identity service...');
       patchState(store, { isLoading: true, error: null });
 
-      http.get(`${extAppConfigService.settings.tokenUrl}`, { responseType: 'text', withCredentials: true })
+      http.get(`${extAppConfigService.settings.tokenUrl}`, {
+        responseType: 'text',
+        withCredentials: true,
+        // A failed login must not trigger the interceptor's auto-logout branch (a 401 here
+        // means "bad credentials", not "session expired") — but the backend's own message
+        // should still reach both the global toast and the inline error below the login button.
+        context: new HttpContext().set(SKIP_AUTO_LOGOUT, true),
+      })
         .subscribe({
           next: async (token) => {
             const normalizedToken = token.trim();
@@ -42,9 +51,9 @@ export const AuthStore = signalStore(
             await rbacStore.loadPermissions(`${baseUrl}/daily-operations/api/v1/rbac/permissions`, normalizedToken);
             void router.navigate(['main']).finally(() => loading.completeLogin());
           },
-          error: () => {
+          error: (err: HttpErrorResponse) => {
             localStorage.removeItem('agwa_token');
-            patchState(store, { ...initialState, error: 'Login Failed' });
+            patchState(store, { ...initialState, error: extractHttpErrorMessage(err, 'Login Failed') });
             loading.fail();
           },
         });

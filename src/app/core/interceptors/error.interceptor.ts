@@ -2,6 +2,7 @@ import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular
 import { inject } from '@angular/core';
 import { catchError, EMPTY, throwError } from 'rxjs';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { extractHttpErrorMessage } from '@core/utils/http-error.util';
 import { AuthStore } from '../../features/auth/store/auth.store';
 
 // Set to true on requests that handle their own error notifications.
@@ -30,7 +31,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      const message = error.error?.message ?? error.message ?? 'An unexpected error occurred.';
+      const message = extractHttpErrorMessage(error);
       notify.error(message);
       return throwError(() => error);
     }),

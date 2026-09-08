@@ -43,4 +43,25 @@ describe('errorInterceptor', () => {
       });
     });
   });
+
+  it('toasts the backend\'s own plain-text body instead of the generic transport message', (done) => {
+    const request = new HttpRequest('GET', '/api/token', { responseType: 'text' });
+    const oraError = 'ORA-20001: Your oracle account is LOCKED. Please use identityiq to fix the account issue.';
+    const error = new HttpErrorResponse({
+      status: 403,
+      statusText: 'Forbidden',
+      error: oraError,
+    });
+    const next = jest.fn(() => throwError(() => error));
+
+    TestBed.runInInjectionContext(() => {
+      errorInterceptor(request, next).subscribe({
+        next: () => done.fail('Expected the interceptor to rethrow the error'),
+        error: () => {
+          expect(notificationServiceMock.error).toHaveBeenCalledWith(oraError);
+          done();
+        },
+      });
+    });
+  });
 });
