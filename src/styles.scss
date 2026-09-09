@@ -143,6 +143,46 @@ transition: 0.3s ease;
     0 8px 20px rgba(15, 23, 42, 0.35) !important;
 }
 
+// ── IR attachment row actions: View / Upload / Replace / Delete ──────────────
+// Same overlay problem as the two tooltips above — these render outside the editor component, so
+// they have to be styled globally off `matTooltipClass` or they fall back to Material's default.
+// Sized for one-word labels: nowrap and centred, rather than the wrapped paragraph treatment the
+// sentence-length tooltips above need.
+.mat-mdc-tooltip.ir-attachment-tooltip .mdc-tooltip__surface {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.3px !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  box-shadow:
+    0 0 0 1px rgba(148, 163, 184, 0.22),
+    0 6px 16px rgba(15, 23, 42, 0.3) !important;
+}
+
+// ── IR attachment viewer toolbar ─────────────────────────────────────────────
+// Inverted on purpose: the viewer's chrome is near-black (#1b1e26), so the dark surface used above
+// would sit almost invisibly on top of it. A light chip is the readable choice over that stage.
+.mat-mdc-tooltip.ir-viewer-tooltip .mdc-tooltip__surface {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  font-family: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.3px !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+}
+
 .wells-value{
   background: #87ceeb;
   border-color: #38bdf8;

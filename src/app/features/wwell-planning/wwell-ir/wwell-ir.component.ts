@@ -233,6 +233,12 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
         // chain, only whatever buildIntegratedRequirementFromPayload defaulted it to. Doesn't gate
         // isSelecting() (see that computed's comment), so this never reintroduces the skeleton.
         this.store.loadIrApprovalTimeline(savedIrSeq);
+        // A brand-new record has an ir_seq for the first time here, so this is the first moment
+        // its attachment slots can be fetched (and the first moment uploads become possible).
+        this.store.loadIrAttachments(savedIrSeq);
+        // Anything the user attached while this was still an unsaved draft had nowhere to go until
+        // now — send it against the id the save just assigned.
+        this.store.uploadPendingAttachments(savedIrSeq);
       }
 
       const savedCode = savedIrSeq !== null ? this.store.irs().find(ir => ir.irSeq === savedIrSeq)?.code : undefined;
@@ -309,6 +315,13 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
       // Separate call — the approval-process API doesn't exist yet (mocked for now), but the
       // request shape already mirrors the real future one: one fetch per selected IR.
       this.store.loadIrApprovalTimeline(irSeq);
+      // Also its own fetch: attachments are files on the backend's filesystem keyed by ir_seq, not
+      // exad_gwd_ir_* columns, so they can't ride along in the detail blocks above.
+      this.store.loadIrAttachments(irSeq);
+      // Files held for an abandoned New IR belong to that draft alone — drop them rather than let
+      // them surface on whichever record was just selected. (This effect deliberately no-ops on the
+      // save transition, see the comment above, so it can't discard files mid-upload.)
+      this.store.clearPendingAttachments();
       // Re-fetched on every selection, not just once at ngOnInit — this backs the editor's own
       // "Link to Request" dropdown and its live auto-populate-on-pick (see
       // wwell-ir-editor.component.ts's applyLinkedRequestWell / wwell-ir-linked-well.util.ts),
@@ -446,7 +459,9 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   private performCreateNewIr(): void {
     const raw = buildWwellDynamicForm(WWELL_IR_FORM_SCHEMA, this.fb).getRawValue() as WwellIrFormRawValue;
     const { payload } = mapIrFormValueToSubmission(raw, 'draft');
-    const draft = buildIntegratedRequirementFromPayload(payload, { id: 'draft', code: 'New IR', irSeq: null }, []);
+    const draft = buildIntegratedRequirementFromPayload(payload, { id: 'draft', code: 'New IR', irSeq: null });
+    // Start the new draft with empty slots — a previous draft's held files must not carry over.
+    this.store.clearPendingAttachments();
 
     this.pendingDraftIr.set(draft);
     this.selectedIrSeq.set(null);

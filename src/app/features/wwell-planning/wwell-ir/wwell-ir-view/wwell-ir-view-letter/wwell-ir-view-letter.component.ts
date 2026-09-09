@@ -3,6 +3,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentFor } from '../../wwell-ir-attachments.config';
 import { WellBoreViewComponent } from '../../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrDepthScaleComponent } from '../../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import {
@@ -34,6 +36,12 @@ const OPEN_HOLE_COMPLETION = 'Open Hole';
 })
 export class WwellIrViewLetterComponent {
   readonly ir = input.required<IntegratedRequirement>();
+
+  protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
+
+  protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
+    return irAttachmentFor(this.ir().attachments, slot);
+  }
 
   private readonly wellboreDiagramRow = viewChild<ElementRef<HTMLElement>>('wellboreDiagramRow');
 

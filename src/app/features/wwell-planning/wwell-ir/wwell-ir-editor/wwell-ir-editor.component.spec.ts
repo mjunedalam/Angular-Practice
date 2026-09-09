@@ -4,6 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
+import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrEditorComponent } from './wwell-ir-editor.component';
 import { WWELL_IR_SECTION_RAIL, wwellIrRailLeaves } from './wwell-ir-section-rail.config';
 
@@ -40,7 +41,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     offsetWellsRemarks: null,
     hydrogeology: { aquifer: 'Saq', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: null },
     testProgram: { testType: 'flow-test', estimatedRateGpm: null, estimatedWaterLevelFt: null, siwhpPsi: null },
-    attachmentNames: [],
+    attachments: [],
     chain: [],
     ...overrides,
   };
@@ -65,6 +66,20 @@ const storeMock = {
   geologistOptions: jest.fn(() => [] as string[]),
   geologistEmpNumByName: jest.fn(() => ({}) as Readonly<Record<string, number>>),
   loadGwdOpsMembers: jest.fn(),
+  busyAttachmentSlot: jest.fn(() => null),
+  attachmentUploadPercent: jest.fn(() => null),
+  attachmentError: jest.fn(() => null),
+  pendingAttachments: jest.fn(() => ({}) as Partial<Record<string, File>>),
+  deleteIrAttachment: jest.fn(),
+  setPendingAttachment: jest.fn(),
+  removePendingAttachment: jest.fn(),
+  uploadStagedAttachment: jest.fn(),
+};
+
+/** The editor only reaches the service for an attachment's download URL — the uploads themselves
+ *  go through the store (mocked above), so this is all the surface the component actually uses. */
+const wwellIrServiceMock = {
+  irAttachmentUrl: jest.fn((irSeq: number, slot: string) => `/api/integrated-requirements/${irSeq}/attachments/${slot}`),
 };
 
 const notificationServiceMock = {
@@ -91,6 +106,7 @@ describe('WwellIrEditorComponent', () => {
       providers: [
         { provide: WwellIrStore, useValue: storeMock },
         { provide: NotificationService, useValue: notificationServiceMock },
+        { provide: WwellIrService, useValue: wwellIrServiceMock },
       ],
     }).compileComponents();
 
@@ -130,6 +146,7 @@ describe('WwellIrEditorComponent', () => {
       providers: [
         { provide: WwellIrStore, useValue: storeMock },
         { provide: NotificationService, useValue: notificationServiceMock },
+        { provide: WwellIrService, useValue: wwellIrServiceMock },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(WwellIrEditorComponent);

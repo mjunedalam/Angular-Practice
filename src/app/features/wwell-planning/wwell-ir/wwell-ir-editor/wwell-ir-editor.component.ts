@@ -21,11 +21,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
@@ -60,6 +65,13 @@ import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
+import {
+  WWELL_IR_ATTACHMENT_ACCEPT,
+  WWELL_IR_ATTACHMENT_MAX_BYTES,
+  WWELL_IR_ATTACHMENT_SLOTS,
+  irAttachmentFor,
+} from '../wwell-ir-attachments.config';
+import { WwellIrService } from '../wwell-ir.service';
 import { WWELL_IR_STATUS_META, WWELL_IR_SUBMITTABLE_STATUSES } from '../wwell-ir.config';
 import {
   buildGeologistContactRows,
@@ -113,7 +125,9 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
     NgTemplateOutlet,
     MatButtonModule,
     MatIconModule,
+    MatProgressBarModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     DynamicFieldComponent,
     DynamicSectionComponent,
     WellBoreViewComponent,
@@ -137,6 +151,8 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmDialog = inject(ActionConfirmDialogService);
   private readonly notify = inject(NotificationService);
+  private readonly wwellIrService = inject(WwellIrService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly isSaving = this.store.creatingIr;
@@ -455,13 +471,133 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.offsetWellsInlineEdit.cancel(index !== null ? this.offsetWellsRowGroup(index) : null);
   }
 
-  // Attachments has no schema-form counterpart worth reusing — both upload slots save into one
-  // flat `attachmentNames` list on the domain record (see wwell-ir-section-rail.config.ts's
-  // "attachments" entry), and a File can't be reconstructed from a saved name either way — so
-  // this is a plain add/remove-by-name editor instead of a SectionEditState/dynamic-section instance.
-  protected readonly attachmentsEditing = signal(false);
-  protected readonly attachmentsDraftNames = signal<readonly string[]>([]);
-  protected readonly attachmentsNewFiles = signal<readonly File[]>([]);
+  // ── Attachments (7.1 Location Map / 7.2 Initiation Request)
+  // No SectionEditState or dynamic-section here: unlike every other section, these aren't fields on
+  // a form that the global Save submits. Each slot is a real file that uploads to its own endpoint
+  // the moment it's picked and is owned by the backend from then on — so there's no draft state to
+  // hold, and nothing for "Save" or the unsaved-changes guard to be responsible for.
+  protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
+  protected readonly acceptedAttachmentTypes = WWELL_IR_ATTACHMENT_ACCEPT;
+
+  /** The stored file in a slot, or null when it's empty. */
+  protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
+    return irAttachmentFor(this.ir().attachments, slot);
+  }
+
+  /** True while that one slot is mid-upload/mid-delete — the other stays interactive. */
+  protected isAttachmentBusy(slot: IrAttachmentSlot): boolean {
+    return this.store.busyAttachmentSlot() === slot;
+  }
+
+  /** Real bytes-sent percentage, or null for an operation with nothing measurable to show. */
+  protected attachmentUploadPercent(): number | null {
+    return this.store.attachmentUploadPercent();
+  }
+
+  /** An upload needs a persisted ir_seq to file the document under; a never-saved draft has none,
+   *  so its staged files wait for the first save instead of offering an upload that can't work. */
+  protected canAttach(): boolean {
+    return this.ir().irSeq != null;
+  }
+
+  /** The file picked for a slot on a not-yet-saved IR, held until the first save assigns an ir_seq. */
+  protected pendingAttachmentFor(slot: IrAttachmentSlot): File | null {
+    return this.store.pendingAttachments()[slot] ?? null;
+  }
+
+  /** True when a slot has something to show — either stored on the server or waiting to upload. */
+  protected hasAttachment(slot: IrAttachmentSlot): boolean {
+    return this.attachmentFor(slot) !== null || this.pendingAttachmentFor(slot) !== null;
+  }
+
+  /**
+   * Opens the attachment viewer. A staged file is already a `File`; a stored one is fetched back as
+   * one first, so both end up in the same viewer instead of one opening a raw browser tab.
+   */
+  protected viewAttachment(slot: IrAttachmentSlot): void {
+    const config = WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot);
+    const label = config?.label ?? 'Attachment';
+
+    const staged = this.pendingAttachmentFor(slot);
+    if (staged) {
+      this.openViewer(staged, label);
+      return;
+    }
+
+    const attachment = this.attachmentFor(slot);
+    const irSeq = this.ir().irSeq;
+    if (!attachment || irSeq == null) return;
+
+    this.wwellIrService
+      .getIrAttachmentFile(irSeq, slot, attachment.fileName)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: file => this.openViewer(file, label),
+        error: () => this.notify.error(`Failed to open ${attachment.fileName}.`),
+      });
+  }
+
+  /** Sized to the viewport rather than to the file — a scanned map is unreadable in a small panel. */
+  private openViewer(file: File, label: string): void {
+    this.dialog.open(WwellIrAttachmentViewerComponent, {
+      data: { file, label },
+      panelClass: 'ir-viewer-panel',
+      width: '92vw',
+      maxWidth: '1500px',
+      height: '92vh',
+      autoFocus: false,
+    });
+  }
+
+  /** Explicit send of a staged file — attaching alone never uploads. */
+  protected uploadStagedAttachment(slot: IrAttachmentSlot): void {
+    const irSeq = this.ir().irSeq;
+    if (irSeq == null) {
+      this.notify.info('Save the integrated requirement first — this uploads automatically on save.');
+      return;
+    }
+    this.store.uploadStagedAttachment(irSeq, slot);
+  }
+
+  protected attachmentSizeLabel(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  protected attachmentIcon(contentType: string): string {
+    return contentType === 'application/pdf' ? 'picture_as_pdf' : 'image';
+  }
+
+  protected onAttachmentPicked(slot: IrAttachmentSlot, event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    // Reset immediately so re-picking the same file after a failure still fires a change event.
+    if (input) input.value = '';
+    if (!file) return;
+
+    // Checked here purely to fail fast without spending the upload — the server enforces the same
+    // cap, and is the authority on it (see IrAttachmentStorageService).
+    if (file.size > WWELL_IR_ATTACHMENT_MAX_BYTES) {
+      this.notify.error('Attachment exceeds the 25 MB limit.');
+      return;
+    }
+
+    // Attaching only stages the file — the user sends it with the slot's own upload action. On a
+    // New IR there's no ir_seq to upload against anyway, and the first save flushes it instead
+    // (see WwellIrComponent's uploadPendingAttachments call).
+    this.store.setPendingAttachment(slot, file);
+  }
+
+  protected removeAttachment(slot: IrAttachmentSlot): void {
+    if (this.pendingAttachmentFor(slot)) {
+      this.store.removePendingAttachment(slot);
+      return;
+    }
+    const irSeq = this.ir().irSeq;
+    if (irSeq == null) return;
+    this.store.deleteIrAttachment(irSeq, slot);
+  }
 
   // One entry per flattened rail leaf, in the same order — see wwell-ir-editor.component.html.
   @ViewChildren('sectionEl', { read: ElementRef }) private readonly sectionEls?: QueryList<ElementRef<HTMLElement>>;
@@ -489,8 +625,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.formationTopsEdit.isEditing() ||
       this.topsRemarksEdit.isEditing() ||
       this.casingEdit.isEditing() ||
-      this.offsetWellsEdit.isEditing() ||
-      this.attachmentsEditing(),
+      this.offsetWellsEdit.isEditing(),
   );
 
   // Resolved once the in-flight save this array was queued for actually settles — see the
@@ -800,7 +935,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
    *  Approved/In Review". Editing a draft/in-progress record keeps its current status; editing
    *  anything further along pulls it back to 'in-progress' (not 'draft', since it was already
    *  worked past that point) so it's clear the record needs to move through review again. */
-  private saveMergedRaw(raw: WwellIrFormRawValue, attachmentNames?: readonly string[]): void {
+  private saveMergedRaw(raw: WwellIrFormRawValue): void {
     const current = this.ir();
     const status: Extract<IntegratedRequirementStatus, 'draft' | 'in-progress'> =
       current.status === 'draft' || current.status === 'in-progress' ? current.status : 'in-progress';
@@ -810,7 +945,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       existing: current,
       geologistEmpNumByName: this.store.geologistEmpNumByName(),
     });
-    this.store.createIr(payload, irBulkPayload, attachmentNames ?? current.attachmentNames);
+    this.store.createIr(payload, irBulkPayload);
   }
 
   /** Global footer "Save" — merges every currently-open section's live form value (plus
@@ -888,11 +1023,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       };
     }
 
-    const attachmentNames = this.attachmentsEditing()
-      ? [...this.attachmentsDraftNames(), ...this.attachmentsNewFiles().map(file => file.name)]
-      : undefined;
-
-    this.saveMergedRaw(raw, attachmentNames);
+    this.saveMergedRaw(raw);
     this.closeAllSections();
   }
 
@@ -905,32 +1036,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.topsRemarksEdit.close();
     this.casingEdit.close();
     this.offsetWellsEdit.close();
-    this.closeAttachmentsEdit();
-  }
-
-  protected openAttachmentsEdit(): void {
-    this.attachmentsDraftNames.set(this.ir().attachmentNames);
-    this.attachmentsNewFiles.set([]);
-    this.attachmentsEditing.set(true);
-  }
-
-  protected closeAttachmentsEdit(): void {
-    this.attachmentsEditing.set(false);
-  }
-
-  protected removeAttachmentName(name: string): void {
-    this.attachmentsDraftNames.update(names => names.filter(existing => existing !== name));
-  }
-
-  protected removeNewAttachmentFile(file: File): void {
-    this.attachmentsNewFiles.update(files => files.filter(existing => existing !== file));
-  }
-
-  protected onAttachmentFilesPicked(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const picked = input.files ? Array.from(input.files) : [];
-    this.attachmentsNewFiles.update(files => [...files, ...picked]);
-    input.value = '';
   }
 
   protected submitForReview(): void {

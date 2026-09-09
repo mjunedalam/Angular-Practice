@@ -18,7 +18,6 @@ export interface IntegratedRequirementIdentity {
 export function buildIntegratedRequirementFromPayload(
   payload: CreateIntegratedRequirementPayload,
   identity: IntegratedRequirementIdentity,
-  attachmentNames: readonly string[],
 ): IntegratedRequirement {
   return {
     ...identity,
@@ -34,7 +33,9 @@ export function buildIntegratedRequirementFromPayload(
     offsetWellsRemarks: payload.offsetWellsRemarks,
     hydrogeology: payload.hydrogeology,
     testProgram: payload.testProgram,
-    attachmentNames,
+    // Always empty here: attachments are real files keyed by ir_seq on the backend, so a
+    // just-built record has none until loadIrAttachments fetches them.
+    attachments: [],
     chain: buildInitialApprovalChain(WWELL_IR_CHAIN_ROLES, 'You'),
   };
 }

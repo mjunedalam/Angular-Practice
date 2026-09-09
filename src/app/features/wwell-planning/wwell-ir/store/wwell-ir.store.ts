@@ -3,8 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { catchError, delay, map, of, pipe, switchMap, tap } from 'rxjs';
+import { catchError, concatMap, delay, from, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import {
   WWELL_DELETE_DELAY_MS,
   WWELL_SAVE_DELAY_MS,
@@ -62,6 +63,7 @@ export const WwellIrStore = signalStore(
       irDetailError,
       irApprovalTimelineError,
       deleteIrError,
+      attachmentError,
     }) => ({
       isLoading: computed(() => irsLoading() || linkedRequestWellsLoading()),
       /** Trimmed {value,label} view of linkedRequestWells for the "Link to Request" picker itself —
@@ -95,6 +97,7 @@ export const WwellIrStore = signalStore(
           irDetailError(),
           irApprovalTimelineError(),
           deleteIrError(),
+          attachmentError(),
         ].filter((message): message is string => message !== null),
       ),
       hasError: computed(
@@ -106,7 +109,8 @@ export const WwellIrStore = signalStore(
           updateIrStatusError() !== null ||
           irDetailError() !== null ||
           irApprovalTimelineError() !== null ||
-          deleteIrError() !== null,
+          deleteIrError() !== null ||
+          attachmentError() !== null,
       ),
     }),
   ),
@@ -220,6 +224,36 @@ export const WwellIrStore = signalStore(
       ),
     );
 
+    // Attachments are files on the backend's filesystem, not exad_gwd_ir_* columns, so they load
+    // through their own endpoint and get merged onto the record the same way the chain above does.
+    const loadIrAttachments = rxMethod<number>(
+      pipe(
+        tap(() => patchState(store, { attachmentsLoading: true, attachmentError: null })),
+        switchMap(irSeq =>
+          svc.getIrAttachments(irSeq).pipe(
+            tapResponse({
+              next: attachments => {
+                patchState(store, {
+                  irs: store.irs().map(item => (item.irSeq === irSeq ? { ...item, attachments } : item)),
+                  attachmentsLoading: false,
+                });
+              },
+              error: (err: unknown) =>
+                patchState(store, { attachmentsLoading: false, attachmentError: errorMessage(err, 'Failed to load attachments') }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    /** Replaces just this slot's entry on the record, leaving the other slot untouched. */
+    const withAttachment = (irSeq: number, slot: IrAttachmentSlot, attachment: IrAttachment | null) =>
+      store.irs().map(item => {
+        if (item.irSeq !== irSeq) return item;
+        const others = item.attachments.filter(existing => existing.slot !== slot);
+        return { ...item, attachments: attachment ? [...others, attachment] : others };
+      });
+
     return {
       loadIrs(): void {
         loadIrs();
@@ -227,6 +261,119 @@ export const WwellIrStore = signalStore(
 
       loadIrDetail(irSeq: number): void {
         loadIrDetail(irSeq);
+      },
+
+      loadIrAttachments(irSeq: number): void {
+        loadIrAttachments(irSeq);
+      },
+
+      /**
+       * Stages a picked file. Attaching never uploads on its own — the user sends it with the
+       * slot's own upload action (`uploadStagedAttachment`), or, for a New IR that has no ir_seq to
+       * upload against yet, the first save flushes it via `uploadPendingAttachments`.
+       */
+      setPendingAttachment(slot: IrAttachmentSlot, file: File): void {
+        patchState(store, { pendingAttachments: { ...store.pendingAttachments(), [slot]: file }, attachmentError: null });
+      },
+
+      /**
+       * Sends the file staged for one slot. Clears the staging only after the server confirms, so a
+       * failed upload leaves the file in the slot to retry rather than silently dropping the user's
+       * pick — the one thing that would actually lose their work.
+       */
+      uploadStagedAttachment(irSeq: number, slot: IrAttachmentSlot): void {
+        const file = store.pendingAttachments()[slot];
+        if (!file) return;
+
+        patchState(store, { busyAttachmentSlot: slot, attachmentUploadPercent: 0, attachmentError: null });
+        svc.uploadIrAttachment(irSeq, slot, file).subscribe({
+          next: ({ percent, attachment }) => {
+            if (!attachment) {
+              patchState(store, { attachmentUploadPercent: percent });
+              return;
+            }
+            const remaining = Object.fromEntries(
+              Object.entries(store.pendingAttachments()).filter(([key]) => key !== slot),
+            ) as Partial<Record<IrAttachmentSlot, File>>;
+            patchState(store, {
+              irs: withAttachment(irSeq, slot, attachment),
+              pendingAttachments: remaining,
+              busyAttachmentSlot: null,
+              attachmentUploadPercent: null,
+            });
+          },
+          error: (err: unknown) =>
+            patchState(store, {
+              busyAttachmentSlot: null,
+              attachmentUploadPercent: null,
+              attachmentError: errorMessage(err, 'Failed to upload the attachment'),
+            }),
+        });
+      },
+
+      removePendingAttachment(slot: IrAttachmentSlot): void {
+        const remaining = Object.fromEntries(
+          Object.entries(store.pendingAttachments()).filter(([key]) => key !== slot),
+        ) as Partial<Record<IrAttachmentSlot, File>>;
+        patchState(store, { pendingAttachments: remaining });
+      },
+
+      /** Drops every held file — the draft was abandoned, or a different record was selected. */
+      clearPendingAttachments(): void {
+        patchState(store, { pendingAttachments: {} });
+      },
+
+      /**
+       * Uploads everything held for a draft that has just been assigned `irSeq`, one slot at a
+       * time. Sequential rather than parallel because `busyAttachmentSlot`/`attachmentUploadPercent`
+       * describe a single in-flight upload — two at once would fight over both.
+       *
+       * State is cleared up front so a second save can't re-upload the same files, and a failure on
+       * one slot doesn't abort the other: each reports its own error and the chain continues.
+       */
+      uploadPendingAttachments(irSeq: number): void {
+        const pending = Object.entries(store.pendingAttachments()) as [IrAttachmentSlot, File][];
+        if (!pending.length) return;
+        patchState(store, { pendingAttachments: {} });
+
+        from(pending)
+          .pipe(
+            concatMap(([slot, file]) => {
+              patchState(store, { busyAttachmentSlot: slot, attachmentUploadPercent: 0, attachmentError: null });
+              return svc.uploadIrAttachment(irSeq, slot, file).pipe(
+                tap(({ percent, attachment }) => {
+                  if (!attachment) {
+                    patchState(store, { attachmentUploadPercent: percent });
+                    return;
+                  }
+                  patchState(store, {
+                    irs: withAttachment(irSeq, slot, attachment),
+                    busyAttachmentSlot: null,
+                    attachmentUploadPercent: null,
+                  });
+                }),
+                catchError((err: unknown) => {
+                  patchState(store, {
+                    busyAttachmentSlot: null,
+                    attachmentUploadPercent: null,
+                    attachmentError: errorMessage(err, `Failed to upload the ${slot} attachment`),
+                  });
+                  return of(null);
+                }),
+              );
+            }),
+          )
+          .subscribe();
+      },
+
+      /** Percent stays null throughout: a delete has no measurable progress to report. */
+      deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot): void {
+        patchState(store, { busyAttachmentSlot: slot, attachmentError: null, attachmentUploadPercent: null });
+        svc.deleteIrAttachment(irSeq, slot).subscribe({
+          next: () => patchState(store, { irs: withAttachment(irSeq, slot, null), busyAttachmentSlot: null }),
+          error: (err: unknown) =>
+            patchState(store, { busyAttachmentSlot: null, attachmentError: errorMessage(err, 'Failed to remove the attachment') }),
+        });
       },
 
       loadIrApprovalTimeline(irSeq: number): void {
@@ -253,11 +400,7 @@ export const WwellIrStore = signalStore(
        * `creatingIr` stays true for both round-trips (POST, then GET), so the spinner is what
        * covers the extra latency — nothing renders in between.
        */
-      createIr(
-        payload: CreateIntegratedRequirementPayload,
-        irBulkPayload: WwellIrBulkSavePayload,
-        attachmentNames: readonly string[] = [],
-      ): void {
+      createIr(payload: CreateIntegratedRequirementPayload, irBulkPayload: WwellIrBulkSavePayload): void {
         patchState(store, { creatingIr: true, createIrError: null });
         svc
           .createIr(irBulkPayload)
@@ -294,7 +437,7 @@ export const WwellIrStore = signalStore(
               }
               const existing = store.irs().find(item => item.irSeq === irSeq);
               const base =
-                existing ?? buildIntegratedRequirementFromPayload(payload, { id: `IR-${irSeq}`, code: `IR-${irSeq}`, irSeq }, attachmentNames);
+                existing ?? buildIntegratedRequirementFromPayload(payload, { id: `IR-${irSeq}`, code: `IR-${irSeq}`, irSeq });
               const merged = mergeIrDetailBlocksIntoIntegratedRequirement(base, blocks, store.geologistNameByEmpNum());
               patchState(store, {
                 irs: upsertByIrSeq(store.irs(), merged),

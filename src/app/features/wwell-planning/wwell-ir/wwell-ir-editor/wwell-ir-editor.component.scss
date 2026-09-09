@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@angular/material' as mat;
 @use '../../shared/wwell-select-panel-mixin' as wsel;
 @use '../../shared/wwell-design-tokens' as tokens;
@@ -823,84 +824,36 @@ app-wwell-ir-editor {
   font-style: italic;
 }
 
-/* ── Attachments ────────────────────────────────────────────────── */
-.ire__attachments {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-/* Plain metadata, not a link — `attachmentNames` is filenames only (no file/URL data behind it
- * yet), so this deliberately reads as neutral navy text, not accent blue. */
-.ire__attachment {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.65rem;
-  background: tokens.$surface-alt;
-  border: 1px solid $border;
-  border-radius: 7px;
-  font-size: 0.84rem;
-  color: $navy;
-  font-weight: 600;
-  width: fit-content;
-
-  mat-icon {
-    width: 15px;
-    height: 15px;
-    font-size: 15px;
-    color: $muted;
-  }
-}
-
-.ire__attachments--edit .ire__attachment {
-  padding-right: 0.3rem;
-}
-
-.ire__attachment--new {
-  border-style: dashed;
-  border-color: $accent;
-}
-
-.ire__attachment-remove {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  margin-left: 0.15rem;
-  color: $muted;
-
-  &:hover {
-    color: #b91c1c;
-  }
-
-  mat-icon {
-    width: 13px;
-    height: 13px;
-    font-size: 13px;
-  }
-}
-
-.ire__attachment-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.6rem;
-  padding: 0.4rem 0.75rem;
-  border: 1.5px dashed $border;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
+/* ── Attachments (7.1 Location Map / 7.2 Initiation Request) ─────────────────── */
+/* The slot's own icon, inline in its subsection heading — this is the one visual cue that tells
+ * the two slots apart at a glance, since their empty states are otherwise identical. */
+.ire__attachment-slot-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  margin-right: 0.35rem;
+  vertical-align: -3px;
   color: $accent;
-  cursor: pointer;
-  width: fit-content;
+}
 
-  &:hover {
-    border-color: $accent;
-    background: tokens.$surface-alt;
-  }
+.ire__attachment-required {
+  margin-left: 0.2rem;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.ire__attachment-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.82rem;
+  font-weight: 600;
 
   mat-icon {
     width: 16px;
@@ -908,6 +861,181 @@ app-wwell-ir-editor {
     font-size: 16px;
   }
 }
+
+/* Empty slot: hint copy plus one explicit Upload button. The card itself is deliberately NOT the
+ * click target — with a real button present, a whole-card hit area just makes stray clicks open a
+ * file dialog the user didn't ask for. */
+.ire__attachment-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1.1rem 1rem;
+  border: 1.5px dashed $border;
+  border-radius: 10px;
+  background: tokens.$surface-alt;
+  text-align: center;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+
+  &:focus-within {
+    border-color: $accent;
+  }
+
+  > mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    color: $accent;
+  }
+}
+
+/* Icon-only upload control — a round accent button, sized to match the row actions on an occupied
+ * slot so the two states read as the same control set rather than two different designs. */
+.ire__attachment-upload-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-top: 0.6rem;
+  border-radius: 50%;
+  background: $accent;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    opacity 150ms ease;
+
+  &:hover {
+    background: color.adjust($accent, $lightness: -8%);
+  }
+
+  /* Keyboard users reach the label through its hidden input, so the ring has to be drawn here. */
+  &:focus-within {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+
+  &--busy {
+    cursor: progress;
+    opacity: 0.65;
+  }
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+/* Skinny by design — this sits under a compact card, so a full-height Material bar would read as a
+ * separate element rather than as feedback belonging to the slot above it. */
+.ire__attachment-progress {
+  margin-top: 0.5rem;
+  height: 3px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ire__attachment-drop-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.ire__attachment-drop-hint {
+  font-size: 0.75rem;
+  color: $muted;
+}
+
+/* Occupied slot: file identity on the left, actions on the right. */
+.ire__attachment-file {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid $border;
+  border-radius: 10px;
+  background: tokens.$surface-alt;
+
+  /* Held for an unsaved New IR — dashed, matching the empty slot's border, so "not committed yet"
+   * is visible at a glance rather than only in the caption text. */
+  &--pending {
+    border-style: dashed;
+    border-color: $accent;
+  }
+}
+
+.ire__attachment-file-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: $accent;
+}
+
+.ire__attachment-file-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Takes the slack so the action buttons stay pinned right regardless of name length. */
+  flex: 1 1 auto;
+}
+
+.ire__attachment-file-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: $navy;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ire__attachment-file-size {
+  font-size: 0.74rem;
+  color: $muted;
+}
+
+.ire__attachment-action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: $muted;
+  cursor: pointer;
+
+  &:hover {
+    color: $accent;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &--danger:hover {
+    color: #b91c1c;
+  }
+
+  /* The one action that actually commits the file, so it carries accent weight from the start
+   * rather than only on hover like the neutral view/replace icons beside it. */
+  &--upload {
+    color: $accent;
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+  }
+}
+
 
 /* ── Casing size warnings — same treatment as the old wizard's ──────────────── */
 .ire__casing-warnings {

@@ -81,12 +81,20 @@ export const WWELL_IR_SECTION_RAIL: readonly WwellIrRailGroup[] = [
     number: '7.0',
     label: 'Attachments',
     icon: 'attach_file',
-    // Both upload slots save into one flat `attachmentNames` list on the domain record (see
-    // IntegratedRequirement) — there's no persisted way to tell which name came from which slot,
-    // so view/edit treats them as a single section rather than two rail entries with no real
-    // distinction once saved. `sectionKey` picks one schema section arbitrarily; the editor's
-    // Attachments view/edit doesn't use it directly (see attachmentsEdit in wwell-ir-editor.component.ts).
-    leaf: { key: 'attachments', number: '7.0', label: 'Attachments', stepKey: 'attachments', sectionKey: 'locationMap' },
+    // Each slot is a real file stored server-side under its own slot directory (agwa-planning's
+    // IrAttachmentStorageService), so which document is which now survives a save — which is what
+    // finally makes these two distinct rail entries rather than one merged list. Both are appended
+    // to the letter PDF as trailing pages, in this order.
+    children: [
+      { key: 'locationMap', number: '7.1', label: 'Location Map', stepKey: 'attachments', sectionKey: 'locationMap' },
+      {
+        key: 'initiationRequest',
+        number: '7.2',
+        label: 'Initiation Request',
+        stepKey: 'attachments',
+        sectionKey: 'initiationRequest',
+      },
+    ],
   },
 ];
 

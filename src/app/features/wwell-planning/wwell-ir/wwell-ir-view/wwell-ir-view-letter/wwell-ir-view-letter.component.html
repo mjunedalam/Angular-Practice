@@ -181,15 +181,19 @@
     </div>
   </div>
 
+  <!-- Mirrors what the downloaded PDF actually contains: each attached document is appended as its
+       own trailing page (agwa-planning's IrAttachmentPdfAppender), in this same slot order. -->
   <section class="letter__attachments">
     <h4>Attachments</h4>
-    @if (ir().attachmentNames.length) {
+    @if (ir().attachments.length) {
       <ul class="letter__attachments-list">
-        @for (name of ir().attachmentNames; track name) {
-          <li>
-            <mat-icon>attach_file</mat-icon>
-            <span>{{ name }}</span>
-          </li>
+        @for (slot of attachmentSlots; track slot.slot) {
+          @if (attachmentFor(slot.slot); as attachment) {
+            <li>
+              <mat-icon>{{ slot.icon }}</mat-icon>
+              <span>{{ slot.label }} — {{ attachment.fileName }}</span>
+            </li>
+          }
         }
       </ul>
     } @else {

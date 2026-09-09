@@ -104,11 +104,10 @@ describe('WwellIrStore - createIr', () => {
     jest.useRealTimers();
   });
 
-  it('inserts the confirmed record — passes attachment names through, waits out the real follow-up GET', () => {
-    const attachmentNames = ['map.pdf'];
+  it('inserts the confirmed record — waits out the real follow-up GET', () => {
     serviceMock.createIr.mockReturnValue(of(9001));
 
-    store.createIr(buildPayload(), buildIrBulkPayload(), attachmentNames);
+    store.createIr(buildPayload(), buildIrBulkPayload());
     // createIr's request is wrapped in delay(WWELL_SAVE_DELAY_MS) — see WwellIrStore — so its own
     // "creatingIr" flag stays true for at least that long even against this instant mock response.
     jest.advanceTimersByTime(WWELL_SAVE_DELAY_MS);
@@ -116,19 +115,21 @@ describe('WwellIrStore - createIr', () => {
     expect(serviceMock.createIr).toHaveBeenCalledWith(buildIrBulkPayload());
     expect(serviceMock.getIrDetailBlocks).toHaveBeenCalledWith(9001);
     expect(store.irs()).toEqual([
-      buildIntegratedRequirementFromPayload(buildPayload(), { id: 'IR-9001', code: 'IR-9001', irSeq: 9001 }, attachmentNames),
+      buildIntegratedRequirementFromPayload(buildPayload(), { id: 'IR-9001', code: 'IR-9001', irSeq: 9001 }),
     ]);
     expect(store.creatingIr()).toBe(false);
     expect(store.createIrError()).toBeNull();
   });
 
-  it('defaults attachment names to an empty array when omitted', () => {
+  /** Attachments are real files fetched per ir_seq (loadIrAttachments), never part of a save — so a
+   *  freshly created record starts with none until that separate fetch resolves. */
+  it('starts a newly created record with no attachments', () => {
     serviceMock.createIr.mockReturnValue(of(9001));
 
     store.createIr(buildPayload(), buildIrBulkPayload());
     jest.advanceTimersByTime(WWELL_SAVE_DELAY_MS);
 
-    expect(store.irs()[0].attachmentNames).toEqual([]);
+    expect(store.irs()[0].attachments).toEqual([]);
   });
 
   it('sets createIrError on failure and clears the creating flag', () => {

@@ -758,7 +758,7 @@
         </span>
       </div>
       <div class="ire__tl-content">
-      <section #sectionEl id="ire-sec-attachments" class="ire__section">
+      <section class="ire__section">
         <div
           class="ire__section-head"
           role="button"
@@ -773,59 +773,166 @@
               {{ timelineStepStatus("attachments") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
-          @if (!attachmentsEditing() && isTimelineStepExpanded('attachments')) {
-            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Attachments" (click)="$event.stopPropagation(); openAttachmentsEdit()">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
         </div>
 
         @if (isTimelineStepExpanded('attachments')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
-        @if (attachmentsEditing()) {
-          <div class="ire__edit-block" appWwellCollapseAnimate>
-          <ul class="ire__attachments ire__attachments--edit">
-            @for (name of attachmentsDraftNames(); track name) {
-              <li class="ire__attachment" appWwellCollapseAnimate>
-                <mat-icon>attach_file</mat-icon>
-                {{ name }}
-                <button type="button" mat-icon-button class="ire__attachment-remove" aria-label="Remove attachment" (click)="removeAttachmentName(name)">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </li>
-            }
-            @for (file of attachmentsNewFiles(); track file) {
-              <li class="ire__attachment ire__attachment--new" appWwellCollapseAnimate>
-                <mat-icon>attach_file</mat-icon>
-                {{ file.name }}
-                <button type="button" mat-icon-button class="ire__attachment-remove" aria-label="Remove attachment" (click)="removeNewAttachmentFile(file)">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </li>
-            }
-          </ul>
 
-          <label class="ire__attachment-add">
-            <mat-icon>add</mat-icon>
-            Add files
-            <input type="file" multiple hidden (change)="onAttachmentFilesPicked($event)" />
-          </label>
+        @if (store.attachmentError(); as error) {
+          <p class="ire__attachment-error" role="alert" appWwellCollapseAnimate>
+            <mat-icon>error_outline</mat-icon>
+            {{ error }}
+          </p>
+        }
 
-          <div class="ire__edit-actions">
-            <button type="button" mat-button (click)="closeAttachmentsEdit()">Cancel</button>
-          </div>
-          </div>
-        } @else if (ir().attachmentNames.length) {
-          <ul class="ire__attachments" appWwellCollapseAnimate>
-            @for (name of ir().attachmentNames; track name) {
-              <li class="ire__attachment">
-                <mat-icon>attach_file</mat-icon>
-                {{ name }}
-              </li>
+        <!-- One #sectionEl per slot, index-aligned with the 7.1/7.2 rail leaves (see
+             wwell-ir-section-rail.config.ts) exactly as 6.1/6.2 above are. -->
+        @for (slot of attachmentSlots; track slot.slot) {
+          <section #sectionEl [id]="'ire-sec-' + slot.slot" class="ire__section ire__section--sub">
+            <div class="ire__section-head">
+              <h3 class="ire__subsection-title">
+                <mat-icon class="ire__attachment-slot-icon">{{ slot.icon }}</mat-icon>
+                {{ slot.number }} {{ slot.label }}
+                @if (slot.required) {
+                  <span class="ire__attachment-required" aria-hidden="true">*</span>
+                }
+              </h3>
+            </div>
+
+            @if (hasAttachment(slot.slot)) {
+              <!-- One row for both cases: a file already stored server-side, or one picked on a New
+                   IR and waiting for the first save. The actions are identical either way, so the
+                   only difference is where the name/size come from and the "pending" note below. -->
+              @let stored = attachmentFor(slot.slot);
+              @let pending = pendingAttachmentFor(slot.slot);
+
+              <div class="ire__attachment-file" [class.ire__attachment-file--pending]="pending" appWwellCollapseAnimate>
+                <mat-icon class="ire__attachment-file-icon">
+                  {{ attachmentIcon(stored ? stored.contentType : pending!.type) }}
+                </mat-icon>
+                <span class="ire__attachment-file-meta">
+                  <span class="ire__attachment-file-name">{{ stored ? stored.fileName : pending!.name }}</span>
+                  <span class="ire__attachment-file-size">
+                    {{ attachmentSizeLabel(stored ? stored.sizeBytes : pending!.size) }}
+                    @if (pending) {
+                      · {{ canAttach() ? "not uploaded yet" : "uploads when you save" }}
+                    }
+                  </span>
+                </span>
+
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="ire__attachment-action"
+                  [attr.aria-label]="'View ' + slot.label"
+                  matTooltip="View"
+
+                  matTooltipClass="ir-attachment-tooltip"
+
+                  matTooltipPosition="above"
+                  (click)="viewAttachment(slot.slot)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+
+                <!-- Only while the file is still staged: once it's on the server there is nothing
+                     left to send, so the icon disappears rather than sitting there inert. -->
+                @if (pending) {
+                  <button
+                    type="button"
+                    mat-icon-button
+                    class="ire__attachment-action ire__attachment-action--upload"
+                    [attr.aria-label]="'Upload ' + slot.label"
+                    matTooltip="Upload"
+
+                    matTooltipClass="ir-attachment-tooltip"
+
+                    matTooltipPosition="above"
+                    [disabled]="isAttachmentBusy(slot.slot)"
+                    (click)="uploadStagedAttachment(slot.slot)"
+                  >
+                    <mat-icon>cloud_upload</mat-icon>
+                  </button>
+                }
+
+                <label
+                  class="ire__attachment-action ire__attachment-action--replace"
+                  [attr.aria-label]="'Replace ' + slot.label"
+                  matTooltip="Replace"
+
+                  matTooltipClass="ir-attachment-tooltip"
+
+                  matTooltipPosition="above"
+                >
+                  <mat-icon>swap_horiz</mat-icon>
+                  <input
+                    type="file"
+                    hidden
+                    [accept]="acceptedAttachmentTypes"
+                    [disabled]="isAttachmentBusy(slot.slot)"
+                    (change)="onAttachmentPicked(slot.slot, $event)"
+                  />
+                </label>
+
+                <!-- Delete only ever renders inside this block, i.e. only when a doc is attached. -->
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="ire__attachment-action ire__attachment-action--danger"
+                  [attr.aria-label]="'Remove ' + slot.label"
+                  matTooltip="Delete"
+
+                  matTooltipClass="ir-attachment-tooltip"
+
+                  matTooltipPosition="above"
+                  [disabled]="isAttachmentBusy(slot.slot)"
+                  (click)="removeAttachment(slot.slot)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <div class="ire__attachment-drop" appWwellCollapseAnimate>
+                <span class="ire__attachment-drop-label">{{ slot.hint }}</span>
+                <span class="ire__attachment-drop-hint">PDF, JPG or PNG · max 25 MB</span>
+
+                <!-- A <label> wrapping a hidden input, not a <button>: this opens the OS file
+                     picker natively, so there's no click-forwarding JS to keep working. -->
+                <!-- "Attach", not "Upload": picking a file only stages it, and the row that appears
+                     then carries the separate upload action that actually sends it. -->
+                <label
+                  class="ire__attachment-upload-icon"
+                  [class.ire__attachment-upload-icon--busy]="isAttachmentBusy(slot.slot)"
+                  [attr.aria-label]="'Attach ' + slot.label"
+                  matTooltip="Attach"
+
+                  matTooltipClass="ir-attachment-tooltip"
+
+                  matTooltipPosition="above"
+                >
+                  <mat-icon>attach_file</mat-icon>
+                  <input
+                    type="file"
+                    hidden
+                    [accept]="acceptedAttachmentTypes"
+                    [disabled]="isAttachmentBusy(slot.slot)"
+                    (change)="onAttachmentPicked(slot.slot, $event)"
+                  />
+                </label>
+              </div>
             }
-          </ul>
-        } @else {
-          <p class="ire__empty-text" appWwellCollapseAnimate>No attachments uploaded.</p>
+
+            <!-- Skinny progress bar, shared by the empty and occupied states so a Replace shows the
+                 same feedback as a first upload. Determinate off real bytes sent; indeterminate
+                 only when the browser couldn't report a total (see WwellIrService.uploadIrAttachment). -->
+            @if (isAttachmentBusy(slot.slot)) {
+              <mat-progress-bar
+                class="ire__attachment-progress"
+                [mode]="attachmentUploadPercent() === null ? 'indeterminate' : 'determinate'"
+                [value]="attachmentUploadPercent() ?? 0"
+              />
+            }
+          </section>
         }
         </div>
         }

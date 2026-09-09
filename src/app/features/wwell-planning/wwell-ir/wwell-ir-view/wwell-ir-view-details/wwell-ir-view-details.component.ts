@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentFor } from '../../wwell-ir-attachments.config';
 import {
   KvRow,
   buildGeologistContactRows,
@@ -30,6 +32,12 @@ import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-vi
 })
 export class WwellIrViewDetailsComponent {
   readonly ir = input.required<IntegratedRequirement>();
+
+  protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
+
+  protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
+    return irAttachmentFor(this.ir().attachments, slot);
+  }
   /** Resolves `requestReference.linkedRequestId` to a well name — see
    *  buildRequestReferenceRows' own doc comment. Falls back to the raw id when omitted. */
   readonly linkedRequestWellOptions = input<readonly { readonly value: string; readonly label: string }[]>([]);

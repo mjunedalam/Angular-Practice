@@ -36,8 +36,11 @@ export function wwellIrTimelineStepStatus(ir: IntegratedRequirement, groupKey: s
     case 'areaWaterWells':
       return ir.offsetWells.length > 0 || !!ir.offsetWellsRemarks?.trim() ? 'completed' : 'pending';
 
+    // Gated on the Initiation Request alone — it's the one slot the form schema marks required
+    // (see wwell-ir-form.schema.ts); a Location Map is optional, so its presence can't be what
+    // makes the step "complete" and its absence must not hold the step at pending.
     case 'attachments':
-      return ir.attachmentNames.length > 0 ? 'completed' : 'pending';
+      return ir.attachments.some(attachment => attachment.slot === 'initiation-request') ? 'completed' : 'pending';
 
     default:
       return 'pending';

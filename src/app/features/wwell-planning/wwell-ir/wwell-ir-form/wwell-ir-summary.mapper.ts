@@ -57,7 +57,7 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
       estimatedRateGpm: null,
       estimatedWaterLevelFt: null,
     },
-    attachmentNames: [],
+    attachments: [],
     // No approval-process API yet either — preview the same mocked timeline the detail-selection
     // fetch below will return, so the list row's mini-chain matches what opening it shows.
     chain: mockApprovalChainForIrSeq(row.irSeq),

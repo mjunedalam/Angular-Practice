@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, delay, map, of, throwError } from 'rxjs';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpEventType, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Observable, catchError, delay, filter, map, of, throwError } from 'rxjs';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment, IrAttachmentSlot, IrAttachmentUploadEvent } from '@models/wwell-planning/ir-attachment.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
@@ -114,6 +115,91 @@ export class WwellIrService {
       { wellboreImageBase64: wellboreImageBase64 ?? null },
       { responseType: 'blob' },
     );
+  }
+
+  /**
+   * The IR's two named attachment slots. A separate call from the detail fetch — these are real
+   * files on the backend's filesystem, not exad_gwd_ir_* columns — so an IR with nothing uploaded
+   * simply comes back with an empty list rather than an error.
+   */
+  getIrAttachments(irSeq: number): Observable<readonly IrAttachment[]> {
+    return this.http
+      .get<ApiResponse<IrAttachment>>(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments`)
+      .pipe(map(res => res.data ?? []));
+  }
+
+  /**
+   * Uploads (or replaces) one slot's file, reporting real byte-level progress as it goes.
+   *
+   * Emits `{ percent, attachment: null }` while the body is still being sent, then one final
+   * `{ percent: 100, attachment }` carrying the stored record. Uses `HttpRequest` +
+   * `reportProgress` rather than a plain `post()` so the editor's progress bar tracks actual bytes
+   * transferred instead of animating a guess — on a slow link or a 20 MB scan that difference is
+   * the whole point of showing a bar at all.
+   *
+   * Multipart, so no explicit Content-Type header — the browser must set it itself to include the
+   * multipart boundary.
+   *
+   * SUPPRESS_GLOBAL_ERROR: the editor surfaces a per-slot inline message (see WwellIrStore's
+   * attachmentError), so the global interceptor toast would double up on the same failure.
+   */
+  uploadIrAttachment(irSeq: number, slot: IrAttachmentSlot, file: File): Observable<IrAttachmentUploadEvent> {
+    const body = new FormData();
+    body.append('file', file);
+    const request = new HttpRequest<FormData>(
+      'POST',
+      `${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`,
+      body,
+      {
+        reportProgress: true,
+        context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
+      },
+    );
+
+    return this.http.request<ApiResponse<IrAttachment>>(request).pipe(
+      // Only these two event types say anything the UI can use — the rest (Sent, ResponseHeader,
+      // DownloadProgress) would otherwise map to a bogus 0 and visibly reset the bar mid-upload.
+      filter(event => event.type === HttpEventType.UploadProgress || event.type === HttpEventType.Response),
+      map(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          // `total` is absent on some servers/proxies; report 0 rather than dividing by undefined,
+          // which the editor renders as an indeterminate bar instead of a wrong number.
+          const percent = event.total ? Math.round((100 * event.loaded) / event.total) : 0;
+          return { percent, attachment: null };
+        }
+        const response = event as HttpResponse<ApiResponse<IrAttachment>>;
+        return { percent: 100, attachment: response.body?.data?.[0] ?? null };
+      }),
+    );
+  }
+
+  /** Empties one slot. 404s when it was already empty — the caller treats that as "already gone". */
+  deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot): Observable<void> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`, {
+        context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
+      })
+      .pipe(map(() => undefined));
+  }
+
+  /**
+   * Pulls a stored attachment back as a `File` so it can be handed to FilePreviewDialogComponent,
+   * which previews from a File (it builds its own object URL) rather than from a remote URL.
+   * Fetching through HttpClient also means the JWT interceptor authenticates it — a plain
+   * `<a href>` to the same endpoint would not carry the token.
+   */
+  getIrAttachmentFile(irSeq: number, slot: IrAttachmentSlot, fileName: string): Observable<File> {
+    return this.http
+      .get(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`, {
+        responseType: 'blob',
+        context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
+      })
+      .pipe(map(blob => new File([blob], fileName, { type: blob.type })));
+  }
+
+  /** Absolute URL of a stored file, for opening it in a viewer tab. */
+  irAttachmentUrl(irSeq: number, slot: IrAttachmentSlot): string {
+    return `${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`;
   }
 
   /**

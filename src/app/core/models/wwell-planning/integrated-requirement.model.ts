@@ -1,3 +1,4 @@
+import { IrAttachment } from './ir-attachment.model';
 import { ApprovalChainStep } from './wwell-planning.model';
 
 export type IntegratedRequirementStatus = 'draft' | 'in-progress' | 'submit-for-review' | 'in-review' | 'approved';
@@ -117,7 +118,10 @@ export interface IntegratedRequirement {
   readonly offsetWellsRemarks: string | null;
   readonly hydrogeology: IntegratedRequirementHydrogeology;
   readonly testProgram: IntegratedRequirementTestProgram;
-  readonly attachmentNames: readonly string[];
+  /** Real stored files (Location Map / Initiation Request), loaded per ir_seq by its own endpoint
+   *  — like `chain` below, not part of the detail blocks. Empty until loadIrAttachments resolves;
+   *  a slot the user hasn't filled is simply absent from the list. */
+  readonly attachments: readonly IrAttachment[];
   readonly chain: readonly ApprovalChainStep[];
 }
 

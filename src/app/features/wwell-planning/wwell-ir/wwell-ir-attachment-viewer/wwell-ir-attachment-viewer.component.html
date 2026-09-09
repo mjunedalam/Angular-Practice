@@ -1,0 +1,58 @@
+<div class="irv">
+  <header class="irv__bar">
+    <div class="irv__identity">
+      <span class="irv__badge">{{ typeLabel }}</span>
+      <span class="irv__names">
+        <span class="irv__slot">{{ label }}</span>
+        <span class="irv__file" [title]="fileName">{{ fileName }}</span>
+      </span>
+      <span class="irv__size">{{ sizeLabel }}</span>
+    </div>
+
+    <div class="irv__tools">
+      @if (kind === 'image') {
+        <button type="button" class="irv__tool" matTooltip="Zoom out" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Zoom out" [disabled]="!canZoomOut()" (click)="zoomOut()">
+          <mat-icon>remove</mat-icon>
+        </button>
+        <button type="button" class="irv__zoom" matTooltip="Reset view" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Reset view" (click)="resetView()">
+          {{ zoomLabel() }}
+        </button>
+        <button type="button" class="irv__tool" matTooltip="Zoom in" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Zoom in" [disabled]="!canZoomIn()" (click)="zoomIn()">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button type="button" class="irv__tool" matTooltip="Rotate" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Rotate" (click)="rotate()">
+          <mat-icon>rotate_right</mat-icon>
+        </button>
+        <span class="irv__divider"></span>
+      }
+
+      <button type="button" class="irv__tool" matTooltip="Download" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Download" (click)="download()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button type="button" class="irv__tool irv__tool--close" matTooltip="Close" matTooltipClass="ir-viewer-tooltip" matTooltipPosition="below" aria-label="Close" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="irv__stage" [class.irv__stage--pdf]="kind === 'pdf'">
+    @switch (kind) {
+      @case ('image') {
+        <img class="irv__image" [src]="safeUrl" [alt]="fileName" [style.transform]="imageTransform()" />
+      }
+      @case ('pdf') {
+        <!-- The browser's built-in PDF viewer: it already gives paging, text selection and its own
+             zoom, which beats anything hand-rolled here. -->
+        <iframe class="irv__frame" [src]="safeUrl" [title]="fileName"></iframe>
+      }
+      @default {
+        <div class="irv__fallback">
+          <mat-icon>description</mat-icon>
+          <p class="irv__fallback-title">No preview for {{ typeLabel }} files</p>
+          <p class="irv__fallback-hint">Download it to open in another application.</p>
+          <button type="button" mat-flat-button color="primary" (click)="download()">Download</button>
+        </div>
+      }
+    }
+  </div>
+</div>

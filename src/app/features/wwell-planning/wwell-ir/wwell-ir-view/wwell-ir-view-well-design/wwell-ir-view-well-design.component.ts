@@ -104,7 +104,7 @@ export class WwellIrViewWellDesignComponent {
       existing: current,
       geologistEmpNumByName: this.store.geologistEmpNumByName(),
     });
-    this.store.createIr(payload, irBulkPayload, current.attachmentNames);
+    this.store.createIr(payload, irBulkPayload);
     this.editingRemarks.set(false);
   }
 }

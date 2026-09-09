@@ -5,13 +5,15 @@
 
   <section class="ir-details__attachments">
     <h3 class="ir-details__section-title">Attachments</h3>
-    @if (ir().attachmentNames.length) {
+    @if (ir().attachments.length) {
       <ul class="ir-details__attachments-list">
-        @for (name of ir().attachmentNames; track name) {
-          <li class="ir-details__attachment">
-            <mat-icon>attach_file</mat-icon>
-            <span>{{ name }}</span>
-          </li>
+        @for (slot of attachmentSlots; track slot.slot) {
+          @if (attachmentFor(slot.slot); as attachment) {
+            <li class="ir-details__attachment">
+              <mat-icon>{{ slot.icon }}</mat-icon>
+              <span>{{ slot.label }} — {{ attachment.fileName }}</span>
+            </li>
+          }
         }
       </ul>
     } @else {
