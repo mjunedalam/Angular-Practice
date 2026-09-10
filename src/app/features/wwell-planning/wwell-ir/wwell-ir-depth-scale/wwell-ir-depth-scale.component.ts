@@ -61,6 +61,17 @@ export class WwellIrDepthScaleComponent {
     const tickLabelX = tickLeftX - tickLabelGap;
 
     const svg = select(element);
+    // Interrupt any in-progress/scheduled transitions before tearing down the DOM — this
+    // effect re-fires on every live edit that moves `totalDepth` (e.g. switching Completion
+    // while Program Details is open re-derives `wellboreDiagramData().displayDepth` on every
+    // keystroke/selection change), which used to call `.remove()` on nodes that still had a
+    // pending/active D3 transition scheduled on them (see d3-transition's per-node
+    // `__transition` slot). That stale scheduled tick/tween callback still fires later against
+    // the now-detached node — wasted work at best, and confirmed (via a scratch harness that
+    // rapidly re-triggered this effect) to throw when it fires mid-rebuild. Mirrors the
+    // `interrupt()`-before-rebuild guard `well-bore-view.component.ts`'s `redraw()` already
+    // uses for the exact same "live data keeps changing faster than the animation" reason.
+    svg.selectAll('*').interrupt();
     svg.selectAll('*').remove();
 
     svg

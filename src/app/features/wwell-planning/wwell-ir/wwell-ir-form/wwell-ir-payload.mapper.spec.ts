@@ -3,6 +3,7 @@ import {
   IntegratedRequirementFormationTop,
   IntegratedRequirementHydrogeology,
   IntegratedRequirementOffsetWell,
+  IntegratedRequirementProgramDetails,
   IntegratedRequirementTestProgram,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { buildWwellIrBulkSavePayload, WwellIrSaveContext } from './wwell-ir-payload.mapper';
@@ -135,8 +136,9 @@ describe('buildWwellIrBulkSavePayload', () => {
     expect(header.data?.[0].tops_remarks).toBe('Regional cap rock present');
   });
 
-  it('omits the well_design row when Estimated Pump Depth is blank and no design row exists yet', () => {
-    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(buildRaw());
+  it('omits the well_design row when nothing to persist yet (no pump depth, no Completion selected)', () => {
+    const raw = buildRaw({ programDetails: { ...buildRaw().programDetails, main: { ...buildRaw().programDetails.main, completion: '' } } });
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw);
 
     expect(wellDesign.table).toBe('exad_gwd_well_design');
     expect(wellDesign.data).toBeNull();
@@ -152,6 +154,60 @@ describe('buildWwellIrBulkSavePayload', () => {
 
     expect(wellDesign.data?.[0]).toMatchObject({ action: 'INSERT', wd_seq: null, prewap_seq: 1198, pump_lvl: 350 });
   });
+
+  /** The actual fix this file exists to cover: exad_gwd_well_design's oh_flg/gp_flg/ls_flg/
+   *  perforated_flg (+ remarks) — update_ir_data_prc's own exad_gwd_well_design MERGE accepts
+   *  these (docs/ir/update_ir_data_prc.sql) — were never sent at all before, so picking a
+   *  Completion never persisted past this app's own `completion` text column. A Completion
+   *  selection alone (no Estimated Pump Depth) must now be enough to insert the row. */
+  it('inserts a well_design row carrying the derived completion-element flags once Completion is picked, even with no pump depth', () => {
+    const raw = buildRaw({
+      reference: { main: { ...buildRaw().reference.main, linkedRequestId: '1198' } },
+      programDetails: {
+        ...buildRaw().programDetails,
+        main: { ...buildRaw().programDetails.main, completion: 'Open Hole', openHoleSizeIn: '8 1/2"' },
+      },
+    });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw);
+
+    expect(wellDesign.data?.[0]).toMatchObject({
+      action: 'INSERT',
+      wd_seq: null,
+      prewap_seq: 1198,
+      pump_lvl: null,
+      oh_flg: 'Y',
+      oh_remarks: '8 1/2"',
+      gp_flg: 'N',
+      gp_remarks: null,
+      perforated_flg: 'N',
+      perforated_remarks: null,
+      ls_flg: 'N',
+      ls_remarks: null,
+    });
+  });
+
+  it('inserts a well_design row with ls_flg/gp_flg both Y for "Screened + Gravel Pack"', () => {
+    const raw = buildRaw({
+      reference: { main: { ...buildRaw().reference.main, linkedRequestId: '1198' } },
+      programDetails: {
+        ...buildRaw().programDetails,
+        main: { ...buildRaw().programDetails.main, completion: 'Screened + Gravel Pack' },
+      },
+    });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw);
+
+    expect(wellDesign.data?.[0]).toMatchObject({
+      action: 'INSERT',
+      gp_flg: 'Y',
+      gp_remarks: 'Gravel Pack',
+      ls_flg: 'Y',
+      ls_remarks: 'Screen',
+      oh_flg: 'N',
+      perforated_flg: 'N',
+    });
+  });
 });
 
 /** Every repeatable section's `existing`-diff branch (see buildCasingRows/buildTopsRows/
@@ -166,6 +222,7 @@ function buildExistingBase(
     hydrogeology: IntegratedRequirementHydrogeology;
     testProgram: IntegratedRequirementTestProgram;
     wellDesignSeq: number | null;
+    programDetails: IntegratedRequirementProgramDetails;
   }> = {},
 ): NonNullable<WwellIrSaveContext['existing']> {
   return {
@@ -174,6 +231,13 @@ function buildExistingBase(
     offsetWells: [],
     hydrogeology: { aquifer: '', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: null },
     testProgram: { testType: 'pump-test', estimatedRateGpm: null, estimatedWaterLevelFt: null },
+    programDetails: {
+      completion: '',
+      openHoleSizeIn: null,
+      acidization: '',
+      transmission: '',
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
+    },
     ...overrides,
   };
 }
@@ -347,10 +411,21 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
     expect(rows.find(row => row.ep_a_num === 200)).toMatchObject({ action: 'DELETE', ir_seq: 7003 });
   });
 
-  it('well_design: keeps an existing row a no-op when Estimated Pump Depth is unchanged', () => {
+  it('well_design: keeps an existing row a no-op when neither Estimated Pump Depth nor Completion changed', () => {
+    // `existing.programDetails` must match `raw`'s own Completion/Open Hole Size (buildRaw()'s
+    // defaults: completion 'Screened', openHoleSizeIn '') for the row to read as genuinely
+    // unchanged — see buildWellDesignRow's `unchanged` check, which now diffs both pump depth and
+    // Completion, not pump depth alone.
     const existing = buildExistingBase({
       wellDesignSeq: 9500,
       hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
+      programDetails: {
+        completion: 'Screened',
+        openHoleSizeIn: null,
+        acidization: '',
+        transmission: '',
+        developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
+      },
     });
     const raw = buildRaw({ hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 350 } } });
 
@@ -363,11 +438,48 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
     const existing = buildExistingBase({
       wellDesignSeq: 9500,
       hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
+      programDetails: {
+        completion: 'Screened',
+        openHoleSizeIn: null,
+        acidization: '',
+        transmission: '',
+        developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
+      },
     });
     const raw = buildRaw({ hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 400 } } });
 
     const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
 
     expect(wellDesign.data?.[0]).toMatchObject({ action: 'UPDATE', wd_seq: 9500, pump_lvl: 400 });
+  });
+
+  it('well_design: tags an existing row UPDATE once Completion changes, independent of pump depth', () => {
+    const existing = buildExistingBase({
+      wellDesignSeq: 9500,
+      hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
+      programDetails: {
+        completion: 'Open Hole',
+        openHoleSizeIn: null,
+        acidization: '',
+        transmission: '',
+        developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
+      },
+    });
+    // buildRaw()'s default Completion ('Screened') differs from `existing`'s ('Open Hole') —
+    // pump depth (350) is otherwise unchanged. The derived flags follow `raw` (what's being
+    // saved now), not `existing` (what the row held before).
+    const raw = buildRaw({ hydrogeology: { main: { ...buildRaw().hydrogeology.main, estimatedPumpDepthFt: 350 } } });
+
+    const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw, { irSeq: 7001, existing });
+
+    expect(wellDesign.data?.[0]).toMatchObject({
+      action: 'UPDATE',
+      wd_seq: 9500,
+      oh_flg: 'N',
+      gp_flg: 'N',
+      ls_flg: 'Y',
+      ls_remarks: 'Screen',
+      perforated_flg: 'N',
+    });
   });
 });

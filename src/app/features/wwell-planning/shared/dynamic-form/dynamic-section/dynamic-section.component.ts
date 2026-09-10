@@ -99,6 +99,9 @@ export class DynamicSectionComponent implements AfterViewInit, OnDestroy {
     if (condition.equals !== undefined) return value === condition.equals;
     if (condition.oneOf) return condition.oneOf.includes(value);
     if (condition.notOneOf) return !condition.notOneOf.includes(value);
+    if (condition.includesLine !== undefined) {
+      return typeof value === 'string' && value.split('\n').some(line => line.trim() === condition.includesLine);
+    }
     return true;
   }
 

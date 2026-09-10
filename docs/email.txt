@@ -1,0 +1,73 @@
+Subject: Well Design / Completion save failing — found the likely cause in update_ir_data_prc
+
+Hi [Name],
+
+Part 1 — The issue
+
+I'm facing issues while saving the Well Design completion (Open Hole / Gravel Pack, etc.) — the save appears to go through but the change doesn't persist. While reviewing the proc, I found this line likely causing it.
+
+The block that resolves wd_seq right before the Well Design MERGE reads:
+
+SELECT t.wd_seq, t.action into w_wd_seq, w_ir_action
+  FROM json_table(w_json, '$[*]'
+       COLUMNS(table_name VARCHAR2(30) PATH '$.table',
+               NESTED PATH '$.data[*]'
+               COLUMNS(action VARCHAR2(30) PATH '$.action',
+                       wd_seq NUMBER(22) PATH '$.wd_seq'))) t
+ WHERE upper(t.table_name) = 'EXAD_GWD_IR_WATER';
+
+Two things stand out:
+- It filters on 'EXAD_GWD_IR_WATER' instead of 'EXAD_GWD_WELL_DESIGN' — so it's reading wd_seq off the Area Water Well rows, which never carry that field.
+- It's a plain SELECT ... INTO (exactly one row expected), not an aggregate. Depending on how many Area Water Well rows are in the payload, that throws NO_DATA_FOUND (0 rows) or TOO_MANY_ROWS (2+ rows).
+
+Either way it raises, the EXCEPTION block does ROLLBACK, and the whole save — including the completion flags just set — is silently reverted. This matches exactly what I'm seeing.
+
+Separately, worth flagging while we're in here: do_commit fires mid-procedure, right after the Water section and before Well Design runs — but the exception handler still does a blanket ROLLBACK. If Well Design fails after that commit (this bug, or anything else), the IR header/casing/hydrogeology/tops/water changes are already permanent and the rollback doesn't actually undo everything it implies. The whole payload really should commit once, as one transaction.
+
+Part 2 — What I'd suggest
+
+If it's possible on your end, I'd suggest we restructure this into one worker procedure per table plus a thin orchestrator with a single commit and a single exception handler, something like:
+
+------------------------------------------------------------------------
+-- MAIN PROC — orchestrator only: setup, order of calls, one commit,
+-- one exception handler. No business SQL in here.
+------------------------------------------------------------------------
+PROCEDURE update_ir_data_prc
+         (p_ir_json      IN  CLOB,
+          p_app_user     IN  VARCHAR2,
+          p_do_commit    IN  VARCHAR2 DEFAULT 'Y',
+          p_return_value OUT VARCHAR2) IS
+  w_ir_seq  exad_gwd_ir_header.ir_seq%TYPE;
+  w_is_new  BOOLEAN;
+BEGIN
+  p_return_value := 'SUCCESS';
+  setup(p_app_user);
+
+  exad_log_pkg.debug('p_app_user=' || p_app_user || ', p_do_commit=' || p_do_commit ||
+                     ', p_ir_json=' || p_ir_json);
+
+  apply_ir_header   (p_ir_json, w_ir_seq, w_is_new);  -- must be FIRST: resolves ir_seq
+  apply_ir_casing   (p_ir_json, w_ir_seq);
+  apply_ir_hydro    (p_ir_json, w_ir_seq);
+  apply_ir_tops     (p_ir_json, w_ir_seq);
+  apply_ir_water    (p_ir_json, w_ir_seq);
+  apply_well_design (p_ir_json);                       -- own wd_seq, no ir_seq needed
+
+  IF w_is_new THEN
+    p_return_value := w_ir_seq;                        -- new IR: return its number
+  END IF;
+
+  exad_util_pkg.do_commit(p_do_commit);                -- the ONLY commit
+
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;                                          -- undoes ALL workers
+    exad_log_pkg.error(SQLCODE, SQLERRM);
+    p_return_value := exad_util_pkg.user_err_msg(SQLERRM);
+    RETURN;
+END update_ir_data_prc;
+
+This would make the save atomic (all six sections succeed together or none do) and each block independently reviewable/testable, instead of one long procedure. Happy to take a first pass at splitting it out if that's useful — or if a quick one-line fix to the wd_seq lookup is preferred for now to unblock saves, I can send that separately.
+
+Thanks,
+[Your name]

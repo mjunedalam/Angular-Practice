@@ -27,17 +27,30 @@ export interface WwellFieldValidatorConfig {
 
 /**
  * Field is only shown (and its control enabled) while a sibling control in the same section
- * matches this condition. Exactly one of `equals` | `oneOf` | `notOneOf` should be set:
+ * matches this condition. Exactly one of `equals` | `oneOf` | `notOneOf` | `includesLine` should
+ * be set:
  *  - `equals`: sibling value === this value
  *  - `oneOf`: sibling value is one of this set (e.g. a client tier)
  *  - `notOneOf`: sibling value is absent from this set — the fallback for values outside every
  *    named tier (e.g. a client not yet assigned to a tier keeps the default field set)
+ *  - `includesLine`: sibling value, split on `\n` and trimmed, includes this exact line — for a
+ *    sibling that's a `type: 'rich-textarea'` checkbox list (see WwellRichTextareaComponent),
+ *    whose committed value is every checked option newline-joined rather than a single picked
+ *    value, so `equals` can only ever match when exactly one box is checked. `openHoleSizeIn`
+ *    (wwell-ir-form.schema.ts) is the motivating case: gated on `completion` (a rich-textarea)
+ *    having "Open Hole" checked, which must still hold when other options are checked alongside
+ *    it — an `equals` gate there hid (and reset — see DynamicSectionComponent.syncControlEnabled)
+ *    this field the instant a second option was checked, silently discarding whatever open hole
+ *    size had been typed and leaving `resolveOhHalfWidth` (wellbore-depth.helpers.ts) with no real
+ *    diameter to scale Open Hole against — it fell back to a fixed wide default, wider than an
+ *    actual entered casing OD.
  */
 export interface WwellFieldVisibilityCondition {
   readonly field: string;
   readonly equals?: string;
   readonly oneOf?: readonly string[];
   readonly notOneOf?: readonly string[];
+  readonly includesLine?: string;
 }
 
 export interface WwellFieldConfig {

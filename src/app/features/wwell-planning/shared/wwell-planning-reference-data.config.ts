@@ -50,7 +50,6 @@ export const WWELL_COMPLETION_OPTIONS: readonly string[] = [
   'Screened',
   'Screened + Gravel Pack',
   'Liner + Perforated',
-  'Cased & Perforated',
 ];
 
 export const WWELL_FLUID_TYPE_OPTIONS: readonly string[] = ['Water-based', 'Polymer', 'Bentonite', 'Air/Foam'];

@@ -1,4 +1,8 @@
-import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
+import {
+  IntegratedRequirement,
+  IntegratedRequirementTestType,
+  IntegratedRequirementWellDesignFlags,
+} from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 import { stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
 import {
@@ -72,6 +76,37 @@ function parseH2sPpm(h2s: string | null | undefined): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+/** exad_gwd_well_design's flag columns come back as `'Y'|'N'|null` in practice, but the raw block
+ *  is read as loosely-typed `Record<string, unknown>` (see rowsFor above) — narrow defensively to
+ *  the two real values rather than trust the cast, falling back to 'N' for anything else (an
+ *  absent/garbled column reads the same as "not set", matching how deriveCompletionElementFlags
+ *  itself never produces a third value). */
+function normalizeFlag(value: unknown): 'Y' | 'N' {
+  return value === 'Y' ? 'Y' : 'N';
+}
+
+function normalizeRemarks(value: unknown): string | null {
+  return typeof value === 'string' && value ? value : null;
+}
+
+/** Reads the eight completion-element columns off a fetched exad_gwd_well_design row — see
+ *  IntegratedRequirementWellDesignFlags' own doc comment. `null` when no row came back at all
+ *  (no exad_gwd_well_design record yet for this well), not `undefined` — `undefined` is reserved
+ *  for "never fetched" (a still-local draft), which this function is never called for. */
+function mapWellDesignFlags(row: IrWellDesignRow | undefined): IntegratedRequirementWellDesignFlags | null {
+  if (!row) return null;
+  return {
+    ohFlg: normalizeFlag(row.oh_flg),
+    ohRemarks: normalizeRemarks(row.oh_remarks),
+    gpFlg: normalizeFlag(row.gp_flg),
+    gpRemarks: normalizeRemarks(row.gp_remarks),
+    perforatedFlg: normalizeFlag(row.perforated_flg),
+    perforatedRemarks: normalizeRemarks(row.perforated_remarks),
+    lsFlg: normalizeFlag(row.ls_flg),
+    lsRemarks: normalizeRemarks(row.ls_remarks),
+  };
+}
+
 /** `stripLegacyIrHtml` version of the `raw ?? fallback` pattern used throughout this merge: falls
  *  back to `fallback` only when the backend genuinely sent nothing (`null`/`undefined`) for this
  *  column, same as a bare `??` would — an explicitly-cleared column (`''`) is a real value and
@@ -113,12 +148,23 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const waterRows = rowsFor<IrWaterRow>(blocks, 'exad_gwd_ir_water');
   const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
   const wellDesignRow = rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design')[0] as IrWellDesignRow | undefined;
+  // The one exad_gwd_ir_header column genuinely scoped to *this* ir_seq that also confirms a real
+  // Completion pick was ever saved on this record — see the long comment on `wellDesignFlags`
+  // below for why this, not merely `wellDesignRow` existing, has to gate trusting that row at all.
+  const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion);
+  // A well already linked to a *different* IR (or to the separate standalone Well Design workflow)
+  // can already have its own exad_gwd_well_design row before this ir_seq ever saves anything —
+  // `completionText` blank means this ir_seq itself never wrote one, so that row is someone else's.
+  // Adopting its wd_seq here would make this record's *next* save UPDATE (silently overwrite) that
+  // unrelated row instead of INSERTing its own — the exact risk buildWellDesignRow's own DATA-LOSS
+  // CAVEAT (wwell-ir-payload.mapper.ts) already documents.
+  const wellDesignRowBelongsToThisIr = !!wellDesignRow && !!completionText;
 
   return {
     ...existing,
     // exad_gwd_well_design is keyed by wd_seq, not ir_seq — carried forward only so a later save's
     // Estimated Pump Depth UPDATE matches this same row instead of INSERTing a duplicate.
-    wellDesignSeq: wellDesignRow?.wd_seq ?? existing.wellDesignSeq,
+    wellDesignSeq: wellDesignRowBelongsToThisIr ? wellDesignRow.wd_seq : existing.wellDesignSeq,
     requestReference: {
       ...existing.requestReference,
       // prewap_seq/ltr_no are the only two Request Reference columns exad_gwd_ir_header actually
@@ -140,6 +186,11 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
         linkedWell?.surfacen != null && linkedWell?.surfacee != null
           ? `${linkedWell.surfacen}°N, ${linkedWell.surfacee}°E`
           : existing.requestReference.coordinates,
+      // Same "live off exad_rcd_prewap" rule as wellName/surfaceElevationFtAsl above — Target
+      // Depth is read-only in the UI (wwell-ir-form.schema.ts) precisely because this is its only
+      // real source: exad_gwd_ir_header has no target-depth column to fetch one back from
+      // otherwise. An IR with no linked request falls through to `existing` (blank).
+      targetDepthFt: linkedWell?.target_dpth ?? existing.requestReference.targetDepthFt,
     },
     formationTops: topsRows.map(row => ({
       name: row.st_long_cd,
@@ -192,7 +243,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       // on anything that isn't that markup, so this is safe whether the record is old or new. See
       // that util's own doc comment for why running it here (the one place these columns become
       // IntegratedRequirement fields) is also what keeps a later re-save plain-text-only.
-      completion: resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion),
+      completion: completionText,
       // Both are written by buildWwellIrBulkSavePayload but were never read back here, so
       // Transmission/Acidization rendered blank after any reload even though the values were in
       // the DB the whole time — the same class of gap that hid Logging/Sampling before.
@@ -205,6 +256,19 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
         flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest),
         remarks: resolveLegacyText(header?.dt_rmks, existing.programDetails.developmentTesting.remarks),
       },
+      // Round-tripped confirmation that the save actually reached exad_gwd_well_design's own
+      // oh_flg/gp_flg/ls_flg/perforated_flg columns — see mapWellDesignFlags above and
+      // IntegratedRequirementWellDesignFlags' own doc comment. The UI itself still only ever
+      // reads/edits `completion`; this is purely the mirror of what's really in the DB. Same
+      // existing-fallback pattern as every other field here: no wellDesignRow in this particular
+      // response (e.g. this detail fetch's exad_gwd_well_design block came back empty) keeps
+      // whatever `existing` already had, rather than overwriting a real known value with null.
+      //
+      // GATED on `wellDesignRowBelongsToThisIr` (see its own comment above), not merely on
+      // `wellDesignRow` existing: trusting it unconditionally made a brand-new IR (nothing filled
+      // in but "Link to Request") draw Open Hole/etc. it never selected, straight from a different
+      // IR's (or the standalone Well Design workflow's) pre-existing row on the same well.
+      wellDesignFlags: wellDesignRowBelongsToThisIr ? mapWellDesignFlags(wellDesignRow) : existing.programDetails.wellDesignFlags,
     },
     hydrogeology: hydroRow
       ? {

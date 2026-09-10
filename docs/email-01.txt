@@ -1,0 +1,74 @@
+Subject: Second pass on update_ir_data_prc — a couple more findings
+
+Hi [Name],
+
+Went through update_ir_data_prc.sql again (the current version, with the wd_seq lookup fix already applied) looking for anything else in the same vein. Found two more worth fixing, ranked by how much damage they can do.
+
+1. Well Design MERGE silently nulls out columns this app never sends (data loss, on every save)
+
+The exad_gwd_well_design MERGE's WHEN MATCHED THEN UPDATE SET writes 26 columns:
+
+  prewap_seq, sta_water_lvl, sw_lvl_txt, tds, completion_type, w_prim_hid, w_num, pump_lvl,
+  pump_lvl_txt, notes, publish_dt, publish_flg, curr_flg, publish_by, oh_flg, oh_remarks,
+  gp_flg, gp_remarks, perforated_flg, perforated_remarks, ls_flg, ls_remarks, status,
+  design_phase, design_rpt
+
+But this app's JSON payload only ever populates 11 of them: wd_seq, prewap_seq, pump_lvl,
+oh_flg/oh_remarks, gp_flg/gp_remarks, perforated_flg/perforated_remarks, ls_flg/ls_remarks.
+
+The other 15 (design_rpt, status, design_phase, w_prim_hid, w_num, sta_water_lvl, tds,
+completion_type, notes, publish_dt/publish_flg/publish_by, curr_flg, sw_lvl_txt, pump_lvl_txt)
+simply aren't keys in our JSON at all, so json_table's PATH lookups for them come back NULL —
+and the MERGE writes that NULL straight over whatever was already in the row.
+
+Concrete risk: if the same wd_seq is ever touched by the separate standalone Well Design
+workflow (design report, status, design_phase, publish info, notes...), then every single IR
+save this app makes against that well quietly wipes that other workflow's data the moment it
+MERGEs — even though this app never intended to touch any of it.
+
+Suggested fix — either:
+  a) COALESCE(t.col, h.col) on every column this app's payload doesn't own, so an absent JSON
+     field leaves the existing DB value untouched instead of nulling it, or
+  b) narrow the UPDATE SET to just the 11 columns this app is actually responsible for, and
+     leave the rest alone entirely. I'd lean toward (b) — it makes "this app never touches
+     those columns" true by construction, rather than relying on every future caller to
+     remember to always pass NULL there for COALESCE to work safely.
+
+2. Casing MERGE/DELETE match rows by size alone, not type + size
+
+  ON (h.ir_seq = w_ir_seq and h.csg_size = t.csg_size)
+
+...and the DELETE right below it key a casing row purely off csg_size. But this app's own
+natural key for a casing row is type + size together (see casingKey in
+wwell-ir-payload.mapper.ts on our side) — a Production string and a Liner sharing the same
+nominal OD are two different rows in the UI (this isn't hypothetical: the wellbore diagram
+code already special-cases exactly this — a 7" liner hung inside other casing of the same
+size, see PRE_PERF_LINER_SIZE_IN).
+
+With the current MERGE key, saving one of those two rows would silently overwrite the other's
+type/depth/remarks, and removing just one of them in the UI would DELETE both — the DELETE's
+"(a.ir_seq, a.csg_size) IN (...)" isn't scoped to a single row, so it takes out every row that
+shares that size, not just the one the user removed.
+
+Suggested fix: match and delete on (ir_seq, csg_type, csg_size), matching what the frontend
+already assumes.
+
+3. (Low priority / defensive) Same non-aggregate SELECT INTO pattern as the wd_seq bug, on the header check
+
+The very first lookup in the proc:
+
+  SELECT t.ir_seq, t.action into w_ir_seq, w_ir_action
+    FROM json_table(...) t
+   WHERE upper(t.table_name) = 'EXAD_GWD_IR_HEADER';
+
+is the same plain SELECT INTO (not MAX()) as the wd_seq bug we already fixed. It's safe today
+only because this app always sends exactly one header row per save — but if that ever stops
+being true (a bad payload, a future change), it throws NO_DATA_FOUND/TOO_MANY_ROWS at the very
+first statement and rolls back the entire save with no useful error. Worth wrapping in MAX()
+the same way, purely as hardening — not an active bug like #1 and #2.
+
+Happy to write these up as patches if useful. I'd prioritize #1 — it's actively losing data on
+every save that touches a shared wd_seq, not something waiting to be triggered by an edge case.
+
+Thanks,
+[Your name]

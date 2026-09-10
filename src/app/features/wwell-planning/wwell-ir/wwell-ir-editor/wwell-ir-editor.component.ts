@@ -86,6 +86,7 @@ import {
   formatLinkedWellCoordinates,
   linkedWellHasCoordinates,
   linkedWellHasElevation,
+  linkedWellHasTargetDepth,
 } from '../wwell-ir-form/wwell-ir-linked-well.util';
 import { InlineRowEditState, SectionEditState, buildAndPatchArray, buildAndPatchGroup } from './wwell-ir-section-edit.util';
 import { SectionRailController } from './wwell-ir-section-rail.util';
@@ -309,6 +310,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.ir(),
       this.casingEdit.liveValue(),
       this.formationTopsEdit.liveValue(),
+      this.programMainLiveValue(),
     ),
   );
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
@@ -740,11 +742,16 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   }
 
   /** Selecting a "Link to Request" option auto-fills whichever Request Reference fields that
-   *  eligible-well record actually has data for — BI Number/Supporting Business/Target
-   *  Aquifer/Target Depth have no source there (exad_rcd_prewap doesn't carry them) and stay
-   *  manually entered. Purely a client-side lookup against the already-loaded eligible-wells
-   *  list (see store.loadLinkedRequestWells()) — selecting a link never itself triggers a
-   *  network call.
+   *  eligible-well record actually has data for — BI Number/Supporting Business/Target Aquifer
+   *  still have no source there (exad_rcd_prewap doesn't carry them) and stay manually entered.
+   *  Target Depth used to be in that same "no source" group; it now comes from the linked well's
+   *  own exad_rcd_prewap.target_dpth (`targetDepth` here) — the only real source that field has
+   *  anywhere, since exad_gwd_ir_header has no target-depth column of its own to save a
+   *  manually-typed value into. That's why `targetDepthFt` is `readonly: true` in the schema
+   *  (wwell-ir-form.schema.ts) unconditionally, unlike Surface Elevation/Coordinates below, which
+   *  stay editable until a link actually supplies them. Purely a client-side lookup against the
+   *  already-loaded eligible-wells list (see store.loadLinkedRequestWells()) — selecting a link
+   *  never itself triggers a network call.
    *
    *  Whichever fields the link actually supplies are then locked read-only: they track the source
    *  request record, so letting someone edit or clear them here would silently diverge from (or
@@ -761,11 +768,17 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
     const hasElevation = linkedWellHasElevation(well);
     const hasCoordinates = linkedWellHasCoordinates(well);
+    const hasTargetDepth = linkedWellHasTargetDepth(well);
 
     const patch: Record<string, string | number> = { wellName: well.wellName };
     if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation as number;
     if (hasCoordinates) patch['coordinates'] = formatLinkedWellCoordinates(well);
-    console.log('[IR:link] applyLinkedRequestWell — patching form group', { patch, hasElevation, hasCoordinates });
+    // targetDepthFt's control is already permanently disabled (schema `readonly: true`, applied
+    // at control-creation time) — patchValue on the parent group still updates a disabled child
+    // control's own value, it just stays excluded from the group's aggregated `.value`/validity,
+    // same as wellName below is excluded once `.disable()` runs.
+    if (hasTargetDepth) patch['targetDepthFt'] = well.targetDepth as number;
+    console.log('[IR:link] applyLinkedRequestWell — patching form group', { patch, hasElevation, hasCoordinates, hasTargetDepth });
     referenceGroup.patchValue(patch);
 
     referenceGroup.get('wellName')?.disable();

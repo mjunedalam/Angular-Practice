@@ -4,6 +4,7 @@ import {
   IntegratedRequirementFormationTop,
   IntegratedRequirementHydrogeology,
   IntegratedRequirementOffsetWell,
+  IntegratedRequirementProgramDetails,
   IntegratedRequirementTestProgram,
 } from '@models/wwell-planning/integrated-requirement.model';
 import {
@@ -12,6 +13,7 @@ import {
   WwellIrRawFormationTop,
   WwellIrRawHydrology,
   WwellIrRawOffsetWell,
+  WwellIrRawProgramMain,
 } from './wwell-ir-form.types';
 import {
   IrCasingRow,
@@ -23,6 +25,7 @@ import {
   IrWellDesignRow,
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
+import { deriveCompletionElementFlags } from './wwell-ir-wellbore-diagram.mapper';
 import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 
 /**
@@ -39,7 +42,7 @@ export interface WwellIrSaveContext {
   readonly irSeq: number | null;
   readonly existing?: Pick<
     IntegratedRequirement,
-    'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells' | 'wellDesignSeq'
+    'casing' | 'formationTops' | 'hydrogeology' | 'testProgram' | 'offsetWells' | 'wellDesignSeq' | 'programDetails'
   > | null;
   /** Live FULL_NAME → EMPNUM map (GET /gwd-ops-members, see WwellIrStore's
    *  `geologistEmpNumByName`) used to resolve cont_geologist/sub_cont_geologist below. Only omitted
@@ -371,26 +374,60 @@ function resolveTransmissionCode(value: string): string | null {
   return WWELL_TRANSMISSION_CODE_BY_LABEL[value] ?? value.slice(0, 10);
 }
 
-/** Only Estimated Pump Depth (pump_lvl) is mapped onto exad_gwd_well_design so far — see
- *  IrWellDesignRow's own doc comment for why every other column on that table is left alone.
- *  Unlike every other block above, this table is keyed by wd_seq (not ir_seq): with no wd_seq yet
- *  known (no detail fetch has resolved one), a row is only worth INSERTing once there's an actual
- *  value to save and a linked request to hang it off of — otherwise there is nothing to persist yet. */
+/**
+ * Estimated Pump Depth (pump_lvl) plus the eight completion-element columns (derived from
+ * Completion/Open Hole Size via deriveCompletionElementFlags — see IrWellDesignRow's own doc
+ * comment) are mapped onto exad_gwd_well_design. Unlike every other block above, this table is
+ * keyed by wd_seq (not ir_seq): with no wd_seq yet known (no detail fetch has resolved one), a row
+ * is only worth INSERTing once there's an actual value to save (a pump depth, or a real Completion
+ * selection) and a linked request to hang it off of — otherwise there is nothing to persist yet.
+ *
+ * DATA-LOSS CAVEAT: update_ir_data_prc's exad_gwd_well_design MERGE (docs/ir/update_ir_data_prc.sql)
+ * is a blanket `WHEN MATCHED THEN UPDATE SET <every column the proc's JSON_TABLE declares>` off
+ * this same JSON row — a column this app's payload omits (design_rpt, status, design_phase,
+ * w_prim_hid, w_num, sta_water_lvl, tds, completion_type, notes, publish_dt/flg/by, curr_flg) comes
+ * back NULL from JSON_TABLE and gets written as NULL, not left alone. If a wd_seq this UPDATE
+ * targets already carries real data from that other Well Design workflow, this silently wipes it.
+ * That risk already existed for pump_lvl-only saves before this change; sending Completion more
+ * often (it's now the primary driver, not just an occasional pump-depth edit) makes it fire more
+ * often too. Not fixed here — would need either the backend proc to COALESCE(t.col, h.col) instead
+ * of overwriting, or this app reading back and re-sending every other column untouched.
+ */
 function buildWellDesignRow(
+  programMain: WwellIrRawProgramMain,
   pumpDepthFt: number | null,
   prewapSeq: number | null,
   existingWellDesignSeq: number | null | undefined,
   existingPumpDepthFt: number | null | undefined,
+  existingProgramDetails: Pick<IntegratedRequirementProgramDetails, 'completion' | 'openHoleSizeIn'> | null | undefined,
 ): IrWellDesignRow | null {
   const wdSeq = existingWellDesignSeq ?? null;
+  const flags = deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null);
+  // IntegratedRequirementWellDesignFlags is camelCase (domain-model shape, shared with the
+  // wellbore-diagram mapper); the wire payload below needs update_ir_data_prc's own snake_case
+  // column names (see docs/ir/update_ir_data_prc.sql) — translate rather than rename one side.
+  const flagColumns = {
+    oh_flg: flags.ohFlg,
+    oh_remarks: flags.ohRemarks,
+    gp_flg: flags.gpFlg,
+    gp_remarks: flags.gpRemarks,
+    perforated_flg: flags.perforatedFlg,
+    perforated_remarks: flags.perforatedRemarks,
+    ls_flg: flags.lsFlg,
+    ls_remarks: flags.lsRemarks,
+  };
 
   if (wdSeq != null) {
-    const action: IrRowAction = (existingPumpDepthFt ?? null) === pumpDepthFt ? '' : 'UPDATE';
-    return { action, wd_seq: wdSeq, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt };
+    const unchanged =
+      (existingPumpDepthFt ?? null) === pumpDepthFt &&
+      (existingProgramDetails?.completion ?? '') === programMain.completion &&
+      (existingProgramDetails?.openHoleSizeIn ?? null) === (programMain.openHoleSizeIn || null);
+    const action: IrRowAction = unchanged ? '' : 'UPDATE';
+    return { action, wd_seq: wdSeq, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt, ...flagColumns };
   }
 
-  if (pumpDepthFt == null || prewapSeq == null) return null;
-  return { action: 'INSERT', wd_seq: null, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt };
+  if ((pumpDepthFt == null && !programMain.completion) || prewapSeq == null) return null;
+  return { action: 'INSERT', wd_seq: null, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt, ...flagColumns };
 }
 
 /** Bridges the wizard's raw form value to the exad_gwd_ir_* bulk-save wire format — see wwell-ir-payload.model.ts. */
@@ -434,10 +471,12 @@ export function buildWwellIrBulkSavePayload(
   const hydrogeology = buildHydrogeologyRows(raw.hydrogeology.main, irSeq, existing);
   const water = buildWaterRows(raw.contacts.offsetWells, irSeq, existing?.offsetWells);
   const wellDesign = buildWellDesignRow(
+    raw.programDetails.main,
     raw.hydrogeology.main.estimatedPumpDepthFt,
     prewapSeq,
     existing?.wellDesignSeq,
     existing?.hydrogeology.estimatedPumpDepthFt,
+    existing?.programDetails,
   );
 
   return [

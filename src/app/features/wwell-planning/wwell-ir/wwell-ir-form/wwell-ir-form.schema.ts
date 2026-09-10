@@ -67,11 +67,21 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             validators: { required: true },
           },
           {
+            // Read-only: exad_gwd_ir_header has no target-depth column of its own to save a
+            // manually-typed value into (see IntegratedRequirementRequestReference.targetDepthFt's
+            // doc comment) — the only real source this field has is the linked well's own
+            // exad_rcd_prewap.target_dpth, applied by wwell-ir-editor.component.ts's
+            // `applyLinkedRequestWell` the moment a "Link to Request" is picked. No `validators`
+            // (a permanently-disabled control is excluded from its parent's validity anyway, so
+            // `required`/`min` here would be dead weight — see buildFieldControl in
+            // wwell-dynamic-form.builder.ts).
             key: 'targetDepthFt',
             label: 'Target Depth',
             type: 'number',
             suffix: 'ft',
-            validators: { required: true, min: 0 },
+            placeholder: 'auto',
+            hint: 'From the linked well — select a Link to Request to populate',
+            readonly: true,
           },
           {
             key: 'surfaceElevationFtAsl',
@@ -188,11 +198,12 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         fields: [
           // Same control as its siblings below (dropdown-checkbox + big textarea) rather than a
           // strict `select`, per explicit request for visual/behavioral consistency across the
-          // whole section. `openHoleSizeIn`'s `visibleWhen` and the wellbore diagram's completion
-          // switch (wwell-ir-wellbore-diagram.mapper.ts) both still match on an EXACT string equal
-          // to one of WWELL_COMPLETION_OPTIONS — that holds as long as exactly one option is
-          // checked (the expected case), but checking more than one now produces a multi-line
-          // value that matches none of them, same trade-off every other field here already accepts.
+          // whole section. Its committed value is every checked option newline-joined (see
+          // WwellRichTextareaComponent), not a single picked string, once more than one option is
+          // checked — `openHoleSizeIn`'s `visibleWhen` below uses `includesLine` (not `equals`) so
+          // it stays visible whenever "Open Hole" is one of possibly several checked lines, and the
+          // wellbore diagram's completion switch (`deriveCompletionElementFlags` in
+          // wwell-ir-wellbore-diagram.mapper.ts) matches the same way.
           {
             key: 'completion',
             label: 'Completion',
@@ -207,7 +218,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             type: 'text',
             placeholder: 'e.g., 8 1/2"',
             hint: 'Bit size below the last casing shoe',
-            visibleWhen: { field: 'completion', equals: 'Open Hole' },
+            visibleWhen: { field: 'completion', includesLine: 'Open Hole' },
             colSpan: 2,
           },
           { key: 'acidization', label: 'Acidization', type: 'rich-textarea', options: WWELL_ACIDIZATION_OPTIONS, colSpan: 2 },

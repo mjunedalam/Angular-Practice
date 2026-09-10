@@ -110,10 +110,10 @@ export interface IrWaterRow extends IrRow {
  *  names), get_ir_data_prc emits this block as a raw `SELECT p.* FROM exad_rcd_prewap` — no
  *  aliasing at all — so the field names here are the table's actual Oracle columns, confirmed
  *  against a real response payload: PREWAP_SEQ, W_PRIM_HID, W_NUM, SURFACEN, SURFACEE,
- *  SV_SURF_ELEVF, SV_UTM_ZN, WELL_TYPE, WELL_CLASS (normalizeRowKeys lowercases the casing but
- *  does not rename anything). There is no well-name column at all — get_ir_wells_prc.sql builds
- *  one the same way this row's reader must: `w_prim_hid || '_' || w_num`. `EXPL_WB_NAME` also
- *  exists on this table but is an unrelated exploration-well identifier, not this water well's
+ *  SV_SURF_ELEVF, SV_UTM_ZN, WELL_TYPE, WELL_CLASS, TARGET_DPTH (normalizeRowKeys lowercases the
+ *  casing but does not rename anything). There is no well-name column at all — get_ir_wells_prc.sql
+ *  builds one the same way this row's reader must: `w_prim_hid || '_' || w_num`. `EXPL_WB_NAME`
+ *  also exists on this table but is an unrelated exploration-well identifier, not this water well's
  *  name — do not read it for wellName. */
 export interface IrLinkedWellRow {
   readonly prewap_seq: number;
@@ -127,17 +127,37 @@ export interface IrLinkedWellRow {
   readonly sv_utm_zn: number | null;
   readonly well_type: string | null;
   readonly well_class: string | null;
+  /** Planned total depth (ft) — the well's own value, not this IR's. This is the ONLY real source
+   *  Target Depth has anywhere: exad_gwd_ir_header carries no target-depth column of its own (see
+   *  IntegratedRequirementRequestReference.targetDepthFt's doc comment), which is why that field is
+   *  read-only in the UI and only ever populated from whichever well an IR is linked to. */
+  readonly target_dpth: number | null;
 }
 
 /** exad_gwd_well_design — keyed by its own wd_seq, NOT ir_seq (see 01-schema.sql, agwa-planning
- *  backend: that table links to a well only via prewap_seq). Only pump_lvl (Estimated Pump Depth)
- *  is mapped through the IR bulk-save contract — every other column on that ~25-column table
- *  (oh_flg, gp_flg, design_rpt...) belongs to a separate Well Design workflow this app doesn't
- *  touch, so those are simply never sent. */
+ *  backend: that table links to a well only via prewap_seq). pump_lvl (Estimated Pump Depth) and
+ *  the eight completion-element columns (oh_flg/oh_remarks, gp_flg/gp_remarks,
+ *  perforated_flg/perforated_remarks, ls_flg/ls_remarks — see
+ *  IntegratedRequirementWellDesignFlags/deriveCompletionElementFlags) are mapped through the IR
+ *  bulk-save contract; update_ir_data_prc's own exad_gwd_well_design MERGE accepts all of these
+ *  (docs/ir/update_ir_data_prc.sql). Every other column on that ~25-column table (design_rpt,
+ *  status, design_phase, w_prim_hid, w_num, sta_water_lvl, tds, completion_type, notes,
+ *  publish_dt/flg/by, curr_flg...) belongs to a separate Well Design workflow this app doesn't
+ *  touch, so those are simply never sent — see buildWellDesignRow's own doc comment for the
+ *  data-loss risk that leaves on the table's OTHER columns whenever this app's own UPDATE lands on
+ *  a wd_seq that workflow already populated. */
 export interface IrWellDesignRow extends IrActionRow {
   readonly wd_seq: number | null;
   readonly prewap_seq: number | null;
   readonly pump_lvl: number | null;
+  readonly oh_flg: 'Y' | 'N' | null;
+  readonly oh_remarks: string | null;
+  readonly gp_flg: 'Y' | 'N' | null;
+  readonly gp_remarks: string | null;
+  readonly perforated_flg: 'Y' | 'N' | null;
+  readonly perforated_remarks: string | null;
+  readonly ls_flg: 'Y' | 'N' | null;
+  readonly ls_remarks: string | null;
 }
 
 export interface WwellIrTableBlock<TRow extends IrActionRow = IrRow> {
@@ -197,9 +217,12 @@ export interface WwellIrDetailTableBlock {
  * Backed by exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract
  * above), for the IR editor's Request Reference "Link to Request" picker — selecting one
  * auto-populates whichever Request Reference fields this record actually has data for (Water Well
- * Name, Surface Elevation, Coordinates); see wwell-ir-editor.component.ts's
- * `applyLinkedRequestWell`. BI Number/Supporting Business/Target Aquifer/Target Depth have no
- * source here (exad_rcd_prewap doesn't carry them) and stay manually entered.
+ * Name, Surface Elevation, Coordinates, Target Depth); see wwell-ir-editor.component.ts's
+ * `applyLinkedRequestWell`. BI Number/Supporting Business/Target Aquifer still have no source here
+ * (exad_rcd_prewap doesn't carry them) and stay manually entered. Target Depth used to be in that
+ * same "no source" group — it now comes from exad_rcd_prewap.target_dpth (`targetdepth` here),
+ * which is why that field is read-only in the UI: exad_gwd_ir_header has no target-depth column of
+ * its own to save a manually-typed value into.
  */
 export interface IrEligibleWell {
   readonly prewapSeq: number;
@@ -212,6 +235,7 @@ export interface IrEligibleWell {
   readonly utmZone: string | null;
   readonly wellType: string | null;
   readonly wellClassification: string | null;
+  readonly targetDepth: number | null;
 }
 
 /**

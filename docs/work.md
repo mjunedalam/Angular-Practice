@@ -196,3 +196,79 @@ instead of a server-side redraw. Also asked that tables and the diagram never sp
   the actual live-rendered wellbore diagram (gradient casing pipes, static water level, geologic
   horizon ticks, leader-line labels) appears exactly as shown on-screen, ghost label gone. Backend
   `test-compile` and frontend `tsc`/`eslint`/all 37 `wwell-ir` Jest tests clean throughout.
+
+## 2026-09-08
+
+### IR attachments: two real, uploadable slots that become letter PDF pages
+
+Split the IR editor's `7.0 Attachments` section into two named sub-sections — **7.1 Location Map**
+(icon `map`, optional) and **7.2 Initiation Request** (icon `assignment`, required) — and made them
+real stored files that get appended to the downloaded letter PDF as trailing pages.
+
+- **The gap this closed**: `attachmentNames` was filename-only *everywhere* in the app — the shared
+  `WwellAttachmentDropzoneComponent` (also used by wwell-requests / land-affairs / wlda) only ever
+  held `File` objects in browser memory, and `wwell-ir.service.ts` documented that the backend has
+  no column for them and would 415 if sent. Nothing was ever persisted, so nothing survived a
+  reload and the letter PDF could only ever print names. The form schema had *always* described the
+  two slots (`wwell-ir-form.schema.ts`, with a comment naming "7.0 Location Map / 8.0 Initiation
+  Request"), but the rail merged them into one entry because there was no persisted way to tell
+  which name came from which slot. Per-slot storage is what finally made that split real.
+- **Backend (agwa-planning)**: new `IrAttachmentStorageService` stores files at
+  `<root>/ir-<irSeq>/<slot>/<sanitized-name>`, root from `planning.ir.attachments.dir` defaulting to
+  `<user.home>/.agwa-planning/ir-attachments`. Built with `java.nio.Path` throughout so separators
+  are correct on macOS and Windows with no branching. The config property is `Optional<String>`, not
+  a defaulted String — SmallRye *fails* the conversion on a blank value rather than treating it as
+  absent (found by the dev server refusing to restart). Slot is an enum, never a raw path segment.
+  Validation: extension allowlist (pdf/jpg/png), **magic-byte sniff** (extension alone is trivially
+  spoofed and these bytes are fed straight to iText), 25 MB cap, filename reduced to its basename
+  with separators/`:`/control chars stripped. Writes land in the destination dir first, then
+  `ATOMIC_MOVE`, so a reader sees the old file or the new one, never a partial copy.
+  Four endpoints on `IntegratedRequirementResource` (upload/list/download/delete).
+- **PDF**: new `IrAttachmentPdfAppender` merges via the iText kernel that `html2pdf` already pulls
+  in — **no new dependency**. PDF attachments contribute their pages verbatim; images get one
+  captioned A4 page. A corrupt attachment is logged and skipped rather than failing the whole
+  download — the same tolerance the wellbore snapshot already gets. (`Paragraph.setBold()` doesn't
+  exist in this iText version; used `StandardFonts.HELVETICA_BOLD` instead.)
+- **Frontend**: `attachmentNames: string[]` removed from the domain model in favour of
+  `attachments: IrAttachment[]`, loaded per ir_seq by its own endpoint alongside the approval
+  timeline (it can't ride in the detail blocks). Deliberately not optimistic — only the server knows
+  whether the format passed validation. `busyAttachmentSlot` is a slot, not a boolean, so one slot
+  uploading doesn't freeze the other. Uploads need a persisted ir_seq, so a never-saved draft shows
+  "Save the integrated requirement before attaching files." The rail's single 7.0 leaf became two
+  children; the existing "one section anchor per leaf" test is what guards that alignment.
+- **Verified live, not just statically**: real upload through the browser UI → `POST .../attachments/
+  location-map` 200 → slot re-rendered with name/size/actions → `POST .../letter-pdf` returned
+  **4 pages** (3 letter + 1 appended) with `pdftotext` confirming the "Location Map" caption on page
+  4; delete through the UI returned 200 and reverted the slot to its dropzone. Also confirmed by
+  curl that a `.txt`, a text file renamed `.pdf`, and a `../../../evil.png` filename are all
+  rejected or sanitized (the traversal name landed as `evil.png` *inside* its slot dir). Build,
+  `eslint`, and all 434 Jest tests clean. Test uploads cleaned off disk afterward.
+
+## 2026-09-10
+
+### IR letter PDF: Horizons / Formation Tops was silently dropped
+
+Traced a "the formation tops are missing from the downloaded PDF" report to the gap: `get_ir_data_prc`
+already fetches `exad_gwd_ir_tops` (per-horizon name + TVD depth + sub-sea depth, saved by the
+Angular form's `formationTops` section into `exad_gwd_ir_tops` via `buildTopsRows` in
+`wwell-ir-payload.mapper.ts`), but `IrLetterDataAssembler` (agwa-planning) never read that block —
+only the header's free-text `tops_remarks` note surfaced, buried as one row inside "Program Details"
+well after Casing Program.
+
+- **Backend (agwa-planning)**: added `IrLetterData.TopsRow(name, tvdDepthFt, ssDepthFt)` +
+  `topsRows` field/builder wiring, and `IrLetterDataAssembler.buildTopsRows` — reads
+  `exad_gwd_ir_tops`, sorts by `plan_tvd_dpth` (shallowest first, mirroring how casing rows sort by
+  `csg_depth`), maps `st_long_cd`/`plan_tvd_dpth`/`plan_ss_dpth` straight through `orDash`.
+- **Template (`irLetter.html`)**: new "Horizons / Formation Tops:" section (`data-table
+  keep-together`, same pattern as Casing Program including the `{#else}` "No formation tops
+  recorded." fallback) inserted between Well Location and Casing Program per the user's explicit
+  placement request, with the existing `tops_remarks` rendered as a `Remarks:` line under the table.
+  Removed the now-redundant "Formation Tops" row from the Program Details spec-table (user confirmed
+  dedup) and renumbered the trailing `Table N.` captions (Casing Program 2→3, Area Water Wells 3→4,
+  Approval 4→5).
+- Scoped as a bounded fix via the brainstorming skill — user explicitly declined broader "enterprise
+  ready" polish for this pass (letterhead/stamp/pagination were already judged sufficient) and asked
+  to scope future asks with concrete pain points instead.
+- No existing Java tests cover `IrLetterDataAssembler`/`IrLetterData` (not even the `CasingRow`
+  pattern this mirrors), so none were added — verified via `mvn -q -o compile` only (clean build,
+  agwa-planning's `quarkus:dev` was live so `clean` was avoided per prior incident).

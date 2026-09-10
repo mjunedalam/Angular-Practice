@@ -14,6 +14,7 @@ begin
     w_prim_hid || '_' || w_num wellname,
     surfacen surfacenorth,
     surfacee surfaceeast,
+    target_dpth targetdepth,
     sv_surf_elevf surfaceelevation,
     w_prim_hid primaryholeid,
     w_num wellnumber,

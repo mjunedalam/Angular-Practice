@@ -3,6 +3,7 @@ import {
   IntegratedRequirement,
   IntegratedRequirementCasingRow,
   IntegratedRequirementFormationTop,
+  IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
@@ -58,11 +59,44 @@ const COMPLETION_OPEN_HOLE = 'Open Hole';
 const COMPLETION_SCREENED = 'Screened';
 const COMPLETION_SCREENED_GRAVEL_PACK = 'Screened + Gravel Pack';
 const COMPLETION_LINER_PERFORATED = 'Liner + Perforated';
+/** Used to be the 5th `WWELL_COMPLETION_OPTIONS` entry (wwell-planning-reference-data.config.ts) —
+ *  was never wired into `deriveCompletionElementFlags` below, so picking it left every completion-
+ *  element flag 'N' (same as picking nothing at all): with no Casing/Formation Top rows either,
+ *  the whole Wellbore Preview card would silently vanish instead of drawing anything. Maps to the
+ *  same `perforatedFlg`/`resolvePerforatedIntervalInfo`/`renderPrePerforatedLiner` path "Liner +
+ *  Perforated" uses — that renderer already handles the no-target-liner case gracefully (falls
+ *  back to a generic "Perforated Interval" label via its own `perfTitle`/`linerOdSz: null`
+ *  branch, see wellbore-depth.helpers.ts's `resolvePerforatedIntervalInfo`), which is exactly
+ *  "perforated through casing, no liner implied" — the distinction "Liner + Perforated" 's own 7"
+ *  liner convention doesn't apply to.
+ *
+ *  Removed from `WWELL_COMPLETION_OPTIONS` itself (no longer pickable in the Completion dropdown)
+ *  — kept here, still checked below, purely so a previously-saved record whose `completion` text
+ *  already contains this exact line keeps deriving the same flags/remarks it always did, instead
+ *  of silently reverting to 'N' the next time it's opened and saved. */
+const COMPLETION_CASED_PERFORATED = 'Cased & Perforated';
 
 /** Anchors the depth scale to a stable minimum so a shallow/partial entry doesn't stretch
  * across the full drawing height, and so the scale's domain is never degenerate ([0, 0]) before the
  * (required, but non-linear-stepper-skippable) target depth field is filled in. */
 const MIN_SCALE_DEPTH_FT = 500;
+
+/**
+ * `requestReference.targetDepthFt` has no backing column on `exad_gwd_ir_header` itself — see
+ * `wwell-ir-summary.mapper.ts`'s `targetDepthFt: 0` (the list endpoint still always reads back 0).
+ * It's read-only in the UI and now DOES round-trip for a record linked to a well, sourced from
+ * that well's own `exad_rcd_prewap.target_dpth` (see `mergeIrDetailBlocksIntoIntegratedRequirement`
+ * — the linked-well GET join, not exad_gwd_ir_header) — but an IR with no linked request still has
+ * no source for it at all, and reads back 0 the same as before. This fallback below covers exactly
+ * that remaining gap: whenever `targetDepthFt` isn't a real positive number (no link yet, or the
+ * link's own well has no target_dpth), the diagram falls back to this fixed placeholder depth so
+ * completion elements (Open Hole, Gravel Pack, Liner Screen, Perforated Interval — see
+ * `resolveCompletionBottomDepth`'s 'none'/'single-fallback' rule kinds, which draw straight down to
+ * `totalDepth`) still get a sensible depth to draw against instead of collapsing to zero height at
+ * ground level. A real positive `targetDepthFt` (from the linked well, or typed this session before
+ * any reload) always wins over this fallback — see `assembleWellboreDiagramData` below.
+ */
+const STATIC_TARGET_DEPTH_FT = 1000;
 
 /**
  * Never used to match a real casing — `casing.renderer.ts` / `wellbore-depth.helpers.ts`
@@ -71,6 +105,10 @@ const MIN_SCALE_DEPTH_FT = 500;
  * this; they're read exclusively through `wLnrOdSz`, never `wCsgOdSz`.
  */
 const LINER_ANCHOR_SENTINEL = '__wwell_ir_liner_anchor__';
+
+/** Same sentinel role as `LINER_ANCHOR_SENTINEL` above, for `buildShoeAnchorFallback`'s row —
+ *  never used to match a real casing or liner. */
+const SHOE_ANCHOR_SENTINEL = '__wwell_ir_shoe_anchor__';
 
 /**
  * `casing.renderer.ts`'s `getCasingTier` derives each casing's on-screen half-width purely
@@ -148,6 +186,32 @@ function buildLinerTopAnchors(rows: readonly WwellIrRawCasingRow[]): IDrlgCsg[] 
   }));
 }
 
+/**
+ * Lets Open Hole / Screened / Screened + Gravel Pack draw immediately from Program Details, even
+ * before a single Casing row has been entered — otherwise `completion.renderer.ts`'s
+ * `renderOpenHoleAndScreen`/`renderGravelPackDesign` both bail out on `!casings.length &&
+ * !drlgCasings.length`, since with zero casing rows `casings` is `[]` and `buildLinerTopAnchors`
+ * above also returns `[]` (no Liner rows either). Only fires when there are no renderable Casing
+ * rows at all — once one exists, `casings.length > 0` already satisfies that guard on its own.
+ *
+ * Deliberately NOT added to `casings` — it must never itself look like a declared casing. Kept to
+ * `drlgCasings`, with `wCsgBotDpth: 0`, so it stays invisible everywhere that array is read:
+ * - `uniqueCasingsByOd`/`resolveLastCasingShoe` (casing.renderer.ts / liner.renderer.ts) both skip
+ *   any entry with `wCsgBotDpth <= 0`, so `renderCasingsFromActual`'s "no IR casing plan" fallback
+ *   path never draws a phantom casing pipe from it.
+ * - `rawLinersFromDrlg` (liner.renderer.ts) requires a truthy `wLnrOdSz`, left unset here, so it's
+ *   never mistaken for a liner either.
+ * - `resolveShoeDepth`'s `drlgCasings[0]?.wCsgBotDpth ?? 0` fallback reads `0` from this row —
+ *   the exact same value it already returns when `drlgCasings` is empty — so the completion
+ *   interval anchors at ground level (`resolveLinerRule`'s `kind: 'none'` case) with no other
+ *   change in behavior. The element then spans ground level → target depth, the same placeholder
+ *   interval already used whenever no liner qualifies, until real Casing rows give it a real shoe.
+ */
+function buildShoeAnchorFallback(renderableCasings: readonly WwellIrRawCasingRow[]): IDrlgCsg[] {
+  if (renderableCasings.length > 0) return [];
+  return [{ wCsgOdSz: SHOE_ANCHOR_SENTINEL, wCsgBotDpth: 0, wLnrOdSz: null, wLnrTopDepth: null, wLnrBotDepth: null }];
+}
+
 function mapGeologicTops(
   rows: readonly WwellIrRawFormationTop[],
   surfaceElevationFtAsl: number | null,
@@ -207,26 +271,96 @@ function buildWaterLevelFields(hydrology: WwellIrRawHydrology): Pick<IWellDesign
  * `visibleWhen` in wwell-ir-form.schema.ts), so it's naturally `null` — no pump drawn — on a
  * flow-test record.
  */
-function buildWellDesignFromForm(programMain: WwellIrRawProgramMain, hydrology: WwellIrRawHydrology): IWellDesign {
-  const completion = programMain.completion;
-  const isOpenHole = completion === COMPLETION_OPEN_HOLE;
-  const isGravelPack = completion === COMPLETION_SCREENED_GRAVEL_PACK;
-  const isScreened = completion === COMPLETION_SCREENED || isGravelPack;
-  const isLinerPerforated = completion === COMPLETION_LINER_PERFORATED;
+/**
+ * `programDetails.main.completion`'s field is `type: 'rich-textarea'` (see its own comment in
+ * wwell-ir-form.schema.ts), NOT a single-pick select — `WwellRichTextareaComponent` lets any
+ * number of `WWELL_COMPLETION_OPTIONS` be checked at once, and each checked option becomes its
+ * own `\n`-joined line in the control's plain-text value (see that component's own doc comment
+ * and `toggleOption`/`commitFromBox`). Checking both "Open Hole" and "Screened", for instance,
+ * commits the control as `"Open Hole\nScreened"`, never the bare string `'Open Hole'` — so
+ * `deriveCompletionElementFlags` below must check "is this option one of the checked lines?", not
+ * "does the whole value equal this option?". A straight `completion === COMPLETION_OPEN_HOLE`
+ * only ever matched the single-selection case; checking two or more options (or an option plus a
+ * free-typed line) always fell through to every flag being 'N', which is exactly why the DB never
+ * saw any flag flip to 'Y' once more than one box was checked.
+ */
+function selectedCompletionLabels(completion: string): ReadonlySet<string> {
+  return new Set(
+    completion
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0),
+  );
+}
 
+/**
+ * The completion-element flag/remarks derivation itself — pulled out of buildWellDesignFromForm
+ * so wwell-ir-payload.mapper.ts's buildWellDesignRow can compute the exact same
+ * exad_gwd_well_design.{oh,gp,perforated,ls}_flg/remarks values for the actual save payload,
+ * rather than these two call sites drifting apart. See IntegratedRequirementWellDesignFlags'
+ * own doc comment for why the real table needs these written, not just this app's own
+ * `completion` text.
+ */
+export function deriveCompletionElementFlags(
+  completion: string,
+  openHoleSizeIn: string | null,
+): IntegratedRequirementWellDesignFlags {
+  const selected = selectedCompletionLabels(completion);
+  const isOpenHole = selected.has(COMPLETION_OPEN_HOLE);
+  const isGravelPack = selected.has(COMPLETION_SCREENED_GRAVEL_PACK);
+  const isScreened = selected.has(COMPLETION_SCREENED) || isGravelPack;
+  const isLinerPerforated = selected.has(COMPLETION_LINER_PERFORATED);
+  const isCasedPerforated = selected.has(COMPLETION_CASED_PERFORATED);
+  const isPerforated = isLinerPerforated || isCasedPerforated;
+
+  return {
+    ohFlg: isOpenHole ? 'Y' : 'N',
+    ohRemarks: isOpenHole ? (openHoleSizeIn || null) : null,
+    gpFlg: isGravelPack ? 'Y' : 'N',
+    gpRemarks: isGravelPack ? 'Gravel Pack' : null,
+    perforatedFlg: isPerforated ? 'Y' : 'N',
+    perforatedRemarks: isLinerPerforated ? '7" Pre-Perforated Liner' : isCasedPerforated ? 'Cased & Perforated' : null,
+    lsFlg: isScreened ? 'Y' : 'N',
+    lsRemarks: isScreened ? 'Screen' : null,
+  };
+}
+
+/**
+ * True once any completion element flag is 'Y' — the same "is a completion element actually
+ * selected" test `deriveCompletionElementFlags`' four callers each need, whether the flags came
+ * from a live Completion pick or a persisted `wellDesignFlags` row. Used by the emptiness gates
+ * below so a record with only a well_design row (no Casing/Formation Top data at all) still shows
+ * the diagram instead of the empty state — see `hasWellboreDiagramData` and
+ * `hasWellboreDiagramDataForIntegratedRequirement`.
+ */
+function hasCompletionElementFlags(flags: IntegratedRequirementWellDesignFlags | null | undefined): boolean {
+  return !!flags && (flags.ohFlg === 'Y' || flags.gpFlg === 'Y' || flags.perforatedFlg === 'Y' || flags.lsFlg === 'Y');
+}
+
+/**
+ * `persistedFlags` — `ir.programDetails.wellDesignFlags`, the real exad_gwd_well_design row a GET
+ * fetched back (see IntegratedRequirementWellDesignFlags) — wins over re-deriving from
+ * `programMain.completion` whenever it's available: `completion` (exad_gwd_ir_header.completion,
+ * VARCHAR2(4000) free text) and the well_design flags are two separately-persisted columns/tables
+ * that this app always writes together (buildWellDesignRow), but nothing stops them disagreeing —
+ * a record saved before this flags round-trip existed, a legacy/imported row, or any write to
+ * exad_gwd_well_design from outside this app entirely. Trusting the actual fetched flags over a
+ * re-derivation is what makes the diagram match what's really in the DB rather than silently
+ * going blank whenever the two drift apart. Only the live-editing path (no fetched record to trust
+ * yet, or the user is actively picking a new Completion — see buildWellboreDiagramDataFromIntegratedRequirement)
+ * falls back to deriving from `programMain` itself.
+ */
+function buildWellDesignFromForm(
+  programMain: WwellIrRawProgramMain,
+  hydrology: WwellIrRawHydrology,
+  persistedFlags?: IntegratedRequirementWellDesignFlags | null,
+): IWellDesign {
   return {
     name: null,
     prewapSeq: null,
     ...buildWaterLevelFields(hydrology),
     pumpLvl: hydrology.estimatedPumpDepthFt,
-    ohFlg: isOpenHole ? 'Y' : 'N',
-    ohRemarks: isOpenHole ? (programMain.openHoleSizeIn || null) : null,
-    gpFlg: isGravelPack ? 'Y' : 'N',
-    gpRemarks: isGravelPack ? 'Gravel Pack' : null,
-    perforatedFlg: isLinerPerforated ? 'Y' : 'N',
-    perforatedRemarks: isLinerPerforated ? '7" Pre-Perforated Liner' : null,
-    lsFlg: isScreened ? 'Y' : 'N',
-    lsRemarks: isScreened ? 'Screen' : null,
+    ...(persistedFlags ?? deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null)),
   };
 }
 
@@ -255,24 +389,40 @@ function assembleWellboreDiagramData(
   surfaceElevationFtAsl: number | null,
   programMain: WwellIrRawProgramMain,
   hydrology: WwellIrRawHydrology,
+  persistedWellDesignFlags?: IntegratedRequirementWellDesignFlags | null,
 ): WellboreDiagramData {
   const renderableCasings = casingRows.filter(isRenderableCasingRow);
   const renderableFormationTops = formationRows.filter(isRenderableFormationTop);
+  /**
+   * `completion.renderer.ts`'s `resolveCompletionBottomDepth` (rule kinds 'none' /
+   * 'single-fallback' — i.e. no liner shoe to anchor the bottom to, which is exactly the "just a
+   * Completion pick, no Casing rows yet" case this file's own `buildShoeAnchorFallback` exists
+   * for) draws Open Hole / Gravel Pack / Liner Screen straight down to `data.totalDepth` — so
+   * passing raw `targetDepthFt` through unchanged left the element's bottom pinned to its top
+   * (ground level) whenever Target Depth reads as 0, making it technically present in the DOM but
+   * zero-height/invisible. Resolving it once here (real value if positive, else
+   * `STATIC_TARGET_DEPTH_FT`) and reusing that everywhere below — `totalDepth`, `displayDepth`'s
+   * own floor, and `targetDepth` — keeps the whole diagram (scale, ground line, completion
+   * elements, total-depth label) consistent instead of some parts anchoring to a real value and
+   * others to a fallback.
+   */
+  const resolvedTargetDepthFt = targetDepthFt > 0 ? targetDepthFt : STATIC_TARGET_DEPTH_FT;
+  const displayDepth = computeDisplayDepthFt(resolvedTargetDepthFt, casingRows, formationRows);
 
   return {
     wellName,
-    totalDepth: targetDepthFt,
-    displayDepth: computeDisplayDepthFt(targetDepthFt, casingRows, formationRows),
+    totalDepth: resolvedTargetDepthFt,
+    displayDepth,
     casings: mapCasings(renderableCasings),
-    drlgCasings: buildLinerTopAnchors(renderableCasings),
+    drlgCasings: [...buildLinerTopAnchors(renderableCasings), ...buildShoeAnchorFallback(renderableCasings)],
     geologicTops: mapGeologicTops(renderableFormationTops, surfaceElevationFtAsl),
     hydrogeology: null,
     prewap: null,
     rigActivity: null,
     currentDepth: 0,
-    targetDepth: targetDepthFt,
+    targetDepth: resolvedTargetDepthFt,
     mudCirculation: [],
-    wellDesign: buildWellDesignFromForm(programMain, hydrology),
+    wellDesign: buildWellDesignFromForm(programMain, hydrology, persistedWellDesignFlags),
   };
 }
 
@@ -287,7 +437,10 @@ function assembleWellboreDiagramData(
 export function hasWellboreDiagramData(raw: WwellIrFormRawValue): boolean {
   return (
     raw.subsurface.casing.some(isRenderableCasingRow) ||
-    raw.subsurface.formationTops.some(isRenderableFormationTop)
+    raw.subsurface.formationTops.some(isRenderableFormationTop) ||
+    hasCompletionElementFlags(
+      deriveCompletionElementFlags(raw.programDetails.main.completion, raw.programDetails.main.openHoleSizeIn || null),
+    )
   );
 }
 
@@ -354,15 +507,30 @@ function toRawHydrology(ir: IntegratedRequirement): WwellIrRawHydrology {
 /** Same emptiness gate as `hasWellboreDiagramData`, for the IR editor/detail page. `liveCasingRows`/
  *  `liveFormationRows` let the editor substitute its Casing/Formation Tops sections' in-progress
  *  FormArray values while those sections are open for editing — pass `null`/omit for either one
- *  still reads straight from `ir`. */
+ *  still reads straight from `ir`. `liveProgramMain` does the same for Program Details: while that
+ *  section is open for live edit, the gate reacts to the Completion the user is actively picking
+ *  right now, same as `buildWellboreDiagramDataFromIntegratedRequirement` below; otherwise it
+ *  trusts the persisted `ir.programDetails.wellDesignFlags` (falling back to re-deriving from
+ *  `ir.programDetails.completion` for a record fetched before that round-trip existed) — so a
+ *  record carrying only a well_design row (no Casing/Formation Top data at all) still shows the
+ *  diagram instead of the empty state. */
 export function hasWellboreDiagramDataForIntegratedRequirement(
   ir: IntegratedRequirement,
   liveCasingRows?: readonly WwellIrRawCasingRow[] | null,
   liveFormationRows?: readonly WwellIrRawFormationTop[] | null,
+  liveProgramMain?: WwellIrRawProgramMain | null,
 ): boolean {
   const casingRows = liveCasingRows ?? toRawCasingRows(ir.casing);
   const formationRows = liveFormationRows ?? toRawFormationRows(ir.formationTops);
-  return casingRows.some(isRenderableCasingRow) || formationRows.some(isRenderableFormationTop);
+  const completionFlags = liveProgramMain
+    ? deriveCompletionElementFlags(liveProgramMain.completion, liveProgramMain.openHoleSizeIn || null)
+    : (ir.programDetails.wellDesignFlags ??
+      deriveCompletionElementFlags(ir.programDetails.completion, ir.programDetails.openHoleSizeIn));
+  return (
+    casingRows.some(isRenderableCasingRow) ||
+    formationRows.some(isRenderableFormationTop) ||
+    hasCompletionElementFlags(completionFlags)
+  );
 }
 
 /** Detail/editor-page counterpart of `buildWellboreDiagramData` — same live `app-well-bore-view`
@@ -377,7 +545,13 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
  *  element flags in `buildWellDesignFromForm`) and Estimated Hydrology (static water level / SIWHP
  *  / pump depth): without these, picking a different Completion or test type while that section is
  *  open wouldn't move the diagram until the whole record was saved, unlike casing/formation-top
- *  edits, which already updated it live. */
+ *  edits, which already updated it live.
+ *
+ *  While Program Details is open for live edit (`liveProgramMain` set), the diagram must react to
+ *  the Completion the user is actively picking right now — so this deliberately does NOT pass
+ *  `ir.programDetails.wellDesignFlags` (the last-fetched, possibly-stale real DB flags) through in
+ *  that case, only once the section is closed/not being edited. See buildWellDesignFromForm's own
+ *  doc comment for why the persisted flags win over re-derivation the rest of the time. */
 export function buildWellboreDiagramDataFromIntegratedRequirement(
   ir: IntegratedRequirement,
   liveCasingRows?: readonly WwellIrRawCasingRow[] | null,
@@ -393,5 +567,6 @@ export function buildWellboreDiagramDataFromIntegratedRequirement(
     ir.requestReference.surfaceElevationFtAsl,
     liveProgramMain ?? toRawProgramMain(ir),
     liveHydrology ?? toRawHydrology(ir),
+    liveProgramMain ? null : ir.programDetails.wellDesignFlags,
   );
 }

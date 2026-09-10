@@ -44,6 +44,26 @@ export interface IntegratedRequirementDevelopmentTesting {
   readonly remarks: string;
 }
 
+/**
+ * exad_gwd_well_design's own completion-element columns (OH_FLG/OH_REMARKS, GP_FLG/GP_REMARKS,
+ * PERFORATED_FLG/PERFORATED_REMARKS, LS_FLG/LS_REMARKS) — derived one-way from `completion`/
+ * `openHoleSizeIn` (see deriveCompletionElementFlags in wwell-ir-wellbore-diagram.mapper.ts) and
+ * persisted through update_ir_data_prc's exad_gwd_well_design MERGE on every save, so the real
+ * backend table — not just this app's own `completion` text — carries the flags. `completion`
+ * stays the one field the UI actually edits/displays; this is the round-tripped mirror of what
+ * the save wrote, read back from a GET's own exad_gwd_well_design block.
+ */
+export interface IntegratedRequirementWellDesignFlags {
+  readonly ohFlg: 'Y' | 'N';
+  readonly ohRemarks: string | null;
+  readonly gpFlg: 'Y' | 'N';
+  readonly gpRemarks: string | null;
+  readonly perforatedFlg: 'Y' | 'N';
+  readonly perforatedRemarks: string | null;
+  readonly lsFlg: 'Y' | 'N';
+  readonly lsRemarks: string | null;
+}
+
 export interface IntegratedRequirementProgramDetails {
   readonly completion: string;
   /** Bit size below the last casing shoe (e.g. `8 1/2"`) — only meaningful when completion is 'Open Hole'. */
@@ -51,6 +71,10 @@ export interface IntegratedRequirementProgramDetails {
   readonly acidization: string;
   readonly transmission: string;
   readonly developmentTesting: IntegratedRequirementDevelopmentTesting;
+  /** `undefined` until a detail fetch resolves one (a freshly-built local draft has none yet),
+   *  `null` when that fetch found no exad_gwd_well_design row at all — see
+   *  IntegratedRequirementWellDesignFlags' own doc comment. */
+  readonly wellDesignFlags?: IntegratedRequirementWellDesignFlags | null;
 }
 
 export interface IntegratedRequirementContacts {
