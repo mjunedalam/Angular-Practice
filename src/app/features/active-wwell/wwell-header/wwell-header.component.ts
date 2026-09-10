@@ -10,6 +10,7 @@ import { ActiveWwellUiStore } from '../active-wwell-ui.store';
 import { AddStatusDialogComponent } from '../add-status-dialog/add-status-dialog.component';
 import { RbacStore } from '@store/rbac/rbac.store';
 import { ACTIONS } from '@models/rbac/role.constants';
+import { resolveBiDisplayNum } from '@shared/utils/bi-number.util';
 
 const AREAS = [
   { value: 'Western Area' },
@@ -56,5 +57,10 @@ export class WwellHeaderComponent {
 
   protected openAddStatusDialog(): void {
     this.dialog.open(AddStatusDialogComponent, { width: '280px', data: { name: '' } });
+  }
+
+  /** Normalizes 'BI1514'/'1514' → '34', 'BI3300'/'3300' → '33', etc. for display. */
+  protected biDisplayNum(biNum: string): string {
+    return resolveBiDisplayNum(biNum);
   }
 }
