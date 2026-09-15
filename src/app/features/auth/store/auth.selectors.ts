@@ -54,6 +54,20 @@ export function selectLastLogin(user: AuthUser | null): Date | null {
   return new Date(Number(ts) * 1000);
 }
 
+/** The bare network ID (e.g. "junedalam"), stripped of the "@aramco.com" domain `upn` sometimes
+ *  carries — see selectUserEmail's own doc comment on that inconsistency. Falls back to
+ *  preferred_username/unique_name for tokens that don't carry a upn claim at all. */
+export function selectNetworkId(user: AuthUser | null): string | null {
+  const identifier = user?.upn ?? user?.preferred_username ?? user?.unique_name;
+
+  if (typeof identifier !== 'string') return null;
+
+  const trimmed = identifier.trim();
+  if (!trimmed) return null;
+
+  return trimmed.includes('@') ? trimmed.split('@')[0] : trimmed;
+}
+
 export function selectUserEmail(user: AuthUser | null): string | null {
   const upn = user?.upn;
 

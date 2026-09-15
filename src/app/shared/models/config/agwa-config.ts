@@ -5,6 +5,7 @@ export interface AgwaConfig {
   planningServiceUrl: string;
   presDocsServiceUrl: string;
   emailServiceUrl: string;
+  sapServiceUrl: string;
   mapServerUrl: string;
   mosaicLayerUrl: string;
   appId: string;

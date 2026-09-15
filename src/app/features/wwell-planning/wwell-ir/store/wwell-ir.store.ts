@@ -6,15 +6,14 @@ import { tapResponse } from '@ngrx/operators';
 import { catchError, concatMap, delay, from, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
-import {
-  WWELL_DELETE_DELAY_MS,
-  WWELL_SAVE_DELAY_MS,
-  WWELL_UPDATE_DELAY_MS,
-} from '@models/wwell-planning/wwell-planning-loading.constants';
+import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { SapService } from '@services/sap/sap.service';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
+import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_SUBMITTED, buildSapWorkflowId } from '../wwell-ir-sap.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
 /** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
@@ -31,9 +30,31 @@ function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
 }
 
+/** Like errorMessage above, but prefers the SAP trigger endpoint's own `{ detail: [{ msg }] }`
+ *  422 validation shape (SapValidationError) over the generic `{ message }` envelope every other
+ *  exad_agwa endpoint here uses — so a real "field X is required" from SAP reaches the user
+ *  instead of a vague fallback. */
+function sapErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof HttpErrorResponse) {
+    const body: unknown = err.error;
+    const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : undefined;
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map(item => (item && typeof item === 'object' ? (item as { msg?: unknown }).msg : undefined))
+        .filter((msg): msg is string => typeof msg === 'string' && msg.length > 0);
+      if (messages.length > 0) return messages.join('; ');
+    }
+  }
+  return errorMessage(err, fallback);
+}
+
 /** A repeat "Save as Draft" on the same IR reuses its ir_seq (see wwell-ir-payload.mapper.ts), so
  *  the response describes the *same* record, not a new one — replace it in place instead of
  *  prepending a duplicate. Falls back to prepend for a genuinely new IR (irSeq not seen yet). */
+function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string): IntegratedRequirement[] {
+  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const } : item));
+}
+
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
   const existingIndex = created.irSeq != null ? list.findIndex(item => item.irSeq === created.irSeq) : -1;
   if (existingIndex === -1) return [created, ...list];
@@ -59,7 +80,7 @@ export const WwellIrStore = signalStore(
       linkedRequestWellsError,
       gwdOpsMembersError,
       createIrError,
-      updateIrStatusError,
+      sapTriggerError,
       irDetailError,
       irApprovalTimelineError,
       deleteIrError,
@@ -93,7 +114,7 @@ export const WwellIrStore = signalStore(
           linkedRequestWellsError(),
           gwdOpsMembersError(),
           createIrError(),
-          updateIrStatusError(),
+          sapTriggerError(),
           irDetailError(),
           irApprovalTimelineError(),
           deleteIrError(),
@@ -106,7 +127,7 @@ export const WwellIrStore = signalStore(
           linkedRequestWellsError() !== null ||
           gwdOpsMembersError() !== null ||
           createIrError() !== null ||
-          updateIrStatusError() !== null ||
+          sapTriggerError() !== null ||
           irDetailError() !== null ||
           irApprovalTimelineError() !== null ||
           deleteIrError() !== null ||
@@ -115,7 +136,66 @@ export const WwellIrStore = signalStore(
     }),
   ),
 
-  withMethods((store, svc = inject(WwellIrService)) => {
+  withMethods((store, svc = inject(WwellIrService), sap = inject(SapService), authStore = inject(AuthStore)) => {
+    // Step 3, reached only after SAP has accepted the workflow: stamp the id and status onto the
+    // IR header (update_ir_sap_wf_prc — `seq` lands in sap_wf_id, `status` in sap_wf_status).
+    //
+    // Deliberately not called on a failed trigger: sap_wf_id/sap_wf_status describe a workflow
+    // that exists in SAP, so recording one for a push SAP never accepted would leave the header
+    // pointing at an id no SAP workflow was ever created under.
+    function persistSapWorkflow(ir: IntegratedRequirement, irSeq: number, seq: number): void {
+      const finish = (persistError: string | null) =>
+        patchState(store, {
+          updatingIrStatus: false,
+          sapTriggerError: persistError,
+          // Only a clean run — SAP accepted the workflow AND the header recorded it — moves the
+          // record to submitted. This is a local reflection of the sap_wf_status just written, not
+          // a separate persisted status: exad_gwd_ir_header has no status column, and the list read
+          // still derives status from publish_flg alone (wwell-ir-summary.mapper.ts), so this
+          // reverts on refresh until that read path surfaces sap_wf_status.
+          irs: persistError === null ? markSubmittedForReview(store.irs(), ir.id) : store.irs(),
+        });
+
+      svc.updateIrSapWorkflow(irSeq, seq, WWELL_IR_SAP_WF_STATUS_SUBMITTED).subscribe({
+        next: () => finish(null),
+        error: (err: unknown) => finish(errorMessage(err, 'SAP workflow triggered, but failed to record it on the integrated requirement')),
+      });
+    }
+
+    // Steps 1-2: mint a workflow id (get_wf_next_id_fnc), then push the workflow to SAP under it.
+    // workflow_id must be minted fresh per submission and formatted as
+    // `{NETWORK_ID}_{SCENARIO_ID}_{seq}` — see buildSapWorkflowId.
+    function triggerSapWorkflow(ir: IntegratedRequirement, irSeq: number): void {
+      const networkId = authStore.networkId() ?? '';
+      svc.getNextSapWorkflowSeq().subscribe({
+        next: seq => {
+          sap
+            .trigger({
+              workflow_title: `Integrated Requirement ${ir.code} - ${ir.requestReference.wellName}`,
+              initiator_network_id: networkId,
+              requester_network_id: networkId,
+              process_id: WWELL_IR_SAP_PROCESS_ID,
+              scenario_id: WWELL_IR_SAP_SCENARIO_ID,
+              workflow_id: buildSapWorkflowId(networkId, seq),
+              body: [],
+            })
+            .subscribe({
+              next: () => persistSapWorkflow(ir, irSeq, seq),
+              // SAP refused the workflow, so there is nothing to stamp — surface the failure and
+              // leave the header exactly as it was.
+              error: (err: unknown) =>
+                patchState(store, {
+                  updatingIrStatus: false,
+                  sapTriggerError: sapErrorMessage(err, 'Failed to trigger the SAP review workflow'),
+                }),
+            });
+        },
+        // Nothing to trigger or persist without a real id — never call SAP with a fabricated one.
+        error: (err: unknown) =>
+          patchState(store, { updatingIrStatus: false, sapTriggerError: errorMessage(err, 'Failed to generate a SAP workflow id') }),
+      });
+    }
+
     const loadIrs = rxMethod<void>(
       pipe(
         tap(() => patchState(store, { irsLoading: true, irsError: null })),
@@ -449,16 +529,25 @@ export const WwellIrStore = signalStore(
           });
       },
 
+      /**
+       * "Submit for Review" is the SAP workflow submission, in three steps against two backends:
+       * mint a workflow id (agwa-planning's get_wf_next_id_fnc) → push the workflow to SAP AAE
+       * under that id (SapService) → record the outcome on the IR header (update_ir_sap_wf_prc).
+       *
+       * There is no separate IR status-transition call: exad_gwd_ir_header has no status column of
+       * its own, so the SAP workflow columns this writes ARE the record of having submitted.
+       * `updatingIrStatus` stays true across all three so the editor's Submit button spins for the
+       * whole action rather than flickering between steps.
+       */
       submitIrForReview(ir: IntegratedRequirement): void {
-        patchState(store, { updatingIrStatus: true, updateIrStatusError: null });
-        svc
-          .submitIrForReview(ir)
-          .pipe(delay(WWELL_UPDATE_DELAY_MS))
-          .subscribe({
-            next: updated => patchState(store, { irs: store.irs().map(item => (item.id === updated.id ? updated : item)), updatingIrStatus: false }),
-            error: (err: unknown) =>
-              patchState(store, { updatingIrStatus: false, updateIrStatusError: errorMessage(err, 'Failed to submit integrated requirement for review') }),
-          });
+        // A draft that was never saved has no ir_seq to file the workflow under, so there would be
+        // nothing to record the outcome against — refuse before calling SAP rather than after.
+        if (ir.irSeq == null) {
+          patchState(store, { sapTriggerError: 'Save the integrated requirement before submitting it for review.' });
+          return;
+        }
+        patchState(store, { updatingIrStatus: true, sapTriggerError: null });
+        triggerSapWorkflow(ir, ir.irSeq);
       },
 
       /** Deletes the whole IR (header row, cascading to casing/tops/hydrogeology/water — see

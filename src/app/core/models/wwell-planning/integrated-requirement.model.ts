@@ -38,8 +38,8 @@ export interface IntegratedRequirementDevelopmentTesting {
   readonly mudLogging: string;
   readonly sampling: string;
   readonly flowTest: string;
-  /** General Development/Testing remarks (exad_gwd_ir_header.dt_rmks) — a catch-all note for the
-   *  whole Development/Testing group, distinct from logging/mudLogging/sampling/flowTest's own
+  /** General Development/Testing remarks (exad_gwd_ir_header.dev_pump_test) — a catch-all note for
+   *  the whole Development/Testing group, distinct from logging/mudLogging/sampling/flowTest's own
    *  per-topic remarks. */
   readonly remarks: string;
 }
@@ -69,6 +69,7 @@ export interface IntegratedRequirementProgramDetails {
   /** Bit size below the last casing shoe (e.g. `8 1/2"`) — only meaningful when completion is 'Open Hole'. */
   readonly openHoleSizeIn: string | null;
   readonly acidization: string;
+  /** exad_gwd_ir_header.dt_rmks — not trns_type (VARCHAR2(10), too short for these labels). */
   readonly transmission: string;
   readonly developmentTesting: IntegratedRequirementDevelopmentTesting;
   /** `undefined` until a detail fetch resolves one (a freshly-built local draft has none yet),

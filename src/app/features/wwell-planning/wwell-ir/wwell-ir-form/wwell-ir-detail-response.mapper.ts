@@ -3,7 +3,6 @@ import {
   IntegratedRequirementTestType,
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
-import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 import { stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
 import {
   IrCasingRow,
@@ -16,17 +15,6 @@ import {
   WwellIrDetailTableBlock,
   WwellIrTableName,
 } from './wwell-ir-payload.model';
-
-/** Inverse of wwell-ir-payload.mapper.ts's resolveTransmissionCode: exad_gwd_ir_header.trns_type
- *  is VARCHAR2(10), too short for the full label, so a known label is stored as its short code
- *  ('Pipeline' → 'PL'). Decode it back to the label the form's option list expects, otherwise the
- *  select has no matching option and silently renders blank. Anything unrecognised (free-typed
- *  text that was truncated to fit) is passed through as-is. */
-function decodeTransmission(code: string | null | undefined): string | null {
-  if (!code) return null;
-  const label = Object.keys(WWELL_TRANSMISSION_CODE_BY_LABEL).find(key => WWELL_TRANSMISSION_CODE_BY_LABEL[key] === code);
-  return label ?? code;
-}
 
 /** Every IrXxxRow interface in wwell-ir-payload.model.ts (IrHeaderRow, IrCasingRow, IrTopsRow,
  *  IrHydrogeologyRow, IrWaterRow) uses lowercase snake_case field names mirroring the Oracle
@@ -124,8 +112,8 @@ function resolveLegacyText(raw: string | null | undefined, fallback: string): st
  * backing column on exad_gwd_ir_header — see wwell-ir-summary.mapper.ts for the same limitation on
  * the list side, and docs/ir/EXAD_GWD_IR_HEADER.md for the table's real column set.
  * `linkedRequestId`/`letterNumber` (prewap_seq/ltr_no) and the Development & Testing fields
- * (sampling/logging/mud_rmks/flow_rmks) DO have real columns, so those are read back from `header`
- * below rather than left as `existing` had them. Field mappings mirror buildWwellIrBulkSavePayload
+ * (sampling/logging/mud_rmks/flow_rmks/dev_pump_test) DO have real columns, so those are read back
+ * from `header` below rather than left as `existing` had them. Field mappings mirror buildWwellIrBulkSavePayload
  * in wwell-ir-payload.mapper.ts exactly (this is that function's inverse) — keep the two in sync
  * if either changes.
  *
@@ -246,15 +234,16 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       completion: completionText,
       // Both are written by buildWwellIrBulkSavePayload but were never read back here, so
       // Transmission/Acidization rendered blank after any reload even though the values were in
-      // the DB the whole time — the same class of gap that hid Logging/Sampling before.
+      // the DB the whole time — the same class of gap that hid Logging/Sampling before. Transmission
+      // reads off `dt_rmks`, not `trns_type` — see wwell-ir-payload.model.ts's IrHeaderRow doc comments.
       acidization: resolveLegacyText(header?.acidization, existing.programDetails.acidization),
-      transmission: decodeTransmission(header?.trns_type) ?? existing.programDetails.transmission,
+      transmission: resolveLegacyText(header?.dt_rmks, existing.programDetails.transmission),
       developmentTesting: {
         logging: resolveLegacyText(header?.logging, existing.programDetails.developmentTesting.logging),
         mudLogging: resolveLegacyText(header?.mud_rmks, existing.programDetails.developmentTesting.mudLogging),
         sampling: resolveLegacyText(header?.sampling, existing.programDetails.developmentTesting.sampling),
         flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest),
-        remarks: resolveLegacyText(header?.dt_rmks, existing.programDetails.developmentTesting.remarks),
+        remarks: resolveLegacyText(header?.dev_pump_test, existing.programDetails.developmentTesting.remarks),
       },
       // Round-tripped confirmation that the save actually reached exad_gwd_well_design's own
       // oh_flg/gp_flg/ls_flg/perforated_flg columns — see mapWellDesignFlags above and

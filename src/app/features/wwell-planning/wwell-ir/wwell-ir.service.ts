@@ -7,7 +7,6 @@ import { IrAttachment, IrAttachmentSlot, IrAttachmentUploadEvent } from '@models
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
-import { todayIsoDate } from '../shared/wwell-approvals/wwell-approval-request.util';
 import { mockApprovalChainForIrSeq } from './wwell-ir-form/wwell-ir-chain.mock';
 import {
   GwdOpsMember,
@@ -274,13 +273,30 @@ export class WwellIrService {
       .pipe(map(() => undefined));
   }
 
-  submitIrForReview(ir: IntegratedRequirement): Observable<IntegratedRequirement> {
+  /**
+   * Next unique SAP workflow sequence (EXAD_AGWA_QUERIES_PKG.get_wf_next_id_fnc,
+   * docs/ir/get_wf_next_id_fnc.sql) — a raw DB sequence value the caller both formats into the
+   * composite `workflow_id` SAP expects (see buildSapWorkflowId) and stores as-is via
+   * updateIrSapWorkflow below. Live in agwa-planning (SapWorkflowResource) — no offline fallback:
+   * a failure here must stop WwellIrStore.submitIrForReview before it mints a fabricated id, not
+   * silently hand back one that was never really reserved.
+   */
+  getNextSapWorkflowSeq(): Observable<number> {
+    return this.http.get<ApiResponse<number>>(`${this.apiUrl}/sap-workflow/next-id`).pipe(map(res => res.data[0]));
+  }
+
+  /**
+   * Persists the SAP workflow id/status onto the IR header
+   * (EXAD_AGWA_IUD_PKG.update_ir_sap_wf_prc, docs/ir/update_ir_sap_wf_prc.sql) once the SAP AAE
+   * trigger call has been attempted — called on both outcomes (see WwellIrStore.submitIrForReview)
+   * so the header always reflects whether the push to SAP actually succeeded. Live in
+   * agwa-planning (IntegratedRequirementResource.updateSapWorkflow) — no offline fallback: a
+   * failure here is a real, visible error (WwellIrStore's sapTriggerError), not a silently
+   * swallowed one, since it would otherwise mask the header never actually getting stamped.
+   */
+  updateIrSapWorkflow(irSeq: number, wfId: number, wfStatus: string): Observable<void> {
     return this.http
-      .post<ApiResponse<IntegratedRequirement>>(`${this.apiUrl}/integrated-requirements/${ir.id}/submit-for-review`, {})
-      .pipe(
-        map(res => res.data[0]),
-        // TODO: remove fallback once the submit-for-review endpoint is live.
-        catchError(() => of({ ...ir, status: 'submit-for-review' as const, updatedDate: todayIsoDate() })),
-      );
+      .patch<ApiResponse<never>>(`${this.apiUrl}/integrated-requirements/${irSeq}/sap-workflow`, { wfId, wfStatus })
+      .pipe(map(() => undefined));
   }
 }

@@ -1,15 +1,35 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
-import { CreateIntegratedRequirementPayload } from '@models/wwell-planning/integrated-requirement.model';
+import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { SapService } from '@services/sap/sap.service';
+import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
+import {
+  WWELL_IR_SAP_PROCESS_ID,
+  WWELL_IR_SAP_SCENARIO_ID,
+  WWELL_IR_SAP_WF_STATUS_SUBMITTED,
+  buildSapWorkflowId,
+} from '../wwell-ir-sap.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
 
 const serviceMock = {
   createIr: jest.fn(),
   getIrDetailBlocks: jest.fn(),
+  getIrs: jest.fn(),
+  getNextSapWorkflowSeq: jest.fn(),
+  updateIrSapWorkflow: jest.fn(),
+};
+
+const sapServiceMock = {
+  trigger: jest.fn(),
+};
+
+const authStoreMock = {
+  networkId: jest.fn(() => 'junedalam'),
 };
 
 function buildPayload(): CreateIntegratedRequirementPayload {
@@ -73,6 +93,7 @@ function buildIrBulkPayload(): WwellIrBulkSavePayload {
           mud_rmks: null,
           test_type: 'pump-test',
           flow_rmks: null,
+          dev_pump_test: null,
         },
       ],
     },
@@ -95,7 +116,12 @@ describe('WwellIrStore - createIr', () => {
     // buildIntegratedRequirementFromPayload alone would build, matching most of these assertions.
     serviceMock.getIrDetailBlocks.mockReturnValue(of([]));
     TestBed.configureTestingModule({
-      providers: [WwellIrStore, { provide: WwellIrService, useValue: serviceMock }],
+      providers: [
+        WwellIrStore,
+        { provide: WwellIrService, useValue: serviceMock },
+        { provide: SapService, useValue: sapServiceMock },
+        { provide: AuthStore, useValue: authStoreMock },
+      ],
     });
     store = TestBed.inject(WwellIrStore);
   });
@@ -166,5 +192,172 @@ describe('WwellIrStore - createIr', () => {
     jest.advanceTimersByTime(WWELL_SAVE_DELAY_MS);
 
     expect(store.draftIrSeq()).toBe(9001);
+  });
+});
+
+function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequirement {
+  return {
+    id: 'IR-9001',
+    code: 'IR-9001',
+    irSeq: 9001,
+    updatedDate: '2026-01-01',
+    status: 'in-progress',
+    requestReference: {
+      linkedRequestId: null,
+      client: 'BI-12',
+      supportingBusiness: 'Agriculture',
+      wellName: 'HAIL-500',
+      targetAquifer: 'Saq',
+      targetDepthFt: 510,
+      surfaceElevationFtAsl: 980,
+      coordinates: '27.5114°N, 41.7208°E',
+    },
+    formationTops: [],
+    topsRemarks: null,
+    casing: [],
+    programDetails: {
+      completion: 'Screened',
+      openHoleSizeIn: null,
+      acidization: '',
+      transmission: '',
+      developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
+    },
+    contacts: { geologistPrimary: 'Eng. A. Al-Mutairi', geologistSecondary: null },
+    offsetWells: [],
+    offsetWellsRemarks: null,
+    hydrogeology: { aquifer: 'Saq', estimatedTdsPpm: 1200, h2sPpm: 5, estimatedPumpDepthFt: 150 },
+    testProgram: { testType: 'pump-test', estimatedRateGpm: 350, estimatedWaterLevelFt: 95 },
+    attachments: [],
+    chain: [],
+    ...overrides,
+  };
+}
+
+describe('WwellIrStore - submitIrForReview', () => {
+  let store: InstanceType<typeof WwellIrStore>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    authStoreMock.networkId.mockReturnValue('junedalam');
+    TestBed.configureTestingModule({
+      providers: [
+        WwellIrStore,
+        { provide: WwellIrService, useValue: serviceMock },
+        { provide: SapService, useValue: sapServiceMock },
+        { provide: AuthStore, useValue: authStoreMock },
+      ],
+    });
+    store = TestBed.inject(WwellIrStore);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  /** Seeds `irs` through the store's own public read path, so the status assertions below run
+   *  against a record the store actually holds rather than a detached object. */
+  function seedIrs(ir: IntegratedRequirement): void {
+    serviceMock.getIrs.mockReturnValue(of([ir]));
+    store.loadIrs();
+  }
+
+  it('runs the three steps in order — mint id, trigger SAP, record SUBMITTED — and marks the record submitted', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    seedIrs(ir);
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
+
+    store.submitIrForReview(ir);
+
+    const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
+    expect(sentRequest).toMatchObject({
+      process_id: WWELL_IR_SAP_PROCESS_ID,
+      scenario_id: WWELL_IR_SAP_SCENARIO_ID,
+      initiator_network_id: 'junedalam',
+      requester_network_id: 'junedalam',
+      workflow_id: buildSapWorkflowId('junedalam', 6),
+      body: [],
+    });
+    expect(sentRequest).not.toHaveProperty('attachment_files');
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_SUBMITTED);
+    expect(store.irs()[0].status).toBe('submit-for-review');
+    expect(store.updatingIrStatus()).toBe(false);
+    expect(store.sapTriggerError()).toBeNull();
+  });
+
+  /** The header is stamped only for a workflow SAP actually accepted — a failed trigger must leave
+   *  sap_wf_id/sap_wf_status untouched rather than recording a workflow that does not exist in SAP. */
+  it('does not touch the IR header at all when the SAP trigger fails', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    seedIrs(ir);
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(throwError(() => new Error('SAP unreachable')));
+
+    store.submitIrForReview(ir);
+
+    expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
+    expect(store.irs()[0].status).toBe('in-progress');
+    expect(store.sapTriggerError()).toBe('SAP unreachable');
+    expect(store.updatingIrStatus()).toBe(false);
+  });
+
+  it('surfaces the SAP 422 validation detail message instead of a generic HTTP failure text', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 422,
+            error: { detail: [{ loc: ['body', 0], msg: 'field required', type: 'missing', input: '', ctx: {} }] },
+          }),
+      ),
+    );
+
+    store.submitIrForReview(ir);
+
+    expect(store.sapTriggerError()).toBe('field required');
+  });
+
+  /** An unsaved draft has no ir_seq, so there would be nothing to record the SAP outcome against
+   *  — the guard must refuse before SAP is called, not after. */
+  it('refuses to submit an IR that has never been saved, without calling SAP', () => {
+    const ir = buildIntegratedRequirement({ status: 'draft', irSeq: null });
+
+    store.submitIrForReview(ir);
+
+    expect(serviceMock.getNextSapWorkflowSeq).not.toHaveBeenCalled();
+    expect(sapServiceMock.trigger).not.toHaveBeenCalled();
+    expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
+    expect(store.sapTriggerError()).toContain('Save the integrated requirement');
+    expect(store.updatingIrStatus()).toBe(false);
+  });
+
+  it('never calls the SAP trigger when minting a workflow id fails', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(throwError(() => new Error('sequence exhausted')));
+
+    store.submitIrForReview(ir);
+
+    expect(sapServiceMock.trigger).not.toHaveBeenCalled();
+    expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
+    expect(store.sapTriggerError()).toBe('sequence exhausted');
+    expect(store.updatingIrStatus()).toBe(false);
+  });
+
+  it('reports a distinct error, and does not mark the record submitted, when recording the outcome fails', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    seedIrs(ir);
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(throwError(() => new Error('header locked')));
+
+    store.submitIrForReview(ir);
+
+    expect(store.irs()[0].status).toBe('in-progress');
+    expect(store.sapTriggerError()).toBe('header locked');
+    expect(store.updatingIrStatus()).toBe(false);
   });
 });

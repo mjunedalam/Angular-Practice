@@ -48,11 +48,16 @@ export interface IrHeaderRow extends IrRow {
   readonly completion: string | null;
   readonly cmpl_type: string | null;
   readonly acidization: string | null;
+  /** Always sent null — Transmission is stored on `dt_rmks` (NVARCHAR2(2000)) instead, same as
+   *  `cmpl_type` above. */
   readonly trns_type: string | null;
+  /** Transmission (VARCHAR2(10) `trns_type` is too short for these labels). */
   readonly dt_rmks: string | null;
   readonly mud_rmks: string | null;
   readonly test_type: string | null;
   readonly flow_rmks: string | null;
+  /** General Development/Testing remarks — the form's 'remarks' field under developmentTesting. */
+  readonly dev_pump_test: string | null;
 }
 
 export interface IrCasingRow extends IrRow {

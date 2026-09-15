@@ -26,7 +26,6 @@ import {
   WwellIrBulkSavePayload,
 } from './wwell-ir-payload.model';
 import { deriveCompletionElementFlags } from './wwell-ir-wellbore-diagram.mapper';
-import { WWELL_TRANSMISSION_CODE_BY_LABEL } from '../../shared/wwell-planning-reference-data.config';
 
 /**
  * Carries the previously-assigned ir_seq (if any) so a repeat save UPDATEs instead of
@@ -366,14 +365,6 @@ function resolveGeologistId(name: string, empNumByName: Readonly<Record<string, 
   return name && empNumByName ? (empNumByName[name] ?? null) : null;
 }
 
-/** exad_gwd_ir_header.trns_type is VARCHAR2(10) — too short for the full Transmission label, so a
- *  known option maps to its short code; anything else (free-typed 'combo' text) is truncated to
- *  fit rather than silently dropped by Oracle's lax JSON_TABLE conversion. */
-function resolveTransmissionCode(value: string): string | null {
-  if (!value) return null;
-  return WWELL_TRANSMISSION_CODE_BY_LABEL[value] ?? value.slice(0, 10);
-}
-
 /**
  * Estimated Pump Depth (pump_lvl) plus the eight completion-element columns (derived from
  * Completion/Open Hole Size via deriveCompletionElementFlags — see IrWellDesignRow's own doc
@@ -459,11 +450,12 @@ export function buildWwellIrBulkSavePayload(
     completion: raw.programDetails.main.completion || null,
     cmpl_type: null,
     acidization: raw.programDetails.main.acidization || null,
-    trns_type: resolveTransmissionCode(raw.programDetails.main.transmission),
-    dt_rmks: raw.programDetails.developmentTesting.remarks || null,
+    trns_type: null,
+    dt_rmks: raw.programDetails.main.transmission || null,
     mud_rmks: raw.programDetails.developmentTesting.mudLogging || null,
     test_type: raw.hydrogeology.main.testType || null,
     flow_rmks: raw.programDetails.developmentTesting.flowTest || null,
+    dev_pump_test: raw.programDetails.developmentTesting.remarks || null,
   };
 
   const casing = buildCasingRows(raw.subsurface.casing, irSeq, existing?.casing);

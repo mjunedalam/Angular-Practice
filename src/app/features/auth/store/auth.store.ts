@@ -9,7 +9,7 @@ import { ExternalConfigService } from 'src/app/shared/services/external-config.s
 import { RbacStore } from '@store/rbac/rbac.store';
 import { SKIP_AUTO_LOGOUT } from '@interceptors/error.interceptor';
 import { extractHttpErrorMessage } from '@core/utils/http-error.util';
-import { AuthState, initialState, selectDisplayUsername, selectIsTokenExpired, selectLastLogin, selectUserEmail } from './auth.selectors';
+import { AuthState, initialState, selectDisplayUsername, selectIsTokenExpired, selectLastLogin, selectNetworkId, selectUserEmail } from './auth.selectors';
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },
@@ -18,6 +18,7 @@ export const AuthStore = signalStore(
     isTokenExpired: computed(() => selectIsTokenExpired(token(), inject(JwtService))),
     displayUsername: computed(() => selectDisplayUsername(user())),
     userEmail: computed(() => selectUserEmail(user())),
+    networkId: computed(() => selectNetworkId(user())),
     lastLogin: computed(() => selectLastLogin(user())),
   })),
   withMethods((

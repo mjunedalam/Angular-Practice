@@ -52,7 +52,10 @@ export interface WwellIrStoreState {
   readonly linkedRequestWellsError: string | null;
   readonly gwdOpsMembersError: string | null;
   readonly createIrError: string | null;
-  readonly updateIrStatusError: string | null;
+  /** The one error slot for the whole "Submit for Review" action — minting the workflow id,
+   *  triggering SAP, and recording the outcome on the header (see WwellIrStore.submitIrForReview).
+   *  That action has no separate IR status-transition call to fail on its own. */
+  readonly sapTriggerError: string | null;
   readonly irDetailError: string | null;
   readonly irApprovalTimelineError: string | null;
   readonly deleteIrError: string | null;
@@ -80,7 +83,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   linkedRequestWellsError: null,
   gwdOpsMembersError: null,
   createIrError: null,
-  updateIrStatusError: null,
+  sapTriggerError: null,
   irDetailError: null,
   irApprovalTimelineError: null,
   deleteIrError: null,

@@ -247,7 +247,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     });
 
     effect(() => {
-      const message = this.store.updateIrStatusError();
+      const message = this.store.sapTriggerError();
       if (message) this.notify.error(message);
     });
 

@@ -86,15 +86,6 @@ export const WWELL_TRANSMISSION_OPTIONS: readonly string[] = [
   'Tanker',
 ];
 
-/** exad_gwd_ir_header.trns_type is VARCHAR2(10) — too short for these labels (up to 19 chars) —
- *  so the wire payload sends this short code instead of the full label. */
-export const WWELL_TRANSMISSION_CODE_BY_LABEL: Readonly<Record<string, string>> = {
-  'Gravity Flow': 'GF',
-  'Pumped Transmission': 'PT',
-  Pipeline: 'PL',
-  Tanker: 'TK',
-};
-
 export const WWELL_LOGGING_OPTIONS: readonly string[] = ['Caliper', 'Gamma Ray', 'Resistivity', 'SP'];
 
 export const WWELL_MUD_LOGGING_OPTIONS: readonly string[] = ['Full Mud Logging', 'Cuttings Sample Only', 'None'];

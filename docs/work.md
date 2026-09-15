@@ -272,3 +272,52 @@ well after Casing Program.
 - No existing Java tests cover `IrLetterDataAssembler`/`IrLetterData` (not even the `CasingRow`
   pattern this mirrors), so none were added — verified via `mvn -q -o compile` only (clean build,
   agwa-planning's `quarkus:dev` was live so `clean` was avoided per prior incident).
+
+## 2026-09-15
+
+### IR "Submit for Review" → SAP AAE workflow trigger, end to end
+
+Wired the wwell-ir Submit for Review button to SAP AAE's workflow engine, in the exact order the
+flow requires: **mint workflow id → call SAP /trigger → only on SAP success, stamp the IR header.**
+
+- **`SapService`** (`core/services/sap/`) posts `POST {sapServiceUrl}/trigger?native_response=false`.
+  The three `HttpContext` opt-outs on that call are load-bearing, each for a failure reproduced
+  live: `SKIP_AUTH` (authInterceptor was attaching AGWA's own JWT to an external host — captured on
+  the wire), `SKIP_AUTO_LOGOUT` (errorInterceptor treats any 401 as session expiry, so one SAP 401
+  signed the user out of AGWA mid-submit *and*, returning `EMPTY`, stopped the store's own error
+  handler from ever running — spinner stuck, id unrecorded), and `SUPPRESS_GLOBAL_ERROR` (the store
+  raises its own toast). Regression test in `sap.service.spec.ts` asserts all three.
+- **`WwellIrStore.submitIrForReview`** runs the three steps. A SAP failure surfaces
+  `sapTriggerError` and leaves the header untouched — the PATCH is never reached. Removed the old
+  `submitIrForReview()` service call: it POSTed to an endpoint that never existed (404) behind a
+  `catchError` that fabricated success, so the status was never actually persisted.
+- **agwa-planning**: `GET /planning/api/v1/sap-workflow/next-id` (new — wraps `get_wf_next_id_fnc`,
+  added to `EXAD_AGWA_QUERIES_PKG`). The `PATCH .../integrated-requirements/{irSeq}/sap-workflow`
+  already existed and wraps `update_ir_sap_wf_prc`.
+- **New standalone service `sap-service`** (`~/Downloads/Misc/sap-service`, Quarkus 3 / Java 21,
+  port 9090) mocks SAP's `/trigger` contract: 200 `{"message":"Agents were successfully resolved"}`
+  and pydantic-shaped 422 `detail[]`. Deliberately separate from agwa-planning — it is a test
+  double, not part of the product — and deliberately unauthenticated, because the real call carries
+  no AGWA token either. 4 tests green. Point `sapServiceUrl` back at the real host when on the
+  corporate network; no code change needed.
+
+**Why the mock exists:** `sap-dev.apps.ocpb.enp.aramco.com.sa` is NXDOMAIN off the Aramco network
+(so is `eccenterprisegis...`), so the reported "error on Submit for Review" was environmental. That
+investigation is what surfaced the two interceptor bugs above.
+
+**Verified live through the UI**, not just statically: `next-id` 200 → `POST :9090/trigger` 200 →
+`PATCH .../9006/sap-workflow` 200, with `exad_gwd_ir_header` confirming `sap_wf_id=9053`,
+`sap_wf_status=SUBMITTED` and the mock's log confirming it received `ALAMMX1O_IRA_9053`. The failure
+path was proved by pointing `sapServiceUrl` at a dead port: SAP call refused → **no PATCH fired**,
+session survived, button re-enabled, error toast raised. Config restored byte-identical after.
+
+**Known gaps (not fixed):**
+- The list read still derives IR status from `publish_flg` alone (`wwell-ir-summary.mapper.ts`);
+  nothing reads `sap_wf_status`, so the submitted status reverts on refresh.
+- `sap_wf_id` is a `NUMBER` column and `update_ir_sap_wf_prc` takes `p_wf_id IN NUMBER`, so only the
+  sequence (`9053`) is stored — the composite `ALAMMX1O_IRA_9053` sent to SAP is reconstructed from
+  network id + scenario + seq, never persisted whole.
+- `get_wf_next_id_fnc` shares `exad_gwd_sq01` with `ir_seq`, so ids come out as `..._9053`, not the
+  short `..._0006` in the spec screenshot. Matches the proc as supplied.
+- A network-level SAP failure toasts the browser's raw "Failed to fetch" rather than the store's
+  "Failed to trigger the SAP review workflow" default.
