@@ -37,5 +37,8 @@ export function buildIntegratedRequirementFromPayload(
     // just-built record has none until loadIrAttachments fetches them.
     attachments: [],
     chain: buildInitialApprovalChain(WWELL_IR_CHAIN_ROLES, 'You'),
+    // A brand-new record (draft or just-saved, pre-merge) has never been through Submit for
+    // Review — mergeIrDetailBlocksIntoIntegratedRequirement overrides this once a real one exists.
+    sapWfId: null,
   };
 }

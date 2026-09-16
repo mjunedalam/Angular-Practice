@@ -3,17 +3,18 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { catchError, concatMap, delay, from, map, of, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, concatMap, delay, from, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { SapService } from '@services/sap/sap.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
+import { mapSapWorkflowStatusToApprovalChain } from '../wwell-ir-form/wwell-ir-approval.mapper';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
-import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_SUBMITTED, buildSapWorkflowId } from '../wwell-ir-sap.config';
+import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_SUBMITTED } from '../wwell-ir-sap.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
 /** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
@@ -22,6 +23,11 @@ import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
  *  message) reaches the user instead of a vague fallback. */
 function errorMessage(err: unknown, fallback: string): string {
   if (err instanceof HttpErrorResponse) {
+    // status 0 means the request never reached a server at all (refused connection, DNS failure,
+    // CORS rejection, offline). There is no ApiResponse envelope to prefer, and `err.error` holds
+    // the transport's own TypeError — surfacing its "Failed to fetch" as though it were a backend
+    // message tells the user nothing, so the caller's own copy wins here.
+    if (err.status === 0) return fallback;
     const body: unknown = err.error;
     const backendMessage = body && typeof body === 'object' ? (body as { message?: unknown }).message : undefined;
     if (typeof backendMessage === 'string' && backendMessage) return backendMessage;
@@ -50,20 +56,23 @@ function sapErrorMessage(err: unknown, fallback: string): string {
 
 /** A repeat "Save as Draft" on the same IR reuses its ir_seq (see wwell-ir-payload.mapper.ts), so
  *  the response describes the *same* record, not a new one — replace it in place instead of
- *  prepending a duplicate. Falls back to prepend for a genuinely new IR (irSeq not seen yet). */
-function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string): IntegratedRequirement[] {
-  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const } : item));
+ *  prepending a duplicate. Falls back to prepend for a genuinely new IR (irSeq not seen yet).
+ *  Also stamps `sapWfId` locally to the id `update_ir_sap_wf_prc` just persisted, so the Approval
+ *  Workflow sidebar can be refreshed immediately (see triggerSapWorkflow's own call to
+ *  loadIrApprovalTimeline) instead of waiting for the next reselect/reload to notice it. */
+function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string, sapWfId: number): IntegratedRequirement[] {
+  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const, sapWfId } : item));
 }
 
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
   const existingIndex = created.irSeq != null ? list.findIndex(item => item.irSeq === created.irSeq) : -1;
   if (existingIndex === -1) return [created, ...list];
   // A brand-new record's `created` (see createIr's own buildIntegratedRequirementFromPayload
-  // fallback) has no way to know the record's real approval chain (that's a separate, still-mocked
-  // endpoint; see loadIrApprovalTimeline), so it always starts a fresh "just initiated" chain.
-  // Harmless for a first-time INSERT (nothing to preserve yet), but would otherwise wipe out an
-  // already-in-progress/approved record's real chain on every subsequent save. Keep whichever
-  // chain this record already had.
+  // fallback) has no way to know the record's real approval chain (that's a separate fetch; see
+  // loadIrApprovalTimeline), so it always starts a fresh "just initiated" chain. Harmless for a
+  // first-time INSERT (nothing to preserve yet), but would otherwise wipe out an already-in-
+  // progress/approved record's real chain on every subsequent save. Keep whichever chain this
+  // record already had.
   return list.map((item, index) => (index === existingIndex ? { ...created, chain: item.chain } : item));
 }
 
@@ -153,18 +162,23 @@ export const WwellIrStore = signalStore(
           // a separate persisted status: exad_gwd_ir_header has no status column, and the list read
           // still derives status from publish_flg alone (wwell-ir-summary.mapper.ts), so this
           // reverts on refresh until that read path surfaces sap_wf_status.
-          irs: persistError === null ? markSubmittedForReview(store.irs(), ir.id) : store.irs(),
+          irs: persistError === null ? markSubmittedForReview(store.irs(), ir.id, seq) : store.irs(),
         });
 
       svc.updateIrSapWorkflow(irSeq, seq, WWELL_IR_SAP_WF_STATUS_SUBMITTED).subscribe({
-        next: () => finish(null),
+        next: () => {
+          finish(null);
+          // The header now has a real SAP workflow behind it — refresh the Approval Workflow
+          // sidebar immediately with it rather than leave the pre-submit chain showing until the
+          // next reselect/reload happens to notice.
+          loadIrApprovalTimeline({ irSeq, sapWfId: seq });
+        },
         error: (err: unknown) => finish(errorMessage(err, 'SAP workflow triggered, but failed to record it on the integrated requirement')),
       });
     }
 
     // Steps 1-2: mint a workflow id (get_wf_next_id_fnc), then push the workflow to SAP under it.
-    // workflow_id must be minted fresh per submission and formatted as
-    // `{NETWORK_ID}_{SCENARIO_ID}_{seq}` — see buildSapWorkflowId.
+    // workflow_id sent to SAP is the raw minted seq, as-is — no network id or scenario suffix.
     function triggerSapWorkflow(ir: IntegratedRequirement, irSeq: number): void {
       const networkId = authStore.networkId() ?? '';
       svc.getNextSapWorkflowSeq().subscribe({
@@ -176,7 +190,7 @@ export const WwellIrStore = signalStore(
               requester_network_id: networkId,
               process_id: WWELL_IR_SAP_PROCESS_ID,
               scenario_id: WWELL_IR_SAP_SCENARIO_ID,
-              workflow_id: buildSapWorkflowId(networkId, seq),
+              workflow_id: String(seq),
               body: [],
             })
             .subscribe({
@@ -272,6 +286,10 @@ export const WwellIrStore = signalStore(
                 }
                 const merged = mergeIrDetailBlocksIntoIntegratedRequirement(existing, blocks, store.geologistNameByEmpNum());
                 patchState(store, { irs: upsertByIrSeq(store.irs(), merged), irDetailLoading: false });
+                // Only the detail fetch's exad_gwd_ir_header block carries sap_wf_id (the list
+                // endpoint doesn't — see wwell-ir-summary.mapper.ts), so this is the first point a
+                // real SAP lookup becomes possible for a freshly-selected record.
+                loadIrApprovalTimeline({ irSeq, sapWfId: merged.sapWfId });
               },
               error: (err: unknown) =>
                 patchState(store, { irDetailLoading: false, irDetailError: errorMessage(err, 'Failed to load integrated requirement detail') }),
@@ -281,26 +299,40 @@ export const WwellIrStore = signalStore(
       ),
     );
 
-    // Separate call from loadIrDetail above — mirrors the future real API shape (approval process
-    // gets its own endpoint), mocked client-side in the meantime. Same switchMap-cancels-a-stale-
-    // fetch reasoning applies when the selection changes quickly.
-    const loadIrApprovalTimeline = rxMethod<number>(
+    // Feeds the Approval Workflow sidebar straight from SAP's own GET /display, looked up by the
+    // IR's sapWfId (== wf_obj_id, the raw id minted by Submit for Review — see
+    // wwell-ir-sap.config.ts). An IR never submitted has no sapWfId and therefore no SAP workflow
+    // to look up — that case clears the chain locally instead of calling SAP with nothing to ask
+    // about. Same switchMap-cancels-a-stale-fetch reasoning as loadIrDetail applies when the
+    // selection changes quickly.
+    const loadIrApprovalTimeline = rxMethod<{ irSeq: number; sapWfId: number | null }>(
       pipe(
         tap(() => patchState(store, { irApprovalTimelineLoading: true, irApprovalTimelineError: null })),
-        switchMap(irSeq =>
-          svc.getIrApprovalTimeline(irSeq).pipe(
+        switchMap(({ irSeq, sapWfId }) => {
+          // Nothing to look up yet — leave `chain` exactly as it was (the initial local preview;
+          // see buildIntegratedRequirementFromPayload) rather than blank it, since chainBorderColor
+          // reads it for the detail panel's accent strip in both view and edit mode, not only the
+          // view-mode sidebar this gates (wwell-ir.component.html).
+          if (sapWfId == null) {
+            patchState(store, { irApprovalTimelineLoading: false });
+            return EMPTY;
+          }
+          return sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, sapWfId).pipe(
             tapResponse({
-              next: chain => {
+              next: status => {
                 patchState(store, {
-                  irs: store.irs().map(item => (item.irSeq === irSeq ? { ...item, chain } : item)),
+                  irs: store.irs().map(item => (item.irSeq === irSeq ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status) } : item)),
                   irApprovalTimelineLoading: false,
                 });
               },
               error: (err: unknown) =>
-                patchState(store, { irApprovalTimelineLoading: false, irApprovalTimelineError: errorMessage(err, 'Failed to load approval timeline') }),
+                patchState(store, {
+                  irApprovalTimelineLoading: false,
+                  irApprovalTimelineError: sapErrorMessage(err, 'Failed to load the SAP approval workflow status'),
+                }),
             }),
-          ),
-        ),
+          );
+        }),
       ),
     );
 
@@ -456,10 +488,6 @@ export const WwellIrStore = signalStore(
         });
       },
 
-      loadIrApprovalTimeline(irSeq: number): void {
-        loadIrApprovalTimeline(irSeq);
-      },
-
       loadLinkedRequestWells(): void {
         loadLinkedRequestWells();
       },
@@ -524,6 +552,10 @@ export const WwellIrStore = signalStore(
                 draftIrSeq: irSeq,
                 creatingIr: false,
               });
+              // A brand-new record's local draft never had a real sapWfId — this GET's own
+              // exad_gwd_ir_header block is the first point one could exist (a resave of an
+              // already-submitted IR).
+              loadIrApprovalTimeline({ irSeq, sapWfId: merged.sapWfId });
             },
             error: (err: unknown) => patchState(store, { creatingIr: false, createIrError: errorMessage(err, 'Failed to create integrated requirement') }),
           });

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentFor } from '../../wwell-ir-attachments.config';
@@ -25,7 +26,7 @@ import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-vi
 @Component({
   selector: 'app-wwell-ir-view-details',
   standalone: true,
-  imports: [MatIconModule, MatButtonModule, WwellIrViewKvCardComponent],
+  imports: [MatIconModule, MatButtonModule, MatProgressSpinnerModule, WwellIrViewKvCardComponent],
   templateUrl: './wwell-ir-view-details.component.html',
   styleUrl: './wwell-ir-view-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -153,6 +153,9 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     // exad_gwd_well_design is keyed by wd_seq, not ir_seq — carried forward only so a later save's
     // Estimated Pump Depth UPDATE matches this same row instead of INSERTing a duplicate.
     wellDesignSeq: wellDesignRowBelongsToThisIr ? wellDesignRow.wd_seq : existing.wellDesignSeq,
+    // Drives the real SAP display GET (WwellIrStore.loadIrApprovalTimeline) — `undefined` (field
+    // absent on an older record) reads the same as "no workflow yet", same as `null`.
+    sapWfId: header?.sap_wf_id ?? existing.sapWfId,
     requestReference: {
       ...existing.requestReference,
       // prewap_seq/ltr_no are the only two Request Reference columns exad_gwd_ir_header actually

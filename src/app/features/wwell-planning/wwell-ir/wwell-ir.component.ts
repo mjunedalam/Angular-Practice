@@ -193,6 +193,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   private previousSelectedIrSeq: number | null = null;
   private wasCreatingIr = false;
   private wasDeletingIr = false;
+  private wasSubmittingForReview = false;
 
   constructor() {
     effect(() => {
@@ -229,10 +230,8 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
         // the user just watched this exact record save).
         this.previousSelectedIrSeq = savedIrSeq;
         this.selectedIrSeq.set(savedIrSeq);
-        // The one fetch a brand-new record still needs: its local draft never had a real approval
-        // chain, only whatever buildIntegratedRequirementFromPayload defaulted it to. Doesn't gate
-        // isSelecting() (see that computed's comment), so this never reintroduces the skeleton.
-        this.store.loadIrApprovalTimeline(savedIrSeq);
+        // The real approval chain (if any) is fetched from inside store.createIr itself, once its
+        // own follow-up GET resolves a sapWfId — no separate call needed here.
         // A brand-new record has an ir_seq for the first time here, so this is the first moment
         // its attachment slots can be fetched (and the first moment uploads become possible).
         this.store.loadIrAttachments(savedIrSeq);
@@ -249,6 +248,26 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     effect(() => {
       const message = this.store.sapTriggerError();
       if (message) this.notify.error(message);
+    });
+
+    // Reports the outcome of a Submit for Review once the whole three-step flow settles (mint
+    // workflow id → SAP /trigger → stamp sap_wf_id/sap_wf_status on the header). Same settled-edge
+    // shape as the save effect above, and for the same reason: nothing is announced at click time
+    // because the request is still in flight — the editor's own button shows a spinner until then.
+    //
+    // Without this the success path was silent: the flow completes in ~200ms locally and its only
+    // visible trace was the Submit for Review button disappearing (the status leaves
+    // WWELL_IR_SUBMITTABLE_STATUSES, so canSubmitForReview drops it), which reads as the click
+    // having done nothing. A failure is already toasted by the sapTriggerError effect above, so
+    // only success is announced here.
+    effect(() => {
+      const submitting = this.store.updatingIrStatus();
+      const settled = this.wasSubmittingForReview && !submitting;
+      this.wasSubmittingForReview = submitting;
+      if (!settled || this.store.sapTriggerError()) return;
+
+      const submittedCode = this.store.irs().find(ir => ir.irSeq === this.selectedIrSeq())?.code;
+      this.notify.info(`${submittedCode ?? 'Integrated requirement'} submitted for review.`);
     });
 
     effect(() => {
@@ -312,9 +331,9 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
       if (host) playIfMotionAllowed(buildDetailRevealTimeline(host));
       this.previousSelectedIrSeq = irSeq;
       this.store.loadIrDetail(irSeq);
-      // Separate call — the approval-process API doesn't exist yet (mocked for now), but the
-      // request shape already mirrors the real future one: one fetch per selected IR.
-      this.store.loadIrApprovalTimeline(irSeq);
+      // The approval chain is fetched from inside store.loadIrDetail itself, once that GET's own
+      // exad_gwd_ir_header block resolves the record's sapWfId (only the detail fetch carries it —
+      // see wwell-ir-summary.mapper.ts) — no separate call needed here.
       // Also its own fetch: attachments are files on the backend's filesystem keyed by ir_seq, not
       // exad_gwd_ir_* columns, so they can't ride along in the detail blocks above.
       this.store.loadIrAttachments(irSeq);

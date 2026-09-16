@@ -3,6 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { SapService } from './sap.service';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { SapTriggerRequest, SapTriggerResponse, SapValidationError } from '@models/sap/sap-trigger.model';
+import { SapWorkflowStatusResponse } from '@models/sap/sap-workflow-status.model';
 import { SKIP_AUTH } from '@interceptors/auth.interceptor';
 import { SKIP_AUTO_LOGOUT, SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 
@@ -104,5 +105,51 @@ describe('SapService', () => {
 
     // Assert
     expect(error).toEqual(validationError);
+  });
+
+  it('gets the workflow status from /display with process_id, wf_obj_id and native_response=false', () => {
+    // Arrange
+    const response: SapWorkflowStatusResponse = {
+      header: {
+        process_name: 'Geological Operations',
+        initiator_id: 'ALANMX10',
+        requester_id: 'ALANMX10',
+        date_initiated: '2026-09-15',
+        time_initiated: '11:30:35',
+        wf_status: null,
+        wf_status_text: 'In Process',
+      },
+      remarks: [{ remark_by: 'ALANMX10', remarks: 'note' }],
+      reject_remarks: [],
+      approval_chain: [],
+    };
+    let result: SapWorkflowStatusResponse | undefined;
+
+    // Act
+    service.getWorkflowStatus('1406', 11033).subscribe(res => (result = res));
+
+    const req = httpMock.expectOne(
+      r => r.url === 'https://sap.example.test/display' && r.method === 'GET',
+    );
+    expect(req.request.params.get('process_id')).toBe('1406');
+    expect(req.request.params.get('wf_obj_id')).toBe('11033');
+    expect(req.request.params.get('native_response')).toBe('false');
+    req.flush(response);
+
+    // Assert
+    expect(result).toEqual(response);
+  });
+
+  /** Same third-party-origin reasoning as the /trigger opt-outs above, applied to the GET call. */
+  it('opts the SAP display call out of this app\'s auth token, auto-logout and global error toast', () => {
+    // Act
+    service.getWorkflowStatus('1406', 11033).subscribe({ next: () => undefined, error: () => undefined });
+
+    // Assert
+    const req = httpMock.expectOne(r => r.url === 'https://sap.example.test/display');
+    expect(req.request.context.get(SKIP_AUTH)).toBe(true);
+    expect(req.request.context.get(SKIP_AUTO_LOGOUT)).toBe(true);
+    expect(req.request.context.get(SUPPRESS_GLOBAL_ERROR)).toBe(true);
+    req.flush({ header: {}, remarks: [], reject_remarks: [], approval_chain: [] });
   });
 });

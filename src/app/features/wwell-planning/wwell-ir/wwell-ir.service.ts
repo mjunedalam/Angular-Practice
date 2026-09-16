@@ -1,13 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse, HttpEventType, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, catchError, delay, filter, map, of, throwError } from 'rxjs';
-import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
+import { Observable, catchError, filter, map, of, throwError } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot, IrAttachmentUploadEvent } from '@models/wwell-planning/ir-attachment.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
-import { mockApprovalChainForIrSeq } from './wwell-ir-form/wwell-ir-chain.mock';
 import {
   GwdOpsMember,
   GwdOpsMemberRaw,
@@ -202,16 +200,6 @@ export class WwellIrService {
   }
 
   /**
-   * The approval-process API is a separate call from the detail fetch above and doesn't exist yet
-   * — selecting a row fires both, this one just has nothing real to hit. Mocked client-side (with
-   * an artificial delay so it reads as its own network round-trip) until a real
-   * `GET .../integrated-requirements/{irSeq}/approval-timeline` endpoint replaces it.
-   */
-  getIrApprovalTimeline(irSeq: number): Observable<readonly ApprovalChainStep[]> {
-    return of(mockApprovalChainForIrSeq(irSeq)).pipe(delay(300));
-  }
-
-  /**
    * Returns only the real, backend-confirmed `ir_seq` — never a client-fabricated
    * `IntegratedRequirement` (that was this method's old `buildIrFromPayload`-based "optimistic
    * echo," removed because it kept showing whatever the user had just typed for fields with no
@@ -275,11 +263,11 @@ export class WwellIrService {
 
   /**
    * Next unique SAP workflow sequence (EXAD_AGWA_QUERIES_PKG.get_wf_next_id_fnc,
-   * docs/ir/get_wf_next_id_fnc.sql) — a raw DB sequence value the caller both formats into the
-   * composite `workflow_id` SAP expects (see buildSapWorkflowId) and stores as-is via
-   * updateIrSapWorkflow below. Live in agwa-planning (SapWorkflowResource) — no offline fallback:
-   * a failure here must stop WwellIrStore.submitIrForReview before it mints a fabricated id, not
-   * silently hand back one that was never really reserved.
+   * docs/ir/get_wf_next_id_fnc.sql) — a raw DB sequence value the caller sends to SAP as-is for
+   * `workflow_id` and stores as-is via updateIrSapWorkflow below. Live in agwa-planning
+   * (SapWorkflowResource) — no offline fallback: a failure here must stop
+   * WwellIrStore.submitIrForReview before it mints a fabricated id, not silently hand back one
+   * that was never really reserved.
    */
   getNextSapWorkflowSeq(): Observable<number> {
     return this.http.get<ApiResponse<number>>(`${this.apiUrl}/sap-workflow/next-id`).pipe(map(res => res.data[0]));

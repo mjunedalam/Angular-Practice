@@ -11,7 +11,6 @@ import {
   WWELL_IR_SAP_PROCESS_ID,
   WWELL_IR_SAP_SCENARIO_ID,
   WWELL_IR_SAP_WF_STATUS_SUBMITTED,
-  buildSapWorkflowId,
 } from '../wwell-ir-sap.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
@@ -26,6 +25,7 @@ const serviceMock = {
 
 const sapServiceMock = {
   trigger: jest.fn(),
+  getWorkflowStatus: jest.fn(),
 };
 
 const authStoreMock = {
@@ -229,6 +229,7 @@ function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = 
     testProgram: { testType: 'pump-test', estimatedRateGpm: 350, estimatedWaterLevelFt: 95 },
     attachments: [],
     chain: [],
+    sapWfId: null,
     ...overrides,
   };
 }
@@ -236,10 +237,26 @@ function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = 
 describe('WwellIrStore - submitIrForReview', () => {
   let store: InstanceType<typeof WwellIrStore>;
 
+  const emptyWorkflowStatus = {
+    header: {
+      process_name: 'Geological Operations',
+      initiator_id: 'ALANMX10',
+      requester_id: 'ALANMX10',
+      date_initiated: '2026-09-15',
+      time_initiated: '11:30:35',
+      wf_status: null,
+      wf_status_text: 'In Process',
+    },
+    remarks: [],
+    reject_remarks: [],
+    approval_chain: [],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     authStoreMock.networkId.mockReturnValue('junedalam');
+    sapServiceMock.getWorkflowStatus.mockReturnValue(of(emptyWorkflowStatus));
     TestBed.configureTestingModule({
       providers: [
         WwellIrStore,
@@ -277,14 +294,50 @@ describe('WwellIrStore - submitIrForReview', () => {
       scenario_id: WWELL_IR_SAP_SCENARIO_ID,
       initiator_network_id: 'junedalam',
       requester_network_id: 'junedalam',
-      workflow_id: buildSapWorkflowId('junedalam', 6),
+      workflow_id: '6',
       body: [],
     });
     expect(sentRequest).not.toHaveProperty('attachment_files');
     expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_SUBMITTED);
     expect(store.irs()[0].status).toBe('submit-for-review');
+    expect(store.irs()[0].sapWfId).toBe(6);
     expect(store.updatingIrStatus()).toBe(false);
     expect(store.sapTriggerError()).toBeNull();
+  });
+
+  /** Once SAP has accepted the workflow, the sidebar must reflect it immediately — not wait for a
+   *  reselect/reload to notice the header now has a real sap_wf_id. */
+  it('refreshes the approval chain from SAP display right after a successful submit', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    seedIrs(ir);
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
+    sapServiceMock.getWorkflowStatus.mockReturnValue(
+      of({
+        ...emptyWorkflowStatus,
+        approval_chain: [
+          {
+            level: '01',
+            received_date: '2026-09-15',
+            received_time: '11:30:39',
+            approver_network_id: null,
+            approver_name: 'Mohammad Juned Alam',
+            approver_title: 'Initiator',
+            approver_category: 'Reviewer',
+            response_date: '0000-00-00',
+            response_time: '00:00:00',
+            response: null,
+          },
+        ],
+      }),
+    );
+
+    store.submitIrForReview(ir);
+
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6);
+    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'in-progress', date: '2026-09-15' }]);
+    expect(store.irApprovalTimelineError()).toBeNull();
   });
 
   /** The header is stamped only for a workflow SAP actually accepted — a failed trigger must leave
@@ -319,6 +372,29 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.submitIrForReview(ir);
 
     expect(store.sapTriggerError()).toBe('field required');
+  });
+
+  /** A refused or offline connection still arrives as an HttpErrorResponse, but with status 0 and
+   *  `error` holding the transport's own TypeError rather than the backend's ApiResponse envelope.
+   *  Reproduced live by pointing sapServiceUrl at a dead port: the toast read "Failed to fetch",
+   *  which tells the user nothing about what failed or what to do. */
+  it('uses its own copy when the SAP call never reached a server', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
+    sapServiceMock.trigger.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 0,
+            statusText: 'Unknown Error',
+            error: new TypeError('Failed to fetch'),
+          }),
+      ),
+    );
+
+    store.submitIrForReview(ir);
+
+    expect(store.sapTriggerError()).toBe('Failed to trigger the SAP review workflow');
   });
 
   /** An unsaved draft has no ir_seq, so there would be nothing to record the SAP outcome against
@@ -359,5 +435,103 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.irs()[0].status).toBe('in-progress');
     expect(store.sapTriggerError()).toBe('header locked');
     expect(store.updatingIrStatus()).toBe(false);
+  });
+});
+
+describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
+  let store: InstanceType<typeof WwellIrStore>;
+
+  const workflowStatusWithOneApprovedStep = {
+    header: {
+      process_name: 'Geological Operations',
+      initiator_id: 'ALANMX10',
+      requester_id: 'ALANMX10',
+      date_initiated: '2026-09-15',
+      time_initiated: '11:30:35',
+      wf_status: 'COMPLETE',
+      wf_status_text: 'Approved',
+    },
+    remarks: [],
+    reject_remarks: [],
+    approval_chain: [
+      {
+        level: '01',
+        received_date: '2026-09-15',
+        received_time: '11:30:39',
+        approver_network_id: null,
+        approver_name: 'Mohammad Juned Alam',
+        approver_title: 'Initiator',
+        approver_category: 'Reviewer',
+        response_date: '2026-09-15',
+        response_time: '11:45:00',
+        response: 'APPROVED',
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    TestBed.configureTestingModule({
+      providers: [
+        WwellIrStore,
+        { provide: WwellIrService, useValue: serviceMock },
+        { provide: SapService, useValue: sapServiceMock },
+        { provide: AuthStore, useValue: authStoreMock },
+      ],
+    });
+    store = TestBed.inject(WwellIrStore);
+  });
+
+  function seedIrs(ir: IntegratedRequirement): void {
+    serviceMock.getIrs.mockReturnValue(of([ir]));
+    store.loadIrs();
+  }
+
+  /** Only the detail fetch's exad_gwd_ir_header block carries sap_wf_id (see
+   *  wwell-ir-summary.mapper.ts) — this is what lets loadIrDetail resolve a real one to look SAP
+   *  up by. */
+  it('looks up the real SAP workflow once a detail fetch resolves a sap_wf_id', () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
+    seedIrs(ir);
+    serviceMock.getIrDetailBlocks.mockReturnValue(
+      of([{ table: 'exad_gwd_ir_header', data: [{ sap_wf_id: 11033 }] }]),
+    );
+    sapServiceMock.getWorkflowStatus.mockReturnValue(of(workflowStatusWithOneApprovedStep));
+
+    store.loadIrDetail(9001);
+
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 11033);
+    expect(store.irs()[0].sapWfId).toBe(11033);
+    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'approved', date: '2026-09-15' }]);
+    expect(store.irApprovalTimelineLoading()).toBe(false);
+  });
+
+  /** An IR that has never been through Submit for Review has no SAP workflow to look up — calling
+   *  SAP with nothing to ask about would be meaningless (and, per the mock's own validation, a
+   *  422). */
+  it('never calls SAP display for an IR with no sap_wf_id', () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
+    seedIrs(ir);
+    serviceMock.getIrDetailBlocks.mockReturnValue(of([{ table: 'exad_gwd_ir_header', data: [{}] }]));
+
+    store.loadIrDetail(9001);
+
+    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+    expect(store.irs()[0].sapWfId).toBeNull();
+    expect(store.irApprovalTimelineLoading()).toBe(false);
+  });
+
+  it('surfaces a SAP display failure as irApprovalTimelineError without touching the chain', () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null, chain: [{ role: 'Existing', name: 'Someone', status: 'pending', date: null }] });
+    seedIrs(ir);
+    serviceMock.getIrDetailBlocks.mockReturnValue(
+      of([{ table: 'exad_gwd_ir_header', data: [{ sap_wf_id: 11033 }] }]),
+    );
+    sapServiceMock.getWorkflowStatus.mockReturnValue(throwError(() => new Error('SAP unreachable')));
+
+    store.loadIrDetail(9001);
+
+    expect(store.irApprovalTimelineError()).toBe('SAP unreachable');
+    expect(store.irs()[0].chain).toEqual([{ role: 'Existing', name: 'Someone', status: 'pending', date: null }]);
   });
 });

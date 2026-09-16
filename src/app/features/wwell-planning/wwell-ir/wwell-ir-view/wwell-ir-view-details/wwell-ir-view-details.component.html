@@ -89,7 +89,11 @@
       [disabled]="!canRequestApproval() || isSubmitting()"
       (click)="requestApproval()"
     >
-      <mat-icon>send</mat-icon>
+      @if (isSubmitting()) {
+        <mat-spinner diameter="16" class="ir-details__approval-spinner" />
+      } @else {
+        <mat-icon>send</mat-icon>
+      }
       {{ isSubmitting() ? 'Submitting…' : 'Request Approval' }}
     </button>
     @if (!canRequestApproval()) {

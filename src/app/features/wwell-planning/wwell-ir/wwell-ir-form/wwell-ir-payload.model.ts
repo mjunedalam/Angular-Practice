@@ -58,6 +58,11 @@ export interface IrHeaderRow extends IrRow {
   readonly flow_rmks: string | null;
   /** General Development/Testing remarks — the form's 'remarks' field under developmentTesting. */
   readonly dev_pump_test: string | null;
+  /** Read-only: minted per Submit for Review (get_wf_next_id_fnc) and stamped by
+   *  update_ir_sap_wf_prc once SAP accepts the workflow — never sent on save, only ever read back
+   *  from a detail fetch. Optional since older records predate the SAP workflow columns. */
+  readonly sap_wf_id?: number | null;
+  readonly sap_wf_status?: string | null;
 }
 
 export interface IrCasingRow extends IrRow {

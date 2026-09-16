@@ -2,6 +2,7 @@ import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SapTriggerRequest, SapTriggerResponse } from '@models/sap/sap-trigger.model';
+import { SapWorkflowStatusResponse } from '@models/sap/sap-workflow-status.model';
 import { SKIP_AUTH } from '@interceptors/auth.interceptor';
 import { SKIP_AUTO_LOGOUT, SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -11,8 +12,8 @@ export class SapService {
   private readonly http = inject(HttpClient);
   private readonly extConfigService = inject(ExternalConfigService);
 
-  private get apiUrl(): string {
-    return `${this.extConfigService.settings.sapServiceUrl}/trigger`;
+  private get baseUrl(): string {
+    return this.extConfigService.settings.sapServiceUrl;
   }
 
   /**
@@ -26,15 +27,23 @@ export class SapService {
    *   expiring — without this, one SAP 401 signs the user out of AGWA mid-submit (and, because
    *   that branch returns EMPTY rather than rethrowing, WwellIrStore's own error handler never
    *   runs, so the workflow id is never recorded and the Submit spinner never clears).
-   * - SUPPRESS_GLOBAL_ERROR: WwellIrStore surfaces its own sapTriggerError toast; without this the
-   *   user gets two toasts for the same failure.
+   * - SUPPRESS_GLOBAL_ERROR: WwellIrStore surfaces its own sapTriggerError/timeline toast; without
+   *   this the user gets two toasts for the same failure.
    */
+  private get sapContext(): HttpContext {
+    return new HttpContext().set(SKIP_AUTH, true).set(SKIP_AUTO_LOGOUT, true).set(SUPPRESS_GLOBAL_ERROR, true);
+  }
+
   trigger(request: SapTriggerRequest): Observable<SapTriggerResponse> {
     const params = new HttpParams().set('native_response', 'false');
-    const context = new HttpContext()
-      .set(SKIP_AUTH, true)
-      .set(SKIP_AUTO_LOGOUT, true)
-      .set(SUPPRESS_GLOBAL_ERROR, true);
-    return this.http.post<SapTriggerResponse>(this.apiUrl, request, { params, context });
+    return this.http.post<SapTriggerResponse>(`${this.baseUrl}/trigger`, request, { params, context: this.sapContext });
+  }
+
+  /** Backs the IR "Approval Workflow" sidebar — `wfObjId` is the raw sap_wf_id minted and stamped
+   *  onto the header by the trigger flow (see wwell-ir-sap.config.ts), not the display-only
+   *  composite string. */
+  getWorkflowStatus(processId: string, wfObjId: number): Observable<SapWorkflowStatusResponse> {
+    const params = new HttpParams().set('process_id', processId).set('wf_obj_id', String(wfObjId)).set('native_response', 'false');
+    return this.http.get<SapWorkflowStatusResponse>(`${this.baseUrl}/display`, { params, context: this.sapContext });
   }
 }

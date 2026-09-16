@@ -662,19 +662,6 @@ $master-width: 240px;
   color: $muted;
 }
 
-.wwell-ir__approval-mock-chip {
-  flex-shrink: 0;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: tokens.$surface-alt;
-  color: tokens.$subtle;
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: default;
-}
-
 .wwell-ir__empty {
   height: 100%;
   display: flex;

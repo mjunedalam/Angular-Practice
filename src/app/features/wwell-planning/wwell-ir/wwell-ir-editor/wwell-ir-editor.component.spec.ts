@@ -43,6 +43,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     testProgram: { testType: 'flow-test', estimatedRateGpm: null, estimatedWaterLevelFt: null, siwhpPsi: null },
     attachments: [],
     chain: [],
+    sapWfId: null,
     ...overrides,
   };
 }

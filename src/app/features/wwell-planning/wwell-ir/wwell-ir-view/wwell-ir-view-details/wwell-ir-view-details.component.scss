@@ -150,6 +150,12 @@
   gap: 0.4rem;
 }
 
+// Stands in for the `send` icon while the SAP submit is in flight, so the button keeps its width
+// and the label doesn't jump — same treatment as the editor footer's `.ire__save-spinner`.
+.ir-details__approval-spinner {
+  display: inline-flex;
+}
+
 .ir-details__approval-note {
   margin: 0;
   color: tokens.$muted;

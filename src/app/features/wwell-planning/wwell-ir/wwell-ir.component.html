@@ -157,11 +157,18 @@
                   </span>
                   <div class="wwell-ir__approval-head-text">
                     <h2 class="wwell-ir__approval-title">Approval Workflow</h2>
-                    <p class="wwell-ir__approval-progress">{{ approvedStepCount(ir.chain) }} of {{ ir.chain.length }} approved</p>
+                    @if (store.irApprovalTimelineLoading()) {
+                      <p class="wwell-ir__approval-progress">Loading status…</p>
+                    } @else if (ir.sapWfId === null) {
+                      <p class="wwell-ir__approval-progress">Not yet submitted for review.</p>
+                    } @else {
+                      <p class="wwell-ir__approval-progress">{{ approvedStepCount(ir.chain) }} of {{ ir.chain.length }} approved</p>
+                    }
                   </div>
-                  <span class="wwell-ir__approval-mock-chip" title="Not yet wired to a real approval-process API">Mocked</span>
                 </header>
-                <app-wwell-approval-timeline [steps]="ir.chain" [orientation]="'vertical'" />
+                @if (ir.sapWfId !== null) {
+                  <app-wwell-approval-timeline [steps]="ir.chain" [orientation]="'vertical'" />
+                }
               </div>
             </aside>
           </div>

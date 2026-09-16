@@ -321,3 +321,85 @@ session survived, button re-enabled, error toast raised. Config restored byte-id
   short `..._0006` in the spec screenshot. Matches the proc as supplied.
 - A network-level SAP failure toasts the browser's raw "Failed to fetch" rather than the store's
   "Failed to trigger the SAP review workflow" default.
+
+### Submit for Review gave no feedback on success
+
+Follow-up on the same flow: clicking Submit for Review looked like it did nothing. The whole
+three-step flow completes in ~200ms locally, and its only visible trace was the button quietly
+disappearing (status leaves `WWELL_IR_SUBMITTABLE_STATUSES`, so `canSubmitForReview` drops it).
+
+- **Success toast** (`wwell-ir.component.ts`) — new settled-edge effect on `updatingIrStatus`,
+  mirroring the existing `creatingIr` save effect exactly, including its "skip when the error slot
+  is set" guard so a failure never double-reports. Toasts `"IR-9006 submitted for review."`.
+- **Loader**: the editor footer's button spinner was already correct — measured live at 11ms→221ms
+  before the button is removed, so it works and is simply too fast to notice against a local mock.
+  Left as-is rather than adding an artificial minimum duration. The *read-only view's* "Request
+  Approval" button, however, only swapped its label to "Submitting…" with no spinner — brought in
+  line with the editor (`mat-spinner` replacing the `send` icon, `MatProgressSpinnerModule` added).
+- **`errorMessage` fallback bug** (`wwell-ir.store.ts`): a refused connection arrives as an
+  `HttpErrorResponse` with `status: 0` whose `error` is the transport's own `TypeError`, so the
+  helper's "prefer the backend's `{ message }`" branch surfaced `"Failed to fetch"` verbatim as if
+  it were a server message. Now returns the caller's own copy for `status === 0`. Affects every
+  toast this store raises, not just SAP. Covered by a new store test (TDD: RED then GREEN).
+
+**Method note:** my first measurement said the spinner was stuck on for 4s+ after a fully successful
+submit. That was a false positive — I had captured the button node before clicking, and it is
+*detached* on success (`document.contains(...) === false`), freezing its last state. A second
+attempt then reported the button vanishing at 16ms, also wrong: the live-query selector matched on
+the `send` icon's text, which the spinner *replaces*. Only the third measurement (live query on
+`footer.ire__footer button`, matching the label alone) was sound. Worth remembering — a captured
+node and a text selector that overlaps the state being measured both lie confidently.
+
+Verified live end to end after the change: spinner visible, `"IR-9006 submitted for review."` on
+success with all three calls 200; against a dead port, only `"Failed to trigger the SAP review
+workflow"` and **no PATCH**. Config restored byte-identical. Lint clean, 452/452 Jest tests pass.
+
+### `workflow_id` stopped carrying the network id/scenario suffix
+
+Per request, `SapTriggerRequest.workflow_id` now sends the raw minted seq as-is (`String(seq)`,
+e.g. `"6"`) instead of the composite `{NETWORK_ID}_IRA_{seq}` string. Removed
+`buildSapWorkflowId`/`WWELL_IR_SAP_WF_SEQ_PAD_LENGTH` from `wwell-ir-sap.config.ts` entirely —
+`triggerSapWorkflow` (`wwell-ir.store.ts`) just passes `workflow_id: String(seq)`.
+`initiator_network_id`/`requester_network_id` are unaffected, still the plain network id.
+
+### Approval Workflow sidebar wired to real SAP `GET /display`, mock chain removed
+
+The IR "Approval Workflow" sidebar (`wwell-ir.component.html`) previously rendered a client-side
+mock chain (`wwell-ir-chain.mock.ts`, picked deterministically off `irSeq`) behind a "Mocked" chip.
+Replaced end to end with SAP AAE's real `GET /display?process_id=1406&wf_obj_id={sap_wf_id}`.
+
+- **`sap-service` mock** (`~/Downloads/Misc/sap-service`): new `SapDisplayResource` (`GET /display`)
+  alongside the existing `/trigger`. Deterministic per `wf_obj_id` (hashed mod 4, same "stable
+  across re-fetches" reasoning as the mock chain it replaces) across a fixed three-level
+  "Geological Operations" chain (Initiator → Lead Geologist → Manager Ground Water); missing
+  `process_id`/`wf_obj_id` → 422 in the same `SapValidationError` shape `/trigger` already uses.
+  New DTOs `SapWorkflowHeader`/`SapRemark`/`SapApprovalStep`/`SapWorkflowStatusResponse`. 5 new
+  tests (9/9 green), README updated with the new contract.
+- **`SapService.getWorkflowStatus(processId, wfObjId)`** (Angular) — same three cross-origin
+  `HttpContext` opt-outs as `trigger()` (SKIP_AUTH/SKIP_AUTO_LOGOUT/SUPPRESS_GLOBAL_ERROR), now
+  shared via a `sapContext` getter. New model `sap-workflow-status.model.ts`.
+- **`IntegratedRequirement.sapWfId`** (new field) — the detail GET's `exad_gwd_ir_header` block
+  already carried `sap_wf_id`/`sap_wf_status` in its JSON (`get_ir_data_prc`); only the Angular side
+  was never reading it. Now flows through `IrHeaderRow` → `mergeIrDetailBlocksIntoIntegratedRequirement`.
+  The list endpoint doesn't have it (`sapWfId: null` default in `wwell-ir-summary.mapper.ts`), so
+  it's only known after a selection's detail fetch resolves one.
+- **`WwellIrStore.loadIrApprovalTimeline`** reshaped from `rxMethod<number>` (irSeq) to
+  `rxMethod<{irSeq, sapWfId}>`, called internally — from `loadIrDetail`'s and `createIr`'s success
+  handlers once `sapWfId` is known, and again from `triggerSapWorkflow`'s success so the sidebar
+  updates immediately after a submit instead of waiting for a reselect. No longer a public store
+  method. `sapWfId === null` short-circuits (no SAP call, chain left untouched — it still backs
+  `chainBorderColor`'s accent strip in edit mode, not only the view-mode sidebar).
+- **`wwell-ir-approval.mapper.ts`** (new) maps SAP's `approval_chain` onto the existing
+  `ApprovalChainStep[]` shape the shared `app-wwell-approval-timeline` renderer already knows how to
+  draw. Status heuristic (SAP's exact semantics aren't documented to us): a level with a real
+  `response` is approved/rejected (rejection = case-insensitive "reject" match); the *last* level
+  with a real `received_date` but no response is `in-progress` (currently awaiting action); earlier
+  such levels (e.g. the Initiator's own receipt) read as `approved` (already passed); unreached
+  levels are `pending`. 7 mapper tests cover just-initiated / mid-chain / fully-approved / rejected /
+  date-fallback cases.
+- Removed `wwell-ir-chain.mock.ts` and the "Mocked" chip entirely. Sidebar now shows "Not yet
+  submitted for review." (timeline hidden) when `sapWfId` is null, "Loading status…" while the SAP
+  call is in flight, and the real per-level chain otherwise.
+
+16 new/updated store tests, 60 wwell-ir + sap tests green, 465/465 full Jest suite green, lint
+clean, production build clean.

@@ -148,6 +148,10 @@ export interface IntegratedRequirement {
    *  a slot the user hasn't filled is simply absent from the list. */
   readonly attachments: readonly IrAttachment[];
   readonly chain: readonly ApprovalChainStep[];
+  /** exad_gwd_ir_header.sap_wf_id — the raw workflow id minted by Submit for Review (see
+   *  wwell-ir-sap.config.ts) and the `wf_obj_id` the SAP display GET is looked up by. `null` until
+   *  a detail fetch resolves one (a never-submitted IR has no SAP workflow to look up). */
+  readonly sapWfId: number | null;
 }
 
 export interface CreateIntegratedRequirementPayload

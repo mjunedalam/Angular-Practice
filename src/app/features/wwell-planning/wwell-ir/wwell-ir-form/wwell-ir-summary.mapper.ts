@@ -1,6 +1,5 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
 import { todayIsoDate } from '../../shared/wwell-approvals/wwell-approval-request.util';
-import { mockApprovalChainForIrSeq } from './wwell-ir-chain.mock';
 import { IrHeaderSummary } from './wwell-ir-payload.model';
 
 /**
@@ -58,9 +57,12 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
       estimatedWaterLevelFt: null,
     },
     attachments: [],
-    // No approval-process API yet either — preview the same mocked timeline the detail-selection
-    // fetch below will return, so the list row's mini-chain matches what opening it shows.
-    chain: mockApprovalChainForIrSeq(row.irSeq),
+    // The list endpoint has no sap_wf_id column to look a real chain up with (only the detail
+    // fetch's exad_gwd_ir_header block does — see mergeIrDetailBlocksIntoIntegratedRequirement) —
+    // stays empty until a selection's detail fetch resolves one, rather than preview a chain this
+    // row can't actually back yet.
+    chain: [],
+    sapWfId: null,
   };
 }
 
