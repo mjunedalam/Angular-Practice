@@ -50,14 +50,29 @@
           <mat-icon>{{ previewSidebarOpen() ? "view_sidebar" : "dock_to_left" }}</mat-icon>
         </button>
       }
-      <span
-        class="ire__badge"
-        [style.background]="statusMeta[ir().status].bg"
-        [style.color]="statusMeta[ir().status].color"
-      >
-        <span class="ire__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
-        {{ statusMeta[ir().status].label }}
-      </span>
+      @if (hasKnownStatus(ir())) {
+        <span
+          class="ire__badge"
+          [style.background]="statusMeta[ir().status].bg"
+          [style.color]="statusMeta[ir().status].color"
+        >
+          <span class="ire__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
+          {{ ir().sapWfStatusText ?? statusMeta[ir().status].label }}
+        </span>
+      }
+      @if (ir().sapWfId !== null) {
+        <button
+          type="button"
+          mat-icon-button
+          class="ire__status-refresh-btn"
+          aria-label="Refresh approval status"
+          title="Refresh approval status"
+          [disabled]="store.irApprovalTimelineLoading()"
+          (click)="refreshApprovalStatus()"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      }
     </div>
   </header>
 

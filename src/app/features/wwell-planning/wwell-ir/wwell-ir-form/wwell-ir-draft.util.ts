@@ -40,5 +40,6 @@ export function buildIntegratedRequirementFromPayload(
     // A brand-new record (draft or just-saved, pre-merge) has never been through Submit for
     // Review — mergeIrDetailBlocksIntoIntegratedRequirement overrides this once a real one exists.
     sapWfId: null,
+    sapWfStatusText: null,
   };
 }

@@ -11,10 +11,12 @@
       </div>
     </div>
     <div class="irv__header-actions">
-      <span class="irv__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
-        <span class="irv__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
-        {{ statusMeta[ir().status].label }}
-      </span>
+      @if (hasKnownStatus(ir())) {
+        <span class="irv__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
+          <span class="irv__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
+          {{ ir().sapWfStatusText ?? statusMeta[ir().status].label }}
+        </span>
+      }
       <button type="button" mat-stroked-button class="irv__edit-btn" (click)="editRequested.emit()">
         <mat-icon>edit</mat-icon>
         Edit

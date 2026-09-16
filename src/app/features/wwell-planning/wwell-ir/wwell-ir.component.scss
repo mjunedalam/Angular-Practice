@@ -662,6 +662,27 @@ $master-width: 240px;
   color: $muted;
 }
 
+.wwell-ir__approval-refresh-btn {
+  flex-shrink: 0;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 28px;
+  color: $muted;
+
+  ::ng-deep .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    color: $accent;
+  }
+}
+
 .wwell-ir__empty {
   height: 100%;
   display: flex;

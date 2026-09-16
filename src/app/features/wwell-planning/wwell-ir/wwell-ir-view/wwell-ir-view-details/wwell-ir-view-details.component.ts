@@ -58,8 +58,11 @@ export class WwellIrViewDetailsComponent {
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
 
   // "Request Approval" only makes sense before the record has already left the author's hands —
-  // same gate WwellIrEditorComponent's own "Submit for Review" button uses.
-  protected readonly canRequestApproval = computed(() => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status));
+  // same gate WwellIrEditorComponent's own "Submit for Review" button uses, `sapWfId` check
+  // included (see that gate's own doc comment for why `status` alone can't be trusted here).
+  protected readonly canRequestApproval = computed(
+    () => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) && this.ir().sapWfId == null,
+  );
 
   protected requestApproval(): void {
     this.store.submitIrForReview(this.ir());

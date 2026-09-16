@@ -7,7 +7,7 @@ import { IntegratedRequirement } from '@models/wwell-planning/integrated-require
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
-import { WWELL_IR_STATUS_META } from '../wwell-ir.config';
+import { WWELL_IR_STATUS_META, hasKnownIrStatus } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
@@ -61,6 +61,10 @@ export class WwellIrViewComponent {
   readonly editRequested = output<void>();
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
+  // Same rule the list badge uses (wwell-ir.config.ts) — the sidebar right beside this panel
+  // (WwellIrComponent's own template) is what refreshes `sapWfStatusText` from SAP, on selection
+  // and via its own "Refresh" button; this badge just mirrors whatever it last resolved.
+  protected readonly hasKnownStatus = hasKnownIrStatus;
 
   protected readonly tabs = TABS;
   protected readonly activeTab = signal<WwellIrViewTab>('details');

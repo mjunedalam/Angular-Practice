@@ -72,7 +72,7 @@ import {
   irAttachmentFor,
 } from '../wwell-ir-attachments.config';
 import { WwellIrService } from '../wwell-ir.service';
-import { WWELL_IR_STATUS_META, WWELL_IR_SUBMITTABLE_STATUSES } from '../wwell-ir.config';
+import { WWELL_IR_STATUS_META, WWELL_IR_SUBMITTABLE_STATUSES, hasKnownIrStatus } from '../wwell-ir.config';
 import {
   buildGeologistContactRows,
   buildHydrogeologyRows,
@@ -156,6 +156,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
+  // Same rule the list badge uses (wwell-ir.config.ts) — until a real status is known
+  // (`sapWfStatusText`, or `status === 'approved'`), the header badge stays hidden rather than
+  // show the list endpoint's blind "in-progress" guess as though it were real.
+  protected readonly hasKnownStatus = hasKnownIrStatus;
   protected readonly isSaving = this.store.creatingIr;
   protected readonly isDeleting = this.store.deletingIr;
   protected readonly isSubmittingForReview = this.store.updatingIrStatus;
@@ -173,7 +177,27 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   // "Submit for Review" is the one action gated by status — it only makes sense before the
   // record has already left the author's hands. Every section's inline edit, by contrast, is
   // available regardless of status (see saveMergedRaw's status-fallback comment below).
-  protected readonly canSubmitForReview = computed(() => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status));
+  //
+  // `status` alone isn't reliable here: a fresh page load has no way to tell an untouched
+  // in-progress record from one already submitted to SAP (the list endpoint has no sap_wf_id
+  // column — see wwell-ir-summary.mapper.ts — so every non-approved row defaults to
+  // 'in-progress' regardless of history). `sapWfId` doesn't have that gap — it's only ever
+  // non-null once a detail fetch resolves a real one (mergeIrDetailBlocksIntoIntegratedRequirement)
+  // or a submit just minted one (WwellIrStore.submitIrForReview) — so requiring it stay null
+  // is what actually stops a re-submit of an already-submitted record.
+  protected readonly canSubmitForReview = computed(
+    () => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) && this.ir().sapWfId == null,
+  );
+
+  /** Manual "Refresh" action next to the header badge — pulls SAP's real current status/chain for
+   *  this record on demand (see WwellIrStore.refreshIrApprovalStatus), same action the Approval
+   *  Workflow sidebar's own refresh button triggers in view mode. A no-op with no `sapWfId` (never
+   *  submitted — nothing in SAP to ask about) or no `irSeq` (a local-only draft). */
+  protected refreshApprovalStatus(): void {
+    const ir = this.ir();
+    if (ir.irSeq == null || ir.sapWfId == null) return;
+    this.store.refreshIrApprovalStatus(ir.irSeq, ir.sapWfId);
+  }
 
   protected readonly railGroups = WWELL_IR_SECTION_RAIL;
   private readonly railLeaves = wwellIrRailLeaves(WWELL_IR_SECTION_RAIL);

@@ -63,6 +63,7 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     // row can't actually back yet.
     chain: [],
     sapWfId: null,
+    sapWfStatusText: null,
   };
 }
 

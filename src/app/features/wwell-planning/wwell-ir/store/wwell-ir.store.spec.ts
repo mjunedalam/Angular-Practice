@@ -10,7 +10,7 @@ import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model'
 import {
   WWELL_IR_SAP_PROCESS_ID,
   WWELL_IR_SAP_SCENARIO_ID,
-  WWELL_IR_SAP_WF_STATUS_SUBMITTED,
+  WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
 } from '../wwell-ir-sap.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
@@ -230,6 +230,7 @@ function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = 
     attachments: [],
     chain: [],
     sapWfId: null,
+    sapWfStatusText: null,
     ...overrides,
   };
 }
@@ -279,7 +280,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.loadIrs();
   }
 
-  it('runs the three steps in order — mint id, trigger SAP, record SUBMITTED — and marks the record submitted', () => {
+  it('runs the three steps in order — mint id, trigger SAP, record a local "in progress" placeholder — without ever asking SAP for a real status', () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
@@ -298,46 +299,14 @@ describe('WwellIrStore - submitIrForReview', () => {
       body: [],
     });
     expect(sentRequest).not.toHaveProperty('attachment_files');
-    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_SUBMITTED);
+    // Submitting must stay a fast, local-only write — no round-trip to SAP's own GET /display.
+    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
     expect(store.irs()[0].status).toBe('submit-for-review');
     expect(store.irs()[0].sapWfId).toBe(6);
+    expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
     expect(store.updatingIrStatus()).toBe(false);
     expect(store.sapTriggerError()).toBeNull();
-  });
-
-  /** Once SAP has accepted the workflow, the sidebar must reflect it immediately — not wait for a
-   *  reselect/reload to notice the header now has a real sap_wf_id. */
-  it('refreshes the approval chain from SAP display right after a successful submit', () => {
-    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
-    seedIrs(ir);
-    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
-    sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
-    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
-    sapServiceMock.getWorkflowStatus.mockReturnValue(
-      of({
-        ...emptyWorkflowStatus,
-        approval_chain: [
-          {
-            level: '01',
-            received_date: '2026-09-15',
-            received_time: '11:30:39',
-            approver_network_id: null,
-            approver_name: 'Mohammad Juned Alam',
-            approver_title: 'Initiator',
-            approver_category: 'Reviewer',
-            response_date: '0000-00-00',
-            response_time: '00:00:00',
-            response: null,
-          },
-        ],
-      }),
-    );
-
-    store.submitIrForReview(ir);
-
-    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6);
-    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'in-progress', date: '2026-09-15' }]);
-    expect(store.irApprovalTimelineError()).toBeNull();
   });
 
   /** The header is stamped only for a workflow SAP actually accepted — a failed trigger must leave
@@ -533,5 +502,29 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
 
     expect(store.irApprovalTimelineError()).toBe('SAP unreachable');
     expect(store.irs()[0].chain).toEqual([{ role: 'Existing', name: 'Someone', status: 'pending', date: null }]);
+  });
+
+  /** The manual refresh action (Approval Workflow sidebar / detail header) — lets the UI pull
+   *  SAP's real current status/chain for an already-selected record on demand, replacing whatever
+   *  submitIrForReview's local "in progress" placeholder (or a stale earlier fetch) last left. */
+  it('refreshIrApprovalStatus re-fetches SAP display and updates status/chain for a known sapWfId', () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: 11033, status: 'submit-for-review', sapWfStatusText: 'In Progress' });
+    seedIrs(ir);
+    sapServiceMock.getWorkflowStatus.mockReturnValue(of(workflowStatusWithOneApprovedStep));
+
+    store.refreshIrApprovalStatus(9001, 11033);
+
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 11033);
+    expect(store.irs()[0].sapWfStatusText).toBe('Approved');
+    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'approved', date: '2026-09-15' }]);
+  });
+
+  it('refreshIrApprovalStatus is a no-op for a record with no sapWfId — nothing in SAP to ask about', () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
+    seedIrs(ir);
+
+    store.refreshIrApprovalStatus(9001, null);
+
+    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
   });
 });

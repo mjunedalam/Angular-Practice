@@ -130,6 +130,21 @@ app-wwell-ir-editor {
   flex-shrink: 0;
 }
 
+.ire__status-refresh-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 28px;
+
+  ::ng-deep .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+}
+
 .ire__header-actions {
   display: flex;
   align-items: center;

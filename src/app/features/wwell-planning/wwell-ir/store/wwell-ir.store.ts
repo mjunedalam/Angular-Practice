@@ -14,7 +14,7 @@ import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/w
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
-import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_SUBMITTED } from '../wwell-ir-sap.config';
+import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS } from '../wwell-ir-sap.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
 /** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
@@ -54,14 +54,16 @@ function sapErrorMessage(err: unknown, fallback: string): string {
   return errorMessage(err, fallback);
 }
 
-/** A repeat "Save as Draft" on the same IR reuses its ir_seq (see wwell-ir-payload.mapper.ts), so
- *  the response describes the *same* record, not a new one — replace it in place instead of
- *  prepending a duplicate. Falls back to prepend for a genuinely new IR (irSeq not seen yet).
- *  Also stamps `sapWfId` locally to the id `update_ir_sap_wf_prc` just persisted, so the Approval
- *  Workflow sidebar can be refreshed immediately (see triggerSapWorkflow's own call to
- *  loadIrApprovalTimeline) instead of waiting for the next reselect/reload to notice it. */
-function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string, sapWfId: number): IntegratedRequirement[] {
-  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const, sapWfId } : item));
+/** Stamps the just-persisted SAP workflow onto the record: `sapWfId`/`sapWfStatusText` mirror
+ *  exactly what `update_ir_sap_wf_prc` just wrote to sap_wf_id/sap_wf_status
+ *  (WWELL_IR_SAP_WF_STATUS_IN_PROGRESS — submitting never asks SAP's own GET /display, so this is
+ *  a local placeholder, not SAP's real text). `chain` is deliberately left untouched: nothing was
+ *  fetched to refresh it with here — the next time this record is *viewed*
+ *  (WwellIrStore.loadIrApprovalTimeline, via loadIrDetail or refreshIrApprovalStatus) is what
+ *  reads SAP's real current status and chain back over this placeholder, everywhere it's shown
+ *  (list badge, detail header badge, Approval Workflow sidebar) at once. */
+function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string, sapWfId: number, sapWfStatusText: string): IntegratedRequirement[] {
+  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const, sapWfId, sapWfStatusText } : item));
 }
 
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
@@ -146,34 +148,30 @@ export const WwellIrStore = signalStore(
   ),
 
   withMethods((store, svc = inject(WwellIrService), sap = inject(SapService), authStore = inject(AuthStore)) => {
-    // Step 3, reached only after SAP has accepted the workflow: stamp the id and status onto the
-    // IR header (update_ir_sap_wf_prc — `seq` lands in sap_wf_id, `status` in sap_wf_status).
+    // Step 3, reached only after SAP has accepted the workflow (step 2): stamps the id and a
+    // local "In Progress" placeholder status onto the IR header (update_ir_sap_wf_prc — `seq`
+    // lands in sap_wf_id, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS in sap_wf_status). Deliberately does
+    // NOT ask SAP's own GET /display for the real status first — see that constant's own doc
+    // comment for why a just-created workflow can safely assume "in progress" without asking, and
+    // WwellIrStore.loadIrApprovalTimeline for where the real status/chain get read back instead
+    // (any time the record is viewed, or refreshIrApprovalStatus is called on demand).
     //
     // Deliberately not called on a failed trigger: sap_wf_id/sap_wf_status describe a workflow
     // that exists in SAP, so recording one for a push SAP never accepted would leave the header
     // pointing at an id no SAP workflow was ever created under.
     function persistSapWorkflow(ir: IntegratedRequirement, irSeq: number, seq: number): void {
-      const finish = (persistError: string | null) =>
-        patchState(store, {
-          updatingIrStatus: false,
-          sapTriggerError: persistError,
-          // Only a clean run — SAP accepted the workflow AND the header recorded it — moves the
-          // record to submitted. This is a local reflection of the sap_wf_status just written, not
-          // a separate persisted status: exad_gwd_ir_header has no status column, and the list read
-          // still derives status from publish_flg alone (wwell-ir-summary.mapper.ts), so this
-          // reverts on refresh until that read path surfaces sap_wf_status.
-          irs: persistError === null ? markSubmittedForReview(store.irs(), ir.id, seq) : store.irs(),
-        });
-
-      svc.updateIrSapWorkflow(irSeq, seq, WWELL_IR_SAP_WF_STATUS_SUBMITTED).subscribe({
-        next: () => {
-          finish(null);
-          // The header now has a real SAP workflow behind it — refresh the Approval Workflow
-          // sidebar immediately with it rather than leave the pre-submit chain showing until the
-          // next reselect/reload happens to notice.
-          loadIrApprovalTimeline({ irSeq, sapWfId: seq });
-        },
-        error: (err: unknown) => finish(errorMessage(err, 'SAP workflow triggered, but failed to record it on the integrated requirement')),
+      svc.updateIrSapWorkflow(irSeq, seq, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS).subscribe({
+        next: () =>
+          patchState(store, {
+            updatingIrStatus: false,
+            sapTriggerError: null,
+            irs: markSubmittedForReview(store.irs(), ir.id, seq, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS),
+          }),
+        error: (err: unknown) =>
+          patchState(store, {
+            updatingIrStatus: false,
+            sapTriggerError: errorMessage(err, 'SAP workflow triggered, but failed to record it on the integrated requirement'),
+          }),
       });
     }
 
@@ -321,7 +319,16 @@ export const WwellIrStore = signalStore(
             tapResponse({
               next: status => {
                 patchState(store, {
-                  irs: store.irs().map(item => (item.irSeq === irSeq ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status) } : item)),
+                  // header.wf_status_text is the real workflow status SAP is showing right now —
+                  // surfaced on the list badge (wwell-ir.component.html) in place of the local
+                  // "Submit for Review" stand-in markSubmittedForReview sets optimistically, so a
+                  // freshly-submitted record doesn't keep showing that stale label once SAP's own
+                  // status is known.
+                  irs: store.irs().map(item =>
+                    item.irSeq === irSeq
+                      ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status), sapWfStatusText: status.header.wf_status_text }
+                      : item,
+                  ),
                   irApprovalTimelineLoading: false,
                 });
               },
@@ -564,7 +571,10 @@ export const WwellIrStore = signalStore(
       /**
        * "Submit for Review" is the SAP workflow submission, in three steps against two backends:
        * mint a workflow id (agwa-planning's get_wf_next_id_fnc) → push the workflow to SAP AAE
-       * under that id (SapService) → record the outcome on the IR header (update_ir_sap_wf_prc).
+       * under that id (SapService.trigger) → record the id and a local "in progress" placeholder
+       * on the IR header (update_ir_sap_wf_prc). Deliberately does not also call SAP's own GET
+       * /display to ask for a real status — see WWELL_IR_SAP_WF_STATUS_IN_PROGRESS's own doc
+       * comment — so submitting stays fast and only ever costs one round-trip to SAP itself.
        *
        * There is no separate IR status-transition call: exad_gwd_ir_header has no status column of
        * its own, so the SAP workflow columns this writes ARE the record of having submitted.
@@ -580,6 +590,16 @@ export const WwellIrStore = signalStore(
         }
         patchState(store, { updatingIrStatus: true, sapTriggerError: null });
         triggerSapWorkflow(ir, ir.irSeq);
+      },
+
+      /** On-demand counterpart to the automatic loadIrDetail → loadIrApprovalTimeline refresh: lets
+       *  the UI (the Approval Workflow sidebar's refresh button, the detail header's status badge)
+       *  pull SAP's real current status/chain for an already-selected record without needing a
+       *  reselect. A no-op for a record with no `sapWfId` — there is no SAP workflow to ask about
+       *  yet, same guard `loadIrApprovalTimeline` itself already applies. */
+      refreshIrApprovalStatus(irSeq: number, sapWfId: number | null): void {
+        if (sapWfId == null) return;
+        loadIrApprovalTimeline({ irSeq, sapWfId });
       },
 
       /** Deletes the whole IR (header row, cascading to casing/tops/hydrogeology/water — see

@@ -44,6 +44,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     attachments: [],
     chain: [],
     sapWfId: null,
+    sapWfStatusText: null,
     ...overrides,
   };
 }
@@ -61,6 +62,8 @@ const storeMock = {
   deletingIr: deletingIrSignal,
   deleteIr: jest.fn(),
   updatingIrStatus: updatingIrStatusSignal,
+  irApprovalTimelineLoading: jest.fn(() => false),
+  refreshIrApprovalStatus: jest.fn(),
   linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
   linkedRequestWellOptions: jest.fn(() => [] as { value: string; label: string }[]),
   loadLinkedRequestWells: jest.fn(),
@@ -214,6 +217,31 @@ describe('WwellIrEditorComponent', () => {
   it('hides Submit for Review once the record is approved', async () => {
     await setup({ status: 'approved' });
     expect(findButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+  });
+
+  /** A page reload can't tell a genuinely untouched 'in-progress' record from one already
+   *  submitted to SAP (the list endpoint has no sap_wf_id column — see
+   *  wwell-ir-summary.mapper.ts — so every non-approved row defaults to 'in-progress' regardless
+   *  of history). Once a detail fetch resolves a real sapWfId, that must gate the button even
+   *  though `status` alone would still say it's submittable. */
+  it('hides Submit for Review once the record already has a real sapWfId, even while status still reads in-progress', async () => {
+    await setup({ status: 'in-progress', sapWfId: 11033 });
+    expect(findButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+  });
+
+  it('hides the header status refresh button for a record never submitted (no sapWfId)', async () => {
+    await setup({ status: 'draft', sapWfId: null });
+    expect(fixture.nativeElement.querySelector('[aria-label="Refresh approval status"]')).toBeFalsy();
+  });
+
+  it('the header status refresh button calls store.refreshIrApprovalStatus for the open record', async () => {
+    await setup({ status: 'submit-for-review', irSeq: 9001, sapWfId: 11033 });
+
+    const refreshBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Refresh approval status"]');
+    expect(refreshBtn).toBeTruthy();
+    refreshBtn.click();
+
+    expect(storeMock.refreshIrApprovalStatus).toHaveBeenCalledWith(9001, 11033);
   });
 
   it('Submit for Review calls store.submitIrForReview directly (no re-save first)', async () => {

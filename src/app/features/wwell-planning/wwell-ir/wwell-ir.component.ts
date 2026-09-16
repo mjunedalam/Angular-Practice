@@ -39,7 +39,7 @@ import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-
 import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
-import { WWELL_IR_STATUS_META } from './wwell-ir.config';
+import { WWELL_IR_STATUS_META, hasKnownIrStatus } from './wwell-ir.config';
 
 /** Which surface WwellIrEditorComponent's slot in the detail panel currently shows for the
  *  selected record — 'edit' is the existing view-with-inline-edit surface, 'view' is the
@@ -162,6 +162,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   protected readonly rowsSignature = computed(() => this.rows().map(ir => ir.irSeq ?? ir.id).join('|'));
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
+  protected readonly hasKnownStatus = hasKnownIrStatus;
 
   protected readonly skeletonRows = Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => index);
 
@@ -500,6 +501,17 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   /** Powers the approval-workflow sidebar's "N of M approved" progress line (view mode only). */
   protected approvedStepCount(chain: readonly ApprovalChainStep[]): number {
     return chain.filter(step => step.status === 'approved').length;
+  }
+
+  /** Manual "Refresh" action on the Approval Workflow sidebar — pulls SAP's real current
+   *  status/chain for the open record on demand, without needing to reselect it. A no-op for a
+   *  record with no `sapWfId` (never submitted, so there is nothing in SAP to ask about) or no
+   *  `irSeq` (a local-only draft) — the store's own `refreshIrApprovalStatus` guards the same
+   *  case, but checking here too keeps the button itself disabled rather than silently doing
+   *  nothing on click. */
+  protected refreshApprovalStatus(ir: IntegratedRequirement): void {
+    if (ir.irSeq == null || ir.sapWfId == null) return;
+    this.store.refreshIrApprovalStatus(ir.irSeq, ir.sapWfId);
   }
 
   // ── Unsaved-changes guard — backs three separate "leaving the currently-open record" paths with

@@ -99,16 +99,20 @@
           >
             <div class="wwell-ir__row-top">
               <span class="wwell-ir__row-code">{{ ir.code }}</span>
-              <span
-                class="wwell-ir__badge"
-                [style.background]="statusMeta[ir.status].bg"
-                [style.color]="statusMeta[ir.status].color"
-              >
-                <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
-                {{ statusMeta[ir.status].label }}
-              </span>
+              @if (hasKnownStatus(ir)) {
+                <span
+                  class="wwell-ir__badge"
+                  [style.background]="statusMeta[ir.status].bg"
+                  [style.color]="statusMeta[ir.status].color"
+                >
+                  <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
+                  {{ ir.sapWfStatusText ?? statusMeta[ir.status].label }}
+                </span>
+              }
             </div>
-            <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
+            @if (ir.requestReference.wellName) {
+              <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
+            }
             <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
           </button>
 
@@ -165,6 +169,19 @@
                       <p class="wwell-ir__approval-progress">{{ approvedStepCount(ir.chain) }} of {{ ir.chain.length }} approved</p>
                     }
                   </div>
+                  @if (ir.sapWfId !== null) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="wwell-ir__approval-refresh-btn"
+                      aria-label="Refresh approval status"
+                      title="Refresh approval status"
+                      [disabled]="store.irApprovalTimelineLoading()"
+                      (click)="refreshApprovalStatus(ir)"
+                    >
+                      <mat-icon>refresh</mat-icon>
+                    </button>
+                  }
                 </header>
                 @if (ir.sapWfId !== null) {
                   <app-wwell-approval-timeline [steps]="ir.chain" [orientation]="'vertical'" />

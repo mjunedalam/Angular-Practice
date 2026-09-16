@@ -152,6 +152,12 @@ export interface IntegratedRequirement {
    *  wwell-ir-sap.config.ts) and the `wf_obj_id` the SAP display GET is looked up by. `null` until
    *  a detail fetch resolves one (a never-submitted IR has no SAP workflow to look up). */
   readonly sapWfId: number | null;
+  /** SAP `/display` header.wf_status_text (see SapWorkflowHeader) for this record's sapWfId —
+   *  the actual current workflow status text, refreshed alongside `chain` by
+   *  WwellIrStore.loadIrApprovalTimeline. `null` until that first resolves (never-submitted IR,
+   *  or a submit whose follow-up display fetch hasn't landed yet), in which case the list falls
+   *  back to the local status label instead of showing nothing. */
+  readonly sapWfStatusText: string | null;
 }
 
 export interface CreateIntegratedRequirementPayload
