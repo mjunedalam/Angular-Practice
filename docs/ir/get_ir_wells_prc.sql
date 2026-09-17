@@ -20,7 +20,9 @@ begin
     w_num wellnumber,
     sv_utm_zn utmzone,
     well_type welltype,
-    well_class wellclassification
+    well_class wellclassification,
+    target_form targetaquifer,
+    expl_wb_name supportings
   from exad_rcd_prewap a
   where div in ('30001739', '30027736')
   and not exists (select 1 from exad_gwd_ir_header b where b.prewap_seq = a.prewap_seq)

@@ -33,14 +33,22 @@ export function linkedWellHasTargetDepth(well: IrEligibleWell): boolean {
   return well.targetDepth != null;
 }
 
+export function linkedWellHasTargetAquifer(well: IrEligibleWell): boolean {
+  return well.targetAquifer != null;
+}
+
+export function linkedWellHasSupportingBusiness(well: IrEligibleWell): boolean {
+  return well.supportings != null;
+}
+
 export function formatLinkedWellCoordinates(well: IrEligibleWell): string {
   return `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
 }
 
-/** Overrides `reference`'s Well Name/Surface Elevation/Coordinates/Target Depth with whatever
- *  `well` actually supplies — BI Number/Supporting Business/Target Aquifer still have no source
- *  on an eligible-well record (exad_rcd_prewap doesn't carry them) and are left untouched. Falls
- *  back to `reference`'s own value for elevation/coordinates/target depth specifically when the
+/** Overrides `reference`'s Well Name/Surface Elevation/Coordinates/Target Depth/Target
+ *  Aquifer/Supporting Business with whatever `well` actually supplies — BI Number still has no
+ *  source on an eligible-well record (exad_rcd_prewap doesn't carry it) and is left untouched.
+ *  Falls back to `reference`'s own value for every other overridden field specifically when the
  *  well doesn't have that one field, rather than blanking it. Target Depth is read-only in the
  *  UI (see the field's schema entry, wwell-ir-form.schema.ts) precisely because this is its only
  *  real source — exad_gwd_ir_header has nowhere to save a manually-typed value anyway. */
@@ -54,5 +62,7 @@ export function hydrateRequestReferenceFromLinkedWell(
     surfaceElevationFtAsl: linkedWellHasElevation(well) ? (well.surfaceElevation as number) : reference.surfaceElevationFtAsl,
     coordinates: linkedWellHasCoordinates(well) ? formatLinkedWellCoordinates(well) : reference.coordinates,
     targetDepthFt: linkedWellHasTargetDepth(well) ? (well.targetDepth as number) : reference.targetDepthFt,
+    targetAquifer: linkedWellHasTargetAquifer(well) ? (well.targetAquifer as string) : reference.targetAquifer,
+    supportingBusiness: linkedWellHasSupportingBusiness(well) ? (well.supportings as string) : reference.supportingBusiness,
   };
 }

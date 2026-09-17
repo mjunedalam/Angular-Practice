@@ -227,12 +227,16 @@ export interface WwellIrDetailTableBlock {
  * Backed by exad_rcd_prewap (a separate table/package from the exad_gwd_ir_* bulk-save contract
  * above), for the IR editor's Request Reference "Link to Request" picker — selecting one
  * auto-populates whichever Request Reference fields this record actually has data for (Water Well
- * Name, Surface Elevation, Coordinates, Target Depth); see wwell-ir-editor.component.ts's
- * `applyLinkedRequestWell`. BI Number/Supporting Business/Target Aquifer still have no source here
- * (exad_rcd_prewap doesn't carry them) and stay manually entered. Target Depth used to be in that
- * same "no source" group — it now comes from exad_rcd_prewap.target_dpth (`targetdepth` here),
- * which is why that field is read-only in the UI: exad_gwd_ir_header has no target-depth column of
- * its own to save a manually-typed value into.
+ * Name, Surface Elevation, Coordinates, Target Depth, Target Aquifer, Supporting Business); see
+ * wwell-ir-editor.component.ts's `applyLinkedRequestWell`. BI Number still has no source here
+ * (exad_rcd_prewap doesn't carry it) and stays manually entered. Target Depth/Target
+ * Aquifer/Supporting Business used to be in that same "no source" group — they now come from
+ * exad_rcd_prewap.target_dpth/target_form/expl_wb_name (`targetdepth`/`targetaquifer`/
+ * `supportings` here). Target Depth is read-only in the UI unconditionally (exad_gwd_ir_header has
+ * no target-depth column of its own to save a manually-typed value into); Target Aquifer/Supporting
+ * Business instead follow the same optional lock as Surface Elevation/Coordinates — a well that
+ * lacks one leaves it open for manual entry (see linkedWellHasTargetAquifer/
+ * linkedWellHasSupportingBusiness, wwell-ir-linked-well.util.ts).
  */
 export interface IrEligibleWell {
   readonly prewapSeq: number;
@@ -246,6 +250,8 @@ export interface IrEligibleWell {
   readonly wellType: string | null;
   readonly wellClassification: string | null;
   readonly targetDepth: number | null;
+  readonly targetAquifer: string | null;
+  readonly supportings: string | null;
 }
 
 /**
