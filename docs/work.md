@@ -488,3 +488,14 @@ clean, production build clean.
   comments, `wwell-ir-payload.model.ts` 24; the editor and schema were already clean), then re-staged those two paths so the
   index itself is comment-free. AST-equality check (comments off), eslint, `ngc --noEmit` and full Jest (470 tests) pass.
   The agwa-planning repo's staged SQL/Java files were deliberately left alone.
+
+### wwell-ir 1.0 Wellbore Details — bold, readable text on read-only (disabled) fields
+
+- Root cause (measured live): Material paints disabled fields at 38% alpha, so read-only values/labels (BI Number, Supporting
+  Business, Water Well Name, Target Aquifer/Depth, Surface Elevation, Coordinates) were ~2:1 contrast at weight 400 on the
+  grey field fill.
+- Added `ire__section--wellbore` to the section root and a scoped rule in `wwell-ir-editor.component.scss`: every field value
+  in the section is semibold (600); disabled values/suffixes are `$navy`, disabled labels `$muted` — same look as the view-mode
+  `dt`/`dd`. Other sections and the shared dynamic-form styles are untouched.
+- Verified live: disabled value contrast 16.7:1, label 5.06:1 (AA needs 4.5:1); editable fields now semibold too. ESLint,
+  `ngc --noEmit` and the wwell-ir Jest suites pass.

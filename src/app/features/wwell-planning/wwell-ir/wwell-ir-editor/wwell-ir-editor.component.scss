@@ -1219,6 +1219,29 @@ app-wwell-ir-editor {
   color: #dc2626;
 }
 
+// Material dims disabled fields to 38% alpha, which is near-invisible on the field's grey fill.
+// Wellbore Details locks fields that carry the linked well's data (BI Number, Target Aquifer…)
+// and users need to read them, so they get the view-mode look: navy value, muted label, semibold.
+.ire__section--wellbore .mat-mdc-form-field {
+  .mat-mdc-input-element,
+  .mat-mdc-select-value {
+    font-weight: 600;
+  }
+
+  &.mat-form-field-disabled {
+    .mat-mdc-input-element,
+    .mat-mdc-select-value,
+    .mat-mdc-form-field-text-suffix {
+      color: $navy;
+      -webkit-text-fill-color: $navy;
+    }
+
+    .mat-mdc-floating-label {
+      color: $muted;
+    }
+  }
+}
+
 /* ── Tighter field density, scoped to this component only ───────────────────
  * The shared dynamic-form building blocks (dyf__field, dys__grid, rpg__row) are reused by other
  * consumer forms (wwell-request-form, wwell-wlda-request-form) with their own spacing needs, so
