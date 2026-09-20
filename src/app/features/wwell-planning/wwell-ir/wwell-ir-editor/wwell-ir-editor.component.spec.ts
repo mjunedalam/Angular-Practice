@@ -171,8 +171,8 @@ describe('WwellIrEditorComponent', () => {
     expect(sections.length).toBe(wwellIrRailLeaves(WWELL_IR_SECTION_RAIL).length);
   });
 
-  it('renders a read-only view of Wellbore Details until its pencil is clicked', async () => {
-    await setup();
+  it('renders a read-only view of Wellbore Details until its pencil is clicked, for a not-yet-created IR', async () => {
+    await setup({ irSeq: null });
     expect(fixture.nativeElement.textContent).toContain('HAIL-500');
     expect(fixture.nativeElement.querySelector('app-dynamic-section')).toBeNull();
 
@@ -184,7 +184,7 @@ describe('WwellIrEditorComponent', () => {
   });
 
   it('saving Wellbore Details persists via store.createIr and closes edit mode', async () => {
-    await setup();
+    await setup({ irSeq: null });
     const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]');
     editBtn.click();
     fixture.detectChanges();
@@ -194,6 +194,11 @@ describe('WwellIrEditorComponent', () => {
 
     expect(storeMock.createIr).toHaveBeenCalledTimes(1);
     expect(fixture.nativeElement.querySelector('app-dynamic-section')).toBeNull();
+  });
+
+  it('never renders the Wellbore Details pencil once the IR has actually been created (has a real irSeq)', async () => {
+    await setup({ irSeq: 9001 });
+    expect(fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]')).toBeNull();
   });
 
   it('adding a casing row grows the section FormArray while Casing is being edited', async () => {
@@ -253,8 +258,11 @@ describe('WwellIrEditorComponent', () => {
   });
 
   it('editing a section on an already-submitted record saves it back into in-progress', async () => {
+    // Wellbore Details is permanently locked once an IR is created (has a real irSeq — see the
+    // "never renders the Wellbore Details pencil" test above), so this exercises the same
+    // save-reverts-to-in-progress behavior through Casing instead.
     await setup({ status: 'approved' });
-    const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]');
+    const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Edit Casing"]');
     editBtn.click();
     fixture.detectChanges();
 

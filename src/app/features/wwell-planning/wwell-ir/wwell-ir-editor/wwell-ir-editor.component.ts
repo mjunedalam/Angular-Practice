@@ -86,6 +86,8 @@ import {
   formatLinkedWellCoordinates,
   linkedWellHasCoordinates,
   linkedWellHasElevation,
+  linkedWellHasSupportingBusiness,
+  linkedWellHasTargetAquifer,
   linkedWellHasTargetDepth,
 } from '../wwell-ir-form/wwell-ir-linked-well.util';
 import { InlineRowEditState, SectionEditState, buildAndPatchArray, buildAndPatchGroup } from './wwell-ir-section-edit.util';
@@ -172,6 +174,12 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   // `irSeq` is `number | null | undefined` on the model (optional + nullable) — normalized here
   // (mirrors WwellIrComponent's rowIrSeq) so the template's Delete IR gate can compare with a
   // plain `!== null`, since Angular template expressions have no `!=`/loose-equality operator.
+  // Also gates 1.0 Wellbore Details' own edit button: once an IR is actually created (its first
+  // save assigns a real irSeq), the linked well can no longer be changed here, so the section goes
+  // permanently read-only — no `.open()` affordance is rendered once this is true. That transition
+  // always lands with `requestReferenceEdit` already closed too: buildIntegratedRequirementFromPayload
+  // mints `id`/`irSeq` from the same identity object atomically, and the `previousIrId` effect below
+  // calls closeAllSections() the moment `id` changes away from the local `'draft'` placeholder.
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
   // "Submit for Review" is the one action gated by status — it only makes sense before the
@@ -766,14 +774,14 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   }
 
   /** Selecting a "Link to Request" option auto-fills whichever Request Reference fields that
-   *  eligible-well record actually has data for — BI Number/Supporting Business/Target Aquifer
-   *  still have no source there (exad_rcd_prewap doesn't carry them) and stay manually entered.
-   *  Target Depth used to be in that same "no source" group; it now comes from the linked well's
-   *  own exad_rcd_prewap.target_dpth (`targetDepth` here) — the only real source that field has
-   *  anywhere, since exad_gwd_ir_header has no target-depth column of its own to save a
-   *  manually-typed value into. That's why `targetDepthFt` is `readonly: true` in the schema
-   *  (wwell-ir-form.schema.ts) unconditionally, unlike Surface Elevation/Coordinates below, which
-   *  stay editable until a link actually supplies them. Purely a client-side lookup against the
+   *  eligible-well record actually has data for — BI Number still has no source there
+   *  (exad_rcd_prewap doesn't carry it) and stays manually entered. Target Depth used to be in
+   *  that same "no source" group; it now comes from the linked well's own exad_rcd_prewap.target_dpth
+   *  (`targetDepth` here) — the only real source that field has anywhere, since exad_gwd_ir_header
+   *  has no target-depth column of its own to save a manually-typed value into. That's why
+   *  `targetDepthFt` is `readonly: true` in the schema (wwell-ir-form.schema.ts) unconditionally,
+   *  unlike Surface Elevation/Coordinates/Target Aquifer/Supporting Business below, which stay
+   *  editable until a link actually supplies them. Purely a client-side lookup against the
    *  already-loaded eligible-wells list (see store.loadLinkedRequestWells()) — selecting a link
    *  never itself triggers a network call.
    *
@@ -793,6 +801,8 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const hasElevation = linkedWellHasElevation(well);
     const hasCoordinates = linkedWellHasCoordinates(well);
     const hasTargetDepth = linkedWellHasTargetDepth(well);
+    const hasTargetAquifer = linkedWellHasTargetAquifer(well);
+    const hasSupportingBusiness = linkedWellHasSupportingBusiness(well);
 
     const patch: Record<string, string | number> = { wellName: well.wellName };
     if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation as number;
@@ -802,12 +812,23 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     // control's own value, it just stays excluded from the group's aggregated `.value`/validity,
     // same as wellName below is excluded once `.disable()` runs.
     if (hasTargetDepth) patch['targetDepthFt'] = well.targetDepth as number;
-    console.log('[IR:link] applyLinkedRequestWell — patching form group', { patch, hasElevation, hasCoordinates, hasTargetDepth });
+    if (hasTargetAquifer) patch['targetAquifer'] = well.targetAquifer as string;
+    if (hasSupportingBusiness) patch['supportingBusiness'] = well.supportings as string;
+    console.log('[IR:link] applyLinkedRequestWell — patching form group', {
+      patch,
+      hasElevation,
+      hasCoordinates,
+      hasTargetDepth,
+      hasTargetAquifer,
+      hasSupportingBusiness,
+    });
     referenceGroup.patchValue(patch);
 
     referenceGroup.get('wellName')?.disable();
     this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
     this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
+    this.setLinkedFieldLock(referenceGroup, 'targetAquifer', hasTargetAquifer);
+    this.setLinkedFieldLock(referenceGroup, 'supportingBusiness', hasSupportingBusiness);
     console.log('[IR:link] applyLinkedRequestWell — done', { rawValue: referenceGroup.getRawValue() });
   }
 

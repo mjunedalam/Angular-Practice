@@ -142,7 +142,7 @@
               {{ timelineStepStatus("wellbore") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
-          @if (!requestReferenceEdit.isEditing() && isTimelineStepExpanded('wellbore')) {
+          @if (!requestReferenceEdit.isEditing() && isTimelineStepExpanded('wellbore') && !hasSavedIrSeq()) {
             <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Wellbore Details" (click)="$event.stopPropagation(); requestReferenceEdit.open()">
               <mat-icon>edit</mat-icon>
             </button>
