@@ -142,6 +142,9 @@ export interface IrLinkedWellRow {
    *  IntegratedRequirementRequestReference.targetDepthFt's doc comment), which is why that field is
    *  read-only in the UI and only ever populated from whichever well an IR is linked to. */
   readonly target_dpth: number | null;
+  /** The well's own target formation — the ONLY real source Target Aquifer has for a saved IR,
+   *  for the same reason as target_dpth above (exad_gwd_ir_header has no column for it). */
+  readonly target_form: string | null;
 }
 
 /** exad_gwd_well_design — keyed by its own wd_seq, NOT ir_seq (see 01-schema.sql, agwa-planning
@@ -232,11 +235,11 @@ export interface WwellIrDetailTableBlock {
  * (exad_rcd_prewap doesn't carry it) and stays manually entered. Target Depth/Target
  * Aquifer/Supporting Business used to be in that same "no source" group — they now come from
  * exad_rcd_prewap.target_dpth/target_form/expl_wb_name (`targetdepth`/`targetaquifer`/
- * `supportings` here). Target Depth is read-only in the UI unconditionally (exad_gwd_ir_header has
- * no target-depth column of its own to save a manually-typed value into); Target Aquifer/Supporting
- * Business instead follow the same optional lock as Surface Elevation/Coordinates — a well that
- * lacks one leaves it open for manual entry (see linkedWellHasTargetAquifer/
- * linkedWellHasSupportingBusiness, wwell-ir-linked-well.util.ts).
+ * `supportings` here). Target Depth and Target Aquifer are read-only in the UI unconditionally
+ * (exad_gwd_ir_header has no column to save a manually-typed value into); Supporting Business
+ * instead follows the same optional lock as Surface Elevation/Coordinates — a well that lacks one
+ * leaves it open for manual entry (see linkedWellHasSupportingBusiness,
+ * wwell-ir-linked-well.util.ts).
  */
 export interface IrEligibleWell {
   readonly prewapSeq: number;

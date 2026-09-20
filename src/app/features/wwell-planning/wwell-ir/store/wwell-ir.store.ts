@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, concatMap, delay, from, map, of, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, concatMap, delay, exhaustMap, from, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
@@ -222,13 +222,16 @@ export const WwellIrStore = signalStore(
       ),
     );
 
+    // exhaustMap, not switchMap: this fires once at list init and again on the first selection —
+    // milliseconds apart whenever the list is already in the store — and switchMap aborted the first
+    // request (a red "(canceled)" row in the network tab) in favor of an identical second one.
     const loadLinkedRequestWells = rxMethod<void>(
       pipe(
         tap(() => {
           console.log('[IR:link] loadLinkedRequestWells — fetching GET /wells/eligible-for-ir');
           patchState(store, { linkedRequestWellsLoading: true, linkedRequestWellsError: null });
         }),
-        switchMap(() =>
+        exhaustMap(() =>
           svc.getEligibleWellsForIr().pipe(
             tapResponse({
               next: linkedRequestWells => {

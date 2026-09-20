@@ -441,3 +441,26 @@ clean, production build clean.
   TypeScript parser, so nothing inside strings was touched; code is identical modulo comments (checked by
   printing both ASTs with comments off). `ngc --noEmit`, eslint on both files and the wwell-planning Jest
   suites (67 tests) pass. `console.log` calls were left as-is — they aren't comments.
+
+### wwell-ir — first `eligible-for-ir` red in Network tab + Target Aquifer not populating
+
+- **Red first `eligible-for-ir` row:** not a backend failure (endpoint 200s every time, ~40 ms). `loadLinkedRequestWells`
+  is triggered in `ngOnInit` and again by the first-selection effect; as a `switchMap` rxMethod, the second trigger
+  aborted the first in-flight request, which Chrome draws red as "(canceled)". Proved with a forced race (delay that URL,
+  re-enter the route: two loads 2 ms apart, first aborted after 3 ms). Fixed: `switchMap` → `exhaustMap` in
+  `wwell-ir.store.ts`; the same race now sends one request that completes. (The red `permissions` :8080 and SAP `display`
+  :9090 rows are just services that aren't running.)
+- **Target Aquifer empty, two independent causes:**
+  1. *New IR (link picker):* the live local Oracle was stale — `exad_rcd_prewap` had no `target_form`/`expl_wb_name` and the
+     old `get_ir_wells_prc` body (init scripts only run on a fresh volume), so the API returned `targetAquifer: null`. Applied
+     `ALTER TABLE` + `target_form` seeds + re-ran `04-agwa-queries-package.sql` on the live container. `expl_wb_name` left NULL
+     on purpose (seed values don't match the Supporting Business dropdown options — open decision).
+  2. *Saved IR (what a reload shows):* the eligible list can't resolve an already-linked well, and the detail's
+     `EXAD_RCD_PREWAP` block (prod returns `p.*`) carried `target_form` but Angular never read it. Added `target_form` to
+     `IrLinkedWellRow` and `targetAquifer: linkedWell?.target_form ?? existing…` in
+     `mergeIrDetailBlocksIntoIntegratedRequirement`; the local `get_ir_data_prc` stand-in now emits `target_form` too.
+- Also refreshed the stale `IrEligibleWell` doc comment (Target Aquifer is now always read-only).
+- **Verified live (headless browser + curl):** saved IR-9006 shows `Target Aquifer: Umm Er Radhuma`; picking HAIL_500 → `Biyadh`,
+  HAIL_615 → `Wasia`, field disabled; 40 concurrent API calls all 200; one `eligible-for-ir` request per reload. ESLint clean,
+  full Jest 84 suites / 470 tests green, `ngc --noEmit` clean. Did not save a new IR end to end (would create/delete a row in
+  the dev DB); the saved-IR read path it would use is the one verified on IR-9006.

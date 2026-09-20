@@ -182,6 +182,9 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       // real source: exad_gwd_ir_header has no target-depth column to fetch one back from
       // otherwise. An IR with no linked request falls through to `existing` (blank).
       targetDepthFt: linkedWell?.target_dpth ?? existing.requestReference.targetDepthFt,
+      // Same rule for Target Aquifer (read-only in the UI too): the linked well's target_form is its
+      // only real source once the IR is saved, since the eligible-wells list can't resolve it anymore.
+      targetAquifer: linkedWell?.target_form ?? existing.requestReference.targetAquifer,
     },
     formationTops: topsRows.map(row => ({
       name: row.st_long_cd,
