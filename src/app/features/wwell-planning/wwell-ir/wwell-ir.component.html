@@ -141,7 +141,7 @@
       @if (detailMode() === 'view') {
         <app-wwell-detail-loading />
       } @else {
-        <app-wwell-ir-editor-loading />
+        <app-wwell-ir-editor-loading [viewMode]="editorViewMode()" />
       }
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
@@ -190,7 +190,7 @@
             </aside>
           </div>
         } @else {
-          <app-wwell-ir-editor [ir]="ir" />
+          <app-wwell-ir-editor [ir]="ir" [(viewMode)]="editorViewMode" />
         }
       </div>
     } @else {

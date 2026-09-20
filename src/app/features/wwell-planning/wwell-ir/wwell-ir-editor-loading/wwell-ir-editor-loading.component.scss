@@ -1,5 +1,11 @@
 @use '../../shared/wwell-design-tokens' as tokens;
 
+@mixin shimmer {
+  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background-size: 400% 100%;
+  animation: irel-shimmer 1.4s ease-in-out infinite;
+}
+
 // Mirrors app-wwell-ir-editor's own `.ire` sizing (wwell-ir-editor.component.scss) so swapping
 // shimmer → real content never shifts the surrounding layout.
 :host {
@@ -85,9 +91,7 @@
   height: 1.4rem;
   width: 88%;
   border-radius: 6px;
-  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
-  background-size: 400% 100%;
-  animation: irel-shimmer 1.4s ease-in-out infinite;
+  @include shimmer;
 
   &--child {
     width: 76%;
@@ -113,6 +117,97 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.irel__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* ── Timeline layout — mirrors .ire__tl-row / .ire__tl-rail / .ire__tl-dot ───────
+ * Same trick as the editor: the step wrapper and its rail are always in the markup, invisible to
+ * layout in Sections mode (`display: contents` / `display: none`) so the cards stack exactly as
+ * before, and only become the dot-and-line stepper under `.irel--timeline`. */
+.irel__step {
+  display: contents;
+}
+
+.irel__step-rail {
+  display: none;
+}
+
+.irel__dot {
+  position: relative;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+  border: 2px solid tokens.$border;
+  @include shimmer;
+}
+
+.irel--timeline {
+  .irel__step {
+    display: flex;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .irel__step-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 22px;
+    flex-shrink: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 22px;
+      bottom: -0.65rem;
+      left: 50%;
+      width: 2px;
+      background: tokens.$border;
+      transform: translateX(-50%);
+    }
+  }
+
+  .irel__step:last-child .irel__step-rail::after {
+    display: none;
+  }
+
+  .irel__step > .irel__card {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .irel__bar--pill {
+    display: block;
+  }
+}
+
+/* ── Wellbore Preview panel — mirrors .ire__tl-preview-sidebar ───────────── */
+.irel__preview {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.irel__preview-diagram {
+  height: 230px;
+  border-radius: 8px;
+  @include shimmer;
 }
 
 /* ── Read-display grid — mirrors .ire__view-grid / .ire__view-field ─────── */
@@ -158,9 +253,7 @@
   display: block;
   height: 0.7rem;
   border-radius: 4px;
-  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
-  background-size: 400% 100%;
-  animation: irel-shimmer 1.4s ease-in-out infinite;
+  @include shimmer;
 
   &--eyebrow {
     width: 70px;
@@ -181,6 +274,13 @@
   &--card-title {
     width: 32%;
     height: 0.85rem;
+  }
+
+  &--pill {
+    display: none;
+    width: 76px;
+    height: 1.05rem;
+    border-radius: 999px;
   }
 
   &--label {
@@ -208,11 +308,19 @@
   .irel__rail {
     width: 160px;
   }
+
+  .irel__preview {
+    width: 260px;
+  }
 }
 
 @media (max-width: 900px) {
   .irel__body {
     flex-direction: column;
+  }
+
+  .irel__preview {
+    width: 100%;
   }
 
   .irel__rail {

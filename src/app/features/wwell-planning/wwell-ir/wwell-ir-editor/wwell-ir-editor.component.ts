@@ -4,7 +4,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  OnInit,
   QueryList,
   Signal,
   ViewChild,
@@ -14,6 +13,7 @@ import {
   effect,
   inject,
   input,
+  model,
   signal,
   untracked,
 } from '@angular/core';
@@ -128,7 +128,7 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class WwellIrEditorComponent implements OnInit, AfterViewInit {
+export class WwellIrEditorComponent implements AfterViewInit {
   readonly ir = input.required<IntegratedRequirement>();
 
   private readonly fb = inject(FormBuilder);
@@ -163,8 +163,8 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private readonly railLeaves = wwellIrRailLeaves(WWELL_IR_SECTION_RAIL);
   protected readonly rail = new SectionRailController(this.destroyRef);
 
-  protected readonly viewMode = signal<WwellIrEditorViewMode>('sections');
-  private readonly expandedTimelineSteps = signal<ReadonlySet<string>>(new Set());
+  readonly viewMode = model<WwellIrEditorViewMode>('timeline');
+  private readonly expandedTimelineSteps = signal<ReadonlySet<string>>(new Set(this.railGroups.map(group => group.key)));
 
   protected setViewMode(mode: WwellIrEditorViewMode): void {
     this.viewMode.set(mode);
@@ -569,10 +569,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.saveSettledResolvers.push(resolve);
       if (!this.store.creatingIr()) this.saveAll();
     });
-  }
-
-  ngOnInit(): void {
-    this.setViewMode('timeline');
   }
 
   ngAfterViewInit(): void {

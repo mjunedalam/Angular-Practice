@@ -117,11 +117,11 @@ describe('WwellIrEditorComponent', () => {
     fixture = TestBed.createComponent(WwellIrEditorComponent);
     fixture.componentRef.setInput('ir', buildIr(overrides));
     fixture.detectChanges();
-    // ngOnInit defaults the editor to Timeline view (see its own "defaults to Timeline view on
+    // The editor's `viewMode` model defaults to Timeline (see its own "defaults to Timeline view on
     // load" test below) — every other test here exercises section read/edit logic that has
     // nothing to do with which view mode is active, so they're pinned to the always-everything-
     // visible Sections layout rather than depending on whatever the current default happens to be.
-    // Goes through the real toggle button (setViewMode/viewMode are protected) like a user would.
+    // Goes through the real toggle button (setViewMode is protected) like a user would.
     const sectionsViewBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Sections view"]');
     sectionsViewBtn.click();
     fixture.detectChanges();

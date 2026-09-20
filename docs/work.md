@@ -535,3 +535,36 @@ clean, production build clean.
 - Verified live: New IR → Coordinates disabled, no `*`, placeholder `auto`; pick RXYD_140 → `25.4023°N, 43.8871°E`, still
   disabled, header title `RXYD_140`. No mock well lacks coordinates, so the blank-for-no-coordinates branch is by reading only.
   ESLint, `tsc --noEmit -p tsconfig.app.json`, wwell-planning Jest (67 tests) pass.
+
+### wwell-ir editor — Sections/Timeline choice now survives editor rebuilds
+
+- Symptom: after switching to Sections (or back to Timeline) the view snapped back to Timeline. Root cause: `viewMode` was a
+  per-instance signal on `WwellIrEditorComponent` and `ngOnInit` forced `'timeline'`; the list page destroys and rebuilds the
+  editor on a row switch (`isSelecting()` loading skeleton) and on the view→edit toggle, so every rebuild restarted at the default.
+- Reproduced live first, with an editor-element identity probe, before changing anything (Sections selected): existing-IR Save →
+  kept (same editor instance, `createIr` never touches `irDetailLoading`/selection); New IR from an open editor → kept;
+  **row switch → reset**; **eye icon → Edit → reset**.
+- Fix: `viewMode` is now a public `model<WwellIrEditorViewMode>('timeline')` on the editor, two-way bound from
+  `WwellIrComponent.editorViewMode` (`[(viewMode)]`), a sticky signal next to `detailMode` for the same reason. `ngOnInit` removed;
+  `expandedTimelineSteps` starts with every step expanded so a rebuilt editor in Timeline still opens fully expanded.
+  Lives for the route's lifetime only — a full page reload or leaving the page returns to the Timeline default.
+- Verified live after the fix: Sections survives row switch, eye→Edit and New IR; Timeline survives a row switch with all 7
+  steps still expanded; default on a fresh load is still Timeline. The live checks did two no-change saves (open a section, Save,
+  identical data) on IR-9006 and IR-9007 in the local mock, so their "updated" stamps moved. No new specs (deferred); the
+  existing default-Timeline spec still covers the default. ESLint, `ngc --noEmit` and wwell-planning Jest (67 tests) pass.
+
+### wwell-ir editor loading shimmer — follows the Sections/Timeline view
+
+- The load shimmer (`app-wwell-ir-editor-loading`) was always the Sections layout (left rail + stacked cards), even with Timeline
+  selected, so Timeline users saw a layout that vanished on load. It now takes a `viewMode` input, fed from the sticky
+  `WwellIrComponent.editorViewMode` (`[viewMode]="editorViewMode()"` in the `isSelecting()` branch), so it matches the layout that
+  is about to render.
+- Timeline shimmer mirrors the real one: 4 header icon chips, the dot-and-line stepper (`.irel__step` / `.irel__step-rail` /
+  `.irel__dot`, the same `display: contents` vs flex trick the editor uses so one card loop serves both modes), a status-pill bar
+  on each card head, and the Wellbore Preview panel (320px, 260px ≤1100px, full width ≤900px). Sections shimmer is unchanged.
+- The cards now come from one `@for` over `CARD_FIELD_COUNTS` (was hand-copied blocks), and the shimmer gradient is a `shimmer`
+  mixin (was repeated). `.irel__preview` is `border-box`: without it the panel measured 351px at desktop and overflowed the body
+  by ~31px when stacked (caught by measuring live at 1440 and 820 wide).
+- Verified live by delaying the detail GET in the page and screenshotting: Timeline selected → timeline shimmer (dots, preview,
+  no rail); Sections selected → rail + cards (no dots/preview); preview 320px at 1440, equal to the body at 820, no horizontal
+  overflow. ESLint, `ngc --noEmit` and wwell-planning Jest pass. No new specs (deferred).
