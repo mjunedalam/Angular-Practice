@@ -105,22 +105,6 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   return { ...section, title: null };
 }
 
-/**
- * View-with-inline-edit surface for an Integrated Requirement, used for every status — replaces
- * both the old routed wizard (`wwell-ir-new-page`) and the separate read-only viewer
- * (`wwell-ir-detail`). Every section defaults to a compact read display; clicking its pencil
- * opens just that section for editing (via SectionEditState) without disturbing the rest of the
- * page. The IR SECTIONS rail scrolls straight to any section, editing or not.
- *
- * There is exactly one Save — the global button in the footer (see saveAll()). Sections have no
- * Save of their own: any number can be open at once, and one click persists all of them together
- * in a single request, so filling in a new IR is never a sequence of per-section round-trips.
- *
- * `WwellIrComponent.createNewIr()` opens a blank, purely local draft (`ir().irSeq === null`, no
- * backend call yet) and selects it, so `ir` isn't always an already-persisted record here — it
- * only becomes one on that first save, which reuses the exact same
- * saveMergedRaw()/buildWwellIrBulkSavePayload `irSeq: null → INSERT` route as any first-time save.
- */
 @Component({
   selector: 'app-wwell-ir-editor',
   standalone: true,
@@ -140,10 +124,6 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   templateUrl: './wwell-ir-editor.component.html',
   styleUrl: './wwell-ir-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // The app only calls mat.core() globally with no full M3 theme, so the scoped theme in
-  // wwell-ir-editor.component.scss needs to reach a mat-select's portaled overlay panel (CDK
-  // renders it into <body>, outside this component's own view). See that file for the full
-  // rationale.
   encapsulation: ViewEncapsulation.None,
 })
 export class WwellIrEditorComponent implements OnInit, AfterViewInit {
@@ -158,49 +138,19 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
-  // Same rule the list badge uses (wwell-ir.config.ts) — until a real status is known
-  // (`sapWfStatusText`, or `status === 'approved'`), the header badge stays hidden rather than
-  // show the list endpoint's blind "in-progress" guess as though it were real.
   protected readonly hasKnownStatus = hasKnownIrStatus;
   protected readonly isSaving = this.store.creatingIr;
   protected readonly isDeleting = this.store.deletingIr;
   protected readonly isSubmittingForReview = this.store.updatingIrStatus;
-  // Every footer button disables on every other button's in-flight request too, not just its own
-  // — e.g. Delete IR must not be clickable mid-Save, since a save that's still in flight could
-  // resurrect the very row the delete just removed once it settles.
   protected readonly anyFooterActionPending = computed(
     () => this.isSaving() || this.isDeleting() || this.isSubmittingForReview(),
   );
-  // `irSeq` is `number | null | undefined` on the model (optional + nullable) — normalized here
-  // (mirrors WwellIrComponent's rowIrSeq) so the template's Delete IR gate can compare with a
-  // plain `!== null`, since Angular template expressions have no `!=`/loose-equality operator.
-  // Also gates 1.0 Wellbore Details' own edit button: once an IR is actually created (its first
-  // save assigns a real irSeq), the linked well can no longer be changed here, so the section goes
-  // permanently read-only — no `.open()` affordance is rendered once this is true. That transition
-  // always lands with `requestReferenceEdit` already closed too: buildIntegratedRequirementFromPayload
-  // mints `id`/`irSeq` from the same identity object atomically, and the `previousIrId` effect below
-  // calls closeAllSections() the moment `id` changes away from the local `'draft'` placeholder.
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
-  // "Submit for Review" is the one action gated by status — it only makes sense before the
-  // record has already left the author's hands. Every section's inline edit, by contrast, is
-  // available regardless of status (see saveMergedRaw's status-fallback comment below).
-  //
-  // `status` alone isn't reliable here: a fresh page load has no way to tell an untouched
-  // in-progress record from one already submitted to SAP (the list endpoint has no sap_wf_id
-  // column — see wwell-ir-summary.mapper.ts — so every non-approved row defaults to
-  // 'in-progress' regardless of history). `sapWfId` doesn't have that gap — it's only ever
-  // non-null once a detail fetch resolves a real one (mergeIrDetailBlocksIntoIntegratedRequirement)
-  // or a submit just minted one (WwellIrStore.submitIrForReview) — so requiring it stay null
-  // is what actually stops a re-submit of an already-submitted record.
   protected readonly canSubmitForReview = computed(
     () => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) && this.ir().sapWfId == null,
   );
 
-  /** Manual "Refresh" action next to the header badge — pulls SAP's real current status/chain for
-   *  this record on demand (see WwellIrStore.refreshIrApprovalStatus), same action the Approval
-   *  Workflow sidebar's own refresh button triggers in view mode. A no-op with no `sapWfId` (never
-   *  submitted — nothing in SAP to ask about) or no `irSeq` (a local-only draft). */
   protected refreshApprovalStatus(): void {
     const ir = this.ir();
     if (ir.irSeq == null || ir.sapWfId == null) return;
@@ -211,28 +161,11 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   private readonly railLeaves = wwellIrRailLeaves(WWELL_IR_SECTION_RAIL);
   protected readonly rail = new SectionRailController(this.destroyRef);
 
-  // ── Timeline view — an alternate, toggleable layout for the same sections: the IR SECTIONS
-  // rail is replaced with a vertical lifecycle stepper (dot + connecting line per top-level rail
-  // group), each step showing Completed/Pending and collapsing to just its header until expanded.
-  // Purely a display mode — it reuses every section's existing read/edit markup and save methods
-  // untouched, so switching modes never loses in-progress edits. Any number of steps can be open
-  // at once — expanding one never collapses another, so several sections can be compared or
-  // edited side by side.
-  //
-  // Defaults to 'sections' here and flips to 'timeline' in ngOnInit (via setViewMode, not a
-  // different literal) rather than defaulting the field itself — setViewMode's expand-all-steps
-  // seeding only runs through that one method. Runs before the first paint, so there's no visible
-  // flash of the sections layout.
   protected readonly viewMode = signal<WwellIrEditorViewMode>('sections');
   private readonly expandedTimelineSteps = signal<ReadonlySet<string>>(new Set());
 
   protected setViewMode(mode: WwellIrEditorViewMode): void {
     this.viewMode.set(mode);
-    // Every step starts open — a brand-new editor instance (a fresh record selection, or
-    // switching over from the read-only view's own "Edit" button, which remounts this component —
-    // see wwell-ir.component.html's `detailMode()` branch) should never land on an all-collapsed
-    // timeline. Only seeds once per instance (`size === 0`): re-toggling Sections ⇄ Timeline mid-
-    // session must not undo whatever the user has since collapsed themselves.
     if (mode === 'timeline' && this.expandedTimelineSteps().size === 0) {
       this.expandedTimelineSteps.set(new Set(this.railGroups.map(group => group.key)));
     }
@@ -246,8 +179,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     return this.viewMode() !== 'timeline' || this.expandedTimelineSteps().has(groupKey);
   }
 
-  // Drives the header's single expand-all/collapse-all icon — "all" means every top-level rail
-  // group, so it flips to the collapse icon only once nothing is left closed.
   protected readonly allTimelineStepsExpanded = computed(() => this.expandedTimelineSteps().size >= this.railGroups.length);
 
   protected toggleAllTimelineSteps(): void {
@@ -256,10 +187,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // The Wellbore Preview panel (Timeline view only) floats free of the steps column, pinned to a
-  // fixed corner (`position: fixed` — see .ire__tl-preview-sidebar in the stylesheet). Hiding it
-  // is purely a CSS state (opacity/scale, not removal from the DOM) so the toggle gets a smooth
-  // transition instead of an instant show/hide.
   protected readonly previewSidebarOpen = signal(true);
 
   protected togglePreviewSidebar(): void {
@@ -279,13 +206,8 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Live-wired to the store's linkedRequestWellOptions/geologistOptions Signals — same reasoning
-  // as the old wizard's own `schema` field (see buildWwellIrFormSchema's doc comment).
   private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions, this.store.geologistOptions);
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
-  // One combined section — Program Details and Development & Testing are edited/saved together
-  // now (see programEdit below) — see wwell-ir-form.schema.ts's own comment on this section for
-  // why the field order there matters.
   protected readonly programSection = findSection(this.schema, 'programDetails', 'main');
   protected readonly geologistSection = findSection(this.schema, 'contacts', 'geologist');
   protected readonly formationTopsSection = findSection(this.schema, 'subsurface', 'formationTops');
@@ -295,25 +217,13 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected readonly offsetWellsSection = findSection(this.schema, 'contacts', 'offsetWells');
   protected readonly offsetRemarksSection = findSection(this.schema, 'contacts', 'remarks');
 
-  // ── View-mode read rows — one computed per section, re-derived whenever `ir()` changes ──────
   protected readonly requestReferenceRows = computed(() =>
     buildRequestReferenceRows(this.ir(), this.store.linkedRequestWellOptions()),
   );
-  // One combined read-only list backing the merged Program Details section (see programSection
-  // above) — [...main, ...developmentTesting], matching that section's own field grouping.
   protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
 
-  // Wellbore preview + casing warnings track the persisted record by default, but read straight
-  // from the Horizons/Casing sections' live FormArray values while either is open for editing —
-  // via SectionEditState.liveValue — so the diagram builds/updates as rows are added, not only
-  // once that section is saved (matching how the old wizard's live preview worked off raw form
-  // values). `liveValue()` is `null` whenever that section isn't being edited, which both mapper
-  // calls treat as "fall back to `ir()`". Program Details (Completion) and Estimated Hydrology
-  // (static water level / SIWHP / pump depth) get the same live treatment — picking a different
-  // Completion or test type while either section is open now moves the diagram immediately,
-  // instead of only after Save.
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
     buildWellboreDiagramDataFromIntegratedRequirement(
       this.ir(),
@@ -323,10 +233,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.hydrogeologyEdit.liveValue(),
     ),
   );
-  // buildWellboreDiagramDataFromIntegratedRequirement only wants the Completion/Open Hole Size
-  // slice — projects it out of the merged Program Details section's flat liveValue (see
-  // programEdit below), which also carries the Development & Testing fields this diagram doesn't
-  // care about.
   private readonly programMainLiveValue = computed<WwellIrRawProgramMain | null>(() => {
     const live = this.programEdit.liveValue();
     if (!live) return null;
@@ -346,25 +252,17 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     ),
   );
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
-  // Used by both the Sections view's inline Wellbore Preview card and the Timeline view's sidebar
-  // — see wwell-ir-preview-diagram-layout.ts for why a smaller *coordinate space* (not a smaller
-  // container) is what keeps fixed-viewBox-unit labels and tooltips legible in either box.
   protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
   protected readonly casingSizeWarnings: Signal<readonly CasingSizeWarning[]> = computed(() =>
     findInvertedCasingSizeRows(this.ir().casing.map(casingRowPatch)),
   );
 
-  // ── Per-section inline-edit state — lazily built from the *current* record only once its
-  // pencil is clicked, so opening a section always starts from the latest saved values. ─────────
   protected readonly requestReferenceEdit = new SectionEditState(() => {
     const group = buildAndPatchGroup(
       this.referenceMainSection,
       this.fb,
       mapIntegratedRequirementToFormPatch(this.ir()).reference.main,
     );
-    // Record already has a linked request (opened for edit, not just picked this session) — lock
-    // its populated fields immediately instead of waiting for a valueChanges emission that already
-    // happened during patchValue() above, before anything was subscribed to hear it.
     const linkedRequestId = group.get('linkedRequestId')?.value as string | null;
     console.log('[IR:link] requestReferenceEdit — section opened', { irId: this.ir().id, linkedRequestId });
     if (linkedRequestId) this.applyLinkedRequestWell(group, linkedRequestId);
@@ -380,10 +278,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected readonly hydrogeologyEdit = new SectionEditState<FormGroup, WwellIrRawHydrology>(() =>
     buildAndPatchGroup(this.hydrogeologySection, this.fb, mapIntegratedRequirementToFormPatch(this.ir()).hydrogeology.main),
   );
-  // Horizons rows (3.1) and the single "applies to all" remarks field (3.2) are independent edit
-  // units — unlike offsetWellsEdit below, opening one's pencil must not also flip the other into
-  // its edit form (each has its own pencil and its own Cancel), even though saveAll() below still
-  // merges whichever of the two are open into the same save call.
   protected readonly formationTopsEdit = new SectionEditState<FormArray, WwellIrRawFormationTop[]>(() =>
     buildAndPatchArray(this.formationTopsSection, this.fb, this.ir().formationTops, formationTopRowPatch),
   );
@@ -404,20 +298,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   });
 
-  // ── Read-only table row sources — prefer whichever section's live FormArray value while it has
-  // one open (even silently, from a row delete — see deleteCasingRow etc. below), falling back to
-  // the persisted record otherwise. This is what lets a deleted row disappear from the read-only
-  // table immediately, with the table staying on screen the whole time instead of the section
-  // flipping over to its edit form just to reflect the removal. ─────────────────────────────────
   protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
   protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing);
   protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue()?.offsetWells ?? this.ir().offsetWells);
 
-  // ── Row-level inline edit — "Edit" on a single read-only-table row edits just that row's
-  // already-visible columns in place, the same "don't open the whole section" treatment the row
-  // deletes above get. Offset Wells has several fields (TD, RPM, SWL, PWL, drawdown, TDS, H2S...)
-  // that aren't shown as table columns at all — those stay reachable only through the section's own
-  // "Edit Area Water Wells" pencil (the full form), a deliberate scope call, not an oversight. ────
   protected readonly formationTopsInlineEdit = new InlineRowEditState();
   protected readonly casingInlineEdit = new InlineRowEditState();
   protected readonly offsetWellsInlineEdit = new InlineRowEditState();
@@ -505,49 +389,33 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.offsetWellsInlineEdit.cancel(index !== null ? this.offsetWellsRowGroup(index) : null);
   }
 
-  // ── Attachments (7.1 Location Map / 7.2 Initiation Request)
-  // No SectionEditState or dynamic-section here: unlike every other section, these aren't fields on
-  // a form that the global Save submits. Each slot is a real file that uploads to its own endpoint
-  // the moment it's picked and is owned by the backend from then on — so there's no draft state to
-  // hold, and nothing for "Save" or the unsaved-changes guard to be responsible for.
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
   protected readonly acceptedAttachmentTypes = WWELL_IR_ATTACHMENT_ACCEPT;
 
-  /** The stored file in a slot, or null when it's empty. */
   protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
     return irAttachmentFor(this.ir().attachments, slot);
   }
 
-  /** True while that one slot is mid-upload/mid-delete — the other stays interactive. */
   protected isAttachmentBusy(slot: IrAttachmentSlot): boolean {
     return this.store.busyAttachmentSlot() === slot;
   }
 
-  /** Real bytes-sent percentage, or null for an operation with nothing measurable to show. */
   protected attachmentUploadPercent(): number | null {
     return this.store.attachmentUploadPercent();
   }
 
-  /** An upload needs a persisted ir_seq to file the document under; a never-saved draft has none,
-   *  so its staged files wait for the first save instead of offering an upload that can't work. */
   protected canAttach(): boolean {
     return this.ir().irSeq != null;
   }
 
-  /** The file picked for a slot on a not-yet-saved IR, held until the first save assigns an ir_seq. */
   protected pendingAttachmentFor(slot: IrAttachmentSlot): File | null {
     return this.store.pendingAttachments()[slot] ?? null;
   }
 
-  /** True when a slot has something to show — either stored on the server or waiting to upload. */
   protected hasAttachment(slot: IrAttachmentSlot): boolean {
     return this.attachmentFor(slot) !== null || this.pendingAttachmentFor(slot) !== null;
   }
 
-  /**
-   * Opens the attachment viewer. A staged file is already a `File`; a stored one is fetched back as
-   * one first, so both end up in the same viewer instead of one opening a raw browser tab.
-   */
   protected viewAttachment(slot: IrAttachmentSlot): void {
     const config = WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot);
     const label = config?.label ?? 'Attachment';
@@ -571,7 +439,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       });
   }
 
-  /** Sized to the viewport rather than to the file — a scanned map is unreadable in a small panel. */
   private openViewer(file: File, label: string): void {
     this.dialog.open(WwellIrAttachmentViewerComponent, {
       data: { file, label },
@@ -583,7 +450,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   }
 
-  /** Explicit send of a staged file — attaching alone never uploads. */
   protected uploadStagedAttachment(slot: IrAttachmentSlot): void {
     const irSeq = this.ir().irSeq;
     if (irSeq == null) {
@@ -606,20 +472,14 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected onAttachmentPicked(slot: IrAttachmentSlot, event: Event): void {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0];
-    // Reset immediately so re-picking the same file after a failure still fires a change event.
     if (input) input.value = '';
     if (!file) return;
 
-    // Checked here purely to fail fast without spending the upload — the server enforces the same
-    // cap, and is the authority on it (see IrAttachmentStorageService).
     if (file.size > WWELL_IR_ATTACHMENT_MAX_BYTES) {
       this.notify.error('Attachment exceeds the 25 MB limit.');
       return;
     }
 
-    // Attaching only stages the file — the user sends it with the slot's own upload action. On a
-    // New IR there's no ir_seq to upload against anyway, and the first save flushes it instead
-    // (see WwellIrComponent's uploadPendingAttachments call).
     this.store.setPendingAttachment(slot, file);
   }
 
@@ -633,23 +493,11 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.store.deleteIrAttachment(irSeq, slot);
   }
 
-  // One entry per flattened rail leaf, in the same order — see wwell-ir-editor.component.html.
   @ViewChildren('sectionEl', { read: ElementRef }) private readonly sectionEls?: QueryList<ElementRef<HTMLElement>>;
-  // The internally-scrolling region (header/footer stay fixed) — see wwell-ir-editor.component.scss.
   @ViewChild('body', { read: ElementRef }) private readonly bodyEl?: ElementRef<HTMLElement>;
 
-  // Tracks which record this editor instance is currently showing — see the identity-change
-  // effect below, which is the only reader/writer of this outside the constructor.
   private previousIrId: string | null = null;
 
-  // ── Unsaved-changes tracking — read by WwellIrComponent (via ViewChild) before it lets the user
-  // navigate away from this record: switch the selected row, open "New IR", or leave the route
-  // entirely (see the wwell-ir CanDeactivate guard). Every open SectionEditState means "the global
-  // Save button would submit this section's current live value" (see saveAll() below) — including
-  // a row delete or section reset, which open their section and mutate it without saving (see
-  // deleteCasingRow/resetProgramSection etc.) — so "any section open" is exactly "something would
-  // be lost by leaving now", regardless of whether a control's own `dirty` flag happens to be set
-  // (patchValue()/removeAt() don't set it).
   public readonly hasUnsavedChanges = computed(
     () =>
       this.requestReferenceEdit.isEditing() ||
@@ -662,18 +510,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       this.offsetWellsEdit.isEditing(),
   );
 
-  // Resolved once the in-flight save this array was queued for actually settles — see the
-  // `creatingIr` effect below and saveUnsavedChangesAndWait()'s own doc comment.
   private saveSettledResolvers: ((succeeded: boolean) => void)[] = [];
   private wasSavingForNavigation = false;
 
   constructor() {
-    // The "Link to Request" select lives inside requestReferenceEdit's own lazily-built
-    // FormGroup (a fresh instance every time that section's pencil is clicked — see
-    // SectionEditState.open()), so this can't be a one-time subscription set up in the
-    // constructor: it has to re-subscribe to whichever FormGroup instance is *currently* open,
-    // and stop when that section closes (control() goes back to null) or is reopened (a new
-    // FormGroup replaces the old one). `effect()`'s cleanup callback handles both.
     effect(onCleanup => {
       const ctrl = this.requestReferenceEdit.control();
       if (!ctrl) return;
@@ -685,26 +525,12 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       onCleanup(() => subscription?.unsubscribe());
     });
 
-    // WwellIrComponent reuses this same editor instance across selections — its `@else if
-    // (selectedIr(); as ir)` branch never changes just because the *bound* record does (switching
-    // list rows, or opening a blank "New IR" draft), so nothing here gets recreated for free. A
-    // section already open at that moment keeps the FormGroup it already built — SectionEditState
-    // .open() is a no-op once editing (see its own doc comment) — so without this, an open
-    // section keeps showing the *previous* record's values after the identity underneath it
-    // changes. Closing everything forces every section back to its read display, which re-derives
-    // fresh from whatever `ir()` now is on next open. Compares `id` (not the object reference,
-    // which also changes on every in-place update from a save) so an update to the *same* record
-    // never closes sections the user still has open mid-edit.
     effect(() => {
       const id = this.ir().id;
       if (this.previousIrId !== null && id !== this.previousIrId) this.closeAllSections();
       this.previousIrId = id;
     });
 
-    // Resolves every promise queued by saveUnsavedChangesAndWait() once the save it kicked off
-    // settles — mirrors WwellIrComponent's own `wasCreatingIr` settle-detection effect (see there
-    // for why a plain `creatingIr()` read can't be used directly: it's a shared store flag, so only
-    // the true→false *transition* means "a save just finished", not any particular read of it).
     effect(() => {
       const saving = this.store.creatingIr();
       const settled = this.wasSavingForNavigation && !saving;
@@ -718,21 +544,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   }
 
-  /** Discards every open section's in-progress edits without saving — reverts the editor back to
-   *  its all-read-display state, so the next `ir()` (a different record, or this one refreshed)
-   *  renders clean. Used by WwellIrComponent's navigation guard when the user picks "Discard
-   *  Changes" on the unsaved-changes prompt. */
   public discardUnsavedChanges(): void {
     this.closeAllSections();
   }
 
-  /** Triggers the same global Save as the footer button and resolves once that save request
-   *  settles — `true` on success, `false` on failure (the failure itself is already toasted by
-   *  WwellIrComponent's `createIrError` effect, same as any other save). Used by WwellIrComponent's
-   *  navigation guard when the user picks "Save & Continue"/"Save & Leave": the guard awaits this
-   *  before actually letting the navigation proceed, so a failed save keeps the user on the record
-   *  instead of losing it mid-flight. Reuses an already-in-flight save (rather than firing a second
-   *  one) if saveAll() was already triggered from elsewhere when this is called. */
   public saveUnsavedChangesAndWait(): Promise<boolean> {
     return new Promise(resolve => {
       this.saveSettledResolvers.push(resolve);
@@ -748,8 +563,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     if (this.bodyEl && this.sectionEls) this.rail.attach(this.bodyEl, this.sectionEls);
   }
 
-  /** Rail click: leaf index is the flattened `railLeaves` index, which is also the `#sectionEl`
-   *  DOM order — see wwellIrRailLeaves()'s doc comment. */
   protected leafIndex(leafKey: string): number {
     return this.railLeaves.findIndex(leaf => leaf.key === leafKey);
   }
@@ -758,7 +571,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.rail.scrollToIndex(this.leafIndex(leafKey));
   }
 
-  /** Group header click (e.g. "2.0 General") scrolls to its first child. */
   protected scrollToGroupStart(group: WwellIrRailGroup): void {
     const key = group.leaf?.key ?? group.children?.[0]?.key;
     if (key) this.scrollToLeaf(key);
@@ -773,23 +585,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     return elevation === null || depthFt === null ? null : elevation - depthFt;
   }
 
-  /** Selecting a "Link to Request" option auto-fills whichever Request Reference fields that
-   *  eligible-well record actually has data for — BI Number still has no source there
-   *  (exad_rcd_prewap doesn't carry it) and stays manually entered. Target Depth used to be in
-   *  that same "no source" group; it now comes from the linked well's own exad_rcd_prewap.target_dpth
-   *  (`targetDepth` here) — the only real source that field has anywhere, since exad_gwd_ir_header
-   *  has no target-depth column of its own to save a manually-typed value into. That's why
-   *  `targetDepthFt` is `readonly: true` in the schema (wwell-ir-form.schema.ts) unconditionally,
-   *  unlike Surface Elevation/Coordinates/Target Aquifer/Supporting Business below, which stay
-   *  editable until a link actually supplies them. Purely a client-side lookup against the
-   *  already-loaded eligible-wells list (see store.loadLinkedRequestWells()) — selecting a link
-   *  never itself triggers a network call.
-   *
-   *  Whichever fields the link actually supplies are then locked read-only: they track the source
-   *  request record, so letting someone edit or clear them here would silently diverge from (or
-   *  desync) that source. Also reused at initial section-open for an already-linked record (see
-   *  requestReferenceEdit above) — re-locks the same fields to the same values, so it's a no-op
-   *  data-wise there. */
   private applyLinkedRequestWell(referenceGroup: FormGroup, linkedRequestId: string): void {
     console.log('[IR:link] applyLinkedRequestWell — start', { linkedRequestId, eligibleWellsLoaded: this.store.linkedRequestWells().length });
     const well = findLinkedWell(linkedRequestId, this.store.linkedRequestWells());
@@ -807,12 +602,8 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     const patch: Record<string, string | number> = { wellName: well.wellName };
     if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation as number;
     if (hasCoordinates) patch['coordinates'] = formatLinkedWellCoordinates(well);
-    // targetDepthFt's control is already permanently disabled (schema `readonly: true`, applied
-    // at control-creation time) — patchValue on the parent group still updates a disabled child
-    // control's own value, it just stays excluded from the group's aggregated `.value`/validity,
-    // same as wellName below is excluded once `.disable()` runs.
     if (hasTargetDepth) patch['targetDepthFt'] = well.targetDepth as number;
-    if (hasTargetAquifer) patch['targetAquifer'] = well.targetAquifer as string;
+    patch['targetAquifer'] = hasTargetAquifer ? (well.targetAquifer as string) : '';
     if (hasSupportingBusiness) patch['supportingBusiness'] = well.supportings as string;
     console.log('[IR:link] applyLinkedRequestWell — patching form group', {
       patch,
@@ -827,14 +618,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     referenceGroup.get('wellName')?.disable();
     this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
     this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
-    this.setLinkedFieldLock(referenceGroup, 'targetAquifer', hasTargetAquifer);
     this.setLinkedFieldLock(referenceGroup, 'supportingBusiness', hasSupportingBusiness);
     console.log('[IR:link] applyLinkedRequestWell — done', { rawValue: referenceGroup.getRawValue() });
   }
 
-  /** Locks/unlocks one Request Reference field depending on whether the currently-linked request
-   *  actually supplied it — switching to a different linked request that lacks, say, coordinates
-   *  hands that field back for manual entry rather than leaving it stuck disabled and empty. */
   private setLinkedFieldLock(group: FormGroup, key: string, locked: boolean): void {
     const control = group.get(key);
     if (!control) return;
@@ -851,23 +638,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     return ctrl.get('remarks') as FormGroup;
   }
 
-  /** Per-row delete from the read-only table (Casing/Formation Tops/Offset Wells), without first
-   *  clicking the section's own pencil: asks for confirmation (the row's key fields are shown in
-   *  the dialog so the user knows exactly what they're removing), then — only once confirmed —
-   *  opens the section *silently* (building its FormArray fresh from the currently-persisted rows,
-   *  in the same order the read-only table shows them — see buildAndPatchArray — so `index` lines
-   *  up 1:1) and immediately removes that row, and confirms the removal with a toast.
-   *
-   *  `open({ silent: true })` is the whole fix for what used to read as "deleting one row reloads
-   *  the whole section": a plain `open()` also flips the section over to its big edit-form UI,
-   *  which is jarring for a single-row delete and is exactly what pushed content below it up/down
-   *  and felt like the page had reloaded. Silent open still builds the same live FormArray Save
-   *  reads from — formationTopsRows/casingRows/offsetWellsRows above fall back to that live value
-   *  whenever one exists, so the read-only table simply loses that one row (animated out via
-   *  appWwellCollapseAnimate on each `<tr>`, same as any other Angular-control-flow removal) while
-   *  staying on screen the whole time. buildWwellIrBulkSavePayload's `existing`-diff (see
-   *  wwell-ir-payload.mapper.ts) is what turns this missing row into a real DELETE action, kept
-   *  rows into UPDATE/no-op, and any newly-added row into INSERT, all in the same eventual save. */
   protected deleteCasingRow(index: number): void {
     const row = this.ir().casing[index];
     this.confirmThenDelete('Delete casing row?', [
@@ -906,11 +676,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     });
   }
 
-  /** Clears every field in Program Details (2.1) back to blank — a flat, non-repeatable section
-   *  has no "row" to delete (see this section's own read-only view, which has no Actions column),
-   *  so this is its equivalent destructive action. Opens the section for editing (if not already)
-   *  with the reset values already applied, leaving the global Save button as the one place that
-   *  actually persists it — same "review before Save" pattern as the row deletes above. */
   protected resetProgramSection(): void {
     this.confirmThenAct({ title: 'Reset Program Details?', confirmLabel: 'Reset' }, () =>
       this.resetFlatSection(this.programEdit, this.programSection, 'Program Details'),
@@ -935,8 +700,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.notify.info(`${label} cleared — click Save to apply.`);
   }
 
-  /** Shared confirm-before-destructive-action gate for the row deletes above and the section
-   *  resets above — `onConfirmed` only ever runs once the user actually confirms. */
   private confirmThenAct(
     config: { title: string; rows?: { label: string; value: string }[]; confirmLabel: string },
     onConfirmed: () => void,
@@ -953,11 +716,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.confirmThenAct({ title, rows, confirmLabel: 'Delete' }, onConfirmed);
   }
 
-  /** Deletes the whole IR from the backend (header row — casing/tops/hydrogeology/water cascade
-   *  server-side via FK, see WwellIrService.deleteIr) after confirmation. Only reachable once the
-   *  record is actually persisted (`ir().irSeq !== null`, gated in the template) — a local-only
-   *  draft has nothing to delete server-side. WwellIrComponent reacts to store.deletingIr()
-   *  settling to notify and fall back the selection once this record disappears from `irs`. */
   protected deleteIr(): void {
     const irSeq = this.ir().irSeq;
     if (irSeq === null || irSeq === undefined) return;
@@ -978,21 +736,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     return mapIntegratedRequirementToRawFormValue(this.ir());
   }
 
-  /** Shared save path: re-derives the payload/bulk-save arrays from the *current* record with the
-   *  open sections' slices overlaid, so a section nobody touched this time round is resent
-   *  unchanged (and diffed to a DML no-op by buildWwellIrBulkSavePayload's `existing` comparison)
-   *  rather than dropped.
-   *
-   *  Deliberately fires no success toast — the request is still in flight here, so anything shown
-   *  now would claim success before the backend has answered (and would still show next to the
-   *  error toast when the save actually fails). WwellIrComponent reports the real outcome once
-   *  store.creatingIr() settles.
-   *
-   *  Status handling: the save payload type only ever accepts 'draft' | 'in-progress' (see
-   *  CreateIntegratedRequirementPayload) — there's no contract for "edit this field but keep it
-   *  Approved/In Review". Editing a draft/in-progress record keeps its current status; editing
-   *  anything further along pulls it back to 'in-progress' (not 'draft', since it was already
-   *  worked past that point) so it's clear the record needs to move through review again. */
   private saveMergedRaw(raw: WwellIrFormRawValue): void {
     const current = this.ir();
     const status: Extract<IntegratedRequirementStatus, 'draft' | 'in-progress'> =
@@ -1006,20 +749,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     this.store.createIr(payload, irBulkPayload);
   }
 
-  /** Global footer "Save" — merges every currently-open section's live form value (plus
-   *  attachments, if that's open too) into a single raw value and saves it in one call, instead of
-   *  requiring the user to click each open section's own Save button separately. A section that
-   *  isn't open contributes its existing saved value unchanged, exactly as it would for any one
-   *  section's own save (see saveMergedRaw / currentRawFormValue). This is also what turns a brand
-   *  new local-only draft (ir().irSeq === null) into a real backend record on the very first click,
-   *  even if the user never opened a single section — so the no-op guard below only applies once
-   *  the record is already persisted; a still-local draft always goes through, even with nothing
-   *  open, since that first click is what creates it.
-   *
-   *  Without the guard, clicking Save again after a save already settled (nothing reopened since)
-   *  re-submitted the exact same payload — hasUnsavedChanges() false means no section is open, so
-   *  there is nothing new to merge in, but saveMergedRaw() doesn't know that and hits the backend
-   *  regardless. */
   protected saveAll(): void {
     if (this.ir().irSeq !== null && !this.hasUnsavedChanges()) {
       this.notify.info('No changes to save.');

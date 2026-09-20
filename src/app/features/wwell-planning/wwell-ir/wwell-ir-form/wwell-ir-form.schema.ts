@@ -20,7 +20,6 @@ import {
 } from '../../shared/wwell-planning-reference-data.config';
 import { WWELL_IR_FORMATION_OPTIONS } from './wwell-ir-form.config';
 
-/** Single source of truth for the IR stepper — add a field here, not in a template. */
 export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
   {
     key: 'reference',
@@ -30,11 +29,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         key: 'main',
         title: null,
         fields: [
-          // Static [] placeholder — buildWwellIrFormSchema() below swaps this for a live Signal
-          // (backed by GET /planning/api/v1/wells/eligible-for-ir) before this schema is rendered.
-          // Required: it maps to exad_gwd_ir_header.prewap_seq, which is NOT NULL in production
-          // (docs/ir/EXAD_GWD_IR_HEADER.md) — without this the save fails at the database with
-          // ORA-01400 instead of telling the user which field is missing.
           {
             key: 'linkedRequestId',
             label: 'Link to Request',
@@ -62,19 +56,12 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           {
             key: 'targetAquifer',
             label: 'Target Aquifer',
-            type: 'select',
-            options: WWELL_IR_FORMATION_OPTIONS,
-            validators: { required: true },
+            type: 'text',
+            placeholder: 'auto',
+            hint: 'From the linked well — select a Link to Request to populate',
+            readonly: true,
           },
           {
-            // Read-only: exad_gwd_ir_header has no target-depth column of its own to save a
-            // manually-typed value into (see IntegratedRequirementRequestReference.targetDepthFt's
-            // doc comment) — the only real source this field has is the linked well's own
-            // exad_rcd_prewap.target_dpth, applied by wwell-ir-editor.component.ts's
-            // `applyLinkedRequestWell` the moment a "Link to Request" is picked. No `validators`
-            // (a permanently-disabled control is excluded from its parent's validity anyway, so
-            // `required`/`min` here would be dead weight — see buildFieldControl in
-            // wwell-dynamic-form.builder.ts).
             key: 'targetDepthFt',
             label: 'Target Depth',
             type: 'number',
@@ -91,9 +78,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             hint: 'Used for auto-calculating sub-sea depths',
           },
           {
-            // Odd field out in this section's otherwise-even count — colSpan:2 keeps it from
-            // landing alone in a row with a dangling empty cell beside it (also just genuinely
-            // useful room for a lat/long string).
             key: 'coordinates',
             label: 'Coordinates',
             type: 'text',
@@ -124,9 +108,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         },
       },
       {
-        // One remarks field for the whole Horizons section (maps to the single
-        // exad_gwd_ir_header.tops_remarks column) rather than one per formation-top row — mirrors
-        // the Offset Wells / Area Water Wells 'remarks' section below.
         key: 'remarks',
         title: null,
         fields: [
@@ -165,8 +146,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               visibleWhen: { field: 'type', equals: 'Liner' },
             },
             {
-              // colSpan:2 — same "don't orphan the trailing free-text field" fix as
-              // Formation Tops' Remarks above.
               key: 'remarks',
               label: 'Remarks',
               type: 'text',
@@ -183,27 +162,9 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
     label: 'Program Details',
     sections: [
       {
-        // One combined section — Program Details (completion/acidization/transmission) and
-        // Development & Testing (logging/mudLogging/sampling/flowTest/remarks) used to be two
-        // separately edited/saved sections; merged into one so they read as a single block
-        // (matching the reference GWD/AGWA screen) instead of two stacked cards.
-        //
-        // Every field here is full-width (`colSpan: 2`), stacked one per row — a 2-column grid
-        // made sense for the old single-line combo inputs, but these are big resizable textareas
-        // now (see WwellRichTextareaComponent) that can legitimately hold several lines each;
-        // sitting two per row would either cramp them or waste half the row's height. Plain
-        // top-to-bottom order, not interleaved — there's no column pairing left to preserve.
         key: 'main',
         title: null,
         fields: [
-          // Same control as its siblings below (dropdown-checkbox + big textarea) rather than a
-          // strict `select`, per explicit request for visual/behavioral consistency across the
-          // whole section. Its committed value is every checked option newline-joined (see
-          // WwellRichTextareaComponent), not a single picked string, once more than one option is
-          // checked — `openHoleSizeIn`'s `visibleWhen` below uses `includesLine` (not `equals`) so
-          // it stays visible whenever "Open Hole" is one of possibly several checked lines, and the
-          // wellbore diagram's completion switch (`deriveCompletionElementFlags` in
-          // wwell-ir-wellbore-diagram.mapper.ts) matches the same way.
           {
             key: 'completion',
             label: 'Completion',
@@ -246,8 +207,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         key: 'geologist',
         title: 'Geologist Contact',
         fields: [
-          // Static [] placeholder — buildWwellIrFormSchema() below swaps this for a live Signal
-          // (backed by GET /planning/api/v1/gwd-ops-members) before this schema is rendered.
           {
             key: 'geologistPrimary',
             label: 'Primary',
@@ -269,7 +228,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             { key: 'epANum', label: 'EP A Num', type: 'number', placeholder: 'e.g., 200', validators: { required: true } },
             { key: 'distanceKm', label: 'Distance (km)', type: 'number', placeholder: 'e.g., 2.5' },
             { key: 'location', label: 'Location', type: 'text', placeholder: 'e.g., N 2.5 km' },
-            // exad_gwd_ir_water.aquifer is NOT NULL (docs/ir/p2-ir.md), same reasoning as linkedRequestId above.
             { key: 'aquifer', label: 'Aquifer', type: 'text', placeholder: 'e.g., Wasia-Biyadh', validators: { required: true } },
             { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'e.g., 530' },
             { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'e.g., 1440' },
@@ -340,8 +298,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           { key: 'estimatedTdsPpm', label: 'Estimated TDS', type: 'number', suffix: 'ppm' },
           { key: 'estimatedRateGpm', label: 'Estimated Rate', type: 'number', suffix: 'GPM' },
           { key: 'h2sPpm', label: 'H2S', type: 'number', suffix: 'ppm' },
-          // Mode-specific fields are grouped last (after an even count of always-visible fields above)
-          // so a collapsed field never shares a grid row with an unrelated visible one.
           {
             key: 'siwhpPsi',
             label: 'SIWHP',
@@ -369,9 +325,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
     ],
   },
   {
-    // Split into two single-field sections (rather than one 'files' section holding both) so each
-    // becomes its own scrollable IR SECTIONS nav target (7.0 Location Map / 8.0 Initiation
-    // Request) — see wwell-ir-section-rail.config.ts.
     key: 'attachments',
     label: 'Attachments & Review',
     sections: [
@@ -397,14 +350,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
   },
 ];
 
-/**
- * Returns a copy of WWELL_IR_FORM_SCHEMA with the 'reference'/'main' section's 'linkedRequestId'
- * field wired to `linkedRequestOptions`, and the 'contacts'/'geologist' section's
- * 'geologistPrimary'/'geologistSecondary' fields wired to `geologistOptions` — each replacing its
- * static `[]` placeholder. The schema array itself is a module-level constant (no injector
- * available at definition time), so a store-backed Signal can only be attached here, once, by the
- * component that actually has one — see WwellIrEditorComponent's `schema` field.
- */
 export function buildWwellIrFormSchema(
   linkedRequestOptions: Signal<readonly WwellFieldOption[]>,
   geologistOptions: Signal<readonly string[]>,

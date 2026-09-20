@@ -419,3 +419,25 @@ clean, production build clean.
 - Existing wwell-ir Jest suites green (63 tests); `ngc --noEmit` on the app config clean. No new
   specs, per the standing "defer spec coverage during the wwell-ir redesign" call. Not reproduced in
   a live browser (dev server/backend weren't running).
+
+### wwell-ir 1.0 Wellbore Details — Target Aquifer is now a read-only field
+
+- `wwell-ir-form.schema.ts`: `targetAquifer` changed from a required `select` (formation options) to a
+  read-only `text` field with the same `placeholder: 'auto'` + hint as Target Depth. `required` dropped
+  — a permanently-disabled control is excluded from validity, so it would be dead weight.
+- `wwell-ir-editor.component.ts` (`applyLinkedRequestWell`): removed the `setLinkedFieldLock(...,
+  'targetAquifer', ...)` call (it `.enable()`d the control whenever the linked well had no aquifer,
+  which would have made the read-only field editable again), and the field is now blanked when the
+  newly-linked well supplies none, so a previous link's value can't linger un-clearable.
+- Known limit, unchanged: the value only comes from the eligible-wells list (`target_form`), which
+  can't resolve an already-saved IR's link, and `exad_gwd_ir_header` has no column for it — so a saved
+  IR reloads with Target Aquifer blank. Previously a hand-picked value reverted after save anyway.
+- `ngc --noEmit`, eslint on both files, and the wwell-planning Jest suites (67 tests) all pass. Not
+  checked in a live browser.
+
+### Comment cleanup
+
+- Removed every comment (170 in `wwell-ir-editor.component.ts`, 55 in `wwell-ir-form.schema.ts`) using the
+  TypeScript parser, so nothing inside strings was touched; code is identical modulo comments (checked by
+  printing both ASTs with comments off). `ngc --noEmit`, eslint on both files and the wwell-planning Jest
+  suites (67 tests) pass. `console.log` calls were left as-is — they aren't comments.
