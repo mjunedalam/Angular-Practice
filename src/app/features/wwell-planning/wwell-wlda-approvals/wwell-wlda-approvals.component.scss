@@ -1,4 +1,5 @@
 @use '../shared/wwell-design-tokens' as tokens;
+@use '../shared/wwell-material' as wmat;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
@@ -13,7 +14,11 @@ $master-width: 240px;
   display: block;
   height: 100%;
   background: tokens.$page-bg;
+  color: tokens.$navy;
+  color-scheme: var(--wp-scheme);
   font-family: tokens.$font-family;
+  -webkit-font-smoothing: antialiased;
+  @include wmat.buttons;
 }
 
 /* The project has no global `box-sizing: border-box` reset, so `max-height: 100%` /
@@ -52,8 +57,7 @@ $master-width: 240px;
   border-radius: 10px;
   padding: 0.9rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
   overflow: hidden;
 }
 
@@ -74,9 +78,9 @@ $master-width: 240px;
 .wlda__title {
   margin: 0;
   font-size: 1.08rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .wlda__count {
@@ -87,10 +91,10 @@ $master-width: 240px;
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: rgba($accent, 0.12);
+  background: tokens.alpha($accent, 12%);
   color: $accent;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .wlda__new-btn {
@@ -99,7 +103,7 @@ $master-width: 240px;
   gap: 4px;
   flex-shrink: 0;
   border-radius: 7px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.84rem;
   padding: 0 10px;
   box-shadow: none;
@@ -160,7 +164,7 @@ $master-width: 240px;
   font-size: 0.93rem;
 
   &--error {
-    color: #dc2626;
+    color: var(--wp-danger);
   }
 }
 
@@ -178,7 +182,7 @@ $master-width: 240px;
   display: block;
   height: 0.6rem;
   border-radius: 4px;
-  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background: linear-gradient(90deg, var(--wp-shimmer-a) 25%, var(--wp-shimmer-b) 37%, var(--wp-shimmer-a) 63%);
   background-size: 400% 100%;
   animation: wlda-shimmer 1.4s ease-in-out infinite;
 
@@ -259,12 +263,12 @@ $master-width: 240px;
 
   &:hover {
     background: tokens.$surface-alt;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--wp-shadow-1);
   }
 
   &--active {
-    background: rgba($accent, 0.06);
-    border-color: rgba($accent, 0.16);
+    background: tokens.alpha($accent, 6%);
+    border-color: tokens.alpha($accent, 16%);
     border-left-color: $accent;
   }
 
@@ -285,7 +289,7 @@ $master-width: 240px;
     background: tokens.$surface;
   }
   50% {
-    background: rgba($accent, 0.07);
+    background: tokens.alpha($accent, 7%);
   }
 }
 
@@ -298,15 +302,17 @@ $master-width: 240px;
 
 .wlda__row-code {
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
   letter-spacing: 0.01em;
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
 }
 
 .wlda__row-name {
   margin: 0;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $navy;
   white-space: nowrap;
   overflow: hidden;
@@ -333,7 +339,7 @@ $master-width: 240px;
   padding: 2px 7px;
   border-radius: 999px;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 
   &--lg {
@@ -391,25 +397,26 @@ $master-width: 240px;
   border-radius: 12px;
   padding: 0.9rem 1.1rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
 }
 
 .wlda__eyebrow {
   margin: 0;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $accent;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
 }
 
 .wlda__detail-title {
   margin: 0.15rem 0 0;
   font-size: 1.32rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .wlda__detail-subtitle {
@@ -452,8 +459,7 @@ $master-width: 240px;
   border-radius: 10px;
   padding: 0.95rem 1.1rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
   transition:
     box-shadow tokens.$duration-fast ease,
     transform tokens.$duration-fast ease;
@@ -462,8 +468,7 @@ $master-width: 240px;
     &:hover {
       transform: translateY(-2px);
       box-shadow:
-        0 4px 10px rgba(0, 0, 0, 0.07),
-        0 10px 24px rgba(59, 130, 246, 0.09);
+        var(--wp-shadow-2);
     }
   }
 }
@@ -479,7 +484,7 @@ $master-width: 240px;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -492,7 +497,7 @@ $master-width: 240px;
   width: 21px;
   height: 21px;
   border-radius: 6px;
-  background: rgba($accent, 0.1);
+  background: tokens.alpha($accent, 10%);
   color: $accent;
   flex-shrink: 0;
 
@@ -550,7 +555,7 @@ $master-width: 240px;
   width: 100%;
   justify-content: center;
   gap: 6px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.9rem;
 
   mat-icon {
@@ -577,7 +582,7 @@ $master-width: 240px;
     width: 32px;
     height: 32px;
     font-size: 32px;
-    color: #cbd5e1;
+    color: var(--wp-line-strong);
   }
 
   p {

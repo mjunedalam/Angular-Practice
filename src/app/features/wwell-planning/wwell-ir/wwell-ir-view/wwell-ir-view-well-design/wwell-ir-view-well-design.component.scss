@@ -1,4 +1,5 @@
 @use '../../../shared/wwell-design-tokens' as tokens;
+@use '../../../shared/wwell-wellbore' as wb;
 
 :host {
   display: block;
@@ -16,10 +17,10 @@
 .ir-well-design__diagram-card,
 .ir-well-design__table-card {
   background: tokens.$surface;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 1rem 1.1rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--wp-shadow-1);
 }
 
 // `.ir-well-design__diagram-row` below has a fixed `min-width` that can exceed this card's own
@@ -40,7 +41,7 @@
 .ir-well-design__title {
   margin: 0 0 0.75rem;
   font-size: tokens.$text-xs;
-  font-weight: 700;
+  font-weight: 600;
   color: tokens.$accent;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -59,6 +60,7 @@
 // depth-scale column visible breathing room from the wellbore graphic instead of the two sitting
 // flush against each other.
 .ir-well-design__diagram-row {
+  @include wb.wellbore-theme;
   display: flex;
   align-items: stretch;
   gap: 1rem;
@@ -139,7 +141,7 @@
 
 .ir-well-design__remarks-label {
   font-size: tokens.$text-xs;
-  font-weight: 700;
+  font-weight: 600;
   color: tokens.$subtle;
   text-transform: uppercase;
   letter-spacing: 0.04em;

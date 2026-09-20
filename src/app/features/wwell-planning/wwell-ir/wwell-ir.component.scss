@@ -1,4 +1,5 @@
 @use '../shared/wwell-design-tokens' as tokens;
+@use '../shared/wwell-material' as wmat;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
@@ -13,7 +14,11 @@ $master-width: 240px;
   display: block;
   height: 100%;
   background: tokens.$page-bg;
+  color: tokens.$navy;
+  color-scheme: var(--wp-scheme);
   font-family: tokens.$font-family;
+  -webkit-font-smoothing: antialiased;
+  @include wmat.buttons;
 }
 
 /* The project has no global `box-sizing: border-box` reset, so `max-height: 100%` /
@@ -56,12 +61,11 @@ $master-width: 240px;
   flex-shrink: 0;
   max-height: 100%;
   background: tokens.$surface;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 0.9rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
   overflow: hidden;
 }
 
@@ -82,9 +86,9 @@ $master-width: 240px;
 .wwell-ir__title {
   margin: 0;
   font-size: 1.08rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .wwell-ir__count {
@@ -95,10 +99,10 @@ $master-width: 240px;
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: rgba($accent, 0.12);
+  background: tokens.alpha($accent, 12%);
   color: $accent;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .wwell-ir__new-btn {
@@ -107,7 +111,7 @@ $master-width: 240px;
   gap: 4px;
   flex-shrink: 0;
   border-radius: 7px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.84rem;
   padding: 0 10px;
   box-shadow: none;
@@ -212,7 +216,7 @@ $master-width: 240px;
   border-radius: 999px;
   padding: 0.14rem 0.4rem;
   font-size: 0.66rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $muted;
   cursor: pointer;
   white-space: nowrap;
@@ -222,13 +226,13 @@ $master-width: 240px;
     color 150ms ease;
 
   &:hover {
-    border-color: rgba($accent, 0.4);
+    border-color: tokens.alpha($accent, 40%);
     color: $navy;
   }
 
   &--active {
-    background: rgba($accent, 0.12);
-    border-color: rgba($accent, 0.35);
+    background: tokens.alpha($accent, 12%);
+    border-color: tokens.alpha($accent, 35%);
     color: $accent;
   }
 }
@@ -248,7 +252,7 @@ $master-width: 240px;
   font-size: 0.93rem;
 
   &--error {
-    color: #dc2626;
+    color: var(--wp-danger);
   }
 }
 
@@ -271,7 +275,7 @@ $master-width: 240px;
   display: block;
   height: 0.6rem;
   border-radius: 4px;
-  background: linear-gradient(90deg, tokens.$border-soft 25%, tokens.$surface-alt 37%, tokens.$border-soft 63%);
+  background: linear-gradient(90deg, var(--wp-shimmer-a) 25%, var(--wp-shimmer-b) 37%, var(--wp-shimmer-a) 63%);
   background-size: 400% 100%;
   animation: wwell-ir-shimmer 1.4s ease-in-out infinite;
 
@@ -422,12 +426,12 @@ $master-width: 240px;
 
   &:hover {
     background: tokens.$surface-alt;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--wp-shadow-1);
   }
 
   &--active {
-    background: rgba($accent, 0.06);
-    border-color: rgba($accent, 0.16);
+    background: tokens.alpha($accent, 6%);
+    border-color: tokens.alpha($accent, 16%);
     border-left-color: $accent;
   }
 
@@ -450,7 +454,7 @@ $master-width: 240px;
     background: tokens.$surface;
   }
   50% {
-    background: rgba($accent, 0.07);
+    background: tokens.alpha($accent, 7%);
   }
 }
 
@@ -463,15 +467,17 @@ $master-width: 240px;
 
 .wwell-ir__row-code {
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
   letter-spacing: 0.01em;
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
 }
 
 .wwell-ir__row-name {
   margin: 0;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $navy;
   white-space: nowrap;
   overflow: hidden;
@@ -494,7 +500,7 @@ $master-width: 240px;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -587,10 +593,10 @@ $master-width: 240px;
   min-height: 0;
   overflow: hidden;
   background: tokens.$surface;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 1.1rem 0.9rem 0.9rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--wp-shadow-1);
 
   &::before {
     content: '';
@@ -651,9 +657,9 @@ $master-width: 240px;
 .wwell-ir__approval-title {
   margin: 0;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .wwell-ir__approval-progress {
@@ -700,7 +706,7 @@ $master-width: 240px;
     width: 32px;
     height: 32px;
     font-size: 32px;
-    color: #cbd5e1;
+    color: var(--wp-line-strong);
   }
 
   p {

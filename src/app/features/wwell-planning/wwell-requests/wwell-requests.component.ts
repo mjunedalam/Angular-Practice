@@ -21,6 +21,7 @@ import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { WwellThemeToggleComponent } from '../shared/wwell-theme-toggle/wwell-theme-toggle.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellPlanningStore } from '../store/wwell-planning.store';
 import { WWELL_REQUEST_PRIORITY_META, WWELL_REQUEST_STATUS_META } from './wwell-requests.config';
@@ -32,7 +33,13 @@ const SKELETON_ROW_COUNT = 6;
 @Component({
   selector: 'app-wwell-requests',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, WwellDetailLoadingComponent],
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    WwellDetailLoadingComponent,
+    WwellThemeToggleComponent,
+  ],
   templateUrl: './wwell-requests.component.html',
   styleUrl: './wwell-requests.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

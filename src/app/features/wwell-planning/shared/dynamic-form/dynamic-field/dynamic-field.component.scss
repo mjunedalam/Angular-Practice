@@ -4,7 +4,7 @@ $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
-$danger: #dc2626;
+$danger: tokens.$danger;
 
 /* The component host sits between the grid container and `.dyf`, so without this,
  * `.dyf--span-2`'s grid-column has no grid item to act on — flatten it away. */
@@ -29,23 +29,23 @@ $danger: #dc2626;
    * "premium input" without touching the 3 consumer themes individually.
    */
   ::ng-deep .mdc-text-field--outlined {
-    background: rgba($muted, 0.05);
+    background: tokens.alpha($muted, 5%);
     transition:
       background-color 180ms ease,
       box-shadow 180ms ease;
   }
 
   &:hover:not(.mat-focused):not(.mat-form-field-disabled) ::ng-deep .mdc-text-field--outlined {
-    background: rgba($muted, 0.09);
+    background: tokens.alpha($muted, 9%);
   }
 
   &.mat-focused ::ng-deep .mdc-text-field--outlined {
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba($accent, 0.14);
+    background: var(--wp-surface);
+    box-shadow: 0 0 0 3px tokens.alpha($accent, 14%);
   }
 
   &.mat-form-field-invalid.mat-focused ::ng-deep .mdc-text-field--outlined {
-    box-shadow: 0 0 0 3px rgba($danger, 0.14);
+    box-shadow: 0 0 0 3px tokens.alpha($danger, 14%);
   }
 
   ::ng-deep .mat-mdc-floating-label {
@@ -80,17 +80,17 @@ $danger: #dc2626;
 .dyf__toggle-label {
   font-size: 0.86rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--wp-muted);
 }
 
 .dyf__required {
   margin-left: 0.15rem;
-  color: #dc2626;
+  color: var(--wp-danger);
 }
 
 .dyf__toggle-error {
   font-size: 0.8rem;
-  color: #dc2626;
+  color: var(--wp-danger);
 }
 
 /* Enterprise segmented toggle — one connected bar, equal-width segments, solid
@@ -100,17 +100,17 @@ $danger: #dc2626;
 .dyf__toggle-group {
   display: flex;
   width: 100%;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--wp-line);
   border-radius: 10px;
   overflow: hidden;
-  background: #f8fafc;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: var(--wp-surface-alt);
+  box-shadow: var(--wp-shadow-1);
 
   ::ng-deep .mat-button-toggle {
     flex: 1 1 0;
 
     & + .mat-button-toggle {
-      border-left: 1.5px solid #e2e8f0;
+      border-left: 1.5px solid var(--wp-line);
     }
   }
 
@@ -139,24 +139,24 @@ $danger: #dc2626;
     line-height: 1.2;
     font-size: 0.94rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--wp-muted);
     transition:
       color 150ms ease,
       background-color 150ms ease;
   }
 
   ::ng-deep .mat-button-toggle:not(.mat-button-toggle-checked):hover .mat-button-toggle-label-content {
-    color: #1e293b;
-    background: #eef2f7;
+    color: var(--wp-text);
+    background: var(--wp-surface-hover);
   }
 
   ::ng-deep .mat-button-toggle-checked .mat-button-toggle-label-content {
-    color: #fff;
-    background: #3b82f6;
+    color: var(--wp-on-accent);
+    background: var(--wp-accent-fill);
   }
 
   ::ng-deep .mat-button-toggle-button:focus-visible {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--wp-accent);
     outline-offset: -2px;
   }
 }
@@ -174,26 +174,26 @@ $danger: #dc2626;
   flex-direction: column;
   gap: 0.3rem;
   padding: 0.65rem 0.85rem;
-  background: #f8fafc;
-  border: 1px solid #eef2f7;
+  background: var(--wp-surface-alt);
+  border: 1px solid var(--wp-line-soft);
   border-radius: 10px;
   transition:
     background-color 150ms ease,
     border-color 150ms ease;
 
   &:hover {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
+    background: var(--wp-surface-hover);
+    border-color: var(--wp-line);
   }
 }
 
 .dyf__label {
   margin: 0;
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #94a3b8;
+  color: var(--wp-subtle);
 }
 
 /* Projected into a searchable 'select' field's own mat-select panel (see the template) — Angular's
@@ -208,7 +208,7 @@ $danger: #dc2626;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.85rem;
-  background: #fff;
+  background: var(--wp-surface);
   border-bottom: 1px solid $border;
 }
 
@@ -246,11 +246,11 @@ $danger: #dc2626;
   margin: 0;
   font-size: 0.98rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--wp-text);
   word-break: break-word;
 
   &--empty {
-    color: #cbd5e1;
+    color: var(--wp-line-strong);
     font-weight: 500;
     font-style: italic;
   }

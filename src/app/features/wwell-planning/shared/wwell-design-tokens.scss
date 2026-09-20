@@ -4,11 +4,19 @@
 // values instead of re-declaring its own copy — keeps typography and color changes
 // module-wide instead of a per-file hunt.
 //
-// No font is actually loaded for 'DM Sans' anywhere in the app (referenced in
-// styles.scss/index.html but never linked) — it silently falls back to Arial. This
-// stack renders with the OS's own polished UI font instead, with zero extra network
-// requests, scoped to this module only (not a global app-wide change).
+// Every color here is a `var(--wp-*)` reference, NOT a literal. The actual light/dark values
+// live in `_wwell-theme.scss` (global, `@use`d from styles.scss) and flip with the
+// `data-wp-theme` attribute on <html>. The Sass names are kept so existing component styles
+// become theme-aware without being rewritten. Because these are runtime CSS variables, Sass
+// colour functions (`rgba($accent, .1)`, `darken()`, `color.adjust()`) cannot operate on them —
+// use `alpha()` below, or add a dedicated token.
+
+// ── Typography ───────────────────────────────────────────────────
+// Geist / Geist Mono are self-hosted via @fontsource-variable (loaded in styles.scss); the OS UI
+// stack is the fallback while the file loads or if it is blocked. Scoped to this module only — the
+// shell keeps its own font.
 $font-family:
+  'Geist Variable',
   -apple-system,
   BlinkMacSystemFont,
   'Segoe UI',
@@ -17,24 +25,69 @@ $font-family:
   Arial,
   sans-serif;
 
-// ── Color ────────────────────────────────────────────────────────
-$navy: #1e293b; // primary body text
-$navy-deep: #0f172a; // headings — one step darker for stronger hierarchy against body text
-$muted: #5b6b83; // secondary text — deepened from #64748b for better contrast at small sizes
-$subtle: #94a3b8; // tertiary text / icons
-$border: #e2e8f0;
-$border-soft: #eef2f7;
+// Identifiers, coordinates, depths, timestamps — anything the reader compares character by character.
+$font-mono:
+  'Geist Mono Variable',
+  ui-monospace,
+  'SFMono-Regular',
+  Menlo,
+  Consolas,
+  monospace;
 
-$accent: #3b82f6;
-$accent-deep: #2563eb; // hover/active states
-$accent-soft: rgba(59, 130, 246, 0.08);
+// ── Color (theme-aware) ──────────────────────────────────────────
+$navy: var(--wp-text); // primary body text
+$navy-deep: var(--wp-ink); // headings — one step stronger than body for hierarchy
+$muted: var(--wp-muted); // secondary text
+$subtle: var(--wp-subtle); // tertiary text / icons
+$border: var(--wp-line);
+$border-soft: var(--wp-line-soft);
+$border-strong: var(--wp-line-strong);
+$border-control: var(--wp-line-control); // input / control outlines
 
-$surface: #ffffff;
-$surface-alt: #f8fafc;
-$page-bg: #f0f4f8;
+$accent: var(--wp-accent); // links, focus, selected text/icons (a signal, not a fill)
+$accent-deep: var(--wp-accent-hover); // hover/active states
+$accent-soft: var(--wp-accent-soft);
+$accent-fill: var(--wp-accent-fill); // solid backgrounds: selection bars, progress, filled chips
+$on-accent: var(--wp-on-accent); // text on $accent-fill / danger fills
+
+$cta: var(--wp-cta); // primary action — monochrome ink (inverts in dark)
+$cta-hover: var(--wp-cta-hover);
+$on-cta: var(--wp-on-cta);
+
+$surface: var(--wp-surface);
+$surface-alt: var(--wp-surface-alt);
+$surface-hover: var(--wp-surface-hover);
+$surface-raised: var(--wp-surface-raised);
+$surface-sunken: var(--wp-surface-sunken);
+$page-bg: var(--wp-page);
+
+$danger: var(--wp-danger);
+$danger-ink: var(--wp-danger-ink);
+$danger-soft: var(--wp-danger-soft);
+$success: var(--wp-success);
+$success-soft: var(--wp-success-soft);
+$success-fill: var(--wp-success-fill); // solid green behind white text/glyphs
+$danger-fill: var(--wp-danger-fill); // solid red behind white text/glyphs
+$warning: var(--wp-warning);
+$warning-soft: var(--wp-warning-soft);
+
+// ── Shape & depth ────────────────────────────────────────────────
+$radius-sm: var(--wp-radius-sm); // small controls, chips
+$radius-md: var(--wp-radius-md); // cards, panels, inputs
+$radius-lg: var(--wp-radius-lg); // dialogs, popovers
+$shadow-1: var(--wp-shadow-1);
+$shadow-2: var(--wp-shadow-2);
+$shadow-3: var(--wp-shadow-3);
+
+// Translucent tint of a theme colour — the runtime replacement for `rgba($color, $a)`.
+//   background: tokens.alpha($accent, 12%);
+@function alpha($color, $percent) {
+  @return color-mix(in srgb, #{$color} $percent, transparent);
+}
 
 // ── Typography scale ─────────────────────────────────────────────
-// One step up across the board ("little more bigger") vs. the previous ad-hoc values.
+// Sizes are unchanged from the earlier "one step up" pass; hierarchy now comes from weight,
+// tracking and line-height (see the role mixins below).
 $text-2xs: 0.7rem; // badges, eyebrows
 $text-xs: 0.8rem; // meta text, captions
 $text-sm: 0.88rem; // secondary body text
@@ -42,6 +95,71 @@ $text-base: 0.95rem; // primary body text, list-row names
 $text-md: 1.05rem; // card/section sub-headings
 $text-lg: 1.3rem; // detail-panel titles
 $text-xl: 1.55rem; // page titles
+
+// Type roles. Use these for the recurring roles so weight/tracking/leading stay consistent
+// module-wide; one-off sizes can stay as plain declarations.
+@mixin type-title {
+  font-size: $text-xl;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  color: $navy-deep;
+}
+
+@mixin type-panel-title {
+  font-size: $text-lg;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  color: $navy-deep;
+}
+
+@mixin type-section {
+  font-size: $text-md;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: $navy-deep;
+}
+
+@mixin type-eyebrow {
+  font-size: $text-2xs;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: $muted;
+}
+
+@mixin type-label {
+  font-size: $text-xs;
+  font-weight: 500;
+  line-height: 1.3;
+  color: $muted;
+}
+
+@mixin type-value {
+  font-size: $text-base;
+  font-weight: 500;
+  line-height: 1.4;
+  color: $navy;
+  font-variant-numeric: tabular-nums;
+}
+
+@mixin type-mono {
+  font-family: $font-mono;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+// Keyboard focus: 2px cobalt ring separated from the control by a surface-coloured gap, so it
+// reads on both light and dark surfaces.
+@mixin focus-ring {
+  outline: none;
+  box-shadow:
+    0 0 0 2px $surface,
+    0 0 0 4px $accent;
+}
 
 // ── Motion ───────────────────────────────────────────────────────
 $ease-out: cubic-bezier(0.16, 1, 0.3, 1);

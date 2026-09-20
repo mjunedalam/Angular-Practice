@@ -25,7 +25,7 @@ $bg-subtle: tokens.$surface-alt;
   justify-content: center;
   gap: 0.5rem;
   padding: 1.25rem 1rem;
-  border: 1.5px dashed #93c5fd;
+  border: 1.5px dashed var(--wp-accent-line);
   border-radius: 12px;
   background: $bg-subtle;
   color: $muted;
@@ -39,8 +39,8 @@ $bg-subtle: tokens.$surface-alt;
   &:hover,
   &--active {
     border-color: $accent;
-    background: #eff6ff;
-    box-shadow: 0 0 0 4px rgba($accent, 0.08);
+    background: var(--wp-accent-soft);
+    box-shadow: 0 0 0 4px tokens.alpha($accent, 8%);
   }
 }
 
@@ -51,7 +51,7 @@ $bg-subtle: tokens.$surface-alt;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba($accent, 0.12);
+  background: tokens.alpha($accent, 12%);
   color: $accent;
 }
 
@@ -94,8 +94,8 @@ $bg-subtle: tokens.$surface-alt;
     box-shadow 150ms ease;
 
   &:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    border-color: var(--wp-line-strong);
+    box-shadow: var(--wp-shadow-1);
   }
 }
 

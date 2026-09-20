@@ -14,16 +14,16 @@ $accent: tokens.$accent;
 
 .kv-card {
   background: $surface;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 1rem 1.1rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--wp-shadow-1);
 }
 
 .kv-card__title {
   margin: 0 0 0.75rem;
   font-size: tokens.$text-xs;
-  font-weight: 700;
+  font-weight: 600;
   color: $accent;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -74,17 +74,17 @@ $accent: tokens.$accent;
   }
 
   &[data-tone='warning'] dd {
-    color: #b45309;
+    color: var(--wp-warning);
     font-weight: 600;
   }
 
   &[data-tone='danger'] dd {
-    color: #b91c1c;
+    color: var(--wp-danger-ink);
     font-weight: 600;
   }
 
   &[data-tone='success'] dd {
-    color: #15803d;
+    color: var(--wp-success);
     font-weight: 600;
   }
 }

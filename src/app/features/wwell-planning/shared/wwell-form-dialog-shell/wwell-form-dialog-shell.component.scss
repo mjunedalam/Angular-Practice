@@ -4,7 +4,7 @@
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
-$danger: #dc2626;
+$danger: tokens.$danger;
 $bg-subtle: tokens.$surface-alt;
 
 /*
@@ -30,7 +30,7 @@ $bg-subtle: tokens.$surface-alt;
   gap: 1rem;
   padding: 1.1rem 1.5rem 0.9rem;
   border-bottom: 1px solid $border;
-  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--wp-surface-alt) 0%, var(--wp-surface-raised) 100%);
 }
 
 .wfds__header-copy {
@@ -40,9 +40,9 @@ $bg-subtle: tokens.$surface-alt;
 .wfds__title {
   margin: 0 0 0.3rem;
   font-size: 1.38rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .wfds__subtitle {
@@ -91,7 +91,7 @@ $bg-subtle: tokens.$surface-alt;
 
 .wfds__required-mark {
   color: $danger;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .wfds__actions {

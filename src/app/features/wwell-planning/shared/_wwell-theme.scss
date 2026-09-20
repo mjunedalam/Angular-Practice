@@ -1,0 +1,256 @@
+// wwell-planning theme — the single source of truth for every `--wp-*` custom property.
+//
+// Global on purpose (`@use`d once from src/styles.scss): component-scoped SCSS can't target `:root`,
+// and dialogs / select panels / tooltips render on <body>, outside the module's own DOM, so the
+// theme has to reach them by inheritance from <html>. Everything is `--wp-` prefixed, so no other
+// feature is affected — none of them read these tokens.
+//
+// Light is the default (no attribute). `WwellThemeService` writes `data-wp-theme` on <html>.
+// Direction: "Instrument" — cool neutrals, hairline borders, monochrome ink primary action,
+// cobalt reserved for signals (focus, links, selection, in-review status).
+
+// The two token sets are mixins so a subtree can re-declare either one regardless of the page
+// theme — see `.wp-paper` below.
+@mixin light-tokens {
+  --wp-scheme: light;
+
+  // Surfaces
+  --wp-page: #f4f5f7;
+  --wp-surface: #ffffff;
+  --wp-surface-alt: #f8f9fb; // inset panels, table heads, read-only fields
+  --wp-surface-hover: #f1f3f6;
+  --wp-surface-raised: #ffffff; // dialogs, popovers (separated by shadow in light)
+  --wp-surface-sunken: #eceef2; // tracks, skeleton bars, wells
+
+  // Lines
+  --wp-line: #e4e6eb;
+  --wp-line-soft: #eceef2; // row dividers
+  --wp-line-strong: #cbd0d9; // hover borders, emphasis dividers
+  --wp-line-control: #858d9e; // input / control outlines — 3:1 so a field reads as a field (WCAG 1.4.11)
+
+  // Text
+  --wp-ink: #0a0d14; // headings
+  --wp-text: #1c2230; // body
+  --wp-muted: #566073; // secondary
+  --wp-subtle: #626b7c; // tertiary, placeholders, icons
+  --wp-on-accent: #ffffff;
+
+  // Accent — cobalt, a signal not a fill
+  --wp-accent: #2b50ff; // links, focus, selected text/icons
+  --wp-accent-hover: #1c3ee0;
+  --wp-accent-fill: #2b50ff; // solid backgrounds (selection bars, progress)
+  --wp-accent-soft: rgba(43, 80, 255, 0.08);
+  --wp-accent-line: rgba(43, 80, 255, 0.28);
+
+  // Primary action — monochrome ink
+  --wp-cta: #0a0d14;
+  --wp-cta-hover: #232a3a;
+  --wp-on-cta: #ffffff;
+  --wp-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.14) inset, 0 1px 2px rgba(10, 13, 20, 0.28);
+
+  // Semantic
+  --wp-danger: #cc271b;
+  --wp-danger-ink: #b42318;
+  --wp-danger-soft: rgba(217, 45, 32, 0.06);
+  --wp-danger-line: rgba(217, 45, 32, 0.3);
+  --wp-success: #15803d;
+  --wp-success-soft: rgba(21, 128, 61, 0.07);
+  --wp-success-line: rgba(21, 128, 61, 0.3);
+  --wp-warning: #b45309;
+  --wp-warning-soft: rgba(217, 119, 6, 0.08);
+  --wp-warning-line: rgba(180, 83, 9, 0.32);
+
+  // Status pills (bg / ink / dot) — mirrors wwell-status.config.ts
+  --wp-st-slate-bg: #f1f5f9;
+  --wp-st-slate-ink: #3f4b5e;
+  --wp-st-slate-dot: #7a869a;
+  --wp-st-slate-muted-bg: #f1f5f9;
+  --wp-st-slate-muted-ink: #566073;
+  --wp-st-slate-muted-dot: #a0aabb;
+  --wp-st-indigo-bg: #e0e7ff;
+  --wp-st-indigo-ink: #4338ca;
+  --wp-st-indigo-dot: #6366f1;
+  --wp-st-purple-bg: #f3e8ff;
+  --wp-st-purple-ink: #7e22ce;
+  --wp-st-purple-dot: #a855f7;
+  --wp-st-blue-bg: #dbeafe;
+  --wp-st-blue-ink: #1d4ed8;
+  --wp-st-blue-dot: #3b82f6;
+  --wp-st-green-bg: #dcfce7;
+  --wp-st-green-ink: #15803d;
+  --wp-st-green-dot: #16a34a;
+  --wp-st-amber-bg: #fef3c7;
+  --wp-st-amber-ink: #b45309;
+  --wp-st-amber-dot: #d97706;
+  --wp-st-red-bg: #fee2e2;
+  --wp-st-red-ink: #b91c1c;
+  --wp-st-red-dot: #ef4444;
+
+  // Depth — hairline + soft shadow in light
+  --wp-shadow-1: 0 1px 2px rgba(10, 13, 20, 0.06);
+  --wp-shadow-2: 0 1px 2px rgba(10, 13, 20, 0.06), 0 6px 18px rgba(10, 13, 20, 0.08);
+  --wp-shadow-3:
+    0 1px 2px rgba(10, 13, 20, 0.08), 0 12px 32px rgba(10, 13, 20, 0.14),
+    0 32px 64px rgba(10, 13, 20, 0.1);
+  --wp-scrim: rgba(10, 13, 20, 0.45);
+
+  // Chips over the page (tooltips)
+  --wp-tooltip-bg: #0a0d14;
+  --wp-tooltip-ink: #ffffff;
+  --wp-tooltip-ring: rgba(148, 163, 184, 0.22);
+
+  // Loading shimmers
+  --wp-shimmer-a: #eceef2;
+  --wp-shimmer-b: #f6f7f9;
+
+  // Wellbore diagram — domain colours keep their hue; luminance shifts per theme so labels and lines
+  // read on the surface behind them. Text-bearing ones (ground/target/actual/water) meet 4.5:1.
+  --wp-wb-outline: #0a0d14; // casing outlines, axes, ticks, arrow heads
+  --wp-wb-ground: #b94a12;
+  --wp-wb-target: #b45309;
+  --wp-wb-actual: #15803d;
+  --wp-wb-water: #0369a1;
+  --wp-wb-pad: #f0f0f0;
+}
+
+@mixin dark-tokens {
+  --wp-scheme: dark;
+
+  // Surfaces — depth comes from lighter steps, not drop shadows
+  --wp-page: #07090d;
+  --wp-surface: #0e1218;
+  --wp-surface-alt: #0a0e14;
+  --wp-surface-hover: #151b25;
+  --wp-surface-raised: #141a23;
+  --wp-surface-sunken: #090c11;
+
+  --wp-line: #1e2530;
+  --wp-line-soft: #161c26;
+  --wp-line-strong: #2d3644;
+  --wp-line-control: #5d6779;
+
+  --wp-ink: #f2f4f8;
+  --wp-text: #d3d9e4;
+  --wp-muted: #939cae;
+  --wp-subtle: #7b8496;
+  --wp-on-accent: #ffffff;
+
+  --wp-accent: #7b95ff;
+  --wp-accent-hover: #9db0ff;
+  --wp-accent-fill: #4463f5;
+  --wp-accent-soft: rgba(123, 149, 255, 0.12);
+  --wp-accent-line: rgba(123, 149, 255, 0.32);
+
+  --wp-cta: #eef1f6;
+  --wp-cta-hover: #ffffff;
+  --wp-on-cta: #07090d;
+  --wp-cta-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 18px rgba(123, 149, 255, 0.18);
+
+  --wp-danger: #f87171;
+  --wp-danger-ink: #fca5a5;
+  --wp-danger-soft: rgba(248, 113, 113, 0.13);
+  --wp-danger-line: rgba(248, 113, 113, 0.34);
+  --wp-success: #4ade80;
+  --wp-success-soft: rgba(74, 222, 128, 0.12);
+  --wp-success-line: rgba(74, 222, 128, 0.32);
+  --wp-warning: #fbbf24;
+  --wp-warning-soft: rgba(251, 191, 36, 0.12);
+  --wp-warning-line: rgba(251, 191, 36, 0.34);
+
+  --wp-st-slate-bg: rgba(148, 163, 184, 0.14);
+  --wp-st-slate-ink: #b8c1d1;
+  --wp-st-slate-dot: #7c8799;
+  --wp-st-slate-muted-bg: rgba(148, 163, 184, 0.1);
+  --wp-st-slate-muted-ink: #9aa4b5;
+  --wp-st-slate-muted-dot: #667186;
+  --wp-st-indigo-bg: rgba(99, 102, 241, 0.18);
+  --wp-st-indigo-ink: #b4bdff;
+  --wp-st-indigo-dot: #818cf8;
+  --wp-st-purple-bg: rgba(168, 85, 247, 0.18);
+  --wp-st-purple-ink: #dcbcff;
+  --wp-st-purple-dot: #c084fc;
+  --wp-st-blue-bg: rgba(59, 130, 246, 0.18);
+  --wp-st-blue-ink: #a5cbff;
+  --wp-st-blue-dot: #60a5fa;
+  --wp-st-green-bg: rgba(34, 197, 94, 0.15);
+  --wp-st-green-ink: #8ef0b0;
+  --wp-st-green-dot: #4ade80;
+  --wp-st-amber-bg: rgba(245, 158, 11, 0.16);
+  --wp-st-amber-ink: #fdd670;
+  --wp-st-amber-dot: #fbbf24;
+  --wp-st-red-bg: rgba(239, 68, 68, 0.17);
+  --wp-st-red-ink: #fdb0b0;
+  --wp-st-red-dot: #f87171;
+
+  --wp-shadow-1: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --wp-shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.45);
+  --wp-shadow-3: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 24px 64px rgba(0, 0, 0, 0.7);
+  --wp-scrim: rgba(0, 0, 0, 0.62);
+
+  // Inverse chip: a dark tooltip would vanish on a dark surface
+  --wp-tooltip-bg: #eef1f6;
+  --wp-tooltip-ink: #07090d;
+  --wp-tooltip-ring: rgba(255, 255, 255, 0.12);
+
+  --wp-shimmer-a: #121821;
+  --wp-shimmer-b: #1a212d;
+
+  --wp-wb-outline: #a9b3c6;
+  --wp-wb-ground: #f0894a;
+  --wp-wb-target: #fbbf24;
+  --wp-wb-actual: #4ade80;
+  --wp-wb-water: #38bdf8;
+  --wp-wb-pad: #1a212d;
+}
+
+:root {
+  // ── Theme-independent ─────────────────────────────────────────
+  --wp-radius-sm: 6px; // small controls, chips
+  --wp-radius-md: 8px; // cards, panels, inputs
+  --wp-radius-lg: 12px; // dialogs, popovers
+  --wp-radius-pill: 999px;
+
+  // Solid fills that carry white text/glyphs — same in both themes so the contrast holds either way.
+  --wp-success-fill: #15803d;
+  --wp-danger-fill: #d92d20;
+
+  @include light-tokens;
+}
+
+:root[data-wp-theme='dark'] {
+  @include dark-tokens;
+}
+
+// A printed page. The IR letter previews the PDF the backend generates, and that PDF is always white
+// paper — so this scope re-declares the LIGHT set on its subtree, whatever the app theme is. It also
+// keeps the wellbore-diagram PNG that ships inside the PDF correct: that snapshot inlines each SVG
+// element's computed colours onto a white canvas, so a dark-themed diagram would export as
+// light-on-white (unreadable) if it were not pinned to light here.
+.wp-paper {
+  @include light-tokens;
+  color-scheme: light;
+}
+
+// Brief cross-fade, only while the user flips the toggle (class added/removed by WwellThemeService).
+// Colour-only properties, so nothing reflows.
+:root.wp-theme-switching,
+:root.wp-theme-switching *,
+:root.wp-theme-switching *::before,
+:root.wp-theme-switching *::after {
+  transition:
+    background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    fill 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    stroke 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root.wp-theme-switching,
+  :root.wp-theme-switching *,
+  :root.wp-theme-switching *::before,
+  :root.wp-theme-switching *::after {
+    transition: none !important;
+  }
+}

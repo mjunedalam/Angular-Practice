@@ -1,13 +1,14 @@
-@use 'sass:color';
 @use '@angular/material' as mat;
 @use '../../shared/wwell-select-panel-mixin' as wsel;
 @use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-wellbore' as wb;
+@use '../../shared/wwell-material' as wmat;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
-$warning: #b45309;
+$warning: tokens.$warning;
 
 // `:host` is a no-op under ViewEncapsulation.None (see the component's own comment) — the tag
 // selector is what actually reaches this element. Bounds the component's own height end to end
@@ -27,12 +28,12 @@ app-wwell-ir-editor {
 // renders it into <body>, hence the separate `.ire-select-panel` target).
 .ire,
 .ire-select-panel {
-  color-scheme: light;
+  color-scheme: var(--wp-scheme);
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$blue-palette,
         tertiary: mat.$azure-palette,
       ),
@@ -46,18 +47,14 @@ app-wwell-ir-editor {
 }
 
 .ire {
-  @include mat.form-field-overrides(
-    (
-      outlined-container-shape: 10px,
-    )
-  );
+  @include wmat.buttons;
+  @include wmat.form-fields;
 }
 
 .ire-select-panel {
   border-radius: 10px !important;
   box-shadow:
-    0 4px 10px rgba(15, 23, 42, 0.12),
-    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+    var(--wp-shadow-3) !important;
   @include wsel.panel($accent, $navy);
 }
 
@@ -90,25 +87,26 @@ app-wwell-ir-editor {
   border-radius: 10px;
   padding: 0.55rem 0.9rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
 }
 
 .ire__eyebrow {
   margin: 0 0 1px;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: $accent;
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
 }
 
 .ire__title {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .ire__badge {
@@ -118,7 +116,7 @@ app-wwell-ir-editor {
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -200,7 +198,7 @@ app-wwell-ir-editor {
 .ire__view-toggle-btn--active {
   background: tokens.$surface;
   color: $accent;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--wp-shadow-1);
 
   &:hover {
     color: $accent;
@@ -261,14 +259,13 @@ app-wwell-ir-editor {
   border: 1px solid $border;
   border-radius: 10px;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 16px rgba(15, 23, 42, 0.05);
+    var(--wp-shadow-1);
 }
 
 .ire__rail-title {
   margin: 0 0 0.4rem 0.35rem;
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: $muted;
@@ -308,7 +305,7 @@ app-wwell-ir-editor {
     color 150ms ease;
 
   &:hover {
-    background: rgba($accent, 0.08);
+    background: tokens.alpha($accent, 8%);
   }
 
   &:focus-visible {
@@ -327,7 +324,7 @@ app-wwell-ir-editor {
 
 .ire__rail-number {
   flex-shrink: 0;
-  font-weight: 800;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   font-size: 0.78rem;
   color: $muted;
@@ -343,7 +340,7 @@ app-wwell-ir-editor {
 
 .ire__rail-group-btn--active,
 .ire__rail-child-btn--active {
-  background: rgba($accent, 0.12);
+  background: tokens.alpha($accent, 12%);
   border-left-color: $accent;
 
   .ire__rail-number,
@@ -387,8 +384,7 @@ app-wwell-ir-editor {
   border-radius: 12px;
   padding: 0.7rem 0.9rem;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 16px rgba(15, 23, 42, 0.05);
+    var(--wp-shadow-1);
   // Keeps a scrolled-to section's heading clear of the sticky app chrome above `.ire__body`.
   scroll-margin-top: 0.5rem;
 }
@@ -418,7 +414,7 @@ app-wwell-ir-editor {
   margin: 0 0 0.5rem;
   padding-left: 0.65rem;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
 
   &::before {
@@ -566,6 +562,7 @@ app-wwell-ir-editor {
 // here so the sidebar keeps rendering at its own actual content width instead of being forced to
 // 600px and clipped by `.ire__tl-preview-anim`'s `overflow-x: hidden` above.
 .ire__tl-preview-sidebar .ire__wellbore-diagram-row {
+  @include wb.wellbore-theme;
   margin: 0;
   min-width: 0;
   max-width: none;
@@ -606,19 +603,19 @@ app-wwell-ir-editor {
 }
 
 .ire__tl-dot--done {
-  background: #15803d;
-  border-color: #15803d;
+  background: var(--wp-success-fill);
+  border-color: var(--wp-success-fill);
 }
 
 .ire__tl-dot--active {
   border-color: $accent;
-  box-shadow: 0 0 0 3px rgba($accent, 0.16);
+  box-shadow: 0 0 0 3px tokens.alpha($accent, 16%);
 }
 
 .ire__tl-status {
   flex-shrink: 0;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $muted;
   padding: 0.1rem 0.6rem;
   border-radius: 999px;
@@ -628,15 +625,15 @@ app-wwell-ir-editor {
 }
 
 .ire__tl-status--done {
-  color: #15803d;
-  background: rgba(21, 128, 61, 0.08);
-  border-color: rgba(21, 128, 61, 0.22);
+  color: var(--wp-success);
+  background: var(--wp-success-soft);
+  border-color: var(--wp-success-line);
 }
 
 .ire__subsection-title {
   margin: 0 0 0.4rem;
   font-size: 0.86rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $navy;
 }
 
@@ -677,7 +674,7 @@ app-wwell-ir-editor {
 }
 
 .ire__edit-btn--danger:hover {
-  color: #b91c1c;
+  color: var(--wp-danger-ink);
 }
 
 /* Groups a section-head's edit + reset buttons so `.ire__section-head`'s `justify-content:
@@ -737,11 +734,11 @@ app-wwell-ir-editor {
   }
 
   &[data-tone='danger'] dd {
-    color: #b91c1c;
+    color: var(--wp-danger-ink);
   }
 
   &[data-tone='success'] dd {
-    color: #15803d;
+    color: var(--wp-success);
   }
 }
 
@@ -753,7 +750,7 @@ app-wwell-ir-editor {
   background: tokens.$surface-alt;
   border: 1px solid $border;
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 600;
   color: inherit;
 }
 
@@ -772,7 +769,7 @@ app-wwell-ir-editor {
   th {
     background: tokens.$surface-alt;
     color: $muted;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -784,7 +781,7 @@ app-wwell-ir-editor {
   td {
     padding: 0.4rem 0.6rem;
     color: $navy;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--wp-line-soft);
   }
 
   tr:last-child td {
@@ -828,7 +825,7 @@ app-wwell-ir-editor {
 }
 
 .ire__row-action-btn--danger:hover {
-  color: #b91c1c;
+  color: var(--wp-danger-ink);
 }
 
 .ire__remarks,
@@ -853,8 +850,8 @@ app-wwell-ir-editor {
 
 .ire__attachment-required {
   margin-left: 0.2rem;
-  color: #b91c1c;
-  font-weight: 700;
+  color: var(--wp-danger-ink);
+  font-weight: 600;
 }
 
 .ire__attachment-error {
@@ -863,10 +860,10 @@ app-wwell-ir-editor {
   gap: 0.4rem;
   margin: 0 0 0.75rem;
   padding: 0.5rem 0.7rem;
-  border: 1px solid #fca5a5;
+  border: 1px solid var(--wp-danger-line);
   border-radius: 8px;
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--wp-danger-soft);
+  color: var(--wp-danger-ink);
   font-size: 0.82rem;
   font-weight: 600;
 
@@ -917,15 +914,15 @@ app-wwell-ir-editor {
   height: 38px;
   margin-top: 0.6rem;
   border-radius: 50%;
-  background: $accent;
-  color: #fff;
+  background: tokens.$cta;
+  color: tokens.$on-cta;
   cursor: pointer;
   transition:
     background 150ms ease,
     opacity 150ms ease;
 
   &:hover {
-    background: color.adjust($accent, $lightness: -8%);
+    background: tokens.$cta-hover;
   }
 
   /* Keyboard users reach the label through its hidden input, so the ring has to be drawn here. */
@@ -957,7 +954,7 @@ app-wwell-ir-editor {
 
 .ire__attachment-drop-label {
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $navy;
 }
 
@@ -1027,11 +1024,11 @@ app-wwell-ir-editor {
 
   &:hover {
     color: $accent;
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--wp-surface-hover);
   }
 
   &--danger:hover {
-    color: #b91c1c;
+    color: var(--wp-danger-ink);
   }
 
   /* The one action that actually commits the file, so it carries accent weight from the start
@@ -1040,7 +1037,7 @@ app-wwell-ir-editor {
     color: $accent;
 
     &:hover:not(:disabled) {
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--wp-surface-hover);
     }
   }
 
@@ -1067,8 +1064,8 @@ app-wwell-ir-editor {
   align-items: flex-start;
   gap: 0.55rem;
   padding: 0.6rem 0.85rem;
-  background: #fef3c7;
-  border: 1px solid rgba($warning, 0.25);
+  background: var(--wp-warning-soft);
+  border: 1px solid tokens.alpha($warning, 25%);
   border-radius: 10px;
   font-size: 0.84rem;
   line-height: 1.4;
@@ -1165,7 +1162,7 @@ app-wwell-ir-editor {
     width: 26px;
     height: 26px;
     font-size: 26px;
-    color: #cbd5e1;
+    color: var(--wp-line-strong);
   }
 
   p {
@@ -1216,7 +1213,7 @@ app-wwell-ir-editor {
 }
 
 .ire .mat-mdc-form-field-required-marker {
-  color: #dc2626;
+  color: var(--wp-danger);
 }
 
 // Material dims disabled fields to 38% alpha, which is near-invisible on the field's grey fill.

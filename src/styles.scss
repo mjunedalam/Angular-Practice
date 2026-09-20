@@ -1,5 +1,11 @@
 
 @use '@angular/material' as mat;
+// wwell-planning: self-hosted Geist / Geist Mono (Latin subsets load on demand via unicode-range)
+// and the light/dark `--wp-*` token sets. See wwell-theme.service.ts for how the theme is switched.
+@use '@fontsource-variable/geist/wght.css' as geist-font;
+@use '@fontsource-variable/geist-mono/wght.css' as geist-mono-font;
+@use './app/features/wwell-planning/shared/wwell-theme';
+@use './app/features/wwell-planning/shared/wwell-design-tokens' as wp;
 
 @include mat.core();
 
@@ -59,10 +65,16 @@ background: linear-gradient(90deg, rgba(80, 132, 240, 1) 44%, rgba(121, 207, 241
 }
 
 /* ── Well bore design preview dialog — container overrides ───────────────────── */
+// Portaled to <body>, so it reads the global `--wp-*` tokens and pins its own colour-scheme.
 .wwell-ir-design-preview-dialog-panel .mat-mdc-dialog-surface {
-  border-radius: 14px !important;
+  border-radius: var(--wp-radius-lg) !important;
   overflow: hidden !important;
   padding: 0 !important;
+  background-color: var(--wp-surface-raised) !important;
+  color: var(--wp-text) !important;
+  color-scheme: var(--wp-scheme);
+  border: 1px solid var(--wp-line) !important;
+  box-shadow: var(--wp-shadow-3) !important;
 }
 
 /* ── File preview dialog — container overrides ──────────────────────────────── */
@@ -118,17 +130,12 @@ transition: 0.3s ease;
 // defined on `.irv` (see wwell-ir-view.component.scss) never reach them by inheritance,
 // and the tooltip falls back to unstyled text. Same fix as `.sidenav-lock-tooltip`
 // above: style it directly, globally, keyed off `matTooltipClass`.
+// Colours come from the `--wp-tooltip-*` tokens: a dark chip in light theme, an inverse (light) chip in
+// dark theme, so the tooltip never disappears into the surface behind it.
 .mat-mdc-tooltip.irv-download-tooltip .mdc-tooltip__surface {
-  background: #0f172a !important;
-  color: #ffffff !important;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif !important;
+  background: var(--wp-tooltip-bg) !important;
+  color: var(--wp-tooltip-ink) !important;
+  font-family: wp.$font-family !important;
   font-size: 12.5px !important;
   font-weight: 500 !important;
   line-height: 1.5 !important;
@@ -139,8 +146,8 @@ transition: 0.3s ease;
   white-space: normal !important;
   text-align: left !important;
   box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.25),
-    0 8px 20px rgba(15, 23, 42, 0.35) !important;
+    0 0 0 1px var(--wp-tooltip-ring),
+    var(--wp-shadow-2) !important;
 }
 
 // ── IR attachment row actions: View / Upload / Replace / Delete ──────────────
@@ -148,10 +155,12 @@ transition: 0.3s ease;
 // they have to be styled globally off `matTooltipClass` or they fall back to Material's default.
 // Sized for one-word labels: nowrap and centred, rather than the wrapped paragraph treatment the
 // sentence-length tooltips above need.
-.mat-mdc-tooltip.ir-attachment-tooltip .mdc-tooltip__surface {
-  background: #0f172a !important;
-  color: #ffffff !important;
-  font-family: inherit !important;
+// `.wp-tooltip` is the generic one-word tooltip for the module (e.g. the theme toggle).
+.mat-mdc-tooltip.ir-attachment-tooltip .mdc-tooltip__surface,
+.mat-mdc-tooltip.wp-tooltip .mdc-tooltip__surface {
+  background: var(--wp-tooltip-bg) !important;
+  color: var(--wp-tooltip-ink) !important;
+  font-family: wp.$font-family !important;
   font-size: 11.5px !important;
   font-weight: 600 !important;
   line-height: 1.4 !important;
@@ -161,8 +170,8 @@ transition: 0.3s ease;
   white-space: nowrap !important;
   text-align: center !important;
   box-shadow:
-    0 0 0 1px rgba(148, 163, 184, 0.22),
-    0 6px 16px rgba(15, 23, 42, 0.3) !important;
+    0 0 0 1px var(--wp-tooltip-ring),
+    var(--wp-shadow-2) !important;
 }
 
 // ── IR attachment viewer toolbar ─────────────────────────────────────────────

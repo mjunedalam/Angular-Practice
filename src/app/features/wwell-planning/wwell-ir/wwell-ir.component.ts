@@ -29,6 +29,7 @@ import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.
 import { WwellCollapseAnimateDirective } from '../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
+import { WwellThemeToggleComponent } from '../shared/wwell-theme-toggle/wwell-theme-toggle.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellIrStore } from './store/wwell-ir.store';
 import { WwellIrEditorComponent, WwellIrEditorViewMode } from './wwell-ir-editor/wwell-ir-editor.component';
@@ -82,6 +83,7 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     WwellIrViewComponent,
     WwellApprovalTimelineComponent,
     WwellDetailLoadingComponent,
+    WwellThemeToggleComponent,
     WwellIrEditorLoadingComponent,
     WwellCollapseAnimateDirective,
   ],

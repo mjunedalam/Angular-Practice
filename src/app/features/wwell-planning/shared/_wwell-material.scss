@@ -1,0 +1,89 @@
+@use '@angular/material' as mat;
+@use './wwell-design-tokens' as tokens;
+
+// Material token overrides for the module's look ("Instrument"). Two mixins:
+//   buttons     — a monochrome ink primary action, hairline outlined secondary, cobalt text buttons,
+//                 muted icon buttons
+//   form-fields — hairline control outlines that step to muted on hover and cobalt on focus
+//
+// The app only calls `mat.core()` globally (no full M3 theme), so unthemed Material buttons fall
+// back to a transparent fill and a pure-black label — invisible on a dark surface. Include this at a
+// component's root: custom properties inherit down the DOM, so every button inside (child
+// components, dialog content) follows without restating it. It reads only `--wp-*` tokens, so it
+// flips with the theme.
+//
+//   .my-root { @include wmat.buttons; }
+@mixin buttons {
+  @include mat.button-overrides(
+    (
+      filled-container-color: tokens.$cta,
+      filled-label-text-color: tokens.$on-cta,
+      filled-ripple-color: tokens.alpha(tokens.$on-cta, 18%),
+      filled-disabled-container-color: tokens.alpha(tokens.$navy-deep, 12%),
+      filled-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
+      filled-container-shape: tokens.$radius-sm,
+      filled-label-text-weight: 600,
+      outlined-label-text-color: tokens.$navy-deep,
+      outlined-outline-color: tokens.$border-strong,
+      outlined-ripple-color: tokens.alpha(tokens.$accent, 18%),
+      outlined-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
+      outlined-disabled-outline-color: tokens.$border,
+      outlined-container-shape: tokens.$radius-sm,
+      outlined-label-text-weight: 600,
+      text-label-text-color: tokens.$accent,
+      text-ripple-color: tokens.alpha(tokens.$accent, 18%),
+      text-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
+      text-container-shape: tokens.$radius-sm,
+      text-label-text-weight: 600,
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: tokens.$muted,
+      disabled-icon-color: tokens.alpha(tokens.$navy-deep, 38%),
+    )
+  );
+}
+
+// Outlined form fields. Outline colour is the 3:1 `--wp-line-control` (a field has to read as a
+// field), stepping to muted on hover and cobalt on focus; errors use the danger token. Without this,
+// Material's default outline is a bright grey that fights the module's hairline language in dark.
+@mixin form-fields {
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: tokens.$radius-md,
+      outlined-outline-color: tokens.$border-control,
+      outlined-hover-outline-color: tokens.$muted,
+      outlined-focus-outline-color: tokens.$accent,
+      outlined-disabled-outline-color: tokens.$border,
+      outlined-error-outline-color: tokens.$danger,
+      outlined-error-hover-outline-color: tokens.$danger,
+      outlined-error-focus-outline-color: tokens.$danger,
+      outlined-label-text-color: tokens.$muted,
+      outlined-hover-label-text-color: tokens.$navy-deep,
+      outlined-focus-label-text-color: tokens.$accent,
+      outlined-error-label-text-color: tokens.$danger,
+      outlined-error-hover-label-text-color: tokens.$danger,
+      outlined-error-focus-label-text-color: tokens.$danger,
+      outlined-disabled-label-text-color: tokens.$muted,
+      outlined-input-text-color: tokens.$navy-deep,
+      outlined-input-text-placeholder-color: tokens.$subtle,
+      outlined-disabled-input-text-color: tokens.$navy-deep,
+      outlined-caret-color: tokens.$accent,
+      outlined-error-caret-color: tokens.$danger,
+      error-text-color: tokens.$danger,
+      leading-icon-color: tokens.$muted,
+      trailing-icon-color: tokens.$muted,
+      enabled-select-arrow-color: tokens.$muted,
+      focus-select-arrow-color: tokens.$accent,
+      disabled-select-arrow-color: tokens.alpha(tokens.$navy-deep, 38%),
+    )
+  );
+
+  // Material has no token for hint text, and unresolved it falls back to black — unreadable on dark.
+  // `::ng-deep` because the hint belongs to Material's own template, outside this component's scope.
+  ::ng-deep .mat-mdc-form-field-hint {
+    color: tokens.$muted;
+  }
+}

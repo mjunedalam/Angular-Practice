@@ -3,7 +3,7 @@ import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../shared
 
 export const WWELL_REQUEST_STATUS_META: Record<WwellPlanningRequestStatus, WwellStatusMeta> = {
   draft: wwellStatusMeta('Draft', WWELL_STATUS_COLORS.slate),
-  submitted: { label: 'Submitted', bg: '#f1f5f9', color: '#475569', dot: '#64748b' },
+  submitted: { label: 'Submitted', bg: 'var(--wp-st-slate-bg)', color: 'var(--wp-muted)', dot: 'var(--wp-muted)' },
   'in-review': wwellStatusMeta('In Review', WWELL_STATUS_COLORS.purple),
   'in-progress': wwellStatusMeta('In Progress', WWELL_STATUS_COLORS.blue),
   approved: wwellStatusMeta('Approved', WWELL_STATUS_COLORS.green),

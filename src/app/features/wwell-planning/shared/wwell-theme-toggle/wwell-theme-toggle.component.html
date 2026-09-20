@@ -1,0 +1,14 @@
+<!-- The label names the action (not the state), so a screen reader hears what a press will do. -->
+<button
+  type="button"
+  mat-icon-button
+  class="wtt"
+  [class.wtt--dark]="theme.isDark()"
+  [attr.aria-label]="theme.isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+  [matTooltip]="theme.isDark() ? 'Light theme' : 'Dark theme'"
+  matTooltipClass="wp-tooltip"
+  (click)="theme.toggle()"
+>
+  <mat-icon class="wtt__icon wtt__icon--moon">dark_mode</mat-icon>
+  <mat-icon class="wtt__icon wtt__icon--sun">light_mode</mat-icon>
+</button>

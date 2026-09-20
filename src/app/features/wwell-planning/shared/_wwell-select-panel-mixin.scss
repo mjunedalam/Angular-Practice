@@ -1,3 +1,5 @@
+@use './wwell-design-tokens' as tokens;
+
 /*
  * Shared mat-select polish for every wwell-planning form dialog.
  *
@@ -10,19 +12,27 @@
  * $navy so the result matches that dialog's palette instead of introducing a
  * new one, and reuse the same cubic-bezier(0.16, 1, 0.3, 1) easing already
  * used for the dialog-open/field-in keyframes in these files.
+ *
+ * The panel is portaled to <body>, so it can't inherit a component's theme: it reads the global
+ * `--wp-*` tokens (via `tokens.$surface-raised` etc.) and pins `color-scheme` itself, which is what
+ * keeps it correct in both light and dark.
  */
 
 $_ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-@mixin panel($accent, $navy: #1e293b) {
+@mixin panel($accent, $navy: tokens.$navy) {
   /*
    * MDC resolves the panel background from --mat-sys-surface-container, which
    * the M3 tonal palette generates as a faint gray/lavender tint rather than
-   * pure white — visibly inconsistent with each dialog's own solid #fff
-   * surface. Pin it to white here instead of chasing the token in 5 places.
+   * the module's own surface — visibly inconsistent with each dialog. Pin it
+   * to the raised surface token here instead of chasing the token in 5 places.
    */
-  background-color: #fff !important;
+  background-color: tokens.$surface-raised !important;
+  color-scheme: var(--wp-scheme);
   padding: 6px !important;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-md !important;
+  box-shadow: tokens.$shadow-2 !important;
 
   &.mat-select-panel-animations-enabled {
     animation-duration: 160ms;
@@ -30,24 +40,24 @@ $_ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .mat-mdc-option {
-    border-radius: 8px;
+    border-radius: tokens.$radius-sm;
     margin: 2px 0;
     transition: background-color 140ms ease;
 
     &:hover:not(.mdc-list-item--disabled) {
-      background-color: rgba($accent, 0.08);
+      background-color: tokens.$surface-hover;
     }
 
     &.mat-mdc-option-active,
     &:focus.mdc-list-item {
-      background-color: rgba($accent, 0.12);
+      background-color: tokens.alpha($accent, 12%);
     }
 
     &.mdc-list-item--selected:not(.mdc-list-item--disabled):not(.mat-mdc-option-multiple) {
-      background-color: rgba($accent, 0.14);
+      background-color: tokens.alpha($accent, 14%);
 
       .mdc-list-item__primary-text {
-        color: $navy;
+        color: tokens.$navy-deep;
         font-weight: 600;
       }
 
@@ -58,19 +68,19 @@ $_ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .mat-mdc-optgroup-label {
-    font-weight: 700;
+    font-weight: 600;
     color: $navy;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: rgba($navy, 0.2) transparent;
+  scrollbar-color: tokens.alpha($navy, 20%) transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba($navy, 0.2);
+    background: tokens.alpha($navy, 20%);
     border-radius: 999px;
   }
 }

@@ -9,15 +9,15 @@
   align-items: flex-start;
   gap: 0.85rem;
   padding: 0.85rem 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--wp-line);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: var(--wp-surface);
+  box-shadow: var(--wp-shadow-1);
   transition: border-color 150ms ease, box-shadow 150ms ease;
 
   &:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+    border-color: var(--wp-line-strong);
+    box-shadow: var(--wp-shadow-1);
   }
 }
 
@@ -30,16 +30,16 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--wp-accent-soft);
   font-size: 0.74rem;
-  font-weight: 800;
-  color: #2563eb;
+  font-weight: 650;
+  color: var(--wp-accent);
   transition: background-color 150ms ease, color 150ms ease;
 }
 
 .rpg__row:hover .rpg__row-index {
-  background: #3b82f6;
-  color: #fff;
+  background: var(--wp-accent-fill);
+  color: var(--wp-on-accent);
 }
 
 /* `minmax(210px, 1fr)` — wide enough that both a number field's "ft bgl" suffix (see
@@ -57,14 +57,14 @@
 
 .rpg__add {
   align-self: flex-start;
-  border-color: #93c5fd !important;
+  border-color: var(--wp-accent-line) !important;
   border-style: dashed !important;
-  color: #2563eb !important;
+  color: var(--wp-accent) !important;
   transition: background-color 150ms ease, border-color 150ms ease;
 
   &:hover {
-    background: rgba(59, 130, 246, 0.06);
-    border-color: #3b82f6 !important;
+    background: var(--wp-accent-soft);
+    border-color: var(--wp-accent) !important;
   }
 }
 

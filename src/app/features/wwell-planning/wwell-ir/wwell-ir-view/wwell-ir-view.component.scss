@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-material' as wmat;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
@@ -20,12 +21,12 @@ $accent: tokens.$accent;
 // only sets CSS custom properties, which inherit through emulated-encapsulation boundaries same
 // as any other property.
 .irv {
-  color-scheme: light;
+  color-scheme: var(--wp-scheme);
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$blue-palette,
         tertiary: mat.$azure-palette,
       ),
@@ -36,6 +37,8 @@ $accent: tokens.$accent;
       density: -2,
     )
   );
+
+  @include wmat.buttons;
 }
 
 .irv {
@@ -59,25 +62,26 @@ $accent: tokens.$accent;
   border-radius: 10px;
   padding: 0.55rem 0.9rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(59, 130, 246, 0.05);
+    var(--wp-shadow-1);
 }
 
 .irv__eyebrow {
   margin: 0 0 1px;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: $accent;
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
 }
 
 .irv__title {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 650;
   color: $navy;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
 }
 
 .irv__header-actions {
@@ -99,7 +103,7 @@ $accent: tokens.$accent;
 
 .irv__progress-label {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $muted;
   white-space: nowrap;
 }
@@ -126,7 +130,7 @@ $accent: tokens.$accent;
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -261,11 +265,11 @@ $accent: tokens.$accent;
   }
 
   &--active {
-    background: rgba($accent, 0.1);
+    background: tokens.alpha($accent, 10%);
     color: $accent;
 
     &:hover {
-      background: rgba($accent, 0.14);
+      background: tokens.alpha($accent, 14%);
     }
   }
 }

@@ -19,35 +19,35 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: var(--wp-line-strong);
   flex-shrink: 0;
   transition: background 200ms ease;
 }
 
 .mini-chain__item[data-status='approved'] .mini-chain__dot {
-  background: #22c55e;
+  background: var(--wp-st-green-dot);
 }
 
 .mini-chain__item[data-status='in-progress'] .mini-chain__dot {
-  background: #3b82f6;
+  background: var(--wp-st-blue-dot);
   animation: mini-chain-pulse 1.4s ease-in-out infinite;
 }
 
 .mini-chain__item[data-status='rejected'] .mini-chain__dot {
-  background: #ef4444;
+  background: var(--wp-st-red-dot);
 }
 
 .mini-chain__line {
   width: 15px;
   height: 2px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--wp-line);
   margin: 0 2px;
   transition: background 200ms ease;
 }
 
 .mini-chain__line--filled {
-  background: #22c55e;
+  background: var(--wp-st-green-dot);
 }
 
 @keyframes mini-chain-pulse {
@@ -78,7 +78,7 @@
     width: 10px;
     height: 4px;
     margin: 0 2px;
-    background: #cbd5e1;
+    background: var(--wp-line-strong);
   }
 }
 

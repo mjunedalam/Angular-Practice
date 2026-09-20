@@ -1,13 +1,14 @@
 @use '@angular/material' as mat;
 @use '../../shared/wwell-select-panel-mixin' as wsel;
 @use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-material' as wmat;
 
 /* ── wwell-wlda-request-form tokens ────────────────────────────── */
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
-$danger: #dc2626;
+$danger: tokens.$danger;
 $bg-subtle: tokens.$surface-alt;
 
 /*
@@ -18,12 +19,12 @@ $bg-subtle: tokens.$surface-alt;
  */
 .wldaf,
 .wldaf-select-panel {
-  color-scheme: light;
+  color-scheme: var(--wp-scheme);
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$blue-palette,
         tertiary: mat.$azure-palette,
       ),
@@ -37,11 +38,8 @@ $bg-subtle: tokens.$surface-alt;
 }
 
 .wldaf {
-  @include mat.form-field-overrides(
-    (
-      outlined-container-shape: 10px,
-    )
-  );
+  @include wmat.buttons;
+  @include wmat.form-fields;
 }
 
 /* ── Dialog surface reset (targets this dialog's overlay only) ──── */
@@ -55,8 +53,7 @@ $bg-subtle: tokens.$surface-alt;
 .wldaf-select-panel {
   border-radius: 10px !important;
   box-shadow:
-    0 4px 10px rgba(15, 23, 42, 0.12),
-    0 12px 28px rgba(15, 23, 42, 0.14) !important;
+    var(--wp-shadow-3) !important;
   @include wsel.panel($accent, $navy);
 }
 
@@ -76,12 +73,11 @@ $bg-subtle: tokens.$surface-alt;
   flex-direction: column;
   width: min(760px, 92vw);
   max-height: min(94vh, 820px);
-  background: #ffffff;
+  background: var(--wp-surface-raised);
   border-radius: 16px;
   border: 1px solid $border;
   box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.18),
-    0 4px 14px rgba(15, 23, 42, 0.08);
+    var(--wp-shadow-3);
   overflow: hidden;
   animation: wldafIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
   @include wsel.trigger($accent);
@@ -100,7 +96,7 @@ $bg-subtle: tokens.$surface-alt;
   border-radius: 10px;
 
   &:focus-within {
-    box-shadow: 0 0 0 4px rgba($accent, 0.15);
+    box-shadow: 0 0 0 4px tokens.alpha($accent, 15%);
   }
 }
 
@@ -117,7 +113,7 @@ $bg-subtle: tokens.$surface-alt;
 
 .wldaf__attachments-label {
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $navy;
 }
 

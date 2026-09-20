@@ -25,15 +25,15 @@ $accent: tokens.$accent;
 
 .wrt__label {
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #94a3b8;
+  color: var(--wp-subtle);
 }
 
 .wrt__required {
   margin-left: 0.15rem;
-  color: #dc2626;
+  color: var(--wp-danger);
 }
 
 /* Bordered "▼ | text" control — the dropdown button and the writable box share one outline so
@@ -44,7 +44,7 @@ $accent: tokens.$accent;
   align-items: stretch;
   border: 1.5px solid $border;
   border-radius: 8px;
-  background: #fff;
+  background: var(--wp-surface);
   overflow: hidden;
   transition:
     box-shadow 180ms ease,
@@ -52,7 +52,7 @@ $accent: tokens.$accent;
 
   &:focus-within {
     border-color: $accent;
-    box-shadow: 0 0 0 3px rgba($accent, 0.14);
+    box-shadow: 0 0 0 3px tokens.alpha($accent, 14%);
   }
 }
 
@@ -64,7 +64,7 @@ $accent: tokens.$accent;
   flex-shrink: 0;
   border: none;
   border-right: 1.5px solid $border;
-  background: #fff;
+  background: var(--wp-surface);
   color: $muted;
   cursor: pointer;
   transition: color 150ms ease;
@@ -152,7 +152,7 @@ $accent: tokens.$accent;
 
   &:empty::before {
     content: attr(data-placeholder);
-    color: #94a3b8;
+    color: var(--wp-subtle);
     pointer-events: none;
   }
 
@@ -174,8 +174,8 @@ $accent: tokens.$accent;
   font-size: 0.92rem;
 }
 
-$danger: #dc2626;
-$danger-hover: #b91c1c;
+$danger: tokens.$danger;
+$danger-hover: tokens.$danger-ink;
 
 .wrt__line-remove {
   display: flex;
@@ -202,7 +202,7 @@ $danger-hover: #b91c1c;
   }
 
   &:hover:not(:disabled) {
-    background: rgba($danger, 0.12);
+    background: tokens.alpha($danger, 12%);
     color: $danger-hover;
   }
 
@@ -213,7 +213,7 @@ $danger-hover: #b91c1c;
 }
 
 .wrt--disabled .wrt__field {
-  background: rgba($muted, 0.08);
+  background: tokens.alpha($muted, 8%);
 }
 
 .wrt__hint {

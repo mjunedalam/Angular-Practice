@@ -1,3 +1,14 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+
+// Depth axis for the wellbore diagram. Colours are theme tokens (light/dark); the geometry the D3
+// code draws is unchanged. Everything the D3 code appends is class-only, so it is styled here via
+// `::ng-deep` (runtime-created nodes carry no Angular scoping attribute).
+//
+// Reads as an instrument scale: a hairline axis in the muted ink, small tracked-out caps for the
+// title, and tabular Geist Mono numerals so the digits of "1,500" / "2,000" line up column-wise.
+// Inside `.wp-paper` (the printed-letter preview) the tokens resolve to the light set, so the scale
+// stays paper-white in both themes.
+
 :host {
   display: block;
   flex: 0 0 12%;
@@ -7,8 +18,8 @@
 .depth-scale-svg {
   display: block;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  border-right: 1px solid rgba(15, 23, 42, 0.14);
+  background: linear-gradient(180deg, tokens.$surface 0%, tokens.$surface-alt 100%);
+  border-right: 1px solid tokens.$border-strong;
   border-top-left-radius: 18px;
   border-bottom-left-radius: 18px;
   width: 100%;
@@ -18,19 +29,42 @@
 
 :host ::ng-deep {
   .axis-title {
-    font-size: 17px; font-weight: 900;
-    fill: #000;
-    letter-spacing: 0.04em; text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 600;
+    fill: tokens.$muted;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
-  .axis-line  { stroke: #000; stroke-width: 2.4; fill: none; opacity: 1; }
-  .axis-arrow { fill: #000; opacity: 1; }
-  .tick-line  { stroke: #000; stroke-width: 2.2; stroke-linecap: round; opacity: 1; }
+
+  .axis-line {
+    stroke: tokens.$muted;
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.9;
+  }
+
+  .axis-arrow {
+    fill: tokens.$muted;
+    opacity: 1;
+  }
+
+  .tick-line {
+    stroke: tokens.$muted;
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 1;
+  }
+
   .tick-label {
-    font-size: 20px;
-    font-weight: 900;
-    fill: #000; text-anchor: end;
+    font-family: tokens.$font-mono;
+    font-size: 18px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    fill: tokens.$navy-deep;
+    text-anchor: end;
+    // Halo in the surface colour keeps a label legible where it crosses the axis line.
     paint-order: stroke;
-    stroke: #fff;
+    stroke: tokens.$surface;
     stroke-width: 3px;
     stroke-linejoin: round;
   }

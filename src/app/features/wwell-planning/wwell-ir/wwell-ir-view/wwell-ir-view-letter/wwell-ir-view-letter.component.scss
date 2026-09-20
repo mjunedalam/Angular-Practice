@@ -1,17 +1,26 @@
 @use '../../../shared/wwell-design-tokens' as tokens;
+@use '../../../shared/wwell-wellbore' as wb;
 
 :host {
   display: block;
+  // The desk the paper sits on: a sunken tray in either theme, so a white sheet reads as an object
+  // (like a PDF viewer's canvas) rather than a glaring hole in a dark UI.
+  padding: 1.25rem;
+  background: tokens.$surface-sunken;
+  border-radius: tokens.$radius-md;
 }
 
 .letter {
   max-width: 780px;
   margin: 0 auto;
   background: tokens.$surface;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 2rem 2.25rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  // Fixed (not a token): a sheet of paper keeps the same drop shadow on either tray.
+  box-shadow:
+    0 1px 2px rgba(10, 13, 20, 0.18),
+    0 14px 40px rgba(10, 13, 20, 0.28);
   color: tokens.$navy;
   font-size: tokens.$text-sm;
   line-height: 1.55;
@@ -30,7 +39,7 @@
 .letter__org {
   margin: 0;
   font-size: tokens.$text-lg;
-  font-weight: 800;
+  font-weight: 650;
   color: tokens.$navy-deep;
 }
 
@@ -80,7 +89,7 @@
   h4 {
     margin: 0 0 0.6rem;
     font-size: tokens.$text-base;
-    font-weight: 700;
+    font-weight: 600;
     color: tokens.$accent-deep;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -133,7 +142,7 @@
     padding: 0.4rem 0.55rem;
     background: tokens.$surface-alt;
     color: tokens.$navy-deep;
-    font-weight: 700;
+    font-weight: 600;
     border: 1px solid tokens.$border;
   }
 
@@ -161,6 +170,7 @@
 // `gap` gives the depth-scale column visible breathing room from the wellbore graphic instead of
 // the two sitting flush against each other.
 .letter__diagram-row {
+  @include wb.wellbore-theme;
   display: flex;
   align-items: stretch;
   gap: 1rem;
@@ -211,7 +221,7 @@
 }
 
 .letter__signoff-value {
-  font-weight: 700;
+  font-weight: 600;
   color: tokens.$navy-deep;
   font-style: italic;
 }
@@ -234,7 +244,7 @@
   h4 {
     margin: 0 0 0.6rem;
     font-size: tokens.$text-base;
-    font-weight: 700;
+    font-weight: 600;
     color: tokens.$navy-deep;
   }
 }

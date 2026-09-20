@@ -1,0 +1,74 @@
+@use '../wwell-design-tokens' as tokens;
+
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+
+  // Material's icon-button sizing tokens: a compact 32px control that suits the narrow master column.
+  --mat-icon-button-state-layer-size: 32px;
+  --mat-icon-button-icon-size: 18px;
+  --mat-icon-button-icon-color: #{tokens.$muted};
+}
+
+.wtt {
+  position: relative;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-sm;
+  background: tokens.$surface;
+  box-shadow: tokens.$shadow-1;
+  transition:
+    background-color tokens.$duration-fast tokens.$ease-out,
+    border-color tokens.$duration-fast tokens.$ease-out,
+    color tokens.$duration-fast tokens.$ease-out;
+
+  &:hover {
+    background: tokens.$surface-hover;
+    border-color: tokens.$border-strong;
+    --mat-icon-button-icon-color: #{tokens.$navy-deep};
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+}
+
+// Both glyphs are stacked and cross-rotate with transform + opacity only (compositor-friendly).
+// Light theme shows the moon (pressing goes dark); dark theme shows the sun.
+// `.wtt .wtt__icon` (not `.wtt__icon`): Material sets its own position/size on `.mat-icon`, which would
+// otherwise win and let the second glyph wrap out of the button.
+.wtt .wtt__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  font-size: 18px;
+  line-height: 18px;
+  transition:
+    transform tokens.$duration-base tokens.$ease-out,
+    opacity tokens.$duration-fast tokens.$ease-out;
+}
+
+.wtt .wtt__icon--sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.wtt--dark {
+  .wtt__icon--sun {
+    opacity: 1;
+    transform: none;
+  }
+
+  .wtt__icon--moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wtt .wtt__icon {
+    transition: none;
+  }
+}

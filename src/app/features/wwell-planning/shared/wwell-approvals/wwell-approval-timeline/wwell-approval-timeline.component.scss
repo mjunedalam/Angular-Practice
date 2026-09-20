@@ -16,7 +16,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
   color: tokens.$navy-deep;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -45,25 +45,25 @@
 
   &[data-status='approved'] {
     .approval-timeline__track::after {
-      background: #22c55e;
+      background: var(--wp-success-fill);
     }
 
     .approval-timeline__node {
-      background: #22c55e;
-      border-color: #22c55e;
-      color: #fff;
+      background: var(--wp-success-fill);
+      border-color: var(--wp-success-fill);
+      color: var(--wp-on-accent);
     }
   }
 
   &[data-status='in-progress'] .approval-timeline__node {
-    background: #dbeafe;
+    background: var(--wp-st-blue-bg);
     border-color: tokens.$accent;
   }
 
   &[data-status='rejected'] .approval-timeline__node {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: #fff;
+    background: var(--wp-danger-fill);
+    border-color: var(--wp-danger-fill);
+    color: var(--wp-on-accent);
   }
 
   &:last-child .approval-timeline__track::after {
@@ -100,7 +100,7 @@
   height: 32px;
   border-radius: 50%;
   background: tokens.$surface-alt;
-  border: 2px solid #cbd5e1;
+  border: 2px solid var(--wp-line-strong);
   color: tokens.$subtle;
   flex-shrink: 0;
   transition:
@@ -146,7 +146,7 @@
 
 .approval-timeline__role {
   font-size: 0.74rem;
-  font-weight: 800;
+  font-weight: 650;
   color: tokens.$muted;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -154,7 +154,7 @@
 
 .approval-timeline__name {
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 600;
   color: tokens.$navy-deep;
   line-height: 1.25;
 }
@@ -164,7 +164,7 @@
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .approval-timeline__date {
