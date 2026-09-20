@@ -22,6 +22,11 @@
   letter-spacing: 0.05em;
 }
 
+// A request code like REQ-00252 must not break at its hyphen when the header wraps in the narrow column.
+.approval-timeline__req {
+  white-space: nowrap;
+}
+
 .approval-timeline__header-icon {
   display: inline-flex;
   color: tokens.$accent;

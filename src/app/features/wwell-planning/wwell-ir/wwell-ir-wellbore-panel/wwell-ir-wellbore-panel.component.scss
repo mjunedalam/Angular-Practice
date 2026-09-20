@@ -1,0 +1,408 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-material' as wmat;
+@use '../wwell-ir-wellbore-theme' as wb;
+
+// `ViewEncapsulation.None` (see the component) — everything is namespaced `.wbp`, and the
+// `.wp-wellbore-dialog` block at the end styles the portalled Expand dialog's own surface.
+
+app-wwell-ir-wellbore-panel {
+  display: block;
+  min-width: 0;
+}
+
+.wbp,
+.wbp *,
+.wbp *::before,
+.wbp *::after {
+  // The Expand dialog is portalled outside any page that sets this.
+  box-sizing: border-box;
+}
+
+.wbp {
+  // Depth gridlines: a quiet continuation of the axis ticks, never competing with the drawing.
+  --wbp-grid: color-mix(in srgb, var(--wp-line-strong) 65%, transparent);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem 0.9rem 0.8rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-lg;
+  box-shadow: tokens.$shadow-1;
+  color: tokens.$navy;
+  color-scheme: var(--wp-scheme);
+  @include wmat.buttons;
+}
+
+// ── Header ─────────────────────────────────────────────────────────
+.wbp__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wbp__heading {
+  min-width: 0;
+}
+
+.wbp__title {
+  position: relative;
+  margin: 0;
+  padding-left: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: tokens.$navy;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.12em;
+    bottom: 0.12em;
+    width: 3px;
+    border-radius: 999px;
+    background: tokens.$accent;
+  }
+}
+
+.wbp__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.5rem;
+  margin: 0.2rem 0 0 0.65rem;
+  font-size: 0.72rem;
+  color: tokens.$muted;
+}
+
+.wbp__well {
+  font-family: tokens.$font-mono;
+  font-weight: 600;
+  color: tokens.$navy;
+}
+
+.wbp__action {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: tokens.$muted;
+
+  &:hover {
+    color: tokens.$accent;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// ── Readouts ───────────────────────────────────────────────────────
+.wbp__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.4rem, 1fr));
+  gap: 0.45rem 0.85rem;
+  margin: 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid tokens.$border-soft;
+}
+
+.wbp__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  dt {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: tokens.$subtle;
+  }
+
+  dd {
+    margin: 0;
+    font-family: tokens.$font-mono;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: tokens.$navy;
+  }
+}
+
+// ── Stage: the depth-gridded drawing surface ───────────────────────
+.wbp__stage {
+  display: flex;
+  justify-content: center;
+  container-type: inline-size;
+  padding: 0.6rem 0.5rem 0.5rem 0;
+  background: tokens.$surface-alt;
+  border-radius: tokens.$radius-md;
+  box-shadow: inset 0 0 0 1px tokens.$border-soft;
+}
+
+// Width is the smallest of: the stage, the max width, and the width at which the max height is
+// reached — so the aspect ratio always holds and the SVGs (`preserveAspectRatio="none"`) never
+// stretch.
+.wbp__figure {
+  display: flex;
+  align-items: stretch;
+  flex: none;
+  width: min(100cqw, var(--wbp-max-width, 100cqw), calc(var(--wbp-max-height, 9999px) * var(--wbp-ratio)));
+  aspect-ratio: var(--wbp-ratio);
+}
+
+.wbp__plot {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.wbp__grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  line {
+    stroke: var(--wbp-grid);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+.wbp__diagram {
+  position: relative;
+  display: block;
+  height: 100%;
+}
+
+// Hides the D3-rendered "TOTAL DEPTH: 0 FT" label until a target depth actually exists — and, since
+// the scale then ends at a placeholder depth, stops calling its last tick out as the target.
+.wbp__figure--no-depth .td-label {
+  display: none;
+}
+
+.wbp .wbp__figure--no-depth {
+  .tick-line--target {
+    stroke: tokens.$muted;
+  }
+
+  .tick-label--target {
+    fill: tokens.$navy-deep;
+    font-weight: 600;
+  }
+}
+
+// Beats the diagram's own `[_nghost] .geo-axis`-style rules (0,2,0): this compiles to (0,3,0).
+.wbp .wbp__stage {
+  @include wb.wellbore-theme($ng-deep: false);
+}
+
+// Sidebar form: the leader labels render at ~6px and collide there, so they are left to Expand.
+// Hover tooltips on the casing and the depth/geologic labels still work.
+.wbp--compact .wbp__stage {
+  .casing-label__primary,
+  .casing-label__secondary,
+  .casing-label__line,
+  .casing-label__arrow,
+  .oh-label-line,
+  .oh-label-arrow,
+  .open-hole-text,
+  .screen-label-line,
+  .screen-label-text,
+  .pump-leader-group,
+  .water-label {
+    display: none;
+  }
+}
+
+// ── Legend ─────────────────────────────────────────────────────────
+.wbp__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0;
+  padding: 0.6rem 0 0;
+  list-style: none;
+  border-top: 1px solid tokens.$border-soft;
+}
+
+.wbp__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: tokens.$muted;
+}
+
+.wbp__swatch {
+  flex: none;
+  display: inline-block;
+  width: 14px;
+  height: 12px;
+}
+
+// Swatches mirror how each element is drawn, so the legend reads as a key, not decoration.
+.wbp__swatch--ground,
+.wbp__swatch--water,
+.wbp__swatch--tops {
+  height: 0;
+  align-self: center;
+}
+
+.wbp__swatch--ground {
+  border-top: 2px solid var(--wp-wb-ground);
+}
+
+.wbp__swatch--water {
+  border-top: 2px dashed var(--wp-wb-water);
+}
+
+.wbp__swatch--tops {
+  width: 10px;
+  border-top: 2px solid var(--wp-wb-outline);
+}
+
+.wbp__swatch--casing,
+.wbp__swatch--liner {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #7c8798 0%, #dfe5ee 48%, #7c8798 100%);
+}
+
+.wbp__swatch--casing {
+  width: 10px;
+}
+
+.wbp__swatch--liner {
+  width: 7px;
+}
+
+.wbp__swatch--open-hole {
+  width: 10px;
+  border: 1.5px dashed var(--wp-wb-outline);
+  border-top: 0;
+}
+
+.wbp__swatch--gravel {
+  background: radial-gradient(circle, var(--wp-subtle) 1px, transparent 1.6px) 0 0 / 4px 4px;
+}
+
+.wbp__swatch--screen {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, var(--wp-subtle) 2px 3px),
+    repeating-linear-gradient(90deg, transparent 0 2px, var(--wp-subtle) 2px 3px);
+  opacity: 0.8;
+}
+
+.wbp__swatch--perforated {
+  width: 10px;
+  border-right: 2px dotted var(--wp-wb-outline);
+  border-left: 2px dotted var(--wp-wb-outline);
+}
+
+// ── Empty ──────────────────────────────────────────────────────────
+.wbp__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.5rem 1rem 1.3rem;
+  text-align: center;
+  background: tokens.$surface-alt;
+  border-radius: tokens.$radius-md;
+}
+
+.wbp__empty-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: tokens.$radius-md;
+  background: var(--wp-accent-soft);
+  color: tokens.$accent;
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+}
+
+.wbp__empty-title {
+  margin: 0.35rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: tokens.$navy;
+}
+
+.wbp__empty-hint {
+  margin: 0;
+  max-width: 32ch;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: tokens.$muted;
+}
+
+// ── Expanded (dialog) form ─────────────────────────────────────────
+// The figure is sized off the stage's own box (container query units) so it fills the dialog at
+// the diagram's true aspect ratio instead of being cropped or stretched.
+.wbp--expanded {
+  height: 100%;
+  padding: 1.1rem 1.4rem 1rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  .wbp__title {
+    font-size: 1.1rem;
+  }
+
+  .wbp__sub {
+    font-size: 0.78rem;
+  }
+
+  .wbp__stat dd {
+    font-size: 1rem;
+  }
+
+  .wbp__stage {
+    flex: 1 1 auto;
+    align-items: center;
+    min-height: 0;
+    container-type: size;
+    padding: 0.75rem 1rem 0.75rem 0;
+  }
+
+  .wbp__figure {
+    width: min(100cqw, calc(100cqh * var(--wbp-ratio)));
+  }
+
+  .wbp__key {
+    font-size: 0.74rem;
+  }
+}
+
+.wp-wellbore-dialog {
+  .mat-mdc-dialog-surface {
+    background: tokens.$surface-raised !important;
+    border: 1px solid tokens.$border;
+    border-radius: tokens.$radius-lg !important;
+    box-shadow: tokens.$shadow-3 !important;
+    color-scheme: var(--wp-scheme);
+    overflow: hidden;
+  }
+
+  app-wwell-ir-wellbore-panel {
+    height: 100%;
+  }
+}

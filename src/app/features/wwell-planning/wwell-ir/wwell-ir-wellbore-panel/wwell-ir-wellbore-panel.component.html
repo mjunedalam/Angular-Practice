@@ -1,0 +1,107 @@
+<section class="wbp" [class.wbp--expanded]="expanded()" [class.wbp--compact]="compact()" [attr.aria-label]="title()">
+  <header class="wbp__head">
+    <div class="wbp__heading">
+      <h2 class="wbp__title">{{ title() }}</h2>
+      <p class="wbp__sub">
+        @if (diagramData().wellName) {
+          <span class="wbp__well">{{ diagramData().wellName }}</span>
+        }
+        <span>Depths in ft below ground level</span>
+      </p>
+    </div>
+    @if (hasData()) {
+      @if (expanded()) {
+        <button type="button" mat-icon-button class="wbp__action" aria-label="Close expanded diagram" (click)="closed.emit()">
+          <mat-icon>close</mat-icon>
+        </button>
+      } @else {
+        <button
+          type="button"
+          mat-icon-button
+          class="wbp__action"
+          aria-label="Expand wellbore diagram"
+          [matTooltip]="compact() ? 'Expand for full labels' : 'Expand'"
+          matTooltipClass="wp-tooltip"
+          (click)="expand()"
+        >
+          <mat-icon>open_in_full</mat-icon>
+        </button>
+      }
+    }
+  </header>
+
+  @if (hasData()) {
+    @if (stats().length > 0) {
+      <dl class="wbp__stats">
+        @for (stat of stats(); track stat.label) {
+          <div class="wbp__stat">
+            <dt>{{ stat.label }}</dt>
+            <dd>{{ stat.value }}</dd>
+          </div>
+        }
+      </dl>
+    }
+
+    <div class="wbp__stage">
+      <div
+        class="wbp__figure"
+        [class.wbp__figure--no-depth]="!hasTargetDepth()"
+        [style.--wbp-ratio]="ratio()"
+        [style.--wbp-max-width]="maxWidthPx() + 'px'"
+        [style.--wbp-max-height]="maxHeightPx() + 'px'"
+      >
+        @if (!isExpandedOpen()) {
+          <app-wwell-ir-depth-scale
+            [style.flex-basis.%]="scalePercent()"
+            [totalDepth]="diagramData().targetDepth"
+            [animTrigger]="0"
+            [diagramLayout]="layout()"
+          />
+          <div class="wbp__plot">
+            <svg class="wbp__grid" aria-hidden="true" preserveAspectRatio="none" [attr.viewBox]="gridViewBox()">
+              @for (line of gridLines(); track line.depth) {
+                <line x1="0" [attr.x2]="layout().wellboreViewWidth" [attr.y1]="line.y" [attr.y2]="line.y" />
+              }
+            </svg>
+            <app-well-bore-view
+              class="wbp__diagram"
+              [diagramData]="diagramData()"
+              [animTrigger]="0"
+              [diagramLayout]="layout()"
+              [isFullscreen]="expanded()"
+            />
+          </div>
+        }
+      </div>
+    </div>
+
+    <ul class="wbp__legend" aria-label="Diagram legend">
+      @for (item of legend(); track item.key) {
+        <li class="wbp__key">
+          <span class="wbp__swatch wbp__swatch--{{ item.key }}" aria-hidden="true"></span>
+          {{ item.label }}
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="wbp__empty">
+      <span class="wbp__empty-icon"><mat-icon>architecture</mat-icon></span>
+      <p class="wbp__empty-title">Nothing to draw yet</p>
+      <p class="wbp__empty-hint">{{ emptyHint() }}</p>
+    </div>
+  }
+</section>
+
+<!-- Opened by Expand. The panel renders itself again, in its dialog form, so there is one
+     implementation of the diagram, not two. -->
+<ng-template #expandedTpl>
+  <app-wwell-ir-wellbore-panel
+    [diagramData]="diagramData()"
+    [hasData]="hasData()"
+    [hasTargetDepth]="hasTargetDepth()"
+    [layout]="expandedLayout"
+    [title]="title()"
+    [expanded]="true"
+    (closed)="collapse()"
+  />
+</ng-template>

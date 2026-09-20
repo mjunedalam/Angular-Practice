@@ -1,5 +1,4 @@
 @use '../../../shared/wwell-design-tokens' as tokens;
-@use '../../../shared/wwell-wellbore' as wb;
 
 :host {
   display: block;
@@ -14,26 +13,12 @@
   gap: 1rem;
 }
 
-.ir-well-design__diagram-card,
 .ir-well-design__table-card {
   background: tokens.$surface;
   border: 1px solid var(--wp-line);
   border-radius: 10px;
   padding: 1rem 1.1rem;
   box-shadow: var(--wp-shadow-1);
-}
-
-// `.ir-well-design__diagram-row` below has a fixed `min-width` that can exceed this card's own
-// width on a narrow viewport — scope the horizontal scroll to just this card instead of letting
-// the diagram's real width push out the rest of the tab.
-.ir-well-design__diagram-card {
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 // Matches `.kv-card__title`/`.ir-details__section-title` — same uppercase/accent card-title
@@ -45,46 +30,6 @@
   color: tokens.$accent;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-// `app-wwell-ir-depth-scale`/`app-well-bore-view` both size their own SVG to `height: 100%` of
-// this row (see those components' own host styles: `flex: 0 0 12%; height: 100%` and `flex: 1`
-// respectively) — a percentage height only resolves against an ancestor with a *definite* height,
-// which `max-height` alone never provides. `aspect-ratio` is what supplies that definite height
-// here, derived from the row's fixed width. Ratioed to the real `DIAGRAM_LAYOUT` viewBox
-// (116+1040 wide : 840 tall — see wwell-ir-view-well-design.component.ts's `diagramLayout`), not
-// the editor wizard's shrunk preview layout — that smaller `drawingHeight` packed the diagram's
-// fixed-size casing labels too close together (colliding secondary lines, and the longest labels
-// clipping past the SVG's own right edge). `.ir-well-design__diagram-card`'s own `overflow-x: auto`
-// is the safety net if this ever exceeds the card's width on a narrow viewport. `gap` gives the
-// depth-scale column visible breathing room from the wellbore graphic instead of the two sitting
-// flush against each other.
-.ir-well-design__diagram-row {
-  @include wb.wellbore-theme;
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
-  width: 100%;
-  min-width: 680px;
-  max-width: 680px;
-  aspect-ratio: 1156 / 840;
-  margin: 0 auto;
-}
-
-// Hides the D3-rendered "TOTAL DEPTH: 0 FT" label until a target depth actually exists.
-.ir-well-design__diagram-row--no-depth ::ng-deep .td-label {
-  display: none;
-}
-
-.ir-well-design__diagram {
-  display: block;
-  min-width: 0;
-}
-
-.ir-well-design__empty {
-  margin: 0;
-  color: tokens.$muted;
-  font-size: tokens.$text-sm;
 }
 
 .ir-well-design__table-wrap {

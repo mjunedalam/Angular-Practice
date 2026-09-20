@@ -1,15 +1,13 @@
 <div class="ir-well-design">
-  <section class="ir-well-design__diagram-card">
-    <h3 class="ir-well-design__title">Well Bore Design</h3>
-    @if (hasWellboreData()) {
-      <div class="ir-well-design__diagram-row" [class.ir-well-design__diagram-row--no-depth]="!hasTargetDepth()">
-        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="diagramLayout" />
-        <app-well-bore-view class="ir-well-design__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="diagramLayout" />
-      </div>
-    } @else {
-      <p class="ir-well-design__empty">No casing or formation top data recorded for this well.</p>
-    }
-  </section>
+  <app-wwell-ir-wellbore-panel
+    title="Well Bore Design"
+    emptyHint="No casing or formation top data recorded for this well."
+    [diagramData]="wellboreDiagramData()"
+    [hasData]="hasWellboreData()"
+    [hasTargetDepth]="hasTargetDepth()"
+    [layout]="diagramLayout"
+    [maxWidthPx]="860"
+  />
 
   <section class="ir-well-design__table-card">
     <h3 class="ir-well-design__title">Formation Tops</h3>

@@ -9,10 +9,9 @@ export interface KvRow {
   readonly label: string;
   readonly value: string;
   readonly tone?: RowTone;
-  /** Renders `value` as a small pill instead of plain text — for fields whose value is one of
-   *  a fixed set of options (a completion type, a test type, ...), where a badge reads faster
-   *  than inline text at a glance. */
-  readonly badge?: boolean;
+  /** Marks a value picked from a fixed set of options (a completion type, a test type, ...).
+   *  A multi-select's picks arrive newline-separated in `value` and are shown one per line. */
+  readonly options?: boolean;
 }
 
 export const EMPTY_VALUE = '—';
@@ -55,7 +54,7 @@ export function buildRequestReferenceRows(
     { label: 'BI Number', value: fmtStr(r.client) },
     { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Water Well Name', value: fmtStr(r.wellName) },
-    { label: 'Target Aquifer', value: fmtStr(r.targetAquifer), badge: true },
+    { label: 'Target Aquifer', value: fmtStr(r.targetAquifer), options: true },
     // A brand-new draft is created through the required-number fallback in
     // mapIrFormValueToSubmission (targetDepthFt ?? 0) before the author has entered a real value —
     // treat a literal 0 as "not yet entered" rather than a misleading real reading (see the
@@ -72,15 +71,15 @@ export function buildRequestReferenceRows(
  *  only included then rather than showing a dangling "—" the rest of the time. */
 export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[] {
   const p = ir.programDetails;
-  const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completion), badge: true }];
+  const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completion), options: true }];
 
   if (p.completion === 'Open Hole') {
     rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
   }
 
   rows.push(
-    { label: 'Acidization', value: fmtStr(p.acidization), badge: true },
-    { label: 'Transmission', value: fmtStr(p.transmission), badge: true },
+    { label: 'Acidization', value: fmtStr(p.acidization), options: true },
+    { label: 'Transmission', value: fmtStr(p.transmission), options: true },
   );
   return rows;
 }
@@ -90,10 +89,10 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
 export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[] {
   const d = ir.programDetails.developmentTesting;
   return [
-    { label: 'Logging', value: fmtStr(d.logging), badge: true },
-    { label: 'Mud Logging', value: fmtStr(d.mudLogging), badge: true },
-    { label: 'Sampling', value: fmtStr(d.sampling), badge: true },
-    { label: 'Flow Test', value: fmtStr(d.flowTest), badge: true },
+    { label: 'Logging', value: fmtStr(d.logging), options: true },
+    { label: 'Mud Logging', value: fmtStr(d.mudLogging), options: true },
+    { label: 'Sampling', value: fmtStr(d.sampling), options: true },
+    { label: 'Flow Test', value: fmtStr(d.flowTest), options: true },
     { label: 'Development/Testing', value: fmtStr(d.remarks) },
   ];
 }
@@ -107,8 +106,8 @@ export function buildHydrogeologyRows(ir: IntegratedRequirement): readonly KvRow
   const isFlowTest = ir.testProgram.testType === 'flow-test';
   const h2sPpm = ir.hydrogeology.h2sPpm;
   const rows: KvRow[] = [
-    { label: 'Aquifer', value: fmtStr(ir.hydrogeology.aquifer), badge: true },
-    { label: 'Test Type', value: isFlowTest ? 'Flow Test' : 'Pump Test', badge: true },
+    { label: 'Aquifer', value: fmtStr(ir.hydrogeology.aquifer), options: true },
+    { label: 'Test Type', value: isFlowTest ? 'Flow Test' : 'Pump Test', options: true },
     { label: 'Estimated TDS', value: fmtNum(ir.hydrogeology.estimatedTdsPpm, 'ppm') },
     { label: 'Estimated Rate', value: fmtNum(ir.testProgram.estimatedRateGpm, 'GPM') },
     {

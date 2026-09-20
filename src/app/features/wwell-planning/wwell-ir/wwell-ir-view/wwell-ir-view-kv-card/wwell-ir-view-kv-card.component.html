@@ -4,7 +4,7 @@
     @for (row of rows(); track row.label) {
       <div class="kv-card__field" [attr.data-tone]="row.tone">
         <dt>{{ row.label }}</dt>
-        <dd [class.kv-card__value--badge]="row.badge">{{ row.value }}</dd>
+        <dd><app-wwell-ir-kv-value [row]="row" /></dd>
       </div>
     } @empty {
       <p class="kv-card__empty">No data recorded.</p>

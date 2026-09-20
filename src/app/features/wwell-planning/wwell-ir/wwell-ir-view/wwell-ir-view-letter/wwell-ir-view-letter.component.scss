@@ -1,5 +1,5 @@
 @use '../../../shared/wwell-design-tokens' as tokens;
-@use '../../../shared/wwell-wellbore' as wb;
+@use '../../wwell-ir-wellbore-theme' as wb;
 
 :host {
   display: block;

@@ -18,10 +18,9 @@
 .depth-scale-svg {
   display: block;
   box-sizing: border-box;
-  background: linear-gradient(180deg, tokens.$surface 0%, tokens.$surface-alt 100%);
-  border-right: 1px solid tokens.$border-strong;
-  border-top-left-radius: 18px;
-  border-bottom-left-radius: 18px;
+  // Sits on the wellbore panel's stage (or the letter's paper), so it draws no surface of its own —
+  // just the hairline that separates the axis from the drawing.
+  border-right: 1px solid tokens.$border;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -62,10 +61,15 @@
     font-variant-numeric: tabular-nums;
     fill: tokens.$navy-deep;
     text-anchor: end;
-    // Halo in the surface colour keeps a label legible where it crosses the axis line.
-    paint-order: stroke;
-    stroke: tokens.$surface;
-    stroke-width: 3px;
-    stroke-linejoin: round;
+  }
+
+  // The last tick is the target depth: where the well ends, so the ruler ends in the accent colour.
+  .tick-line--target {
+    stroke: tokens.$accent;
+  }
+
+  .tick-label--target {
+    fill: tokens.$accent;
+    font-weight: 700;
   }
 }

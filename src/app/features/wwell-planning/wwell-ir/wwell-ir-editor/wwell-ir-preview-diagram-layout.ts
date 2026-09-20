@@ -1,48 +1,39 @@
-import { DiagramLayout } from '@models/well-design/wellbore-diagram.model';
+import { DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@models/well-design/wellbore-diagram.model';
 
 /**
- * Compact `DiagramLayout` for the wwell-ir Wellbore Preview card — used both inline in Sections
- * view and in the Timeline view's sidebar (a narrower, fixed-width panel — see
- * `.ire__tl-preview-sidebar` in wwell-ir-editor.component.scss). `WellBoreViewComponent` and
- * `WwellIrDepthScaleComponent` draw every label (and every hover tooltip — casing/liner, geo-top
- * remark, water level, mud-circulation — see the renderers under
- * `features/presentation/well-bore-view/renderers/`) at a fixed font-size in *viewBox* units (see
- * well-bore-view.component.scss / wwell-ir-depth-scale.component.scss) — those font-sizes are the
- * same regardless of `DiagramLayout`, so the on-screen text size is really driven by how many
- * viewBox units the container's CSS width has to divide across (`containerPx / wellboreViewWidth`).
- * Even the inline card in Sections view — capped by `.ire__wellbore-diagram-row`'s
- * `max-height: 340px` against a 1040×840 aspect ratio — only renders at ~420px wide, well short of
- * the ~600px this layout's own comments once assumed, which made every label and tooltip look
- * undersized there too. Rather than widening the box (which would disturb the surrounding page) or
- * shrinking the SVG's *container* further (which is what made the old sidebar text unreadable),
- * this shrinks the *coordinate space* itself by 25% (every geometric constant scaled together, so
- * the diagram's shape is untouched) — enough to noticeably grow the same fixed-size fonts relative
- * to the diagram, without touching any shared rendering code (just a different config value through
- * the `diagramLayout` input both components already accept — same extension point
- * `FULLSCREEN_DIAGRAM_LAYOUT` uses for the opposite case).
+ * Compact `DiagramLayout` for the wwell-ir Wellbore Preview panel — the inline card in Sections
+ * view and the Timeline view's sidebar. `WellBoreViewComponent` and `WwellIrDepthScaleComponent`
+ * draw every label at a fixed font size in *viewBox* units, so the on-screen text size is
+ * `containerPx / (depthScaleWidth + wellboreViewWidth)`, and the room between two labels is
+ * `drawingHeight / totalDepth` units per foot. Both are tuned here, through the `diagramLayout`
+ * input the shared components already accept, without touching any shared rendering code:
  *
- * Not scaled further than this: several labels are centered/right-anchored fixed-width (or
- * fixed-offset) text that doesn't shrink with the layout — e.g. `static-chrome.renderer.ts`'s
- * "Geologic / Horizons (ft bgl)" column title, centered on `geoLineX`; the "500"-style depth-scale
- * tick labels right-anchored near `depthAxisX`; and the depth-scale's own "DEPTH" title, drawn at a
- * fixed `y="-42"` above the axis origin regardless of `marginTop`. Every `<svg>` here clips at its
- * own viewBox edge by default, so shrinking `geoLineX`/`depthAxisX` past ~75%, or `marginTop` below
- * that fixed -42, starts clipping the very text this layout exists to keep legible — `marginTop`
- * is intentionally left at its full original value for exactly that reason. All confirmed by
- * rendering: every label has room on both the depth-scale and the main diagram, nothing clips.
+ * - **Width** is a 75% shrink of the default coordinate space (every horizontal constant scaled
+ *   together, so the shape is untouched), which grows the fixed-size text relative to the drawing.
+ *   Not shrunk further: several labels are fixed-width or fixed-offset text ("Geologic / Horizons
+ *   (ft bgl)" centred on `geoLineX`, the "DEPTH" title, the right-anchored tick labels) that would
+ *   clip at the viewBox edge.
+ * - **`wellboreViewWidth`** leaves ~390 units to the right of the bore centre: the casing/liner
+ *   leader labels run out that way ('18" Intermediate @ 320 ft' is ~250 units) and clipped at the
+ *   viewBox edge with the old 780. `casingCenterX` stays put — a label anchored on the *left* of
+ *   the bore ("Flowing — SIWHP: 123 psi") needs that room to clear the "Geologic Horizons" heading.
+ * - **Height** is taller than the width alone suggests. Wells are deep and casing shoes are often
+ *   only a few hundred feet apart, so on a linear scale their multi-line labels collide unless
+ *   each foot gets enough vertical room. `marginTop` stays at its original 55 for the fixed
+ *   `y="-42"` "DEPTH" title above the axis.
+ *
+ * The panel sizes its figure from these numbers (aspect ratio, depth-scale share), so changing
+ * them here is all a re-tune needs.
  */
 export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
-  svgHeight: 650,
+  svgHeight: 1000,
   marginTop: 55,
-  drawingHeight: 555,
+  drawingHeight: 905,
 
-  // Kept wider than a strict 75% scale of the original (116/82) — the depth-scale's own uppercase
-  // "DEPTH" title (centered on depthScaleWidth/2) needs a bit more absolute room than that to clear
-  // the SVG's viewBox edge; verified by rendering it at this value with no clipping.
   depthScaleWidth: 105,
   depthAxisX: 72,
 
-  wellboreViewWidth: 780,
+  wellboreViewWidth: 870,
 
   depthArrowX: 18,
   geoLineX: 90,
@@ -54,4 +45,32 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
   linerScreenInset: 15,
   gpScreenGap: 2.25,
   gpFillRatio: 1.0,
+};
+
+/**
+ * The Timeline sidebar's narrower (~290px) figure. At that width the default layout's fixed-size
+ * leader labels render at ~6px and collide, so the panel hides them there (`wbp--compact`; they
+ * are all in the Expand view) — which frees the right-hand label room this layout gives up, so the
+ * drawing and the depth axis get roughly 50% more pixels than they would from the default.
+ */
+export const WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT: DiagramLayout = {
+  ...WWELL_IR_PREVIEW_DIAGRAM_LAYOUT,
+  svgHeight: 800,
+  drawingHeight: 705,
+  wellboreViewWidth: 520,
+  casingCenterX: 350,
+};
+
+/** Bottom room, in viewBox units, for the last tick label and the "TOTAL DEPTH" label. */
+const EXPANDED_BOTTOM_MARGIN = 60;
+
+/**
+ * The Expand dialog's layout: Presentation's fullscreen one plus room under the drawing. That layout
+ * ends the drawing exactly at the SVG's bottom edge (`marginTop + drawingHeight === svgHeight`), so
+ * anything printed at the deepest point — the ruler's target-depth tick and the diagram's "TOTAL
+ * DEPTH" label — was cut in half by the viewBox. The drawing itself is unchanged.
+ */
+export const WWELL_IR_EXPANDED_DIAGRAM_LAYOUT: DiagramLayout = {
+  ...FULLSCREEN_DIAGRAM_LAYOUT,
+  svgHeight: FULLSCREEN_DIAGRAM_LAYOUT.marginTop + FULLSCREEN_DIAGRAM_LAYOUT.drawingHeight + EXPANDED_BOTTOM_MARGIN,
 };

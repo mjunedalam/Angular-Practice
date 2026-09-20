@@ -53,7 +53,9 @@
       <mat-icon class="wwell-ir__search-icon">search</mat-icon>
       <input
         type="search"
-        placeholder="Search by code, well, request or client&hellip;"
+        placeholder="Search code, well&hellip;"
+        aria-label="Search by code, well, request or client"
+        title="Search by code, well, request or client"
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearchChange($event)"
       />

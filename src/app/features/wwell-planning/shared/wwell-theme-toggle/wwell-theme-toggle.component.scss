@@ -10,10 +10,15 @@
   --mat-icon-button-icon-color: #{tokens.$muted};
 }
 
+// The two buttons read as one joined control: shared hairline, outer corners rounded only.
+.wtt-group {
+  display: inline-flex;
+}
+
 .wtt {
   position: relative;
   border: 1px solid tokens.$border;
-  border-radius: tokens.$radius-sm;
+  border-radius: 0;
   background: tokens.$surface;
   box-shadow: tokens.$shadow-1;
   transition:
@@ -21,15 +26,27 @@
     border-color tokens.$duration-fast tokens.$ease-out,
     color tokens.$duration-fast tokens.$ease-out;
 
-  &:hover {
+  &:hover,
+  &.wtt--open {
+    z-index: 1; // lift the hovered edge over its neighbour's shared border
     background: tokens.$surface-hover;
     border-color: tokens.$border-strong;
     --mat-icon-button-icon-color: #{tokens.$navy-deep};
   }
 
   &:focus-visible {
+    z-index: 2;
     @include tokens.focus-ring;
   }
+}
+
+.wtt--quick {
+  border-radius: tokens.$radius-sm 0 0 tokens.$radius-sm;
+}
+
+.wtt--tune {
+  margin-left: -1px;
+  border-radius: 0 tokens.$radius-sm tokens.$radius-sm 0;
 }
 
 // Both glyphs are stacked and cross-rotate with transform + opacity only (compositor-friendly).
@@ -67,8 +84,292 @@
   }
 }
 
+// ── Appearance popover ───────────────────────────────────────────
+// Rendered in the CDK overlay on <body>, but it is this component's own template, so these scoped
+// rules still apply; the `--wp-*` tokens arrive by inheritance from <html>.
+.wtt-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 272px;
+  padding: 16px;
+  border: 1px solid tokens.$border-strong;
+  border-radius: tokens.$radius-lg;
+  background: tokens.$surface-raised;
+  box-shadow: tokens.$shadow-3;
+  color: tokens.$navy;
+  font-family: tokens.$font-family;
+  transform-origin: top right;
+  animation: wtt-pop-in tokens.$duration-base tokens.$ease-out;
+}
+
+@keyframes wtt-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.wtt-pop__title {
+  margin: 0;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: tokens.$navy-deep;
+}
+
+.wtt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wtt-field__label {
+  padding: 0;
+  @include tokens.type-eyebrow;
+}
+
+// A fieldset's legend is not a flex item, so the column's `gap` doesn't reach it.
+legend.wtt-field__label {
+  margin-bottom: 8px;
+}
+
+// The label wraps the slider so the whole row is one click target; the head text and the range
+// share a two-column grid: name left, value right, slider full width beneath.
+.wtt-field__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 8px;
+
+  .wtt-range {
+    grid-column: 1 / -1;
+  }
+}
+
+.wtt-field__value {
+  @include tokens.type-mono;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  color: tokens.$navy-deep;
+}
+
+// Segmented System/Light/Dark control. The native radios stay (arrow-key roving, form semantics)
+// and are stretched invisibly over their face, so the whole segment is the hit target.
+.wtt-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-md;
+  background: tokens.$surface-sunken;
+}
+
+.wtt-seg__opt {
+  position: relative;
+  display: block;
+}
+
+.wtt-seg__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wtt-seg__face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: calc(#{tokens.$radius-md} - 2px);
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  color: tokens.$muted;
+  transition:
+    background-color tokens.$duration-fast tokens.$ease-out,
+    border-color tokens.$duration-fast tokens.$ease-out,
+    color tokens.$duration-fast tokens.$ease-out;
+
+  mat-icon {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+    line-height: 15px;
+  }
+}
+
+.wtt-seg__opt:hover .wtt-seg__face {
+  color: tokens.$navy-deep;
+}
+
+.wtt-seg__input:checked + .wtt-seg__face {
+  border-color: tokens.$border-strong;
+  background: tokens.$surface;
+  box-shadow: tokens.$shadow-1;
+  color: tokens.$navy-deep;
+}
+
+.wtt-seg__input:focus-visible + .wtt-seg__face {
+  @include tokens.focus-ring;
+}
+
+// Native range, restyled. The filled stretch stops at the thumb's centre, which travels from half a
+// thumb in to half a thumb short of the end — hence the calc rather than a bare percentage.
+.wtt-range {
+  --wtt-thumb: 16px;
+  --wtt-stop: calc(var(--wtt-thumb) / 2 + (100% - var(--wtt-thumb)) * var(--wtt-p, 0.5));
+
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: tokens.$radius-sm;
+    background: linear-gradient(to right, tokens.$accent var(--wtt-stop), tokens.$border-strong var(--wtt-stop));
+  }
+
+  &::-moz-range-track {
+    height: 4px;
+    border-radius: tokens.$radius-sm;
+    background: linear-gradient(to right, tokens.$accent var(--wtt-stop), tokens.$border-strong var(--wtt-stop));
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: var(--wtt-thumb);
+    height: var(--wtt-thumb);
+    margin-top: -6px; // (track 4px − thumb 16px) / 2
+    border: 2px solid tokens.$surface-raised;
+    border-radius: 50%;
+    background: tokens.$navy-deep;
+    box-shadow: 0 0 0 1px tokens.$border-control;
+    transition: transform tokens.$duration-fast tokens.$ease-out;
+  }
+
+  &::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--wtt-thumb);
+    height: var(--wtt-thumb);
+    border: 2px solid tokens.$surface-raised;
+    border-radius: 50%;
+    background: tokens.$navy-deep;
+    box-shadow: 0 0 0 1px tokens.$border-control;
+    transition: transform tokens.$duration-fast tokens.$ease-out;
+  }
+
+  &:hover::-webkit-slider-thumb,
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.12);
+  }
+
+  &:hover::-moz-range-thumb,
+  &:active::-moz-range-thumb {
+    transform: scale(1.12);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 1px tokens.$border-control,
+      0 0 0 3px tokens.$surface-raised,
+      0 0 0 5px tokens.$accent;
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 1px tokens.$border-control,
+      0 0 0 3px tokens.$surface-raised,
+      0 0 0 5px tokens.$accent;
+  }
+}
+
+.wtt-range__ends {
+  display: flex;
+  justify-content: space-between;
+  @include tokens.type-label;
+  font-size: tokens.$text-2xs;
+}
+
+.wtt-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid tokens.$border; // $border-soft vanishes against the raised surface
+}
+
+.wtt-foot__hint {
+  margin: 0;
+  @include tokens.type-label;
+  font-size: tokens.$text-2xs;
+  line-height: 1.4;
+}
+
+.wtt-reset {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-sm;
+  background: transparent;
+  font: inherit;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  color: tokens.$navy-deep;
+  cursor: pointer;
+  transition:
+    background-color tokens.$duration-fast tokens.$ease-out,
+    border-color tokens.$duration-fast tokens.$ease-out;
+
+  &:hover:not(:disabled) {
+    border-color: tokens.$border-strong;
+    background: tokens.$surface-hover;
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+}
+
+// Vendor thumb pseudo-elements get their own rules: one unknown selector in a list drops the whole rule.
 @media (prefers-reduced-motion: reduce) {
-  .wtt .wtt__icon {
+  .wtt .wtt__icon,
+  .wtt-pop {
+    transition: none;
+    animation: none;
+  }
+
+  .wtt-range::-webkit-slider-thumb {
+    transition: none;
+  }
+
+  .wtt-range::-moz-range-thumb {
     transition: none;
   }
 }

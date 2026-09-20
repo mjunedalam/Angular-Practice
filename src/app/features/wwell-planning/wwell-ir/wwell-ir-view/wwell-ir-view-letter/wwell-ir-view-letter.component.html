@@ -63,7 +63,7 @@
     <h4>3. Well Bore Diagram</h4>
     @if (hasWellboreData()) {
       <div class="letter__diagram-row" #wellboreDiagramRow [class.letter__diagram-row--no-depth]="!hasTargetDepth()">
-        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="diagramLayout" />
+        <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().targetDepth" [animTrigger]="0" [diagramLayout]="diagramLayout" />
         <app-well-bore-view class="letter__diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="diagramLayout" />
       </div>
     } @else {

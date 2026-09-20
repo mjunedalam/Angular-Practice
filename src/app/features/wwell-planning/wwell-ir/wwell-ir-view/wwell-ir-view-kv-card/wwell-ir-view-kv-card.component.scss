@@ -5,7 +5,6 @@ $muted: tokens.$muted;
 $subtle: tokens.$subtle;
 $border-soft: tokens.$border-soft;
 $surface: tokens.$surface;
-$surface-alt: tokens.$surface-alt;
 $accent: tokens.$accent;
 
 :host {
@@ -87,17 +86,6 @@ $accent: tokens.$accent;
     color: var(--wp-success);
     font-weight: 600;
   }
-}
-
-.kv-card__value--badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  background: $surface-alt;
-  color: $navy-deep;
-  font-weight: 600;
-  font-size: tokens.$text-xs;
 }
 
 .kv-card__empty {

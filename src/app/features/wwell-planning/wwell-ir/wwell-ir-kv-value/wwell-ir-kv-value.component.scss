@@ -1,0 +1,28 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.kvv__pick {
+  position: relative;
+  overflow-wrap: anywhere;
+
+  &:not(:only-child) {
+    padding-left: 0.85rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0.1rem;
+      top: 0.62em;
+      width: 0.28rem;
+      height: 0.28rem;
+      border-radius: 50%;
+      background: tokens.$subtle;
+    }
+  }
+}

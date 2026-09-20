@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { KvRow } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
+import { WwellIrKvValueComponent } from '../../wwell-ir-kv-value/wwell-ir-kv-value.component';
 
 /** Read-only label/value card — one per Details/Well Design section (General Information,
  *  Program Details, Geologist Contact, Estimated Hydrology…). Purely presentational: every
@@ -9,7 +10,7 @@ import { KvRow } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
 @Component({
   selector: 'app-wwell-ir-view-kv-card',
   standalone: true,
-  imports: [],
+  imports: [WwellIrKvValueComponent],
   templateUrl: './wwell-ir-view-kv-card.component.html',
   styleUrl: './wwell-ir-view-kv-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -76,11 +76,6 @@ const COMPLETION_LINER_PERFORATED = 'Liner + Perforated';
  *  of silently reverting to 'N' the next time it's opened and saved. */
 const COMPLETION_CASED_PERFORATED = 'Cased & Perforated';
 
-/** Anchors the depth scale to a stable minimum so a shallow/partial entry doesn't stretch
- * across the full drawing height, and so the scale's domain is never degenerate ([0, 0]) before the
- * (required, but non-linear-stepper-skippable) target depth field is filled in. */
-const MIN_SCALE_DEPTH_FT = 500;
-
 /**
  * `requestReference.targetDepthFt` has no backing column on `exad_gwd_ir_header` itself — see
  * `wwell-ir-summary.mapper.ts`'s `targetDepthFt: 0` (the list endpoint still always reads back 0).
@@ -364,19 +359,6 @@ function buildWellDesignFromForm(
   };
 }
 
-function computeDisplayDepthFt(
-  targetDepthFt: number,
-  casingRows: readonly WwellIrRawCasingRow[],
-  formationRows: readonly WwellIrRawFormationTop[],
-): number {
-  const depths = [
-    targetDepthFt,
-    ...casingRows.map(row => row.depthFtBgl ?? 0),
-    ...formationRows.map(row => row.depthFt ?? 0),
-  ];
-  return Math.max(...depths, MIN_SCALE_DEPTH_FT);
-}
-
 /** Shared tail for both entry points below — takes already-normalized raw rows so the actual
  *  gating/mapping (isRenderable*, mapCasings, buildLinerTopAnchors, mapGeologicTops,
  *  buildWellDesignFromForm) is written once regardless of whether the source was a live,
@@ -401,18 +383,20 @@ function assembleWellboreDiagramData(
    * passing raw `targetDepthFt` through unchanged left the element's bottom pinned to its top
    * (ground level) whenever Target Depth reads as 0, making it technically present in the DOM but
    * zero-height/invisible. Resolving it once here (real value if positive, else
-   * `STATIC_TARGET_DEPTH_FT`) and reusing that everywhere below — `totalDepth`, `displayDepth`'s
-   * own floor, and `targetDepth` — keeps the whole diagram (scale, ground line, completion
+   * `STATIC_TARGET_DEPTH_FT`) and reusing that everywhere below — `totalDepth`, `displayDepth` and
+   * `targetDepth` — keeps the whole diagram (scale, ground line, completion
    * elements, total-depth label) consistent instead of some parts anchoring to a real value and
    * others to a fallback.
    */
   const resolvedTargetDepthFt = targetDepthFt > 0 ? targetDepthFt : STATIC_TARGET_DEPTH_FT;
-  const displayDepth = computeDisplayDepthFt(resolvedTargetDepthFt, casingRows, formationRows);
 
   return {
     wellName,
     totalDepth: resolvedTargetDepthFt,
-    displayDepth,
+    // The depth scale (and the diagram's own vertical domain, which is `max(totalDepth, displayDepth)`)
+    // always runs to the target depth — never past it to reach a deeper casing/formation row, and
+    // never held open by a minimum. A row deeper than the target runs off the end of the scale.
+    displayDepth: resolvedTargetDepthFt,
     casings: mapCasings(renderableCasings),
     drlgCasings: [...buildLinerTopAnchors(renderableCasings), ...buildShoeAnchorFallback(renderableCasings)],
     geologicTops: mapGeologicTops(renderableFormationTops, surfaceElevationFtAsl),

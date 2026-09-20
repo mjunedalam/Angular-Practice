@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
-import { WellBoreViewComponent } from '../../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrStore } from '../../store/wwell-ir.store';
 import { buildHydrogeologyRows } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
 import { mapIntegratedRequirementToRawFormValue } from '../../wwell-ir-form/wwell-ir-edit.mapper';
@@ -14,7 +13,7 @@ import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
-import { WwellIrDepthScaleComponent } from '../../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
+import { WwellIrWellborePanelComponent } from '../../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
 import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-view-kv-card.component';
 
 /** "Well Design" step of the read-only IR view: the same submitted-record wellbore diagram
@@ -38,7 +37,7 @@ import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-vi
 @Component({
   selector: 'app-wwell-ir-view-well-design',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, WellBoreViewComponent, WwellIrDepthScaleComponent, WwellIrViewKvCardComponent],
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, WwellIrWellborePanelComponent, WwellIrViewKvCardComponent],
   templateUrl: './wwell-ir-view-well-design.component.html',
   styleUrl: './wwell-ir-view-well-design.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

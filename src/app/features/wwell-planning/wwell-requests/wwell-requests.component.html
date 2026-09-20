@@ -25,7 +25,9 @@
       <mat-icon class="wreq__search-icon">search</mat-icon>
       <input
         type="search"
-        placeholder="Search by req #, client or well name&hellip;"
+        placeholder="Search req #, client&hellip;"
+        aria-label="Search by req #, client or well name"
+        title="Search by req #, client or well name"
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearchChange($event)"
       />

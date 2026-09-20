@@ -163,7 +163,7 @@
               @for (row of requestReferenceRows(); track row.label) {
                 <div class="ire__view-field" [attr.data-tone]="row.tone">
                   <dt>{{ row.label }}</dt>
-                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                  <dd><app-wwell-ir-kv-value [row]="row" /></dd>
                 </div>
               }
             </dl>
@@ -231,7 +231,7 @@
               @for (row of programRows(); track row.label) {
                 <div class="ire__view-field" [attr.data-tone]="row.tone">
                   <dt>{{ row.label }}</dt>
-                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                  <dd><app-wwell-ir-kv-value [row]="row" /></dd>
                 </div>
               }
             </dl>
@@ -266,7 +266,7 @@
               @for (row of geologistContactRows(); track row.label) {
                 <div class="ire__view-field" [attr.data-tone]="row.tone">
                   <dt>{{ row.label }}</dt>
-                  <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                  <dd><app-wwell-ir-kv-value [row]="row" /></dd>
                 </div>
               }
             </dl>
@@ -551,21 +551,14 @@
         <ng-container [ngTemplateOutlet]="wellborePreviewTpl" />
       }
 
-      <ng-template #wellborePreviewTpl>
-        <section class="ire__section ire__wellbore-card">
-          <h2 class="ire__section-title">Wellbore Preview</h2>
-          @if (hasWellboreData()) {
-            <div class="ire__wellbore-diagram-row" [class.ire__wellbore-diagram-row--no-depth]="!hasTargetDepth()">
-              <app-wwell-ir-depth-scale [totalDepth]="wellboreDiagramData().displayDepth" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
-              <app-well-bore-view class="ire__wellbore-diagram" [diagramData]="wellboreDiagramData()" [animTrigger]="0" [diagramLayout]="previewDiagramLayout" />
-            </div>
-          } @else {
-            <div class="ire__wellbore-empty">
-              <mat-icon>architecture</mat-icon>
-              <p>Add a casing or formation top row — with type, size, and depth filled in — to preview the wellbore diagram.</p>
-            </div>
-          }
-        </section>
+      <ng-template #wellborePreviewTpl let-compact="compact">
+        <app-wwell-ir-wellbore-panel
+          [diagramData]="wellboreDiagramData()"
+          [hasData]="hasWellboreData()"
+          [hasTargetDepth]="hasTargetDepth()"
+          [compact]="!!compact"
+          [layout]="compact ? sidebarDiagramLayout : previewDiagramLayout"
+        />
       </ng-template>
 
       <!-- 5.0 Hydrogeology -->
@@ -614,7 +607,7 @@
             @for (row of hydrogeologyRows(); track row.label) {
               <div class="ire__view-field" [attr.data-tone]="row.tone">
                 <dt>{{ row.label }}</dt>
-                <dd [class.ire__view-value--badge]="row.badge">{{ row.value }}</dd>
+                <dd><app-wwell-ir-kv-value [row]="row" /></dd>
               </div>
             }
           </dl>
@@ -963,7 +956,7 @@
     @if (viewMode() === 'timeline') {
       <aside class="ire__tl-preview-sidebar" [class.ire__tl-preview-sidebar--hidden]="!previewSidebarOpen()">
         <div class="ire__tl-preview-anim">
-          <ng-container [ngTemplateOutlet]="wellborePreviewTpl" />
+          <ng-container [ngTemplateOutlet]="wellborePreviewTpl" [ngTemplateOutletContext]="{ compact: true }" />
         </div>
       </aside>
     }

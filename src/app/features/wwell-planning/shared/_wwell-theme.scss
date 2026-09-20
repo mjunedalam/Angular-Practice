@@ -9,62 +9,87 @@
 // Direction: "Instrument" — cool neutrals, hairline borders, monochrome ink primary action,
 // cobalt reserved for signals (focus, links, selection, in-review status).
 
+// Both palettes ride a contrast dial. `WwellThemeService` writes `--wp-contrast-dark` and
+// `--wp-contrast-light` (each 0–100%) on <html>, and a dialed token is
+//   color-mix(in srgb, HIGH <dial>, SOFT)
+// so 100% is its High value and 0% its Soft one.
+//   Dark:  High is the original dark palette; Soft lifts the page/surface steps to a lighter charcoal
+//          and eases the text tiers down, so the whole scale compresses. Default 50%.
+//   Light: High is the standard light palette (the default, 100%); Soft dims the whites to a cool
+//          grey to cut glare, and darkens the fixed-colour text (accent, semantic, wellbore labels)
+//          to keep pace with the darker grounds.
+// Every text tier stays ≥ 4.5:1 across each range and no fixed-colour pairing gets worse than it is
+// at High (scripted at 0/25/50/75/100%, then swept live). The fallbacks match DEFAULT_CONTRAST_* in
+// the service.
+@function dark-tone($high, $soft) {
+  @return color-mix(in srgb, #{$high} var(--wp-contrast-dark, 50%), #{$soft});
+}
+
+// `$dialed: false` (the `.wp-paper` scope) hands back the High value untouched, so paper never
+// follows the dial.
+@function light-tone($high, $soft, $dialed) {
+  @if not $dialed {
+    @return $high;
+  }
+  @return color-mix(in srgb, #{$high} var(--wp-contrast-light, 100%), #{$soft});
+}
+
 // The two token sets are mixins so a subtree can re-declare either one regardless of the page
 // theme — see `.wp-paper` below.
-@mixin light-tokens {
+@mixin light-tokens($dialed: true) {
   --wp-scheme: light;
 
   // Surfaces
-  --wp-page: #f4f5f7;
-  --wp-surface: #ffffff;
-  --wp-surface-alt: #f8f9fb; // inset panels, table heads, read-only fields
-  --wp-surface-hover: #f1f3f6;
-  --wp-surface-raised: #ffffff; // dialogs, popovers (separated by shadow in light)
-  --wp-surface-sunken: #eceef2; // tracks, skeleton bars, wells
+  --wp-page: #{light-tone(#f4f5f7, #dde1e8, $dialed)};
+  --wp-surface: #{light-tone(#ffffff, #ebeef2, $dialed)};
+  --wp-surface-alt: #{light-tone(#f8f9fb, #e3e7ed, $dialed)}; // inset panels, table heads, read-only fields
+  --wp-surface-hover: #{light-tone(#f1f3f6, #dbe0e7, $dialed)};
+  --wp-surface-raised: #{light-tone(#ffffff, #f2f4f7, $dialed)}; // dialogs, popovers (separated by shadow in light)
+  --wp-surface-sunken: #{light-tone(#eceef2, #d3d8e0, $dialed)}; // tracks, skeleton bars, wells
 
   // Lines
-  --wp-line: #e4e6eb;
-  --wp-line-soft: #eceef2; // row dividers
-  --wp-line-strong: #cbd0d9; // hover borders, emphasis dividers
-  --wp-line-control: #858d9e; // input / control outlines — 3:1 so a field reads as a field (WCAG 1.4.11)
+  --wp-line: #{light-tone(#e4e6eb, #c6ccd7, $dialed)};
+  --wp-line-soft: #{light-tone(#eceef2, #d3d9e2, $dialed)}; // row dividers
+  --wp-line-strong: #{light-tone(#cbd0d9, #aab2c1, $dialed)}; // hover borders, emphasis dividers
+  --wp-line-control: #{light-tone(#858d9e, #5f687b, $dialed)}; // input / control outlines — 3:1 so a field reads as a field (WCAG 1.4.11)
 
   // Text
-  --wp-ink: #0a0d14; // headings
-  --wp-text: #1c2230; // body
-  --wp-muted: #566073; // secondary
-  --wp-subtle: #626b7c; // tertiary, placeholders, icons
+  --wp-ink: #{light-tone(#0a0d14, #262d3c, $dialed)}; // headings
+  --wp-text: #{light-tone(#1c2230, #353e51, $dialed)}; // body
+  --wp-muted: #{light-tone(#566073, #485265, $dialed)}; // secondary
+  --wp-subtle: #{light-tone(#626b7c, #4d576a, $dialed)}; // tertiary, placeholders, icons
   --wp-on-accent: #ffffff;
 
   // Accent — cobalt, a signal not a fill
-  --wp-accent: #2b50ff; // links, focus, selected text/icons
-  --wp-accent-hover: #1c3ee0;
-  --wp-accent-fill: #2b50ff; // solid backgrounds (selection bars, progress)
+  --wp-accent: #{light-tone(#2b50ff, #1f41d9, $dialed)}; // links, focus, selected text/icons
+  --wp-accent-hover: #{light-tone(#1c3ee0, #1a37bd, $dialed)};
+  --wp-accent-fill: #{light-tone(#2b50ff, #1f41d9, $dialed)}; // solid backgrounds (selection bars, progress)
   --wp-accent-soft: rgba(43, 80, 255, 0.08);
   --wp-accent-line: rgba(43, 80, 255, 0.28);
 
   // Primary action — monochrome ink
-  --wp-cta: #0a0d14;
-  --wp-cta-hover: #232a3a;
+  --wp-cta: #{light-tone(#0a0d14, #262d3c, $dialed)};
+  --wp-cta-hover: #{light-tone(#232a3a, #3a4358, $dialed)};
   --wp-on-cta: #ffffff;
   --wp-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.14) inset, 0 1px 2px rgba(10, 13, 20, 0.28);
 
   // Semantic
-  --wp-danger: #cc271b;
-  --wp-danger-ink: #b42318;
+  --wp-danger: #{light-tone(#cc271b, #ad2016, $dialed)};
+  --wp-danger-ink: #{light-tone(#b42318, #97190f, $dialed)};
   --wp-danger-soft: rgba(217, 45, 32, 0.06);
   --wp-danger-line: rgba(217, 45, 32, 0.3);
-  --wp-success: #15803d;
+  --wp-success: #{light-tone(#15803d, #116a32, $dialed)};
   --wp-success-soft: rgba(21, 128, 61, 0.07);
   --wp-success-line: rgba(21, 128, 61, 0.3);
-  --wp-warning: #b45309;
+  --wp-warning: #{light-tone(#b45309, #8f4106, $dialed)};
   --wp-warning-soft: rgba(217, 119, 6, 0.08);
   --wp-warning-line: rgba(180, 83, 9, 0.32);
 
   // Status pills (bg / ink / dot) — mirrors wwell-status.config.ts
-  --wp-st-slate-bg: #f1f5f9;
+  --wp-st-slate-bg: #{light-tone(#f1f5f9, #d9dee6, $dialed)};
   --wp-st-slate-ink: #3f4b5e;
   --wp-st-slate-dot: #7a869a;
-  --wp-st-slate-muted-bg: #f1f5f9;
+  --wp-st-slate-muted-bg: #{light-tone(#f1f5f9, #d9dee6, $dialed)};
   --wp-st-slate-muted-ink: #566073;
   --wp-st-slate-muted-dot: #a0aabb;
   --wp-st-indigo-bg: #e0e7ff;
@@ -95,44 +120,44 @@
   --wp-scrim: rgba(10, 13, 20, 0.45);
 
   // Chips over the page (tooltips)
-  --wp-tooltip-bg: #0a0d14;
+  --wp-tooltip-bg: #{light-tone(#0a0d14, #262d3c, $dialed)};
   --wp-tooltip-ink: #ffffff;
   --wp-tooltip-ring: rgba(148, 163, 184, 0.22);
 
   // Loading shimmers
-  --wp-shimmer-a: #eceef2;
-  --wp-shimmer-b: #f6f7f9;
+  --wp-shimmer-a: #{light-tone(#eceef2, #d3d8e0, $dialed)};
+  --wp-shimmer-b: #{light-tone(#f6f7f9, #e3e7ed, $dialed)};
 
   // Wellbore diagram — domain colours keep their hue; luminance shifts per theme so labels and lines
   // read on the surface behind them. Text-bearing ones (ground/target/actual/water) meet 4.5:1.
-  --wp-wb-outline: #0a0d14; // casing outlines, axes, ticks, arrow heads
-  --wp-wb-ground: #b94a12;
-  --wp-wb-target: #b45309;
-  --wp-wb-actual: #15803d;
-  --wp-wb-water: #0369a1;
-  --wp-wb-pad: #f0f0f0;
+  --wp-wb-outline: #{light-tone(#0a0d14, #262d3c, $dialed)}; // casing outlines, axes, ticks, arrow heads
+  --wp-wb-ground: #{light-tone(#b94a12, #9b3d0e, $dialed)};
+  --wp-wb-target: #{light-tone(#b45309, #8f4106, $dialed)};
+  --wp-wb-actual: #{light-tone(#15803d, #116a32, $dialed)};
+  --wp-wb-water: #{light-tone(#0369a1, #025a88, $dialed)};
+  --wp-wb-pad: #{light-tone(#f0f0f0, #d3d8e0, $dialed)};
 }
 
 @mixin dark-tokens {
   --wp-scheme: dark;
 
   // Surfaces — depth comes from lighter steps, not drop shadows
-  --wp-page: #07090d;
-  --wp-surface: #0e1218;
-  --wp-surface-alt: #0a0e14;
-  --wp-surface-hover: #151b25;
-  --wp-surface-raised: #141a23;
-  --wp-surface-sunken: #090c11;
+  --wp-page: #{dark-tone(#07090d, #181d26)};
+  --wp-surface: #{dark-tone(#0e1218, #202632)};
+  --wp-surface-alt: #{dark-tone(#0a0e14, #1b212b)};
+  --wp-surface-hover: #{dark-tone(#151b25, #2a3240)};
+  --wp-surface-raised: #{dark-tone(#141a23, #28303c)};
+  --wp-surface-sunken: #{dark-tone(#090c11, #151a22)};
 
-  --wp-line: #1e2530;
-  --wp-line-soft: #161c26;
-  --wp-line-strong: #2d3644;
-  --wp-line-control: #5d6779;
+  --wp-line: #{dark-tone(#1e2530, #333c4b)};
+  --wp-line-soft: #{dark-tone(#161c26, #2a313d)};
+  --wp-line-strong: #{dark-tone(#2d3644, #465264)};
+  --wp-line-control: #{dark-tone(#5d6779, #7a859b)};
 
-  --wp-ink: #f2f4f8;
-  --wp-text: #d3d9e4;
-  --wp-muted: #939cae;
-  --wp-subtle: #7b8496;
+  --wp-ink: #{dark-tone(#f2f4f8, #c8cfdb)};
+  --wp-text: #{dark-tone(#d3d9e4, #adb6c6)};
+  --wp-muted: #{dark-tone(#939cae, #9aa4b7)};
+  --wp-subtle: #{dark-tone(#7b8496, #929daf)};
   --wp-on-accent: #ffffff;
 
   --wp-accent: #7b95ff;
@@ -141,8 +166,8 @@
   --wp-accent-soft: rgba(123, 149, 255, 0.12);
   --wp-accent-line: rgba(123, 149, 255, 0.32);
 
-  --wp-cta: #eef1f6;
-  --wp-cta-hover: #ffffff;
+  --wp-cta: #{dark-tone(#eef1f6, #c2cad8)};
+  --wp-cta-hover: #{dark-tone(#ffffff, #d4dae6)};
   --wp-on-cta: #07090d;
   --wp-cta-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 18px rgba(123, 149, 255, 0.18);
 
@@ -188,19 +213,19 @@
   --wp-scrim: rgba(0, 0, 0, 0.62);
 
   // Inverse chip: a dark tooltip would vanish on a dark surface
-  --wp-tooltip-bg: #eef1f6;
+  --wp-tooltip-bg: #{dark-tone(#eef1f6, #c2cad8)};
   --wp-tooltip-ink: #07090d;
   --wp-tooltip-ring: rgba(255, 255, 255, 0.12);
 
-  --wp-shimmer-a: #121821;
-  --wp-shimmer-b: #1a212d;
+  --wp-shimmer-a: #{dark-tone(#121821, #232a36)};
+  --wp-shimmer-b: #{dark-tone(#1a212d, #2c3441)};
 
-  --wp-wb-outline: #a9b3c6;
+  --wp-wb-outline: #{dark-tone(#a9b3c6, #98a3b8)};
   --wp-wb-ground: #f0894a;
   --wp-wb-target: #fbbf24;
   --wp-wb-actual: #4ade80;
   --wp-wb-water: #38bdf8;
-  --wp-wb-pad: #1a212d;
+  --wp-wb-pad: #{dark-tone(#1a212d, #2c3441)};
 }
 
 :root {
@@ -227,7 +252,7 @@
 // element's computed colours onto a white canvas, so a dark-themed diagram would export as
 // light-on-white (unreadable) if it were not pinned to light here.
 .wp-paper {
-  @include light-tokens;
+  @include light-tokens($dialed: false);
   color-scheme: light;
 }
 

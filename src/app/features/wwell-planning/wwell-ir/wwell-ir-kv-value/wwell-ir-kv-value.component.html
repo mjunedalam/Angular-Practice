@@ -1,0 +1,7 @@
+@if (row().options) {
+  @for (pick of picks(); track $index) {
+    <span class="kvv__pick">{{ pick }}</span>
+  }
+} @else {
+  {{ row().value }}
+}

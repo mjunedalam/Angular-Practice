@@ -32,14 +32,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
-import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFieldConfig, WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
-import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
+import { WwellIrWellborePanelComponent } from '../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
+import { WwellIrKvValueComponent } from '../wwell-ir-kv-value/wwell-ir-kv-value.component';
 import {
   casingRowPatch,
   formationTopRowPatch,
@@ -82,7 +82,7 @@ import {
   buildProgramMainRows,
   buildRequestReferenceRows,
 } from './wwell-ir-detail-rows.util';
-import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from './wwell-ir-preview-diagram-layout';
+import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT, WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT } from './wwell-ir-preview-diagram-layout';
 import {
   findLinkedWell,
   formatLinkedWellCoordinates,
@@ -119,8 +119,8 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
     MatTooltipModule,
     DynamicFieldComponent,
     DynamicSectionComponent,
-    WellBoreViewComponent,
-    WwellIrDepthScaleComponent,
+    WwellIrWellborePanelComponent,
+    WwellIrKvValueComponent,
     WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir-editor.component.html',
@@ -259,6 +259,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   );
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
   protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
+  protected readonly sidebarDiagramLayout = WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT;
   protected readonly casingSizeWarnings: Signal<readonly CasingSizeWarning[]> = computed(() =>
     findInvertedCasingSizeRows(this.ir().casing.map(casingRowPatch)),
   );

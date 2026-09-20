@@ -11,7 +11,8 @@ import { easeBackOut, easeCubicOut } from 'd3-ease';
 import 'd3-transition';
 
 import { ANIM, DIAGRAM_LAYOUT, DiagramLayout } from '@models/well-design/wellbore-diagram.model';
-import { buildDepthTicks, createDepthScale, pickTickInterval } from '@shared/utils/wellbore-math.util';
+import { createDepthScale } from '@shared/utils/wellbore-math.util';
+import { buildScaleTicks } from './wwell-ir-depth-ticks.util';
 
 /**
  * Wizard-local replica of `presentation/depth-scale/depth-scale.component.ts`'s D3 rendering
@@ -63,7 +64,7 @@ export class WwellIrDepthScaleComponent {
     const svg = select(element);
     // Interrupt any in-progress/scheduled transitions before tearing down the DOM — this
     // effect re-fires on every live edit that moves `totalDepth` (e.g. switching Completion
-    // while Program Details is open re-derives `wellboreDiagramData().displayDepth` on every
+    // while Program Details is open re-derives `wellboreDiagramData().targetDepth` on every
     // keystroke/selection change), which used to call `.remove()` on nodes that still had a
     // pending/active D3 transition scheduled on them (see d3-transition's per-node
     // `__transition` slot). That stale scheduled tick/tween callback still fires later against
@@ -82,8 +83,7 @@ export class WwellIrDepthScaleComponent {
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
-    const interval = pickTickInterval(totalDepth);
-    const ticks = buildDepthTicks(totalDepth, interval);
+    const ticks = buildScaleTicks(totalDepth, drawingHeight);
 
     const titleX = depthScaleWidth / 2;
     g.append('text')
@@ -118,16 +118,17 @@ export class WwellIrDepthScaleComponent {
       .attr('stroke-dashoffset', 0);
 
     ticks.forEach((depth: number) => {
+      const isTargetTick = depth === totalDepth;
       const yPx = scale(depth);
       const delay = (depth / totalDepth) * ANIM.SCALE_DURATION + ANIM.TICK_BASE_DELAY;
 
       const tick = g.append('g')
-        .attr('class', 'tick')
+        .attr('class', isTargetTick ? 'tick tick--target' : 'tick')
         .attr('transform', `translate(0,${yPx - 4})`)
         .style('opacity', 0.01);
 
       tick.append('line')
-        .attr('class', 'tick-line')
+        .attr('class', isTargetTick ? 'tick-line tick-line--target' : 'tick-line')
         .attr('x1', depthAxisX).attr('x2', depthAxisX)
         .attr('y1', 0).attr('y2', 0)
         .transition()
@@ -137,7 +138,7 @@ export class WwellIrDepthScaleComponent {
         .attr('x1', tickLeftX).attr('x2', tickRightX);
 
       tick.append('text')
-        .attr('class', 'tick-label')
+        .attr('class', isTargetTick ? 'tick-label tick-label--target' : 'tick-label')
         .attr('x', tickLabelX + 8)
         .attr('y', 0)
         .attr('dominant-baseline', 'middle')
