@@ -817,18 +817,20 @@
             @if (hasAttachment(slot.slot)) {
               <!-- One row for both cases: a file already stored server-side, or one picked on a New
                    IR and waiting for the first save. The actions are identical either way, so the
-                   only difference is where the name/size come from and the "pending" note below. -->
+                   only difference is where the name/size come from and the "pending" note below.
+                   A staged file wins over the stored one — on Replace both exist until the upload
+                   lands, and the row must describe what View/Upload will act on (the new file). -->
               @let stored = attachmentFor(slot.slot);
               @let pending = pendingAttachmentFor(slot.slot);
 
               <div class="ire__attachment-file" [class.ire__attachment-file--pending]="pending" appWwellCollapseAnimate>
                 <mat-icon class="ire__attachment-file-icon">
-                  {{ attachmentIcon(stored ? stored.contentType : pending!.type) }}
+                  {{ attachmentIcon(pending ? pending.type : stored!.contentType) }}
                 </mat-icon>
                 <span class="ire__attachment-file-meta">
-                  <span class="ire__attachment-file-name">{{ stored ? stored.fileName : pending!.name }}</span>
+                  <span class="ire__attachment-file-name">{{ pending ? pending.name : stored!.fileName }}</span>
                   <span class="ire__attachment-file-size">
-                    {{ attachmentSizeLabel(stored ? stored.sizeBytes : pending!.size) }}
+                    {{ attachmentSizeLabel(pending ? pending.size : stored!.sizeBytes) }}
                     @if (pending) {
                       · {{ canAttach() ? "not uploaded yet" : "uploads when you save" }}
                     }

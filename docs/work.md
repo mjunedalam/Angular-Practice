@@ -403,3 +403,19 @@ Replaced end to end with SAP AAE's real `GET /display?process_id=1406&wf_obj_id=
 
 16 new/updated store tests, 60 wwell-ir + sap tests green, 465/465 full Jest suite green, lint
 clean, production build clean.
+
+## 2026-09-20
+
+### wwell-ir editor — Attachments card showed the old doc name after Replace
+
+- **Symptom:** on 7.1/7.2, picking a replacement via the swap icon left the row showing the *old*
+  file's name, size and type icon (with the "not uploaded yet" note), while View opened the new file.
+- **Root cause:** `wwell-ir-editor.component.html` resolved name/size/icon with
+  `stored ? stored.X : pending!.X`. On Replace both exist until the upload lands, so the stored
+  (old) record always won — the reverse of `viewAttachment`/`removeAttachment`, which prefer the
+  staged file. Backend was fine (`IrAttachmentStorageService.store` clears the slot and returns the
+  new name); the post-upload path was fine too (`withAttachment` swaps the slot's record).
+- **Fix:** the three expressions now prefer `pending` over `stored`. Template-only change.
+- Existing wwell-ir Jest suites green (63 tests); `ngc --noEmit` on the app config clean. No new
+  specs, per the standing "defer spec coverage during the wwell-ir redesign" call. Not reproduced in
+  a live browser (dev server/backend weren't running).
