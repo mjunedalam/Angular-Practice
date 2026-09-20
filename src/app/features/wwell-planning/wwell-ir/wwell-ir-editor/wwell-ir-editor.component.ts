@@ -604,7 +604,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     if (hasCoordinates) patch['coordinates'] = formatLinkedWellCoordinates(well);
     if (hasTargetDepth) patch['targetDepthFt'] = well.targetDepth as number;
     patch['targetAquifer'] = hasTargetAquifer ? (well.targetAquifer as string) : '';
-    if (hasSupportingBusiness) patch['supportingBusiness'] = well.supportings as string;
+    patch['supportingBusiness'] = hasSupportingBusiness ? (well.supportings as string) : '';
     console.log('[IR:link] applyLinkedRequestWell — patching form group', {
       patch,
       hasElevation,
@@ -618,7 +618,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     referenceGroup.get('wellName')?.disable();
     this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
     this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
-    this.setLinkedFieldLock(referenceGroup, 'supportingBusiness', hasSupportingBusiness);
     console.log('[IR:link] applyLinkedRequestWell — done', { rawValue: referenceGroup.getRawValue() });
   }
 

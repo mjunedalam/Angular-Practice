@@ -464,3 +464,27 @@ clean, production build clean.
   HAIL_615 → `Wasia`, field disabled; 40 concurrent API calls all 200; one `eligible-for-ir` request per reload. ESLint clean,
   full Jest 84 suites / 470 tests green, `ngc --noEmit` clean. Did not save a new IR end to end (would create/delete a row in
   the dev DB); the saved-IR read path it would use is the one verified on IR-9006.
+
+### wwell-ir 1.0 Wellbore Details — BI Number and Supporting Business are now read-only fields
+
+- `wwell-ir-form.schema.ts`: `client` (BI Number) and `supportingBusiness` changed from required `select`s to read-only `text`
+  fields (same treatment as Target Aquifer/Target Depth); dropped their option-list imports and `required` validators.
+- **Supporting Business** is sourced from the linked well's `expl_wb_name` (`supportings` in the prod `get_ir_wells_prc`):
+  `applyLinkedRequestWell` now patches it (blank when the well has none) and no longer passes it through `setLinkedFieldLock`,
+  which would have re-enabled it. For a saved IR, `IrLinkedWellRow.expl_wb_name` is read in
+  `mergeIrDetailBlocksIntoIntegratedRequirement` (prod's `p.*` block already carries it); the local `get_ir_data_prc` stand-in
+  in agwa-planning now emits it too and was re-applied to the live container. `expl_wb_name` seeds restored — a text field can
+  show `Exploration`/`Producing`, which the old dropdown couldn't.
+- **BI Number has no data source anywhere** (prod `get_ir_wells_prc` returns no BI column; `exad_rcd_prewap` has none; Active
+  Well takes BI from a rig block), so it is read-only and blank until the proc/table supplies one — left unwired on purpose
+  rather than guessing a column name.
+- Verified live: saved IR-9006 shows `Supporting Business: Exploration`; HAIL_500 → `Producing`, RXYD_140 → `Exploration`; a
+  well with no value blanks the fields and they stay disabled (tested by temporarily nulling one row, then restored and
+  checked against the 03 seed script). ESLint clean, `ngc --noEmit` clean, full Jest 84 suites / 470 tests green.
+
+### Comment cleanup (git-staged files)
+
+- Stripped every comment from the staged Angular files with the TypeScript parser (`wwell-ir-detail-response.mapper.ts` 70
+  comments, `wwell-ir-payload.model.ts` 24; the editor and schema were already clean), then re-staged those two paths so the
+  index itself is comment-free. AST-equality check (comments off), eslint, `ngc --noEmit` and full Jest (470 tests) pass.
+  The agwa-planning repo's staged SQL/Java files were deliberately left alone.

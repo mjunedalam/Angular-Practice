@@ -7,14 +7,12 @@ import {
 import {
   WWELL_ACIDIZATION_OPTIONS,
   WWELL_CASING_TYPE_OPTIONS,
-  WWELL_CLIENT_OPTIONS,
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
   WWELL_DEVELOPMENT_TESTING_OPTIONS,
   WWELL_LOGGING_OPTIONS,
   WWELL_MUD_LOGGING_OPTIONS,
   WWELL_SAMPLING_OPTIONS,
-  WWELL_SUPPORTING_BUSINESS_OPTIONS,
   WWELL_TEST_TYPE_OPTIONS,
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
@@ -38,13 +36,14 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             searchable: true,
           },
           { key: 'letterNumber', label: 'Letter Number', type: 'text', placeholder: 'e.g., LTR-2026-0456' },
-          { key: 'client', label: 'BI Number', type: 'select', options: WWELL_CLIENT_OPTIONS, validators: { required: true } },
+          { key: 'client', label: 'BI Number', type: 'text', readonly: true },
           {
             key: 'supportingBusiness',
             label: 'Supporting Business',
-            type: 'select',
-            options: WWELL_SUPPORTING_BUSINESS_OPTIONS,
-            validators: { required: true },
+            type: 'text',
+            placeholder: 'auto',
+            hint: 'From the linked well — select a Link to Request to populate',
+            readonly: true,
           },
           {
             key: 'wellName',
