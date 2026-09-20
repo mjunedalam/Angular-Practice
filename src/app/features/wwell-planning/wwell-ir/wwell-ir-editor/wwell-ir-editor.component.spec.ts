@@ -171,23 +171,15 @@ describe('WwellIrEditorComponent', () => {
     expect(sections.length).toBe(wwellIrRailLeaves(WWELL_IR_SECTION_RAIL).length);
   });
 
-  it('renders a read-only view of Wellbore Details until its pencil is clicked, for a not-yet-created IR', async () => {
+  it('opens Wellbore Details straight into edit mode for a not-yet-created IR', async () => {
     await setup({ irSeq: null });
-    expect(fixture.nativeElement.textContent).toContain('HAIL-500');
-    expect(fixture.nativeElement.querySelector('app-dynamic-section')).toBeNull();
-
-    const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]');
-    editBtn.click();
-    fixture.detectChanges();
-
+    expect(fixture.nativeElement.querySelector('.ire__title').textContent).toContain('HAIL-500');
     expect(fixture.nativeElement.querySelector('app-dynamic-section')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]')).toBeNull();
   });
 
   it('saving Wellbore Details persists via store.createIr and closes edit mode', async () => {
     await setup({ irSeq: null });
-    const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Edit Wellbore Details"]');
-    editBtn.click();
-    fixture.detectChanges();
 
     findButtonByText(fixture, 'Save')?.click();
     fixture.detectChanges();

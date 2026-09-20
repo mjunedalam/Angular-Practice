@@ -15,6 +15,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -57,6 +58,7 @@ import {
   WwellIrRawOffsetWell,
   WwellIrRawProgramDetails,
   WwellIrRawProgramMain,
+  WwellIrRawReference,
   WwellIrRawRemarks,
   WwellIrRawTopsRemarks,
 } from '../wwell-ir-form/wwell-ir-form.types';
@@ -220,6 +222,10 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
   protected readonly requestReferenceRows = computed(() =>
     buildRequestReferenceRows(this.ir(), this.store.linkedRequestWellOptions()),
   );
+  protected readonly headerTitle = computed(() => {
+    const live = this.requestReferenceEdit.liveValue();
+    return (live ? live.wellName : this.ir().requestReference.wellName) || 'Untitled Well';
+  });
   protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
@@ -257,7 +263,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
     findInvertedCasingSizeRows(this.ir().casing.map(casingRowPatch)),
   );
 
-  protected readonly requestReferenceEdit = new SectionEditState(() => {
+  protected readonly requestReferenceEdit = new SectionEditState<FormGroup, WwellIrRawReference>(() => {
     const group = buildAndPatchGroup(
       this.referenceMainSection,
       this.fb,
@@ -498,9 +504,14 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
   private previousIrId: string | null = null;
 
+  private readonly hasUnsavedReferenceEdits = computed(() => {
+    const ctrl = this.requestReferenceEdit.control();
+    return ctrl !== null && this.requestReferenceEdit.liveValue() !== null && ctrl.dirty;
+  });
+
   public readonly hasUnsavedChanges = computed(
     () =>
-      this.requestReferenceEdit.isEditing() ||
+      this.hasUnsavedReferenceEdits() ||
       this.programEdit.isEditing() ||
       this.geologistContactEdit.isEditing() ||
       this.hydrogeologyEdit.isEditing() ||
@@ -529,6 +540,11 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
       const id = this.ir().id;
       if (this.previousIrId !== null && id !== this.previousIrId) this.closeAllSections();
       this.previousIrId = id;
+    });
+
+    effect(() => {
+      if (this.ir().irSeq != null) return;
+      untracked(() => this.requestReferenceEdit.open());
     });
 
     effect(() => {
@@ -601,7 +617,7 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
     const patch: Record<string, string | number> = { wellName: well.wellName };
     if (hasElevation) patch['surfaceElevationFtAsl'] = well.surfaceElevation as number;
-    if (hasCoordinates) patch['coordinates'] = formatLinkedWellCoordinates(well);
+    patch['coordinates'] = hasCoordinates ? formatLinkedWellCoordinates(well) : '';
     if (hasTargetDepth) patch['targetDepthFt'] = well.targetDepth as number;
     patch['targetAquifer'] = hasTargetAquifer ? (well.targetAquifer as string) : '';
     patch['supportingBusiness'] = hasSupportingBusiness ? (well.supportings as string) : '';
@@ -617,7 +633,6 @@ export class WwellIrEditorComponent implements OnInit, AfterViewInit {
 
     referenceGroup.get('wellName')?.disable();
     this.setLinkedFieldLock(referenceGroup, 'surfaceElevationFtAsl', hasElevation);
-    this.setLinkedFieldLock(referenceGroup, 'coordinates', hasCoordinates);
     console.log('[IR:link] applyLinkedRequestWell — done', { rawValue: referenceGroup.getRawValue() });
   }
 

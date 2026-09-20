@@ -499,3 +499,39 @@ clean, production build clean.
   `dt`/`dd`. Other sections and the shared dynamic-form styles are untouched.
 - Verified live: disabled value contrast 16.7:1, label 5.06:1 (AA needs 4.5:1); editable fields now semibold too. ESLint,
   `ngc --noEmit` and the wwell-ir Jest suites pass.
+
+### wwell-ir editor — New IR opens Wellbore Details in edit; header title follows Link to Request live
+
+- **Header title** (`ire__title`) read `ir().requestReference.wellName`, i.e. the saved/draft record, so picking a Link to
+  Request filled Water Well Name in the form but the title stayed "Untitled Well" until Save. New `headerTitle` computed reads
+  `requestReferenceEdit.liveValue()` while the section is open (falls back to `ir()` otherwise, then "Untitled Well"), so it
+  updates the instant `applyLinkedRequestWell` patches `wellName`. `requestReferenceEdit` is now typed
+  `SectionEditState<FormGroup, WwellIrRawReference>` so `liveValue()` is not `unknown`.
+- **New IR opens 1.0 Wellbore Details in edit** — a constructor effect (declared after the `ir().id` one, whose
+  `closeAllSections()` would otherwise undo it) calls `requestReferenceEdit.open()` when `ir().irSeq == null`. It tracks the
+  whole `ir()` rather than the id because a draft's id is always `'draft'`: its object only changes on a fresh New IR or after
+  Discard. `open()` is a no-op when already open, so typed input is never overwritten. The pencil is hidden while editing.
+- **Unsaved-changes prompt** — step 1 being open on a draft would have made `hasUnsavedChanges` true for an untouched New IR
+  and popped the "Unsaved changes" dialog on every row switch. New `hasUnsavedReferenceEdits` counts it only once the form is
+  `dirty` (reads `liveValue()` so it re-evaluates per edit, since `dirty` is not a signal). Other sections unchanged.
+- Specs: the two editor specs that assumed a draft opens read-only behind a pencil were rewritten for the new behaviour; no
+  new specs added (deferred during the redesign). No dedicated test covers the dirty-gating.
+- Verified live (dev server + mock :7070): New IR → step 1 open, title "Untitled Well"; pick HAIL_615 → title "HAIL_615"
+  with nothing saved, matching Water Well Name; dirty draft + row click → "Unsaved changes" dialog; untouched draft + row
+  click → switches silently; dirty draft → New IR → Discard → step 1 reopens clean with "Untitled Well"; saved IR-9004/9029
+  still show step 1 read-only. ESLint, `tsc --noEmit -p tsconfig.app.json` and the wwell-ir Jest suites (63 tests) pass.
+
+### wwell-ir 1.0 Wellbore Details — Coordinates read-only
+
+- `coordinates` in `wwell-ir-form.schema.ts` is now `readonly: true` (placeholder `auto` + the same "From the linked well" hint as
+  Target Depth/Aquifer/Supporting Business). `required` and the coordinates `pattern` were dropped — a disabled control is
+  never validated, and a `*` on a field the author can't type in was misleading. The now-unused
+  `WWELL_APPROVAL_COORDINATES_PATTERN` import was removed from the IR schema (the Requests/WLDA forms still use it).
+- Why read-only is correct: `wwell-ir-payload.mapper.ts` never sends `coordinates`, and on read they come only from the linked
+  well (`surfacen`/`surfacee`), so a hand-typed value was silently lost after Save.
+- `applyLinkedRequestWell` no longer routes `coordinates` through `setLinkedFieldLock` (its `enable()` branch, for a well with no
+  coordinates, would have re-enabled the field) and always patches it — blank when the well has none, like Target Aquifer /
+  Supporting Business, so switching links can't leave a stale value the author can't edit. Surface Elevation still locks/unlocks.
+- Verified live: New IR → Coordinates disabled, no `*`, placeholder `auto`; pick RXYD_140 → `25.4023°N, 43.8871°E`, still
+  disabled, header title `RXYD_140`. No mock well lacks coordinates, so the blank-for-no-coordinates branch is by reading only.
+  ESLint, `tsc --noEmit -p tsconfig.app.json`, wwell-planning Jest (67 tests) pass.

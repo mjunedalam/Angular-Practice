@@ -1,9 +1,6 @@
 import type { Signal } from '@angular/core';
 import { WwellFieldOption, WwellFormStepConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
-import {
-  WWELL_APPROVAL_COORDINATES_PATTERN,
-  WWELL_APPROVAL_WELL_NAME_PATTERN,
-} from '../../shared/wwell-approvals/wwell-approvals.config';
+import { WWELL_APPROVAL_WELL_NAME_PATTERN } from '../../shared/wwell-approvals/wwell-approvals.config';
 import {
   WWELL_ACIDIZATION_OPTIONS,
   WWELL_CASING_TYPE_OPTIONS,
@@ -80,8 +77,9 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             key: 'coordinates',
             label: 'Coordinates',
             type: 'text',
-            placeholder: 'e.g., 27.5114°N, 41.7208°E',
-            validators: { required: true, pattern: WWELL_APPROVAL_COORDINATES_PATTERN },
+            placeholder: 'auto',
+            hint: 'From the linked well — select a Link to Request to populate',
+            readonly: true,
             colSpan: 2,
           },
         ],
