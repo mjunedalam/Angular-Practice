@@ -45,9 +45,13 @@ $master-width: 240px;
    * showing up as a short card beside a tall one.
    */
   align-items: stretch;
-  gap: 1.25rem;
+  // One gutter for the whole page: round the edge, between the list and the detail, and (inherited) between the
+  // cards inside the detail — a hairline of page showing through, not a margin.
+  --wwell-gutter: 0.375rem;
+
+  gap: var(--wwell-gutter);
   height: 100%;
-  padding: 1.5rem;
+  padding: var(--wwell-gutter);
 }
 
 /* ── Master column ────────────────────────────────────────────── */
@@ -101,25 +105,117 @@ $master-width: 240px;
   border-radius: 999px;
   background: tokens.alpha($accent, 12%);
   color: $accent;
-  font-size: 0.76rem;
+  font-size: tokens.$text-2xs;
   font-weight: 650;
 }
 
+/* The action row: New IR takes the width the toggle group leaves, so the pair reads as one control
+ * row rather than a stub button beside a stranded pair of icons. Both are 32px tall. */
+.wwell-ir__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
 .wwell-ir__new-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  padding: 0 12px 0 6px;
+  border-radius: tokens.$radius-sm;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  // The CTA's own depth token: a top highlight + soft shadow in light, a hairline ring + cobalt glow
+  // in dark. This rule used to zero it out, which is what made the button read as a flat slab.
+  box-shadow: var(--wp-cta-shadow);
+  transition:
+    transform tokens.$duration-fast tokens.$ease-out,
+    box-shadow tokens.$duration-fast tokens.$ease-out,
+    background-color tokens.$duration-fast tokens.$ease-out;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &:disabled {
+    box-shadow: none;
+  }
+}
+
+// Icon + label as one centred group. Own wrapper (not Material's projected label span, which scoped
+// styles can't reach) so the gap and alignment are ours.
+.wwell-ir__new-inner {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  border-radius: 7px;
-  font-weight: 600;
-  font-size: 0.84rem;
-  padding: 0 10px;
-  box-shadow: none;
+  justify-content: center;
+  gap: 8px;
+}
+
+// The plus sits in a small chip — tinted from the label colour so it works on both the ink (light) and
+// inverted (dark) fills — and turns a quarter on hover, a cue that this creates something.
+.wwell-ir__new-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: tokens.alpha(tokens.$on-cta, 16%);
+  transition: transform tokens.$duration-base tokens.$ease-out;
 
   mat-icon {
-    width: 15px;
-    height: 15px;
-    font-size: 15px;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    line-height: 14px;
+    margin: 0;
+  }
+}
+
+.wwell-ir__new-btn:hover:not(:disabled) .wwell-ir__new-icon {
+  transform: rotate(90deg);
+}
+
+// Busy state while the server mints the new IR: the ring replaces the plus and the label says why the
+// button is inert, instead of just going grey.
+.wwell-ir__new-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wwell-ir-spin 0.7s linear infinite;
+}
+
+@keyframes wwell-ir-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwell-ir__new-btn,
+  .wwell-ir__new-icon {
+    transition: none;
+  }
+
+  .wwell-ir__new-btn:hover:not(:disabled),
+  .wwell-ir__new-btn:hover:not(:disabled) .wwell-ir__new-icon {
+    transform: none;
+  }
+
+  .wwell-ir__new-spinner {
+    animation-duration: 1.8s;
   }
 }
 
@@ -215,7 +311,7 @@ $master-width: 240px;
   background: tokens.$surface;
   border-radius: 999px;
   padding: 0.14rem 0.4rem;
-  font-size: 0.66rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   color: $muted;
   cursor: pointer;
@@ -486,7 +582,7 @@ $master-width: 240px;
 
 .wwell-ir__row-meta {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: tokens.$text-2xs;
   color: $muted;
   white-space: nowrap;
   overflow: hidden;
@@ -499,7 +595,7 @@ $master-width: 240px;
   gap: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -540,7 +636,7 @@ $master-width: 240px;
  * the bento cards themselves, which is the only "card" layer left.
  */
 .wwell-ir__detail-panel {
-  padding: 0.25rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -555,7 +651,7 @@ $master-width: 240px;
 /* ── View mode — read-only stepper + approval-workflow sidebar, side by side ────── */
 .wwell-ir__view-layout {
   display: flex;
-  gap: 0.9rem;
+  gap: var(--wwell-gutter, 0.9rem);
   min-height: 0;
 }
 
@@ -626,6 +722,8 @@ $master-width: 240px;
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
+  // The rail is narrow and the title wraps: nothing here may push past its edge.
+  min-width: 0;
   margin-bottom: 0.9rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid tokens.$border-soft;
@@ -664,7 +762,7 @@ $master-width: 240px;
 
 .wwell-ir__approval-progress {
   margin: 2px 0 0;
-  font-size: 0.7rem;
+  font-size: tokens.$text-2xs;
   color: $muted;
 }
 

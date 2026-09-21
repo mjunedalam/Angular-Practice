@@ -46,7 +46,7 @@ $accent: tokens.$accent;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  gap: 0.75rem;
+  gap: var(--wwell-gutter, 0.75rem);
 }
 
 /* ── Header: mirrors wwell-ir-editor's `.ire__header` so swapping edit ⇄ view in the same
@@ -67,7 +67,7 @@ $accent: tokens.$accent;
 
 .irv__eyebrow {
   margin: 0 0 1px;
-  font-size: 0.72rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -102,7 +102,7 @@ $accent: tokens.$accent;
 }
 
 .irv__progress-label {
-  font-size: 0.7rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   color: $muted;
   white-space: nowrap;
@@ -129,7 +129,7 @@ $accent: tokens.$accent;
   gap: 6px;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;

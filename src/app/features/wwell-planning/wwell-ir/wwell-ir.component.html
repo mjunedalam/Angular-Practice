@@ -6,19 +6,30 @@
         <span class="wwell-ir__count">{{ rows().length }}</span>
       </div>
 
-      <button
-        type="button"
-        mat-flat-button
-        color="primary"
-        class="wwell-ir__new-btn"
-        [disabled]="store.creatingIr()"
-        (click)="createNewIr()"
-      >
-        <mat-icon>add</mat-icon>
-        New IR
-      </button>
+      <div class="wwell-ir__actions">
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          class="wwell-ir__new-btn"
+          [disabled]="store.creatingIr()"
+          [attr.aria-busy]="store.creatingIr()"
+          (click)="createNewIr()"
+        >
+          <span class="wwell-ir__new-inner">
+            <span class="wwell-ir__new-icon" aria-hidden="true">
+              @if (store.creatingIr()) {
+                <span class="wwell-ir__new-spinner"></span>
+              } @else {
+                <mat-icon>add</mat-icon>
+              }
+            </span>
+            {{ store.creatingIr() ? 'Creating&hellip;' : 'New IR' }}
+          </span>
+        </button>
 
-      <app-wwell-theme-toggle />
+        <app-wwell-theme-toggle />
+      </div>
     </header>
 
     <div class="wwell-ir__filter-bar">

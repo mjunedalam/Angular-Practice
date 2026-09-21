@@ -150,7 +150,7 @@
 }
 
 .approval-timeline__role {
-  font-size: 0.74rem;
+  font-size: tokens.$text-2xs;
   font-weight: 650;
   color: tokens.$muted;
   text-transform: uppercase;
@@ -168,12 +168,12 @@
   display: inline-flex;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
 }
 
 .approval-timeline__date {
-  font-size: 0.78rem;
+  font-size: tokens.$text-2xs;
   color: tokens.$subtle;
 }
 
@@ -230,7 +230,7 @@
   }
 
   .approval-timeline__header {
-    font-size: 0.7rem;
+    font-size: tokens.$text-2xs;
     gap: 4px;
   }
 
@@ -288,21 +288,21 @@
   }
 
   .approval-timeline__role {
-    font-size: 0.62rem;
+    font-size: tokens.$text-2xs;
   }
 
   .approval-timeline__name {
-    font-size: 0.78rem;
+    font-size: tokens.$text-2xs;
     line-height: 1.2;
     overflow-wrap: break-word;
   }
 
   .approval-timeline__badge {
     padding: 1px 7px;
-    font-size: 0.64rem;
+    font-size: tokens.$text-2xs;
   }
 
   .approval-timeline__date {
-    font-size: 0.68rem;
+    font-size: tokens.$text-2xs;
   }
 }

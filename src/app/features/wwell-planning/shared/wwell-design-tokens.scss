@@ -75,6 +75,7 @@ $warning-soft: var(--wp-warning-soft);
 $radius-sm: var(--wp-radius-sm); // small controls, chips
 $radius-md: var(--wp-radius-md); // cards, panels, inputs
 $radius-lg: var(--wp-radius-lg); // dialogs, popovers
+$radius-pill: var(--wp-radius-pill); // count badges, capsule bars
 $shadow-1: var(--wp-shadow-1);
 $shadow-2: var(--wp-shadow-2);
 $shadow-3: var(--wp-shadow-3);
@@ -86,12 +87,14 @@ $shadow-3: var(--wp-shadow-3);
 }
 
 // ── Typography scale ─────────────────────────────────────────────
-// Sizes are unchanged from the earlier "one step up" pass; hierarchy now comes from weight,
-// tracking and line-height (see the role mixins below).
-$text-2xs: 0.7rem; // badges, eyebrows
-$text-xs: 0.8rem; // meta text, captions
-$text-sm: 0.88rem; // secondary body text
-$text-base: 0.95rem; // primary body text, list-row names
+// Hierarchy comes from weight, tracking and line-height (see the role mixins below), not from
+// shrinking the type: nothing on these screens is set under 12px, which is the floor for a label
+// that has to be read at a glance on a dense tool. Anything that used to be 0.62–0.74rem
+// (9.9–11.8px) now takes `$text-2xs`.
+$text-2xs: 0.75rem; // 12px — badges, eyebrows, table heads
+$text-xs: 0.8125rem; // 13px — meta text, captions
+$text-sm: 0.875rem; // 14px — secondary body text
+$text-base: 0.9375rem; // 15px — primary body text, list-row names
 $text-md: 1.05rem; // card/section sub-headings
 $text-lg: 1.3rem; // detail-panel titles
 $text-xl: 1.55rem; // page titles

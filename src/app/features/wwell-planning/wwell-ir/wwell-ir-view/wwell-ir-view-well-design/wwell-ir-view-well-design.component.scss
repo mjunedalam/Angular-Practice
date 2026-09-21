@@ -2,6 +2,8 @@
 
 :host {
   display: block;
+  // The step's first card fills the visible page (below), so this must know how tall that is.
+  height: 100%;
 }
 
 // Plain vertical stack of full-width cards — same pattern as the Details step's `.ir-details`
@@ -11,6 +13,16 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: 100%;
+}
+
+// The wellbore panel takes the whole visible page — the profile across the top, the drawing left, key depths / casing
+// / formation tops right, as in its maximised view — so nothing in it needs a scroll; the tables below are reached by
+// scrolling past it. It does not get smaller than `min-height`: a page shorter than that scrolls instead.
+.ir-well-design__view {
+  flex: 0 0 auto;
+  height: max(100%, var(--ir-well-design-min-h, 30rem));
+  min-height: 0;
 }
 
 .ir-well-design__table-card {

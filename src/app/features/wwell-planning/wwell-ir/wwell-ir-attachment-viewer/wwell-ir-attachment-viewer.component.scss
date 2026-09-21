@@ -51,7 +51,7 @@
   border-radius: 5px;
   background: tokens.$accent;
   color: #fff;
-  font-size: 0.62rem;
+  font-size: tokens.$text-2xs;
   font-weight: 650;
   letter-spacing: 0.06em;
 }
@@ -64,7 +64,7 @@
 }
 
 .irv__slot {
-  font-size: 0.68rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -83,7 +83,7 @@
   flex: none;
   padding-left: 0.65rem;
   border-left: 1px solid rgb(255 255 255 / 10%);
-  font-size: 0.75rem;
+  font-size: tokens.$text-2xs;
   color: rgb(232 234 240 / 55%);
 }
 
@@ -140,7 +140,7 @@
   border-radius: 8px;
   background: transparent;
   color: rgb(232 234 240 / 78%);
-  font-size: 0.76rem;
+  font-size: tokens.$text-2xs;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   cursor: pointer;

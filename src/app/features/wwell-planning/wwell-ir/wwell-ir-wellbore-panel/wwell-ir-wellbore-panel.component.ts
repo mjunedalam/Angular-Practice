@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   TemplateRef,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -18,18 +20,27 @@ import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore
 import { createDepthScale } from '@shared/utils/wellbore-math.util';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
-import { buildScaleTicks } from '../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
+import { buildScaleTicks, resolveScaleDepthFt } from '../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { WWELL_IR_EXPANDED_DIAGRAM_LAYOUT, WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from '../wwell-ir-editor/wwell-ir-preview-diagram-layout';
+import { buildWellboreFacts } from './wwell-ir-wellbore-facts.util';
+import { WwellIrWellboreGlyphComponent } from './wwell-ir-wellbore-glyph.component';
+import { LabelCandidate, placeLabels } from './wwell-ir-wellbore-labels.util';
+import { buildWellboreProfile, readWellboreAt } from './wwell-ir-wellbore-profile.util';
 
 const CASING_TYPE_LINER = 'Liner';
 const CASING_TYPE_GRAVEL_PACK = 'Gravel Pack';
 const DEFAULT_MAX_WIDTH_PX = 600;
 const DEFAULT_MAX_HEIGHT_PX = 700;
-
-interface WellborePanelStat {
-  readonly label: string;
-  readonly value: string;
-}
+/** The maximised view takes most of the window: this share of it, but not less than the floors (any smaller and the
+ *  drawing and every figure cannot all be shown without scrolling) nor more than the caps (past them a bigger dialog
+ *  only adds margin round the drawing). */
+const EXPANDED_VIEWPORT_SHARE_PCT = 92;
+const EXPANDED_MIN_WIDTH_PX = 1240;
+const EXPANDED_MIN_HEIGHT_PX = 700;
+const EXPANDED_MAX_WIDTH_PX = 1760;
+const EXPANDED_MAX_HEIGHT_PX = 1100;
+/** How far one arrow key, or one notch of a drag, moves the depth slider: whole tens, unless total depth is not one. */
+const SLIDER_STEP_FT = 10;
 
 interface WellborePanelLegendKey {
   readonly key: 'ground' | 'water' | 'casing' | 'liner' | 'open-hole' | 'gravel' | 'screen' | 'perforated' | 'tops';
@@ -42,25 +53,25 @@ interface WellboreGridLine {
 }
 
 const isFlagYes = (flag: string | null | undefined): boolean => (flag ?? '').trim().toUpperCase() === 'Y';
-const formatFeet = (value: number): string => `${value.toLocaleString('en-US')} ft`;
 
-/** The wellbore diagram as a finished panel: header, readouts, the depth-gridded diagram, a legend
- *  of only the elements actually drawn, and an Expand action that opens the same diagram in
+/** The wellbore diagram as a finished panel: header, readouts, a surface-to-TD well profile, the depth-gridded
+ *  diagram, a legend of only the elements actually drawn, the casing program and formation tops, and an Expand action that opens the same diagram in
  *  Presentation's fullscreen layout (see WWELL_IR_EXPANDED_DIAGRAM_LAYOUT) — the inline preview is deliberately compact, so its labels
  *  are small by design and Expand is where they are comfortable to read. Shared by the editor's
- *  preview (Sections and the Timeline sidebar) and the view page's Well Design step; the printed
- *  letter keeps its own paper-white markup because the PDF snapshot reads it.
+ *  preview (Sections and the Timeline sidebar) and the view page's Well Design step. The Letter has its
+ *  own diagram markup (it is exported as a PNG for the PDF, which is captured from a paper-scoped copy).
  *
  *  `ViewEncapsulation.None`: the Expand dialog is portalled to <body>, so its surface can only be
  *  styled by global rules (`.wp-wellbore-dialog`). Everything else is namespaced `.wbp`. */
 @Component({
   selector: 'app-wwell-ir-wellbore-panel',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule, WellBoreViewComponent, WwellIrDepthScaleComponent],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, WellBoreViewComponent, WwellIrDepthScaleComponent, WwellIrWellboreGlyphComponent],
   templateUrl: './wwell-ir-wellbore-panel.component.html',
   styleUrl: './wwell-ir-wellbore-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  host: { '[class.wbp-host--fit]': 'fit()' },
 })
 export class WwellIrWellborePanelComponent {
   readonly diagramData = input.required<WellboreDiagramData>();
@@ -78,7 +89,14 @@ export class WwellIrWellborePanelComponent {
   readonly compact = input(false);
   /** Set by the Expand dialog's own instance: fills the dialog, shows Close instead of Expand. */
   readonly expanded = input(false);
+  /** Fills the box its parent gives it (which must have a height), laid out like the maximised view — the profile
+   *  across the top, the drawing and its key left, the figures right — so the whole panel is seen without scrolling.
+   *  Keeps the Expand action. The parent passes the layout the drawing is to use (WWELL_IR_EXPANDED_DIAGRAM_LAYOUT). */
+  readonly fit = input(false);
   readonly closed = output<void>();
+
+  /** The maximised layout: the dialog's own instance, or an inline one that fills its box. */
+  protected readonly isFilled = computed(() => this.expanded() || this.fit());
 
   protected readonly expandedLayout = WWELL_IR_EXPANDED_DIAGRAM_LAYOUT;
 
@@ -109,15 +127,21 @@ export class WwellIrWellborePanelComponent {
     return `0 0 ${wellboreViewWidth} ${svgHeight}`;
   });
 
+  /** The depth the scale runs to: the target depth, redrawn to the deepest formation top once one
+   *  goes past it (see resolveScaleDepthFt). */
+  protected readonly scaleDepth = computed(() => resolveScaleDepthFt(this.diagramData()));
+
+  /** Depth → y in the diagram SVG's own coordinates, before the top margin: the axis's scale. */
+  private readonly depthScale = computed(() => createDepthScale(this.scaleDepth(), this.layout().drawingHeight));
+
   /** One hairline per depth tick, in the diagram SVG's own coordinates — the same scale and ticks
-   *  the depth axis uses (down to the target depth), so each line continues its tick across the
-   *  diagram. */
+   *  the depth axis uses, so each line continues its tick across the diagram. */
   protected readonly gridLines = computed<readonly WellboreGridLine[]>(() => {
-    const totalDepth = this.diagramData().targetDepth;
-    if (totalDepth <= 0) return [];
+    const scaleDepth = this.scaleDepth();
+    if (scaleDepth <= 0) return [];
     const { marginTop, drawingHeight } = this.layout();
-    const scale = createDepthScale(totalDepth, drawingHeight);
-    return buildScaleTicks(totalDepth, drawingHeight)
+    const scale = this.depthScale();
+    return buildScaleTicks(scaleDepth, drawingHeight, this.diagramData().targetDepth)
       .filter(depth => depth > 0)
       .map(depth => ({ depth, y: marginTop + scale(depth) }));
   });
@@ -127,14 +151,86 @@ export class WwellIrWellborePanelComponent {
     return data.wellDesign?.staWaterLvl ?? data.hydrogeology?.estStaticWaterLevel ?? 0;
   });
 
-  protected readonly stats = computed<readonly WellborePanelStat[]>(() => {
+  /** 0 until a target depth exists: every depth-dependent figure is then left out. */
+  protected readonly totalDepthFt = computed(() => (this.hasTargetDepth() ? this.diagramData().totalDepth : 0));
+
+  /** The readouts and casing/tops tables printed around the diagram. */
+  protected readonly facts = computed(() => {
     const data = this.diagramData();
-    const stats: WellborePanelStat[] = [];
-    if (this.hasTargetDepth() && data.totalDepth > 0) stats.push({ label: 'Total depth', value: formatFeet(data.totalDepth) });
-    if (this.staticWaterLevelFt() > 0) stats.push({ label: 'Static water level', value: formatFeet(this.staticWaterLevelFt()) });
-    if (data.casings.length > 0) stats.push({ label: 'Casing strings', value: String(data.casings.length) });
-    if (data.geologicTops.length > 0) stats.push({ label: 'Formation tops', value: String(data.geologicTops.length) });
-    return stats;
+    return buildWellboreFacts({
+      totalDepth: this.totalDepthFt(),
+      staticWaterLevel: this.staticWaterLevelFt(),
+      pumpSetting: data.wellDesign?.pumpLvl ?? 0,
+      casings: data.casings,
+      tops: data.geologicTops,
+    });
+  });
+
+  /** The well profile strip: every string, the open hole, the tops, the water level and the pump on one line. */
+  protected readonly profile = computed(() => {
+    const data = this.diagramData();
+    const design = data.wellDesign;
+    return buildWellboreProfile({
+      totalDepth: this.totalDepthFt(),
+      staticWaterLevel: this.staticWaterLevelFt(),
+      pumpSetting: design?.pumpLvl ?? 0,
+      casings: data.casings,
+      tops: data.geologicTops,
+      openHole: isFlagYes(design?.ohFlg),
+      screen: isFlagYes(design?.lsFlg),
+      gravelPack: isFlagYes(design?.gpFlg),
+    });
+  });
+
+  /** Where the depth slider was left; null until it is first used, so the strip is not lit for a reading nobody asked for. */
+  private readonly pickedDepthFt = signal<number | null>(null);
+
+  protected readonly hasPickedDepth = computed(() => this.pickedDepthFt() !== null);
+
+  protected readonly sliderStepFt = computed(() => (this.totalDepthFt() % SLIDER_STEP_FT === 0 ? SLIDER_STEP_FT : 1));
+
+  /** The slider's value, kept inside the well when total depth changes under it. */
+  protected readonly pickedDepth = computed(() => Math.min(this.pickedDepthFt() ?? 0, this.totalDepthFt()));
+
+  /** What is in the hole at the slider's depth. */
+  protected readonly reading = computed(() => {
+    const profile = this.profile();
+    return profile ? readWellboreAt(profile, this.pickedDepth()) : null;
+  });
+
+  private readonly strip = viewChild<ElementRef<HTMLElement>>('strip');
+
+  /** The strip's drawn width: what a label fits beside is decided at the width it is actually printed at. */
+  private readonly stripWidthPx = signal(0);
+
+  /** The formation codes that fit over their ticks, shallow to deep; a tick whose code does not fit stays a tick. */
+  protected readonly topLabels = computed(() => {
+    const profile = this.profile();
+    const width = this.stripWidthPx();
+    if (!profile) return [];
+    const candidates = profile.tops.map<LabelCandidate>((top, index) => ({
+      key: String(index),
+      xPx: (top.leftPct / 100) * width,
+      texts: [top.code],
+      anchor: 'center',
+    }));
+    return placeLabels(candidates, width);
+  });
+
+  /** "Water 185 ft" and "Pump 800 ft" beside their pins — the value alone, then the bare number (the strip's
+   *  header gives the unit), when the name does not fit; and never across the other pin's line. */
+  protected readonly pinLabels = computed(() => {
+    const profile = this.profile();
+    const width = this.stripWidthPx();
+    if (!profile) return [];
+    const xs = profile.markers.map(marker => (marker.leftPct / 100) * width);
+    const candidates = profile.markers.map<LabelCandidate>((marker, index) => ({
+      key: marker.kind,
+      xPx: xs[index],
+      texts: [`${marker.name} ${marker.value}`, marker.value, marker.bare],
+      anchor: 'start',
+    }));
+    return placeLabels(candidates, width, xs);
   });
 
   /** Only what the diagram actually draws, from the same data/flags the renderers read. */
@@ -142,7 +238,7 @@ export class WwellIrWellborePanelComponent {
     const data = this.diagramData();
     const design = data.wellDesign;
     const keys: WellborePanelLegendKey[] = [{ key: 'ground', label: 'Ground level' }];
-    if (this.staticWaterLevelFt() > 0) keys.push({ key: 'water', label: 'Static water level' });
+    if (this.staticWaterLevelFt() > 0) keys.push({ key: 'water', label: 'Water level' });
     if (data.casings.some(c => c.csgType !== CASING_TYPE_LINER && c.csgType !== CASING_TYPE_GRAVEL_PACK)) {
       keys.push({ key: 'casing', label: 'Casing' });
     }
@@ -150,18 +246,32 @@ export class WwellIrWellborePanelComponent {
     if (isFlagYes(design?.ohFlg)) keys.push({ key: 'open-hole', label: 'Open hole' });
     if (isFlagYes(design?.gpFlg)) keys.push({ key: 'gravel', label: 'Gravel pack' });
     if (isFlagYes(design?.lsFlg)) keys.push({ key: 'screen', label: 'Liner screen' });
-    if (isFlagYes(design?.perforatedFlg)) keys.push({ key: 'perforated', label: 'Perforated interval' });
+    if (isFlagYes(design?.perforatedFlg)) keys.push({ key: 'perforated', label: 'Perforated' });
     if (data.geologicTops.length > 0) keys.push({ key: 'tops', label: 'Formation top' });
     return keys;
   });
+
+  constructor() {
+    effect(onCleanup => {
+      const strip = this.strip()?.nativeElement;
+      if (!strip || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(([entry]) => this.stripWidthPx.set(entry.contentRect.width));
+      observer.observe(strip);
+      onCleanup(() => observer.disconnect());
+    });
+  }
+
+  protected pickDepth(event: Event): void {
+    this.pickedDepthFt.set((event.target as HTMLInputElement).valueAsNumber);
+  }
 
   protected expand(): void {
     this.isExpandedOpen.set(true);
     this.expandedDialog = this.dialog.open(this.expandedTemplate(), {
       panelClass: 'wp-wellbore-dialog',
-      width: 'min(1280px, 96vw)',
-      maxWidth: '96vw',
-      height: 'min(92vh, 880px)',
+      width: `min(max(${EXPANDED_VIEWPORT_SHARE_PCT}vw, ${EXPANDED_MIN_WIDTH_PX}px), 98vw, ${EXPANDED_MAX_WIDTH_PX}px)`,
+      maxWidth: '98vw',
+      height: `min(max(${EXPANDED_VIEWPORT_SHARE_PCT}vh, ${EXPANDED_MIN_HEIGHT_PX}px), 98vh, ${EXPANDED_MAX_HEIGHT_PX}px)`,
       ariaLabel: this.title(),
       autoFocus: 'dialog',
     });

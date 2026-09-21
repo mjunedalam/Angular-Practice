@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, input, signal, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
@@ -11,6 +11,7 @@ import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
+import { resolveScaleDepthFt } from '../../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
 const OPEN_HOLE_COMPLETION = 'Open Hole';
@@ -33,9 +34,19 @@ const OPEN_HOLE_COMPLETION = 'Open Hole';
   templateUrl: './wwell-ir-view-letter.component.html',
   styleUrl: './wwell-ir-view-letter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:beforeprint)': 'printing.set(true)',
+    '(window:afterprint)': 'printing.set(false)',
+  },
 })
 export class WwellIrViewLetterComponent {
   readonly ir = input.required<IntegratedRequirement>();
+
+  /** The sheet follows the app theme on screen, but paper is white: while the browser is printing it is
+   *  pinned back to the light tokens (`.wp-paper`), or a dark-mode print would come out light-on-white.
+   *  The PDF download is unaffected either way — it is built server-side, and the diagram in it is
+   *  captured from a paper-scoped copy (see wwell-ir-wellbore-snapshot.util.ts). */
+  protected readonly printing = signal(false);
 
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
 
@@ -79,6 +90,8 @@ export class WwellIrViewLetterComponent {
     buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
   );
   protected readonly hasWellboreData: Signal<boolean> = computed(() => hasWellboreDiagramDataForIntegratedRequirement(this.ir()));
+  /** Target depth, redrawn to the deepest formation top once one goes past it. */
+  protected readonly scaleDepth: Signal<number> = computed(() => resolveScaleDepthFt(this.wellboreDiagramData()));
   // Same gate as the Well Design step's own preview (wwell-ir-editor.component.ts's
   // `hasTargetDepth`) — hides the D3-rendered "TOTAL DEPTH: 0 FT" label when it never got filled in.
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);

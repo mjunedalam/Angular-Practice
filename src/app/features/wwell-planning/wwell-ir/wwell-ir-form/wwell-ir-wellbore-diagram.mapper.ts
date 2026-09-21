@@ -383,20 +383,27 @@ function assembleWellboreDiagramData(
    * passing raw `targetDepthFt` through unchanged left the element's bottom pinned to its top
    * (ground level) whenever Target Depth reads as 0, making it technically present in the DOM but
    * zero-height/invisible. Resolving it once here (real value if positive, else
-   * `STATIC_TARGET_DEPTH_FT`) and reusing that everywhere below — `totalDepth`, `displayDepth` and
-   * `targetDepth` — keeps the whole diagram (scale, ground line, completion
-   * elements, total-depth label) consistent instead of some parts anchoring to a real value and
-   * others to a fallback.
+   * `STATIC_TARGET_DEPTH_FT`) and reusing that everywhere below — `totalDepth` and `targetDepth`
+   * (and `displayDepth`, until a formation top goes past it) — keeps the whole diagram (scale,
+   * ground line, completion elements, total-depth label) consistent instead of some parts anchoring
+   * to a real value and others to a fallback.
    */
   const resolvedTargetDepthFt = targetDepthFt > 0 ? targetDepthFt : STATIC_TARGET_DEPTH_FT;
+  /**
+   * Presentation draws its depth scale around whichever is deeper, the target depth or the deepest
+   * formation top (`selectDisplayDepth` in well-data.selectors.ts) — this keeps that rule, minus its
+   * padding: the scale is drawn to the target depth, which is what an IR is planned against, and is
+   * only redrawn once a top is added (or edited) below it. Only tops count, as there; a casing row
+   * deeper than the target still runs off the end of the scale.
+   */
+  const deepestTopFt = Math.max(0, ...renderableFormationTops.map(row => row.depthFt ?? 0));
 
   return {
     wellName,
     totalDepth: resolvedTargetDepthFt,
-    // The depth scale (and the diagram's own vertical domain, which is `max(totalDepth, displayDepth)`)
-    // always runs to the target depth — never past it to reach a deeper casing/formation row, and
-    // never held open by a minimum. A row deeper than the target runs off the end of the scale.
-    displayDepth: resolvedTargetDepthFt,
+    // The shared diagram's own vertical domain is `max(totalDepth, displayDepth)`, so this moves
+    // the diagram and (through `resolveScaleDepthFt`) the ruler and gridlines together.
+    displayDepth: Math.max(resolvedTargetDepthFt, deepestTopFt),
     casings: mapCasings(renderableCasings),
     drlgCasings: [...buildLinerTopAnchors(renderableCasings), ...buildShoeAnchorFallback(renderableCasings)],
     geologicTops: mapGeologicTops(renderableFormationTops, surfaceElevationFtAsl),

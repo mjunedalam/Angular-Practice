@@ -1,13 +1,15 @@
 <div class="ir-well-design">
-  <app-wwell-ir-wellbore-panel
-    title="Well Bore Design"
-    emptyHint="No casing or formation top data recorded for this well."
-    [diagramData]="wellboreDiagramData()"
-    [hasData]="hasWellboreData()"
-    [hasTargetDepth]="hasTargetDepth()"
-    [layout]="diagramLayout"
-    [maxWidthPx]="860"
-  />
+  <div class="ir-well-design__view">
+    <app-wwell-ir-wellbore-panel
+      title="Well Bore Design"
+      emptyHint="No casing or formation top data recorded for this well."
+      [diagramData]="wellboreDiagramData()"
+      [hasData]="hasWellboreData()"
+      [hasTargetDepth]="hasTargetDepth()"
+      [layout]="diagramLayout"
+      [fit]="true"
+    />
+  </div>
 
   <section class="ir-well-design__table-card">
     <h3 class="ir-well-design__title">Formation Tops</h3>
@@ -24,7 +26,7 @@
           @for (top of ir().formationTops; track top.name) {
             <tr>
               <td>{{ top.name }}</td>
-              <td>{{ top.depthFt }}</td>
+              <td>{{ formatDepth(top.depthFt) }}</td>
               <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
             </tr>
           } @empty {
@@ -94,7 +96,7 @@
             <tr>
               <td>{{ row.type }}</td>
               <td>{{ row.sizeIn }}</td>
-              <td>{{ row.depthFtBgl }}</td>
+              <td>{{ formatDepth(row.depthFtBgl) }}</td>
               <td>{{ row.remarks || '—' }}</td>
             </tr>
           } @empty {

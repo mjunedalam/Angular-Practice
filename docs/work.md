@@ -568,3 +568,397 @@ clean, production build clean.
 - Verified live by delaying the detail GET in the page and screenshotting: Timeline selected → timeline shimmer (dots, preview,
   no rail); Sections selected → rail + cards (no dots/preview); preview 320px at 1440, equal to the body at 820, no horizontal
   overflow. ESLint, `ngc --noEmit` and wwell-planning Jest pass. No new specs (deferred).
+
+### wwell-planning — light/dark theme, Geist typography, wellbore + depth scale
+
+- **Direction ("Instrument"):** Geist + Geist Mono (self-hosted via `@fontsource-variable/geist` and `geist-mono`, added to
+  `package.json`), cool neutrals, hairline borders, a monochrome ink primary button, cobalt kept for signals only. The toggle lives
+  inside the module (`app-wwell-theme-toggle` in the header of the 4 pages), defaults to the OS theme and remembers the choice.
+- **Token architecture:** `shared/_wwell-theme.scss` is the single source of truth — `--wp-*` custom properties declared by
+  `light-tokens` / `dark-tokens` mixins on `:root` and switched by `data-wp-theme` on `<html>` (overlays render on `<body>`, so the
+  attribute has to live on the root; the `wp-` prefix keeps other features from reading them). `wwell-design-tokens.scss` keeps its
+  Sass names but every value is now `var(--wp-*)`; Sass colour functions can't act on `var()`, so `tokens.alpha($c, n%)` compiles to
+  `color-mix(in srgb, …, transparent)`. Status colours (`WWELL_STATUS_COLORS`, the IR/requests configs) are `--wp-st-*` trios.
+- **Runtime:** `WwellThemeService` (root-provided, signals, `localStorage` key `wwell-theme` in try/catch, 260ms cross-fade guarded
+  by `prefers-reduced-motion`). Material 20.2 `mat.theme(theme-type: color-scheme)` follows `color-scheme: var(--wp-scheme)`; the app
+  only calls `mat.core()`, so unthemed Material buttons rendered transparent with a black label on dark — new `_wwell-material.scss`
+  (`buttons`, `form-fields`) sets them from tokens on each page/dialog/editor/view root. Select panels (portalled) read the same tokens.
+- **Wellbore, depth scale, letter:** the shared `features/presentation/well-bore-view` is untouched — `_wwell-wellbore.scss` re-points
+  its variables and recolours its hardcoded SVG presentation attributes only under wwell-planning wrappers, so Presentation renders as
+  before. Depth scale rewritten (hairline axis, muted ticks, tabular Geist Mono labels with a surface halo). The printed letter is
+  `.wp-paper`, which re-declares the LIGHT token set, so the letter and the wellbore PNG snapshot embedded in the PDF stay
+  paper-white in both themes (the snapshot inlines computed colours onto a white canvas); it sits on a sunken tray in dark.
+- **Typography retune:** weights 800→650 and 700→600 across the module's component stylesheets (36 + 50 declarations), heavy-title
+  tracking −0.01em→−0.018em, and row codes/eyebrows (`*__row-code`, `*__eyebrow` — every one shows an ID like `REQ-00231` /
+  `IR-9006`) now use Geist Mono with tabular numerals. Ad-hoc radii (7/10/18px) were left as-is rather than remapped to the 6/8/12
+  `--wp-radius-*` tokens.
+- **Verified:** WCAG AA on sampled states in both themes (token-level script + an in-page sweep of the rendered text; 0 real
+  failures after tuning the subtle/danger/tint tokens); all 29 entry stylesheets compile with `sass`; ESLint and `ngc --noEmit`
+  clean; wwell-planning Jest 67 passing. Live at 768/1024/1440 × light/dark on all 4 pages: no horizontal overflow, no clipped row
+  codes. No new specs, per the standing "defer spec coverage" call.
+- **Known, not fixed (pre-existing, in the shared renderer):** casing / ground / water labels can overlap on some wells (e.g. the
+  `18" Intermediate` and `7" Liner` labels on IR-9006); fixing it means editing the Presentation renderer, out of scope here.
+
+### wwell-ir read display — no pills/ovals around picked options; 2.0 General reformatted
+
+- **Symptom (light and dark):** in 2.0 General (and 1.0 Target Aquifer, Hydrogeology Aquifer/Test Type, and the view page's cards) every
+  option-type value sat in a bordered 999px pill. A multi-select's picks are one newline-joined string, so the pill wrapped the whole
+  block — Transmission became a large oval. Each 2.1/2.2 sub-section also drew a faint box edge.
+- **Cause 1:** `.ire__view-value--badge` (editor) / `.kv-card__value--badge` (view) — removed. **Cause 2:** `.ire__group
+  .ire__section--sub` reset border and radius but kept `.ire__section`'s `box-shadow`/background — now `none`/`transparent`.
+- **Format:** new `app-wwell-ir-kv-value` (`wwell-ir/wwell-ir-kv-value/`) is the value half of every read row (4 sites in the editor, 1 in
+  `wwell-ir-view-kv-card`). Plain values stay text; picks are listed one per line with a small dot and hanging indent once there is
+  more than one (so a wrapped "Aquifer Performance Test (APT)" can't read as two picks), and a single pick is plain text.
+- `KvRow.badge` renamed `options` (it no longer means "render as a badge"); only the util's 10 rows and the 5 templates used it.
+- Verified live in light and dark (editor timeline + view page). ESLint, `ngc --noEmit` and wwell-planning Jest (67 tests) pass. No new
+  specs, per the standing "defer spec coverage" call.
+
+### wwell-ir wellbore view — premium panel, complete dark/light theme, legible Expand view
+
+Scope was `wwell-ir/` only: the shared Presentation renderer (`features/presentation/well-bore-view`) is untouched, and the theme
+partial moved from `wwell-planning/shared/_wwell-wellbore.scss` to `wwell-ir/_wwell-ir-wellbore-theme.scss` (only wwell-ir uses it).
+
+- **Bug found while checking dark:** Sections view never included the wellbore theme, and even where it was included the diagram's own
+  `[_nghost] .geo-axis { stroke: #000 }` (0,2,0) tied the override's specificity, so stylesheet order decided. Result: geologic labels,
+  axis, WASI/UMER codes and "TOTAL DEPTH" were near-black on the dark surface. The theme now compiles to (0,3,0) under `.wbp .wbp__stage`
+  (`wellbore-theme($ng-deep: false)` for the `ViewEncapsulation.None` panel; the letter and others keep the `::ng-deep` form).
+- **`app-wwell-ir-wellbore-panel`** (new, `wwell-ir/wwell-ir-wellbore-panel/`) replaces three hand-rolled copies of the card (editor
+  Sections + Timeline sidebar share one template; view page Well Design). Header (title, well name), readouts (total depth, static WL,
+  casing strings, formation tops — only those with data), a stage with depth gridlines drawn in the diagram's own coordinates from the
+  same scale/tick interval as the axis (`buildDepthTicks`/`pickTickInterval`), a legend of only the elements actually drawn (from the
+  casing types and `ohFlg/gpFlg/lsFlg/perforatedFlg`), and a designed empty state. Figure size comes from the layout (aspect ratio and
+  depth-scale share computed), sized with container-query units so the SVGs (`preserveAspectRatio="none"`) never stretch.
+- **Expand** opens the same panel in a dialog with `FULLSCREEN_DIAGRAM_LAYOUT` + `isFullscreen` — the layout Presentation uses — so
+  labels are actually readable (the inline preview is ~6–12px text by design). The panel renders itself in the `ng-template`, so there is
+  one implementation. **While it is open the inline diagram is unmounted**: the shared renderer gives casing clip-paths/gradients fixed SVG
+  ids and `url(#id)` resolves to the first match, so two diagrams mounted together made the dialog's casing vanish (seen live).
+- **Layouts** (`wwell-ir-preview-diagram-layout.ts`): preview is taller (1000 vs 650) so shoes a few hundred feet apart get more px/ft,
+  and `wellboreViewWidth` 780→870 stops the right-hand casing labels clipping at the viewBox edge (`casingCenterX` stays — left-anchored
+  labels like "Flowing — SIWHP" need it to clear the "Geologic Horizons" heading; tried 385, it collided). New sidebar layout (520 wide)
+  gives the drawing ~50% more pixels; in that form the leader labels are hidden (`wbp--compact`) because they render at ~6px and collide —
+  hover tooltips still work and every label is in Expand.
+- Depth scale: no own gradient/rounded tray any more (it sits on the stage), hairline edge only. The letter/PDF path is unchanged; the
+  paper scope still resolves the light tokens (checked in dark: axis `rgb(10,13,20)` on white).
+- Verified live in light and dark on IR-9006/9004/9019 + empty-state IRs: Timeline sidebar, Sections, view Well Design, Expand dialog;
+  1440/1024/768 widths, no overflow, figure always inside the stage. In-page contrast sweep 0 failures in both themes; SVG label
+  colours on the stage ≥ 4.9:1 (light) / ≥ 7:1 (dark). Sass (all sheets), ESLint, `ngc --noEmit`, wwell-planning Jest (67) pass. No new
+  specs, per the standing "defer spec coverage" call.
+- **Known, not fixed (shared renderer):** labels that land on the same depth still overlap — e.g. IR-9006's `PS @ 344` pump label on
+  the `18" Intermediate @ 320` casing label, and the `SIWHP` arrow over the `GROUND LEVEL` label on IR-9019. Fixing needs collision
+  avoidance in Presentation's renderer.
+
+### wwell-ir depth scale — always runs to the target depth
+
+- **Ask:** the depth scale must be drawn to the target depth, always. It was fed `displayDepth`, which `wwell-ir-wellbore-diagram.mapper.ts`
+  computed as the deepest of target / casing rows / formation-top rows with a 500 ft floor — so a deeper row or a shallow target stretched
+  or padded the scale — and the ruler's last label stopped at the last regular tick (a 3,200 ft well ended its labels at 3,000).
+- **Fix at the source:** `displayDepth` is now the resolved target depth (`computeDisplayDepthFt` and `MIN_SCALE_DEPTH_FT` removed). The shared
+  diagram's own vertical domain is `max(totalDepth, displayDepth)`, so it moves with the ruler and they stay aligned. The depth scale, the
+  panel's gridlines and the letter now all read `targetDepth` explicitly.
+- **Ruler ends on the target:** new `buildScaleTicks` (`wwell-ir-depth-scale/wwell-ir-depth-ticks.util.ts`) = the regular ticks plus the target
+  depth as the final tick; a regular tick too close to print beside it (26 viewBox units) is dropped, and one that lands exactly on it isn't
+  repeated. The last tick is drawn in the accent colour (neutral when no real target depth exists and the scale ends at the 1,000 ft
+  placeholder). Depth axis and panel gridlines share the util, so a gridline always continues a tick.
+- **Found while checking:** in the Expand dialog the new last tick and the "TOTAL DEPTH" label were cut off — Presentation's fullscreen layout
+  ends the drawing exactly at the SVG's bottom edge (`80 + 860 = 940`). `WWELL_IR_EXPANDED_DIAGRAM_LAYOUT` adds 60 units under the drawing;
+  the drawing itself is unchanged. (The label was silently missing there before this.)
+- **Behaviour change to know about:** a casing or formation-top row deeper than the target depth now runs off the end of the scale instead of
+  stretching it. There is no warning for that yet (the editor only warns on inverted casing sizes).
+- Verified live on IR-9006 / 9004 / 9019: ticks end `…3,000, 3,200` / `…2,800, 2,950` / `…3,500, 4,100`, in the editor sidebar, Expand
+  dialog, and the Letter tab. Sass (all sheets), ESLint, `ngc --noEmit`, wwell-planning Jest (67) pass; no new specs (standing call).
+
+### wwell-planning theme — dark contrast dial + Appearance popover
+
+- **Ask:** dark mode had too much contrast; wanted a custom way / slider to control it.
+- **Dial, not a second palette:** the dark neutrals in `shared/_wwell-theme.scss` (page/surface steps, lines, ink/text/muted/subtle, CTA,
+  tooltip, shimmer, wellbore outline/pad) are now `dial(HIGH, SOFT)` = `color-mix(in srgb, HIGH var(--wp-contrast, 50%), SOFT)`. HIGH is the
+  previous dark palette (100% is byte-identical to before — verified page/surface/ink/text/CTA rgb); SOFT lifts surfaces to a lighter
+  charcoal and eases text down. Accent, semantic, status and wellbore domain colours are untouched. Light theme is untouched.
+- **AA holds across the range:** anchors were checked with a script at 0/25/50/75/100% — every text tier ≥ 4.6:1 on every surface (the first
+  SOFT `subtle` was 4.4 and had to be brightened), control borders ≥ 3.3:1, CTA label ≥ 12:1. Live in-page sweep at 0% (worst case) on all
+  four pages + the Expand dialog: 0 failing text nodes; tooltip 12.1:1.
+- **Default is 50%**, softer than the old dark (ink-on-surface 13.1:1 vs 17.1:1). See the light-dial entry below for the per-theme
+  variables (`--wp-contrast-dark` / `--wp-contrast-light`) that replaced the single `--wp-contrast` first written here.
+- **`WwellThemeService`:** adds `mode` (`light | dark | system`) / `setMode`, and `contrast` / `setContrast` / `resetContrast`. Contrast is
+  written to `<html>` as `--wp-contrast`, persisted under `wwell-contrast` (cleared when equal to the default); choosing System clears
+  `wwell-theme`. Storage failures still only cost persistence.
+- **`app-wwell-theme-toggle`:** keeps the one-press sun/moon switch and adds a joined `tune` button opening an Appearance popover
+  (CDK connected overlay, focus-trapped, ESC/backdrop close, focus returns to the trigger): Light / Dark / System segmented radios and a native
+  range slider (Soft ↔ High, live %), Reset.
+- Verified live: keyboard (Home/End on the slider), persistence across reload, Reset, Light/System/Dark switching, ESC focus restore,
+  popover on-screen at 375px (`cdkConnectedOverlayPush`). Sass (30 sheets + styles.scss), ESLint, `ngc --noEmit`, wwell-planning Jest (67)
+  pass; no new specs (standing call).
+- **Gotcha:** `viewChild.required<ElementRef<HTMLElement>>('x', { read: ElementRef })` doesn't type-check (explicit generic drops the `read`
+  overload) — use `viewChild.required('x', { read: ElementRef<HTMLElement> })`. And `#ref` on a `mat-icon-button` is the Material component,
+  not the element, so `read: ElementRef` is required to focus it.
+- **Also fixed (UX):** the wwell-ir master-column search placeholder was 266px of text in a 159px input (40% cut off: "Search by code, well,").
+  Now "Search code, well…" (132px); the full "by code, well, request or client" wording moved to `aria-label` + `title`.
+  **Found, not fixed (needs a design call):** the status-chip strip is 436px of chips in a 182px window with no scroll cue, so
+  "Submit for Review" / "In Review" and most of "In Progress" are invisible until you scroll a strip with a hidden scrollbar.
+
+### wwell-planning theme — contrast dial for light too
+
+- **Ask:** allow the contrast slider in the light theme as well (a dimmed, lower-glare look, like dark's Soft end).
+- **Per-theme dials:** `_wwell-theme.scss` now has `dark-tone()` / `light-tone()`; each dialed token is `color-mix(in srgb, HIGH <dial>, SOFT)`
+  reading `--wp-contrast-dark` (fallback 50%) or `--wp-contrast-light` (fallback 100%). Light's High end is the unchanged standard palette and
+  is the default (a fresh light theme looks exactly as before); Soft (0%) dims page/surface/lines to a cool grey (surface `#ebeef2`, page
+  `#dde1e8`) and darkens ink/text and the fixed-colour text (accent, danger, success, warning, wellbore ground/target/actual/water) so they
+  keep pace with the darker grounds. 34 light tokens are dialed (55 in total with dark's 21).
+- **`.wp-paper` never follows the dial:** `light-tokens($dialed: false)` returns the High values untouched — the compiled `.wp-paper` block is
+  byte-identical to before, and a live probe at light 0% still resolves paper to white / ink `rgb(10,13,20)`. The IR letter and the wellbore
+  PNG that ships in the PDF are unaffected.
+- **Service:** `WwellThemeService` keeps a dial per theme (`DEFAULT_CONTRASTS = { dark: 50, light: 100 }`); `contrast` / `setContrast` /
+  `resetContrast` / `isContrastDefault` act on the theme that is showing. Both CSS variables are always written to `<html>`, so a theme
+  switch repaints at the right contrast in one step. Storage: dark keeps `wwell-contrast` (an already-saved value still applies), light
+  uses `wwell-contrast-light`; a value equal to its default clears its key.
+- **Popover:** the slider is always enabled; label/aria-label/hint follow the theme ("Light contrast", "Lower it to cut glare in bright rooms.").
+- **AA check:** scripted at 0/25/50/75/100% — the bar is "no pairing worse than it is at High today" (the all-grounds metric is stricter than
+  real usage, so current values already sit at 4.3–4.5 on it): every fixed-colour token at Soft is ≥ its High-end value; ink ≥ 9.6, text ≥
+  7.5, muted ≥ 5.4, subtle ≥ 5.0, control border ≥ 4.8. Live in-page sweep at light 0% on all four pages + the Expand dialog: 0 failures.
+- Verified live: default 100% (Reset disabled), Home → 0% moves only the light variable/key, dark stays at 50%, Light↔Dark keeps each theme's
+  value, Reset in light clears `wwell-contrast-light`. Sass (30 sheets + styles.scss), ESLint, `ngc --noEmit` pass; no new specs (standing call).
+
+### wwell-planning UX audit pass (requests / WLDA / land-affairs pages, both themes)
+
+- **Search placeholders** on Requests, WLDA Approvals and Land Affairs Approvals were cut off in the 159px input ("Search by req #, clier").
+  Now "Search req #, client…" (143px, measured live); the full "by req #, client or well name" wording moved to `aria-label` + `title`
+  (same fix as the IR page).
+- **Approval Chain header** (`wwell-approval-timeline`): "Approval Chain — REQ-\n00252" broke mid-code in the narrow column. The title is one
+  flex item now with the code in a `white-space: nowrap` span, so it wraps at the space ("APPROVAL CHAIN —" / "REQ-00252"). First attempt
+  made the code its own flex item (it jumped to the far right) — caught only by looking at the screenshot, not by the geometry checks.
+- Checked and clean: no horizontal overflow on any of the four pages at 1024 / 768 / 375.
+- **Found, not fixed (needs a call):** status-chip strip on IR (3 of 5 chips hidden, no scroll cue); every page load shows stacked red
+  "Failed to fetch" / "HTTP 404 Not Found" toasts that overlap the detail header's status pill; "New Request" primary button also appears on
+  the two approvals queues; Land Affairs' two-line title pushes its list ~22px lower than the other pages; selected record / view / filters
+  are not in the URL; broken AGWA logo in the app shell (outside the module).
+- Sass (30 sheets + styles.scss), ESLint, `ngc --noEmit`, wwell-planning Jest (67) pass; no new specs (standing call).
+
+### sap-service, New IR button, wellbore statistics, timeline dots, themed Letter
+
+- **sap-service started:** `~/Downloads/Misc/sap-service` is a standalone Quarkus mock of SAP AAE's `/trigger` and `/display` (port 9090, matches
+  `sapServiceUrl` in `external-config.json`). Started with `./mvnw quarkus:dev -Dquarkus.console.enabled=false` (no `clean`). Health `UP`; the IR
+  page's "Approval Workflow" sidebar now loads and the "Failed to load the SAP approval workflow status" toast is gone. The remaining "Failed to
+  fetch" on the other pages is the daily-operations/email service on 8080, which is not running (planning on 7070 is).
+- **Incident:** `shared/wwell-theme-toggle/wwell-theme-toggle.component.scss` was found truncated to 0 bytes (mtime 17:32, after my last edit) — the
+  toggle rendered unstyled (icons stacked, no border, 40px). Cause unknown (not one of my commands; the file was open in the IDE). Restored from
+  the staged copy, which held every edit; re-verified live (32×32, joined border).
+- **New IR button** (`wwell-ir.component.{html,scss}`): was 40px tall beside the 32px toggle group, its "+" stranded left, and `box-shadow: none`
+  stripped the CTA's own depth token. Now a full-width primary action row (`.wwell-ir__actions`) sharing the toggle's 32px height, plus icon in a
+  tinted chip that turns a quarter on hover, `var(--wp-cta-shadow)` depth, press/focus states, and a real busy state (CSS ring + "Creating…",
+  `aria-busy`) instead of just greying. Reduced-motion respected. Checked light/dark; busy state checked by cloning its markup (a real click would
+  create a record).
+- **Wellbore statistics** (`wwell-ir-wellbore-panel/`): new pure util `wwell-ir-wellbore-facts.util.ts` derives everything from data the diagram
+  already draws — stat tiles (total depth, static water level, water column, deepest shoe with size/type, pump setting), a well-profile bar
+  (surface→TD: cased vs open/below-shoe share, water and pump markers), a casing program table and formation tops table. A shoe deeper than the
+  target depth is flagged (tile + row + "below TD" text) — closes the "deeper than target depth" gap noted earlier. In the Expand dialog the
+  extras sit in a right-hand rail beside the diagram (grid; stacks under 900px); compact sidebar gets the tables the hidden leader labels lose.
+  Added `$radius-pill` to the design tokens. No new specs (standing call) — the util is pure and easy to spec when that pause ends.
+- **Timeline circles:** `.ire__tl-dot--done.ire__tl-dot--active` — Timeline view opens every step, so a completed circle was also "active" and the
+  later `--active` rule repainted its ring/halo cobalt. Done now wins: green fill, green ring, green halo (checked computed styles: all six done
+  circles green, the pending one keeps cobalt).
+- **Letter follows the theme:** the sheet no longer carries a permanent `.wp-paper` (it is themed, and follows the contrast dials). Two safeguards so
+  paper stays paper: (1) `captureWellboreSnapshot` now rasterizes an off-screen copy of the diagram row inside a `.wp-paper` wrapper, so the PNG sent to
+  the PDF is ink-on-white whatever the screen theme — verified: capture in dark vs light gives an identical pixel hash (3468×2520, 96.06% white);
+  (2) `beforeprint`/`afterprint` pin the sheet back to `.wp-paper` while the browser prints (checked while in dark). The server-side PDF is unaffected.
+  Sweep on the Letter tab: 0 failing text nodes at dark 0/50/100% and light 0/100%.
+- **Test-harness note:** zsh doesn't word-split `set -- $combo`, so an empty value wrote `--wp-contrast-dark: %`, which invalidates every dark token
+  (black on navy). The app never writes that (the service clamps and always emits `N%`), but an *invalid* value bypasses the `var(--x, 50%)` fallback.
+- Sass (30 sheets + styles.scss), ESLint, `ngc --noEmit`, wwell-planning Jest (67) pass.
+
+### Full test IR (IR-9065) — HAIL_500, every section populated
+
+- **What:** one IR created through the real API (`POST /planning/api/v1/integrated-requirements`, all six table blocks INSERT, the same shape
+  `buildWwellIrBulkSavePayload` produces) linked to HAIL_500 (prewap 5009 — one of the two wells with no IR yet). Read back and checked against the
+  payload row by row, then checked in the app (all sections "Completed" except Attachments; Wellbore Preview + Expand verified).
+- **Contents:** 5 casings per the user's program — Conductor 30" @ 120, Surface 24" @ 400, Intermediate 18" @ 1,500 ("a8" read as 18), Production
+  13" @ 2,000, Liner 9" @ 3,300; well design flags Open Hole (6 1/2"), Screened, Screened + Gravel Pack, pump at 800 ft; 5 tops (DMM 120, RUS 480,
+  UMER 760, ARUM 1,450, WASI 2,150); 3 offset wells (EP A 1187 / 1203 / 1266); Estimated Hydrology pump-test with all six visible fields (WASI, 185 ft
+  water level, 800 ft pump depth, 2,100 ppm TDS, 1,500 GPM, 3 ppm H2S); Program Details every group filled; both geologists; letter no.
+  LTR-2026-0500. Draft — not submitted to SAP. (First insert used a 24/18 5/8/13 3/8/9 5/8/7 5/8 program; replaced by the one above.)
+- **Local mock data changed:** `exad_rcd_prewap` 5009 (HAIL_500) `target_dpth` **3,100 → 3,800** (dev DB only; the 03 seed file still says 3,100 and
+  would revert on a rebuild). The 3,300 ft liner shoe sat below the old target depth, where the depth scale ends, so the open hole / screen / gravel
+  pack had no interval to draw in. With 3,800 they get 500 ft below the shoe (cased 87% / open hole 13%). Revert: `UPDATE exad_rcd_prewap SET
+  target_dpth = 3100 WHERE prewap_seq = 5009`.
+- **Two things learned the hard way (both changed the data after first insert):**
+  - `csg_size` holds the bare number (`24`, `18 5/8`) — the shared renderer appends the `"` itself, so `24"` drew as `24""`. The form placeholder
+    (`e.g., 20"`) is misleading; UI-created IRs store bare numbers. Size is part of the PK (`ir_seq, csg_size`), so fixing it was DELETE + INSERT.
+  - A **7"** liner is the app's "screen liner" (Rule 2/3): open hole, gravel pack and screen all end at its shoe and their labels collide with the
+    liner label. Any non-7" liner (7 5/8" tried, then the user's 9") puts them below the shoe down to TD, each labelled cleanly.
+  - Casing save order matters: `05-agwa-iud-package.sql` runs the MERGE (INSERT/UPDATE) **before** the DELETE, both keyed on `(ir_seq, csg_size)`
+    only. To re-use a size with a different type/depth, send it as an UPDATE (a DELETE + INSERT of the same size ends with the row deleted). By
+    reading the proc, the editor's own diff (`casingKey` = type + size) looks like it hits this when a row's Type is changed but its Size kept —
+    not tested in the UI.
+- **Finding, not changed:** production's `update_ir_data_prc` declares `distanct`, `spec_capacity`, `plan_ss_dpth` (and every other measured
+  column) as `NUMBER(22)` — scale 0 — so decimals are rounded on save (2.4 km → 2, 7.81 GPM/ft → 8, sub-sea 485.2 → 485). The local
+  `05-agwa-iud-package.sql` copies it. Only `est_sta_water_lvl`, `est_water_quality`, `est_productivity`, `siwhp` are bare `NUMBER`.
+- **Not populated (no column / no UI path):** BI Number (no source on the link record), Offset Wells remarks (`water_remarks` is always sent null and
+  never read back), attachments (separate upload API). `gen_remarks` left null — the UI never writes it.
+- Creating an IR removes its well from `GET /wells/eligible-for-ir` (eligibility = no IR yet), so only RXYD_140 is left to try the New IR flow on.
+
+### wwell-ir depth scale — redraws when a formation top goes past the target depth
+
+- **Ask:** keep Presentation's scale rule — draw around whichever is deeper, the deepest formation top or the target depth — but in the IR base
+  it on the target depth and redraw only once a top is added below it. Presentation's `selectDisplayDepth` (`core/store/shared/well-data.selectors.ts`)
+  is `max(target/current depth, deepest planned top, deepest actual top) + 500 ft`; `presentation/` and the shared renderer are untouched.
+- **Mapper** (`wwell-ir-wellbore-diagram.mapper.ts`): `displayDepth = max(resolved target depth, deepest renderable formation top)`; `totalDepth` /
+  `targetDepth` stay the target, so the "TOTAL DEPTH" label and the open hole / screen / gravel pack interval stay on the target. The shared diagram's
+  domain is `max(totalDepth, displayDepth)`, so the drawing follows. No padding (the ruler still ends exactly on what it is drawn to). It reacts to
+  live editing too — the editor feeds the mapper the Formation Tops FormArray while a row is being edited.
+- **Ruler / gridlines / Letter:** new `resolveScaleDepthFt` (the same `max(totalDepth, displayDepth)`) in `wwell-ir-depth-ticks.util.ts`;
+  `buildScaleTicks(scaleDepth, drawingHeight, targetDepth)` now marks the target as its own accent tick and, when the scale runs past it, ends
+  on the scale's end as a neutral tick (dropped if it is too close to the target to print beside it). `app-wwell-ir-depth-scale` got a
+  `targetDepth` input; the panel (ruler + gridlines) and the Letter bind `scaleDepth()` + `targetDepth`.
+- **Unchanged on purpose:** only tops extend the scale, as in Presentation — a casing shoe deeper than the target still runs off the end (and is
+  still flagged "below TD" in the panel). Default case (no top past the target) is identical: ruler `… 3,500 [3,800]`.
+- **Verified live on IR-9065 (target 3,800):** typing 4,300 into the WASI depth in the editor (unsaved) → ruler `… 3,500 [3,800] 4,000 4,300`,
+  10 gridlines, WASI label at the bottom edge unclipped, TOTAL DEPTH still 3,800, in the sidebar and the Expand dialog; cancelling the row edit
+  returns it to `… [3,800]`. Then saved WASI at 4,300 temporarily: the Letter draws the same extended ruler; restored to 2,150 afterwards
+  (DB re-read). `ngc --noEmit`, ESLint, Jest (wwell-planning + core selectors + presentation, 160) pass; no new specs (standing call).
+- **Seen while checking, not changed:** the Formation Tops "Sub-sea" column (editor table and Letter) shows floating-point noise —
+  `485.20000000000005`, `-154.79999999999995` — because sub-sea is recomputed as elevation − depth on the client instead of using the stored
+  (rounded) value or rounding the result. Also, cancelling an inline row edit left the editor's unsaved-changes guard armed (it prompted when
+  opening the view page).
+
+### wwell-ir wellbore panel — profile first, then the diagram, then the figures
+
+- **Ask:** re-order the Wellbore Preview panel to Well profile → wellbore diagram → the readout tiles (Total depth / Static water level / Water
+  column / Deepest shoe / Pump setting), and improve the diagram's UX. Panel-local only (`wwell-ir-wellbore-panel/`); the shared renderer and
+  `presentation/` are untouched.
+- **Order:** template is now header → profile → diagram (`.wbp__stage`) → legend → tiles → casing program / formation tops. Expand dialog: the
+  profile takes a full-width row under the header (`grid-template-areas: head / profile / stage+stats / stage+facts / legend+facts`); below 900px
+  it stacks in DOM order.
+- **Well profile redesigned (user: "better design of well profile, skinny, more informative, items reflected"):** the single 10px bar + four
+  key lines became one strip carrying every item, in a card ~119px tall in the sidebar (was ~135px).
+  Lanes on one shared width: formation tops (tick + code) above; the **track** below — one segment per string where it runs (shoe to shoe), the liner
+  in its own tone, the open stretch hatched — then **pins** for static water (round head) and pump (diamond head) with their values. Under it,
+  Cased / Open hole as range + share. Header right: `0 – 3,800 ft`. Wider forms (view page, Expand) put each figure on one line and the
+  segments say more ("18″ Intermediate", "Open hole" chip); the open segment's screen / gravel pack are named only when there is room (≥13rem),
+  not drawn over the hatch (tried — noise at sidebar width).
+  New files: `wwell-ir-wellbore-profile.util.ts` (model: segments/tops/markers/facts/aria description; equal-depth strings resolve to the narrower;
+  gravel-pack rows are not strings; tops past TD are off the strip) and `wwell-ir-wellbore-labels.util.ts` (greedy label placement at the strip's
+  *measured* width — a `ResizeObserver` on the strip feeds a signal — trying longer text first: `Water 185 ft` → `185 ft` → `185`; a label never
+  crosses another pin; a top whose code doesn't fit stays a tick). Segment text visibility is pure CSS (container queries on each segment). The
+  facts util lost its profile code (`profile` moved out of `WellboreFacts`).
+  Two things found while building it: (1) a pins box overlapping the track's grid cell was auto-placed into a second, zero-width column — all
+  three lanes now say `grid-column: 1`; (2) a full-height pin line struck through the segment labels, so pins are a short tick into the track's foot
+  plus a head below. The strip is one `role="img"` with a generated sentence (no hover, per the earlier call).
+- **Profile polish (user: "use some other shape for water/pump, and more design improvement"):** water is now a drop and the pump a submersible
+  pump (discharge pipe, motor body, intake) — inline SVGs hanging from the pin tick, label beside them (label offset 6→9px in the placer). Also:
+  strings shade top-to-bottom like the diagram's pipe (`--wbp-a/--wbp-b`; the dark theme runs the same stops the other way up via
+  `[data-wp-theme='dark']`), a small wedge at each string's shoe (a real child element, because a container can't query its own pseudo-element),
+  and a 2px water-blue line along the track's foot from the static water level to TD — the water column on the strip itself (a line, not a wash).
+  Card ~121px in the sidebar. Checked sidebar + Expand, light + dark.
+- **Real pump + shared pictograms + tile gauges (user: "use a real pump shape", "statics must use the same icon, and on the line show how much
+  below — the dot was showing from the beginning"):** new `wwell-ir-wellbore-glyph.component.ts` — one tiny inline-SVG component used by the profile
+  pins *and* the readout tiles: drop (water), pump (volute with impeller ring, motor block with ribs, outlet pipe on the centre line so it hangs from
+  its pin by the pipe; the earlier capsule/submersible read as a bottle/spark plug at large scale), guide shoe, and ground-bar-plus-down-arrow
+  for total depth. Previewed large on light/dark before wiring. The tile's old dot/bar `locator` is now a `gauge` (`WellboreStat.glyph` + `gauge`):
+  the well as a hairline, **filled from the surface down to the depth** (that is "how much below ground"), the glyph on the fill's end; the water
+  column fills its own stretch (water level → TD) with the drop where it starts. Glyphs centre themselves with `translate(-50%)` so the wider
+  pump needs no special-casing; pin labels stand 12px off the pin. Card ~124px in the sidebar.
+  Slip caught by diffing the compiled selectors: a slice edit deleted `.wbp__pin--water` (the water pin fell back to the accent colour) — restored.
+- **Tiles:** each got a locator hairline (dot = a depth, blue bar = the water column) on its foot, aligned across a row (`margin-top:auto`), so
+  where each figure sits along the well is visible at a glance. `WellboreStat` gained `locator`.
+- **Tried and removed (user: "some part of the well bore shows a different grey-blue background, I want it the same"):** a 7% water-blue wash
+  from the static water level down (a rect in the grid SVG, behind the drawing). It read as a second background over the plot only — the axis
+  column and everything above the water level stayed the stage's own tone. Gone (rect, `waterZone`, SCSS); the stage is `surface-alt` edge to
+  edge, and the water level is shown only by the shared diagram's own dashed line/label and the profile bar's marker. Checked: no SVG element in
+  the diagram paints a large fill (only the transparent `g.wellbore-root`).
+- **Motion:** entrance only, compositor properties, once — bar draws in (`scaleX`), markers drop on, tiles rise in turn.
+  `prefers-reduced-motion: reduce` turns all panel animation/transition off.
+- **Tried and removed (user: "remove the reading on hover, that line causing the issues"):** a hover depth probe — crosshair line over the
+  diagram, depth tag on the ruler, needle + readout on the profile, an invisible range scrubber on the bar, tile-hover linking. All of it is
+  gone (component signals/handlers, template, SCSS, `wwell-ir-wellbore-probe.util.ts`, `WellboreStat.depthFt`); nothing on the panel reacts to
+  hover any more except what the shared diagram already did (its own casing/label tooltips).
+- **Slip caught while removing it:** the first SCSS cut ran to the wrong marker and also deleted the legend, casing/tops tables, empty state and
+  the wellbore-theme include. Gates stayed green (Sass still compiled) — only a screenshot showed an unstyled legend. Restored verbatim and
+  checked by diffing the compiled selector set against the pre-removal compile: only probe selectors differ.
+- **Verified live (IR-9065, sidebar, dark):** order `head > profile > stage > legend > stats > facts`; hovering the diagram shows no line, tag
+  or readout (DOM has none of them); tiles show their locators; legend and tables styled. `ngc --noEmit`, ESLint, Sass, Jest (wwell-planning +
+  core selectors + presentation, 160) pass; no new specs (standing call).
+- **Seen, not changed:** IR-9065 is no longer a draft — `SAP_WF_ID` 9067, `SAP_WF_STATUS` "In Progress" (submitted from the UI outside my
+  runs). In Expand the shared diagram's own casing hover tooltip's "Cemented; shoe above Wasia top" line overlaps its "est bottom depth" row —
+  that's inside the shared renderer.
+
+## 2026-09-21
+
+### wwell-ir wellbore panel — glass profile and a depth-reading slider
+
+- **Ask ("still improvement, and glass effect with a custom controller slider"):** the slider's purpose was never pinned
+  down (both clarifying answers came back as "UI glass effect"), so it is a **depth reader** — the one control the panel was missing.
+  - *Glass:* theme tokens `--wp-glass-fill/rim/sheen/shadow` in `_wwell-theme.scss` (light + dark; overlays, so the contrast dial leaves them).
+    The profile card is the backdrop — two soft pools of the water and accent colours, `isolation`+`overflow:hidden`, so the page and the plot
+    stay one flat colour (the earlier grey-blue complaint). On it a frosted plate (`backdrop-filter: blur(14px) saturate(1.6)`, top rim, soft
+    shadow) holds the strip and the readout; the track gets a glass-tube sheen; the reading chips and the tiles catch the same light.
+  - *Slider:* a native `<input type="range">` (keyboard/touch/AT for free) laid on the strip's track, widened by one bead and pulled out half a
+    bead each side so the bead's centre travels exactly the track's width (measured: slider 946.6–1213.4 over track 956.6–1203.4). A glass bead,
+    focus ring, snaps to 10 ft (1 ft when TD is not a multiple of 10). It reads `readWellboreAt(profile, depth)` — string there, formation
+    ("In UMER"), "N ft below water" — as chips under the strip, and lights the stretch it names with an accent ring. Not hover: the slider is
+    dragged/clicked/keyed, nothing is drawn over the diagram, and nothing shows until it is first used (thumb at the surface, a hint line).
+    Chips reserve two rows in the sidebar so a reading never shifts what is below; the open hole's "Screen · Gravel pack" is left to the wider
+    forms (with it the string alone would take a row). `aria-valuetext` carries the same sentence; the strip is a `group` (was `img`, which
+    would have hidden the input from AT), its lanes stay `aria-hidden`.
+  - *Height:* a first cut with a separate rail row made the sidebar card 216px (was ~124) — against "skinny" — so the slider moved onto the track:
+    186px, stable across depths. Profile/marker/top types gained `depthFt`; `readWellboreAt` lives in the profile util.
+  - *Verified live (IR-9065; sidebar, Expand, view-page Well Design; light + dark):* readings at 0/185/1,250/3,300/3,800 ft (185 = "At water
+    level"; 3,300 = open hole, 3,800 also shows the completion in the wide forms); Home/End/arrows/Tab focus ring; no console errors.
+    `ngc --noEmit`, ESLint, Sass (compiled selectors only added, none removed), full Jest (84 suites, 470) pass; no new specs (standing call).
+
+### wwell-ir page + wellbore panel — hairline gutters, a real type scale, an aligned bottom part
+
+- **Ask:** "the bottom part is unaligned and random … make the fonts a little bigger, not easily readable" and "there is a lot of free space at the
+  bottom, top and left of the page — fill it, leave only a line".
+- **Gutters:** the page had ~40px of dead space per side (`.wwell-ir` padding 1.5rem + `.wwell-ir__detail-panel` .25rem + `.ire` .75rem) and
+  20/10/11px gaps between cards. One `--wwell-gutter: 0.375rem` on `.wwell-ir` now drives the page padding and the master/detail gap
+  (`wwell-ir.component.scss`), the editor's `.ire` gap and `.ire__body` gap (its padding is 0), the view page's `.irv` gap and view-layout gap
+  (custom property, so it inherits). The Timeline preview sidebar is `--ire-preview-w: clamp(20rem, 27vw, 27rem)` (was fixed 320px; 389px at
+  1440) — the diagram and its figures scale with its width. Sibling pages (requests / WLDA / land affairs) keep their own 1.5rem; not touched.
+- **Type scale:** `--wbp-fs-micro/small/body/figure` = 11 / 12 / 13 / 17px on `.wbp`; nothing on the panel is under 11px now (it was 9.6–10.6px: eyebrows,
+  strip labels, tile labels, legend, chips). Strip track 16→18px, lanes 14/18→17/21; `LABEL_FONT_PX` in the label placer 9.6→11 (it measures
+  the labels it places — keep it equal to `--wbp-fs-micro`), `PIN_OFFSET_PX` 12→14 (the pump icon is 19px wide); container-query thresholds scaled.
+- **Bottom part as one system** (it was a ragged flex-wrap legend, a pile of tiles with an odd fifth tile spanning the full row at twice the gauge
+  length, and tables whose columns sized per row): every block is now an eyebrow + one bordered card, one rhythm (`--wbp-block-gap`).
+  Legend = auto-fill grid with a fixed swatch column (labels shortened: "Water level", "Perforated" so two columns fit). Key depths = one list card:
+  label left, figure right-aligned in mono, gauge under at one length for every row, the qualifier ("9″ Liner") beside the label (`WellboreStat`
+  unchanged). Casing program / Formation tops share columns through `subgrid`. Wide forms (view page, Sections) lay the three cards side by side
+  (`.wbp__data`); the Expand rail keeps its grid areas (`.wbp__data { display: contents }`).
+- **The drawing's own type:** SVG text is set in viewBox units, so it printed at 9–10px in the sidebar and 6–9px in Expand (its figure is
+  height-limited, scale 0.42). Sidebar: overrides in the panel SCSS (ruler/geologic 22 units, titles 18–19, total depth 23) and
+  `WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT` depth axis 105→124 wide (`depthAxisX` 72→91) so "3,800" at 22 units (66 wide, mono) is not clipped.
+  Expand: the profile's header row now carries Cased / Open hole (−36px), the legend loses its eyebrow, the dialog is `min(96vh, 960px)` — scale
+  0.42→0.52 — and the type is lifted a third (ruler 24, geologic 26, leader labels 26/21, in-bore sizes 28). Caps: the two-line titles ("Geologic
+  Horizons", "DEPTH (FT BGL)") stay ≤19 units because the renderer's line spacing is fixed at 19–20 units — 23 made the lines overlap (seen, fixed).
+- **Also fixed:** the view page uses `DIAGRAM_LAYOUT` (1040 units), where the casing remarks ("(Driven, cemented to surface)") ran ~25 units past the
+  right edge and were cut mid-word; it now uses a copy 60 units wider (`LEADER_LABEL_ROOM`, local to `wwell-ir-view-well-design`).
+- **Verified live (IR-9065; sidebar, Sections view, view-page Well Design, Expand; light + dark):** gaps measured 6px on all four sides; eyebrows and
+  card tops line up across the three wide columns (identical `top`); readout reserves two rows so nothing shifts; tick labels clear of the viewBox edge
+  (x-min 18 in Expand, 3+ in the sidebar before the extra axis room, now more). `ngc --noEmit`, ESLint, Sass (selectors removed vs the glass build: only the
+  old tile/`:has`/`--top` rules, all replaced), full Jest (84 suites, 470) pass; no new specs (standing call).
+- **Seen, not changed:** in the wide forms the shared renderer's "Static WL: 185 ft" label sits on the top geologic code ("DMM") — renderer-internal.
+
+### wwell-ir wellbore panel — maximised view: no scrolling, one-line legend under the drawing, a calmer window
+
+- **Ask:** "once we maximise the well bore view … it must not have any scrolling, everything visible, and the legends (Ground level, Water level,
+  Casing, Liner, Open hole, Gravel pack, Liner screen, Formation top) must fit in one single line" — then, mid-work: "legends must be in the area
+  of the wellbore view, minimize the gap in between, and reduce some size of the window".
+- **Window:** `expand()` opens `min(max(92vw, 1240px), 98vw, 1760px)` × `min(max(92vh, 700px), 98vh, 1100px)` (was `min(96vh, 960px)`, then briefly
+  98% / 2000×1240). The floors keep a small window whole (the figures need ~700px of height); the caps stop a 4K monitor adding only margin. The panel
+  host inside the dialog is a size container (`.wp-wellbore-dialog app-wwell-ir-wellbore-panel { container: wbp-dialog / size }`), so
+  `.wbp--expanded` re-grids by the dialog's own size.
+- **Legend:** directly under the drawing, in the drawing's own column (`grid-area: legend`; the rail — `.wbp__data`, now a real grid item spanning
+  the stage and legend rows — stands beside both). Eight entries in one non-wrapping flex row, centered, 18px between them (was spread over the
+  whole dialog width); no eyebrow. Narrower dialogs (≤1190px) step the key down to 12px / 10px gaps (811 → 716px natural width); ≤1087px it wraps.
+- **No scroll, by tier:** dense rail (gauge 12px, rows .22rem) fits a ≥816px-high dialog beside the drawing; `@container wbp-dialog (min-height:
+  980px)` gives the rail its room back. Under 816px high (a 768–813px browser window) the three cards cannot stack (~570px), so
+  `(max-height: 815px) and (min-width: 1140px)` puts them in two columns (Key depths 15rem | Casing program + Formation tops 13.5rem) beside the
+  drawing and lets the key run under the drawing *and* the key depths (the drawing's column alone is ~690px, the key needs 811).
+- **Drawing type:** SVG text is in viewBox units, so its on-screen size follows the drawing's scale. Stage ≤680px high lifts it a third (tick 24,
+  geologic 26, leader 26/21 units); ≤600px lifts it once more (tick 28, geologic 29, leader 30, total depth 31). The casing remarks stay at 21
+  units — at 24 they ran past the drawing's right edge and were cut mid-word (seen, reverted).
+- **Verified live (IR-9065, dark + light):** dialog share, panel / rail scroll, legend rows and gaps, on-screen tick size — all no scroll, one legend
+  row, 18px gaps, zero SVG text outside the drawing (probe in screen space): 1180×768 (tick 10.9px), 1240×768, 1280×720 (10.9), 1353×813 (12.3, the
+  window in the user's last screenshot), 1366×768 (11.1), 1440×900 (14.5), 1512×982 (16.6), 1536×864 (13.6), 1920×1080 (12.3), 2560×1440 (14.2; dialog
+  1760×1100). `ngc --noEmit`, ESLint, Sass, full Jest (84 suites, 470) pass; no new specs (standing call).
+- **Limit (chosen):** a dialog narrower than ~1140px *and* shorter than 816px (a small browser window) keeps the single rail, which scrolls (315/208 at
+  1090×768, where the key also wraps to two rows); three columns there shrink the drawing until its figures are 8–9px (scale 0.28–0.34), so the scroll is the lesser evil.
+- **Seen, not changed:** the shared renderer's hover popover ("PLANNED DMM 120 ft") appears over the top geologic row when the pointer rests there.

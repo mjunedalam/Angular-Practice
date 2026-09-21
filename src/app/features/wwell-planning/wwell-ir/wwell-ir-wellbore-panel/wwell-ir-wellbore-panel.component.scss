@@ -5,6 +5,16 @@
 // `ViewEncapsulation.None` (see the component) — everything is namespaced `.wbp`, and the
 // `.wp-wellbore-dialog` block at the end styles the portalled Expand dialog's own surface.
 
+// Frosted glass: a translucent fill that blurs whatever is behind it, and the light rim a pane catches along its
+// top edge. The colours are the theme's `--wp-glass-*` overlays, so it reads in both palettes.
+@mixin glass($blur: 12px) {
+  background: var(--wp-glass-fill);
+  border: 1px solid color-mix(in srgb, var(--wp-line-strong) 45%, transparent);
+  box-shadow: inset 0 1px 0 var(--wp-glass-rim);
+  -webkit-backdrop-filter: blur($blur) saturate(1.6);
+  backdrop-filter: blur($blur) saturate(1.6);
+}
+
 app-wwell-ir-wellbore-panel {
   display: block;
   min-width: 0;
@@ -21,11 +31,21 @@ app-wwell-ir-wellbore-panel {
 .wbp {
   // Depth gridlines: a quiet continuation of the axis ticks, never competing with the drawing.
   --wbp-grid: color-mix(in srgb, var(--wp-line-strong) 65%, transparent);
+  // The sheen across a raised surface's upper corner, as light falls on glass.
+  --wbp-sheen: linear-gradient(160deg, var(--wp-glass-sheen), transparent 55%);
+  // The panel's type scale. Nothing is set smaller than `micro` (12px, upper-case labels only); prose and chips
+  // sit on `small`, table rows and facts on `body`, the figures on `figure`.
+  --wbp-fs-micro: 0.75rem;
+  --wbp-fs-small: 0.8125rem;
+  --wbp-fs-body: 0.875rem;
+  --wbp-fs-figure: 1.125rem;
+  // The rhythm between the panel's blocks, and between a block's label and its card.
+  --wbp-block-gap: 0.95rem;
 
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  padding: 0.85rem 0.9rem 0.8rem;
+  gap: var(--wbp-block-gap);
+  padding: 0.85rem 0.9rem 0.9rem;
   background: tokens.$surface;
   border: 1px solid tokens.$border;
   border-radius: tokens.$radius-lg;
@@ -51,7 +71,7 @@ app-wwell-ir-wellbore-panel {
   position: relative;
   margin: 0;
   padding-left: 0.65rem;
-  font-size: 0.95rem;
+  font-size: 1.0625rem;
   font-weight: 650;
   letter-spacing: -0.012em;
   color: tokens.$navy;
@@ -73,7 +93,7 @@ app-wwell-ir-wellbore-panel {
   flex-wrap: wrap;
   gap: 0.15rem 0.5rem;
   margin: 0.2rem 0 0 0.65rem;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: tokens.$muted;
 }
 
@@ -101,24 +121,47 @@ app-wwell-ir-wellbore-panel {
   }
 }
 
-// ── Readouts ───────────────────────────────────────────────────────
+// ── Key depths ─────────────────────────────────────────────────────
+// A list, not a pile of tiles: every row has the same three parts on the same lines — label on the left, the
+// figure right-aligned in one column, and under them the gauge (the well as a hairline, surface to total depth, at
+// one length for every row so the rows compare). Rows are cut from one card by hairlines.
+.wbp__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .wbp__stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(6.4rem, 1fr));
-  gap: 0.45rem 0.85rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
   margin: 0;
-  padding-top: 0.6rem;
-  border-top: 1px solid tokens.$border-soft;
+  padding: 0;
+  overflow: hidden;
+  background: var(--wp-line-soft);
+  border: 1px solid var(--wp-line-soft);
+  border-radius: tokens.$radius-md;
 }
 
 .wbp__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.75rem;
+  row-gap: 0.1rem;
   min-width: 0;
+  padding: var(--wbp-stat-pad, 0.5rem 0.8rem 0.4rem);
+  background: var(--wbp-sheen), tokens.$surface;
+  animation: wbp-rise tokens.$duration-slow tokens.$ease-out backwards;
+  animation-delay: calc(var(--wbp-i, 0) * 45ms);
 
   dt {
-    font-size: 0.62rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    font-size: var(--wbp-fs-micro);
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -128,11 +171,690 @@ app-wwell-ir-wellbore-panel {
   dd {
     margin: 0;
     font-family: tokens.$font-mono;
-    font-size: 0.88rem;
+    font-size: var(--wbp-fs-figure);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+    color: tokens.$navy-deep;
+  }
+}
+
+// The gauge fills the row's foot from the surface down ("how much below ground") with its pictogram on the
+// end; the water column fills the stretch it occupies.
+.wbp__gauge {
+  --wbp-tone: color-mix(in srgb, var(--wp-wb-outline) 60%, transparent);
+
+  position: relative;
+  grid-column: 1 / -1;
+  height: var(--wbp-gauge-h, 16px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 2px;
+    background: var(--wp-line);
+  }
+}
+
+.wbp__gauge--water {
+  --wbp-tone: var(--wp-wb-water);
+}
+
+.wbp__gauge--pump {
+  --wbp-tone: var(--wp-accent);
+}
+
+.wbp__gauge-fill {
+  position: absolute;
+  top: 50%;
+  display: block;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--wbp-tone);
+}
+
+// Centred on the line at its point; the tone doubles as the glyph's colour.
+.wbp__gauge-mark {
+  position: absolute;
+  top: 50%;
+  color: var(--wbp-tone);
+  filter: drop-shadow(0 0 1.5px var(--wp-surface));
+  transform: translate(-50%, -50%);
+}
+
+// The qualifier beside the label ("9″ Liner"): prose, not another upper-case label.
+.wbp__stat-hint {
+  font-family: tokens.$font-family;
+  font-size: var(--wbp-fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: tokens.$muted;
+}
+
+.wbp .wbp__stat--warn {
+  background-image: var(--wbp-sheen), linear-gradient(var(--wp-warning-soft), var(--wp-warning-soft));
+
+  dd {
+    color: var(--wp-warning);
+  }
+
+  .wbp__stat-hint {
+    font-weight: 600;
+    color: var(--wp-warning);
+  }
+}
+
+// Section label shared by the profile and the two tables.
+.wbp__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  // As tall as the count badge some carry, so a label and its card start on the same line in every column.
+  min-height: 1.15rem;
+  margin: 0;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: tokens.$subtle;
+}
+
+.wbp__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.15rem;
+  padding: 0 0.35rem;
+  border-radius: tokens.$radius-pill;
+  background: tokens.$surface-sunken;
+  font-family: tokens.$font-mono;
+  font-size: var(--wbp-fs-micro);
+  letter-spacing: 0;
+  color: tokens.$muted;
+}
+
+// ── Well profile: surface → total depth, every item on one strip ────
+// The card is the backdrop the glass sits over: two soft pools of the water and accent colours, kept inside its
+// own edges so the page and the plot around it stay one flat colour.
+.wbp__profile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem 0.55rem 0.6rem;
+  overflow: hidden;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border-soft;
+  border-radius: tokens.$radius-md;
+  box-shadow: inset 0 1px 0 var(--wp-glass-rim);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(75% 110% at 4% 108%, color-mix(in srgb, var(--wp-wb-water) 24%, transparent), transparent 72%),
+      radial-gradient(65% 120% at 98% -12%, color-mix(in srgb, var(--wp-accent) 22%, transparent), transparent 72%);
+    pointer-events: none;
+  }
+}
+
+.wbp__profile-head,
+.wbp__spans {
+  padding-inline: 0.15rem;
+}
+
+// The pane: the strip and its slider on frosted glass, over the glows.
+.wbp__plate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem 0.45rem;
+  border-radius: tokens.$radius-md;
+  @include glass(14px);
+  box-shadow:
+    inset 0 1px 0 var(--wp-glass-rim),
+    var(--wp-glass-shadow);
+}
+
+.wbp__profile-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wbp__extent {
+  font-family: tokens.$font-mono;
+  font-size: var(--wbp-fs-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: tokens.$muted;
+}
+
+// Three lanes on one shared width: the formation tops over the track, the pins' labels under it. The pins'
+// own box spans the track and the lane below, so a pin's line crosses the strings and its label hangs
+// beneath them.
+.wbp__strip {
+  --wbp-track-h: 18px;
+  --wbp-lane-h: 21px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto var(--wbp-track-h) var(--wbp-lane-h);
+}
+
+// All three share the one column (the pins' box overlaps the track's, so each says so).
+.wbp__lane--tops,
+.wbp__track,
+.wbp__pins {
+  grid-column: 1;
+}
+
+.wbp__lane--tops {
+  position: relative;
+  grid-row: 1;
+  height: 17px;
+}
+
+.wbp__tick {
+  position: absolute;
+  bottom: 1px;
+  width: 1px;
+  height: 5px;
+  margin-left: -0.5px;
+  background: tokens.$subtle;
+}
+
+.wbp__lane-label,
+.wbp__pin-label {
+  position: absolute;
+  font-family: tokens.$font-mono;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 12px;
+  white-space: nowrap;
+  animation: wbp-fade tokens.$duration-slow ease-out 480ms backwards;
+}
+
+.wbp__lane-label {
+  top: 0;
+  color: tokens.$muted;
+}
+
+.wbp__pin-label {
+  top: calc(var(--wbp-track-h) + 5px);
+  color: tokens.$navy;
+}
+
+// The track: each string where it runs, shallow to deep, then the open stretch. A segment names itself
+// only as far as it has room for (container queries below), so a 30″ conductor a few px wide stays a
+// clean step and the casing table carries it.
+.wbp__track {
+  position: relative;
+  grid-row: 2;
+  overflow: hidden;
+  border-radius: tokens.$radius-pill;
+  background: var(--wp-surface-sunken);
+  animation: wbp-reveal 620ms tokens.$ease-out 80ms backwards;
+
+  // A tube of glass: the sheen runs along the top of it, over the segments.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 45%;
+    z-index: 1;
+    background: linear-gradient(180deg, var(--wp-glass-sheen), transparent);
+    pointer-events: none;
+  }
+
+  // The outline is drawn over the segments: an inset shadow on the track itself would sit under them.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--wp-line);
+    pointer-events: none;
+  }
+}
+
+.wbp__seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  container: wbp-seg / inline-size;
+  overflow: hidden;
+  font-family: tokens.$font-mono;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: tokens.$navy-deep;
+  // A hairline between neighbours, inside the segment so it never shifts one.
+  box-shadow: inset -1.5px 0 0 var(--wp-surface-alt);
+}
+
+// The stretch the slider is in.
+.wbp__seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--wp-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--wp-accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity tokens.$duration-fast tokens.$ease-out;
+}
+
+.wbp__seg--lit::after {
+  opacity: 1;
+}
+
+.wbp__seg-size,
+.wbp__seg-type {
+  display: none;
+}
+
+@container wbp-seg (min-width: 1.85rem) {
+  .wbp__seg--casing .wbp__seg-size,
+  .wbp__seg--liner .wbp__seg-size {
+    display: inline;
+  }
+}
+
+@container wbp-seg (min-width: 5rem) {
+  .wbp__seg--open .wbp__seg-size {
+    display: inline;
+  }
+}
+
+@container wbp-seg (min-width: 7.5rem) {
+  .wbp__seg--casing .wbp__seg-type,
+  .wbp__seg--liner .wbp__seg-type {
+    display: inline;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: tokens.$muted;
+  }
+}
+
+// "Open hole" plus "Screen · Gravel pack" is two chips: not before there is room for both.
+@container wbp-seg (min-width: 15rem) {
+  .wbp__seg--open .wbp__seg-type {
+    display: inline;
+    font-weight: 500;
+  }
+}
+
+// Strings shade top to bottom like the pipe the diagram draws. `--wbp-a`/`--wbp-b` are how far each edge is
+// pulled toward the ink colour (dark in the light theme, light in the dark one), so the dark theme runs the
+// same stops the other way up to keep the light on top.
+.wbp__seg--casing,
+.wbp__seg--liner {
+  background: linear-gradient(
+    var(--wbp-dir, 180deg),
+    color-mix(in srgb, var(--wp-wb-outline) var(--wbp-a), var(--wp-surface)),
+    color-mix(in srgb, var(--wp-wb-outline) var(--wbp-b), var(--wp-surface))
+  );
+}
+
+.wbp__seg--casing {
+  --wbp-a: 24%;
+  --wbp-b: 38%;
+
+  &:nth-child(even) {
+    --wbp-a: 18%;
+    --wbp-b: 30%;
+  }
+}
+
+.wbp__seg--liner {
+  --wbp-a: 10%;
+  --wbp-b: 20%;
+}
+
+[data-wp-theme='dark'] .wbp__seg {
+  --wbp-dir: 0deg;
+}
+
+// A casing shoe: the small wedge the diagram draws where a string ends. Not before the segment has room for it.
+.wbp__shoe {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: none;
+  width: 0;
+  height: 0;
+  border-bottom: 5px solid color-mix(in srgb, var(--wp-wb-outline) 75%, transparent);
+  border-left: 5px solid transparent;
+}
+
+@container wbp-seg (min-width: 1.1rem) {
+  .wbp__shoe {
+    display: block;
+  }
+}
+
+// The water column, on the strip itself: a line along the track's foot from the static water level to total depth.
+.wbp__water-line {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--wp-wb-water);
+  opacity: 0.85;
+}
+
+// Below the last shoe: hatched, as the diagram draws open hole. Its screen / gravel pack are named beside
+// the label when the segment is wide enough to say so (Expand), not drawn over the hatch — at the
+// sidebar's width they turn it to noise.
+.wbp__seg--open {
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--wp-wb-outline) 45%, transparent) 0 1px, transparent 1px 5px),
+    var(--wp-surface-sunken);
+  color: tokens.$muted;
+
+  // The labels sit on a chip: text straight over the hatch is hard to read.
+  .wbp__seg-size,
+  .wbp__seg-type {
+    padding: 0.1rem 0.35rem;
+    border-radius: tokens.$radius-pill;
+    background: var(--wp-surface-alt);
+  }
+}
+
+// Water and pump: a short tick up into the foot of the track and an icon hanging from it, the value beside
+// the icon. Kept clear of the track's middle so a segment's own label is never struck through.
+.wbp__pins {
+  position: relative;
+  grid-row: 2 / 4;
+  pointer-events: none;
+}
+
+.wbp__pin {
+  --wbp-pin: var(--wp-accent);
+
+  position: absolute;
+  top: calc(var(--wbp-track-h) - 5px);
+  width: 2px;
+  height: 7px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--wbp-pin);
+  box-shadow: 0 0 0 1.5px var(--wp-surface-alt);
+  transform-origin: top;
+  animation: wbp-pop tokens.$duration-slow tokens.$ease-out 520ms backwards;
+}
+
+.wbp__pin--water {
+  --wbp-pin: var(--wp-wb-water);
+}
+
+// Hangs from the tick's foot, its point (drop) or pipe (pump) touching it.
+.wbp__pin-icon {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: -1px;
+  color: var(--wbp-pin);
+  transform: translateX(-50%);
+}
+
+// How much is cased and how much is not: the numbers behind the two kinds of segment.
+.wbp__spans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.wbp__span {
+  min-width: 0;
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--wbp-fs-micro);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: tokens.$subtle;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-family: tokens.$font-mono;
+    font-size: var(--wbp-fs-body);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
     color: tokens.$navy;
   }
+}
+
+.wbp__pct {
+  margin-left: auto;
+  font-family: tokens.$font-mono;
+  letter-spacing: 0;
+  color: tokens.$navy;
+}
+
+// Wider than the sidebar (the view page, Expand): each figure reads on one line — swatch, name, range, share —
+// instead of stacking. The label's own box dissolves so its parts line up with the range.
+.wbp:not(.wbp--compact) {
+  .wbp__spans {
+    display: flex;
+    gap: 2.5rem;
+  }
+
+  .wbp__span {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+
+    dt {
+      display: contents;
+    }
+
+    dd {
+      order: 1;
+      margin: 0;
+    }
+
+    .wbp__pct {
+      order: 2;
+      margin-left: 0;
+    }
+  }
+}
+
+.wbp__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.wbp__dot--cased {
+  background: color-mix(in srgb, var(--wp-wb-outline) 32%, var(--wp-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--wp-wb-outline) 45%, transparent);
+}
+
+.wbp__dot--open {
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--wp-wb-outline) 55%, transparent) 0 1px, transparent 1px 3px),
+    var(--wp-surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--wp-line);
+}
+
+// ── Depth slider ───────────────────────────────────────────────────
+// Slide along the well to read it at a depth. A native range input, so keyboard, touch and screen readers work as
+// they should, laid over the strip's track and drawn as a bead of glass. It is wider than the track by one bead and
+// pulled out half a bead each side, so the bead's centre travels exactly the track's width and rests on the depth
+// it reads; a click anywhere on the track takes it there.
+.wbp__strip {
+  --wbp-thumb: 20px;
+}
+
+// A bead of glass: a lit upper corner, a tinted lower edge, a soft shadow under it.
+@mixin slider-thumb {
+  box-sizing: border-box;
+  width: var(--wbp-thumb);
+  height: var(--wbp-thumb);
+  border: 1px solid var(--wp-glass-rim);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, var(--wp-glass-rim) 0 12%, transparent 58%),
+    color-mix(in srgb, var(--wp-accent) 32%, var(--wp-glass-fill));
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--wp-wb-outline) 36%, transparent),
+    inset 0 -3px 5px color-mix(in srgb, var(--wp-accent) 30%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  cursor: inherit;
+  transition:
+    transform tokens.$duration-fast tokens.$ease-out,
+    box-shadow tokens.$duration-fast tokens.$ease-out;
+}
+
+.wbp__slider {
+  position: relative;
+  z-index: 2;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  display: block;
+  width: calc(100% + var(--wbp-thumb));
+  height: var(--wbp-thumb);
+  margin: 0 calc(var(--wbp-thumb) / -2);
+  padding: 0;
+  background: transparent;
+  outline: none;
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-slider-runnable-track {
+    height: var(--wbp-thumb);
+    background: transparent;
+  }
+
+  &::-moz-range-track {
+    height: var(--wbp-thumb);
+    background: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    @include slider-thumb;
+  }
+
+  &::-moz-range-thumb {
+    @include slider-thumb;
+  }
+
+  &:hover::-webkit-slider-thumb,
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+  }
+
+  &:hover::-moz-range-thumb,
+  &:active::-moz-range-thumb {
+    transform: scale(1.1);
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 2px var(--wp-surface),
+      0 0 0 4px var(--wp-accent);
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 2px var(--wp-surface),
+      0 0 0 4px var(--wp-accent);
+  }
+}
+
+// What is in the hole there, as glass chips: the depth, the string, the formation, the water.
+.wbp__readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+  min-height: 1.5rem;
+  margin: 0;
+  font-family: tokens.$font-mono;
+  font-size: var(--wbp-fs-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: tokens.$navy;
+}
+
+// The sidebar's chips wrap onto a second row: room is kept for it, so reading a depth does not shift what is below.
+// What is set in the open hole is left to the wider forms — with it, the string alone would take a row.
+.wbp--compact {
+  .wbp__readout {
+    min-height: 2.75rem;
+    align-content: flex-start;
+  }
+
+  .wbp__chip-extra {
+    display: none;
+  }
+}
+
+.wbp__read-depth {
+  margin-right: 0.15rem;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: tokens.$navy-deep;
+}
+
+.wbp__read-hint {
+  font-family: tokens.$font-family;
+  font-size: var(--wbp-fs-small);
+  font-weight: 500;
+  color: tokens.$subtle;
+}
+
+.wbp__chip {
+  padding: 0.1rem 0.55rem;
+  line-height: 1.3;
+  border-radius: tokens.$radius-pill;
+  white-space: nowrap;
+  @include glass(6px);
+  animation: wbp-fade tokens.$duration-fast ease-out;
+}
+
+.wbp__chip--water {
+  color: var(--wp-wb-water);
 }
 
 // ── Stage: the depth-gridded drawing surface ───────────────────────
@@ -206,8 +928,57 @@ app-wwell-ir-wellbore-panel {
   @include wb.wellbore-theme($ng-deep: false);
 }
 
-// Sidebar form: the leader labels render at ~6px and collide there, so they are left to Expand.
-// Hover tooltips on the casing and the depth/geologic labels still work.
+// The figures behind the drawing: stacked in the sidebar, and where there is room (the view page, Sections view) the
+// three cards — key depths, casing program, formation tops — stand side by side, each the width the sidebar gives it.
+.wbp__data {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wbp-block-gap) 1rem;
+}
+
+.wbp:not(.wbp--compact):not(.wbp--expanded) {
+  .wbp__data {
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    align-items: start;
+  }
+
+  .wbp__facts {
+    display: contents;
+  }
+}
+
+// The drawing's own type is set in viewBox units, so at the sidebar's width it printed at 9–10px. Lifted to about 11px
+// (WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT gives the depth axis the room; the geologic column and the total-depth label
+// had it). The wider forms already print the same type at 13px and more.
+.wbp--compact .wbp__stage {
+  .tick-label,
+  .geo-depth,
+  .geo-code {
+    font-size: 22px;
+  }
+
+  // The two-line titles keep the renderer's fixed line spacing (19–20 units), which caps their type.
+  .axis-title {
+    font-size: 18px;
+  }
+
+  .column-label {
+    font-size: 19px;
+  }
+
+  .ground-label {
+    font-size: 20px;
+  }
+
+  .total-depth-main {
+    font-size: 23px;
+  }
+}
+
+// Sidebar form: the leader labels render at ~6px and collide there, so they are left to Expand (showing them would
+// cost ~145px of drawing each — a ~500px sidebar). Hover tooltips on the casing and the depth/geologic labels still
+// work. The water arrow goes with the water label it points at (the profile strip above pins that figure anyway), so
+// nothing in the drawing points at a label that is not there.
 .wbp--compact .wbp__stage {
   .casing-label__primary,
   .casing-label__secondary,
@@ -219,33 +990,42 @@ app-wwell-ir-wellbore-panel {
   .screen-label-line,
   .screen-label-text,
   .pump-leader-group,
-  .water-label {
+  .water-label,
+  .water-arrow {
     display: none;
   }
 }
 
 // ── Legend ─────────────────────────────────────────────────────────
+// A grid, so the swatches stand in one column and the names start on one line; the columns are as many as fit.
 .wbp__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.55rem 0.75rem;
   margin: 0;
-  padding: 0.6rem 0 0;
+  padding: 0.7rem 0.8rem;
   list-style: none;
-  border-top: 1px solid tokens.$border-soft;
+  background: tokens.$surface;
+  border: 1px solid var(--wp-line-soft);
+  border-radius: tokens.$radius-md;
 }
 
 .wbp__key {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr);
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.68rem;
+  column-gap: 0.5rem;
+  overflow: hidden;
+  font-size: var(--wbp-fs-small);
   font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: tokens.$muted;
 }
 
 .wbp__swatch {
-  flex: none;
+  justify-self: center;
   display: inline-block;
   width: 14px;
   height: 12px;
@@ -309,6 +1089,97 @@ app-wwell-ir-wellbore-panel {
   border-left: 2px dotted var(--wp-wb-outline);
 }
 
+// ── Casing program + formation tops ────────────────────────────────
+// These also stand in for the leader labels the compact sidebar hides.
+.wbp__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--wbp-block-gap) 1rem;
+}
+
+.wbp__table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+// A 1px grid gap over a tinted backing draws the hairline row dividers with no per-row borders. The list owns the
+// columns and each row takes them from it (subgrid), so the sizes, types and depths line up down the card whatever a
+// row holds; where subgrid is missing a row sizes its own columns, as it always did.
+.wbp__rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--wp-line-soft);
+  border: 1px solid var(--wp-line-soft);
+  border-radius: tokens.$radius-md;
+}
+
+.wbp__rows--tops {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.wbp__row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  column-gap: 0.75rem;
+  padding: var(--wbp-row-pad, 0.45rem 0.8rem);
+  background-color: tokens.$surface;
+  font-size: var(--wbp-fs-body);
+}
+
+.wbp__row-size,
+.wbp__row-depth {
+  font-family: tokens.$font-mono;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: tokens.$navy-deep;
+}
+
+.wbp__row-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: tokens.$muted;
+}
+
+.wbp__row-type--code {
+  font-family: tokens.$font-mono;
+  font-weight: 600;
+  color: tokens.$navy;
+}
+
+.wbp__row-depth {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.wbp .wbp__row--warn {
+  background-image: linear-gradient(var(--wp-warning-soft), var(--wp-warning-soft));
+
+  .wbp__row-depth {
+    color: var(--wp-warning);
+  }
+}
+
+.wbp__row-flag {
+  font-family: tokens.$font-family;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wp-warning);
+}
+
 // ── Empty ──────────────────────────────────────────────────────────
 .wbp__empty {
   display: flex;
@@ -352,43 +1223,487 @@ app-wwell-ir-wellbore-panel {
   color: tokens.$muted;
 }
 
+// ── Motion ─────────────────────────────────────────────────────────
+// Entrance only, once, on compositor properties: the bar draws in from the surface, its markers drop
+// on, the tiles rise in turn.
+@keyframes wbp-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes wbp-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes wbp-pop {
+  from {
+    opacity: 0;
+    transform: scaleY(0.3);
+  }
+}
+
+@keyframes wbp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wbp,
+  .wbp *,
+  .wbp *::before,
+  .wbp *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 // ── Expanded (dialog) form ─────────────────────────────────────────
-// The figure is sized off the stage's own box (container query units) so it fills the dialog at
-// the diagram's true aspect ratio instead of being cropped or stretched.
+// The maximised view: nothing in it scrolls. The dialog takes most of the window (see `expand()`); inside it the
+// profile runs across the top, the drawing takes the left with its key in one line right under it, and the figures
+// stand in a rail beside them. The figure is sized off the stage's own box (container query units) so it fills its
+// area at the diagram's true aspect ratio instead of being cropped or stretched. The rail is set tight enough to fit
+// a 900px-high window whole; from 980px up (`wbp-dialog`) it gets the room back.
 .wbp--expanded {
+  --wbp-block-gap: 0.6rem;
+  --wbp-stat-pad: 0.26rem 0.8rem 0.2rem;
+  --wbp-gauge-h: 12px;
+  --wbp-row-pad: 0.22rem 0.8rem;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(19.5rem, 22vw, 23rem);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'head    head'
+    'profile profile'
+    'stage   data'
+    'legend  data';
+  gap: 0.65rem 1.25rem;
   height: 100%;
-  padding: 1.1rem 1.4rem 1rem;
+  padding: 0.85rem 1.25rem 0.75rem;
   background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
 
-  .wbp__title {
-    font-size: 1.1rem;
+  .wbp__head {
+    grid-area: head;
   }
 
-  .wbp__sub {
-    font-size: 0.78rem;
+  // The rail: key depths, then the two tables in what is left.
+  .wbp__data {
+    grid-area: data;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
   }
 
-  .wbp__stat dd {
-    font-size: 1rem;
+  // The profile's header row also carries its two figures, so the drawing keeps the height: it is what scales the
+  // drawing's own type, and this is the view meant for reading it.
+  .wbp__profile {
+    display: grid;
+    grid-area: profile;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'eyebrow spans extent'
+      'plate   plate plate';
+    align-items: center;
+    gap: 0.4rem 1.5rem;
+  }
+
+  .wbp__profile-head {
+    display: contents;
+  }
+
+  .wbp__profile .wbp__eyebrow {
+    grid-area: eyebrow;
+  }
+
+  .wbp__extent {
+    grid-area: extent;
+  }
+
+  .wbp__spans {
+    grid-area: spans;
+  }
+
+  .wbp__plate {
+    grid-area: plate;
   }
 
   .wbp__stage {
-    flex: 1 1 auto;
+    grid-area: stage;
     align-items: center;
     min-height: 0;
     container-type: size;
     padding: 0.75rem 1rem 0.75rem 0;
   }
 
-  .wbp__figure {
-    width: min(100cqw, calc(100cqh * var(--wbp-ratio)));
+  // The key: one line under the drawing, in the drawing's own column. No label of its own (the section is named for
+  // assistive tech); the entries sit close together and never wrap.
+  .wbp__block--legend {
+    grid-area: legend;
+  }
+
+  .wbp__block--legend .wbp__eyebrow {
+    display: none;
+  }
+
+  .wbp__legend {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 1.1rem;
+    padding: 0.5rem 0.9rem;
   }
 
   .wbp__key {
-    font-size: 0.74rem;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.45rem;
+    font-size: var(--wbp-fs-body);
+  }
+
+  // Only if the window is too short for the rail after all does it scroll, on its own.
+  .wbp__facts {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .wbp__title {
+    font-size: 1.2rem;
+  }
+
+  .wbp__sub {
+    font-size: 0.875rem;
+  }
+
+  .wbp__stat dd {
+    font-size: 1.0625rem;
+  }
+
+  .wbp__figure {
+    width: min(100cqw, calc(100cqh * var(--wbp-ratio)));
+  }
+}
+
+// A taller window gives the rail its room back.
+@container wbp-dialog (min-height: 980px) {
+  .wbp--expanded {
+    .wbp__block--stats {
+      --wbp-stat-pad: 0.5rem 0.8rem 0.4rem;
+      --wbp-gauge-h: 16px;
+    }
+
+    .wbp__facts {
+      --wbp-row-pad: 0.45rem 0.8rem;
+      --wbp-block-gap: 0.95rem;
+    }
+
+    .wbp__stat dd {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+// The drawing's own type, in viewBox units, so what it prints at follows the stage's size. Two steps, each taken when
+// the stage is small enough in *either* direction (a tall, narrow stage draws the well just as small as a short one):
+// the first lifts everything about a third, the second again for a stage at about half scale. Two caps hold through
+// both: the two-line titles ("Geologic Horizons", "DEPTH (FT BGL)") stay ≤19 units because the renderer's line
+// spacing is fixed at 19–20, and the casing remarks stay at 21 or they run past the drawing's right edge.
+// `@container` here asks the stage itself — the nearest container above each label.
+@mixin stage-type-step-1 {
+  .tick-label {
+    font-size: 24px;
+  }
+
+  .geo-depth,
+  .geo-code {
+    font-size: 26px;
+  }
+
+  .axis-title {
+    font-size: 18px;
+  }
+
+  .column-label {
+    font-size: 19px;
+  }
+
+  .ground-label {
+    font-size: 23px;
+  }
+
+  .total-depth-main {
+    font-size: 27px;
+  }
+
+  .casing-label__primary,
+  .water-label,
+  .pump-label {
+    font-size: 26px;
+  }
+
+  .casing-label__secondary {
+    font-size: 21px;
+  }
+
+  .open-hole-text,
+  .screen-label-text {
+    font-size: 25px;
+  }
+
+  .casing-size-inner {
+    font-size: 28px;
+  }
+}
+
+@mixin stage-type-step-2 {
+  .tick-label {
+    font-size: 28px;
+  }
+
+  .geo-depth,
+  .geo-code {
+    font-size: 29px;
+  }
+
+  .ground-label {
+    font-size: 27px;
+  }
+
+  .total-depth-main {
+    font-size: 31px;
+  }
+
+  .casing-label__primary,
+  .water-label,
+  .pump-label {
+    font-size: 30px;
+  }
+
+  .open-hole-text,
+  .screen-label-text {
+    font-size: 29px;
+  }
+
+  .casing-size-inner {
+    font-size: 30px;
+  }
+}
+
+@container (max-height: 680px) {
+  .wbp--expanded .wbp__stage {
+    @include stage-type-step-1;
+  }
+}
+
+@container (max-width: 950px) {
+  .wbp--expanded .wbp__stage {
+    @include stage-type-step-1;
+  }
+}
+
+@container (max-height: 600px) {
+  .wbp--expanded .wbp__stage {
+    @include stage-type-step-2;
+  }
+}
+
+@container (max-width: 780px) {
+  .wbp--expanded .wbp__stage {
+    @include stage-type-step-2;
+  }
+}
+
+// Under ~900px of stage the browser sets small text a little wider than its box scales to, so the leader labels take
+// one unit off here — last, so it holds whichever step above applied — and the widest of them ("18" Intermediate
+// @ 1,500") still ends inside the drawing.
+@container (max-width: 900px) {
+  .wbp--expanded .wbp__stage {
+    .casing-label__primary,
+    .water-label,
+    .pump-label {
+      font-size: 29px;
+    }
+
+    .casing-label__secondary {
+      font-size: 20px;
+    }
+  }
+}
+
+// Not enough width for a rail: stack everything and let the dialog body scroll. The stage needs a
+// definite height of its own then (it is a size container), so it gets one.
+@media (max-width: 900px) {
+  .wbp--expanded {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+
+    .wbp__stage {
+      flex: none;
+      height: min(70vh, 560px);
+    }
+
+    .wbp__data {
+      flex: none;
+      grid-template-rows: none;
+    }
+
+    .wbp__facts {
+      overflow-y: visible;
+    }
+
+    .wbp__legend {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+  }
+}
+
+// The panel's host is the container the maximised view asks about its size (`@container wbp-dialog`): it is as tall
+// and wide as the dialog, and `.wbp--expanded` re-grids itself by it.
+.wp-wellbore-dialog app-wwell-ir-wellbore-panel,
+.wbp-host--fit {
+  container: wbp-dialog / size;
+}
+
+// ── Fit form (the view page's Well Design step) ────────────────────
+// The maximised layout, inline: the host is as tall as the page it sits in (its parent gives it a height), and the
+// panel is a card again. The profile runs across the top, the drawing and its key stand left, the figures right; the
+// page already names the well and the step, so the title is kept for assistive tech only and Expand joins the
+// profile's own row. The rail is set as tight as a laptop-height page needs, and is given its room back as it grows.
+.wbp-host--fit {
+  height: 100%;
+}
+
+.wbp--expanded.wbp--fit {
+  --wbp-block-gap: 0.5rem;
+  --wbp-stat-pad: 0.24rem 0.7rem 0.18rem;
+  --wbp-gauge-h: 8px;
+  --wbp-row-pad: 0.2rem 0.7rem;
+
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) 14.5rem;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'profile profile'
+    'stage   data'
+    'legend  legend';
+  gap: 0.4rem 0.7rem;
+  padding: 0.45rem 0.6rem 0.5rem;
+  background: tokens.$surface;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-lg;
+  box-shadow: tokens.$shadow-1;
+
+  .wbp__head {
+    position: absolute;
+    top: 0.62rem;
+    right: 0.85rem;
+    z-index: 2;
+    grid-area: auto;
+  }
+
+  .wbp__heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .wbp__action {
+    width: 26px;
+    height: 26px;
+  }
+
+  .wbp__extent {
+    margin-right: 1.9rem;
+  }
+
+  .wbp__stage {
+    padding: 0.35rem 0.4rem 0.35rem 0;
+  }
+
+  // The plate's own padding and its hint row, taken in: the drawing and the rail want every pixel of height.
+  .wbp__profile {
+    gap: 0.3rem 1.25rem;
+    padding: 0.4rem 0.5rem 0.45rem;
+  }
+
+  .wbp__plate {
+    gap: 0.25rem;
+    padding: 0.35rem 0.75rem 0.3rem;
+  }
+
+  .wbp__legend {
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    gap: 0 0.6rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .wbp__title {
+    font-size: 1.05rem;
+  }
+}
+
+// The rail's density follows the page height: below ~780px the gauges shrink to a hairline, below ~700 they go.
+@container wbp-dialog (max-height: 780px) {
+  .wbp--expanded.wbp--fit {
+    --wbp-stat-pad: 0.2rem 0.7rem 0.16rem;
+    --wbp-gauge-h: 3px;
+    --wbp-row-pad: 0.14rem 0.7rem;
+    --wbp-block-gap: 0.4rem;
+  }
+}
+
+@container wbp-dialog (max-height: 700px) {
+  .wbp--expanded.wbp--fit {
+    --wbp-stat-pad: 0.14rem 0.7rem 0.12rem;
+    --wbp-row-pad: 0.1rem 0.7rem;
+    --wbp-block-gap: 0.3rem;
+
+    .wbp__gauge,
+    .wbp__stat-hint {
+      display: none;
+    }
+
+    .wbp__row,
+    .wbp__stat {
+      line-height: 1.15;
+    }
+
+    // Still on the scale (12px), one step down from the rows' usual size.
+    .wbp__row,
+    .wbp__stat dt {
+      font-size: var(--wbp-fs-small);
+    }
+
+    .wbp__stat dd {
+      font-size: 0.9375rem;
+    }
+
+    .wbp__eyebrow {
+      min-height: 0.9rem;
+    }
+
+    .wbp__legend {
+      padding: 0.28rem 0.6rem;
+    }
   }
 }
 
@@ -404,5 +1719,106 @@ app-wwell-ir-wellbore-panel {
 
   app-wwell-ir-wellbore-panel {
     height: 100%;
+  }
+}
+
+// ── Both sides of the well (a wide maximised view) ─────────────────
+// Wide enough to read the drawing from both sides: the well stands in the middle, the depth figures it is measured by
+// (key depths) on the left — the side its ruler is drawn on — and the two programmes the leader labels on its right
+// name (casing, then formation tops) on the right. The key stays under the drawing, as its footnote. Each side is
+// shorter than one stacked rail, so a laptop-height window fits without scrolling too. Last in the file on purpose:
+// it also re-grids the inline `fit` form, whose own rule has the same weight.
+@container wbp-dialog (min-width: 1140px) {
+  .wbp--expanded,
+  .wbp--expanded.wbp--fit {
+    // The sides grow with the dialog (`cqw` is its width), so the well keeps the middle at any size.
+    grid-template-columns: clamp(14rem, 16cqw, 20rem) minmax(0, 1fr) clamp(14rem, 16cqw, 20rem);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'head    head    head'
+      'profile profile profile'
+      'stats   stage   facts'
+      '.       legend  .';
+
+    .wbp__data {
+      display: contents;
+    }
+
+    .wbp__block--stats {
+      grid-area: stats;
+      align-content: start;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .wbp__facts {
+      grid-area: facts;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    // In a column this narrow a label and its figure cannot share a line ("STATIC WATER LEVEL" alone is most of it),
+    // so each key depth becomes a tile: label over figure, the gauge under both. It reads as a column of readings
+    // beside the well, and fills the height the two tables take on the other side.
+    .wbp__stat {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.05rem;
+      padding: 0.42rem 0.8rem 0.38rem;
+
+      dd {
+        font-size: 1.25rem;
+        text-align: left;
+      }
+    }
+
+    .wbp__stat-hint {
+      width: 100%;
+    }
+  }
+
+  // The inline form has no header row of its own (its one action floats over the profile).
+  .wbp--expanded.wbp--fit {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'profile profile profile'
+      'stats   stage   facts'
+      '.       legend  .';
+  }
+}
+
+// The key sizes itself by the room its own row has, not by the dialog's: under the drawing it has the middle column,
+// in the stacked forms the whole width. Measured, its eight entries need about 857px at `body` with roomy gaps,
+// 749 at `small`, 696 at `micro` — so each step down is taken just before they would wrap.
+.wbp--expanded .wbp__block--legend {
+  container: wbp-key / inline-size;
+}
+
+@container wbp-key (max-width: 875px) {
+  .wbp--expanded .wbp__legend {
+    gap: 0 0.625rem;
+  }
+
+  .wbp--expanded .wbp__key {
+    gap: 0.4rem;
+    font-size: var(--wbp-fs-small);
+  }
+}
+
+@container wbp-key (max-width: 765px) {
+  .wbp--expanded .wbp__legend {
+    gap: 0 0.5rem;
+  }
+
+  .wbp--expanded .wbp__key {
+    font-size: var(--wbp-fs-micro);
+  }
+}
+
+@container wbp-key (max-width: 710px) {
+  .wbp--expanded .wbp__legend {
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 }

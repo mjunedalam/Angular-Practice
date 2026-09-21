@@ -13,9 +13,10 @@ import { DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@models/well-design/we
  *   Not shrunk further: several labels are fixed-width or fixed-offset text ("Geologic / Horizons
  *   (ft bgl)" centred on `geoLineX`, the "DEPTH" title, the right-anchored tick labels) that would
  *   clip at the viewBox edge.
- * - **`wellboreViewWidth`** leaves ~390 units to the right of the bore centre: the casing/liner
+ * - **`wellboreViewWidth`** leaves ~410 units to the right of the bore centre: the casing/liner
  *   leader labels run out that way ('18" Intermediate @ 320 ft' is ~250 units) and clipped at the
- *   viewBox edge with the old 780. `casingCenterX` stays put — a label anchored on the *left* of
+ *   viewBox edge with the old 780 — and the longest remark line, "(Cemented; seals Umm Er Radhuma)",
+ *   still ran ~5px past it at 870. `casingCenterX` stays put — a label anchored on the *left* of
  *   the bore ("Flowing — SIWHP: 123 psi") needs that room to clear the "Geologic Horizons" heading.
  * - **Height** is taller than the width alone suggests. Wells are deep and casing shoes are often
  *   only a few hundred feet apart, so on a linear scale their multi-line labels collide unless
@@ -33,7 +34,7 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
   depthScaleWidth: 105,
   depthAxisX: 72,
 
-  wellboreViewWidth: 870,
+  wellboreViewWidth: 890,
 
   depthArrowX: 18,
   geoLineX: 90,
@@ -52,11 +53,21 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
  * leader labels render at ~6px and collide, so the panel hides them there (`wbp--compact`; they
  * are all in the Expand view) — which frees the right-hand label room this layout gives up, so the
  * drawing and the depth axis get roughly 50% more pixels than they would from the default.
+ *
+ * Showing them instead costs about 145px of drawing per label whatever the coordinate space (a label's
+ * screen width follows its share of the viewBox), which means a ~500px sidebar — tried, and too much
+ * of the page to give a preview.
+ *
+ * The depth axis is 19 units wider than the preview's: the panel prints the ruler's numerals at 22 units (about
+ * 11px at this width, up from 18) and "3,800" in that mono face is 66 units, which the preview's 105-unit strip
+ * has no room for left of its axis (the rest keeps them off the stage's edge).
  */
 export const WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT: DiagramLayout = {
   ...WWELL_IR_PREVIEW_DIAGRAM_LAYOUT,
   svgHeight: 800,
   drawingHeight: 705,
+  depthScaleWidth: 124,
+  depthAxisX: 91,
   wellboreViewWidth: 520,
   casingCenterX: 350,
 };

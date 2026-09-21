@@ -32,7 +32,10 @@ import { buildScaleTicks } from './wwell-ir-depth-ticks.util';
   styleUrl: './wwell-ir-depth-scale.component.scss',
 })
 export class WwellIrDepthScaleComponent {
+  /** The depth the scale runs to — the target depth, or the deepest formation top once one goes past it. */
   readonly totalDepth = input.required<number>();
+  /** Marked in the accent colour as the well's own end; defaults to `totalDepth`. */
+  readonly targetDepth = input<number | null>(null);
   readonly animTrigger = input.required<number>();
   readonly diagramLayout = input<DiagramLayout>(DIAGRAM_LAYOUT);
 
@@ -44,16 +47,17 @@ export class WwellIrDepthScaleComponent {
     effect(() => {
       const svgEl = this.svgRef();
       const depth = this.totalDepth();
+      const target = this.targetDepth() ?? depth;
       this.animTrigger(); // track trigger so we redraw on every diagram rebuild
       this.diagramLayout(); // track layout changes
 
       if (svgEl?.nativeElement) {
-        this.drawScale(depth, svgEl.nativeElement);
+        this.drawScale(depth, target, svgEl.nativeElement);
       }
     });
   }
 
-  private drawScale(totalDepth: number, element: SVGSVGElement): void {
+  private drawScale(totalDepth: number, targetDepth: number, element: SVGSVGElement): void {
     const { depthScaleWidth, svgHeight, marginTop, drawingHeight, depthAxisX } = this.layout;
     const tickHalfLength = 10;
     const tickLabelGap = 6;
@@ -83,7 +87,7 @@ export class WwellIrDepthScaleComponent {
 
     const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
     const scale = createDepthScale(totalDepth, drawingHeight);
-    const ticks = buildScaleTicks(totalDepth, drawingHeight);
+    const ticks = buildScaleTicks(totalDepth, drawingHeight, targetDepth);
 
     const titleX = depthScaleWidth / 2;
     g.append('text')
@@ -118,7 +122,7 @@ export class WwellIrDepthScaleComponent {
       .attr('stroke-dashoffset', 0);
 
     ticks.forEach((depth: number) => {
-      const isTargetTick = depth === totalDepth;
+      const isTargetTick = depth === targetDepth;
       const yPx = scale(depth);
       const delay = (depth / totalDepth) * ANIM.SCALE_DURATION + ANIM.TICK_BASE_DELAY;
 

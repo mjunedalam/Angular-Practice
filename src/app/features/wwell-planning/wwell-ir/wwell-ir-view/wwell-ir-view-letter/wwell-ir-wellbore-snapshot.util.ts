@@ -93,6 +93,39 @@ function rasterizeSvg(svgEl: SVGSVGElement, pixelWidth: number, pixelHeight: num
  * animation has already settled on its own.
  */
 export async function captureWellboreSnapshot(containerEl: HTMLElement): Promise<string | null> {
+  const paper = createPaperCopy(containerEl);
+  try {
+    return await composeSnapshot(paper.copy);
+  } finally {
+    paper.host.remove();
+  }
+}
+
+/**
+ * The diagram as it prints. The live diagram follows the app theme, and a dark one rasterized onto
+ * the white canvas below would export light-on-white — unreadable in the PDF. So the capture is taken
+ * from a copy of the container inside a `.wp-paper` wrapper, which re-declares the light tokens for
+ * its subtree (the same scope the Letter used to carry in full).
+ *
+ * The copy is parked off-screen rather than the live diagram being switched in place, so nothing
+ * flashes to paper colours mid-download. It stays laid out (`fixed`, not `display:none` or
+ * `visibility:hidden`) because `inlineComputedStyles` would otherwise bake those into the export.
+ * Angular's scoped-style attributes and the row's own classes survive `cloneNode`, so every rule that
+ * styles the live diagram — including the letter's own wellbore theme, which hangs off the row —
+ * still matches the copy.
+ */
+function createPaperCopy(source: HTMLElement): { host: HTMLElement; copy: HTMLElement } {
+  const host = document.createElement('div');
+  host.className = 'wp-paper';
+  host.setAttribute('aria-hidden', 'true');
+  host.style.cssText = 'position:fixed;top:0;left:-10000px;pointer-events:none;';
+  const copy = source.cloneNode(true) as HTMLElement;
+  host.appendChild(copy);
+  document.body.appendChild(host);
+  return { host, copy };
+}
+
+async function composeSnapshot(containerEl: HTMLElement): Promise<string | null> {
   // Only the two top-level diagram roots (depth-scale, well-bore-view) — the wellbore renderer
   // draws several small icons (e.g. the pump glyph) as nested `<svg>` elements positioned inside
   // the main diagram's coordinate space, which `querySelectorAll('svg')` alone would also match

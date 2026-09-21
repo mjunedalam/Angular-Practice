@@ -1,4 +1,10 @@
-<section class="wbp" [class.wbp--expanded]="expanded()" [class.wbp--compact]="compact()" [attr.aria-label]="title()">
+<section
+  class="wbp"
+  [class.wbp--expanded]="isFilled()"
+  [class.wbp--fit]="fit()"
+  [class.wbp--compact]="compact()"
+  [attr.aria-label]="title()"
+>
   <header class="wbp__head">
     <div class="wbp__heading">
       <h2 class="wbp__title">{{ title() }}</h2>
@@ -31,15 +37,112 @@
   </header>
 
   @if (hasData()) {
-    @if (stats().length > 0) {
-      <dl class="wbp__stats">
-        @for (stat of stats(); track stat.label) {
-          <div class="wbp__stat">
-            <dt>{{ stat.label }}</dt>
-            <dd>{{ stat.value }}</dd>
+    @let f = facts();
+
+    @if (profile(); as well) {
+      <section class="wbp__profile" aria-label="Well profile, surface to total depth">
+        <header class="wbp__profile-head">
+          <h3 class="wbp__eyebrow">Well profile</h3>
+          <span class="wbp__extent">{{ well.rangeText }}</span>
+        </header>
+
+        <!-- The glass: the strip and its slider sit on one frosted plate over the card's soft glows. -->
+        <div class="wbp__plate">
+          <!-- One shared width, three lanes: formation tops over, the strings and open hole, then the pins for
+               water and pump. The lanes are drawn, not text (hidden from a screen reader); the group's label says what
+               they show, and the slider on the track is the one control. -->
+          <div #strip class="wbp__strip" role="group" [attr.aria-label]="well.description">
+            @if (well.tops.length > 0) {
+              <div class="wbp__lane wbp__lane--tops" aria-hidden="true">
+                @for (top of well.tops; track $index) {
+                  <i class="wbp__tick" [style.left.%]="top.leftPct"></i>
+                }
+                @for (label of topLabels(); track label.key) {
+                  <span class="wbp__lane-label" [style.left.px]="label.leftPx">{{ label.text }}</span>
+                }
+              </div>
+            }
+            <div class="wbp__track" aria-hidden="true">
+              @for (segment of well.segments; track $index) {
+                <span
+                  class="wbp__seg wbp__seg--{{ segment.kind }}"
+                  [class.wbp__seg--lit]="hasPickedDepth() && reading()?.segmentIndex === $index"
+                  [style.left.%]="segment.leftPct"
+                  [style.width.%]="segment.widthPct"
+                >
+                  @if (segment.kind !== 'open') {
+                    <i class="wbp__shoe"></i>
+                  }
+                  <b class="wbp__seg-size">{{ segment.label }}</b>
+                  @if (segment.type) {
+                    <span class="wbp__seg-type">{{ segment.type }}</span>
+                  }
+                </span>
+              }
+              @for (marker of well.markers; track marker.kind) {
+                @if (marker.kind === 'water') {
+                  <i class="wbp__water-line" [style.left.%]="marker.leftPct"></i>
+                }
+              }
+            </div>
+            <div class="wbp__pins" aria-hidden="true">
+              @for (marker of well.markers; track marker.kind) {
+                <span class="wbp__pin wbp__pin--{{ marker.kind }}" [style.left.%]="marker.leftPct">
+                  <app-wwell-ir-wellbore-glyph class="wbp__pin-icon" [kind]="marker.kind" />
+                </span>
+              }
+              @for (label of pinLabels(); track label.key) {
+                <span class="wbp__pin-label" [style.left.px]="label.leftPx">{{ label.text }}</span>
+              }
+            </div>
+            <!-- Slide to read the well at any depth: the string there, the formation, how far under the water. Its
+                 scale is the track's, so the bead sits on the depth it reads and the stretch it names is lit. -->
+            <input
+              type="range"
+              class="wbp__slider"
+              min="0"
+              [step]="sliderStepFt()"
+              [max]="totalDepthFt()"
+              [value]="pickedDepth()"
+              aria-label="Read the well at a depth"
+              [attr.aria-valuetext]="reading()?.summary"
+              (input)="pickDepth($event)"
+            />
           </div>
-        }
-      </dl>
+
+          <p class="wbp__readout" aria-hidden="true">
+            @if (hasPickedDepth() ? reading() : null; as read) {
+              <b class="wbp__read-depth">{{ read.depthText }}</b>
+              <span class="wbp__chip">
+                {{ read.hole }}
+                @if (read.completion) {
+                  <span class="wbp__chip-extra"> · {{ read.completion }}</span>
+                }
+              </span>
+              @if (read.formation) {
+                <span class="wbp__chip">{{ read.formation }}</span>
+              }
+              @if (read.water) {
+                <span class="wbp__chip wbp__chip--water">{{ read.water }}</span>
+              }
+            } @else {
+              <span class="wbp__read-hint">Slide along the well to read any depth</span>
+            }
+          </p>
+        </div>
+
+        <dl class="wbp__spans">
+          @for (fact of well.facts; track fact.kind) {
+            <div class="wbp__span">
+              <dt>
+                <span class="wbp__dot wbp__dot--{{ fact.kind }}" aria-hidden="true"></span>{{ fact.label }}
+                <b class="wbp__pct">{{ fact.percent }}</b>
+              </dt>
+              <dd>{{ fact.range }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
     }
 
     <div class="wbp__stage">
@@ -53,7 +156,8 @@
         @if (!isExpandedOpen()) {
           <app-wwell-ir-depth-scale
             [style.flex-basis.%]="scalePercent()"
-            [totalDepth]="diagramData().targetDepth"
+            [totalDepth]="scaleDepth()"
+            [targetDepth]="diagramData().targetDepth"
             [animTrigger]="0"
             [diagramLayout]="layout()"
           />
@@ -68,21 +172,92 @@
               [diagramData]="diagramData()"
               [animTrigger]="0"
               [diagramLayout]="layout()"
-              [isFullscreen]="expanded()"
+              [isFullscreen]="isFilled()"
             />
           </div>
         }
       </div>
     </div>
 
-    <ul class="wbp__legend" aria-label="Diagram legend">
-      @for (item of legend(); track item.key) {
-        <li class="wbp__key">
-          <span class="wbp__swatch wbp__swatch--{{ item.key }}" aria-hidden="true"></span>
-          {{ item.label }}
-        </li>
+    <section class="wbp__block wbp__block--legend" aria-label="Diagram legend">
+      <h3 class="wbp__eyebrow">Legend</h3>
+      <ul class="wbp__legend">
+        @for (item of legend(); track item.key) {
+          <li class="wbp__key">
+            <span class="wbp__swatch wbp__swatch--{{ item.key }}" aria-hidden="true"></span>
+            {{ item.label }}
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- The figures behind the drawing: key depths, the casing program, the formation tops — one card each,
+         side by side where there is room. -->
+    <div class="wbp__data">
+      @if (f.stats.length > 0) {
+        <section class="wbp__block wbp__block--stats" aria-label="Key depths">
+          <h3 class="wbp__eyebrow">Key depths</h3>
+          <dl class="wbp__stats">
+            @for (stat of f.stats; track stat.label) {
+              <div class="wbp__stat" [class.wbp__stat--warn]="stat.warn" [style.--wbp-i]="$index">
+                <dt>
+                  {{ stat.label }}
+                  @if (stat.hint) {
+                    <span class="wbp__stat-hint">{{ stat.hint }}</span>
+                  }
+                </dt>
+                <dd>{{ stat.value }}</dd>
+                @if (stat.gauge; as gauge) {
+                  <!-- How far down the well it is: the line is the well, surface to total depth, filled to the depth
+                       (or, for the water column, over the stretch it fills), the same pictogram the profile uses on it. -->
+                  <span class="wbp__gauge wbp__gauge--{{ stat.glyph }}" aria-hidden="true">
+                    <i class="wbp__gauge-fill" [style.left.%]="gauge.fromPct" [style.width.%]="gauge.toPct - gauge.fromPct"></i>
+                    <app-wwell-ir-wellbore-glyph class="wbp__gauge-mark" [kind]="stat.glyph" [style.left.%]="gauge.markPct" />
+                  </span>
+                }
+              </div>
+            }
+          </dl>
+        </section>
       }
-    </ul>
+
+      @if (f.casingRows.length > 0 || f.topRows.length > 0) {
+        <div class="wbp__facts">
+          @if (f.casingRows.length > 0) {
+            <section class="wbp__table wbp__table--casing" aria-label="Casing program">
+              <h3 class="wbp__eyebrow">Casing program <span class="wbp__count">{{ f.casingRows.length }}</span></h3>
+              <ul class="wbp__rows">
+                @for (row of f.casingRows; track $index) {
+                  <li class="wbp__row" [class.wbp__row--warn]="row.belowTarget">
+                    <span class="wbp__row-size">{{ row.size }}</span>
+                    <span class="wbp__row-type">{{ row.type }}</span>
+                    <span class="wbp__row-depth">
+                      {{ row.depth }}
+                      @if (row.belowTarget) {
+                        <span class="wbp__row-flag" title="Set deeper than the target depth">below TD</span>
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+          @if (f.topRows.length > 0) {
+            <section class="wbp__table wbp__table--tops" aria-label="Formation tops">
+              <h3 class="wbp__eyebrow">Formation tops <span class="wbp__count">{{ f.topRows.length }}</span></h3>
+              <ul class="wbp__rows wbp__rows--tops">
+                @for (row of f.topRows; track $index) {
+                  <li class="wbp__row">
+                    <span class="wbp__row-type wbp__row-type--code">{{ row.code }}</span>
+                    <span class="wbp__row-depth">{{ row.depth }}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </div>
+      }
+    </div>
   } @else {
     <div class="wbp__empty">
       <span class="wbp__empty-icon"><mat-icon>architecture</mat-icon></span>

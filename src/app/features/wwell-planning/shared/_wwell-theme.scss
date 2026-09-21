@@ -119,6 +119,13 @@
     0 32px 64px rgba(10, 13, 20, 0.1);
   --wp-scrim: rgba(10, 13, 20, 0.45);
 
+  // Frosted glass: a translucent fill, the light rim a pane catches along its top edge, the sheen across it,
+  // and the soft shadow it throws. Overlays, not palette colours, so the contrast dial leaves them alone.
+  --wp-glass-fill: rgba(255, 255, 255, 0.55);
+  --wp-glass-rim: rgba(255, 255, 255, 0.9);
+  --wp-glass-sheen: rgba(255, 255, 255, 0.6);
+  --wp-glass-shadow: 0 10px 28px -16px rgba(10, 13, 20, 0.34);
+
   // Chips over the page (tooltips)
   --wp-tooltip-bg: #{light-tone(#0a0d14, #262d3c, $dialed)};
   --wp-tooltip-ink: #ffffff;
@@ -211,6 +218,11 @@
   --wp-shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.45);
   --wp-shadow-3: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 24px 64px rgba(0, 0, 0, 0.7);
   --wp-scrim: rgba(0, 0, 0, 0.62);
+
+  --wp-glass-fill: rgba(255, 255, 255, 0.05);
+  --wp-glass-rim: rgba(255, 255, 255, 0.18);
+  --wp-glass-sheen: rgba(255, 255, 255, 0.14);
+  --wp-glass-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.8);
 
   // Inverse chip: a dark tooltip would vanish on a dark surface
   --wp-tooltip-bg: #{dark-tone(#eef1f6, #c2cad8)};
