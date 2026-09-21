@@ -12,6 +12,8 @@ export interface WellboreFacts {
 
 export interface WellboreStat {
   readonly label: string;
+  /** What the inline previews print instead: the same figure in the shorthand a well file uses. */
+  readonly short: string;
   readonly value: string;
   /** A qualifier under the value, e.g. which string a shoe belongs to. */
   readonly hint?: string;
@@ -107,23 +109,14 @@ function buildStats(input: WellboreFactsInput, total: number, deepest: ICasingIR
   };
 
   const stats: WellboreStat[] = [];
-  if (total > 0) stats.push({ label: 'Total depth', value: formatFeet(total), glyph: 'depth', gauge: below(total) });
-  if (water > 0) stats.push({ label: 'Static water level', value: formatFeet(water), glyph: 'water', gauge: below(water) });
-  // The column runs from the water level down to total depth, its glyph where the water starts.
-  if (total > 0 && water > 0 && water < total) {
-    const start = percentOfTotal(water, total);
-    stats.push({
-      label: 'Water column',
-      value: formatFeet(total - water),
-      glyph: 'water',
-      gauge: { fromPct: start, toPct: 100, markPct: start },
-    });
-  }
+  if (total > 0) stats.push({ label: 'Total depth', short: 'TD', value: formatFeet(total), glyph: 'depth', gauge: below(total) });
+  if (water > 0) stats.push({ label: 'Static water level', short: 'Static WL', value: formatFeet(water), glyph: 'water', gauge: below(water) });
   if (deepest) {
     const belowTarget = total > 0 && deepest.csgDepth > total;
     const string = [formatInches(deepest.csgSize), deepest.csgType].filter(Boolean).join(' ');
     stats.push({
       label: 'Deepest shoe',
+      short: 'Shoe',
       value: formatFeet(deepest.csgDepth),
       hint: [string, belowTarget ? 'below TD' : ''].filter(Boolean).join(' · '),
       warn: belowTarget,
@@ -131,7 +124,7 @@ function buildStats(input: WellboreFactsInput, total: number, deepest: ICasingIR
       gauge: below(deepest.csgDepth),
     });
   }
-  if (pump > 0) stats.push({ label: 'Pump setting', value: formatFeet(pump), glyph: 'pump', gauge: below(pump) });
+  if (pump > 0) stats.push({ label: 'Pump setting', short: 'Pump', value: formatFeet(pump), glyph: 'pump', gauge: below(pump) });
   return stats;
 }
 

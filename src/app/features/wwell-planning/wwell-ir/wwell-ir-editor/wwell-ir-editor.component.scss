@@ -527,11 +527,17 @@ app-wwell-ir-editor {
   --ire-preview-w: clamp(20rem, 27vw, 27rem);
 
   flex-shrink: 0;
+  // A column, so the card inside can be told to fill exactly what the page leaves it (a percentage height would
+  // have nothing definite to resolve against here, which is what let the card run past the fold and get clipped).
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: 0;
   align-self: flex-start;
   width: var(--ire-preview-w);
-  max-height: 100%;
+  // As tall as the page leaves it, whatever the card inside is: the card is told to fill this, so a height taken
+  // from the card's own content would be circular (and used to let the card run past the fold and get clipped).
+  height: 100%;
   overflow: hidden;
   transition: width tokens.$duration-base tokens.$ease-out;
 
@@ -541,8 +547,9 @@ app-wwell-ir-editor {
 }
 
 .ire__tl-preview-anim {
+  flex: 1;
+  min-height: 0;
   width: var(--ire-preview-w, 20rem);
-  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   transition:
@@ -1180,6 +1187,7 @@ app-wwell-ir-editor {
   .ire__tl-preview-sidebar {
     position: static;
     width: 100%;
+    height: auto;
     max-height: none;
     overflow: hidden;
     order: -1;

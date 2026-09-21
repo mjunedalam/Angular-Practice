@@ -58,17 +58,20 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
  * screen width follows its share of the viewBox), which means a ~500px sidebar — tried, and too much
  * of the page to give a preview.
  *
- * The depth axis is 19 units wider than the preview's: the panel prints the ruler's numerals at 22 units (about
- * 11px at this width, up from 18) and "3,800" in that mono face is 66 units, which the preview's 105-unit strip
- * has no room for left of its axis (the rest keeps them off the stage's edge).
+ * The depth axis is 29 units wider than the preview's: the panel prints the ruler's numerals at 27 units (about
+ * 12px once the card is sized to the page, where the drawing is height-limited) and "3,800" in that mono face is
+ * 81 units, which the preview's 105-unit strip has no room for left of its axis.
  */
 export const WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT: DiagramLayout = {
   ...WWELL_IR_PREVIEW_DIAGRAM_LAYOUT,
-  svgHeight: 800,
+  // 80 units under the drawing, for the "TOTAL DEPTH" label at the size the sidebar prints it (28 units).
+  svgHeight: 840,
   drawingHeight: 705,
-  depthScaleWidth: 124,
-  depthAxisX: 91,
+  depthScaleWidth: 134,
+  depthAxisX: 100,
   wellboreViewWidth: 520,
+  // The geologic column moves right with its type: "1,450" at 27 units is 81 wide and is set to the left of this line.
+  geoLineX: 105,
   casingCenterX: 350,
 };
 

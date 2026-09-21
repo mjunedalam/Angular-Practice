@@ -67,12 +67,15 @@ app-wwell-ir-wellbore-panel {
   min-width: 0;
 }
 
+// The well's name, in the mono face every other screen sets a well name in, and big: it is what the card is.
 .wbp__title {
   position: relative;
   margin: 0;
   padding-left: 0.65rem;
-  font-size: 1.0625rem;
+  font-family: tokens.$font-mono;
+  font-size: 1.375rem;
   font-weight: 650;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.012em;
   color: tokens.$navy;
 
@@ -97,12 +100,6 @@ app-wwell-ir-wellbore-panel {
   color: tokens.$muted;
 }
 
-.wbp__well {
-  font-family: tokens.$font-mono;
-  font-weight: 600;
-  color: tokens.$navy;
-}
-
 .wbp__action {
   flex-shrink: 0;
   width: 30px;
@@ -122,6 +119,30 @@ app-wwell-ir-wellbore-panel {
 }
 
 // ── Key depths ─────────────────────────────────────────────────────
+// Brief form (the inline previews, which is where a new IR is filled in): the four figures share one card as tiles —
+// shorthand label over the figure, as many across as fit — with no gauges. The drawing beside them already shows
+// where each one sits on the well, so the card is a read-out, not a second picture of it.
+.wbp:not(.wbp--expanded) {
+  // Two across, always: four figures make two even rows, where `auto-fit` would leave one alone on a ragged third.
+  .wbp__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wbp__stat {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+    padding: 0.35rem 0.7rem 0.4rem;
+  }
+
+  .wbp__stat dd {
+    text-align: left;
+  }
+
+  .wbp__gauge {
+    display: none;
+  }
+}
+
 // A list, not a pile of tiles: every row has the same three parts on the same lines — label on the left, the
 // figure right-aligned in one column, and under them the gauge (the well as a hairline, surface to total depth, at
 // one length for every row so the rows compare). Rows are cut from one card by hairlines.
@@ -947,14 +968,14 @@ app-wwell-ir-wellbore-panel {
   }
 }
 
-// The drawing's own type is set in viewBox units, so at the sidebar's width it printed at 9–10px. Lifted to about 11px
-// (WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT gives the depth axis the room; the geologic column and the total-depth label
-// had it). The wider forms already print the same type at 13px and more.
+// The drawing's own type is set in viewBox units, so at the sidebar's size it printed at 8–10px. Lifted to about 12px
+// (WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT gives the depth axis the room its numerals then need; the geologic column and the
+// total-depth label had it). The wider forms already print the same type at 12px and more.
 .wbp--compact .wbp__stage {
   .tick-label,
   .geo-depth,
   .geo-code {
-    font-size: 22px;
+    font-size: 28px;
   }
 
   // The two-line titles keep the renderer's fixed line spacing (19–20 units), which caps their type.
@@ -967,11 +988,45 @@ app-wwell-ir-wellbore-panel {
   }
 
   .ground-label {
-    font-size: 20px;
+    font-size: 25px;
   }
 
+  // Centred on the bore, so its width is what keeps it inside the drawing: 20 characters at 28 units just fit.
   .total-depth-main {
-    font-size: 23px;
+    font-size: 28px;
+  }
+
+  .casing-size-inner {
+    font-size: 27px;
+  }
+}
+
+// Sidebar form: the card fills the sidebar exactly — the well name, the drawing in whatever height is left, and the
+// four key depths under it — so nothing is cut off at the foot and nothing has to be scrolled to. The legend and the
+// casing / formation-top tables are left out here: the editor prints both, in its own Horizons and Casing sections a
+// few inches to the left, and the drawing's symbols are named in the maximised view where they can be read.
+// The host is as tall as the column the sidebar gives it, and the card fills it.
+.wbp-host--compact {
+  height: 100%;
+}
+
+.wbp--compact {
+  height: 100%;
+
+  .wbp__stage {
+    flex: 1;
+    // Below this the drawing's own numerals fall under 11px; a window too short for it scrolls the card instead.
+    min-height: 22rem;
+    container-type: size;
+  }
+
+  .wbp__figure {
+    width: min(100cqw, calc(100cqh * var(--wbp-ratio)));
+  }
+
+  .wbp__block--legend,
+  .wbp__facts {
+    display: none;
   }
 }
 
@@ -1381,7 +1436,7 @@ app-wwell-ir-wellbore-panel {
   }
 
   .wbp__title {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
   }
 
   .wbp__sub {
@@ -1657,7 +1712,7 @@ app-wwell-ir-wellbore-panel {
   }
 
   .wbp__title {
-    font-size: 1.05rem;
+    font-size: 1.25rem;
   }
 }
 

@@ -71,7 +71,7 @@ const isFlagYes = (flag: string | null | undefined): boolean => (flag ?? '').tri
   styleUrl: './wwell-ir-wellbore-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { '[class.wbp-host--fit]': 'fit()' },
+  host: { '[class.wbp-host--fit]': 'fit()', '[class.wbp-host--compact]': 'compact()' },
 })
 export class WwellIrWellborePanelComponent {
   readonly diagramData = input.required<WellboreDiagramData>();

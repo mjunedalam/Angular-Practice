@@ -7,13 +7,10 @@
 >
   <header class="wbp__head">
     <div class="wbp__heading">
-      <h2 class="wbp__title">{{ title() }}</h2>
-      <p class="wbp__sub">
-        @if (diagramData().wellName) {
-          <span class="wbp__well">{{ diagramData().wellName }}</span>
-        }
-        <span>Depths in ft below ground level</span>
-      </p>
+      <!-- The well's own name is the heading (the card is named for assistive tech by the section's aria-label);
+           `title()` only stands in for a record with no well name yet. -->
+      <h2 class="wbp__title">{{ diagramData().wellName || title() }}</h2>
+      <p class="wbp__sub">Depths in ft below ground level</p>
     </div>
     @if (hasData()) {
       @if (expanded()) {
@@ -39,7 +36,10 @@
   @if (hasData()) {
     @let f = facts();
 
-    @if (profile(); as well) {
+    <!-- Well profile: only where it can be read — the maximised dialog and the view page's Well Design step
+         (`isFilled()`). The inline previews are a drawing plus its figures; the strip and its depth slider would
+         take a third of that card's height. -->
+    @if (isFilled() ? profile() : null; as well) {
       <section class="wbp__profile" aria-label="Well profile, surface to total depth">
         <header class="wbp__profile-head">
           <h3 class="wbp__eyebrow">Well profile</h3>
@@ -200,8 +200,10 @@
           <dl class="wbp__stats">
             @for (stat of f.stats; track stat.label) {
               <div class="wbp__stat" [class.wbp__stat--warn]="stat.warn" [style.--wbp-i]="$index">
+                <!-- The inline previews take the shorthand ("TD", "Static WL"): four figures beside a small drawing,
+                     read at a glance. The maximised forms have the room for the full label. -->
                 <dt>
-                  {{ stat.label }}
+                  {{ isFilled() ? stat.label : stat.short }}
                   @if (stat.hint) {
                     <span class="wbp__stat-hint">{{ stat.hint }}</span>
                   }
