@@ -35,7 +35,7 @@ import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
-import { defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
+import { addRepeatableRow, buildSectionGroup, defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFieldConfig, WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrWellborePanelComponent } from '../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
@@ -62,7 +62,7 @@ import {
   WwellIrRawRemarks,
   WwellIrRawTopsRemarks,
 } from '../wwell-ir-form/wwell-ir-form.types';
-import { buildWwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.mapper';
+import { buildWwellIrBulkSavePayload, casingKey, topKey, waterKey } from '../wwell-ir-form/wwell-ir-payload.mapper';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
@@ -105,6 +105,19 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   const section = schema.find(step => step.key === stepKey)?.sections.find(s => s.key === sectionKey);
   if (!section) throw new Error(`Missing IR form section ${stepKey}.${sectionKey}`);
   return { ...section, title: null };
+}
+
+/** A repeatable section's row fields as one flat form — what the section's "+" button opens. `requiredKeys`
+ *  are the fields Save identifies a row by (see the payload mapper's row keys), so a row can't be added without them. */
+function singleRowSection(section: WwellFormSectionConfig, requiredKeys: readonly string[]): WwellFormSectionConfig {
+  const rowFields = section.repeatable?.rowFields ?? [];
+  return {
+    key: `${section.key}NewRow`,
+    title: null,
+    fields: rowFields.map(field =>
+      requiredKeys.includes(field.key) ? { ...field, validators: { ...field.validators, required: true } } : field,
+    ),
+  };
 }
 
 @Component({
@@ -218,6 +231,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hydrogeologySection = findSection(this.schema, 'hydrogeology', 'main');
   protected readonly offsetWellsSection = findSection(this.schema, 'contacts', 'offsetWells');
   protected readonly offsetRemarksSection = findSection(this.schema, 'contacts', 'remarks');
+  protected readonly formationTopAddSection = singleRowSection(this.formationTopsSection, ['name', 'depthFt']);
+  protected readonly casingAddSection = singleRowSection(this.casingSection, ['type', 'sizeIn', 'depthFtBgl']);
+  protected readonly offsetWellAddSection = singleRowSection(this.offsetWellsSection, ['epANum', 'aquifer']);
 
   protected readonly requestReferenceRows = computed(() =>
     buildRequestReferenceRows(this.ir(), this.store.linkedRequestWellOptions()),
@@ -304,6 +320,18 @@ export class WwellIrEditorComponent implements AfterViewInit {
       remarks: buildAndPatchGroup(this.offsetRemarksSection, this.fb, { offsetWellsRemarks: current.offsetWellsRemarks ?? '' }),
     });
   });
+
+  /** The "+" buttons' one-row forms. Their control is a standalone group — a row only reaches the section's live
+   *  FormArray (the one Save diffs) once "Add" commits it — so opening one never flips the section into its edit form. */
+  protected readonly formationTopAdd = new SectionEditState<FormGroup>(
+    () => buildSectionGroup(this.formationTopAddSection, this.fb) as FormGroup,
+  );
+  protected readonly casingAdd = new SectionEditState<FormGroup>(
+    () => buildSectionGroup(this.casingAddSection, this.fb) as FormGroup,
+  );
+  protected readonly offsetWellAdd = new SectionEditState<FormGroup>(
+    () => buildSectionGroup(this.offsetWellAddSection, this.fb) as FormGroup,
+  );
 
   protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
   protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing);
@@ -394,6 +422,78 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected cancelOffsetWellRowInline(): void {
     const index = this.offsetWellsInlineEdit.index();
     this.offsetWellsInlineEdit.cancel(index !== null ? this.offsetWellsRowGroup(index) : null);
+  }
+
+  protected addFormationTopRow(): void {
+    this.commitNewRow<WwellIrRawFormationTop>(this.formationTopAdd, this.formationTopsSection, {
+      existingKeys: this.formationTopsRows().map(row => topKey(row)),
+      keyOf: topKey,
+      liveArray: () => {
+        this.formationTopsEdit.open({ silent: true });
+        return this.formationTopsEdit.control();
+      },
+      duplicate: key => `Formation ${key} already has a horizon — edit that row instead.`,
+      added: 'Formation top added — click Save to apply.',
+    });
+  }
+
+  protected addCasingRow(): void {
+    this.commitNewRow<WwellIrRawCasingRow>(this.casingAdd, this.casingSection, {
+      existingKeys: this.casingRows().map(row => casingKey(row)),
+      keyOf: casingKey,
+      liveArray: () => {
+        this.casingEdit.open({ silent: true });
+        return this.casingEdit.control();
+      },
+      duplicate: key => `Casing ${key} already exists — edit that row instead.`,
+      added: 'Casing row added — click Save to apply.',
+    });
+  }
+
+  protected addOffsetWellRow(): void {
+    this.commitNewRow<WwellIrRawOffsetWell>(this.offsetWellAdd, this.offsetWellsSection, {
+      existingKeys: this.offsetWellsRows().map(row => waterKey(row.epANum ?? 0)),
+      keyOf: row => waterKey(row.epANum ?? 0),
+      liveArray: () => {
+        this.offsetWellsEdit.open({ silent: true });
+        const ctrl = this.offsetWellsEdit.control();
+        return ctrl ? this.offsetWellsArrayControl(ctrl) : null;
+      },
+      duplicate: key => `Area well ${key} already exists — edit that row instead.`,
+      added: 'Offset well added — click Save to apply.',
+    });
+  }
+
+  /** Commits a "+" form's row into the section's live FormArray — the same array inline edits and deletes write to,
+   *  so Save diffs it like any other change. Save matches rows on their natural key, so a row whose key is already
+   *  taken is refused: it would silently overwrite that row instead of being added. */
+  private commitNewRow<TRow>(
+    add: SectionEditState<FormGroup>,
+    section: WwellFormSectionConfig,
+    commit: {
+      readonly existingKeys: readonly string[];
+      readonly keyOf: (row: TRow) => string;
+      readonly liveArray: () => FormArray | null;
+      readonly duplicate: (key: string) => string;
+      readonly added: string;
+    },
+  ): void {
+    const form = add.control();
+    if (!form || form.invalid) return;
+
+    const row = form.getRawValue() as TRow;
+    const key = commit.keyOf(row);
+    if (commit.existingKeys.includes(key)) {
+      this.notify.warn(commit.duplicate(key));
+      return;
+    }
+
+    const array = commit.liveArray();
+    if (!array) return;
+    addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
+    array.at(array.length - 1).patchValue(row as object);
+    add.close();
+    this.notify.info(commit.added);
   }
 
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
@@ -761,7 +861,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected saveAll(): void {
-    if (this.ir().irSeq !== null && !this.hasUnsavedChanges()) {
+    // A record whose stored remarks still carry legacy HTML is saved even with nothing edited — the form already
+    // holds the cleaned text, and saving is what writes it back.
+    if (this.ir().irSeq !== null && !this.hasUnsavedChanges() && !this.ir().hasLegacyMarkup) {
       this.notify.info('No changes to save.');
       return;
     }
@@ -834,6 +936,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.topsRemarksEdit.close();
     this.casingEdit.close();
     this.offsetWellsEdit.close();
+    this.formationTopAdd.close();
+    this.casingAdd.close();
+    this.offsetWellAdd.close();
   }
 
   protected submitForReview(): void {

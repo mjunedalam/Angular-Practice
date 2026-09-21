@@ -692,6 +692,14 @@ app-wwell-ir-editor {
   margin-top: 0.65rem;
 }
 
+/* A "+" button's one-row add form: its own card above the table, matching the table wrapper's border and radius. */
+.ire__add-block {
+  margin-bottom: 0.65rem;
+  padding: 0.85rem 0.9rem 0.7rem;
+  border: 1px solid $border;
+  border-radius: 8px;
+}
+
 /* ── View-mode read display ───────────────────────────────────────
  * `[data-tone]` (bound from KvRow.tone — e.g. a nonzero H2S reading) flags a field whose value
  * is actually a problem, not just data. Values are plain text — no pill or box around them; a

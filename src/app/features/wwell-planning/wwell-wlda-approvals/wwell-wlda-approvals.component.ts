@@ -27,7 +27,6 @@ import { WwellApprovalMiniChainComponent } from '../shared/wwell-approvals/wwell
 import { WwellApprovalTimelineComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
-import { WwellThemeToggleComponent } from '../shared/wwell-theme-toggle/wwell-theme-toggle.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellWldaRequestFormComponent, WwellWldaRequestFormResult } from './wwell-wlda-request-form/wwell-wlda-request-form.component';
 
@@ -45,7 +44,6 @@ const SKELETON_ROW_COUNT = 6;
     WwellApprovalMiniChainComponent,
     WwellApprovalTimelineComponent,
     WwellDetailLoadingComponent,
-    WwellThemeToggleComponent,
   ],
   templateUrl: './wwell-wlda-approvals.component.html',
   styleUrl: './wwell-wlda-approvals.component.scss',

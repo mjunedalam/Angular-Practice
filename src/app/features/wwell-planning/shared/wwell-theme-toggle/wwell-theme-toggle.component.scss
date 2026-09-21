@@ -1,52 +1,88 @@
 @use '../wwell-design-tokens' as tokens;
 
+// The control lives in the shell's top bar, so its two buttons are drawn from the shell tokens (one
+// look per shell, scoped like the bar itself: `data-shell` on <html>). The popover further down is a
+// planning surface and keeps the `--wp-*` tokens.
 :host {
   display: inline-flex;
   flex-shrink: 0;
-
-  // Material's icon-button sizing tokens: a compact 32px control that suits the narrow master column.
-  --mat-icon-button-state-layer-size: 32px;
   --mat-icon-button-icon-size: 18px;
-  --mat-icon-button-icon-color: #{tokens.$muted};
 }
 
-// The two buttons read as one joined control: shared hairline, outer corners rounded only.
 .wtt-group {
   display: inline-flex;
 }
 
 .wtt {
   position: relative;
-  border: 1px solid tokens.$border;
-  border-radius: 0;
-  background: tokens.$surface;
-  box-shadow: tokens.$shadow-1;
   transition:
     background-color tokens.$duration-fast tokens.$ease-out,
     border-color tokens.$duration-fast tokens.$ease-out,
     color tokens.$duration-fast tokens.$ease-out;
 
-  &:hover,
-  &.wtt--open {
-    z-index: 1; // lift the hovered edge over its neighbour's shared border
-    background: tokens.$surface-hover;
-    border-color: tokens.$border-strong;
-    --mat-icon-button-icon-color: #{tokens.$navy-deep};
-  }
-
   &:focus-visible {
     z-index: 2;
-    @include tokens.focus-ring;
   }
 }
 
-.wtt--quick {
-  border-radius: tokens.$radius-sm 0 0 tokens.$radius-sm;
+// ── Mono shell: a joined pair of square buttons under one hairline ───────────
+:host-context([data-shell='mono']) {
+  --mat-icon-button-state-layer-size: 34px;
+
+  .wtt-group {
+    overflow: hidden;
+    border: 1px solid var(--shell-hair-strong);
+    border-radius: 5px;
+  }
+
+  .wtt {
+    --mat-icon-button-icon-color: var(--shell-muted);
+    border-radius: 0;
+
+    &:hover,
+    &.wtt--open {
+      background: var(--shell-press);
+      --mat-icon-button-icon-color: var(--shell-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--shell-text);
+      outline-offset: -2px;
+    }
+  }
+
+  .wtt--tune {
+    border-left: 1px solid var(--shell-hair-strong);
+  }
 }
 
-.wtt--tune {
-  margin-left: -1px;
-  border-radius: 0 tokens.$radius-sm tokens.$radius-sm 0;
+// ── Legacy shell: the same two buttons as the old navy bar's bell ────────────
+:host-context([data-shell='legacy']) {
+  --mat-icon-button-state-layer-size: 40px;
+
+  .wtt-group {
+    gap: 8px;
+  }
+
+  .wtt {
+    --mat-icon-button-icon-color: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+
+    &:hover,
+    &.wtt--open {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(14, 165, 233, 0.14);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+      --mat-icon-button-icon-color: #38bdf8;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #38bdf8;
+      outline-offset: 2px;
+    }
+  }
 }
 
 // Both glyphs are stacked and cross-rotate with transform + opacity only (compositor-friendly).
@@ -357,10 +393,84 @@ legend.wtt-field__label {
   }
 }
 
+// ── Legacy layout switch ─────────────────────────────────────────
+// Swaps the redesigned top bar and left nav for the old navy ones; light/dark is untouched.
+.wtt-legacy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid tokens.$border;
+}
+
+.wtt-legacy__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wtt-legacy__title {
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: tokens.$navy-deep;
+}
+
+.wtt-legacy__hint {
+  @include tokens.type-label;
+  font-size: tokens.$text-2xs;
+  line-height: 1.4;
+}
+
+.wtt-switch {
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid tokens.$border-control;
+  border-radius: tokens.$radius-pill;
+  background: tokens.$surface-sunken;
+  cursor: pointer;
+  transition:
+    background-color tokens.$duration-fast tokens.$ease-out,
+    border-color tokens.$duration-fast tokens.$ease-out;
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &[aria-checked='true'] {
+    border-color: tokens.$cta;
+    background: tokens.$cta;
+
+    .wtt-switch__thumb {
+      background: tokens.$on-cta;
+      transform: translateX(16px);
+    }
+  }
+}
+
+.wtt-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: tokens.$muted;
+  transition:
+    transform tokens.$duration-fast tokens.$ease-out,
+    background-color tokens.$duration-fast tokens.$ease-out;
+}
+
 // Vendor thumb pseudo-elements get their own rules: one unknown selector in a list drops the whole rule.
 @media (prefers-reduced-motion: reduce) {
   .wtt .wtt__icon,
-  .wtt-pop {
+  .wtt-pop,
+  .wtt-switch__thumb {
     transition: none;
     animation: none;
   }

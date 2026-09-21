@@ -101,5 +101,22 @@
         Reset
       </button>
     </div>
+
+    <div class="wtt-legacy">
+      <div class="wtt-legacy__text">
+        <span class="wtt-legacy__title" id="wtt-legacy-label">Legacy layout</span>
+        <span class="wtt-legacy__hint">Classic navy top bar and left nav. Theme still applies to the page.</span>
+      </div>
+      <button
+        type="button"
+        class="wtt-switch"
+        role="switch"
+        aria-labelledby="wtt-legacy-label"
+        [attr.aria-checked]="theme.isLegacyShell()"
+        (click)="theme.setLegacyShell(!theme.isLegacyShell())"
+      >
+        <span class="wtt-switch__thumb"></span>
+      </button>
+    </div>
   </section>
 </ng-template>

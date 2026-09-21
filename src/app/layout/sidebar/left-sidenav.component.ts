@@ -1,10 +1,16 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
+  ElementRef,
   inject,
   input,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RbacStore } from '@store/rbac/rbac.store';
@@ -43,6 +49,8 @@ export class LeftSidenavComponent {
   private readonly rbacStore = inject(RbacStore);
   private readonly buildInfoService = inject(BuildInfoService);
   private readonly notificationService = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly list = viewChild<ElementRef<HTMLElement>>('list');
 
   protected readonly buildInfo = this.buildInfoService.info;
   protected readonly shortHash = this.buildInfoService.shortHash;
@@ -50,6 +58,27 @@ export class LeftSidenavComponent {
   readonly collapsed    = input<boolean>(false);
   readonly activeRoute  = input<string>('home');
   readonly navItemClick = output<string>();
+
+  /** True once the mono shell's highlight has been measured; until then the active button paints its own fill. */
+  protected readonly glideReady = signal(false);
+
+  constructor() {
+    // Re-measure whenever the current page or the rail's width changes.
+    effect(() => {
+      this.activeRoute();
+      this.collapsed();
+      requestAnimationFrame(() => this.placeHighlight());
+    });
+
+    // The rail animates its width and labels re-wrap as it does, so follow the list's size frame by frame.
+    afterNextRender(() => {
+      const list = this.list()?.nativeElement;
+      if (!list || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(() => this.placeHighlight());
+      observer.observe(list);
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 
   readonly navItems: NavItem[] = [
     {
@@ -136,5 +165,25 @@ export class LeftSidenavComponent {
       return;
     }
     this.navItemClick.emit(item.id);
+  }
+
+  /** Measures the active button into the CSS variables the mono shell's highlight is drawn from. */
+  private placeHighlight(): void {
+    const list = this.list()?.nativeElement;
+    const active = list?.querySelector<HTMLElement>('.sidenav__btn--active');
+    if (!list || !active) {
+      this.glideReady.set(false);
+      return;
+    }
+
+    list.style.setProperty('--hl-x', `${active.offsetLeft}px`);
+    list.style.setProperty('--hl-y', `${active.offsetTop}px`);
+    list.style.setProperty('--hl-w', `${active.offsetWidth}px`);
+    list.style.setProperty('--hl-h', `${active.offsetHeight}px`);
+
+    // Enabled a frame after the first placement, so the highlight doesn't slide in from the corner.
+    if (!this.glideReady()) {
+      requestAnimationFrame(() => this.glideReady.set(true));
+    }
   }
 }

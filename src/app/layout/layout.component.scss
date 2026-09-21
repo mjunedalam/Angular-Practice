@@ -1,4 +1,5 @@
-$topbar-h: 62px;
+// The bar's height is a shell token (56px mono / 62px legacy, see _shell-theme.scss).
+$topbar-h: var(--shell-bar-h, 62px);
 
 :host {
   display: block;
@@ -51,4 +52,9 @@ $topbar-h: 62px;
       overflow: hidden;
     }
   }
+}
+
+// The sky-blue corner glow belongs to the legacy shell; the mono shell is colourless.
+:host-context([data-shell='mono']) .dashboard__content::before {
+  display: none;
 }

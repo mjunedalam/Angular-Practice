@@ -178,7 +178,7 @@
 /* ── Loading bar ─────────────────────────────────────────────── */
 .report-loading-bar {
   position: fixed;
-  top: 62px;
+  top: var(--shell-bar-h, 62px); // sits directly under the top bar, whichever shell is showing
   left: 0;
   right: 0;
   height: 3px;

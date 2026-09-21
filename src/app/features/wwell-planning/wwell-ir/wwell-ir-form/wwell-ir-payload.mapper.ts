@@ -65,8 +65,8 @@ const isBlankFormationTop = (row: WwellIrRawFormationTop): boolean =>
  *  EXAD_AGWA_IUD_PKG.save_casing/save_tops in 05-agwa-iud-package.sql) — a row whose key isn't
  *  already present in `existing` is genuinely new and must be sent as INSERT, not UPDATE, or the
  *  backend's `WHERE <key match>` finds nothing and silently drops it. */
-const casingKey = (row: { readonly type: string; readonly sizeIn: string }): string => `${row.type} ${row.sizeIn}`;
-const topKey = (row: { readonly name: string }): string => row.name;
+export const casingKey = (row: { readonly type: string; readonly sizeIn: string }): string => `${row.type} ${row.sizeIn}`;
+export const topKey = (row: { readonly name: string }): string => row.name;
 
 /** Only the columns save_casing's/save_tops' UPDATE branch actually writes (type/size are the
  *  match key itself, not a writable column) — comparing anything else could flag a row "changed"
@@ -271,7 +271,7 @@ function buildHydrogeologyRows(
 const isBlankOffsetWell = (row: WwellIrRawOffsetWell): boolean => row.epANum == null && !row.aquifer;
 
 /** Natural key exad_gwd_ir_water is matched on — (ir_seq, ep_a_num) is its primary key. */
-const waterKey = (epANum: number): string => String(epANum);
+export const waterKey = (epANum: number): string => String(epANum);
 
 /** Only the columns save_water's UPDATE branch writes — ep_a_num is the match key itself. */
 const waterRowUnchanged = (existingRow: IntegratedRequirementOffsetWell, row: WwellIrRawOffsetWell): boolean =>

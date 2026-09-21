@@ -1,10 +1,13 @@
 <nav
   class="sidenav"
   [class.sidenav--collapsed]="collapsed()"
+  [class.sidenav--glide]="glideReady()"
   aria-label="Main navigation"
 >
   <!-- Nav Items -->
-  <ul class="sidenav__list" role="list">
+  <ul class="sidenav__list" role="list" #list>
+    <!-- Gliding highlight behind the active item (mono shell only; measured in the component) -->
+    <li class="sidenav__hl" aria-hidden="true"></li>
     @for (group of navGroups; track $index) {
       @if (group.section) {
         <li class="sidenav__section-label">{{ group.section }}</li>

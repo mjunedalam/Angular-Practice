@@ -5,6 +5,9 @@
  * `<HTML><BODY><P ALIGN="left"><FONT FACE="Arial" SIZE="11" COLOR="#000000">7" diameter, 0.012"
  * slots</FONT></P></BODY></HTML>`, sometimes several such `<HTML>...</HTML>` documents
  * concatenated back-to-back in one column value (each `<P>` was originally its own remark line).
+ * Other records hold bare fragments from a browser rich-text editor instead — no `<HTML>` wrapper,
+ * e.g. `<p>The screen should be jetted…</p><p><br></p>`, possibly followed by plain option lines
+ * (`Open Hole`, `Screened`). Both shapes are handled the same way.
  * Left as-is, every place that shows one of these fields — the KV read cards
  * (wwell-ir-detail-rows.util.ts), the editor's combo/select inputs, the printable Letter view —
  * renders the raw tags instead of the remark text.
@@ -17,12 +20,20 @@
  * ever sees plain text, so a save after that point persists plain text back to the backend even
  * though the column itself started out as markup.
  */
-const LEGACY_HTML_DOCUMENT_PATTERN = /<html[\s>]/i;
+/** A real markup tag — an `<HTML>` dump's or a rich-text fragment's. A whitelist of tag names rather
+ *  than "anything in angle brackets", so plain text with a stray `<` (`PWL < SWL`, `<5000 ppm`) is
+ *  never mistaken for markup and rewritten. */
+const LEGACY_MARKUP_TAG_PATTERN =
+  /<\/?(?:html|body|p|br|div|span|font|b|i|u|s|strong|em|ul|ol|li|h[1-6]|a|sub|sup|hr|pre|blockquote|table|tr|td|th)(?:[\s/][^>]*)?>/i;
 
-/** True when `value` is one of these legacy `<HTML>...` dumps rather than plain text. A brand-new
- *  record's plain, user-typed remarks (or a blank value) always fail this check. */
+/** Where a legacy value's own line breaks were: a `<br>`, or the end of a block element. */
+const LINE_BREAK_TAG_PATTERN = /<br\s*\/?>|<\/(?:p|div|li|h[1-6]|tr)>/gi;
+
+/** True when `value` carries legacy markup — an `<HTML>...` dump or a bare `<p>…</p>` fragment —
+ *  rather than plain text. A brand-new record's plain, user-typed remarks (or a blank value)
+ *  always fail this check. */
 export function isLegacyIrHtmlText(value: string | null | undefined): boolean {
-  return !!value && LEGACY_HTML_DOCUMENT_PATTERN.test(value);
+  return !!value && LEGACY_MARKUP_TAG_PATTERN.test(value);
 }
 
 /** Collapses runs of horizontal whitespace within each line (left by adjacent `<FONT>` run
@@ -57,7 +68,7 @@ export function stripLegacyIrHtml(value: string | null | undefined): string {
     // remark lines saved back-to-back — split them apart before parsing, since DOMParser only
     // ever reads the first document out of a string containing several.
     .split(/(?=<html[\s>])/i)
-    .map(document => document.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n'))
+    .map(document => document.replace(LINE_BREAK_TAG_PATTERN, '\n'))
     .map(document => parser.parseFromString(document, 'text/html').body.textContent ?? '')
     .map(collapseWhitespacePreservingLines)
     .filter(Boolean);

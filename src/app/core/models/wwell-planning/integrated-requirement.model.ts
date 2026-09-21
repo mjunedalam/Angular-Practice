@@ -158,6 +158,11 @@ export interface IntegratedRequirement {
    *  or a submit whose follow-up display fetch hasn't landed yet), in which case the list falls
    *  back to the local status label instead of showing nothing. */
   readonly sapWfStatusText: string | null;
+  /** True while the stored header remarks (completion, acidization, …) still carry legacy HTML. The
+   *  fields above already hold the cleaned text, so a Save has to write it back even when the user
+   *  edited nothing — otherwise the markup stays in the database. Recomputed by every detail fetch,
+   *  so it clears itself once a save has stored the plain text. */
+  readonly hasLegacyMarkup?: boolean;
 }
 
 export interface CreateIntegratedRequirementPayload

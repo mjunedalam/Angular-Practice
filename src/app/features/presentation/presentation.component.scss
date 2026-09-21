@@ -451,7 +451,7 @@
 
   &--diagram {
     flex-shrink: 0;
-    height: calc(100vh - 68px);
+    height: calc(100vh - var(--shell-bar-h, 62px) - 6px); // viewport minus the top bar (56/62px) and the page's 6px gap
     background: var(--bg-card);
     border-radius: 18px;
     padding: 50px 16px 16px;

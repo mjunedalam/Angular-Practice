@@ -1,0 +1,66 @@
+// Shell theme — the tokens behind the top bar and left nav ("Monolith": flat, hairline, pure monochrome).
+//
+// Global on purpose, like `_wwell-theme.scss`: component-scoped SCSS can't target `:root`. Light/dark
+// follow the same `data-wp-theme` attribute `WwellThemeService` already writes on <html>; the same
+// service writes `data-shell="mono" | "legacy"` for the Appearance popover's Legacy switch.
+//
+// Legacy is the old navy shell. Its colours stay hard-coded in the `*-legacy` partials next to each
+// component, so this file only hands it the one thing the page layout shares: the bar height.
+// Every text tier below stays ≥ 4.5:1 on the bar and rail surface it sits on.
+
+:root {
+  --shell-bar-h: 56px;
+
+  // Light: "Paper"
+  --shell-back: #ededed;
+  --shell-bar: #ffffff;
+  --shell-rail: #fafafa;
+  --shell-hair: #e4e4e4;
+  --shell-hair-strong: #cfcfcf;
+  --shell-text: #0a0a0a;
+  --shell-muted: #6b6b6b;
+  --shell-label: #6b6b6b;
+  --shell-hover: rgba(0, 0, 0, 0.04);
+  --shell-press: rgba(0, 0, 0, 0.07);
+  --shell-active-bg: #0a0a0a; // the inverted block behind the current page
+  --shell-active-text: #ffffff;
+  --shell-avatar-bg: #0a0a0a;
+  --shell-avatar-text: #ffffff;
+  --shell-signal: #d92d20; // red only where it means something: notification badge, lock chip
+  --shell-on-signal: #ffffff;
+  --shell-lock-bg: rgba(220, 38, 38, 0.08);
+  --shell-lock-bd: rgba(220, 38, 38, 0.3);
+  --shell-lock-fg: #c62828;
+}
+
+:root[data-wp-theme='dark'] {
+  --shell-back: #050505;
+  --shell-bar: #0a0a0a;
+  --shell-rail: #0a0a0a;
+  --shell-hair: #262626;
+  --shell-hair-strong: #383838;
+  --shell-text: #f4f4f4;
+  --shell-muted: #949494;
+  --shell-label: #808080;
+  --shell-hover: rgba(255, 255, 255, 0.05);
+  --shell-press: rgba(255, 255, 255, 0.09);
+  --shell-active-bg: #f4f4f4;
+  --shell-active-text: #0a0a0a;
+  --shell-avatar-bg: #f4f4f4;
+  --shell-avatar-text: #0a0a0a;
+  --shell-lock-bg: rgba(220, 38, 38, 0.15);
+  --shell-lock-bd: rgba(220, 38, 38, 0.3);
+  --shell-lock-fg: #f87171;
+}
+
+// Today's bar was 62px; the mono bar is 56px. Everything that hangs off the bar reads this variable.
+:root[data-shell='legacy'] {
+  --shell-bar-h: 62px;
+}
+
+// The page layout's own backdrop follows the mono shell. Legacy keeps the navy `--bg-*` tokens from
+// styles.scss untouched. (Every page paints its own surface over this; it only shows in the gaps.)
+:root[data-shell='mono'] {
+  --bg-app: var(--shell-back);
+  --bg-content: var(--shell-back);
+}

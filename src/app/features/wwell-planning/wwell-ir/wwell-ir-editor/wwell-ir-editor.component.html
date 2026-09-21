@@ -313,11 +313,26 @@
           <div class="ire__section-head">
             <h3 class="ire__subsection-title">3.1 Horizons</h3>
             @if (!formationTopsEdit.visible()) {
-              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="formationTopsEdit.open()">
-                <mat-icon>edit</mat-icon>
-              </button>
+              <div class="ire__section-actions">
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add horizon" matTooltip="Add horizon" (click)="formationTopAdd.open()">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="formationTopAdd.close(); formationTopsEdit.open()">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
             }
           </div>
+
+          @if (formationTopAdd.control(); as addCtrl) {
+            <div class="ire__edit-block ire__add-block" appWwellCollapseAnimate>
+              <app-dynamic-section [section]="formationTopAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+              <div class="ire__edit-actions">
+                <button type="button" mat-button (click)="formationTopAdd.close()">Cancel</button>
+                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addFormationTopRow()">Add horizon</button>
+              </div>
+            </div>
+          }
 
           @if (formationTopsEdit.visible() && formationTopsEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
@@ -446,14 +461,28 @@
             </span>
           }
           @if (!casingEdit.visible() && isTimelineStepExpanded('casing')) {
-            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Casing" (click)="$event.stopPropagation(); casingEdit.open()">
-              <mat-icon>edit</mat-icon>
-            </button>
+            <div class="ire__section-actions">
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add casing" matTooltip="Add casing" (click)="$event.stopPropagation(); casingAdd.open()">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Casing" (click)="$event.stopPropagation(); casingAdd.close(); casingEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
           }
         </div>
 
         @if (isTimelineStepExpanded('casing')) {
         <div class="ire__step-body" appWwellCollapseAnimate>
+        @if (casingAdd.control(); as addCtrl) {
+          <div class="ire__edit-block ire__add-block" appWwellCollapseAnimate>
+            <app-dynamic-section [section]="casingAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+            <div class="ire__edit-actions">
+              <button type="button" mat-button (click)="casingAdd.close()">Cancel</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addCasingRow()">Add casing</button>
+            </div>
+          </div>
+        }
         @if (casingEdit.visible() && casingEdit.control(); as ctrl) {
           <div class="ire__edit-block" appWwellCollapseAnimate>
             <app-dynamic-section [section]="casingSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
@@ -652,11 +681,26 @@
           <div class="ire__section-head">
             <h3 class="ire__subsection-title">6.1 Area Water Wells</h3>
             @if (!offsetWellsEdit.visible()) {
-              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells" (click)="offsetWellsEdit.open()">
-                <mat-icon>edit</mat-icon>
-              </button>
+              <div class="ire__section-actions">
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add area water well" matTooltip="Add area water well" (click)="offsetWellAdd.open()">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells" (click)="offsetWellAdd.close(); offsetWellsEdit.open()">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
             }
           </div>
+
+          @if (offsetWellAdd.control(); as addCtrl) {
+            <div class="ire__edit-block ire__add-block" appWwellCollapseAnimate>
+              <app-dynamic-section [section]="offsetWellAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+              <div class="ire__edit-actions">
+                <button type="button" mat-button (click)="offsetWellAdd.close()">Cancel</button>
+                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addOffsetWellRow()">Add well</button>
+              </div>
+            </div>
+          }
 
           @if (offsetWellsEdit.visible() && offsetWellsEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>

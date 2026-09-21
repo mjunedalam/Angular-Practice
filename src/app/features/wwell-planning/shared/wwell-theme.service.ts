@@ -4,8 +4,12 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 export type WwellTheme = 'light' | 'dark';
 /** What the user picked: a fixed theme, or `system` to follow the OS. */
 export type WwellThemeMode = WwellTheme | 'system';
+/** Which top bar + left nav is showing: the redesigned `mono` shell, or the navy `legacy` one it replaced. */
+export type WwellShell = 'mono' | 'legacy';
 
 const THEME_STORAGE_KEY = 'wwell-theme';
+const SHELL_STORAGE_KEY = 'wwell-shell';
+const SHELL_ATTRIBUTE = 'data-shell';
 /** Dark keeps the key it shipped with, so a value saved before light gained a dial still applies. */
 const CONTRAST_STORAGE_KEYS: Readonly<Record<WwellTheme, string>> = {
   dark: 'wwell-contrast',
@@ -40,6 +44,9 @@ export const DEFAULT_CONTRASTS: Readonly<Record<WwellTheme, number>> = { dark: 5
  * choice wins and is remembered in localStorage. Each theme has its own contrast dial (0 soft – 100
  * high, see `dark-tone` / `light-tone` in _wwell-theme.scss); both are always written, so switching
  * theme never waits on a second update to repaint at the right contrast.
+ *
+ * The same attribute mechanism carries the shell layout: `data-shell="mono" | "legacy"` on <html>
+ * (see layout/_shell-theme.scss). Legacy is opt-in and remembered; mono is what everyone gets by default.
  */
 @Injectable({ providedIn: 'root' })
 export class WwellThemeService {
@@ -53,8 +60,11 @@ export class WwellThemeService {
     dark: this.readStoredContrast('dark'),
     light: this.readStoredContrast('light'),
   });
+  private readonly legacyChosen = signal<boolean>(this.readStored(SHELL_STORAGE_KEY) === 'legacy');
   private switchingTimer: ReturnType<typeof setTimeout> | undefined;
 
+  readonly shell = computed<WwellShell>(() => (this.legacyChosen() ? 'legacy' : 'mono'));
+  readonly isLegacyShell = computed(() => this.legacyChosen());
   readonly theme = computed<WwellTheme>(() => this.chosen() ?? this.system());
   readonly isDark = computed(() => this.theme() === 'dark');
   readonly mode = computed<WwellThemeMode>(() => this.chosen() ?? 'system');
@@ -71,11 +81,15 @@ export class WwellThemeService {
     // theme; the effects keep the root in sync with later changes (toggle, OS switch, dial).
     this.apply(this.theme());
     this.applyContrasts(this.contrasts());
+    this.applyShell(this.shell());
     effect(() => {
       this.apply(this.theme());
     });
     effect(() => {
       this.applyContrasts(this.contrasts());
+    });
+    effect(() => {
+      this.applyShell(this.shell());
     });
   }
 
@@ -107,8 +121,20 @@ export class WwellThemeService {
     this.setContrast(DEFAULT_CONTRASTS[this.theme()]);
   }
 
+  /** `true` shows the legacy navy shell; `false` is the default mono one. Independent of light/dark. */
+  setLegacyShell(legacy: boolean): void {
+    if (legacy === this.legacyChosen()) return;
+    this.flagSwitching();
+    this.legacyChosen.set(legacy);
+    this.writeStored(SHELL_STORAGE_KEY, legacy ? 'legacy' : null);
+  }
+
   private apply(theme: WwellTheme): void {
     this.document.documentElement.setAttribute(THEME_ATTRIBUTE, theme);
+  }
+
+  private applyShell(shell: WwellShell): void {
+    this.document.documentElement.setAttribute(SHELL_ATTRIBUTE, shell);
   }
 
   private applyContrasts(all: Readonly<Record<WwellTheme, number>>): void {

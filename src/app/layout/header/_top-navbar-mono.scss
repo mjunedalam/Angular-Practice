@@ -1,0 +1,417 @@
+// The redesigned top bar ("Monolith"): flat, hairline, monochrome. Scoped to `data-shell='mono'`, which
+// WwellThemeService keeps on <html>. Colours come from layout/_shell-theme.scss, so it follows
+// light/dark; the user dropdown borrows the planning `--wp-*` surface tokens, which flip with the theme.
+
+$font: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+$ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+$radius: 4px;
+
+:host-context([data-shell='mono']) {
+  // ── Shell ──────────────────────────────────────────────────────────────────
+  .top-navbar {
+    position: relative;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box; // the hairline sits inside --shell-bar-h, so the bar is exactly that tall
+    height: var(--shell-bar-h);
+    padding: 0 14px 0 0;
+    border-bottom: 1px solid var(--shell-hair);
+    background: var(--shell-bar);
+    color: var(--shell-text);
+    font-family: $font;
+
+    // Buttons don't inherit the family by default, and the user trigger and logout button hold text.
+    button {
+      font-family: inherit;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--shell-text);
+      outline-offset: 2px;
+    }
+  }
+
+  // ── Brand: its width matches the rail below, so the hairline runs straight down ──
+  .top-navbar__brand {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    width: 244px;
+    height: 100%;
+    padding: 0 12px 0 10px;
+    border-right: 1px solid var(--shell-hair);
+  }
+
+  .top-navbar__hamburger {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    justify-content: center;
+    gap: 4px;
+    width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: $radius;
+    background: transparent;
+    color: var(--shell-muted);
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+
+    span {
+      display: block;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+
+      &:nth-child(1) { width: 20px; }
+      &:nth-child(2) { width: 14px; }
+      &:nth-child(3) { width: 17px; }
+    }
+
+    &:hover {
+      background: var(--shell-hover);
+      color: var(--shell-text);
+    }
+  }
+
+  .top-navbar__logo {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .top-navbar__logo-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .top-navbar__logo-text {
+    font: 700 16px/1 $font;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--shell-text);
+  }
+
+  // ── Title ──────────────────────────────────────────────────────────────────
+  .top-navbar__title {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    padding: 0 24px;
+
+    h1 {
+      margin: 0;
+      overflow: hidden;
+      font: 500 12px/1 $mono;
+      letter-spacing: 0.14em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--shell-muted);
+    }
+  }
+
+  // ── Right cluster ──────────────────────────────────────────────────────────
+  .top-navbar__user {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .top-navbar__notifications {
+    position: relative;
+  }
+
+  .top-navbar__icon-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: $radius;
+    background: transparent;
+    color: var(--shell-muted);
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      transform 0.12s;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: var(--shell-press);
+      color: var(--shell-text);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .top-navbar__divider {
+    width: 1px;
+    height: 26px;
+    background: var(--shell-hair);
+  }
+
+  // ── User trigger ───────────────────────────────────────────────────────────
+  .top-navbar__menu {
+    position: relative;
+  }
+
+  .top-navbar__menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 8px 3px 14px;
+    border: 1px solid var(--shell-hair);
+    border-radius: $radius;
+    background: transparent;
+    color: var(--shell-text);
+    cursor: pointer;
+    transition: border-color 0.2s;
+
+    &:hover,
+    &--open {
+      border-color: var(--shell-hair-strong);
+    }
+
+    &--open .top-navbar__chevron {
+      transform: rotate(180deg);
+    }
+  }
+
+  .top-navbar__user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.25;
+  }
+
+  .top-navbar__user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--shell-text);
+  }
+
+  .top-navbar__last-login {
+    font: 500 11px/1.25 $mono;
+    color: var(--shell-muted);
+  }
+
+  .top-navbar__avatar {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: $radius;
+    background: var(--shell-avatar-bg);
+    color: var(--shell-avatar-text);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .top-navbar__chevron {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    color: var(--shell-muted);
+    transition: transform 0.25s $ease;
+  }
+
+  // ── Dropdown: a raised planning surface, so it flips with the theme ─────────
+  .top-navbar__menu-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 300;
+    width: 17rem;
+    overflow: hidden;
+    border: 1px solid var(--wp-line-strong);
+    border-radius: 8px;
+    background: var(--wp-surface-raised);
+    box-shadow: var(--wp-shadow-3);
+    color: var(--wp-text);
+    transform-origin: top right;
+    animation: top-navbar-menu-enter 180ms $ease;
+  }
+
+  .top-navbar__profile-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top-navbar__profile-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--wp-line);
+  }
+
+  .top-navbar__profile-avatar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: $radius;
+    background: var(--shell-avatar-bg);
+    color: var(--shell-avatar-text);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .top-navbar__profile-details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .top-navbar__profile-name {
+    overflow: hidden;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--wp-ink);
+  }
+
+  .top-navbar__profile-subtitle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+    font: 500 11px/1.45 $mono;
+    color: var(--wp-muted);
+
+    svg {
+      flex-shrink: 0;
+      width: 11px;
+      height: 11px;
+      margin-top: 2px;
+      color: var(--wp-subtle);
+    }
+  }
+
+  .top-navbar__profile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--wp-line);
+  }
+
+  .top-navbar__profile-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .top-navbar__profile-role-chip {
+    padding: 2px 7px;
+    border: 1px solid var(--wp-line-strong);
+    border-radius: $radius;
+    background: var(--wp-surface-sunken);
+    font: 600 11px/1.6 $mono;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--wp-muted);
+  }
+
+  .top-navbar__logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--wp-danger-ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    svg {
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+    }
+
+    &:hover {
+      background: var(--wp-danger-soft);
+    }
+  }
+
+  // ── Material badge on the bell: the one place red shows up ──────────────────
+  ::ng-deep .mat-badge-content {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 6px;
+    background: var(--shell-signal);
+    color: var(--shell-on-signal);
+    font-family: $font;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 18px;
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  :host-context([data-shell='mono']) {
+    .top-navbar__title,
+    .top-navbar__user-info {
+      display: none;
+    }
+
+    .top-navbar__menu-trigger {
+      padding-left: 6px;
+    }
+
+    .top-navbar__menu-popup {
+      right: -0.25rem;
+      min-width: 17.5rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-shell='mono']) {
+    .top-navbar__menu-popup {
+      animation: none;
+    }
+
+    .top-navbar__hamburger,
+    .top-navbar__icon-btn,
+    .top-navbar__menu-trigger,
+    .top-navbar__chevron {
+      transition: none;
+    }
+  }
+}

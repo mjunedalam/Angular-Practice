@@ -3,7 +3,7 @@ import {
   IntegratedRequirementTestType,
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
-import { stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
+import { isLegacyIrHtmlText, stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
 import {
   IrCasingRow,
   IrHeaderRow,
@@ -84,9 +84,20 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const wellDesignRow = rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design')[0] as IrWellDesignRow | undefined;
   const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion);
   const wellDesignRowBelongsToThisIr = !!wellDesignRow && !!completionText;
+  const hasLegacyMarkup = [
+    header?.completion ?? header?.cmpl_type,
+    header?.acidization,
+    header?.dt_rmks,
+    header?.logging,
+    header?.mud_rmks,
+    header?.sampling,
+    header?.flow_rmks,
+    header?.dev_pump_test,
+  ].some(isLegacyIrHtmlText);
 
   return {
     ...existing,
+    hasLegacyMarkup,
     wellDesignSeq: wellDesignRowBelongsToThisIr ? wellDesignRow.wd_seq : existing.wellDesignSeq,
     sapWfId: header?.sap_wf_id ?? existing.sapWfId,
     requestReference: {

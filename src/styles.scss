@@ -6,6 +6,8 @@
 @use '@fontsource-variable/geist-mono/wght.css' as geist-mono-font;
 @use './app/features/wwell-planning/shared/wwell-theme';
 @use './app/features/wwell-planning/shared/wwell-design-tokens' as wp;
+// Top bar + left nav tokens (light/dark + the legacy switch). See layout/_shell-theme.scss.
+@use './app/layout/shell-theme';
 
 @include mat.core();
 

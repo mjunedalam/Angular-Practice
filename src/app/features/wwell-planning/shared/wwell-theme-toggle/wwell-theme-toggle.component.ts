@@ -25,8 +25,9 @@ const POPOVER_POSITIONS: ConnectedPosition[] = [
 ];
 
 /**
- * Header appearance control: a one-press light/dark switch, plus an Appearance popover for the
- * System/Light/Dark choice and a contrast dial for whichever theme is showing.
+ * Appearance control for the shell's top bar: a one-press light/dark switch, plus an Appearance popover
+ * for the System/Light/Dark choice, a contrast dial for whichever theme is showing, and the Legacy
+ * layout switch that swaps the redesigned top bar and left nav for the old navy ones.
  */
 @Component({
   selector: 'app-wwell-theme-toggle',

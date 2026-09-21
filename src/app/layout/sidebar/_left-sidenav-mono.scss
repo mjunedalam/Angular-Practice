@@ -1,0 +1,390 @@
+// The redesigned left nav ("Monolith"): flat, hairline, monochrome. Scoped to `data-shell='mono'`, which
+// WwellThemeService keeps on <html>. Colours come from layout/_shell-theme.scss, so it follows
+// light/dark; the build-info popover borrows the planning `--wp-*` surface tokens.
+//
+// The current page is an inverted block. `.sidenav__hl` is that block as its own element, so it can
+// glide between items (transform only). LeftSidenavComponent measures the active button into
+// --hl-x / --hl-y / --hl-w / --hl-h and flips `.sidenav--glide` once it has; until then the active
+// button paints the same fill itself, so the current page is never left without a highlight.
+
+$font: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+$ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+$slide: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+$expanded-w: 244px;
+$collapsed-w: 64px;
+$radius: 4px;
+
+:host-context([data-shell='mono']) {
+  // ── Shell ──────────────────────────────────────────────────────────────────
+  .sidenav {
+    position: relative;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    width: $expanded-w;
+    height: 100%;
+    overflow: visible;
+    border-right: 1px solid var(--shell-hair);
+    background: var(--shell-rail);
+    font-family: $font;
+    transition: width $slide;
+
+    button:focus-visible {
+      outline: 2px solid var(--shell-text);
+      outline-offset: 2px;
+    }
+
+    &--collapsed {
+      width: $collapsed-w;
+    }
+  }
+
+  // ── List ───────────────────────────────────────────────────────────────────
+  .sidenav__list {
+    position: relative;
+    flex: 1;
+    margin: 0;
+    padding: 10px 0 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    list-style: none;
+
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+  }
+
+  // The gliding highlight. No transition until `--glide`, so its first placement doesn't slide in from
+  // the corner; width is driven per frame by LeftSidenavComponent's ResizeObserver, so it isn't animated.
+  .sidenav__hl {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    display: block;
+    width: var(--hl-w, 0);
+    height: var(--hl-h, 0);
+    border-radius: $radius;
+    background: var(--shell-active-bg);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(var(--hl-x, 0), var(--hl-y, 0));
+    will-change: transform;
+  }
+
+  .sidenav--glide .sidenav__hl {
+    opacity: 1;
+    transition:
+      transform 0.34s $ease,
+      opacity 0.2s ease;
+  }
+
+  .sidenav__section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 20px 8px;
+    overflow: hidden;
+    font: 600 11px/1 $mono;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--shell-label);
+    transition:
+      opacity $slide,
+      height $slide,
+      padding $slide;
+
+    // A hairline runs out to the edge: the label reads as a section break, not a heading.
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--shell-hair);
+    }
+  }
+
+  .sidenav__item {
+    padding: 2px 10px;
+  }
+
+  // ── Nav button ─────────────────────────────────────────────────────────────
+  .sidenav__btn {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 10px;
+    overflow: hidden;
+    border: 0;
+    border-radius: $radius;
+    background: transparent;
+    color: var(--shell-muted);
+    font: 500 14px/1.18 $font;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+
+    &:hover {
+      background: var(--shell-hover);
+      color: var(--shell-text);
+    }
+
+    &--active,
+    &--active:hover {
+      background: var(--shell-active-bg);
+      color: var(--shell-active-text);
+      font-weight: 600;
+    }
+
+    &--locked {
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Once the highlight element is in place it carries the fill, so the button steps aside.
+  .sidenav--glide .sidenav__btn--active,
+  .sidenav--glide .sidenav__btn--active:hover {
+    background: transparent;
+  }
+
+  .sidenav__icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 1.6;
+    }
+  }
+
+  // Image icon (rig): the PNG is a mask, so it takes the text colour like the SVG icons do.
+  .sidenav__icon-img {
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+  }
+
+  .sidenav__label {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .sidenav__lock {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;
+    border: 1px solid var(--shell-lock-bd);
+    border-radius: 6px;
+    background: var(--shell-lock-bg);
+    color: var(--shell-lock-fg);
+
+    svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+    }
+  }
+
+  // The legacy left-edge bar; the inverted block replaces it.
+  .sidenav__active-bar {
+    display: none;
+  }
+
+  // ── Collapsed ──────────────────────────────────────────────────────────────
+  .sidenav--collapsed {
+    .sidenav__section-label {
+      height: 0;
+      padding: 0;
+      opacity: 0;
+    }
+
+    .sidenav__btn {
+      justify-content: center;
+      padding: 0;
+    }
+
+    .sidenav__footer {
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .sidenav__brand {
+      justify-content: center;
+    }
+  }
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  .sidenav__footer {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 14px;
+    padding: 12px 16px;
+    overflow: visible;
+    border-top: 1px solid var(--shell-hair);
+  }
+
+  .sidenav__brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: visible;
+  }
+
+  .sidenav__water-logo {
+    position: relative;
+    z-index: 60;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    outline: none;
+
+    img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    &:hover,
+    &:focus-visible {
+      .sidenav__build-popover {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(0, 0) scale(1);
+      }
+    }
+  }
+
+  .sidenav__footer-text {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--shell-muted);
+  }
+
+  .sidenav__build-version {
+    margin-left: auto;
+    font: 500 11px/1 $mono;
+    font-variant-numeric: tabular-nums;
+    color: var(--shell-muted);
+  }
+
+  // ── Build info, shown on hover while the rail is collapsed ──────────────────
+  .sidenav__build-popover {
+    position: absolute;
+    bottom: -2px;
+    left: calc(100% + 16px);
+    z-index: 50;
+    width: 190px;
+    padding: 9px 10px;
+    border: 1px solid var(--wp-line-strong);
+    border-radius: 8px;
+    background: var(--wp-surface-raised);
+    box-shadow: var(--wp-shadow-3);
+    color: var(--wp-text);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-6px, 0) scale(0.97);
+    transition:
+      opacity 0.16s ease,
+      transform 0.16s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 12px;
+      left: -6px;
+      width: 10px;
+      height: 10px;
+      border-bottom: 1px solid var(--wp-line-strong);
+      border-left: 1px solid var(--wp-line-strong);
+      background: var(--wp-surface-raised);
+      transform: rotate(45deg);
+    }
+  }
+
+  .sidenav__build-popover-title {
+    margin-bottom: 7px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--wp-line);
+    font: 700 11px/1 $mono;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--wp-muted);
+  }
+
+  .sidenav__build-popover-row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+    padding: 2px 0;
+    font-family: $mono;
+
+    span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--wp-muted);
+    }
+
+    strong {
+      min-width: 0;
+      overflow: hidden;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--wp-ink);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host-context([data-shell='mono']) {
+    .sidenav,
+    .sidenav__section-label,
+    .sidenav__btn,
+    .sidenav__build-popover,
+    .sidenav--glide .sidenav__hl {
+      transition: none;
+    }
+  }
+}

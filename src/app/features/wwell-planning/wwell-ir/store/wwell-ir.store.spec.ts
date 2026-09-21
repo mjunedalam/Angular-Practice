@@ -140,8 +140,12 @@ describe('WwellIrStore - createIr', () => {
 
     expect(serviceMock.createIr).toHaveBeenCalledWith(buildIrBulkPayload());
     expect(serviceMock.getIrDetailBlocks).toHaveBeenCalledWith(9001);
+    // The follow-up GET's merge also stamps whether the stored remarks still carry legacy HTML (they don't here).
     expect(store.irs()).toEqual([
-      buildIntegratedRequirementFromPayload(buildPayload(), { id: 'IR-9001', code: 'IR-9001', irSeq: 9001 }),
+      {
+        ...buildIntegratedRequirementFromPayload(buildPayload(), { id: 'IR-9001', code: 'IR-9001', irSeq: 9001 }),
+        hasLegacyMarkup: false,
+      },
     ]);
     expect(store.creatingIr()).toBe(false);
     expect(store.createIrError()).toBeNull();

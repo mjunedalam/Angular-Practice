@@ -962,3 +962,87 @@ partial moved from `wwell-planning/shared/_wwell-wellbore.scss` to `wwell-ir/_ww
 - **Limit (chosen):** a dialog narrower than ~1140px *and* shorter than 816px (a small browser window) keeps the single rail, which scrolls (315/208 at
   1090×768, where the key also wraps to two rows); three columns there shrink the drawing until its figures are 8–9px (scale 0.28–0.34), so the scroll is the lesser evil.
 - **Seen, not changed:** the shared renderer's hover popover ("PLANNED DMM 120 ft") appears over the top geologic row when the pointer rests there.
+
+### App shell — "Monolith" top bar + left nav, Light/Dark, Legacy switch (and an agwa-planning restart)
+
+- **Ask:** put the Theme / Appearance control in the main top bar; redesign the left nav and top bar (logo image, icons, item order preserved); the shell
+  follows Light/Dark; one toggle switches to the legacy (navy) shell; the dark shell must **not** be blue. Four mockups were shown; the user chose
+  **B — "Monolith"** (pure black/white, Geist + Geist Mono, hairlines, 4px radii, active item = inverted block, red only for the bell badge and the lock chip).
+- **Mechanism:** `WwellThemeService` gained `shell` (`'mono' | 'legacy'`, persisted as `wwell-shell`, written to `<html data-shell>`; `setLegacyShell()`,
+  `isLegacyShell`). Component SCSS is split into partials scoped by `:host-context([data-shell=…])` — `_top-navbar-{mono,legacy}.scss`,
+  `_left-sidenav-{mono,legacy}.scss` — so there is no template branching. **Legacy is the old SCSS verbatim, only re-scoped** (compiled output diffed:
+  identical rule bodies apart from the scoping). `layout/_shell-theme.scss` holds the `--shell-*` tokens (light "Paper"; dark `#050505`-family neutrals)
+  and `--shell-bar-h` (56px mono / 62px legacy), which `layout.component.scss`, the morning-report loading bar and the presentation canvas height now
+  read instead of a hardcoded 62px.
+- **Top bar:** flat 56px hairline; the 244px brand cell lines its hairline up with the rail edge; `<app-wwell-theme-toggle />` sits between the bell and the
+  user menu (removed from the header of Requests, WLDA Approvals, Land Affairs Approvals and Integrated Requirements). The Appearance popover carries the
+  Legacy switch (`role="switch"`).
+- **Left nav:** 244 / 64px rail. A `li.sidenav__hl` glides behind the active item — `offsetLeft/Top/Width/Height` of `.sidenav__btn--active` are measured in a
+  `requestAnimationFrame` (from an `effect` on `activeRoute`/`collapsed`, plus a `ResizeObserver`) into `--hl-x/-y/-w/-h`; `sidenav--glide` turns the
+  transition on after the first placement, so the initial paint doesn't slide in from the corner.
+- **Fixed after verifying live:** the mono bar was `content-box`, so 56px + the 1px hairline = 57px against `--shell-bar-h` and bar + content overflowed the
+  viewport by 1px (814 vs 813) → `box-sizing: border-box` on the mono bar (legacy keeps its own 62 + 1, untouched by design). The username rendered in
+  Arial because buttons don't inherit `font-family` → `button { font-family: inherit }` inside `.top-navbar`.
+- **Verified:** full Jest 85 suites / 481 tests (new: theme-service spec ×6, top-navbar child-order test, sidenav order / single `aria-current` / highlight
+  tests); `ng build` and ESLint clean on the changed files. Live (gstack browse, real mock-SSO login against the real backends): light, dark, legacy on/off,
+  collapsed rail, user dropdown, Requests, Integrated Requirements at 1353×813 and 820×~800 — bar 56px, bar + content = viewport, no horizontal scroll,
+  all eight nav items in the original order.
+- **Left as is, by the user's call:** the broken footer logo (`assets/images/agwa-logo.svg`, 404) and the blue-tinted dark tokens of the planning pages
+  (`#0f131a` family — they read slightly navy beside the true-black shell). No new tests beyond the above; nothing committed.
+- **agwa-planning backend (checked and restarted at the user's request):** it was *listening* on 7070 but wedged — unauthenticated calls answered 401
+  instantly, every authenticated call hung. Thread dump: all `executor-thread-*` parked on the `ReentrantLock` in `WriterHandler.doPublish`, reached from
+  `RequestLoggingFilter.filter` (the first thing an authenticated request does; the 401 path never gets there). `lsof` showed stdin/stdout/stderr of both the
+  `mvn quarkus:dev` launcher and the app JVM as `(revoked)` — the terminal that started them was gone, so console writes blocked while holding the log lock.
+  Oracle was healthy, so not a database problem. Stopped exactly launcher 70814 + app 70898 (SIGTERM ignored → SIGKILL), restarted with
+  `nohup ./mvnw -o quarkus:dev > <log> 2>&1 < /dev/null` so stdio is a file and `/dev/null` (log: the session scratchpad's `agwa-planning-dev.log`).
+  Up in ~7s; `wells/eligible-for-ir`, `integrated-requirements`, `gwd-ops-members` → 200 in milliseconds, no token → 401.
+
+### wwell-ir editor — a "+" button adds a row directly (Horizons, Casing, Area Water Wells)
+
+- **Ask:** "to add a new record/row in Horizons, Casing, Area Well give a plus icon button — it opens one form — instead of click Edit and then click Add new; it is duplication."
+- **Change:** each of the three sections' heads now has a `+` (`add`) icon button beside the pencil, grouped in the existing `.ire__section-actions`. It opens a
+  **one-row form** — a card above the table (`.ire__add-block`) — built from the section's own schema `rowFields` as a flat section (`singleRowSection()` in
+  `wwell-ir-editor.component.ts`). So Area Water Wells shows all 14 fields, not the table's 4, and Casing's Top-of-Liner appears when Type = Liner. The key
+  fields are required in this form only (horizon: formation + depth; casing: type + size + depth; well: EP A Num + aquifer, already required). State is three
+  `SectionEditState<FormGroup>` instances (`formationTopAdd` / `casingAdd` / `offsetWellAdd`) — the existing class, no new files.
+  "Add" (`commitNewRow`) opens the section's own `SectionEditState` *silently* and appends the row to its live FormArray — the same array inline edits and deletes
+  write to — then toasts "… added — click Save to apply." The section never flips into its big edit form. The pencil closes an open add form and opens the full one;
+  the full form keeps its own "+ Add …" button (the New IR wizard still uses the repeatable group).
+- **Duplicate guard:** Save matches rows on a natural key (horizon: formation; casing: type + size; well: EP A Num), so a "new" row whose key is already taken would
+  silently overwrite that row as an UPDATE. `commitNewRow` refuses it with a warning and keeps the form open. `casingKey` / `topKey` / `waterKey` are now exported
+  from `wwell-ir-payload.mapper.ts` and shared, so the guard can't drift from what Save does.
+- **Deliberately not "unsaved":** an open, uncommitted add form is not part of `hasUnsavedChanges` — only rows already in the live arrays are (otherwise the
+  Save / Discard / Stay prompt's "Save" would silently drop the half-typed row). `closeAllSections()` closes the add forms on record switch and after Save.
+- **Verified live** (real mock-SSO login against the real backends; light and dark): each form opens in one click; required fields gate "Add"; the new row lands in the
+  table; a second DMM horizon is refused with the form kept open; "+" on Casing doesn't collapse its step (click stopped from reaching the toggle); the pencil swaps
+  the add form for the full form; inline row edit is unaffected. Save payload captured with `fetch` intercepted so **nothing was persisted** (the backend log shows zero
+  writes): existing rows `action: ""`, new rows `INSERT`, and the well's TD / RPM / SWL — fields the inline row can't reach — made it into the water row.
+- `ngc`, ESLint and the 7 wwell-planning Jest suites (73 tests) pass; no new specs (standing call for the wwell-ir redesign).
+- **Seen, not changed:** the Horizons Sub-sea column shows floating-point noise (`212.29999999999995`) — `subSeaFt()` isn't rounded.
+
+### wwell-ir — legacy HTML in General (Program Details) is parsed on load and saved back as plain text
+
+- **Ask:** some legacy records hold HTML (`<p>`, `<br>`) in the General section's fields; "as soon as it's encountered, parse it, and once the user hits Save,
+  update it — no HTML tags saved."
+- **Root cause:** `stripLegacyIrHtml` (`wwell-ir-legacy-html.util.ts`) — which `mergeIrDetailBlocksIntoIntegratedRequirement` already applies to the eight Program
+  Details columns (`completion`/`cmpl_type`, `acidization`, `dt_rmks`, `logging`, `mud_rmks`, `sampling`, `flow_rmks`, `dev_pump_test`) — only recognised the old
+  `<HTML>…</HTML>` "Save As HTML" dumps (`/<html[\s>]/i`). These records hold bare rich-text fragments — `<p>…</p><p><br></p>` followed by plain option lines
+  (`Open Hole`, `Screened`) — so they passed through with their tags.
+- **Parser:** detection is now a whitelist of real tag names (html, body, p, br, div, span, font, b, i, u, s, strong, em, ul, ol, li, h1–6, a, sub, sup, hr, pre,
+  blockquote, table, tr, td, th), so plain text with a stray `<` (`PWL < SWL`, `<5000 ppm`) is never rewritten. `<br>` and the closing `</p> </div> </li>
+  </h1-6> </tr>` become line breaks; `DOMParser` decodes entities (`&nbsp;`, `&amp;`, `&quot;`); blank paragraphs (`<p><br></p>`) are dropped.
+- **Save on an untouched record:** `saveAll()` answered "No changes to save." unless something had been edited, so opening a legacy record and pressing Save would never
+  write the cleaned text back. The detail mapper now stamps `hasLegacyMarkup` (new optional `IntegratedRequirement` field) from the *raw* header values, and
+  `saveAll()` lets a flagged record through — the header `UPDATE` then carries the cleaned text. It is deliberately not part of `hasUnsavedChanges` (that would
+  raise the unsaved-changes prompt every time the user leaves a legacy record). It clears itself: every detail fetch, including the post-save refetch, recomputes it.
+- **Verified:** parser against the exact strings from the user's screenshot plus edge cases (throwaway spec, deleted — no new specs, standing call): paragraphs →
+  separate lines, option lines kept, `<HTML>` dumps still work, stray `<` untouched, idempotent. Live, with the detail response intercepted to inject those strings
+  and writes blocked: the read view and all eight edit-form fields show no tags; Save with **no edits** now sends the record with clean text (no tags, no entities
+  anywhere in the payload), while a clean record with no edits still answers "No changes to save." `ngc`, ESLint, full Jest (85 suites / 481 tests). One existing
+  expectation (`wwell-ir.store.spec.ts`, "inserts the confirmed record") gained `hasLegacyMarkup: false`.
+- **Not covered, for follow-up:** other remarks columns (`tops_remarks`, offset-well remarks, casing remarks, well-design flag remarks) don't go through the parser; and
+  the backend letter's `LegacyIrTextUtil` (agwa-planning) has the same `<html`-only detection, so the PDF of a not-yet-re-saved record would still show raw `<p>` tags.
+- **Seen in the data:** `;590`, `7;;`, `didn;t`, `9-5/8;` look like `&nbsp;` / `&quot;` / `&#39;` whose `&…` part was stripped before the value reached us — the quote
+  characters are already gone from the stored text, so the parser can't restore them (entities still present in a value are decoded).
+- **Dev backend log note:** it shows one write at 15:29 — an INSERT of an Area Water Well (EP A Num 3454, aquifer "test") on IR-9065. Not from my sessions (they block
+  writes and hadn't opened 9065); it is a test row from another client, left alone.
