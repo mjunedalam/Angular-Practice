@@ -335,6 +335,37 @@ app-wwell-ir-wellbore-panel {
   }
 }
 
+// The ground line. The renderer draws its own between two fixed offsets that are only centred on the bore in the one
+// coordinate space they were tuned for, so in every other form it sat lopsided on the well. That one is hidden and the
+// panel draws one in the grid layer instead (`groundLine` in the component), centred on the bore.
+// The diagram's SVG is stretched to fit its box, so a hairline lands at a fractional thickness and y and is anti-aliased
+// across two pixel rows — blurred, and different on every surface. Snapped to the pixel grid and squared off (round caps
+// distort under the stretch), it is one even line everywhere.
+.wbp__stage .ground-line {
+  display: none;
+}
+
+.wbp__grid .wbp__ground-line {
+  stroke: var(--wp-wb-ground);
+  stroke-width: 3;
+  stroke-dasharray: none;
+  stroke-linecap: butt;
+  vector-effect: none;
+  shape-rendering: crispEdges;
+}
+
+// The renderer sets the "TOTAL DEPTH" label's baseline a fixed 35 units under the deepest element, so its top edge rises
+// as the type grows (20 → 31 units across this panel's forms) until it meets the completion's own bottom labels
+// ("Screen", "Gravel Pack", which hang ~6 units below it). Shifting it down by the cap height (~0.72em) puts its top
+// edge the same $td-label-gap under the drawing in every form; `em` follows whatever size the rules below give it.
+// The layouts leave room for it under the drawing (wwell-ir-preview-diagram-layout.ts).
+$td-label-renderer-baseline: 35;
+$td-label-gap: 30;
+
+.wbp__stage .total-depth-main {
+  transform: translateY(calc(0.72em - #{$td-label-renderer-baseline - $td-label-gap}px));
+}
+
 .wbp__diagram {
   position: relative;
   display: block;

@@ -59,6 +59,13 @@
   // Domain colours: same hue as before, luminance tuned per theme.
   .ground-line {
     stroke: var(--wp-wb-ground);
+    // The diagram's SVG is stretched to fit its box, so this thin line lands at a fractional thickness and a
+    // fractional y and is anti-aliased across two pixel rows — blurred, and different on every surface. Snapped
+    // to the pixel grid, squared off (round caps distort under the non-uniform stretch) and fully opaque, it is
+    // one even line everywhere.
+    stroke-linecap: butt;
+    shape-rendering: crispEdges;
+    opacity: 1;
   }
 
   .ground-label {

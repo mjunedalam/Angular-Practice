@@ -27,7 +27,10 @@ import { DIAGRAM_LAYOUT, DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@model
  * them here is all a re-tune needs.
  */
 export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
-  svgHeight: 1000,
+  // 60 units under the drawing, not the 40 the drawing needs on its own: the panel sets the "TOTAL DEPTH" label
+  // 30 units below the deepest element (`$td-label-gap`, wwell-ir-wellbore-panel.component.scss) and its 20-unit type
+  // needs ~22 more, or the viewBox cuts it off.
+  svgHeight: 1020,
   marginTop: 55,
   drawingHeight: 905,
 
@@ -80,8 +83,9 @@ export const WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT: DiagramLayout = {
   casingCenterX: 350,
 };
 
-/** Bottom room, in viewBox units, for the last tick label and the "TOTAL DEPTH" label. */
-const EXPANDED_BOTTOM_MARGIN = 60;
+/** Bottom room, in viewBox units, for the last tick label and the "TOTAL DEPTH" label, which prints up to 31 units
+ *  tall here and sits 30 units under the drawing (`$td-label-gap` in the panel's stylesheet). */
+const EXPANDED_BOTTOM_MARGIN = 68;
 
 /**
  * The Expand dialog's layout: Presentation's fullscreen one plus room under the drawing. That layout

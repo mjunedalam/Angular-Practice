@@ -258,8 +258,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     () =>
       buildWellboreDiagramDataFromIntegratedRequirement(
         this.ir(),
-        this.casingEdit.liveValue(),
-        this.formationTopsEdit.liveValue(),
+        this.casingPreviewRows(),
+        this.formationTopsPreviewRows(),
         this.programMainLiveValue(),
         this.hydrogeologyEdit.liveValue(),
         this.requestReferenceEdit.liveValue(),
@@ -279,8 +279,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hasWellboreData: Signal<boolean> = computed(() =>
     hasWellboreDiagramDataForIntegratedRequirement(
       this.ir(),
-      this.casingEdit.liveValue(),
-      this.formationTopsEdit.liveValue(),
+      this.casingPreviewRows(),
+      this.formationTopsPreviewRows(),
       this.programMainLiveValue(),
     ),
   );
@@ -339,10 +339,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   /** The "+" buttons' one-row forms. Their control is a standalone group — a row only reaches the section's live
    *  FormArray (the one Save diffs) once "Add" commits it — so opening one never flips the section into its edit form. */
-  protected readonly formationTopAdd = new SectionEditState<FormGroup>(
+  protected readonly formationTopAdd = new SectionEditState<FormGroup, WwellIrRawFormationTop>(
     () => buildSectionGroup(this.formationTopAddSection, this.fb) as FormGroup,
   );
-  protected readonly casingAdd = new SectionEditState<FormGroup>(
+  protected readonly casingAdd = new SectionEditState<FormGroup, WwellIrRawCasingRow>(
     () => buildSectionGroup(this.casingAddSection, this.fb) as FormGroup,
   );
   protected readonly offsetWellAdd = new SectionEditState<FormGroup>(
@@ -352,6 +352,34 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
   protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing);
   protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue()?.offsetWells ?? this.ir().offsetWells);
+
+  /** What the Wellbore Preview draws for the casing / formation tops: the section's live rows (edits, deletes, committed
+   *  adds) plus the "+" form's row as it is typed, so a row is in the drawing the moment it is complete — not only once
+   *  "Add" (and then Save) has been pressed — and leaves it again on Cancel. `null` while neither is in play, so the
+   *  mapper keeps reading the saved record. */
+  protected readonly casingPreviewRows = computed(() =>
+    this.previewRows(this.casingEdit.liveValue(), () => this.ir().casing.map(casingRowPatch), this.casingAdd.liveValue(), casingKey),
+  );
+  protected readonly formationTopsPreviewRows = computed(() =>
+    this.previewRows(
+      this.formationTopsEdit.liveValue(),
+      () => this.ir().formationTops.map(formationTopRowPatch),
+      this.formationTopAdd.liveValue(),
+      topKey,
+    ),
+  );
+
+  private previewRows<TRow>(
+    live: readonly TRow[] | null,
+    saved: () => readonly TRow[],
+    draft: TRow | null,
+    keyOf: (row: TRow) => string,
+  ): readonly TRow[] | null {
+    if (!draft) return live;
+    const rows = live ?? saved();
+    // "Add" refuses a row whose natural key is taken (it would overwrite that row), so it is not drawn either.
+    return rows.some(row => keyOf(row) === keyOf(draft)) ? live : [...rows, draft];
+  }
 
   protected readonly formationTopsInlineEdit = new InlineRowEditState();
   protected readonly casingInlineEdit = new InlineRowEditState();
@@ -766,7 +794,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected deleteCasingRow(index: number): void {
-    const row = this.ir().casing[index];
+    const row = this.casingRows()[index];
+    if (!row) return;
     this.confirmThenDelete('Delete casing row?', [
       { label: 'Type', value: row.type },
       { label: 'Size', value: row.sizeIn },
@@ -779,7 +808,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected deleteFormationTopRow(index: number): void {
-    const row = this.ir().formationTops[index];
+    const row = this.formationTopsRows()[index];
+    if (!row) return;
     this.confirmThenDelete('Delete formation top?', [
       { label: 'Formation', value: row.name },
       { label: 'Depth', value: `${row.depthFt} ft bgl` },
@@ -791,7 +821,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected deleteOffsetWellRow(index: number): void {
-    const row = this.ir().offsetWells[index];
+    const row = this.offsetWellsRows()[index];
+    if (!row) return;
     this.confirmThenDelete('Delete offset well?', [
       { label: 'EP A Num', value: String(row.epANum) },
       { label: 'Aquifer', value: row.aquifer || '—' },

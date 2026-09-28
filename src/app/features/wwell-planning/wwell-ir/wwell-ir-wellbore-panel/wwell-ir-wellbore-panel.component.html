@@ -57,6 +57,8 @@
               @for (line of gridLines(); track line.depth) {
                 <line x1="0" [attr.x2]="layout().wellboreViewWidth" [attr.y1]="line.y" [attr.y2]="line.y" />
               }
+              @let ground = groundLine();
+              <line class="wbp__ground-line" [attr.x1]="ground.x1" [attr.x2]="ground.x2" [attr.y1]="ground.y" [attr.y2]="ground.y" />
             </svg>
             <app-well-bore-view
               class="wbp__diagram"

@@ -4,7 +4,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
-import { createDepthScale } from '@shared/utils/wellbore-math.util';
+import { computeCasingHalfWidth, createDepthScale } from '@shared/utils/wellbore-math.util';
+import { getCasingTier, resolveOhHalfWidth } from '../../../presentation/well-bore-view/renderers/wellbore-depth.helpers';
 import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { buildScaleTicks, resolveScaleDepthFt } from '../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
@@ -34,6 +35,20 @@ interface WellboreGridLine {
   readonly depth: number;
   readonly y: number;
 }
+
+interface WellboreGroundLine {
+  readonly x1: number;
+  readonly x2: number;
+  readonly y: number;
+}
+
+/** How far past the widest thing on the bore the ground line reaches on each side, as a share of the layout's
+ *  `baseHalfWidth` — so it scales with the form (preview, sidebar, expanded) instead of being a fixed number of units. */
+const GROUND_LINE_OVERHANG_RATIO = 0.8;
+/** Least clear space between the ground line's ends and the geologic axis / the diagram's edge, in diagram units. */
+const GROUND_LINE_EDGE_GAP_UNITS = 12;
+/** Where the renderer puts its own ground line, relative to the top of the drawing. */
+const GROUND_LINE_Y_UNITS = -3;
 
 const isFlagYes = (flag: string | null | undefined): boolean => (flag ?? '').trim().toUpperCase() === 'Y';
 
@@ -128,6 +143,37 @@ export class WwellIrWellborePanelComponent {
     return buildScaleTicks(scaleDepth, drawingHeight, this.diagramData().targetDepth)
       .filter(depth => depth > 0)
       .map(depth => ({ depth, y: marginTop + scale(depth) }));
+  });
+
+  /** Half-width of the widest thing drawn around the bore — the widest structural casing, by the same tier → width rule
+   *  the renderer draws it with, or the open hole. Liners and gravel pack sit inside the casing. */
+  private readonly boreHalfWidth = computed(() => {
+    const data = this.diagramData();
+    const layout = this.layout();
+    const { baseHalfWidth, halfWidthIncrement } = layout;
+    const casingHalfWidths = data.casings
+      .filter(c => c.csgType !== CASING_TYPE_LINER && c.csgType !== CASING_TYPE_GRAVEL_PACK)
+      .map(c => computeCasingHalfWidth(getCasingTier(c, data.casings), baseHalfWidth, halfWidthIncrement));
+    return Math.max(
+      computeCasingHalfWidth(0, baseHalfWidth, halfWidthIncrement),
+      resolveOhHalfWidth(data, layout),
+      ...casingHalfWidths,
+    );
+  });
+
+  /** The ground line, in the diagram SVG's own coordinates (the grid's), centred on the bore. The renderer draws its
+   *  own between two fixed offsets (`geoLineX + 200` → `centerX + 300`) that are only centred in the one coordinate
+   *  space they were tuned for, so in every other form it sits lopsided on the well — hidden by the stylesheet, and
+   *  drawn here instead. One reach for both sides: where the room on one side (the geologic axis on the left, the
+   *  diagram's edge on the right) is what limits it, the line still stays centred. */
+  protected readonly groundLine = computed<WellboreGroundLine>(() => {
+    const { casingCenterX, geoLineX, wellboreViewWidth, marginTop, baseHalfWidth } = this.layout();
+    const reach = Math.min(
+      this.boreHalfWidth() + baseHalfWidth * GROUND_LINE_OVERHANG_RATIO,
+      casingCenterX - geoLineX - GROUND_LINE_EDGE_GAP_UNITS,
+      wellboreViewWidth - casingCenterX - GROUND_LINE_EDGE_GAP_UNITS,
+    );
+    return { x1: casingCenterX - reach, x2: casingCenterX + reach, y: marginTop + GROUND_LINE_Y_UNITS };
   });
 
   private readonly staticWaterLevelFt = computed(() => {
