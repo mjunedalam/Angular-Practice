@@ -444,7 +444,7 @@ legend.wtt-field__label {
 
   &[aria-checked='true'] {
     border-color: tokens.$cta;
-    background: tokens.$cta;
+    background: tokens.$cta-bg;
 
     .wtt-switch__thumb {
       background: tokens.$on-cta;

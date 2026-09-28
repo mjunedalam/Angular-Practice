@@ -81,17 +81,15 @@ app-wwell-ir-editor {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 10px;
-  padding: 0.55rem 0.9rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  padding: 0.7rem 1.1rem;
+  @include tokens.glass-panel;
 }
 
 .ire__eyebrow {
-  margin: 0 0 1px;
-  font-size: tokens.$text-2xs;
+  margin: 0 0 2px;
+  font-size: tokens.$text-xs;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -101,11 +99,13 @@ app-wwell-ir-editor {
 }
 
 .ire__title {
+  font-family: tokens.$font-display;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: tokens.$text-lg;
   font-weight: 650;
+  line-height: 1.2;
   color: $navy;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.02em;
 }
 
 .ire__badge {
@@ -246,6 +246,12 @@ app-wwell-ir-editor {
  * against `.ire__body` (its scrolling ancestor) is enough to keep it in view.
  */
 .ire__rail {
+  // One vertical rhythm for the whole nav. Every row is the same height and every consecutive
+  // pair is separated by the same gap, whether or not a group boundary falls between them —
+  // previously the gap ran 0 / 0.8 / 2.4 / 5.6px depending on where you were in the tree, which
+  // fused each group's children together and opened a void before the next group. Hierarchy is
+  // carried by indent, the connector line and type weight instead.
+  --rail-gap: 0.15rem;
   flex-shrink: 0;
   position: sticky;
   top: 0;
@@ -262,7 +268,7 @@ app-wwell-ir-editor {
 }
 
 .ire__rail-title {
-  margin: 0 0 0.4rem 0.35rem;
+  margin: 0 0 0.4rem 0.4rem; // matches a row's 0.4rem content inset (3px border + padding)
   font-size: tokens.$text-2xs;
   font-weight: 650;
   letter-spacing: 0.08em;
@@ -277,10 +283,7 @@ app-wwell-ir-editor {
   padding: 0;
   display: flex;
   flex-direction: column;
-}
-
-.ire__rail-list {
-  gap: 0.15rem;
+  gap: var(--rail-gap);
 }
 
 .ire__rail-group-btn,
@@ -353,14 +356,19 @@ app-wwell-ir-editor {
 }
 
 .ire__rail-children {
-  margin: 0.05rem 0 0.2rem 1.3rem;
+  // Top margin matches the list gap so stepping from a group header into its first child costs
+  // the same as any other step; no bottom margin, so the parent list's own gap alone separates
+  // the last child from the next group.
+  margin: var(--rail-gap) 0 0 1.3rem;
   padding-left: 0.4rem;
   border-left: 1px solid $border;
 }
 
 .ire__rail-child-btn {
-  padding: 0.24rem 0.4rem;
-
+  // No padding override: the shared rule above already carries the row height and the
+  // `calc(0.4rem - 3px)` that compensates for the transparent 3px active-marker border. The
+  // shorthand that used to sit here dropped that compensation, pushing every child's text 3px
+  // off the indent grid, and made child rows 2.5px shorter than group rows.
   .ire__rail-label {
     font-weight: 500;
   }
@@ -378,12 +386,10 @@ app-wwell-ir-editor {
 
 .ire__section,
 .ire__group {
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
   padding: 0.7rem 0.9rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  @include tokens.glass-panel;
   // Keeps a scrolled-to section's heading clear of the sticky app chrome above `.ire__body`.
   scroll-margin-top: 0.5rem;
 }
@@ -413,6 +419,7 @@ app-wwell-ir-editor {
 }
 
 .ire__section-title {
+  font-family: tokens.$font-display;
   position: relative;
   margin: 0 0 0.5rem;
   padding-left: 0.65rem;
@@ -907,7 +914,7 @@ app-wwell-ir-editor {
   height: 38px;
   margin-top: 0.6rem;
   border-radius: 50%;
-  background: tokens.$cta;
+  background: tokens.$cta-bg;
   color: tokens.$on-cta;
   cursor: pointer;
   transition:
@@ -915,7 +922,7 @@ app-wwell-ir-editor {
     opacity 150ms ease;
 
   &:hover {
-    background: tokens.$cta-hover;
+    background: tokens.$cta-bg-hover;
   }
 
   /* Keyboard users reach the label through its hidden input, so the ring has to be drawn here. */
@@ -1080,10 +1087,9 @@ app-wwell-ir-editor {
   justify-content: flex-end;
   gap: 0.6rem;
   padding: 0.5rem 0.8rem;
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 10px;
-  box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  @include tokens.glass-panel;
 }
 
 // Keeps the Save button's own width stable whether it's showing the save icon or the

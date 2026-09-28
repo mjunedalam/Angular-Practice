@@ -1,8 +1,12 @@
-// Shell theme — the tokens behind the top bar and left nav ("Monolith": flat, hairline, pure monochrome).
+// Shell theme — the tokens behind the top bar and left nav ("Aurora Glass": frosted panes over a soft aurora).
 //
 // Global on purpose, like `_wwell-theme.scss`: component-scoped SCSS can't target `:root`. Light/dark
 // follow the same `data-wp-theme` attribute `WwellThemeService` already writes on <html>; the same
 // service writes `data-shell="mono" | "legacy"` for the Appearance popover's Legacy switch.
+//
+// The bar and the rail are translucent and blurred; the aurora they frost is painted once, by the layout, from
+// `--wp-atmosphere` (see layout.component.scss). The current page is a tinted, ringed pane — never an inverted
+// black or white block — and the avatar carries the aurora gradient.
 //
 // Legacy is the old navy shell. Its colours stay hard-coded in the `*-legacy` partials next to each
 // component, so this file only hands it the one thing the page layout shares: the bar height.
@@ -10,44 +14,57 @@
 
 :root {
   --shell-bar-h: 56px;
+  --shell-blur: blur(16px) saturate(140%);
+  // Fine grain over the atmosphere: it stops the gradients banding and gives the glass something to frost.
+  --shell-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
-  // Light: "Paper"
-  --shell-back: #ededed;
-  --shell-bar: #ffffff;
-  --shell-rail: #fafafa;
-  --shell-hair: #e4e4e4;
-  --shell-hair-strong: #cfcfcf;
-  --shell-text: #0a0a0a;
-  --shell-muted: #6b6b6b;
-  --shell-label: #6b6b6b;
-  --shell-hover: rgba(0, 0, 0, 0.04);
-  --shell-press: rgba(0, 0, 0, 0.07);
-  --shell-active-bg: #0a0a0a; // the inverted block behind the current page
-  --shell-active-text: #ffffff;
-  --shell-avatar-bg: #0a0a0a;
-  --shell-avatar-text: #ffffff;
+  // Light: "Aurora paper"
+  --shell-back: #e8eef8; // the ground under the atmosphere
+  --shell-bar: rgba(255, 255, 255, 0.58);
+  --shell-rail: rgba(255, 255, 255, 0.4);
+  --shell-hair: rgba(20, 40, 90, 0.12);
+  --shell-hair-strong: rgba(20, 40, 90, 0.22);
+  --shell-text: #0b1730;
+  --shell-muted: #52617d;
+  --shell-label: #586783;
+  --shell-hover: rgba(11, 23, 48, 0.06);
+  --shell-press: rgba(11, 23, 48, 0.1);
+  --shell-focus: #0b62c4;
+  --shell-active-bg: linear-gradient(90deg, rgba(14, 116, 220, 0.16), rgba(59, 130, 246, 0.06)); // the pane behind the current page
+  --shell-active-text: #0a52a6;
+  --shell-active-ring: inset 0 0 0 1px rgba(11, 98, 196, 0.22), 0 8px 18px -12px rgba(11, 98, 196, 0.5);
+  --shell-avatar-bg: linear-gradient(135deg, #22d3ee, #3b82f6);
+  --shell-avatar-text: #041220;
+  --shell-avatar-glow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 6px 14px -4px rgba(34, 211, 238, 0.6);
   --shell-signal: #d92d20; // red only where it means something: notification badge, lock chip
   --shell-on-signal: #ffffff;
   --shell-lock-bg: rgba(220, 38, 38, 0.08);
   --shell-lock-bd: rgba(220, 38, 38, 0.3);
   --shell-lock-fg: #c62828;
+
+  // The pages sit straight on the layout's atmosphere; legacy, whose layout is a flat navy, gives them their own ground.
+  --wp-page-bg: var(--wp-page);
 }
 
+// Dark follows the page's own ramp rather than its own literals, so the bar and the rail sit on exactly the
+// ground `--wp-page` resolves to at whatever the contrast dial is set to — pure black at High, a little slate
+// at Soft. Text tiers likewise: a navy-tinted bar over a neutral page was the giveaway before.
 :root[data-wp-theme='dark'] {
-  --shell-back: #050505;
-  --shell-bar: #0a0a0a;
-  --shell-rail: #0a0a0a;
-  --shell-hair: #262626;
-  --shell-hair-strong: #383838;
-  --shell-text: #f4f4f4;
-  --shell-muted: #949494;
-  --shell-label: #808080;
-  --shell-hover: rgba(255, 255, 255, 0.05);
-  --shell-press: rgba(255, 255, 255, 0.09);
-  --shell-active-bg: #f4f4f4;
-  --shell-active-text: #0a0a0a;
-  --shell-avatar-bg: #f4f4f4;
-  --shell-avatar-text: #0a0a0a;
+  --shell-back: var(--wp-page);
+  --shell-bar: color-mix(in srgb, var(--wp-page) 72%, transparent);
+  --shell-rail: color-mix(in srgb, var(--wp-page) 55%, transparent);
+  --shell-hair: rgba(255, 255, 255, 0.1);
+  --shell-hair-strong: rgba(255, 255, 255, 0.18);
+  --shell-text: var(--wp-ink);
+  --shell-muted: var(--wp-muted);
+  --shell-label: var(--wp-subtle);
+  --shell-hover: rgba(255, 255, 255, 0.06);
+  --shell-press: rgba(255, 255, 255, 0.1);
+  --shell-focus: #67e8f9;
+  --shell-active-bg: linear-gradient(90deg, rgba(34, 211, 238, 0.18), rgba(59, 130, 246, 0.1));
+  --shell-active-text: #a5f3fc;
+  --shell-active-ring: inset 0 0 0 1px rgba(103, 232, 249, 0.24), 0 8px 20px -12px rgba(34, 211, 238, 0.55);
+  --shell-avatar-glow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 6px 14px -4px rgba(34, 211, 238, 0.55);
   --shell-lock-bg: rgba(220, 38, 38, 0.15);
   --shell-lock-bd: rgba(220, 38, 38, 0.3);
   --shell-lock-fg: #f87171;
@@ -59,8 +76,9 @@
 }
 
 // The page layout's own backdrop follows the mono shell. Legacy keeps the navy `--bg-*` tokens from
-// styles.scss untouched. (Every page paints its own surface over this; it only shows in the gaps.)
+// styles.scss untouched. Every page is transparent over the layout's atmosphere here.
 :root[data-shell='mono'] {
   --bg-app: var(--shell-back);
   --bg-content: var(--shell-back);
+  --wp-page-bg: transparent;
 }

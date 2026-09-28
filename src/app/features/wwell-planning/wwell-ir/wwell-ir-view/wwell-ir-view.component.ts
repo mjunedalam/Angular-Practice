@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, output, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -67,7 +67,11 @@ export class WwellIrViewComponent {
   protected readonly hasKnownStatus = hasKnownIrStatus;
 
   protected readonly tabs = TABS;
-  protected readonly activeTab = signal<WwellIrViewTab>('details');
+  /** Owned by WwellIrComponent, not by this component: the whole detail panel is torn down and
+   *  rebuilt on every row switch (the loading skeleton replaces it), so a tab held here reset to
+   *  'details' each time you picked another record. Same fix, and the same reason, as the editor's
+   *  `viewMode` — see the `viewTab` signal this is two-way bound to. */
+  readonly activeTab = model<WwellIrViewTab>('details');
 
   private readonly wwellIrService = inject(WwellIrService);
   private readonly notify = inject(NotificationService);

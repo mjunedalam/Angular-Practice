@@ -1,4 +1,4 @@
-import { DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@models/well-design/wellbore-diagram.model';
+import { DIAGRAM_LAYOUT, DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@models/well-design/wellbore-diagram.model';
 
 /**
  * Compact `DiagramLayout` for the wwell-ir Wellbore Preview panel — the inline card in Sections
@@ -46,6 +46,11 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
   linerScreenInset: 15,
   gpScreenGap: 2.25,
   gpFillRatio: 1.0,
+  // An IR is planned against its target depth, and the hole is what the 7" liner is run into — so it is
+  // drawn to that depth with the liner inside it, rather than stopping at the liner's shoe. Declared here
+  // rather than in the shared renderer so Presentation, which draws as-drilled wells from the same code,
+  // keeps its own behaviour. WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT inherits this by spreading.
+  openHoleRunsToTargetDepth: true,
 };
 
 /**
@@ -87,4 +92,15 @@ const EXPANDED_BOTTOM_MARGIN = 60;
 export const WWELL_IR_EXPANDED_DIAGRAM_LAYOUT: DiagramLayout = {
   ...FULLSCREEN_DIAGRAM_LAYOUT,
   svgHeight: FULLSCREEN_DIAGRAM_LAYOUT.marginTop + FULLSCREEN_DIAGRAM_LAYOUT.drawingHeight + EXPANDED_BOTTOM_MARGIN,
+  openHoleRunsToTargetDepth: true,
+};
+
+/**
+ * The IR letter's diagram — Presentation's default coordinate space (the letter is exported as a PNG for
+ * the PDF at that size), but it is a wwell-ir surface showing the same IR as the panel, so it opts into
+ * the same open-hole rule. Without this the panel and the PDF would disagree about where the hole ends.
+ */
+export const WWELL_IR_LETTER_DIAGRAM_LAYOUT: DiagramLayout = {
+  ...DIAGRAM_LAYOUT,
+  openHoleRunsToTargetDepth: true,
 };

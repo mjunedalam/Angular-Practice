@@ -287,22 +287,24 @@
     min-width: 0;
   }
 
+  // A host can raise the type through `--wtl-fs` / `--wtl-name-fs` (the IR view's sidebar does); left unset, the rail keeps
+  // its compact sizes for the approval tables.
   .approval-timeline__role {
-    font-size: tokens.$text-2xs;
+    font-size: var(--wtl-fs, #{tokens.$text-2xs});
   }
 
   .approval-timeline__name {
-    font-size: tokens.$text-2xs;
+    font-size: var(--wtl-name-fs, #{tokens.$text-2xs});
     line-height: 1.2;
     overflow-wrap: break-word;
   }
 
   .approval-timeline__badge {
     padding: 1px 7px;
-    font-size: tokens.$text-2xs;
+    font-size: var(--wtl-fs, #{tokens.$text-2xs});
   }
 
   .approval-timeline__date {
-    font-size: tokens.$text-2xs;
+    font-size: var(--wtl-fs, #{tokens.$text-2xs});
   }
 }

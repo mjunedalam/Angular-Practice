@@ -1,8 +1,8 @@
 @use '@angular/material' as mat;
 @use './wwell-design-tokens' as tokens;
 
-// Material token overrides for the module's look ("Instrument"). Two mixins:
-//   buttons     — a monochrome ink primary action, hairline outlined secondary, cobalt text buttons,
+// Material token overrides for the module's look ("Aurora Glass"). Two mixins:
+//   buttons     — an aurora-gradient primary action, hairline outlined secondary, sky text buttons,
 //                 muted icon buttons
 //   form-fields — hairline control outlines that step to muted on hover and cobalt on focus
 //
@@ -21,19 +21,19 @@
       filled-ripple-color: tokens.alpha(tokens.$on-cta, 18%),
       filled-disabled-container-color: tokens.alpha(tokens.$navy-deep, 12%),
       filled-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
-      filled-container-shape: tokens.$radius-sm,
+      filled-container-shape: tokens.$radius-btn,
       filled-label-text-weight: 600,
       outlined-label-text-color: tokens.$navy-deep,
       outlined-outline-color: tokens.$border-strong,
       outlined-ripple-color: tokens.alpha(tokens.$accent, 18%),
       outlined-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
       outlined-disabled-outline-color: tokens.$border,
-      outlined-container-shape: tokens.$radius-sm,
+      outlined-container-shape: tokens.$radius-btn,
       outlined-label-text-weight: 600,
       text-label-text-color: tokens.$accent,
       text-ripple-color: tokens.alpha(tokens.$accent, 18%),
       text-disabled-label-text-color: tokens.alpha(tokens.$navy-deep, 38%),
-      text-container-shape: tokens.$radius-sm,
+      text-container-shape: tokens.$radius-btn,
       text-label-text-weight: 600,
     )
   );
@@ -44,6 +44,19 @@
       disabled-icon-color: tokens.alpha(tokens.$navy-deep, 38%),
     )
   );
+
+  // Material's tokens only take a colour, and the primary action is a gradient. The gradient look is written once, in
+  // styles.scss (`.mat-mdc-unelevated-button`), reading these; a page that does not include this mixin leaves them unset,
+  // and every one of those declarations then falls back to Material's own value — so other pages are untouched.
+  --wp-btn-fill: #{tokens.$cta-bg};
+  --wp-btn-fill-hover: #{tokens.$cta-bg-hover};
+  --wp-btn-fill-shadow: #{tokens.$cta-shadow};
+  --wp-btn-fill-shadow-hover: #{tokens.$cta-shadow-hover};
+  --wp-btn-fill-lift: translateY(-1px);
+  --wp-btn-fill-press: translateY(0) scale(0.975);
+  --wp-btn-fill-transition:
+    transform #{tokens.$duration-fast} #{tokens.$ease-out},
+    box-shadow #{tokens.$duration-base} #{tokens.$ease-out};
 }
 
 // Outlined form fields. Outline colour is the 3:1 `--wp-line-control` (a field has to read as a

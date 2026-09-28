@@ -84,6 +84,10 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'well-profile',
+        loadComponent: () => import('./features/well-profile/well-profile.component').then(m => m.WellProfileComponent),
+      },
+      {
         path: 'presentations',
         data: { routeId: 'presentations' },
         canActivate: [roleGuard],

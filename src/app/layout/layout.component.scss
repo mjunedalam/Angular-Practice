@@ -58,3 +58,26 @@ $topbar-h: var(--shell-bar-h, 62px);
 :host-context([data-shell='mono']) .dashboard__content::before {
   display: none;
 }
+
+// The mono shell paints the aurora once, here: the bar and rail frost it, the pages sit straight on it (their hosts are
+// transparent — see `--wp-page-bg` in _shell-theme.scss), and a fine grain rides on top so the gradients never band.
+// `isolation` keeps the grain (z-index -1) above this background but below every child.
+:host-context([data-shell='mono']) .dashboard {
+  position: relative;
+  isolation: isolate;
+  background: var(--wp-atmosphere), var(--bg-app);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--shell-noise);
+    opacity: var(--wp-grain-opacity, 0);
+    pointer-events: none;
+  }
+}
+
+:host-context([data-shell='mono']) .dashboard__content {
+  background: transparent;
+}

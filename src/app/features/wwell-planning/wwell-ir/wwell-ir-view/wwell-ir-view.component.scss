@@ -57,17 +57,15 @@ $accent: tokens.$accent;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 10px;
-  padding: 0.55rem 0.9rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  padding: 0.7rem 1.1rem;
+  @include tokens.glass-panel;
 }
 
 .irv__eyebrow {
-  margin: 0 0 1px;
-  font-size: tokens.$text-2xs;
+  margin: 0 0 2px;
+  font-size: tokens.$text-xs;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -77,11 +75,13 @@ $accent: tokens.$accent;
 }
 
 .irv__title {
+  font-family: tokens.$font-display;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: tokens.$text-lg;
   font-weight: 650;
+  line-height: 1.2;
   color: $navy;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.02em;
 }
 
 .irv__header-actions {
@@ -97,12 +97,12 @@ $accent: tokens.$accent;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 128px;
+  min-width: 148px;
   flex-shrink: 0;
 }
 
 .irv__progress-label {
-  font-size: tokens.$text-2xs;
+  font-size: tokens.$text-xs;
   font-weight: 600;
   color: $muted;
   white-space: nowrap;
@@ -110,7 +110,7 @@ $accent: tokens.$accent;
 
 .irv__progress-track {
   width: 100%;
-  height: 5px;
+  height: 6px;
   border-radius: 999px;
   background: tokens.$surface-alt;
   overflow: hidden;
@@ -127,23 +127,24 @@ $accent: tokens.$accent;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: 999px;
-  font-size: tokens.$text-2xs;
+  font-size: tokens.$text-xs;
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .irv__badge-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .irv__edit-btn {
   flex-shrink: 0;
+  font-size: tokens.$text-base;
 }
 
 /* ── Tabs row — the flat tab bar plus, only while the Letter tab is open, the Download PDF
@@ -230,33 +231,34 @@ $accent: tokens.$accent;
   flex: 1;
   display: flex;
   gap: 0.25rem;
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 10px;
-  padding: 0.3rem;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  padding: 0.35rem;
+  @include tokens.glass-panel;
 }
 
 .irv__tab {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
   border: none;
-  border-radius: 7px;
+  border-radius: tokens.$radius-sm;
   background: transparent;
   color: $muted;
   font: inherit;
-  font-size: 0.88rem;
+  font-size: tokens.$text-base;
   font-weight: 600;
   cursor: pointer;
   transition:
     background-color 150ms ease,
+    box-shadow 150ms ease,
     color 150ms ease;
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 
   &:hover {
@@ -265,7 +267,8 @@ $accent: tokens.$accent;
   }
 
   &--active {
-    background: tokens.alpha($accent, 10%);
+    background: tokens.alpha($accent, 12%);
+    box-shadow: inset 0 0 0 1px tokens.alpha($accent, 26%);
     color: $accent;
 
     &:hover {

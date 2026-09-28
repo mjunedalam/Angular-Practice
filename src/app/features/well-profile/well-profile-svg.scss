@@ -1,0 +1,32 @@
+:host { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; }
+svg { display: block; width: 100%; height: 100%; }
+text { font: 12px 'Geist Variable', Arial, sans-serif; fill: var(--ink); stroke: none; }
+.number { font-family: 'Geist Mono Variable', monospace; font-size: 11px; font-variant-numeric: tabular-nums; }
+.muted { fill: var(--muted); } .muted-fill { fill: var(--muted); }
+.axis, .rim { stroke: var(--muted); fill: none; }
+.grid-line { stroke: var(--line); stroke-dasharray: 2 5; }
+.formation-band { fill: var(--rock); opacity: .24; } .target { fill: var(--accent); }
+.rock-fill { fill: var(--rock); } .steel-fill { fill: var(--steel); }
+.screen-lines { stroke: var(--muted); stroke-width: .7; }
+.open-hole { fill: none; stroke: var(--muted); stroke-dasharray: 4 3; }
+.gravel { stroke: var(--rock); stroke-width: .7; }
+.screen-body { fill: var(--paper); stroke: var(--muted); stroke-width: .8; }
+.shell { stroke-width: .85; cursor: pointer; }
+.shell.selected { stroke: var(--accent); stroke-width: 1.5; }
+.inner-rim { opacity: .7; stroke-width: .6; }
+.core { pointer-events: none; }
+.water-column { fill: var(--water); fill-opacity: .07; }
+.water-surface { fill: var(--water); fill-opacity: .22; stroke: var(--water); }
+.riser { stroke: var(--muted); stroke-width: 2; }
+.cable { stroke: var(--water); stroke-width: .8; }
+.pump { fill: var(--steel); stroke: var(--ink); stroke-width: .8; }
+.callout { fill: var(--muted); stroke: var(--muted); stroke-width: 1; pointer-events: none; }
+.callout path { fill: none; }.callout text { fill: var(--muted); }
+.callout-selected { fill: var(--accent); stroke: var(--accent); }.callout-selected text { fill: var(--accent); }
+.water-leader { fill: none; stroke: var(--water); stroke-dasharray: 4 3; }.water-text { fill: var(--water); }
+.depth-cursor { stroke: var(--accent); stroke-dasharray: 3 4; opacity: .65; pointer-events: none; }.accent-fill { fill: var(--accent); }
+.interval { cursor: pointer; }.interval.active rect { stroke: var(--accent); stroke-width: 1.5; }.interval.active text { fill: var(--accent); }
+.completion-interval { fill: var(--rock); stroke: var(--muted); stroke-dasharray: 2 2; }
+g[tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.intervals-svg, .intervals-svg.large { height: 100%; }

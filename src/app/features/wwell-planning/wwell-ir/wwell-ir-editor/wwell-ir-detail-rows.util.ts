@@ -12,6 +12,8 @@ export interface KvRow {
   /** Marks a value picked from a fixed set of options (a completion type, a test type, ...).
    *  A multi-select's picks arrive newline-separated in `value` and are shown one per line. */
   readonly options?: boolean;
+  /** An identifier or a measurement (an IR number, a depth, a reading): set in the mono face, like the figures elsewhere. */
+  readonly mono?: boolean;
 }
 
 export const EMPTY_VALUE = '—';
@@ -50,7 +52,7 @@ export function buildRequestReferenceRows(
   const r = ir.requestReference;
   return [
     { label: 'Link to Request', value: resolveLinkedRequestLabel(r.linkedRequestId, r.wellName, linkedRequestWellOptions) },
-    { label: 'Letter Number', value: fmtStr(r.letterNumber) },
+    { label: 'Letter Number', value: fmtStr(r.letterNumber), mono: true },
     { label: 'BI Number', value: fmtStr(r.client) },
     { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Water Well Name', value: fmtStr(r.wellName) },
@@ -59,9 +61,9 @@ export function buildRequestReferenceRows(
     // mapIrFormValueToSubmission (targetDepthFt ?? 0) before the author has entered a real value —
     // treat a literal 0 as "not yet entered" rather than a misleading real reading (see the
     // matching fallback in mapIntegratedRequirementToFormPatch, wwell-ir-edit.mapper.ts).
-    { label: 'Target Depth', value: r.targetDepthFt ? fmtNum(r.targetDepthFt, 'ft') : EMPTY_VALUE },
-    { label: 'Surface Elevation', value: `${fmtNum(r.surfaceElevationFtAsl)} ft ASL` },
-    { label: 'Coordinates', value: fmtStr(r.coordinates) },
+    { label: 'Target Depth', value: r.targetDepthFt ? fmtNum(r.targetDepthFt, 'ft') : EMPTY_VALUE, mono: true },
+    { label: 'Surface Elevation', value: `${fmtNum(r.surfaceElevationFtAsl)} ft ASL`, mono: true },
+    { label: 'Coordinates', value: fmtStr(r.coordinates), mono: true },
   ];
 }
 
@@ -108,21 +110,22 @@ export function buildHydrogeologyRows(ir: IntegratedRequirement): readonly KvRow
   const rows: KvRow[] = [
     { label: 'Aquifer', value: fmtStr(ir.hydrogeology.aquifer), options: true },
     { label: 'Test Type', value: isFlowTest ? 'Flow Test' : 'Pump Test', options: true },
-    { label: 'Estimated TDS', value: fmtNum(ir.hydrogeology.estimatedTdsPpm, 'ppm') },
-    { label: 'Estimated Rate', value: fmtNum(ir.testProgram.estimatedRateGpm, 'GPM') },
+    { label: 'Estimated TDS', value: fmtNum(ir.hydrogeology.estimatedTdsPpm, 'ppm'), mono: true },
+    { label: 'Estimated Rate', value: fmtNum(ir.testProgram.estimatedRateGpm, 'GPM'), mono: true },
     {
       label: 'H2S',
       value: fmtNum(h2sPpm, 'ppm'),
       tone: h2sPpm ? 'warning' : 'default',
+      mono: true,
     },
   ];
 
   if (isFlowTest) {
-    rows.push({ label: 'SIWHP', value: fmtNum(ir.testProgram.siwhpPsi, 'psi') });
+    rows.push({ label: 'SIWHP', value: fmtNum(ir.testProgram.siwhpPsi, 'psi'), mono: true });
   } else {
     rows.push(
-      { label: 'Estimated Water Level', value: fmtNum(ir.testProgram.estimatedWaterLevelFt, 'ft') },
-      { label: 'Estimated Pump Depth', value: fmtNum(ir.hydrogeology.estimatedPumpDepthFt, 'ft') },
+      { label: 'Estimated Water Level', value: fmtNum(ir.testProgram.estimatedWaterLevelFt, 'ft'), mono: true },
+      { label: 'Estimated Pump Depth', value: fmtNum(ir.hydrogeology.estimatedPumpDepthFt, 'ft'), mono: true },
     );
   }
   return rows;

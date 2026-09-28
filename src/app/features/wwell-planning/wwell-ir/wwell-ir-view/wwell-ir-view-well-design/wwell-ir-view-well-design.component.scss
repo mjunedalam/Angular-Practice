@@ -16,9 +16,9 @@
   height: 100%;
 }
 
-// The wellbore panel takes the whole visible page — the profile across the top, the drawing left, key depths / casing
-// / formation tops right, as in its maximised view — so nothing in it needs a scroll; the tables below are reached by
-// scrolling past it. It does not get smaller than `min-height`: a page shorter than that scrolls instead.
+// The wellbore panel takes the whole visible page — the drawing left, key depths / casing / formation tops right, as
+// in its maximised view — so nothing in it needs a scroll; the tables below are reached by scrolling past it. It does
+// not get smaller than `min-height`: a page shorter than that scrolls instead.
 .ir-well-design__view {
   flex: 0 0 auto;
   height: max(100%, var(--ir-well-design-min-h, 30rem));
@@ -26,22 +26,13 @@
 }
 
 .ir-well-design__table-card {
-  background: tokens.$surface;
-  border: 1px solid var(--wp-line);
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-  box-shadow: var(--wp-shadow-1);
+  @include tokens.view-card;
 }
 
-// Matches `.kv-card__title`/`.ir-details__section-title` — same uppercase/accent card-title
-// language across every step of the view, not just Details.
+// Same card-title language as `.kv-card__title`/`.ir-details__section-title` — one mixin across every step of the view.
 .ir-well-design__title {
-  margin: 0 0 0.75rem;
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  color: tokens.$accent;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  @include tokens.view-card-title;
+  margin: 0 0 0.9rem;
 }
 
 .ir-well-design__table-wrap {
@@ -57,22 +48,28 @@
 .ir-well-design__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: tokens.$text-sm;
+  font-size: tokens.$text-base;
 
   th {
     text-align: left;
-    padding: 0.45rem 0.6rem;
-    color: tokens.$subtle;
-    font-size: tokens.$text-2xs;
+    padding: 0.5rem 0.7rem;
+    color: tokens.$muted;
+    font-size: tokens.$text-xs;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid tokens.$border;
   }
 
   td {
-    padding: 0.5rem 0.6rem;
+    padding: 0.6rem 0.7rem;
     border-bottom: 1px solid tokens.$border-soft;
     color: tokens.$navy;
+    font-variant-numeric: tabular-nums;
+  }
+
+  td.ir-well-design__num {
+    @include tokens.type-mono;
   }
 
   tr:last-child td {
@@ -99,9 +96,9 @@
 .ir-well-design__remarks-label {
   font-size: tokens.$text-xs;
   font-weight: 600;
-  color: tokens.$subtle;
+  color: tokens.$muted;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .ir-well-design__remarks-edit-btn {

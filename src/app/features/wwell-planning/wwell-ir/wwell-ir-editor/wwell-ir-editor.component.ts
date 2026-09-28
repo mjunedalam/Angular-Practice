@@ -66,6 +66,7 @@ import { buildWwellIrBulkSavePayload, casingKey, topKey, waterKey } from '../wwe
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
+  wellboreDiagramDataEqual,
 } from '../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 import {
   WWELL_IR_ATTACHMENT_ACCEPT,
@@ -246,14 +247,24 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
 
-  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
-    buildWellboreDiagramDataFromIntegratedRequirement(
-      this.ir(),
-      this.casingEdit.liveValue(),
-      this.formationTopsEdit.liveValue(),
-      this.programMainLiveValue(),
-      this.hydrogeologyEdit.liveValue(),
-    ),
+  /**
+   * `equal` is load-bearing, not an optimisation. Every section open for live edit re-emits its whole
+   * raw value on each keystroke, so this rebuilds on input the diagram does not draw — a client name, a
+   * letter number, a geologist. Signals compare by reference, so each of those rebuilt objects read as a
+   * change and `well-bore-view`'s effect fades the drawing out and re-animates it. Comparing structurally
+   * keeps the previous object whenever nothing the diagram actually renders has moved.
+   */
+  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(
+    () =>
+      buildWellboreDiagramDataFromIntegratedRequirement(
+        this.ir(),
+        this.casingEdit.liveValue(),
+        this.formationTopsEdit.liveValue(),
+        this.programMainLiveValue(),
+        this.hydrogeologyEdit.liveValue(),
+        this.requestReferenceEdit.liveValue(),
+      ),
+    { equal: wellboreDiagramDataEqual },
   );
   private readonly programMainLiveValue = computed<WwellIrRawProgramMain | null>(() => {
     const live = this.programEdit.liveValue();
@@ -273,7 +284,12 @@ export class WwellIrEditorComponent implements AfterViewInit {
       this.programMainLiveValue(),
     ),
   );
-  protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
+  /** Follows the live edit too — otherwise typing a Target Depth left the readout and the D3 label
+   *  hidden until save, while the drawing beneath them had already moved. */
+  protected readonly hasTargetDepth: Signal<boolean> = computed(() => {
+    const live = this.requestReferenceEdit.liveValue();
+    return ((live ? live.targetDepthFt : this.ir().requestReference.targetDepthFt) ?? 0) > 0;
+  });
   protected readonly previewDiagramLayout = WWELL_IR_PREVIEW_DIAGRAM_LAYOUT;
   protected readonly sidebarDiagramLayout = WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT;
   protected readonly casingSizeWarnings: Signal<readonly CasingSizeWarning[]> = computed(() =>

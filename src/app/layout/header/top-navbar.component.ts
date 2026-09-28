@@ -8,7 +8,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatBadgeModule } from '@angular/material/badge';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { WwellThemeToggleComponent } from 'src/app/features/wwell-planning/shared/wwell-theme-toggle/wwell-theme-toggle.component';
 import { RbacStore } from '@store/rbac/rbac.store';
@@ -16,7 +15,7 @@ import { RbacStore } from '@store/rbac/rbac.store';
 @Component({
   selector: 'app-top-navbar',
   standalone: true,
-  imports: [MatBadgeModule, WwellThemeToggleComponent],
+  imports: [WwellThemeToggleComponent],
   templateUrl: './top-navbar.component.html',
   styleUrl: './top-navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

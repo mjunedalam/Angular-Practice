@@ -22,6 +22,7 @@
     <main
       class="dashboard__content"
       [class.dashboard__content--scroll-locked]="
+        activeRoute() === 'well-profile' ||
         activeRoute() === 'active-wwell' ||
         activeRoute() === 'integrated-requirements' ||
         activeRoute() === 'land-affairs-approvals' ||

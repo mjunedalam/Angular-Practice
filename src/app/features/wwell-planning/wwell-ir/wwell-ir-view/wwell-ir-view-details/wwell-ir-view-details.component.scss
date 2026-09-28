@@ -19,28 +19,20 @@
 .ir-details__attachments,
 .ir-details__offset-wells,
 .ir-details__approval {
-  background: tokens.$surface;
-  border: 1px solid var(--wp-line);
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-  box-shadow: var(--wp-shadow-1);
+  @include tokens.view-card;
 }
 
 .ir-details__section-title {
+  @include tokens.view-card-title;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 0.75rem;
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  color: tokens.$accent;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
 
   mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     color: inherit;
   }
 }
@@ -57,18 +49,18 @@
 .ir-details__attachment {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.6rem;
-  border-radius: 7px;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: tokens.$radius-sm;
   background: tokens.$surface-alt;
-  font-size: tokens.$text-sm;
+  font-size: tokens.$text-base;
   color: tokens.$navy;
 
   mat-icon {
     color: tokens.$subtle;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 
   span {
@@ -79,7 +71,7 @@
 .ir-details__empty {
   margin: 0;
   color: tokens.$muted;
-  font-size: tokens.$text-sm;
+  font-size: tokens.$text-base;
 }
 
 .ir-details__table-wrap {
@@ -96,24 +88,33 @@
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
-  font-size: tokens.$text-sm;
+  font-size: tokens.$text-base;
 
+  // 14 columns: the headings wrap ("Rate (GPM)" over two lines) rather than the table outgrowing its card, where the last
+  // columns would sit behind a scroll nobody can see.
   th {
     text-align: left;
-    padding: 0.4rem 0.5rem;
-    color: tokens.$subtle;
-    font-size: tokens.$text-2xs;
+    vertical-align: bottom;
+    padding: 0.5rem 0.5rem;
+    color: tokens.$muted;
+    font-size: tokens.$text-xs;
+    font-weight: 600;
+    line-height: 1.25;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid tokens.$border;
-    white-space: nowrap;
   }
 
   td {
-    padding: 0.45rem 0.5rem;
+    padding: 0.55rem 0.5rem;
     border-bottom: 1px solid tokens.$border-soft;
     color: tokens.$navy;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  td.ir-details__num {
+    @include tokens.type-mono;
   }
 
   tr:last-child td {
@@ -130,11 +131,12 @@
 
 .ir-details__remarks {
   margin: 0.75rem 0 0;
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem 0.9rem;
   background: tokens.$surface-alt;
-  border-radius: 7px;
+  border-radius: tokens.$radius-sm;
   color: tokens.$navy;
-  font-size: tokens.$text-sm;
+  font-size: tokens.$text-base;
+  line-height: 1.55;
 }
 
 .ir-details__approval {
@@ -159,5 +161,5 @@
 .ir-details__approval-note {
   margin: 0;
   color: tokens.$muted;
-  font-size: tokens.$text-xs;
+  font-size: tokens.$text-sm;
 }

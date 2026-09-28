@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { ApplicationRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 
 export type WwellTheme = 'light' | 'dark';
 /** What the user picked: a fixed theme, or `system` to follow the OS. */
@@ -21,10 +21,20 @@ const CONTRAST_PROPERTIES: Readonly<Record<WwellTheme, string>> = {
 };
 const THEMES: readonly WwellTheme[] = ['dark', 'light'];
 const THEME_ATTRIBUTE = 'data-wp-theme';
+/** Restores the root's view-transition-name for the length of the switch; see _wwell-theme.scss. */
+const CROSSFADE_CLASS = 'wp-theme-crossfade';
+/** Carries the stylesheet's own colour transition, for browsers with no view transitions. */
 const SWITCHING_CLASS = 'wp-theme-switching';
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+/**
+ * The fallback cross-fade's duration, for browsers with no view transitions. Roughly what the browser's own
+ * default transition runs to, so the swap feels the same either way. Short on purpose: the fallback transitions
+ * colour on `*`, which repaints every element on screen for its whole length.
+ */
+const THEME_MS = 250;
 const DARK_QUERY = '(prefers-color-scheme: dark)';
-/** Slightly longer than the 200ms cross-fade in _wwell-theme.scss, so it can finish before the class drops. */
-const SWITCHING_MS = 260;
+/** Slightly longer than the fade, so it finishes before the class — and with it the declaration — is dropped. */
+const SWITCHING_MS = THEME_MS + 60;
 
 export const MIN_CONTRAST = 0;
 export const MAX_CONTRAST = 100;
@@ -47,11 +57,18 @@ export const DEFAULT_CONTRASTS: Readonly<Record<WwellTheme, number>> = { dark: 5
  *
  * The same attribute mechanism carries the shell layout: `data-shell="mono" | "legacy"` on <html>
  * (see layout/_shell-theme.scss). Legacy is opt-in and remembered; mono is what everyone gets by default.
+ *
+ * Switching light/dark cross-fades: `commit()` runs the change inside a view transition and the browser fades
+ * between its own before/after snapshots. Browsers without view transitions get the stylesheet's colour
+ * transition instead.
+ * See the switching section of _wwell-theme.scss.
  */
 @Injectable({ providedIn: 'root' })
 export class WwellThemeService {
   private readonly document = inject(DOCUMENT);
+  private readonly appRef = inject(ApplicationRef);
   private readonly systemQuery = this.document.defaultView?.matchMedia?.(DARK_QUERY) ?? null;
+  private readonly motionQuery = this.document.defaultView?.matchMedia?.(REDUCED_MOTION_QUERY) ?? null;
 
   /** The user's explicit pick; null means "follow the OS". */
   private readonly chosen = signal<WwellTheme | null>(this.readStoredTheme());
@@ -74,7 +91,14 @@ export class WwellThemeService {
 
   constructor() {
     this.systemQuery?.addEventListener('change', (event) => {
-      this.system.set(event.matches ? 'dark' : 'light');
+      const next: WwellTheme = event.matches ? 'dark' : 'light';
+      // Through `commit` like every other route in. Setting the signal directly meant that following the
+      // OS — which is the DEFAULT mode, so the common case — repainted the whole app with no transition at
+      // all: flip the appearance in system settings and the page simply snapped.
+      //
+      // It only repaints while we are actually following the OS. With an explicit theme picked, the OS
+      // moving underneath changes `system()` but not `theme()`, and there is nothing to show.
+      this.commit(() => this.system.set(next), this.chosen() === null && next !== this.theme());
     });
 
     // Applied synchronously so the first paint of a wwell-planning page is already in the right
@@ -103,9 +127,14 @@ export class WwellThemeService {
 
   setMode(mode: WwellThemeMode): void {
     if (mode === this.mode()) return;
-    this.flagSwitching();
-    this.chosen.set(mode === 'system' ? null : mode);
-    this.writeStored(THEME_STORAGE_KEY, mode === 'system' ? null : mode);
+    const chosen = mode === 'system' ? null : mode;
+    // Picking "System" while it already resolves to the theme on screen changes nothing visible, so it gets
+    // the plain commit — turning a page onto an identical one would just read as a glitch.
+    const repaints = (chosen ?? this.system()) !== this.theme();
+    this.commit(() => {
+      this.chosen.set(chosen);
+      this.writeStored(THEME_STORAGE_KEY, chosen);
+    }, repaints);
   }
 
   /** Sets the contrast of the theme that is showing. */
@@ -144,9 +173,68 @@ export class WwellThemeService {
     }
   }
 
-  /** Adds the cross-fade class for the duration of the switch only, so it never animates on load. */
+  /**
+   * Applies a theme change and shows it.
+   *
+   * `repaints` is false when the pick changes the stored mode but not what is on screen — choosing "System"
+   * while it already resolves to the current theme. Transitioning onto an identical picture just reads as a
+   * glitch, so that case commits silently.
+   */
+  private commit(change: () => void, repaints: boolean): void {
+    if (!repaints || this.prefersReducedMotion()) {
+      change();
+      return;
+    }
+
+    if (typeof this.document.startViewTransition === 'function') {
+      this.crossfade(change);
+      return;
+    }
+
+    // No view transitions: the stylesheet's own colour transition instead.
+    this.flagSwitching();
+    change();
+  }
+
+  /**
+   * Cross-fades to the new theme.
+   *
+   * The browser snapshots the page on either side of `change()` and fades between the two itself — no keyframes
+   * of our own, which is the point: this is the default transition, the same one most products use for a theme
+   * swap. See the switching section of _wwell-theme.scss for what the class is for.
+   */
+  private crossfade(change: () => void): void {
+    const root = this.document.documentElement;
+    // Before `startViewTransition`, not after: this class restores `view-transition-name: root` (ArcGIS
+    // removes it), and it has to be there when the first snapshot is taken.
+    root.classList.add(CROSSFADE_CLASS);
+
+    const transition = this.document.startViewTransition(() => {
+      change();
+      // The attribute is written by an effect, and the second snapshot is taken as soon as this callback
+      // settles — so everything signal-driven is flushed here, or it lands after that snapshot and pops in
+      // once the fade is over.
+      this.apply(this.theme());
+      try {
+        this.appRef.tick();
+      } catch {
+        // Already inside change detection. `apply()` above has put the theme on <html>, which is the part the
+        // snapshot must have.
+      }
+    });
+
+    const done = () => root.classList.remove(CROSSFADE_CLASS);
+    transition.finished.then(done, done);
+  }
+
+  private prefersReducedMotion(): boolean {
+    return this.motionQuery?.matches ?? false;
+  }
+
+  /** Adds the fallback transition's class for the length of the switch only, so it never runs on load. */
   private flagSwitching(): void {
     const root = this.document.documentElement;
+    root.style.setProperty('--wp-theme-ms', `${THEME_MS}ms`);
     root.classList.add(SWITCHING_CLASS);
     clearTimeout(this.switchingTimer);
     this.switchingTimer = setTimeout(() => {
@@ -191,3 +279,4 @@ export class WwellThemeService {
 function clampContrast(value: number): number {
   return Math.min(MAX_CONTRAST, Math.max(MIN_CONTRAST, Math.round(value)));
 }
+

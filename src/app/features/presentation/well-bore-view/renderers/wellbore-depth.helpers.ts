@@ -68,6 +68,41 @@ export function resolveCompletionBottomDepth(data: WellboreDiagramData): number 
   return Math.min(naturalBottom, data.displayDepth);
 }
 
+/**
+ * Bottom depth for the Open Hole element specifically.
+ *
+ * Open Hole is the drilled hole itself, and a liner hangs *inside* it — so unlike the elements that
+ * belong to the liner (gravel pack, perforated interval), it does not stop where the liner stops. Under
+ * Rule 2 / Rule 3 standard evaluation `resolveCompletionBottomDepth` returns the 7" target liner's own
+ * shoe, which is correct for those elements and wrong for the hole around them: it left the liner and
+ * screen drawn correctly but the open hole cut off at the hanger, with bare rock below.
+ *
+ * So open hole carries on to the well's target depth. Two guards:
+ *  - `Math.max` against the liner bottom, so a target depth shallower than the shoe can never pull the
+ *    hole up *inside* the liner and leave the liner sitting in undrilled rock;
+ *  - `Math.min` against `displayDepth`, the drawing's own vertical domain, same as every other element.
+ *
+ * Every rule that already ends in open rock (Rule 1, and the fallbacks where no liner qualifies) is
+ * unchanged — there is no liner shoe cutting it short, so there is nothing to extend past.
+ *
+ * Opt-in via `layout.openHoleRunsToTargetDepth`: without it this returns `resolveCompletionBottomDepth`
+ * untouched, so Presentation and every other caller of the shared renderer draw exactly what they always
+ * have. Only the wwell-ir layouts ask for it (see wwell-ir-preview-diagram-layout.ts).
+ */
+export function resolveOpenHoleBottomDepth(
+  data: WellboreDiagramData,
+  layout: DiagramLayout,
+): number {
+  const completionBottom = resolveCompletionBottomDepth(data);
+  if (!layout.openHoleRunsToTargetDepth) return completionBottom;
+
+  const kind = resolveCompletionRule(data.casings, data.drlgCasings).kind;
+  if (kind !== 'single' && kind !== 'multi-target') return completionBottom;
+
+  const target = data.targetDepth > 0 ? data.targetDepth : data.totalDepth;
+  return Math.min(Math.max(completionBottom, target), data.displayDepth);
+}
+
 export function resolveCompletionBottomPx(data: WellboreDiagramData, scale: DepthScale): number {
   return scale(resolveCompletionBottomDepth(data));
 }

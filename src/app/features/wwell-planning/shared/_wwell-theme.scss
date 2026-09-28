@@ -6,8 +6,9 @@
 // feature is affected — none of them read these tokens.
 //
 // Light is the default (no attribute). `WwellThemeService` writes `data-wp-theme` on <html>.
-// Direction: "Instrument" — cool neutrals, hairline borders, monochrome ink primary action,
-// cobalt reserved for signals (focus, links, selection, in-review status).
+// Direction: "Aurora Glass" — deep navy / cool paper grounds lit by soft aurora colour, frosted glass panels, hairline
+// rings, and one loud thing: the sky-to-cobalt gradient of the primary action. Sky/cobalt is also the signal colour
+// (focus, links, selection).
 
 // Both palettes ride a contrast dial. `WwellThemeService` writes `--wp-contrast-dark` and
 // `--wp-contrast-light` (each 0–100%) on <html>, and a dialed token is
@@ -40,38 +41,39 @@
   --wp-scheme: light;
 
   // Surfaces
-  --wp-page: #{light-tone(#f4f5f7, #dde1e8, $dialed)};
-  --wp-surface: #{light-tone(#ffffff, #ebeef2, $dialed)};
-  --wp-surface-alt: #{light-tone(#f8f9fb, #e3e7ed, $dialed)}; // inset panels, table heads, read-only fields
-  --wp-surface-hover: #{light-tone(#f1f3f6, #dbe0e7, $dialed)};
-  --wp-surface-raised: #{light-tone(#ffffff, #f2f4f7, $dialed)}; // dialogs, popovers (separated by shadow in light)
-  --wp-surface-sunken: #{light-tone(#eceef2, #d3d8e0, $dialed)}; // tracks, skeleton bars, wells
+  --wp-page: #{light-tone(#e8eef8, #d5deee, $dialed)};
+  --wp-surface: #{light-tone(#fbfcff, #e9eef8, $dialed)};
+  --wp-surface-alt: #{light-tone(#f3f6fc, #dfe6f2, $dialed)}; // inset panels, table heads, read-only fields
+  --wp-surface-hover: #{light-tone(#ebf1fb, #d6dfee, $dialed)};
+  --wp-surface-raised: #{light-tone(#ffffff, #f1f5fb, $dialed)}; // dialogs, popovers (separated by shadow in light)
+  --wp-surface-sunken: #{light-tone(#e3eaf6, #cdd7e9, $dialed)}; // tracks, skeleton bars, wells
 
   // Lines
-  --wp-line: #{light-tone(#e4e6eb, #c6ccd7, $dialed)};
-  --wp-line-soft: #{light-tone(#eceef2, #d3d9e2, $dialed)}; // row dividers
-  --wp-line-strong: #{light-tone(#cbd0d9, #aab2c1, $dialed)}; // hover borders, emphasis dividers
-  --wp-line-control: #{light-tone(#858d9e, #5f687b, $dialed)}; // input / control outlines — 3:1 so a field reads as a field (WCAG 1.4.11)
+  --wp-line: #{light-tone(#d6deed, #bbc6db, $dialed)};
+  --wp-line-soft: #{light-tone(#e2e8f4, #cbd4e6, $dialed)}; // row dividers
+  --wp-line-strong: #{light-tone(#bac6dc, #9dabc7, $dialed)}; // hover borders, emphasis dividers
+  --wp-line-control: #{light-tone(#7787a6, #5a6a8a, $dialed)}; // input / control outlines — 3:1 so a field reads as a field (WCAG 1.4.11)
 
   // Text
-  --wp-ink: #{light-tone(#0a0d14, #262d3c, $dialed)}; // headings
-  --wp-text: #{light-tone(#1c2230, #353e51, $dialed)}; // body
-  --wp-muted: #{light-tone(#566073, #485265, $dialed)}; // secondary
-  --wp-subtle: #{light-tone(#626b7c, #4d576a, $dialed)}; // tertiary, placeholders, icons
+  --wp-ink: #{light-tone(#0b1730, #22304a, $dialed)}; // headings
+  --wp-text: #{light-tone(#22304a, #34435f, $dialed)}; // body
+  --wp-muted: #{light-tone(#52617d, #465570, $dialed)}; // secondary
+  --wp-subtle: #{light-tone(#586783, #4c5a75, $dialed)}; // tertiary, placeholders, icons
   --wp-on-accent: #ffffff;
 
   // Accent — cobalt, a signal not a fill
-  --wp-accent: #{light-tone(#2b50ff, #1f41d9, $dialed)}; // links, focus, selected text/icons
-  --wp-accent-hover: #{light-tone(#1c3ee0, #1a37bd, $dialed)};
-  --wp-accent-fill: #{light-tone(#2b50ff, #1f41d9, $dialed)}; // solid backgrounds (selection bars, progress)
-  --wp-accent-soft: rgba(43, 80, 255, 0.08);
-  --wp-accent-line: rgba(43, 80, 255, 0.28);
+  --wp-accent: #{light-tone(#0b62c4, #0a52a6, $dialed)}; // links, focus, selected text/icons
+  --wp-accent-hover: #{light-tone(#0a52a6, #08448a, $dialed)};
+  --wp-accent-fill: #{light-tone(#1f55d4, #1a47b3, $dialed)}; // solid backgrounds (selection bars, progress)
+  --wp-accent-soft: rgba(11, 98, 196, 0.08);
+  --wp-accent-line: rgba(11, 98, 196, 0.3);
 
-  // Primary action — monochrome ink
-  --wp-cta: #{light-tone(#0a0d14, #262d3c, $dialed)};
-  --wp-cta-hover: #{light-tone(#232a3a, #3a4358, $dialed)};
+  // Primary action. The flat value is the gradient's own mid colour, so the Material fill underneath and the
+  // few places that cannot take a gradient stay the same blue as the button itself.
+  --wp-cta: #{light-tone(#205bbd, #1b4c9c, $dialed)};
+  --wp-cta-hover: #{light-tone(#2664c6, #1d54ad, $dialed)};
   --wp-on-cta: #ffffff;
-  --wp-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.14) inset, 0 1px 2px rgba(10, 13, 20, 0.28);
+  --wp-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 1px 2px rgba(20, 50, 160, 0.4), 0 12px 24px -10px rgba(32, 91, 189, 0.6);
 
   // Semantic
   --wp-danger: #{light-tone(#cc271b, #ad2016, $dialed)};
@@ -112,71 +114,119 @@
   --wp-st-red-dot: #ef4444;
 
   // Depth — hairline + soft shadow in light
-  --wp-shadow-1: 0 1px 2px rgba(10, 13, 20, 0.06);
-  --wp-shadow-2: 0 1px 2px rgba(10, 13, 20, 0.06), 0 6px 18px rgba(10, 13, 20, 0.08);
-  --wp-shadow-3:
-    0 1px 2px rgba(10, 13, 20, 0.08), 0 12px 32px rgba(10, 13, 20, 0.14),
-    0 32px 64px rgba(10, 13, 20, 0.1);
-  --wp-scrim: rgba(10, 13, 20, 0.45);
+  --wp-shadow-1: 0 1px 2px rgba(20, 40, 90, 0.07);
+  --wp-shadow-2: 0 1px 2px rgba(20, 40, 90, 0.06), 0 8px 22px rgba(20, 40, 90, 0.1);
+  --wp-shadow-3: 
+    0 1px 2px rgba(20, 40, 90, 0.08), 0 14px 34px rgba(20, 40, 90, 0.16),
+    0 34px 68px rgba(20, 40, 90, 0.12);
+  --wp-scrim: rgba(8, 16, 36, 0.45);
 
   // Frosted glass: a translucent fill, the light rim a pane catches along its top edge, the sheen across it,
   // and the soft shadow it throws. Overlays, not palette colours, so the contrast dial leaves them alone.
-  --wp-glass-fill: rgba(255, 255, 255, 0.55);
-  --wp-glass-rim: rgba(255, 255, 255, 0.9);
-  --wp-glass-sheen: rgba(255, 255, 255, 0.6);
-  --wp-glass-shadow: 0 10px 28px -16px rgba(10, 13, 20, 0.34);
+  --wp-glass-fill: rgba(255, 255, 255, 0.62);
+  --wp-glass-rim: rgba(255, 255, 255, 0.95);
+  --wp-glass-sheen: rgba(255, 255, 255, 0.7);
+  --wp-glass-shadow: 0 12px 30px -16px rgba(20, 40, 90, 0.32);
 
   // Chips over the page (tooltips)
-  --wp-tooltip-bg: #{light-tone(#0a0d14, #262d3c, $dialed)};
+  --wp-tooltip-bg: #{light-tone(#0b1730, #22304a, $dialed)};
   --wp-tooltip-ink: #ffffff;
   --wp-tooltip-ring: rgba(148, 163, 184, 0.22);
 
   // Loading shimmers
-  --wp-shimmer-a: #{light-tone(#eceef2, #d3d8e0, $dialed)};
-  --wp-shimmer-b: #{light-tone(#f6f7f9, #e3e7ed, $dialed)};
+  --wp-shimmer-a: #{light-tone(#e3eaf6, #cdd7e9, $dialed)};
+  --wp-shimmer-b: #{light-tone(#f3f6fc, #dfe6f2, $dialed)};
 
   // Wellbore diagram — domain colours keep their hue; luminance shifts per theme so labels and lines
   // read on the surface behind them. Text-bearing ones (ground/target/actual/water) meet 4.5:1.
-  --wp-wb-outline: #{light-tone(#0a0d14, #262d3c, $dialed)}; // casing outlines, axes, ticks, arrow heads
+  --wp-wb-outline: #{light-tone(#0b1730, #22304a, $dialed)}; // casing outlines, axes, ticks, arrow heads
   --wp-wb-ground: #{light-tone(#b94a12, #9b3d0e, $dialed)};
   --wp-wb-target: #{light-tone(#b45309, #8f4106, $dialed)};
   --wp-wb-actual: #{light-tone(#15803d, #116a32, $dialed)};
   --wp-wb-water: #{light-tone(#0369a1, #025a88, $dialed)};
   --wp-wb-pad: #{light-tone(#f0f0f0, #d3d8e0, $dialed)};
+
+  // Well profile ("Strata") — the formation bands are one ordinal ramp, shallow → deep: a sandstone hue, every step
+  // ≥0.06 lighter/darker than its neighbour, the first ≥2:1 against the card. `-ink` is the label colour on each step
+  // (≥4.5:1). The target aquifer is the one band that is not rock: emerald, a muted fill under a bright top edge.
+  // Fixed colours, like the wellbore's domain colours: the contrast dial does not move them.
+  --wp-profile-rock-1: #cbab88;
+  --wp-profile-rock-2: #b7946f;
+  --wp-profile-rock-3: #a27e58;
+  --wp-profile-rock-4: #8d6a43;
+  --wp-profile-rock-ink-1: #04060a;
+  --wp-profile-rock-ink-2: #04060a;
+  --wp-profile-rock-ink-3: #04060a;
+  --wp-profile-rock-ink-4: #ffffff;
+  --wp-profile-aquifer: #8fd7b0;
+  --wp-profile-aquifer-edge: #007f4e;
+  --wp-profile-aquifer-ink: #04060a;
+  // The wash a water selection lays over a band: deep, so a band's label keeps its contrast under it.
+  --wp-profile-water-wash: #0369a1;
+  --wp-profile-on-water: #ffffff;
+  // How much of a band a selection tints: faint, so the label on it keeps its contrast (measured ≥4.5:1 in every state).
+  --wp-profile-select-wash: 10%;
+
+  // Primary action: one blue, lit from the top. It was a 135° sweep across three stops from sky to cobalt to
+  // indigo — a lot of hue travel for a button ~200px wide, which read as a gradient rather than as a surface.
+  // A single hue shading down the vertical instead still gives the key its dimensionality, without the rainbow.
+  --wp-cta-bg: linear-gradient(180deg, #2668c6, #1a4eb4);
+  --wp-cta-bg-hover: linear-gradient(180deg, #2d71cf, #1f57bd);
+  --wp-cta-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 1px 2px rgba(20, 50, 160, 0.4), 0 18px 32px -10px rgba(32, 91, 189, 0.75);
+
+  // Atmosphere: three soft pools of colour the glass sits on (painted once, by the app shell), and how much grain rides them.
+  --wp-atmosphere:
+    radial-gradient(58% 48% at 12% -6%, rgba(56, 189, 248, 0.34), transparent 62%),
+    radial-gradient(50% 44% at 98% 4%, rgba(99, 124, 255, 0.26), transparent 64%),
+    radial-gradient(60% 55% at 56% 120%, rgba(45, 212, 191, 0.24), transparent 62%);
+  --wp-grain-opacity: 0.07;
+
+  // A glass panel: a spotlight that leans in from the top right, over a frosted fill, ringed by a hairline.
+  --wp-panel-bg:
+    radial-gradient(360px circle at 84% -10%, rgba(56, 189, 248, 0.2), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.66));
+  --wp-panel-ring: rgba(20, 40, 90, 0.1);
+  --wp-panel-rim: rgba(255, 255, 255, 0.95);
 }
 
 @mixin dark-tokens {
   --wp-scheme: dark;
 
-  // Surfaces — depth comes from lighter steps, not drop shadows
-  --wp-page: #{dark-tone(#07090d, #181d26)};
-  --wp-surface: #{dark-tone(#0e1218, #202632)};
-  --wp-surface-alt: #{dark-tone(#0a0e14, #1b212b)};
-  --wp-surface-hover: #{dark-tone(#151b25, #2a3240)};
-  --wp-surface-raised: #{dark-tone(#141a23, #28303c)};
-  --wp-surface-sunken: #{dark-tone(#090c11, #151a22)};
+  // Surfaces — depth comes from lighter steps, not drop shadows.
+  //
+  // The dial runs between two ends chosen so it reads the way an editor theme does: at High (100%) every value
+  // is a pure neutral — R, G and B are equal, so there is no hue in the ground at all and the page is true
+  // black. At Soft (0%) the same ramp lifts to a little slate, a blue-grey of only 11–17/255 saturation: enough
+  // to warm a dark room, not enough to read as a colour. Default 50% sits between them.
+  --wp-page: #{dark-tone(#000000, #1b1f27)};
+  --wp-surface: #{dark-tone(#0f0f0f, #262b35)};
+  --wp-surface-alt: #{dark-tone(#090909, #20242d)};
+  --wp-surface-hover: #{dark-tone(#1d1d1d, #333944)};
+  --wp-surface-raised: #{dark-tone(#151515, #2b313b)};
+  --wp-surface-sunken: #{dark-tone(#040404, #161a21)};
 
-  --wp-line: #{dark-tone(#1e2530, #333c4b)};
-  --wp-line-soft: #{dark-tone(#161c26, #2a313d)};
-  --wp-line-strong: #{dark-tone(#2d3644, #465264)};
-  --wp-line-control: #{dark-tone(#5d6779, #7a859b)};
+  --wp-line: #{dark-tone(#242424, #353b46)};
+  --wp-line-soft: #{dark-tone(#171717, #272c35)};
+  --wp-line-strong: #{dark-tone(#383838, #4a5160)};
+  --wp-line-control: #{dark-tone(#707070, #7e8797)};
 
-  --wp-ink: #{dark-tone(#f2f4f8, #c8cfdb)};
-  --wp-text: #{dark-tone(#d3d9e4, #adb6c6)};
-  --wp-muted: #{dark-tone(#939cae, #9aa4b7)};
-  --wp-subtle: #{dark-tone(#7b8496, #929daf)};
+  --wp-ink: #{dark-tone(#ffffff, #e4e6ea)};
+  --wp-text: #{dark-tone(#d6d6d6, #c2c6cd)};
+  --wp-muted: #{dark-tone(#a2a2a2, #a8adb6)};
+  --wp-subtle: #{dark-tone(#8e8e8e, #a4aab4)};
   --wp-on-accent: #ffffff;
 
-  --wp-accent: #7b95ff;
-  --wp-accent-hover: #9db0ff;
-  --wp-accent-fill: #4463f5;
-  --wp-accent-soft: rgba(123, 149, 255, 0.12);
-  --wp-accent-line: rgba(123, 149, 255, 0.32);
+  --wp-accent: #7dd3fc;
+  --wp-accent-hover: #a5e3fe;
+  --wp-accent-fill: #2f6bea;
+  --wp-accent-soft: rgba(125, 211, 252, 0.12);
+  --wp-accent-line: rgba(125, 211, 252, 0.34);
 
-  --wp-cta: #{dark-tone(#eef1f6, #c2cad8)};
-  --wp-cta-hover: #{dark-tone(#ffffff, #d4dae6)};
-  --wp-on-cta: #07090d;
-  --wp-cta-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 18px rgba(123, 149, 255, 0.18);
+  // Flat value is the gradient's mid colour; the glow follows the fill rather than staying cyan.
+  --wp-cta: #3ea4ec;
+  --wp-cta-hover: #54b3f4;
+  --wp-on-cta: #03131f;
+  --wp-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 0 0 1px rgba(77, 184, 247, 0.25), 0 10px 26px -8px rgba(77, 184, 247, 0.55);
 
   --wp-danger: #f87171;
   --wp-danger-ink: #fca5a5;
@@ -189,12 +239,14 @@
   --wp-warning-soft: rgba(251, 191, 36, 0.12);
   --wp-warning-line: rgba(251, 191, 36, 0.34);
 
-  --wp-st-slate-bg: rgba(148, 163, 184, 0.14);
-  --wp-st-slate-ink: #b8c1d1;
-  --wp-st-slate-dot: #7c8799;
-  --wp-st-slate-muted-bg: rgba(148, 163, 184, 0.1);
-  --wp-st-slate-muted-ink: #9aa4b5;
-  --wp-st-slate-muted-dot: #667186;
+  // Slate is the "no particular status" pill — its colour carries no meaning, so it is a neutral grey here
+  // rather than a blue-grey. Every other pill keeps its hue, because those hues ARE the meaning.
+  --wp-st-slate-bg: rgba(168, 168, 168, 0.16);
+  --wp-st-slate-ink: #c9c9c9;
+  --wp-st-slate-dot: #8a8a8a;
+  --wp-st-slate-muted-bg: rgba(168, 168, 168, 0.11);
+  --wp-st-slate-muted-ink: #a8a8a8;
+  --wp-st-slate-muted-dot: #737373;
   --wp-st-indigo-bg: rgba(99, 102, 241, 0.18);
   --wp-st-indigo-ink: #b4bdff;
   --wp-st-indigo-dot: #818cf8;
@@ -219,43 +271,105 @@
   --wp-shadow-3: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 24px 64px rgba(0, 0, 0, 0.7);
   --wp-scrim: rgba(0, 0, 0, 0.62);
 
-  --wp-glass-fill: rgba(255, 255, 255, 0.05);
+  --wp-glass-fill: rgba(255, 255, 255, 0.06);
   --wp-glass-rim: rgba(255, 255, 255, 0.18);
   --wp-glass-sheen: rgba(255, 255, 255, 0.14);
   --wp-glass-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.8);
 
   // Inverse chip: a dark tooltip would vanish on a dark surface
-  --wp-tooltip-bg: #{dark-tone(#eef1f6, #c2cad8)};
-  --wp-tooltip-ink: #07090d;
+  --wp-tooltip-bg: #{dark-tone(#ffffff, #e4e6ea)};
+  --wp-tooltip-ink: #060b14;
   --wp-tooltip-ring: rgba(255, 255, 255, 0.12);
 
-  --wp-shimmer-a: #{dark-tone(#121821, #232a36)};
-  --wp-shimmer-b: #{dark-tone(#1a212d, #2c3441)};
+  --wp-shimmer-a: #{dark-tone(#141414, #2a2f39)};
+  --wp-shimmer-b: #{dark-tone(#1f1f1f, #363c47)};
 
-  --wp-wb-outline: #{dark-tone(#a9b3c6, #98a3b8)};
+  --wp-wb-outline: #{dark-tone(#b4b4b4, #a9aeb7)};
   --wp-wb-ground: #f0894a;
   --wp-wb-target: #fbbf24;
   --wp-wb-actual: #4ade80;
   --wp-wb-water: #38bdf8;
-  --wp-wb-pad: #{dark-tone(#1a212d, #2c3441)};
+  --wp-wb-pad: #{dark-tone(#1f1f1f, #363c47)};
+
+  --wp-profile-rock-1: #5b4226;
+  --wp-profile-rock-2: #725433;
+  --wp-profile-rock-3: #896742;
+  --wp-profile-rock-4: #a27e58;
+  --wp-profile-rock-ink-1: #ffffff;
+  --wp-profile-rock-ink-2: #ffffff;
+  --wp-profile-rock-ink-3: #ffffff;
+  --wp-profile-rock-ink-4: #04060a;
+  --wp-profile-aquifer: #0c5537;
+  --wp-profile-aquifer-edge: #4ad496;
+  --wp-profile-aquifer-ink: #ffffff;
+  --wp-profile-water-wash: #0b6fa6;
+  --wp-profile-on-water: #04141d;
+  --wp-profile-select-wash: 14%;
+
+  // One blue, lit from the top — see the light set for why the three-stop cyan-to-indigo sweep went.
+  --wp-cta-bg: linear-gradient(180deg, #4db8f7, #2f8fe0);
+  --wp-cta-bg-hover: linear-gradient(180deg, #68c6fa, #3f9fee);
+  --wp-cta-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 0 0 1px rgba(104, 198, 250, 0.5), 0 16px 34px -8px rgba(77, 184, 247, 0.72);
+
+  // No aurora in dark. Light frosts its glass over three soft pools of colour; here the ground is meant to be
+  // black, and a wash of cyan and indigo across it is exactly the hue this theme is not supposed to have.
+  // The grain stays, at a whisper: it is greyscale, so it adds no colour, and it keeps a large flat dark field
+  // from banding on an 8-bit panel at the slate end of the dial.
+  --wp-atmosphere: none;
+  --wp-grain-opacity: 0.025;
+
+  // A panel is a neutral film over the ground, held by a hairline. The spotlight it used to catch was a cyan
+  // radial, which tinted every pane on the page.
+  --wp-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+  --wp-panel-ring: rgba(255, 255, 255, 0.09);
+  --wp-panel-rim: rgba(255, 255, 255, 0.14);
 }
 
 :root {
   // ── Theme-independent ─────────────────────────────────────────
-  --wp-radius-sm: 6px; // small controls, chips
-  --wp-radius-md: 8px; // cards, panels, inputs
-  --wp-radius-lg: 12px; // dialogs, popovers
+  --wp-radius-sm: 8px; // small controls, chips
+  --wp-radius-md: 12px; // cards, panels, inputs
+  --wp-radius-lg: 18px; // dialogs, popovers, the big glass panes
+  --wp-radius-btn: 12px; // buttons
   --wp-radius-pill: 999px;
+
+  // A glass pane's edge and blur, once for both themes: the hairline ring and top rim come from the theme's `--wp-panel-*`.
+  --wp-panel-shadow: inset 0 0 0 1px var(--wp-panel-ring), inset 0 1px 0 var(--wp-panel-rim), var(--wp-shadow-2);
+  --wp-panel-blur: blur(22px) saturate(150%);
+
+  // The faces, for the places that cannot `@use` the design tokens (a component outside the module, the wellbore canvas chips).
+  --wp-font-ui: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --wp-font-display: 'Outfit Variable', 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --wp-font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   // Solid fills that carry white text/glyphs — same in both themes so the contrast holds either way.
   --wp-success-fill: #15803d;
   --wp-danger-fill: #d92d20;
+
+  // Well profile: steel stays metallic in both themes, like the pipe the diagram draws. The size stamped on it is a fixed
+  // dark ink — a themed (near-white in dark) one would vanish into the steel.
+  --wp-profile-steel-a: #c3cbd8;
+  --wp-profile-steel-b: #8f9aad;
+  --wp-profile-liner-a: #dde3ec;
+  --wp-profile-liner-b: #a4aebe;
+  --wp-profile-on-steel: #0a0d14;
 
   @include light-tokens;
 }
 
 :root[data-wp-theme='dark'] {
   @include dark-tokens;
+}
+
+// IR uses the same opaque black/charcoal surfaces as Well Profile. Keep the
+// shared contrast dial and light palette; avoid stacking translucent glass.
+:root[data-wp-theme='dark'] :is(app-wwell-ir, app-wwell-ir-editor, app-wwell-ir-view) {
+  --wp-page-bg: var(--wp-page);
+  --wp-panel-bg: var(--wp-surface);
+  --wp-panel-blur: none;
+  --wp-panel-ring: var(--wp-line);
+  --wp-panel-rim: var(--wp-line-soft);
+  --wp-panel-shadow: inset 0 0 0 1px var(--wp-panel-ring);
 }
 
 // A printed page. The IR letter previews the PDF the backend generates, and that PDF is always white
@@ -268,19 +382,46 @@
   color-scheme: light;
 }
 
-// Brief cross-fade, only while the user flips the toggle (class added/removed by WwellThemeService).
-// Colour-only properties, so nothing reflows.
+// ── Switching between the themes ─────────────────────────────────────────────
+//
+// A plain cross-fade — the browser's own default view transition, deliberately not customised. This is what
+// most products do for a theme swap (many do nothing at all), and it is the one thing here that needs no
+// explaining to anyone reading it later.
+//
+// There are no keyframes below because there is nothing to write: `startViewTransition()` snapshots the page
+// before and after the attribute flips and cross-fades the two by itself. Because it is a snapshot, everything
+// crosses together — gradients, backdrop-filters, the wellbore canvas — which no property-by-property CSS
+// transition can manage, `background-image` not being animatable.
+//
+// The one rule that IS needed: ArcGIS's stylesheet, which angular.json loads BEFORE this one, declares
+// `:root { view-transition-name: none }`, and an author declaration beats the UA's own `root` name. Without
+// this the root is captured nameless, there are no `::view-transition-*(root)` pseudo-elements for the browser
+// to fade, and the theme snaps. It is restored only while the class is on — the service adds it before calling
+// `startViewTransition()`, so the name is there when the first snapshot is taken — and ArcGIS keeps its opt-out
+// everywhere else.
+:root.wp-theme-crossfade {
+  view-transition-name: root;
+}
+
+// ── Fallback ─────────────────────────────────────────────────────────────────
+// Browsers without view transitions (Firefox before 144, Safari before 18) get the nearest equivalent a
+// stylesheet can give: the same colours moving over the same time. Held to colour-only properties, so nothing
+// reflows, and to a short duration, because `*` means every element on screen repaints on every frame of it.
+//
+// Its own class, not shared with the one above: where view transitions DO exist this must not run, or the
+// second snapshot would be taken mid-fade and the transition would cross onto a half-finished picture.
 :root.wp-theme-switching,
 :root.wp-theme-switching *,
 :root.wp-theme-switching *::before,
 :root.wp-theme-switching *::after {
   transition:
-    background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    color 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    fill 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    stroke 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background-color var(--wp-theme-ms, 250ms) ease,
+    background-image var(--wp-theme-ms, 250ms) ease,
+    color var(--wp-theme-ms, 250ms) ease,
+    border-color var(--wp-theme-ms, 250ms) ease,
+    outline-color var(--wp-theme-ms, 250ms) ease,
+    fill var(--wp-theme-ms, 250ms) ease,
+    stroke var(--wp-theme-ms, 250ms) ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

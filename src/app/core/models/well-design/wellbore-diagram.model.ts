@@ -45,6 +45,17 @@ export interface DiagramLayout {
   // ── Gravel pack fill control ────────────────────────────────────────────
   readonly gpScreenGap: number;        // px gap between screen outer wall and GP inner fill edge
   readonly gpFillRatio: number;        // 0.0–1.0: fraction of available annulus (after gpScreenGap) that GP fills
+  /**
+   * Opt-in: carry Open Hole past a 7" liner's shoe down to the well's target depth, instead of ending
+   * it with the rest of the completion elements at that shoe.
+   *
+   * A rendering policy rather than a geometry constant, but it lives here because `diagramLayout` is
+   * the per-call-site seam the shared diagram already exposes — see the wwell-ir layouts, which are
+   * tuned entirely through it without touching shared rendering code. Optional and falsy by default, so
+   * Presentation's own layouts are unaffected and the shared renderer behaves exactly as it always has
+   * for every caller that does not ask for this.
+   */
+  readonly openHoleRunsToTargetDepth?: boolean;
 }
 
 export const DIAGRAM_LAYOUT: DiagramLayout = {

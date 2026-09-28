@@ -11,6 +11,7 @@ import { KvRow } from '../wwell-ir-editor/wwell-ir-detail-rows.util';
   templateUrl: './wwell-ir-kv-value.component.html',
   styleUrl: './wwell-ir-kv-value.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.kvv--mono]': 'row().mono' },
 })
 export class WwellIrKvValueComponent {
   readonly row = input.required<KvRow>();

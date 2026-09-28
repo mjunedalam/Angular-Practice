@@ -36,115 +36,6 @@
   @if (hasData()) {
     @let f = facts();
 
-    <!-- Well profile: only where it can be read — the maximised dialog and the view page's Well Design step
-         (`isFilled()`). The inline previews are a drawing plus its figures; the strip and its depth slider would
-         take a third of that card's height. -->
-    @if (isFilled() ? profile() : null; as well) {
-      <section class="wbp__profile" aria-label="Well profile, surface to total depth">
-        <header class="wbp__profile-head">
-          <h3 class="wbp__eyebrow">Well profile</h3>
-          <span class="wbp__extent">{{ well.rangeText }}</span>
-        </header>
-
-        <!-- The glass: the strip and its slider sit on one frosted plate over the card's soft glows. -->
-        <div class="wbp__plate">
-          <!-- One shared width, three lanes: formation tops over, the strings and open hole, then the pins for
-               water and pump. The lanes are drawn, not text (hidden from a screen reader); the group's label says what
-               they show, and the slider on the track is the one control. -->
-          <div #strip class="wbp__strip" role="group" [attr.aria-label]="well.description">
-            @if (well.tops.length > 0) {
-              <div class="wbp__lane wbp__lane--tops" aria-hidden="true">
-                @for (top of well.tops; track $index) {
-                  <i class="wbp__tick" [style.left.%]="top.leftPct"></i>
-                }
-                @for (label of topLabels(); track label.key) {
-                  <span class="wbp__lane-label" [style.left.px]="label.leftPx">{{ label.text }}</span>
-                }
-              </div>
-            }
-            <div class="wbp__track" aria-hidden="true">
-              @for (segment of well.segments; track $index) {
-                <span
-                  class="wbp__seg wbp__seg--{{ segment.kind }}"
-                  [class.wbp__seg--lit]="hasPickedDepth() && reading()?.segmentIndex === $index"
-                  [style.left.%]="segment.leftPct"
-                  [style.width.%]="segment.widthPct"
-                >
-                  @if (segment.kind !== 'open') {
-                    <i class="wbp__shoe"></i>
-                  }
-                  <b class="wbp__seg-size">{{ segment.label }}</b>
-                  @if (segment.type) {
-                    <span class="wbp__seg-type">{{ segment.type }}</span>
-                  }
-                </span>
-              }
-              @for (marker of well.markers; track marker.kind) {
-                @if (marker.kind === 'water') {
-                  <i class="wbp__water-line" [style.left.%]="marker.leftPct"></i>
-                }
-              }
-            </div>
-            <div class="wbp__pins" aria-hidden="true">
-              @for (marker of well.markers; track marker.kind) {
-                <span class="wbp__pin wbp__pin--{{ marker.kind }}" [style.left.%]="marker.leftPct">
-                  <app-wwell-ir-wellbore-glyph class="wbp__pin-icon" [kind]="marker.kind" />
-                </span>
-              }
-              @for (label of pinLabels(); track label.key) {
-                <span class="wbp__pin-label" [style.left.px]="label.leftPx">{{ label.text }}</span>
-              }
-            </div>
-            <!-- Slide to read the well at any depth: the string there, the formation, how far under the water. Its
-                 scale is the track's, so the bead sits on the depth it reads and the stretch it names is lit. -->
-            <input
-              type="range"
-              class="wbp__slider"
-              min="0"
-              [step]="sliderStepFt()"
-              [max]="totalDepthFt()"
-              [value]="pickedDepth()"
-              aria-label="Read the well at a depth"
-              [attr.aria-valuetext]="reading()?.summary"
-              (input)="pickDepth($event)"
-            />
-          </div>
-
-          <p class="wbp__readout" aria-hidden="true">
-            @if (hasPickedDepth() ? reading() : null; as read) {
-              <b class="wbp__read-depth">{{ read.depthText }}</b>
-              <span class="wbp__chip">
-                {{ read.hole }}
-                @if (read.completion) {
-                  <span class="wbp__chip-extra"> · {{ read.completion }}</span>
-                }
-              </span>
-              @if (read.formation) {
-                <span class="wbp__chip">{{ read.formation }}</span>
-              }
-              @if (read.water) {
-                <span class="wbp__chip wbp__chip--water">{{ read.water }}</span>
-              }
-            } @else {
-              <span class="wbp__read-hint">Slide along the well to read any depth</span>
-            }
-          </p>
-        </div>
-
-        <dl class="wbp__spans">
-          @for (fact of well.facts; track fact.kind) {
-            <div class="wbp__span">
-              <dt>
-                <span class="wbp__dot wbp__dot--{{ fact.kind }}" aria-hidden="true"></span>{{ fact.label }}
-                <b class="wbp__pct">{{ fact.percent }}</b>
-              </dt>
-              <dd>{{ fact.range }}</dd>
-            </div>
-          }
-        </dl>
-      </section>
-    }
-
     <div class="wbp__stage">
       <div
         class="wbp__figure"
@@ -211,7 +102,7 @@
                 <dd>{{ stat.value }}</dd>
                 @if (stat.gauge; as gauge) {
                   <!-- How far down the well it is: the line is the well, surface to total depth, filled to the depth
-                       (or, for the water column, over the stretch it fills), the same pictogram the profile uses on it. -->
+                       (or, for the water column, over the stretch it fills), with the stat's own pictogram on it. -->
                   <span class="wbp__gauge wbp__gauge--{{ stat.glyph }}" aria-hidden="true">
                     <i class="wbp__gauge-fill" [style.left.%]="gauge.fromPct" [style.width.%]="gauge.toPct - gauge.fromPct"></i>
                     <app-wwell-ir-wellbore-glyph class="wbp__gauge-mark" [kind]="stat.glyph" [style.left.%]="gauge.markPct" />

@@ -1,0 +1,21 @@
+<svg class="intervals-svg" [class.large]="large()" [attr.viewBox]="'0 0 760 '+height()" role="group" aria-label="Full construction intervals on a shared depth scale">
+  @for (d of ticks(); track d) {
+    <line [attr.x1]="x(d)" [attr.x2]="x(d)" [attr.y1]="rowY(0)-18" [attr.y2]="rowY(strings().length)+30" class="grid-line"/>
+    <text [attr.x]="x(d)" [attr.y]="rowY(0)-25" [attr.text-anchor]="d === store.totalDepth() ? 'end' : d === 0 ? 'start' : 'middle'" class="number muted">{{d | number}}</text>
+  }
+  @for (s of strings(); track s.id; let i = $index) {
+    <g role="button" tabindex="0" [attr.aria-label]="s.csgType+' '+s.top+' to '+s.csgDepth+' feet'" [attr.aria-pressed]="store.selectedId() === s.id"
+      (click)="store.select(s.id)" (keydown.enter)="store.select(s.id)" (keydown.space)="$event.preventDefault(); store.select(s.id)" class="interval" [class.active]="store.selectedId() === s.id">
+      <text x="12" [attr.y]="rowY(i)+12">{{s.csgSize}}″ {{s.csgType}}</text>
+      <rect [attr.x]="x(s.top)" [attr.y]="rowY(i)+2" [attr.width]="x(s.csgDepth)-x(s.top)" [attr.height]="large() ? 21 : 11" rx="2" [attr.fill]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()"/>
+      <line [attr.x1]="x(s.csgDepth)" [attr.x2]="x(s.csgDepth)" [attr.y1]="rowY(i)" [attr.y2]="rowY(i)+(large() ? 25 : 15)" class="axis"/>
+      @if (large()) { <text [attr.x]="x(s.top)" [attr.y]="rowY(i)+42" class="number muted">{{s.top | number}}–{{s.csgDepth | number}} ft</text> }
+    </g>
+  }
+  @for (f of formations(); track $index) {
+    <rect [attr.x]="x(f.planTvdDepth)" [attr.y]="rowY(strings().length)+12" [attr.width]="x(f.bottom)-x(f.planTvdDepth)" [attr.height]="large() ? 35 : 18" class="formation-band" [class.target]="f.stLongCd === store.record()?.requestReference?.targetAquifer"/>
+    @if (x(f.bottom)-x(f.planTvdDepth) > 35) { <text [attr.x]="(x(f.planTvdDepth)+x(f.bottom))/2" [attr.y]="rowY(strings().length)+(large() ? 34 : 25)" text-anchor="middle" class="muted">{{f.stLongCd}}</text> }
+  }
+  <line [attr.x1]="x(store.depth())" [attr.x2]="x(store.depth())" [attr.y1]="rowY(0)-16" [attr.y2]="rowY(strings().length)+(large() ? 47 : 30)" class="depth-cursor"/>
+  @if (large()) { <text x="12" [attr.y]="height()-12" class="muted">Shared ruler · True interval lengths · Overlap remains visible</text> }
+</svg>

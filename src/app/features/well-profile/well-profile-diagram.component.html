@@ -1,0 +1,90 @@
+<svg viewBox="0 0 760 660" role="group" aria-label="Nested casing assembly with depth scale and formation tops">
+  <defs>
+    <pattern id="wp-gravel" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" class="rock-fill"/><circle cx="5" cy="5" r="0.65" class="steel-fill"/></pattern>
+    <pattern id="wp-screen" width="5" height="7" patternUnits="userSpaceOnUse"><path d="M1 2h2 M1 5h2" class="screen-lines"/></pattern>
+    @for (s of strings(); track s.id) {
+      <linearGradient [id]="'wp-metal-'+s.id" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" [attr.stop-color]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.stop-opacity]="store.shellOpacity() * .75"/>
+        <stop offset="22%" [attr.stop-color]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.stop-opacity]="store.shellOpacity() * 1.15"/>
+        <stop offset="52%" [attr.stop-color]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.stop-opacity]="store.shellOpacity() * .58"/>
+        <stop offset="100%" [attr.stop-color]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.stop-opacity]="store.shellOpacity() * 1.3"/>
+      </linearGradient>
+    }
+  </defs>
+  <text x="14" y="23" class="muted">Depth</text><text x="14" y="38" class="muted">ft bgl</text><text x="94" y="23" class="muted">Formation tops</text>
+  <line x1="62" y1="60" x2="62" y2="614" class="axis"/>
+  @for (d of ticks(); track d) {
+    <line [attr.x1]="d % 500 === 0 ? 55 : 59" [attr.y1]="y(d)" x2="62" [attr.y2]="y(d)" class="axis"/>
+    @if (d >= 0) {
+      <text x="51" [attr.y]="y(d)+4" text-anchor="end" class="number">{{d | number}}</text>
+      <line x1="70" [attr.y1]="y(d)" x2="745" [attr.y2]="y(d)" class="grid-line"/>
+    }
+  }
+  @for (f of formations(); track $index) {
+    <rect x="98" [attr.y]="y(f.planTvdDepth)" width="6" [attr.height]="y(f.bottom)-y(f.planTvdDepth)" class="formation-band" [class.target]="f.stLongCd === store.record()?.requestReference?.targetAquifer"/>
+    @if (!f.stLongCd.startsWith('Above ')) {
+      <path [attr.d]="'M101 '+(y(f.planTvdDepth)-3)+' l3 3 -3 3 -3 -3Z'" class="muted-fill"/>
+      <text x="114" [attr.y]="y(f.planTvdDepth)+4">{{f.stLongCd}}</text>
+      <text x="114" [attr.y]="y(f.planTvdDepth)+18" class="number muted">{{f.planTvdDepth | number}}</text>
+    }
+  }
+  <line x1="315" y1="60" x2="445" y2="60" class="axis"/>
+  @if (store.profile().openHole; as hole) {
+    <g [attr.transform]="'translate('+coreX()+' 0)'" aria-label="Open hole below the last casing shoe">
+      <rect x="-17" [attr.y]="y(hole.top)" width="34" [attr.height]="y(hole.bottom)-y(hole.top)" rx="3" class="open-hole"/>
+    </g>
+  }
+  @for (s of drawOrder(); track s.id) {
+    <g role="button" tabindex="0" [attr.aria-label]="s.csgSize+' inch '+s.csgType+', shoe '+s.csgDepth+' feet'" [attr.aria-pressed]="s.id === store.selectedId()"
+      (click)="store.select(s.id)" (keydown.enter)="store.select(s.id)" (keydown.space)="$event.preventDefault(); store.select(s.id)"
+      class="shell" [class.selected]="s.id === store.selectedId()" [attr.stroke]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()">
+      <path [attr.d]="s.path" [attr.fill]="'url(#wp-metal-'+s.id+')'"/>
+      <ellipse [attr.cx]="s.x" [attr.cy]="s.topY" [attr.rx]="s.radius" [attr.ry]="s.ry" [attr.fill]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.fill-opacity]="store.shellOpacity() * .3"/>
+      <ellipse [attr.cx]="s.x" [attr.cy]="s.topY" [attr.rx]="s.radius-2" [attr.ry]="s.ry-1" fill="none" class="inner-rim"/>
+      <ellipse [attr.cx]="s.x" [attr.cy]="s.bottomY" [attr.rx]="s.radius" [attr.ry]="s.ry" [attr.fill]="s.csgType.toLowerCase().includes('liner') ? store.linerFill() : store.casingFill()" [attr.fill-opacity]="store.shellOpacity() * .4"/>
+      <path [attr.d]="'M'+(s.x-s.radius)+' '+(s.bottomY-3)+' A'+s.radius+' '+s.ry+' 0 0 0 '+(s.x+s.radius)+' '+(s.bottomY-3)" fill="none" class="inner-rim"/>
+      @if (store.mode() === 'xray') { <line [attr.x1]="s.x" [attr.x2]="s.x" [attr.y1]="s.topY" [attr.y2]="s.bottomY" stroke-dasharray="3 5" opacity=".3"/> }
+    </g>
+  }
+  <g [attr.transform]="'translate('+coreX()+' 0)'" class="core">
+    @if (store.profile().water !== null) {
+      <rect x="-21" [attr.y]="y(store.profile().water!)" width="42" [attr.height]="y(store.totalDepth())-y(store.profile().water!)" class="water-column"/>
+      <ellipse cx="0" [attr.cy]="y(store.profile().water!)" rx="21" ry="4.8" class="water-surface"/>
+    }
+    @if (store.profile().pump !== null) {
+      <line x1="0" y1="60" x2="0" [attr.y2]="y(store.profile().pump!)" class="riser"/>
+      <line x1="5" y1="60" x2="5" [attr.y2]="y(store.profile().pump!)" class="cable"/>
+      <rect x="-5" [attr.y]="y(store.profile().pump!)-34" width="10" height="34" rx="3" class="pump"/>
+      @for (slot of pumpSlots; track slot) { <line x1="-4" x2="4" [attr.y1]="y(store.profile().pump!)-34+slot" [attr.y2]="y(store.profile().pump!)-34+slot" class="axis"/> }
+    }
+    <text x="0" y="39" text-anchor="middle" [attr.opacity]="explodedOpacity()" class="muted">Core</text>
+  </g>
+  @for (s of strings(); track s.id; let i = $index) {
+    <g [class.callout-selected]="s.id === store.selectedId()" class="callout">
+      <circle [attr.cx]="s.x+s.radius" [attr.cy]="s.bottomY" r="2.4"/>
+      <g [attr.opacity]="labelsOpacity()">
+        <path [attr.d]="'M'+(s.x+s.radius)+' '+s.bottomY+' H465 Q473 '+s.bottomY+' 473 '+(s.bottomY+4)+' V'+(i === 1 ? s.bottomY+6 : s.bottomY+4)+' H492'"/>
+        <text x="502" [attr.y]="s.bottomY-5">{{s.csgSize}}″ {{s.csgType}}</text>
+        <text x="502" [attr.y]="s.bottomY+11" class="number">{{s.csgDepth | number}} ft</text>
+      </g>
+      <g [attr.opacity]="explodedOpacity()">
+        <text [attr.x]="s.x" [attr.y]="s.topY-16" text-anchor="middle">{{s.csgSize}}″</text>
+        <line [attr.x1]="s.x" [attr.x2]="s.x" [attr.y1]="s.bottomY+s.ry" [attr.y2]="s.bottomY+14"/>
+        <text [attr.x]="s.x" [attr.y]="s.bottomY+27" text-anchor="middle" class="number">{{s.csgDepth | number}}</text>
+      </g>
+    </g>
+  }
+  <g [attr.opacity]="labelsOpacity()">
+    @if (store.profile().water !== null) {
+      <path [attr.d]="'M300 '+y(store.profile().water!)+' H401'" class="water-leader"/>
+      <text x="292" [attr.y]="y(store.profile().water!)+4" text-anchor="end" class="water-text">Est. WL {{store.profile().water | number}}</text>
+    }
+    @if (store.profile().pump !== null) {
+      <line x1="310" x2="375" [attr.y1]="y(store.profile().pump!)" [attr.y2]="y(store.profile().pump!)" class="cable"/>
+      <text x="302" [attr.y]="y(store.profile().pump!)+4" text-anchor="end" class="water-text">Pump {{store.profile().pump | number}}</text>
+    }
+  </g>
+  <line x1="70" x2="740" [attr.y1]="y(store.depth())" [attr.y2]="y(store.depth())" class="depth-cursor"/>
+  <circle cx="62" [attr.cy]="y(store.depth())" r="3" class="accent-fill"/>
+  <text x="380" y="647" text-anchor="middle" class="muted">{{store.spread() > .5 ? 'Lateral separation · Depth positions unchanged' : 'Closed shells · Width exaggerated'}}</text>
+</svg>

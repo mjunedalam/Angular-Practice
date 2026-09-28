@@ -54,12 +54,10 @@ $master-width: 240px;
   width: $master-width;
   flex-shrink: 0;
   max-height: 100%;
-  background: tokens.$surface;
-  border: 1px solid tokens.$border-soft;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
   padding: 0.9rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  @include tokens.glass-panel;
   overflow: hidden;
 }
 
@@ -72,6 +70,7 @@ $master-width: 240px;
 }
 
 .wreq__heading {
+  font-family: tokens.$font-display;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -390,12 +389,10 @@ $master-width: 240px;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
   padding: 0.9rem 1.1rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  @include tokens.glass-panel;
 }
 
 .wreq__eyebrow {
@@ -449,12 +446,10 @@ $master-width: 240px;
 }
 
 .wreq__card {
-  background: tokens.$surface;
-  border: 1px solid $border;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
   padding: 0.95rem 1.1rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  @include tokens.glass-panel;
   transition:
     box-shadow tokens.$duration-fast ease,
     transform tokens.$duration-fast ease;
@@ -462,8 +457,7 @@ $master-width: 240px;
   @media (prefers-reduced-motion: no-preference) {
     &:hover {
       transform: translateY(-2px);
-      box-shadow:
-        var(--wp-shadow-2);
+      box-shadow: var(--wp-panel-shadow);
     }
   }
 }

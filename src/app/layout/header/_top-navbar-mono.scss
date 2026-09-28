@@ -1,11 +1,12 @@
-// The redesigned top bar ("Monolith"): flat, hairline, monochrome. Scoped to `data-shell='mono'`, which
+// The top bar ("Aurora Glass"): a frosted pane over the shell's atmosphere, hairline-edged. Scoped to `data-shell='mono'`, which
 // WwellThemeService keeps on <html>. Colours come from layout/_shell-theme.scss, so it follows
 // light/dark; the user dropdown borrows the planning `--wp-*` surface tokens, which flip with the theme.
 
 $font: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 $mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+$display: 'Outfit Variable', $font;
 $ease: cubic-bezier(0.2, 0.9, 0.25, 1);
-$radius: 4px;
+$radius: 10px;
 
 :host-context([data-shell='mono']) {
   // ── Shell ──────────────────────────────────────────────────────────────────
@@ -19,6 +20,8 @@ $radius: 4px;
     padding: 0 14px 0 0;
     border-bottom: 1px solid var(--shell-hair);
     background: var(--shell-bar);
+    -webkit-backdrop-filter: var(--shell-blur);
+    backdrop-filter: var(--shell-blur);
     color: var(--shell-text);
     font-family: $font;
 
@@ -28,7 +31,7 @@ $radius: 4px;
     }
 
     button:focus-visible {
-      outline: 2px solid var(--shell-text);
+      outline: 2px solid var(--shell-focus);
       outline-offset: 2px;
     }
   }
@@ -94,8 +97,8 @@ $radius: 4px;
   }
 
   .top-navbar__logo-text {
-    font: 700 16px/1 $font;
-    letter-spacing: 0.3em;
+    font: 600 16px/1 $display;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--shell-text);
   }
@@ -128,42 +131,6 @@ $radius: 4px;
     align-items: center;
     gap: 10px;
     margin-left: auto;
-  }
-
-  .top-navbar__notifications {
-    position: relative;
-  }
-
-  .top-navbar__icon-btn {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    border: 0;
-    border-radius: $radius;
-    background: transparent;
-    color: var(--shell-muted);
-    cursor: pointer;
-    transition:
-      background-color 0.2s,
-      color 0.2s,
-      transform 0.12s;
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    &:hover {
-      background: var(--shell-press);
-      color: var(--shell-text);
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
   }
 
   .top-navbar__divider {
@@ -222,8 +189,9 @@ $radius: 4px;
     place-items: center;
     width: 30px;
     height: 30px;
-    border-radius: $radius;
+    border-radius: 50%;
     background: var(--shell-avatar-bg);
+    box-shadow: var(--shell-avatar-glow);
     color: var(--shell-avatar-text);
     font-size: 12px;
     font-weight: 800;
@@ -273,8 +241,9 @@ $radius: 4px;
     place-items: center;
     width: 2.4rem;
     height: 2.4rem;
-    border-radius: $radius;
+    border-radius: 50%;
     background: var(--shell-avatar-bg);
+    box-shadow: var(--shell-avatar-glow);
     color: var(--shell-avatar-text);
     font-size: 0.95rem;
     font-weight: 800;
@@ -365,21 +334,6 @@ $radius: 4px;
       background: var(--wp-danger-soft);
     }
   }
-
-  // ── Material badge on the bell: the one place red shows up ──────────────────
-  ::ng-deep .mat-badge-content {
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    border-radius: 6px;
-    background: var(--shell-signal);
-    color: var(--shell-on-signal);
-    font-family: $font;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0;
-    line-height: 18px;
-  }
 }
 
 // ── Responsive ───────────────────────────────────────────────────────────────
@@ -408,7 +362,6 @@ $radius: 4px;
     }
 
     .top-navbar__hamburger,
-    .top-navbar__icon-btn,
     .top-navbar__menu-trigger,
     .top-navbar__chevron {
       transition: none;

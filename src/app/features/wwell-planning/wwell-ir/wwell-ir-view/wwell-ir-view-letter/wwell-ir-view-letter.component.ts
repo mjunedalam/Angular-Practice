@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, input, signal, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DIAGRAM_LAYOUT, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
+import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
@@ -11,6 +11,7 @@ import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
+import { WWELL_IR_LETTER_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import { resolveScaleDepthFt } from '../../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
@@ -85,7 +86,7 @@ export class WwellIrViewLetterComponent {
   // casing shoe labels too close together to read (colliding secondary lines) and clipping the
   // longest labels past the SVG's own right edge (see `.letter__diagram-row` in the stylesheet for
   // the matching container width/aspect-ratio change).
-  protected readonly diagramLayout = DIAGRAM_LAYOUT;
+  protected readonly diagramLayout = WWELL_IR_LETTER_DIAGRAM_LAYOUT;
   protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
     buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
   );

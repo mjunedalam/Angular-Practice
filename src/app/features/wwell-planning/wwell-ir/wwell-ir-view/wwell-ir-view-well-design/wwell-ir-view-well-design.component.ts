@@ -12,6 +12,7 @@ import { mapIrFormValueToSubmission } from '../../wwell-ir-form/wwell-ir-form.ma
 import { buildWwellIrBulkSavePayload } from '../../wwell-ir-form/wwell-ir-payload.mapper';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
+  wellboreDiagramDataEqual,
   hasWellboreDiagramDataForIntegratedRequirement,
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 import { WwellIrWellborePanelComponent } from '../../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
@@ -52,8 +53,13 @@ export class WwellIrViewWellDesignComponent {
   // the visible page — see `fit` on the panel and `.ir-well-design__view` in the stylesheet.
   protected readonly diagramLayout = WWELL_IR_EXPANDED_DIAGRAM_LAYOUT;
 
-  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(() =>
-    buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
+  /** Structural `equal` for the same reason as the editor's: the store hands this component a fresh
+   *  `IntegratedRequirement` whenever the record is re-fetched (a status refresh, say), and without it
+   *  every one of those re-ran `well-bore-view`'s redraw effect and replayed the whole animation even
+   *  though nothing the diagram draws had moved. */
+  protected readonly wellboreDiagramData: Signal<WellboreDiagramData> = computed(
+    () => buildWellboreDiagramDataFromIntegratedRequirement(this.ir()),
+    { equal: wellboreDiagramDataEqual },
   );
   protected readonly hasWellboreData: Signal<boolean> = computed(() => hasWellboreDiagramDataForIntegratedRequirement(this.ir()));
   // Hides the D3-rendered "TOTAL DEPTH: 0 FT" label — same gate the editor's own preview uses

@@ -49,9 +49,9 @@ export class WwellIrViewDetailsComponent {
   // Record-level fields (`code`/`updatedDate`) layered onto the request-reference fields —
   // matches the reference screen's "General Information" card, which shows both together.
   protected readonly generalInfoRows = computed<readonly KvRow[]>(() => [
-    { label: 'IR #', value: this.ir().code },
+    { label: 'IR #', value: this.ir().code, mono: true },
     ...buildRequestReferenceRows(this.ir(), this.linkedRequestWellOptions()),
-    { label: 'Last Updated', value: this.ir().updatedDate },
+    { label: 'Last Updated', value: this.ir().updatedDate, mono: true },
   ]);
   protected readonly programDetailsRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));

@@ -1,8 +1,8 @@
-// The redesigned left nav ("Monolith"): flat, hairline, monochrome. Scoped to `data-shell='mono'`, which
+// The left nav ("Aurora Glass"): a frosted pane over the shell's atmosphere, hairline-edged. Scoped to `data-shell='mono'`, which
 // WwellThemeService keeps on <html>. Colours come from layout/_shell-theme.scss, so it follows
 // light/dark; the build-info popover borrows the planning `--wp-*` surface tokens.
 //
-// The current page is an inverted block. `.sidenav__hl` is that block as its own element, so it can
+// The current page is a tinted, ringed pane. `.sidenav__hl` is that pane as its own element, so it can
 // glide between items (transform only). LeftSidenavComponent measures the active button into
 // --hl-x / --hl-y / --hl-w / --hl-h and flips `.sidenav--glide` once it has; until then the active
 // button paints the same fill itself, so the current page is never left without a highlight.
@@ -13,7 +13,7 @@ $ease: cubic-bezier(0.2, 0.9, 0.25, 1);
 $slide: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
 $expanded-w: 244px;
 $collapsed-w: 64px;
-$radius: 4px;
+$radius: 10px;
 
 :host-context([data-shell='mono']) {
   // ── Shell ──────────────────────────────────────────────────────────────────
@@ -27,11 +27,13 @@ $radius: 4px;
     overflow: visible;
     border-right: 1px solid var(--shell-hair);
     background: var(--shell-rail);
+    -webkit-backdrop-filter: var(--shell-blur);
+    backdrop-filter: var(--shell-blur);
     font-family: $font;
     transition: width $slide;
 
     button:focus-visible {
-      outline: 2px solid var(--shell-text);
+      outline: 2px solid var(--shell-focus);
       outline-offset: 2px;
     }
 
@@ -67,6 +69,7 @@ $radius: 4px;
     height: var(--hl-h, 0);
     border-radius: $radius;
     background: var(--shell-active-bg);
+    box-shadow: var(--shell-active-ring);
     opacity: 0;
     pointer-events: none;
     transform: translate(var(--hl-x, 0), var(--hl-y, 0));
@@ -139,6 +142,7 @@ $radius: 4px;
     &--active,
     &--active:hover {
       background: var(--shell-active-bg);
+      box-shadow: var(--shell-active-ring);
       color: var(--shell-active-text);
       font-weight: 600;
     }
@@ -156,6 +160,7 @@ $radius: 4px;
   .sidenav--glide .sidenav__btn--active,
   .sidenav--glide .sidenav__btn--active:hover {
     background: transparent;
+    box-shadow: none;
   }
 
   .sidenav__icon {

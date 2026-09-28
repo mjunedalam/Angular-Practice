@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { WellboreGlyphKind } from './wwell-ir-wellbore-facts.util';
 
-/** The small pictograms the well profile and its readout tiles share, so a thing looks the same wherever the
- *  panel shows it: a drop for the static water level, a pump (volute, impeller, motor, outlet pipe) for the
- *  pump setting, a guide shoe for the deepest casing shoe, an arrow down from a ground bar for total depth.
+/** The small pictograms the panel's readout tiles use, so a thing looks the same wherever it is shown: a drop
+ *  for the static water level, a pump (volute, impeller, motor, outlet pipe) for the pump setting, a guide
+ *  shoe for the deepest casing shoe, an arrow down from a ground bar for total depth.
  *  They take their colour from the surrounding `color` and are decorative — the text beside them says what
  *  they are. The pump is wider than the rest (16 × 14 against 10 × 14) and is drawn with its outlet pipe on
  *  the centre line, so it hangs from a pin by that pipe. */

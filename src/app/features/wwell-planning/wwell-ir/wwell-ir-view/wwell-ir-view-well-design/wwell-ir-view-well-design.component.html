@@ -26,8 +26,8 @@
           @for (top of ir().formationTops; track top.name) {
             <tr>
               <td>{{ top.name }}</td>
-              <td>{{ formatDepth(top.depthFt) }}</td>
-              <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
+              <td class="ir-well-design__num">{{ formatDepth(top.depthFt) }}</td>
+              <td class="ir-well-design__num">{{ subSeaFt(top.depthFt) ?? '—' }}</td>
             </tr>
           } @empty {
             <tr>
@@ -95,8 +95,8 @@
           @for (row of ir().casing; track row.type + row.depthFtBgl) {
             <tr>
               <td>{{ row.type }}</td>
-              <td>{{ row.sizeIn }}</td>
-              <td>{{ formatDepth(row.depthFtBgl) }}</td>
+              <td class="ir-well-design__num">{{ row.sizeIn }}</td>
+              <td class="ir-well-design__num">{{ formatDepth(row.depthFtBgl) }}</td>
               <td>{{ row.remarks || '—' }}</td>
             </tr>
           } @empty {

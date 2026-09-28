@@ -34,23 +34,8 @@
     <h1>{{ appTitle }}</h1>
   </div>
 
-  <!-- Right: notifications + user -->
+  <!-- Right: theme + user -->
   <div class="top-navbar__user">
-
-    <div class="top-navbar__notifications">
-      <button
-        class="top-navbar__icon-btn"
-        aria-label="Notifications"
-        [matBadge]="3"
-        matBadgeColor="warn"
-        [matBadgeOverlap]="true"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 01-3.46 0"/>
-        </svg>
-      </button>
-    </div>
 
     <app-wwell-theme-toggle />
 

@@ -18,7 +18,7 @@ export interface WellboreStat {
   /** A qualifier under the value, e.g. which string a shoe belongs to. */
   readonly hint?: string;
   readonly warn?: boolean;
-  /** The pictogram the profile uses for the same thing, so it looks alike in both places. */
+  /** The pictogram the gauge marks its depth with. */
   readonly glyph: WellboreGlyphKind;
   /** How far down the well it is, surface to total depth. Absent until a total depth exists. */
   readonly gauge?: WellboreGauge;

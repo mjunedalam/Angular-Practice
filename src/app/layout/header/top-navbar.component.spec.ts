@@ -60,14 +60,13 @@ describe('TopNavbarComponent', () => {
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
   });
 
-  it('should host the theme + appearance control between the bell and the user menu', () => {
+  it('should host the theme + appearance control ahead of the user menu', () => {
     const bar: HTMLElement = fixture.nativeElement.querySelector('.top-navbar__user');
     const children = Array.from(bar.children).map((el) => el.tagName.toLowerCase() === 'app-wwell-theme-toggle'
       ? 'toggle'
       : el.className);
 
     expect(children).toEqual([
-      'top-navbar__notifications',
       'toggle',
       'top-navbar__divider',
       'top-navbar__menu',

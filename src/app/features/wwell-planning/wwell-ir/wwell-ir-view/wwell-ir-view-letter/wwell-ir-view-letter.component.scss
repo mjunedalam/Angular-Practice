@@ -38,8 +38,10 @@
 
 .letter__org {
   margin: 0;
-  font-size: tokens.$text-lg;
+  font-family: tokens.$font-display;
+  font-size: tokens.$text-xl;
   font-weight: 650;
+  letter-spacing: -0.02em;
   color: tokens.$navy-deep;
 }
 
@@ -68,6 +70,7 @@
   }
 
   dd {
+    @include tokens.type-mono;
     margin: 0;
     font-weight: 600;
     color: tokens.$navy-deep;
@@ -87,12 +90,13 @@
   margin-bottom: 1.4rem;
 
   h4 {
-    margin: 0 0 0.6rem;
-    font-size: tokens.$text-base;
-    font-weight: 600;
+    margin: 0 0 0.65rem;
+    font-family: tokens.$font-display;
+    font-size: tokens.$text-md;
+    font-weight: 650;
     color: tokens.$accent-deep;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.05em;
   }
 }
 

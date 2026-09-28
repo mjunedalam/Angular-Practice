@@ -64,12 +64,10 @@ $master-width: 240px;
   width: $master-width;
   flex-shrink: 0;
   max-height: 100%;
-  background: tokens.$surface;
-  border: 1px solid var(--wp-line);
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
   padding: 0.9rem;
-  box-shadow:
-    var(--wp-shadow-1);
+  @include tokens.glass-panel;
   overflow: hidden;
 }
 
@@ -88,6 +86,7 @@ $master-width: 240px;
 }
 
 .wwell-ir__title {
+  font-family: tokens.$font-display;
   margin: 0;
   font-size: 1.08rem;
   font-weight: 650;
@@ -121,14 +120,14 @@ $master-width: 240px;
 .wwell-ir__new-btn {
   flex: 1 1 auto;
   min-width: 0;
-  height: 32px;
-  padding: 0 12px 0 6px;
-  border-radius: tokens.$radius-sm;
+  height: 34px;
+  padding: 0 14px 0 6px;
+  border-radius: tokens.$radius-btn;
   font-size: tokens.$text-sm;
   font-weight: 600;
   letter-spacing: -0.005em;
-  // The CTA's own depth token: a top highlight + soft shadow in light, a hairline ring + cobalt glow
-  // in dark. This rule used to zero it out, which is what made the button read as a flat slab.
+  // The CTA's own depth token: a top highlight + soft shadow in light, a hairline ring + aurora glow
+  // in dark. The gradient fill itself comes from `wmat.buttons`.
   box-shadow: var(--wp-cta-shadow);
   transition:
     transform tokens.$duration-fast tokens.$ease-out,
@@ -688,11 +687,13 @@ $master-width: 240px;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  background: tokens.$surface;
-  border: 1px solid var(--wp-line);
-  border-radius: 10px;
-  padding: 1.1rem 0.9rem 0.9rem;
-  box-shadow: var(--wp-shadow-1);
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  padding: 1.2rem 0.9rem 1rem;
+  @include tokens.glass-panel;
+  // The timeline's type, a step up from its compact default (see `--wtl-fs` in the timeline's stylesheet).
+  --wtl-fs: #{tokens.$text-xs};
+  --wtl-name-fs: #{tokens.$text-sm};
 
   &::before {
     content: '';
@@ -753,16 +754,17 @@ $master-width: 240px;
 }
 
 .wwell-ir__approval-title {
+  font-family: tokens.$font-display;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: tokens.$text-md;
   font-weight: 650;
   color: $navy;
   letter-spacing: -0.018em;
 }
 
 .wwell-ir__approval-progress {
-  margin: 2px 0 0;
-  font-size: tokens.$text-2xs;
+  margin: 3px 0 0;
+  font-size: tokens.$text-xs;
   color: $muted;
 }
 

@@ -1046,3 +1046,129 @@ partial moved from `wwell-planning/shared/_wwell-wellbore.scss` to `wwell-ir/_ww
   characters are already gone from the stored text, so the parser can't restore them (entities still present in a value are decoded).
 - **Dev backend log note:** it shows one write at 15:29 — an INSERT of an Area Water Well (EP A Num 3454, aquifer "test") on IR-9065. Not from my sessions (they block
   writes and hadn't opened 9065); it is a test row from another client, left alone.
+
+### wwell-ir wellbore panel — Well Profile redesigned as a reusable component set ("Log tracks", Strata palette)
+
+- **Ask:** replace the profile strip with direction B — log tracks on one depth axis — no design checks, a water drop at the static level, and select-a-block
+  (highlight the span on the scale, and a coverage lane above the formations); Strata colours; and the profile "must be separate components so we can
+  re-use, enable or disable easily any time".
+- **Components** (`features/wwell-planning/shared/wwell-profile/`, all standalone / OnPush, barrel `index.ts`): `app-wwell-profile` (the strip: Covered /
+  Formation / Casing / Water lanes on one axis, depth-reader slider, `selection = model()`), `app-wwell-profile-selection` (idle how-to, or what the
+  selection covers with % bars; same `selection` model), `app-wwell-profile-hydrology` (yield hero + TDS / H₂S; `compact` for a rail short on height).
+  Pure logic beside them: `wwell-profile.builder.ts` (diagram data → `WwellProfile`; structural `sameWwellProfile` so an unrelated edit doesn't drop the
+  selection), `-coverage.util` (`coverageOf`), `-reading.util` (`readWellboreAt`), `-format.util`, `wwell-profile.model.ts`. No store — selection is a
+  `model()` the host binds, which is also what lights the matching casing-program / formation-tops row (`wbp__row--lit`).
+- **One switch:** `WWELL_IR_WELL_PROFILE_ENABLED` (`wwell-ir.config.ts`) is the default of the panel's `profileEnabled` input, so any place can override it.
+  Off = the panel as it was before the strip (Key depths card back, no profile, no hydrology). Checked both ways live.
+- **Hydrology path:** the IR diagram mapper deliberately leaves `hydrogeology: null` (`well-bore-view` marks the target top from it), so the hydrology
+  travels on its own `hydrology` input — `buildWellboreHydrologyFromIntegratedRequirement(ir, liveHydrology?)`; the editor passes the live draft, so the card
+  and the aquifer band follow an unsaved edit.
+- **Colours:** `--wp-profile-*` tokens in `_wwell-theme.scss` (sandstone rock ramp, emerald aquifer, indigo selection, water wash, steel), light + dark,
+  contrast-checked; nothing under 12px.
+- **Removed:** the old strip / plate / pins / slider CSS (~630 lines of the panel's SCSS), `wwell-ir-wellbore-profile.util.ts`,
+  `wwell-ir-wellbore-labels.util.ts`. The format helpers the facts util needed moved down into `wwell-profile-format.util.ts` (shared no longer depends on the feature).
+- **Layout calls:** ≥1140px container (Expand dialog, wide view): left rail = Hydrology + Selection, right = tables. Narrower: the **Selection card is hidden**
+  (the strip's chip and the lit table rows carry the selection) rather than stacked over the tables, and in the inline Well Design view the hydrology card
+  is `compact` so all five Formation Tops rows still fit at 1353×813.
+- **Found live and fixed:** (1) `.wprof button {background:none…}` beat every component class (steel bars, water column invisible) → a `bare-button` mixin;
+  (2) the head readout wrapped in narrow views → single row, ellipsis, hint hidden; (3) no aquifer / hydrology → the `hydrology` input above;
+  (4) **Escape cleared the selection and also closed the Expand dialog** → the strip now consumes Escape while something is selected; a second Escape closes.
+- **Verified** (real SSO login, IR-9065 / HAIL_500, 1353×813, light + dark): idle, casing / formation / water selections (coverage lane, range bar + chip,
+  Selection card, lit rows), Escape / Clear, slider readout, Expand from the view and from the editor preview, switch off. Edge data pushed through the editor
+  *without saving*: liner shoe 4,000 ft > TD 3,800 (bar runs to TD + amber "shoe 200 ft below TD" flag) and pump 120 ft above the 185 ft water level (pin folds
+  beside the drop; water label moves into the column). Builder / coverage / reader also run against 10 edge inputs (duplicate-depth strings, tops at one depth,
+  no tops, no casings, water / pump outside the well, gravel-pack rows, TD 0). Dev build, `tsc`, ESLint and full Jest (85 suites / 481 tests) pass; no new specs (standing call).
+- **Seen, not changed:** in the shoe-below-TD case the shared diagram's own "TOTAL DEPTH" label overlaps the liner — that is `well-bore-view`, not this panel.
+
+### wwell-ir wellbore panel — a real 3D cutaway (Section ⇄ 3D)
+
+- **Ask ("the current well bore view looks good but it is 2D — give proper 3D, use the best skill, look on the web / download / setup / refer"):** nothing
+  was installed — Three.js 0.185 was already a dependency; cutaway technique and three docs were researched. Scope (asked): **all three panel forms** —
+  compact sidebar, Expand dialog, View → Well Design "fit" form. The Presentation page stays 2D.
+- **What it is:** a half-section cutaway — the back half of concentric cylinders, flat section planes on z≈0, half-ring caps (analytic, no stencil buffer).
+  PBR (`RoomEnvironment` via PMREM, ACES); render-on-demand (IntersectionObserver / ResizeObserver, damped `OrbitControls`); a camera flight from face-on to
+  the angled home view (skipped under reduced motion). Depth is to scale; widths follow the real casing sizes but are nested strictly, so strings never
+  overlap (schematic). Strata use the profile strip's rock ramp (`bandRockSteps`, moved to `wwell-profile-rock.util.ts` — the strip's colours are unchanged).
+  Colours are read from the `--wp-profile-*` tokens at runtime and a MutationObserver on `<html>` re-themes, so **any future theme flows through**.
+  Selecting a casing / formation / the water column in the strip dims everything outside that span in 3D. Depth chips are stacked in depth order with SVG
+  leader lines (12px, hidden in the compact sidebar). Orbit / zoom / pan, arrow keys, double-click and the Reset button.
+- **Where:** `features/presentation/well-bore-view/real-3d/cutaway/` (new): `cutaway-plan.builder` (pure: data → slabs / bands / markers), `-labels.util`,
+  `-palette`, `-textures`, `-materials`, `-scene`, `-engine`, `app-wellbore-cutaway`. Panel: Section/3D toggle, Reset, and a fallback to Section when WebGL
+  is missing or lost (`webglUnavailable`). Only change to the old `real-3d` code: `CasingEntry` / `resolveCasingEntries` in `casing-3d.builder.ts` are exported.
+- **Lazy, and a gotcha:** `@defer (on immediate)`; the 3D chunk is ~610 kB min / ~157 kB gzip (three 556 kB, new code 16 kB; esbuild measure) and is fetched
+  only on first 3D. `viewChild(WellboreCutawayComponent)` in the panel's TS **silently stopped Angular splitting it** — three.js landed in the `WwellIrComponent`
+  route chunk. Now a `#cutaway` template ref typed `CutawayViewHandle` (in the three-free `cutaway.types.ts`); the class is named only in `imports`.
+  Checked in a dev build: the three chunk is referenced only by a dynamic `import()` and `main.js` never reaches it.
+- **Jest:** `jest.config.js` `transformIgnorePatterns` allow-list gains `three/examples/jsm` (ESM addons). jsdom has no WebGL, so the engine has no unit
+  test; the plan builder (18) and label layout (8) were written test-first. No more specs (standing call — said again this session; three specs started
+  for the palette / scene / component were deleted).
+- **Verified** (a CDP-driven software-WebGL Chrome — the gstack browser cannot create a WebGL context; IR-9065 / HAIL_500, 1353×813, dark + light):
+  sidebar, Expand dialog (opens in 3D when the inline panel was), fit form (no page scroll, strip head clear of the tools), selection dimming, orbit drag →
+  Reset, theme flip, and the no-WebGL fallback (seen in the gstack browser). `tsc` (app + spec), ESLint and full Jest (87 suites / 507 tests) pass; no console
+  errors beyond the existing broken-logo 404.
+- **Seen, not changed:** (1) `ng build` (production) **fails on the `anyComponentStyle` budget** — `wwell-ir-editor.component.scss` is 34.35 kB against 32 kB;
+  that file and everything it `@use`s are identical to HEAD, so it predates this work. (2) The old `real-3d` engine / builders (`wellbore-3d-view` …) are still
+  unused. (3) The 2D legend still shows under the 3D view. (4) The premium light / dark theme redesign (directions A–D) still waits on a pick; nothing of it is in the repo.
+
+## 2026-09-22
+
+### wwell-ir wellbore panel — the 3D is now a front cut section (a solid block, seen nearly face-on)
+
+- **Ask ("i dont like the 3d … use ur own best decision … see attached, it looks front cut section"):** the reference is a wide, near face-on block
+  with a patterned cut face, a round bore through it and pill labels on the right — not an orbiting pipe. The first 3D (a narrow half-cylinder shell seen at
+  ~30° / 11°) was replaced; the engine, plan, scene and panel wiring are the same modules, reworked.
+- **Composition:** the block is a real box (`plan.shellRadius` = its half-width 13.6, `plan.blockDepth` 9 — about 2/3 as wide as tall) with the well slimmed
+  (widest string 4.4) so it reads as a channel through ground. Home view is near face-on: azimuth −0.26 rad, elevation 0.12, so the left side and the top (with
+  the bore's half-round rim) show. The room for the chips is a **projection offset** (`camera.setViewOffset`), not a shifted orbit target, so orbiting spins
+  the block in place. The top / bottom faces are the block less the bore (`ShapeGeometry` with an `absarc` notch); sides and back are flat planes.
+- **Cut face:** lithology-style hatch by depth order (stipple → brick → bedding lines → coarse blocks → cross, zigzag for the target aquifer), coarser tiles
+  (`ROCK_TILE` 6.4 units), drawn nine times per tile so repeats have no seam, and registered to the world (`tileToWorld`) so a pattern runs on across depth
+  slabs. A hairline (`LineSegments`) outlines the face and marks each formation top. **The patterns tell layers apart; the well design carries no lithology, so
+  they are not a claim about the rock.**
+- **Labels:** pills (glass fill, 12px Geist Mono, a lit dot for water and TD) in one aligned column; each leader starts on the block's silhouette edge
+  (front or back edge, whichever is further right on screen). `--wp-font-mono` / `--wp-font-ui` / `--wp-font-display` now exist as custom properties.
+- **Verified live** (CDP software-WebGL Chrome, dark + light): fit form, compact sidebar, Expand dialog; orbit → Reset still works. `tsc` (app + spec), ESLint
+  and full Jest (87 suites / 507 tests) pass. No new specs (standing call); the plan builder's existing specs pass unchanged.
+
+### App theme — "Aurora Glass" (direction A) replaces the monochrome "Instrument" / "Monolith" look
+
+- **Ask:** implement the Aurora Glass A theme from the direction previews (the user's earlier complaint: white buttons on dark, black buttons on light, plain type).
+- **Palette:** `_wwell-theme.scss` re-mapped, both themes, still riding the contrast dials (`dark-tone` / `light-tone`): deep navy / cool paper grounds, sky
+  (`#7dd3fc` dark, `#0b62c4` light) as the signal colour, rounder radii (8 / 12 / 18, buttons 12). Scripted check across the dial at 0/25/50/75/100%: every text
+  tier ≥ 4.5:1, control outlines ≥ 3:1, gradient-button text ≥ 4.6:1 at every stop, shell text ≥ 4.5:1 on the frosted bar / rail over the worst aurora pool.
+- **Primary action:** an aurora gradient (`--wp-cta-bg`: cyan→blue with navy ink in dark, sky→cobalt with white ink in light), glow lifting on hover. Written once in
+  `styles.scss` (`.mat-mdc-unelevated-button`) and **switched on per module by `wmat.buttons`**, which sets inherited `--wp-btn-*` custom properties; anywhere they
+  are unset every declaration falls back to Material's own value, so buttons in other features are unchanged. (Doing it with per-component `::ng-deep` blocks put
+  ~1.5 kB into each of ten component styles and pushed the editor further past its error budget.)
+- **Shell:** `_shell-theme.scss` rewritten — bar and rail are frosted (`backdrop-filter`), the current page is a tinted, ringed pane (never an inverted block),
+  the avatar is a gradient circle, Outfit for the brand. The layout paints the aurora (`--wp-atmosphere`) and grain once on `.dashboard`; pages are transparent over
+  it in the mono shell (`--wp-page-bg`), opaque in Legacy. Legacy still works (checked).
+- **Glass:** `glass-panel` mixin (`--wp-panel-bg` / `-shadow` / `-blur`) on the IR list, detail header, tabs, approval card, editor header / sections / footer, and
+  the Requests / WLDA / Land Affairs masters, detail headers and cards. Flat surfaces stay flat for controls and tables.
+- **Type:** Outfit (new dependency `@fontsource-variable/outfit`, self-hosted like Geist) for page and panel headings; Geist and Geist Mono as before.
+- **Verified live** (dark + light): IR editor, Well Design (fit form), compact sidebar, Expand dialog, Requests page, Appearance popover, Legacy shell.
+- **Seen, not changed:** (1) `ng build` production still fails on the `anyComponentStyle` error budget — `wwell-ir-editor.component.scss` is 35.23 kB against 32 kB
+  (34.35 before this theme; it was already over); the request forms sit ~80 bytes over the 20 kB warning. (2) Pages outside wwell-planning (dashboard, active-wells,
+  presentations, morning report) keep their own styles — only the shell chrome and the transparent layout background reach them. (3) Dialog surfaces stay opaque
+  (`--wp-surface-raised`); frosting them would need a blur on the overlay. (4) ~~The old `real-3d` builders are still unused~~ — wrong: the Presentation page's 3D toggle uses them (see the removal entry below). (5) The broken-logo 404 and its toast.
+
+### wwell-ir — the 3D is removed; the view screen gets a type step-up
+
+- **Ask:** "i dont like 3d lets remove it and also improve the view screen … same fonts typography, font size a little bigger etc".
+- **3D removed:** `real-3d/cutaway/` deleted; the wellbore panel's Section/3D toggle, Reset and `@defer` block gone (panel restored to its pre-3D form, keeping only
+  the Outfit `.wbp__heading`); `bandRockSteps` / `wwell-profile-rock.util.ts` gone (the strip computes its steps locally again); the `three/examples/jsm` Jest
+  allow-list and the `casing-3d.builder.ts` exports reverted. **Left alone:** the Presentation page's own 3D toggle (`wellbore-view-toggle` →
+  `real-3d/wellbore-3d-view`) — it is used and has a spec — so `three` stays installed. Say the word to remove that too.
+- **View screen** (`wwell-ir-view/*`): header title 17.6 → 20.8px (Outfit), eyebrow / progress / status pill 12 → 13px, tabs 14 → 15px with a ringed active pane,
+  card titles Outfit 15px (they were Geist 13px on the KV and Well Design cards), field labels 12 → 13px, values 14 → 15px / weight 500, table heads 13px and cells
+  15px. Cards are glass panes like the rest of the app (`view-card` / `view-card-title` mixins in `wwell-design-tokens.scss`). Identifiers and measurements
+  (IR #, Letter Number, depths, coordinates, TDS / rate / H2S, numeric table cells) are Geist Mono via a new optional `KvRow.mono`. The Letter's masthead and section
+  headings are Outfit and its Date / IR # / Letter # are mono (body stays 14px). The approval card's title and its timeline text are a step up, through
+  `--wtl-fs` / `--wtl-name-fs` on the shared vertical timeline (unset elsewhere, so WLDA / Land Affairs approvals are unchanged).
+- **Editor header** given the same metrics as the view header (both 68px) so switching Edit ⇄ View doesn't shift.
+- **Two of my own regressions caught live and backed out:** widening the approval sidebar 200 → 232px squeezed the Well Design panel until its profile strip clipped
+  "Water level"; a 15px Letter body made the Coordinates / Surface Elevation pairs wrap. Both stay at their old values. The Offset Water Wells table (14 columns)
+  overflowed its card at the larger type — its headings now wrap and cell padding is 0.5rem, so all 14 columns fit at 1353px.
+- **Checked:** `tsc` (app + spec), ESLint on `wwell-planning`, full Jest (85 suites / 481 tests — the two cutaway specs went with the folder); Details / Well Design /
+  Letter and the editor screenshotted live in dark and light. No new specs (standing call).
+- **Seen, not changed:** `ng build` production still fails on `wwell-ir-editor.component.scss` (≈35.2 kB vs the 32 kB error budget; it was over before this work).

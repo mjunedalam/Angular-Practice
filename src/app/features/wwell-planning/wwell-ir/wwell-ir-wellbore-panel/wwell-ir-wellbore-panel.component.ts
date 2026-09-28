@@ -1,17 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  TemplateRef,
-  ViewEncapsulation,
-  computed,
-  effect,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,8 +11,6 @@ import { buildScaleTicks, resolveScaleDepthFt } from '../wwell-ir-depth-scale/ww
 import { WWELL_IR_EXPANDED_DIAGRAM_LAYOUT, WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from '../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import { buildWellboreFacts } from './wwell-ir-wellbore-facts.util';
 import { WwellIrWellboreGlyphComponent } from './wwell-ir-wellbore-glyph.component';
-import { LabelCandidate, placeLabels } from './wwell-ir-wellbore-labels.util';
-import { buildWellboreProfile, readWellboreAt } from './wwell-ir-wellbore-profile.util';
 
 const CASING_TYPE_LINER = 'Liner';
 const CASING_TYPE_GRAVEL_PACK = 'Gravel Pack';
@@ -39,8 +24,6 @@ const EXPANDED_MIN_WIDTH_PX = 1240;
 const EXPANDED_MIN_HEIGHT_PX = 700;
 const EXPANDED_MAX_WIDTH_PX = 1760;
 const EXPANDED_MAX_HEIGHT_PX = 1100;
-/** How far one arrow key, or one notch of a drag, moves the depth slider: whole tens, unless total depth is not one. */
-const SLIDER_STEP_FT = 10;
 
 interface WellborePanelLegendKey {
   readonly key: 'ground' | 'water' | 'casing' | 'liner' | 'open-hole' | 'gravel' | 'screen' | 'perforated' | 'tops';
@@ -54,12 +37,13 @@ interface WellboreGridLine {
 
 const isFlagYes = (flag: string | null | undefined): boolean => (flag ?? '').trim().toUpperCase() === 'Y';
 
-/** The wellbore diagram as a finished panel: header, readouts, a surface-to-TD well profile, the depth-gridded
- *  diagram, a legend of only the elements actually drawn, the casing program and formation tops, and an Expand action that opens the same diagram in
- *  Presentation's fullscreen layout (see WWELL_IR_EXPANDED_DIAGRAM_LAYOUT) — the inline preview is deliberately compact, so its labels
- *  are small by design and Expand is where they are comfortable to read. Shared by the editor's
- *  preview (Sections and the Timeline sidebar) and the view page's Well Design step. The Letter has its
- *  own diagram markup (it is exported as a PNG for the PDF, which is captured from a paper-scoped copy).
+/** The wellbore diagram as a finished panel: header, readouts, the depth-gridded diagram, a legend of only the
+ *  elements actually drawn, the casing program and formation tops, and an Expand action that opens the same
+ *  diagram in Presentation's fullscreen layout (see WWELL_IR_EXPANDED_DIAGRAM_LAYOUT) — the inline preview is
+ *  deliberately compact, so its labels are small by design and Expand is where they are comfortable to read.
+ *  Shared by the editor's preview (Sections and the Timeline sidebar) and the view page's Well Design step.
+ *  The Letter has its own diagram markup (it is exported as a PNG for the PDF, which is captured from a
+ *  paper-scoped copy).
  *
  *  `ViewEncapsulation.None`: the Expand dialog is portalled to <body>, so its surface can only be
  *  styled by global rules (`.wp-wellbore-dialog`). Everything else is namespaced `.wbp`. */
@@ -89,9 +73,9 @@ export class WwellIrWellborePanelComponent {
   readonly compact = input(false);
   /** Set by the Expand dialog's own instance: fills the dialog, shows Close instead of Expand. */
   readonly expanded = input(false);
-  /** Fills the box its parent gives it (which must have a height), laid out like the maximised view — the profile
-   *  across the top, the drawing and its key left, the figures right — so the whole panel is seen without scrolling.
-   *  Keeps the Expand action. The parent passes the layout the drawing is to use (WWELL_IR_EXPANDED_DIAGRAM_LAYOUT). */
+  /** Fills the box its parent gives it (which must have a height), laid out like the maximised view — the drawing
+   *  and its key left, the figures right — so the whole panel is seen without scrolling. Keeps the Expand action.
+   *  The parent passes the layout the drawing is to use (WWELL_IR_EXPANDED_DIAGRAM_LAYOUT). */
   readonly fit = input(false);
   readonly closed = output<void>();
 
@@ -166,73 +150,6 @@ export class WwellIrWellborePanelComponent {
     });
   });
 
-  /** The well profile strip: every string, the open hole, the tops, the water level and the pump on one line. */
-  protected readonly profile = computed(() => {
-    const data = this.diagramData();
-    const design = data.wellDesign;
-    return buildWellboreProfile({
-      totalDepth: this.totalDepthFt(),
-      staticWaterLevel: this.staticWaterLevelFt(),
-      pumpSetting: design?.pumpLvl ?? 0,
-      casings: data.casings,
-      tops: data.geologicTops,
-      openHole: isFlagYes(design?.ohFlg),
-      screen: isFlagYes(design?.lsFlg),
-      gravelPack: isFlagYes(design?.gpFlg),
-    });
-  });
-
-  /** Where the depth slider was left; null until it is first used, so the strip is not lit for a reading nobody asked for. */
-  private readonly pickedDepthFt = signal<number | null>(null);
-
-  protected readonly hasPickedDepth = computed(() => this.pickedDepthFt() !== null);
-
-  protected readonly sliderStepFt = computed(() => (this.totalDepthFt() % SLIDER_STEP_FT === 0 ? SLIDER_STEP_FT : 1));
-
-  /** The slider's value, kept inside the well when total depth changes under it. */
-  protected readonly pickedDepth = computed(() => Math.min(this.pickedDepthFt() ?? 0, this.totalDepthFt()));
-
-  /** What is in the hole at the slider's depth. */
-  protected readonly reading = computed(() => {
-    const profile = this.profile();
-    return profile ? readWellboreAt(profile, this.pickedDepth()) : null;
-  });
-
-  private readonly strip = viewChild<ElementRef<HTMLElement>>('strip');
-
-  /** The strip's drawn width: what a label fits beside is decided at the width it is actually printed at. */
-  private readonly stripWidthPx = signal(0);
-
-  /** The formation codes that fit over their ticks, shallow to deep; a tick whose code does not fit stays a tick. */
-  protected readonly topLabels = computed(() => {
-    const profile = this.profile();
-    const width = this.stripWidthPx();
-    if (!profile) return [];
-    const candidates = profile.tops.map<LabelCandidate>((top, index) => ({
-      key: String(index),
-      xPx: (top.leftPct / 100) * width,
-      texts: [top.code],
-      anchor: 'center',
-    }));
-    return placeLabels(candidates, width);
-  });
-
-  /** "Water 185 ft" and "Pump 800 ft" beside their pins — the value alone, then the bare number (the strip's
-   *  header gives the unit), when the name does not fit; and never across the other pin's line. */
-  protected readonly pinLabels = computed(() => {
-    const profile = this.profile();
-    const width = this.stripWidthPx();
-    if (!profile) return [];
-    const xs = profile.markers.map(marker => (marker.leftPct / 100) * width);
-    const candidates = profile.markers.map<LabelCandidate>((marker, index) => ({
-      key: marker.kind,
-      xPx: xs[index],
-      texts: [`${marker.name} ${marker.value}`, marker.value, marker.bare],
-      anchor: 'start',
-    }));
-    return placeLabels(candidates, width, xs);
-  });
-
   /** Only what the diagram actually draws, from the same data/flags the renderers read. */
   protected readonly legend = computed<readonly WellborePanelLegendKey[]>(() => {
     const data = this.diagramData();
@@ -250,20 +167,6 @@ export class WwellIrWellborePanelComponent {
     if (data.geologicTops.length > 0) keys.push({ key: 'tops', label: 'Formation top' });
     return keys;
   });
-
-  constructor() {
-    effect(onCleanup => {
-      const strip = this.strip()?.nativeElement;
-      if (!strip || typeof ResizeObserver === 'undefined') return;
-      const observer = new ResizeObserver(([entry]) => this.stripWidthPx.set(entry.contentRect.width));
-      observer.observe(strip);
-      onCleanup(() => observer.disconnect());
-    });
-  }
-
-  protected pickDepth(event: Event): void {
-    this.pickedDepthFt.set((event.target as HTMLInputElement).valueAsNumber);
-  }
 
   protected expand(): void {
     this.isExpandedOpen.set(true);

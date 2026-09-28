@@ -47,19 +47,19 @@
           @for (row of ir().offsetWells; track row.epANum) {
             <tr>
               <td>{{ row.epANum }}</td>
-              <td>{{ row.distanceKm ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.distanceKm ?? '—' }}</td>
               <td>{{ row.location || '—' }}</td>
               <td>{{ row.aquifer || '—' }}</td>
-              <td>{{ row.totalDepthFt ?? '—' }}</td>
-              <td>{{ row.testDurationMin ?? '—' }}</td>
-              <td>{{ row.rateGpm ?? '—' }}</td>
-              <td>{{ row.rpm ?? '—' }}</td>
-              <td>{{ row.swlFt ?? '—' }}</td>
-              <td>{{ row.pwlFt ?? '—' }}</td>
-              <td>{{ row.drawdownFt ?? '—' }}</td>
-              <td>{{ row.specificCapacity ?? '—' }}</td>
-              <td>{{ row.tdsPpm ?? '—' }}</td>
-              <td>{{ row.h2sPpm ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.totalDepthFt ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.testDurationMin ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.rateGpm ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.rpm ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.swlFt ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.pwlFt ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.drawdownFt ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.specificCapacity ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.tdsPpm ?? '—' }}</td>
+              <td class="ir-details__num">{{ row.h2sPpm ?? '—' }}</td>
             </tr>
           } @empty {
             <tr>

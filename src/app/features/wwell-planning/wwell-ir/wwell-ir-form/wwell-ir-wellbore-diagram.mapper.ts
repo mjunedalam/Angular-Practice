@@ -16,6 +16,7 @@ import {
   WwellIrRawFormationTop,
   WwellIrRawHydrology,
   WwellIrRawProgramMain,
+  WwellIrRawReference,
 } from './wwell-ir-form.types';
 
 /**
@@ -524,6 +525,49 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
   );
 }
 
+/**
+ * Structural equality for `WellboreDiagramData`.
+ *
+ * The editor rebuilds the diagram's data on every keystroke in any section it live-edits, because the
+ * builders below are pure functions returning a fresh object each call. Angular's signals compare with
+ * `Object.is`, so a fresh-but-identical object still counts as a change — and `well-bore-view`'s redraw
+ * effect then fades the whole drawing out over 120ms and re-animates it from scratch. Typing a client
+ * name or a geologist, neither of which the diagram draws, restarted the animation.
+ *
+ * Handing this to `computed(..., { equal })` makes the signal keep the previous object whenever the
+ * newly-built one is equivalent, so nothing downstream sees a change and the diagram holds still.
+ *
+ * Deliberately a whole-object comparison rather than a list of the fields that "matter": getting this
+ * wrong in the conservative direction costs one redundant redraw, whereas a hand-maintained field list
+ * silently stops updating the diagram the day someone adds a field to the model.
+ */
+export function wellboreDiagramDataEqual(
+  a: WellboreDiagramData | null,
+  b: WellboreDiagramData | null,
+): boolean {
+  return deepEquals(a, b);
+}
+
+/** Plain-data structural comparison. The diagram data is JSON-shaped — numbers, strings, nulls, arrays
+ *  and object literals — so there are no Dates, Maps or cycles to account for here. */
+function deepEquals(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    return a.every((item, i) => deepEquals(item, b[i]));
+  }
+
+  const aRecord = a as Record<string, unknown>;
+  const bRecord = b as Record<string, unknown>;
+  const aKeys = Object.keys(aRecord);
+  if (aKeys.length !== Object.keys(bRecord).length) return false;
+  // `in` rather than a truthiness check, so a key explicitly set to undefined on one side and absent
+  // on the other is still treated as a difference.
+  return aKeys.every(key => key in bRecord && deepEquals(aRecord[key], bRecord[key]));
+}
+
 /** Detail/editor-page counterpart of `buildWellboreDiagramData` — same live `app-well-bore-view`
  *  diagram, fed from a submitted `IntegratedRequirement` instead of the in-progress wizard form,
  *  so those pages show the real engineering rendering instead of the lighter
@@ -538,6 +582,12 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
  *  open wouldn't move the diagram until the whole record was saved, unlike casing/formation-top
  *  edits, which already updated it live.
  *
+ *  `liveReference` completes that set for the Request Reference section, which owns Target Depth,
+ *  Surface Elevation and Well Name. Without it those three alone kept reading the last-saved record while
+ *  every other section updated live, so editing Target Depth moved nothing until the whole IR was saved —
+ *  and since Target Depth is what `totalDepth`, `displayDepth` and the depth scale are all derived from,
+ *  that one gap froze the entire vertical extent of the drawing mid-edit.
+ *
  *  While Program Details is open for live edit (`liveProgramMain` set), the diagram must react to
  *  the Completion the user is actively picking right now — so this deliberately does NOT pass
  *  `ir.programDetails.wellDesignFlags` (the last-fetched, possibly-stale real DB flags) through in
@@ -549,13 +599,14 @@ export function buildWellboreDiagramDataFromIntegratedRequirement(
   liveFormationRows?: readonly WwellIrRawFormationTop[] | null,
   liveProgramMain?: WwellIrRawProgramMain | null,
   liveHydrology?: WwellIrRawHydrology | null,
+  liveReference?: WwellIrRawReference | null,
 ): WellboreDiagramData {
   return assembleWellboreDiagramData(
-    ir.requestReference.wellName,
-    ir.requestReference.targetDepthFt,
+    liveReference?.wellName ?? ir.requestReference.wellName,
+    liveReference ? (liveReference.targetDepthFt ?? 0) : ir.requestReference.targetDepthFt,
     liveCasingRows ?? toRawCasingRows(ir.casing),
     liveFormationRows ?? toRawFormationRows(ir.formationTops),
-    ir.requestReference.surfaceElevationFtAsl,
+    liveReference ? liveReference.surfaceElevationFtAsl : ir.requestReference.surfaceElevationFtAsl,
     liveProgramMain ?? toRawProgramMain(ir),
     liveHydrology ?? toRawHydrology(ir),
     liveProgramMain ? null : ir.programDetails.wellDesignFlags,

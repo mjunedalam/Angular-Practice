@@ -12,7 +12,7 @@
 // use `alpha()` below, or add a dedicated token.
 
 // ── Typography ───────────────────────────────────────────────────
-// Geist / Geist Mono are self-hosted via @fontsource-variable (loaded in styles.scss); the OS UI
+// Geist / Geist Mono / Outfit are self-hosted via @fontsource-variable (loaded in styles.scss); the OS UI
 // stack is the fallback while the file loads or if it is blocked. Scoped to this module only — the
 // shell keeps its own font.
 $font-family:
@@ -23,6 +23,16 @@ $font-family:
   Roboto,
   'Helvetica Neue',
   Arial,
+  sans-serif;
+
+// Titles, the brand, big numbers: Outfit, a geometric display face with a little more personality than the UI face.
+$font-display:
+  'Outfit Variable',
+  'Geist Variable',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
   sans-serif;
 
 // Identifiers, coordinates, depths, timestamps — anything the reader compares character by character.
@@ -50,16 +60,20 @@ $accent-soft: var(--wp-accent-soft);
 $accent-fill: var(--wp-accent-fill); // solid backgrounds: selection bars, progress, filled chips
 $on-accent: var(--wp-on-accent); // text on $accent-fill / danger fills
 
-$cta: var(--wp-cta); // primary action — monochrome ink (inverts in dark)
+$cta: var(--wp-cta); // primary action, flat: the gradient's mid colour, for the odd place that cannot take a gradient
 $cta-hover: var(--wp-cta-hover);
 $on-cta: var(--wp-on-cta);
+$cta-bg: var(--wp-cta-bg); // primary action: the aurora gradient — a `background`, not a colour
+$cta-bg-hover: var(--wp-cta-bg-hover);
+$cta-shadow: var(--wp-cta-shadow);
+$cta-shadow-hover: var(--wp-cta-shadow-hover);
 
 $surface: var(--wp-surface);
 $surface-alt: var(--wp-surface-alt);
 $surface-hover: var(--wp-surface-hover);
 $surface-raised: var(--wp-surface-raised);
 $surface-sunken: var(--wp-surface-sunken);
-$page-bg: var(--wp-page);
+$page-bg: var(--wp-page-bg); // a `background`: transparent over the shell's atmosphere, the page colour elsewhere
 
 $danger: var(--wp-danger);
 $danger-ink: var(--wp-danger-ink);
@@ -74,7 +88,8 @@ $warning-soft: var(--wp-warning-soft);
 // ── Shape & depth ────────────────────────────────────────────────
 $radius-sm: var(--wp-radius-sm); // small controls, chips
 $radius-md: var(--wp-radius-md); // cards, panels, inputs
-$radius-lg: var(--wp-radius-lg); // dialogs, popovers
+$radius-btn: var(--wp-radius-btn); // buttons
+$radius-lg: var(--wp-radius-lg); // dialogs, popovers, the big glass panes
 $radius-pill: var(--wp-radius-pill); // count badges, capsule bars
 $shadow-1: var(--wp-shadow-1);
 $shadow-2: var(--wp-shadow-2);
@@ -102,17 +117,19 @@ $text-xl: 1.55rem; // page titles
 // Type roles. Use these for the recurring roles so weight/tracking/leading stay consistent
 // module-wide; one-off sizes can stay as plain declarations.
 @mixin type-title {
+  font-family: $font-display;
   font-size: $text-xl;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   line-height: 1.15;
   color: $navy-deep;
 }
 
 @mixin type-panel-title {
+  font-family: $font-display;
   font-size: $text-lg;
-  font-weight: 600;
-  letter-spacing: -0.018em;
+  font-weight: 500;
+  letter-spacing: -0.024em;
   line-height: 1.2;
   color: $navy-deep;
 }
@@ -153,6 +170,33 @@ $text-xl: 1.55rem; // page titles
   font-family: $font-mono;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+
+// A frosted pane: the spotlit fill and hairline ring of `--wp-panel-*`, over whatever is behind it (the shell's aurora),
+// blurred. Put it on a page's big panels; small controls keep flat surfaces so they stay legible on top of one.
+@mixin glass-panel {
+  background: var(--wp-panel-bg);
+  box-shadow: var(--wp-panel-shadow);
+  -webkit-backdrop-filter: var(--wp-panel-blur);
+  backdrop-filter: var(--wp-panel-blur);
+}
+
+// The read-only view's card: a glass pane with room to breathe, headed by an uppercase display-face title.
+@mixin view-card {
+  border: 1px solid transparent;
+  border-radius: $radius-lg;
+  padding: 1.15rem 1.4rem;
+  @include glass-panel;
+}
+
+@mixin view-card-title {
+  font-family: $font-display;
+  font-size: $text-base;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: $accent;
 }
 
 // Keyboard focus: 2px cobalt ring separated from the control by a surface-coloured gap, so it

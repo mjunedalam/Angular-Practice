@@ -7,6 +7,10 @@
   min-width: 0;
 }
 
+:host(.kvv--mono) {
+  @include tokens.type-mono;
+}
+
 .kvv__pick {
   position: relative;
   overflow-wrap: anywhere;

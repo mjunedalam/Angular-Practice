@@ -18,6 +18,7 @@ import {
   resolveCompletionShoeCurvePx,
   resolveCompletionTopDepth,
   resolveCompletionTopPx,
+  resolveOpenHoleBottomDepth,
   resolveOhHalfWidth,
   resolvePerforatedIntervalInfo,
   shouldRenderGravelPack,
@@ -84,11 +85,21 @@ function renderOpenHoleAndScreen({
   // shoe curve instead of stopping flat short of it (see resolveCompletionShoeCurvePx).
   const completionBottomPx = scale(completionBottomDepth)
     + resolveCompletionShoeCurvePx(data.casings, data.drlgCasings, layout);
+  // Open Hole alone runs past the rest of the completion wherever a liner hangs inside it —
+  // the hole is what the liner was run into, so it continues to target depth (see
+  // resolveOpenHoleBottomDepth). Where it does, it ends in open rock rather than on the liner's
+  // shoe, so the shoe-curve offset above is not added to it.
+  const ohBottomDepth = resolveOpenHoleBottomDepth(data, layout);
+  const ohBottomPx = ohBottomDepth > completionBottomDepth ? scale(ohBottomDepth) : completionBottomPx;
   const hasGP = shouldRenderGravelPack(wellDesign) || !!gpCasing;
   const gpBottomPx = gpCasing ? Math.min(scale(gpCasing.csgDepth), completionBottomPx) : completionBottomPx;
   const screenBottomPx = wellDesign
     ? (shouldDrawLS && hasGP ? gpBottomPx - gpScreenGap : completionBottomPx)
     : (liner ? scale(liner.csgDepth) : completionBottomPx - 15);
+  // The clip drives the reveal for both shapes, so it has to reach whichever is drawn deepest —
+  // sized to the completion bottom alone it would crop the open hole at the liner shoe, which is
+  // the very thing being fixed here.
+  const clipBottomPx = shouldDrawOH ? Math.max(completionBottomPx, ohBottomPx) : completionBottomPx;
   const clipHW = shouldDrawOH ? ohHW : screenHW;
   const clipId = 'dyn-oh-clip';
   const clipRect = defsEl.append('clipPath').attr('class', 'dyn-clip').attr('id', clipId).append('rect')
@@ -96,7 +107,7 @@ function renderOpenHoleAndScreen({
 
   if (shouldDrawOH) {
     rootG.append('path').attr('class', 'open-hole')
-      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, completionBottomPx))
+      .attr('d', buildOpenHolePath(centerX, ohHW, shoePx, ohBottomPx))
       .attr('clip-path', `url(#${clipId})`);
   }
 
@@ -106,11 +117,11 @@ function renderOpenHoleAndScreen({
       .attr('clip-path', `url(#${clipId})`);
   }
 
-  clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', completionBottomPx - shoePx + 5);
+  clipRect.transition().delay(ohStart).duration(ANIM.OH_DURATION).ease(easeCubicInOut).attr('height', clipBottomPx - shoePx + 5);
 
   if (shouldDrawOH) {
     const ohLabel = wellDesign?.ohRemarks ?? '8 1/2" Open Hole';
-    const ohLY = shoePx + (completionBottomPx - shoePx) * 0.2;
+    const ohLY = shoePx + (ohBottomPx - shoePx) * 0.2;
     const ohLG = rootG.append('g').attr('class', 'open-hole-label');
     const ohLineX1 = centerX - ohHW;
     const ohLineX2 = centerX - ohHW - 33;

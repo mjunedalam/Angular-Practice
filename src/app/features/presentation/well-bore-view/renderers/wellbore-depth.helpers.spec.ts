@@ -4,6 +4,7 @@ import {
   resolveCompletionBottomPx,
   resolveCompletionTopDepth,
   resolveOhHalfWidth,
+  resolveOpenHoleBottomDepth,
   resolvePerforatedIntervalInfo,
   resolveShoeDepth,
   shouldRenderGravelPack,
@@ -11,6 +12,11 @@ import {
   shouldRenderOpenHole,
   shouldRenderPerforatedInterval,
 } from './wellbore-depth.helpers';
+import {
+  DIAGRAM_LAYOUT,
+  DiagramLayout,
+  FULLSCREEN_DIAGRAM_LAYOUT,
+} from '@models/well-design/wellbore-diagram.model';
 import { createDepthScale } from '@shared/utils/wellbore-math.util';
 import { WellboreTestDataUtil } from '@shared/utils/testing/wellbore-test-data.util';
 
@@ -117,6 +123,78 @@ describe('wellbore-depth.helpers', () => {
     const scale = createDepthScale(7000, 700);
 
     expect(resolveCompletionBottomPx(data, scale)).toBeCloseTo(463, 3);
+  });
+
+  describe('resolveOpenHoleBottomDepth', () => {
+    // The rule is opt-in through the layout. Presentation draws as-drilled wells from this same shared
+    // renderer and must keep its own behaviour, so only the wwell-ir layouts ask for it.
+    const irLayout: DiagramLayout = { ...DIAGRAM_LAYOUT, openHoleRunsToTargetDepth: true };
+
+    // Open Hole is the drilled hole itself: a liner hangs INSIDE it, so it does not stop where the
+    // liner stops. Gravel pack and the perforated interval do belong to the liner and keep ending at
+    // its shoe — that is what resolveCompletionBottomDepth still returns for them.
+    it('carries open hole past a 7" liner shoe down to target depth', () => {
+      const data = WellboreTestDataUtil.diagramData();
+
+      expect(resolveCompletionBottomDepth(data)).toBe(WellboreTestDataUtil.linerDepthFt);
+      expect(resolveOpenHoleBottomDepth(data, irLayout)).toBe(WellboreTestDataUtil.plannedTargetDepthFt);
+    });
+
+    it('never stops open hole above the liner shoe when target depth is shallower', () => {
+      // A target depth above the liner's own shoe would otherwise pull open hole up inside the
+      // liner, leaving the liner drawn in bare rock below it.
+      const data = WellboreTestDataUtil.diagramData({
+        totalDepth: 3000,
+        targetDepth: 3000,
+        currentDepth: 3000,
+        displayDepth: 3500,
+      });
+
+      expect(resolveOpenHoleBottomDepth(data, irLayout)).toBe(WellboreTestDataUtil.linerDepthFt);
+    });
+
+    it('clamps open hole to the drawing domain', () => {
+      const data = WellboreTestDataUtil.diagramData({
+        totalDepth: 9000,
+        targetDepth: 9000,
+        currentDepth: 9000,
+        displayDepth: 4200,
+      });
+
+      expect(resolveOpenHoleBottomDepth(data, irLayout)).toBe(4200);
+    });
+
+    it('falls back to total depth when no target depth has been entered yet', () => {
+      const data = WellboreTestDataUtil.diagramData({
+        targetDepth: 0,
+        totalDepth: 4600,
+        currentDepth: 0,
+        displayDepth: 5100,
+      });
+
+      expect(resolveOpenHoleBottomDepth(data, irLayout)).toBe(4600);
+    });
+
+    it('leaves the shared default untouched, so Presentation draws what it always did', () => {
+      // The guard that keeps this change inside wwell-ir: without the opt-in the helper must return the
+      // shared completion bottom exactly, liner shoe and all.
+      const data = WellboreTestDataUtil.diagramData();
+
+      expect(resolveOpenHoleBottomDepth(data, DIAGRAM_LAYOUT)).toBe(resolveCompletionBottomDepth(data));
+      expect(resolveOpenHoleBottomDepth(data, FULLSCREEN_DIAGRAM_LAYOUT)).toBe(resolveCompletionBottomDepth(data));
+      expect(resolveOpenHoleBottomDepth(data, DIAGRAM_LAYOUT)).toBe(WellboreTestDataUtil.linerDepthFt);
+    });
+
+    it('leaves every rule without a 7" target liner exactly as it was', () => {
+      // 'single-fallback' (a non-7" liner) already ends in open rock at total depth, so open hole
+      // has nothing to extend past and must not diverge from the shared completion bottom.
+      const data = WellboreTestDataUtil.diagramData({
+        casings: [WellboreTestDataUtil.liner({ csgSize: '9 5/8' })],
+        drlgCasings: [],
+      });
+
+      expect(resolveOpenHoleBottomDepth(data, irLayout)).toBe(resolveCompletionBottomDepth(data));
+    });
   });
 
   it('sizes open hole from remarks when the open-hole diameter is smaller than innermost casing', () => {

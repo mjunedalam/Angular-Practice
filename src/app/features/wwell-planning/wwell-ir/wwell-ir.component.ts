@@ -33,7 +33,7 @@ import { createPendingSelection } from '../shared/wwell-pending-selection.util';
 import { WwellIrStore } from './store/wwell-ir.store';
 import { WwellIrEditorComponent, WwellIrEditorViewMode } from './wwell-ir-editor/wwell-ir-editor.component';
 import { WwellIrEditorLoadingComponent } from './wwell-ir-editor-loading/wwell-ir-editor-loading.component';
-import { WwellIrViewComponent } from './wwell-ir-view/wwell-ir-view.component';
+import { WwellIrViewComponent, WwellIrViewTab } from './wwell-ir-view/wwell-ir-view.component';
 import { buildWwellDynamicForm } from '../shared/dynamic-form/wwell-dynamic-form.builder';
 import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-draft.util';
 import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
@@ -112,6 +112,11 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
    *  switch (loading skeleton) and on the view→edit toggle, so a mode held on the editor itself
    *  snapped back to its default each time. Two-way bound to the editor's `viewMode` model. */
   protected readonly editorViewMode = signal<WwellIrEditorViewMode>('timeline');
+
+  /** Sticky for the same reason as `editorViewMode`, for the read-only side: pick Well Design on
+   *  one record and it stays selected when you open the next one, instead of snapping back to
+   *  Details. Two-way bound to the view's `activeTab` model. */
+  protected readonly viewTab = signal<WwellIrViewTab>('details');
 
   protected readonly lifecycleFilter = signal<WwellIrLifecycleFilter>('active');
   protected readonly statusFilter = signal<IntegratedRequirementStatus | 'all'>('all');

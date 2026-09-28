@@ -1,0 +1,58 @@
+<section class="well-profile" [class.dark]="theme.isDark()">
+  <header class="heading">
+    <div><div class="eyebrow">WELL PLANNING / WELL PROFILE</div><h1>{{store.record()?.requestReference?.wellName || 'Well Profile'}}</h1><p>{{store.record()?.code || 'Select an integrated requirement to review its well design'}}</p></div>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ir-selector"><mat-label>Integrated requirement</mat-label>
+      <mat-select panelClass="well-profile-ir-panel" [value]="store.irSeq()" (selectionChange)="selectIr($event.value)" [disabled]="store.listLoading()">
+        @for (ir of store.irs(); track ir.irSeq) { @if (ir.irSeq !== null && ir.irSeq !== undefined) { <mat-option [value]="ir.irSeq">{{ir.code}}{{ir.requestReference.wellName ? ' · '+ir.requestReference.wellName : ''}}</mat-option> } }
+      </mat-select>
+    </mat-form-field>
+  </header>
+  @if (store.listLoading() || store.detailLoading()) { <mat-progress-bar mode="indeterminate" aria-label="Loading integrated requirements"/> }
+  @if (store.listError()) { <div class="status" role="alert">{{store.listError()}} <button mat-button (click)="store.loadIrs()">Retry list</button></div> }
+  @if (store.detailError()) { <div class="status" role="alert">{{store.detailError()}} <button mat-button (click)="selectIr(store.irSeq()!)">Retry detail</button></div> }
+  @if (!store.listLoading() && !store.listError() && !store.irs().length) { <p class="status">No integrated requirements are available.</p> }
+  @if (!store.record() && !store.detailLoading() && store.irs().length && !store.detailError()) { <p class="status">Select an IR above to load its casing program, formations and estimated hydrology.</p> }
+  @if (store.record(); as ir) {
+    <div class="summary">
+      <div><span>Profile depth</span><strong>{{store.totalDepth() ? (store.totalDepth() | number) : 'Not specified'}} <small>ft bgl</small></strong></div>
+      <div><span>Estimated water level</span><strong>{{store.profile().water !== null ? (store.profile().water | number) : 'Not specified'}} <small>ft bgl</small></strong></div>
+      <div><span>Estimated pump setting</span><strong>{{store.profile().pump !== null ? (store.profile().pump | number) : 'Not specified'}} <small>ft bgl</small></strong></div>
+      <div><span>Target formation</span><strong>{{ir.requestReference.targetAquifer || ir.hydrogeology.aquifer || 'Not specified'}}</strong></div>
+    </div>
+    @if (store.totalDepth() > 0) {
+  <div class="toolbar">
+    <div class="modes"><mat-button-toggle-group [hideSingleSelectionIndicator]="true" aria-label="Well visualization" [value]="store.mode()" (change)="store.setMode($event.value)">
+      @for (mode of modes; track mode.value) { <mat-button-toggle [value]="mode.value">{{mode.label}}</mat-button-toggle> }
+    </mat-button-toggle-group>
+    <button mat-stroked-button (click)="explode()" [attr.aria-pressed]="store.exploded()"><mat-icon>{{store.exploded() ? 'layers' : 'view_in_ar'}}</mat-icon>{{store.exploded() ? 'Reassemble' : 'Explode'}}</button></div>
+  <div class="fills"><label>Fill casing <input #casingColor type="color" [value]="store.casingFill()" (input)="store.setFill('casingFill', casingColor.value)"></label><label>Fill liners <input #linerColor type="color" [value]="store.linerFill()" (input)="store.setFill('linerFill', linerColor.value)"></label></div>
+    @if (store.mode() === 'transparent') { <div class="opacity"><span>Shell opacity</span><mat-slider min="10" max="70"><input matSliderThumb aria-label="Shell opacity" [value]="store.opacity()" (valueChange)="store.setOpacity($event)"></mat-slider><span>{{store.opacity()}}%</span></div> }
+  </div>
+    <div class="review-grid">
+      <section class="canvas">
+        <div class="panel-head"><h2>{{viewTitle()}}</h2><span>Depth & horizons · ft bgl</span></div>
+        <div class="diagram-scroll">@if (store.mode() === 'profile') { <app-well-profile-intervals [large]="true"/> } @else { <app-well-profile-diagram/> }</div>
+        <div class="depth-control"><div>Inspect a depth <strong>{{store.depth() | number}} ft</strong></div><mat-slider min="0" [max]="store.totalDepth()" step="1"><input matSliderThumb aria-label="Inspect a depth in feet" [value]="store.depth()" (valueChange)="store.setDepth($event)"></mat-slider><p aria-live="polite">{{store.reading()}}</p></div>
+        <div class="canvas-foot">{{store.mode() === 'solid' ? '45% shell opacity · Intact walls · Width exaggerated' : 'Shared depth scale · Actual diameter ratios · Width exaggerated'}}</div>
+      </section>
+
+        @if (store.selected(); as selected) {
+          <section class="panel selected-panel" aria-label="Selected casing details"><div class="eyebrow">SELECTED STRING</div><h3 class="selection" aria-live="polite">{{selectedLabel()}}</h3><div class="kvs">
+            <div><span>{{selected.topInferred ? 'Attachment (inferred)' : 'Top'}} · ft bgl</span><b>{{selected.top | number}}</b></div><div><span>Shoe · ft bgl</span><b>{{selected.csgDepth | number}}</b></div>
+            <div><span>Length · ft</span><b>{{selected.csgDepth - selected.top | number}}</b></div><div><span>Outer diameter</span><b>{{selected.csgSize}} in</b></div>
+          </div><p class="note">{{selected.topInferred ? 'Liner attachment shown at the preceding shoe; actual TOL is not recorded.' : ''}}</p><p class="note">{{selected.csgRemarks || 'No casing remarks recorded.'}}</p></section>
+        }
+      <section class="panel program" aria-label="Casing program"><h3>Casing program</h3><ag-grid-angular [modules]="modules" [theme]="gridTheme()" [rowData]="store.strings()" [columnDefs]="columns" [headerHeight]="30" [rowHeight]="34" domLayout="normal" [rowSelection]="rowSelection" (gridReady)="onGridReady($event)" (rowClicked)="store.select($event.data?.id ?? '')" (cellKeyDown)="onCellKeyDown($event)"/><p class="note">Depths in ft bgl. Select a row to inspect.</p></section>
+
+      <section class="panel formations" aria-label="Formation intersections"><h3>Formation intersections</h3><p class="note">Across the selected string</p><div class="formation-list">@for (f of store.coverage(); track $index) { <div class="coverage"><span>{{f.name}}</span><span>{{f.length | number}} ft</span><div class="track"><i [style.width.%]="f.length / f.total * 100"></i></div></div> } @empty { <p class="note">No formation intersections available.</p> }</div></section>
+
+      <section class="panel details" aria-label="Completion and hydrology"><h3>Completion & hydrology</h3><p class="completion-text">{{store.profile().completion}}</p><p class="note">{{store.profile().completionNote}}</p>
+      <div class="kvs"><div><span>Test program</span><b>{{ir.testProgram.testType}}</b></div><div><span>Estimated rate · gpm</span><b>{{ir.testProgram.estimatedRateGpm ?? 'Not specified'}}</b></div><div><span>Estimated TDS · ppm</span><b>{{ir.hydrogeology.estimatedTdsPpm ?? 'Not specified'}}</b></div><div><span>H₂S · ppm</span><b>{{ir.hydrogeology.h2sPpm ?? 'Not specified'}}</b></div></div>
+    </section>
+
+
+    </div>
+    } @else { <p class="status">No valid target depth or casing depths are recorded for this IR.</p> }
+    <footer>@if (store.profile().warnings.length) { <button mat-button [matTooltip]="store.profile().warnings.join('\n')" aria-label="View data notes"><mat-icon>info_outline</mat-icon>{{store.profile().warnings.length}} data notes</button> }<span>{{ir.code}} · {{ir.status}}</span><span>Saved IR design · Pump and water levels are estimates</span></footer>
+  }
+</section>
