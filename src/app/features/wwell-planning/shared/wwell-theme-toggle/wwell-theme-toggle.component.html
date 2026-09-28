@@ -1,122 +1,50 @@
-<div class="wtt-group" cdkOverlayOrigin #origin="cdkOverlayOrigin">
+<div class="wtt-group">
   <!-- The label names the action (not the state), so a screen reader hears what a press will do. -->
   <button
     type="button"
     mat-icon-button
-    class="wtt wtt--quick"
+    class="wtt wtt--theme"
     [class.wtt--dark]="theme.isDark()"
     [attr.aria-label]="theme.isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
     [matTooltip]="theme.isDark() ? 'Light theme' : 'Dark theme'"
     matTooltipClass="wp-tooltip"
     (click)="theme.toggle()"
   >
-    <mat-icon class="wtt__icon wtt__icon--moon">dark_mode</mat-icon>
-    <mat-icon class="wtt__icon wtt__icon--sun">light_mode</mat-icon>
+    <!-- One glyph that morphs rather than two that swap: the disc shrinks into the sun while the bite that made it a
+         crescent slides away and the rays open; pressing again reverses it. Light shows the moon (a press goes dark). -->
+    <svg class="wtt__glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <mask id="wtt-moon-bite" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+        <rect width="24" height="24" fill="#fff" />
+        <circle class="wtt__bite" cx="12" cy="12" r="7" fill="#000" />
+      </mask>
+      <g mask="url(#wtt-moon-bite)">
+        <circle class="wtt__disc" cx="12" cy="12" r="8" fill="currentColor" />
+      </g>
+      <g class="wtt__rays" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="12" y1="1.5" x2="12" y2="3.5" />
+        <line x1="12" y1="20.5" x2="12" y2="22.5" />
+        <line x1="1.5" y1="12" x2="3.5" y2="12" />
+        <line x1="20.5" y1="12" x2="22.5" y2="12" />
+        <line x1="4.6" y1="4.6" x2="6" y2="6" />
+        <line x1="18" y1="18" x2="19.4" y2="19.4" />
+        <line x1="4.6" y1="19.4" x2="6" y2="18" />
+        <line x1="18" y1="6" x2="19.4" y2="4.6" />
+      </g>
+    </svg>
   </button>
 
+  <!-- A toggle, so its label stays the same and `aria-pressed` carries the state. -->
   <button
-    #tuneTrigger
     type="button"
     mat-icon-button
-    class="wtt wtt--tune"
-    [class.wtt--open]="isOpen()"
-    aria-label="Appearance settings"
-    aria-haspopup="dialog"
-    [attr.aria-expanded]="isOpen()"
-    matTooltip="Appearance"
+    class="wtt wtt--legacy"
+    [class.wtt--on]="theme.isLegacyShell()"
+    aria-label="Legacy layout"
+    [attr.aria-pressed]="theme.isLegacyShell()"
+    [matTooltip]="theme.isLegacyShell() ? 'New layout' : 'Legacy layout'"
     matTooltipClass="wp-tooltip"
-    [matTooltipDisabled]="isOpen()"
-    (click)="toggleOpen()"
+    (click)="toggleLegacy()"
   >
-    <mat-icon>tune</mat-icon>
+    <mat-icon>history</mat-icon>
   </button>
 </div>
-
-<ng-template
-  cdkConnectedOverlay
-  [cdkConnectedOverlayOrigin]="origin"
-  [cdkConnectedOverlayOpen]="isOpen()"
-  [cdkConnectedOverlayPositions]="popoverPositions"
-  [cdkConnectedOverlayPush]="true"
-  [cdkConnectedOverlayViewportMargin]="8"
-  [cdkConnectedOverlayHasBackdrop]="true"
-  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-  (backdropClick)="close()"
-  (overlayKeydown)="onOverlayKeydown($event)"
-  (detach)="isOpen.set(false)"
->
-  <section class="wtt-pop" role="dialog" aria-label="Appearance" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <h2 class="wtt-pop__title">Appearance</h2>
-
-    <fieldset class="wtt-field">
-      <legend class="wtt-field__label">Theme</legend>
-      <div class="wtt-seg">
-        @for (option of modeOptions; track option.value) {
-          <label class="wtt-seg__opt">
-            <input
-              class="wtt-seg__input"
-              type="radio"
-              name="wtt-mode"
-              [value]="option.value"
-              [checked]="theme.mode() === option.value"
-              (change)="theme.setMode(option.value)"
-            />
-            <span class="wtt-seg__face">
-              <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
-              {{ option.label }}
-            </span>
-          </label>
-        }
-      </div>
-    </fieldset>
-
-    <div class="wtt-field">
-      <label class="wtt-field__head">
-        <span class="wtt-field__label">{{ theme.isDark() ? 'Dark' : 'Light' }} contrast</span>
-        <span class="wtt-field__value" aria-hidden="true">{{ theme.contrast() }}%</span>
-        <input
-          class="wtt-range"
-          type="range"
-          step="1"
-          [attr.aria-label]="(theme.isDark() ? 'Dark' : 'Light') + ' theme contrast'"
-          [min]="minContrast"
-          [max]="maxContrast"
-          [value]="theme.contrast()"
-          [attr.aria-valuetext]="theme.contrast() + ' percent'"
-          [style.--wtt-p]="theme.contrast() / maxContrast"
-          (input)="onContrastInput($event)"
-        />
-      </label>
-      <div class="wtt-range__ends" aria-hidden="true">
-        <span>Soft</span>
-        <span>High</span>
-      </div>
-    </div>
-
-    <div class="wtt-foot">
-      <p class="wtt-foot__hint">
-        {{ theme.isDark() ? 'Lower it if dark mode feels harsh.' : 'Lower it to cut glare in bright rooms.' }}
-      </p>
-      <button type="button" class="wtt-reset" [disabled]="theme.isContrastDefault()" (click)="theme.resetContrast()">
-        Reset
-      </button>
-    </div>
-
-    <div class="wtt-legacy">
-      <div class="wtt-legacy__text">
-        <span class="wtt-legacy__title" id="wtt-legacy-label">Legacy layout</span>
-        <span class="wtt-legacy__hint">Classic navy top bar and left nav. Theme still applies to the page.</span>
-      </div>
-      <button
-        type="button"
-        class="wtt-switch"
-        role="switch"
-        aria-labelledby="wtt-legacy-label"
-        [attr.aria-checked]="theme.isLegacyShell()"
-        (click)="theme.setLegacyShell(!theme.isLegacyShell())"
-      >
-        <span class="wtt-switch__thumb"></span>
-      </button>
-    </div>
-  </section>
-</ng-template>

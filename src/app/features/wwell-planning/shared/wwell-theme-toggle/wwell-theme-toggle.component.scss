@@ -1,8 +1,7 @@
 @use '../wwell-design-tokens' as tokens;
 
-// The control lives in the shell's top bar, so its two buttons are drawn from the shell tokens (one
-// look per shell, scoped like the bar itself: `data-shell` on <html>). The popover further down is a
-// planning surface and keeps the `--wp-*` tokens.
+// The control lives in the shell's top bar, so its buttons are drawn from the shell tokens (one
+// look per shell, scoped like the bar itself: `data-shell` on <html>).
 :host {
   display: inline-flex;
   flex-shrink: 0;
@@ -32,26 +31,31 @@
   .wtt-group {
     overflow: hidden;
     border: 1px solid var(--shell-hair-strong);
-    border-radius: 5px;
+    border-radius: 8px;
   }
 
   .wtt {
     --mat-icon-button-icon-color: var(--shell-muted);
     border-radius: 0;
 
-    &:hover,
-    &.wtt--open {
+    &:hover {
       background: var(--shell-press);
       --mat-icon-button-icon-color: var(--shell-text);
     }
 
+    // Legacy is on: the button holds the same neutral tint as the current page in the nav, with the accent glyph.
+    &.wtt--on {
+      background: var(--shell-active-bg);
+      --mat-icon-button-icon-color: var(--shell-active-text);
+    }
+
     &:focus-visible {
-      outline: 2px solid var(--shell-text);
+      outline: 2px solid var(--shell-focus);
       outline-offset: -2px;
     }
   }
 
-  .wtt--tune {
+  .wtt--legacy {
     border-left: 1px solid var(--shell-hair-strong);
   }
 }
@@ -71,7 +75,7 @@
     background: rgba(255, 255, 255, 0.06);
 
     &:hover,
-    &.wtt--open {
+    &.wtt--on {
       border-color: rgba(56, 189, 248, 0.4);
       background: rgba(14, 165, 233, 0.14);
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
@@ -85,401 +89,59 @@
   }
 }
 
-// Both glyphs are stacked and cross-rotate with transform + opacity only (compositor-friendly).
-// Light theme shows the moon (pressing goes dark); dark theme shows the sun.
-// `.wtt .wtt__icon` (not `.wtt__icon`): Material sets its own position/size on `.mat-icon`, which would
-// otherwise win and let the second glyph wrap out of the button.
-.wtt .wtt__icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
-  font-size: 18px;
-  line-height: 18px;
+// ── The sun / moon glyph ─────────────────────────────────────────────────────
+// One drawing, two states, moved by `transform` and `opacity` only (compositor-friendly). Light theme shows the moon
+// (a press goes dark): a full disc with a circle bitten out of its upper right by the mask. Dark theme shows the sun:
+// the disc shrinks to the sun's core, the bite slides off the corner, and the rays open and turn into place.
+// `.wtt .wtt__glyph` (not `.wtt__glyph`): Material sizes the icon button's content, which would otherwise win.
+.wtt .wtt__glyph {
+  display: block;
+  width: 20px;
+  height: 20px;
+  overflow: visible;
+}
+
+.wtt__disc,
+.wtt__bite,
+.wtt__rays {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
   transition:
-    transform tokens.$duration-base tokens.$ease-out,
-    opacity tokens.$duration-fast tokens.$ease-out;
+    transform tokens.$duration-slow tokens.$ease-out,
+    opacity tokens.$duration-base tokens.$ease-out;
 }
 
-.wtt .wtt__icon--sun {
+// Moon
+.wtt__bite {
+  transform: translate(6px, -6px);
+}
+
+.wtt__rays {
   opacity: 0;
-  transform: rotate(-90deg) scale(0.5);
+  transform: rotate(-90deg) scale(0.4);
 }
 
+// Sun
 .wtt--dark {
-  .wtt__icon--sun {
+  .wtt__disc {
+    transform: scale(0.625);
+  }
+
+  .wtt__bite {
+    transform: translate(20px, -20px);
+  }
+
+  .wtt__rays {
     opacity: 1;
     transform: none;
   }
-
-  .wtt__icon--moon {
-    opacity: 0;
-    transform: rotate(90deg) scale(0.5);
-  }
 }
 
-// ── Appearance popover ───────────────────────────────────────────
-// Rendered in the CDK overlay on <body>, but it is this component's own template, so these scoped
-// rules still apply; the `--wp-*` tokens arrive by inheritance from <html>.
-.wtt-pop {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-sizing: border-box;
-  width: 272px;
-  padding: 16px;
-  border: 1px solid tokens.$border-strong;
-  border-radius: tokens.$radius-lg;
-  background: tokens.$surface-raised;
-  box-shadow: tokens.$shadow-3;
-  color: tokens.$navy;
-  font-family: tokens.$font-family;
-  transform-origin: top right;
-  animation: wtt-pop-in tokens.$duration-base tokens.$ease-out;
-}
-
-@keyframes wtt-pop-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-}
-
-.wtt-pop__title {
-  margin: 0;
-  font-size: tokens.$text-sm;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: tokens.$navy-deep;
-}
-
-.wtt-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.wtt-field__label {
-  padding: 0;
-  @include tokens.type-eyebrow;
-}
-
-// A fieldset's legend is not a flex item, so the column's `gap` doesn't reach it.
-legend.wtt-field__label {
-  margin-bottom: 8px;
-}
-
-// The label wraps the slider so the whole row is one click target; the head text and the range
-// share a two-column grid: name left, value right, slider full width beneath.
-.wtt-field__head {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  row-gap: 8px;
-
-  .wtt-range {
-    grid-column: 1 / -1;
-  }
-}
-
-.wtt-field__value {
-  @include tokens.type-mono;
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  color: tokens.$navy-deep;
-}
-
-// Segmented System/Light/Dark control. The native radios stay (arrow-key roving, form semantics)
-// and are stretched invisibly over their face, so the whole segment is the hit target.
-.wtt-seg {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid tokens.$border;
-  border-radius: tokens.$radius-md;
-  background: tokens.$surface-sunken;
-}
-
-.wtt-seg__opt {
-  position: relative;
-  display: block;
-}
-
-.wtt-seg__input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.wtt-seg__face {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  height: 30px;
-  border: 1px solid transparent;
-  border-radius: calc(#{tokens.$radius-md} - 2px);
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  color: tokens.$muted;
-  transition:
-    background-color tokens.$duration-fast tokens.$ease-out,
-    border-color tokens.$duration-fast tokens.$ease-out,
-    color tokens.$duration-fast tokens.$ease-out;
-
-  mat-icon {
-    width: 15px;
-    height: 15px;
-    font-size: 15px;
-    line-height: 15px;
-  }
-}
-
-.wtt-seg__opt:hover .wtt-seg__face {
-  color: tokens.$navy-deep;
-}
-
-.wtt-seg__input:checked + .wtt-seg__face {
-  border-color: tokens.$border-strong;
-  background: tokens.$surface;
-  box-shadow: tokens.$shadow-1;
-  color: tokens.$navy-deep;
-}
-
-.wtt-seg__input:focus-visible + .wtt-seg__face {
-  @include tokens.focus-ring;
-}
-
-// Native range, restyled. The filled stretch stops at the thumb's centre, which travels from half a
-// thumb in to half a thumb short of the end — hence the calc rather than a bare percentage.
-.wtt-range {
-  --wtt-thumb: 16px;
-  --wtt-stop: calc(var(--wtt-thumb) / 2 + (100% - var(--wtt-thumb)) * var(--wtt-p, 0.5));
-
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  height: 20px;
-  margin: 0;
-  background: transparent;
-  cursor: pointer;
-
-  &::-webkit-slider-runnable-track {
-    height: 4px;
-    border-radius: tokens.$radius-sm;
-    background: linear-gradient(to right, tokens.$accent var(--wtt-stop), tokens.$border-strong var(--wtt-stop));
-  }
-
-  &::-moz-range-track {
-    height: 4px;
-    border-radius: tokens.$radius-sm;
-    background: linear-gradient(to right, tokens.$accent var(--wtt-stop), tokens.$border-strong var(--wtt-stop));
-  }
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: var(--wtt-thumb);
-    height: var(--wtt-thumb);
-    margin-top: -6px; // (track 4px − thumb 16px) / 2
-    border: 2px solid tokens.$surface-raised;
-    border-radius: 50%;
-    background: tokens.$navy-deep;
-    box-shadow: 0 0 0 1px tokens.$border-control;
-    transition: transform tokens.$duration-fast tokens.$ease-out;
-  }
-
-  &::-moz-range-thumb {
-    box-sizing: border-box;
-    width: var(--wtt-thumb);
-    height: var(--wtt-thumb);
-    border: 2px solid tokens.$surface-raised;
-    border-radius: 50%;
-    background: tokens.$navy-deep;
-    box-shadow: 0 0 0 1px tokens.$border-control;
-    transition: transform tokens.$duration-fast tokens.$ease-out;
-  }
-
-  &:hover::-webkit-slider-thumb,
-  &:active::-webkit-slider-thumb {
-    transform: scale(1.12);
-  }
-
-  &:hover::-moz-range-thumb,
-  &:active::-moz-range-thumb {
-    transform: scale(1.12);
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
-
-  &:focus-visible::-webkit-slider-thumb {
-    box-shadow:
-      0 0 0 1px tokens.$border-control,
-      0 0 0 3px tokens.$surface-raised,
-      0 0 0 5px tokens.$accent;
-  }
-
-  &:focus-visible::-moz-range-thumb {
-    box-shadow:
-      0 0 0 1px tokens.$border-control,
-      0 0 0 3px tokens.$surface-raised,
-      0 0 0 5px tokens.$accent;
-  }
-}
-
-.wtt-range__ends {
-  display: flex;
-  justify-content: space-between;
-  @include tokens.type-label;
-  font-size: tokens.$text-2xs;
-}
-
-.wtt-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid tokens.$border; // $border-soft vanishes against the raised surface
-}
-
-.wtt-foot__hint {
-  margin: 0;
-  @include tokens.type-label;
-  font-size: tokens.$text-2xs;
-  line-height: 1.4;
-}
-
-.wtt-reset {
-  flex-shrink: 0;
-  padding: 4px 8px;
-  border: 1px solid tokens.$border;
-  border-radius: tokens.$radius-sm;
-  background: transparent;
-  font: inherit;
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  color: tokens.$navy-deep;
-  cursor: pointer;
-  transition:
-    background-color tokens.$duration-fast tokens.$ease-out,
-    border-color tokens.$duration-fast tokens.$ease-out;
-
-  &:hover:not(:disabled) {
-    border-color: tokens.$border-strong;
-    background: tokens.$surface-hover;
-  }
-
-  &:focus-visible {
-    @include tokens.focus-ring;
-  }
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.45;
-  }
-}
-
-// ── Legacy layout switch ─────────────────────────────────────────
-// Swaps the redesigned top bar and left nav for the old navy ones; light/dark is untouched.
-.wtt-legacy {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid tokens.$border;
-}
-
-.wtt-legacy__text {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.wtt-legacy__title {
-  font-size: tokens.$text-sm;
-  font-weight: 600;
-  color: tokens.$navy-deep;
-}
-
-.wtt-legacy__hint {
-  @include tokens.type-label;
-  font-size: tokens.$text-2xs;
-  line-height: 1.4;
-}
-
-.wtt-switch {
-  position: relative;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  width: 38px;
-  height: 22px;
-  padding: 0;
-  border: 1px solid tokens.$border-control;
-  border-radius: tokens.$radius-pill;
-  background: tokens.$surface-sunken;
-  cursor: pointer;
-  transition:
-    background-color tokens.$duration-fast tokens.$ease-out,
-    border-color tokens.$duration-fast tokens.$ease-out;
-
-  &:focus-visible {
-    @include tokens.focus-ring;
-  }
-
-  &[aria-checked='true'] {
-    border-color: tokens.$cta;
-    background: tokens.$cta-bg;
-
-    .wtt-switch__thumb {
-      background: tokens.$on-cta;
-      transform: translateX(16px);
-    }
-  }
-}
-
-.wtt-switch__thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: tokens.$muted;
-  transition:
-    transform tokens.$duration-fast tokens.$ease-out,
-    background-color tokens.$duration-fast tokens.$ease-out;
-}
-
-// Vendor thumb pseudo-elements get their own rules: one unknown selector in a list drops the whole rule.
 @media (prefers-reduced-motion: reduce) {
-  .wtt .wtt__icon,
-  .wtt-pop,
-  .wtt-switch__thumb {
-    transition: none;
-    animation: none;
-  }
-
-  .wtt-range::-webkit-slider-thumb {
-    transition: none;
-  }
-
-  .wtt-range::-moz-range-thumb {
+  .wtt,
+  .wtt__disc,
+  .wtt__bite,
+  .wtt__rays {
     transition: none;
   }
 }

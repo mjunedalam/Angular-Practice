@@ -225,22 +225,38 @@ describe('WwellThemeService theme switch', () => {
   });
 
   it('does nothing visible when the pick lands on the theme already showing', () => {
-    // Following the OS, which reports light — choosing Light explicitly changes the stored mode but repaints
-    // nothing, and fading onto an identical picture reads as a glitch.
+    // Following the OS, which reports light — choosing Light explicitly pins it but repaints nothing, and
+    // fading onto an identical picture reads as a glitch.
     const service = TestBed.inject(WwellThemeService);
     expect(service.theme()).toBe('light');
 
-    service.setMode('light');
+    service.set('light');
 
-    expect(service.mode()).toBe('light');
     expect(startViewTransition).not.toHaveBeenCalled();
+    expect(localStorage.getItem('wwell-theme')).toBe('light');
+  });
+
+  it('remembers the theme the user picked', () => {
+    const service = TestBed.inject(WwellThemeService);
+
+    service.toggle();
+
+    expect(localStorage.getItem('wwell-theme')).toBe('dark');
+  });
+
+  it('restores a remembered theme on the next visit, over what the OS reports', () => {
+    localStorage.setItem('wwell-theme', 'dark');
+
+    const service = TestBed.inject(WwellThemeService);
+
+    expect(service.isDark()).toBe(true);
+    expect(root.getAttribute(THEME_ATTRIBUTE)).toBe('dark');
   });
 
   it('cross-fades when the OS appearance changes and we are following it', () => {
-    // The default mode is "system", so this is the common case, not an edge one — and it used to set the
-    // signal directly and skip the animation entirely.
+    // Nothing picked yet means "follow the OS", so this is the common case, not an edge one — and it used to
+    // set the signal directly and skip the animation entirely.
     const service = TestBed.inject(WwellThemeService);
-    expect(service.mode()).toBe('system');
 
     fireSystemChange?.(true);
 
@@ -250,7 +266,7 @@ describe('WwellThemeService theme switch', () => {
 
   it('does nothing when the OS moves but an explicit theme is pinned', () => {
     const service = TestBed.inject(WwellThemeService);
-    service.setMode('light');
+    service.set('light');
     startViewTransition.mockClear();
 
     fireSystemChange?.(true);

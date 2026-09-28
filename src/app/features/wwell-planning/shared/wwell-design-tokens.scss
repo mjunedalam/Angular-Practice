@@ -63,7 +63,7 @@ $on-accent: var(--wp-on-accent); // text on $accent-fill / danger fills
 $cta: var(--wp-cta); // primary action, flat: the gradient's mid colour, for the odd place that cannot take a gradient
 $cta-hover: var(--wp-cta-hover);
 $on-cta: var(--wp-on-cta);
-$cta-bg: var(--wp-cta-bg); // primary action: the aurora gradient — a `background`, not a colour
+$cta-bg: var(--wp-cta-bg); // primary action fill layered over $cta: `none` (flat) today — a `background`, not a colour
 $cta-bg-hover: var(--wp-cta-bg-hover);
 $cta-shadow: var(--wp-cta-shadow);
 $cta-shadow-hover: var(--wp-cta-shadow-hover);
@@ -89,7 +89,7 @@ $warning-soft: var(--wp-warning-soft);
 $radius-sm: var(--wp-radius-sm); // small controls, chips
 $radius-md: var(--wp-radius-md); // cards, panels, inputs
 $radius-btn: var(--wp-radius-btn); // buttons
-$radius-lg: var(--wp-radius-lg); // dialogs, popovers, the big glass panes
+$radius-lg: var(--wp-radius-lg); // dialogs, popovers, the big panels
 $radius-pill: var(--wp-radius-pill); // count badges, capsule bars
 $shadow-1: var(--wp-shadow-1);
 $shadow-2: var(--wp-shadow-2);
@@ -172,8 +172,8 @@ $text-xl: 1.55rem; // page titles
   letter-spacing: -0.01em;
 }
 
-// A frosted pane: the spotlit fill and hairline ring of `--wp-panel-*`, over whatever is behind it (the shell's aurora),
-// blurred. Put it on a page's big panels; small controls keep flat surfaces so they stay legible on top of one.
+// A panel: the solid fill, hairline ring and soft shadow of `--wp-panel-*`. (Named for the frosted glass it used to be; the
+// blur is now `none`.) Put it on a page's big panels; small controls keep flat surfaces so they stay legible on top of one.
 @mixin glass-panel {
   background: var(--wp-panel-bg);
   box-shadow: var(--wp-panel-shadow);
@@ -181,7 +181,7 @@ $text-xl: 1.55rem; // page titles
   backdrop-filter: var(--wp-panel-blur);
 }
 
-// The read-only view's card: a glass pane with room to breathe, headed by an uppercase display-face title.
+// The read-only view's card: a panel with room to breathe, headed by an uppercase display-face title.
 @mixin view-card {
   border: 1px solid transparent;
   border-radius: $radius-lg;

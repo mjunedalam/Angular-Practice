@@ -2,24 +2,12 @@ import { DOCUMENT } from '@angular/common';
 import { ApplicationRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 
 export type WwellTheme = 'light' | 'dark';
-/** What the user picked: a fixed theme, or `system` to follow the OS. */
-export type WwellThemeMode = WwellTheme | 'system';
 /** Which top bar + left nav is showing: the redesigned `mono` shell, or the navy `legacy` one it replaced. */
 export type WwellShell = 'mono' | 'legacy';
 
 const THEME_STORAGE_KEY = 'wwell-theme';
 const SHELL_STORAGE_KEY = 'wwell-shell';
 const SHELL_ATTRIBUTE = 'data-shell';
-/** Dark keeps the key it shipped with, so a value saved before light gained a dial still applies. */
-const CONTRAST_STORAGE_KEYS: Readonly<Record<WwellTheme, string>> = {
-  dark: 'wwell-contrast',
-  light: 'wwell-contrast-light',
-};
-const CONTRAST_PROPERTIES: Readonly<Record<WwellTheme, string>> = {
-  dark: '--wp-contrast-dark',
-  light: '--wp-contrast-light',
-};
-const THEMES: readonly WwellTheme[] = ['dark', 'light'];
 const THEME_ATTRIBUTE = 'data-wp-theme';
 /** Restores the root's view-transition-name for the length of the switch; see _wwell-theme.scss. */
 const CROSSFADE_CLASS = 'wp-theme-crossfade';
@@ -36,27 +24,20 @@ const DARK_QUERY = '(prefers-color-scheme: dark)';
 /** Slightly longer than the fade, so it finishes before the class — and with it the declaration — is dropped. */
 const SWITCHING_MS = THEME_MS + 60;
 
-export const MIN_CONTRAST = 0;
-export const MAX_CONTRAST = 100;
-/** Where each theme rests until the user moves its dial. Keep in step with the `var(--wp-contrast-*, N%)`
- *  fallbacks in _wwell-theme.scss. Light's standard look is its High end; dark opens softer than its own. */
-export const DEFAULT_CONTRASTS: Readonly<Record<WwellTheme, number>> = { dark: 50, light: 100 };
-
 /**
  * Light/dark theme for the wwell-planning module.
  *
- * Writes `data-wp-theme` and both contrast variables on <html> (not on a module element) because
- * dialogs, select panels and tooltips render on <body>, outside the module's DOM — they only pick up
- * the `--wp-*` tokens from _wwell-theme.scss by inheriting from the root. The tokens are `--wp-`
- * prefixed, so no other feature reacts to any of them.
+ * Writes `data-wp-theme` on <html> (not on a module element) because dialogs, select panels and
+ * tooltips render on <body>, outside the module's DOM — they only pick up the `--wp-*` tokens from
+ * _wwell-theme.scss by inheriting from the root. The tokens are `--wp-` prefixed, so no other
+ * feature reacts to any of them.
  *
  * Follows the OS `prefers-color-scheme` until the user picks a theme; from then on the explicit
- * choice wins and is remembered in localStorage. Each theme has its own contrast dial (0 soft – 100
- * high, see `dark-tone` / `light-tone` in _wwell-theme.scss); both are always written, so switching
- * theme never waits on a second update to repaint at the right contrast.
+ * choice wins and is remembered in localStorage.
  *
  * The same attribute mechanism carries the shell layout: `data-shell="mono" | "legacy"` on <html>
  * (see layout/_shell-theme.scss). Legacy is opt-in and remembered; mono is what everyone gets by default.
+ * Both the light/dark button and the Legacy button in the top bar drive this service.
  *
  * Switching light/dark cross-fades: `commit()` runs the change inside a view transition and the browser fades
  * between its own before/after snapshots. Browsers without view transitions get the stylesheet's colour
@@ -73,10 +54,6 @@ export class WwellThemeService {
   /** The user's explicit pick; null means "follow the OS". */
   private readonly chosen = signal<WwellTheme | null>(this.readStoredTheme());
   private readonly system = signal<WwellTheme>(this.systemQuery?.matches ? 'dark' : 'light');
-  private readonly contrasts = signal<Readonly<Record<WwellTheme, number>>>({
-    dark: this.readStoredContrast('dark'),
-    light: this.readStoredContrast('light'),
-  });
   private readonly legacyChosen = signal<boolean>(this.readStored(SHELL_STORAGE_KEY) === 'legacy');
   private switchingTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -84,10 +61,6 @@ export class WwellThemeService {
   readonly isLegacyShell = computed(() => this.legacyChosen());
   readonly theme = computed<WwellTheme>(() => this.chosen() ?? this.system());
   readonly isDark = computed(() => this.theme() === 'dark');
-  readonly mode = computed<WwellThemeMode>(() => this.chosen() ?? 'system');
-  /** Contrast of the theme that is showing, 0 (soft) – 100 (high). */
-  readonly contrast = computed(() => this.contrasts()[this.theme()]);
-  readonly isContrastDefault = computed(() => this.contrast() === DEFAULT_CONTRASTS[this.theme()]);
 
   constructor() {
     this.systemQuery?.addEventListener('change', (event) => {
@@ -104,13 +77,9 @@ export class WwellThemeService {
     // Applied synchronously so the first paint of a wwell-planning page is already in the right
     // theme; the effects keep the root in sync with later changes (toggle, OS switch, dial).
     this.apply(this.theme());
-    this.applyContrasts(this.contrasts());
     this.applyShell(this.shell());
     effect(() => {
       this.apply(this.theme());
-    });
-    effect(() => {
-      this.applyContrasts(this.contrasts());
     });
     effect(() => {
       this.applyShell(this.shell());
@@ -122,32 +91,14 @@ export class WwellThemeService {
   }
 
   set(theme: WwellTheme): void {
-    this.setMode(theme);
-  }
-
-  setMode(mode: WwellThemeMode): void {
-    if (mode === this.mode()) return;
-    const chosen = mode === 'system' ? null : mode;
-    // Picking "System" while it already resolves to the theme on screen changes nothing visible, so it gets
-    // the plain commit — turning a page onto an identical one would just read as a glitch.
-    const repaints = (chosen ?? this.system()) !== this.theme();
+    if (theme === this.chosen()) return;
+    // Pinning the theme that is already on screen (the OS reports light, the user picks Light) changes what is
+    // stored but nothing visible, so it gets the plain commit — fading onto an identical page reads as a glitch.
+    const repaints = theme !== this.theme();
     this.commit(() => {
-      this.chosen.set(chosen);
-      this.writeStored(THEME_STORAGE_KEY, chosen);
+      this.chosen.set(theme);
+      this.writeStored(THEME_STORAGE_KEY, theme);
     }, repaints);
-  }
-
-  /** Sets the contrast of the theme that is showing. */
-  setContrast(value: number): void {
-    const theme = this.theme();
-    const next = clampContrast(value);
-    if (next === this.contrasts()[theme]) return;
-    this.contrasts.update((all) => ({ ...all, [theme]: next }));
-    this.writeStored(CONTRAST_STORAGE_KEYS[theme], next === DEFAULT_CONTRASTS[theme] ? null : String(next));
-  }
-
-  resetContrast(): void {
-    this.setContrast(DEFAULT_CONTRASTS[this.theme()]);
   }
 
   /** `true` shows the legacy navy shell; `false` is the default mono one. Independent of light/dark. */
@@ -164,13 +115,6 @@ export class WwellThemeService {
 
   private applyShell(shell: WwellShell): void {
     this.document.documentElement.setAttribute(SHELL_ATTRIBUTE, shell);
-  }
-
-  private applyContrasts(all: Readonly<Record<WwellTheme, number>>): void {
-    const style = this.document.documentElement.style;
-    for (const theme of THEMES) {
-      style.setProperty(CONTRAST_PROPERTIES[theme], `${all[theme]}%`);
-    }
   }
 
   /**
@@ -247,13 +191,6 @@ export class WwellThemeService {
     return value === 'light' || value === 'dark' ? value : null;
   }
 
-  private readStoredContrast(theme: WwellTheme): number {
-    const value = this.readStored(CONTRAST_STORAGE_KEYS[theme]);
-    if (value === null) return DEFAULT_CONTRASTS[theme];
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? clampContrast(parsed) : DEFAULT_CONTRASTS[theme];
-  }
-
   // Storage can throw (private mode, blocked site data). The appearance still works for the
   // session; it just isn't remembered — nothing the user needs to be told about.
   private readStored(key: string): string | null {
@@ -274,9 +211,5 @@ export class WwellThemeService {
       // See readStored: an unwritable store only costs persistence.
     }
   }
-}
-
-function clampContrast(value: number): number {
-  return Math.min(MAX_CONTRAST, Math.max(MIN_CONTRAST, Math.round(value)));
 }
 

@@ -21,7 +21,7 @@ app-wwell-ir-wellbore-panel {
 .wbp {
   // Depth gridlines: a quiet continuation of the axis ticks, never competing with the drawing.
   --wbp-grid: color-mix(in srgb, var(--wp-line-strong) 65%, transparent);
-  // The sheen across a raised surface's upper corner, as light falls on glass.
+  // The sheen across a raised surface's upper corner. Transparent in the current theme (`--wp-glass-sheen`): cards are flat.
   --wbp-sheen: linear-gradient(160deg, var(--wp-glass-sheen), transparent 55%);
   // The panel's type scale. Nothing is set smaller than `micro` (12px, upper-case labels only); prose and chips
   // sit on `small`, table rows and facts on `body`, the figures on `figure`.

@@ -1,10 +1,10 @@
 @use '@angular/material' as mat;
 @use './wwell-design-tokens' as tokens;
 
-// Material token overrides for the module's look ("Aurora Glass"). Two mixins:
-//   buttons     — an aurora-gradient primary action, hairline outlined secondary, sky text buttons,
+// Material token overrides for the module's look. Two mixins:
+//   buttons     — a flat blue primary action, hairline outlined secondary, accent text buttons,
 //                 muted icon buttons
-//   form-fields — hairline control outlines that step to muted on hover and cobalt on focus
+//   form-fields — hairline control outlines that step to muted on hover and blue on focus
 //
 // The app only calls `mat.core()` globally (no full M3 theme), so unthemed Material buttons fall
 // back to a transparent fill and a pure-black label — invisible on a dark surface. Include this at a
@@ -45,7 +45,7 @@
     )
   );
 
-  // Material's tokens only take a colour, and the primary action is a gradient. The gradient look is written once, in
+  // Material's tokens only take a colour, and the primary action's fill/shadow/lift are more than that. That look is written once, in
   // styles.scss (`.mat-mdc-unelevated-button`), reading these; a page that does not include this mixin leaves them unset,
   // and every one of those declarations then falls back to Material's own value — so other pages are untouched.
   --wp-btn-fill: #{tokens.$cta-bg};

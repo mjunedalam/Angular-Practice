@@ -25,8 +25,8 @@
   @include wsel.panel(wp.$accent);
 }
 
-// The primary action ("Aurora Glass"): a gradient fill with a glow that lifts on hover and settles on press. Read from the
-// `--wp-btn-*` custom properties `wmat.buttons` (wwell-planning) sets on a component root; anywhere they are unset each
+// The primary action: a fill and shadow that lift on hover and settle on press. The fill is flat (`none` over Material's own
+// container colour) unless a theme sets `--wp-cta-bg` to something richer. Read from the `--wp-btn-*` custom properties `wmat.buttons` (wwell-planning) sets on a component root; anywhere they are unset each
 // declaration below is Material's own default, so buttons outside that module are unchanged.
 .mat-mdc-unelevated-button:not(:disabled) {
   background-image: var(--wp-btn-fill, none);
