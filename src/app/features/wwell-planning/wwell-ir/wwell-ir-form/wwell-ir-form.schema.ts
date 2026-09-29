@@ -14,6 +14,16 @@ import {
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
 import { WWELL_IR_FORMATION_OPTIONS } from './wwell-ir-form.config';
+import { toUtmAxes } from '../wwell-ir-coordinates.util';
+
+/** Splits the field's single "Northing Xm, Easting Ym, Zone Z" value into its own Northing/
+ *  Easting/UTM Zone box, shown exactly as the raw survey values — same fallback `toUtmAxes` uses
+ *  elsewhere: text that doesn't read as that shape (or isn't populated yet) keeps one "Coordinates"
+ *  box rather than showing empty Easting/Zone boxes next to it. */
+function splitCoordinatesDisplay(value: string): readonly { readonly label: string; readonly value: string }[] {
+  if (!value) return [{ label: 'Coordinates', value: '—' }];
+  return toUtmAxes(value).map(axis => ({ label: axis.label, value: axis.value }));
+}
 
 export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
   {
@@ -81,6 +91,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             hint: 'From the linked well — select a Link to Request to populate',
             readonly: true,
             colSpan: 2,
+            splitDisplay: splitCoordinatesDisplay,
           },
         ],
       },

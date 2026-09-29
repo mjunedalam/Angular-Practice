@@ -35,7 +35,13 @@
   <section class="letter__section">
     <h4>1. Well Location</h4>
     <dl class="letter__kv">
-      <div><dt>Coordinates</dt><dd>{{ ir().requestReference.coordinates || '—' }}</dd></div>
+      @if (coordinateAxes().length > 0) {
+        @for (axis of coordinateAxes(); track axis.label) {
+          <div><dt>{{ axis.label }}</dt><dd>{{ axis.value }}</dd></div>
+        }
+      } @else {
+        <div><dt>Coordinates</dt><dd>—</dd></div>
+      }
       <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
       <div><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer || '—' }}</dd></div>
     </dl>

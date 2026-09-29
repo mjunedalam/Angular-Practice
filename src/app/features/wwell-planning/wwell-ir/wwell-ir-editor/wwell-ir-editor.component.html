@@ -586,6 +586,9 @@
           [hasData]="hasWellboreData()"
           [hasTargetDepth]="hasTargetDepth()"
           [compact]="!!compact"
+          [irCode]="ir().code"
+          [coordinates]="headerCoordinates()"
+          [testType]="headerTestType()"
           [layout]="compact ? sidebarDiagramLayout : previewDiagramLayout"
         />
       </ng-template>

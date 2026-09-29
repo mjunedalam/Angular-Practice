@@ -10,8 +10,31 @@
       <!-- The well's own name is the heading (the card is named for assistive tech by the section's aria-label);
            `title()` only stands in for a record with no well name yet. -->
       <h2 class="wbp__title">{{ diagramData().wellName || title() }}</h2>
-      <p class="wbp__sub">Depths in ft below ground level</p>
+      <!-- The dialog names the record under its well; the other forms sit on a page that already does, and print the
+           unit line instead. -->
+      @if (!expanded()) {
+        <p class="wbp__sub">Depths in ft below ground level</p>
+      } @else if (irCode()) {
+        <p class="wbp__sub"><span class="wbp__sub-code">{{ irCode() }}</span></p>
+      }
     </div>
+    <!-- The IR's test type, as the one word it is — PUMP or FLOW — with its icon, when the record has one. -->
+    @if (expanded() && testMode(); as mode) {
+      <span
+        class="wbp__mode wbp__mode--{{ mode.kind }}"
+        role="img"
+        [attr.aria-label]="mode.aria"
+        [matTooltip]="mode.tip"
+        matTooltipClass="wp-tooltip"
+      >
+        @if (mode.icon) {
+          <mat-icon aria-hidden="true">{{ mode.icon }}</mat-icon>
+        } @else {
+          <app-wwell-ir-wellbore-glyph kind="pump" />
+        }
+        <span aria-hidden="true">{{ mode.word }}</span>
+      </span>
+    }
     @if (hasData()) {
       @if (expanded()) {
         <button type="button" mat-icon-button class="wbp__action" aria-label="Close expanded diagram" (click)="closed.emit()">
@@ -92,31 +115,25 @@
           <h3 class="wbp__eyebrow">Key depths</h3>
           <dl class="wbp__stats">
             @for (stat of f.stats; track stat.label) {
-              <div class="wbp__stat" [class.wbp__stat--warn]="stat.warn" [style.--wbp-i]="$index">
-                <!-- The inline previews take the shorthand ("TD", "Static WL"): four figures beside a small drawing,
-                     read at a glance. The maximised forms have the room for the full label. -->
-                <dt>
-                  {{ isFilled() ? stat.label : stat.short }}
-                  @if (stat.hint) {
-                    <span class="wbp__stat-hint">{{ stat.hint }}</span>
-                  }
-                </dt>
-                <dd>{{ stat.value }}</dd>
-                @if (stat.gauge; as gauge) {
-                  <!-- How far down the well it is: the line is the well, surface to total depth, filled to the depth
-                       (or, for the water column, over the stretch it fills), with the stat's own pictogram on it. -->
-                  <span class="wbp__gauge wbp__gauge--{{ stat.glyph }}" aria-hidden="true">
-                    <i class="wbp__gauge-fill" [style.left.%]="gauge.fromPct" [style.width.%]="gauge.toPct - gauge.fromPct"></i>
-                    <app-wwell-ir-wellbore-glyph class="wbp__gauge-mark" [kind]="stat.glyph" [style.left.%]="gauge.markPct" />
-                  </span>
-                }
-              </div>
+              <ng-container *ngTemplateOutlet="statTile; context: { $implicit: stat, i: $index }" />
             }
           </dl>
+
+          <!-- Worked out from the four above; the maximised views only (the previews stay a read-out). -->
+          @if (isFilled() && f.metrics.length > 0) {
+            <div class="wbp__metrics">
+              <h3 class="wbp__eyebrow">Well metrics</h3>
+              <dl class="wbp__stats wbp__stats--metrics">
+                @for (metric of f.metrics; track metric.label) {
+                  <ng-container *ngTemplateOutlet="statTile; context: { $implicit: metric, i: f.stats.length + $index }" />
+                }
+              </dl>
+            </div>
+          }
         </section>
       }
 
-      @if (f.casingRows.length > 0 || f.topRows.length > 0) {
+      @if (f.casingRows.length > 0 || f.topRows.length > 0 || (expanded() && coordinateAxes().length > 0)) {
         <div class="wbp__facts">
           @if (f.casingRows.length > 0) {
             <section class="wbp__table wbp__table--casing" aria-label="Casing program">
@@ -140,11 +157,45 @@
           @if (f.topRows.length > 0) {
             <section class="wbp__table wbp__table--tops" aria-label="Formation tops">
               <h3 class="wbp__eyebrow">Formation tops <span class="wbp__count">{{ f.topRows.length }}</span></h3>
-              <ul class="wbp__rows wbp__rows--tops">
+              <ul class="wbp__rows wbp__rows--tops" [class.wbp__rows--interval]="isFilled()">
+                @if (isFilled()) {
+                  <li class="wbp__row wbp__row--head" aria-hidden="true">
+                    <span>Top</span>
+                    <span>Depth</span>
+                    <span>Thick ft</span>
+                  </li>
+                }
                 @for (row of f.topRows; track $index) {
                   <li class="wbp__row">
                     <span class="wbp__row-type wbp__row-type--code">{{ row.code }}</span>
                     <span class="wbp__row-depth">{{ row.depth }}</span>
+                    @if (isFilled()) {
+                      <span class="wbp__row-interval"><span class="cdk-visually-hidden">Thickness in feet </span>{{ row.interval }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+          <!-- Where the well is: Northing/Easting/UTM Zone split apart, shown exactly as the raw survey values (no
+               lat/long conversion), each with the icon of its axis. Both maximised forms (the dialog and the Well
+               Design tab's `fit` layout) — same gate as the metrics block and the formation tops' thickness column
+               above. The compact editor-sidebar preview stays without it: that page already shows the same split in
+               its own Request Reference rows, right next to this panel. -->
+          @if (isFilled() && coordinateAxes().length > 0) {
+            <section class="wbp__table wbp__table--location" aria-label="Location">
+              <h3 class="wbp__eyebrow"><mat-icon class="wbp__eyebrow-icon" aria-hidden="true">location_on</mat-icon>Location</h3>
+              <ul class="wbp__geo">
+                <svg class="wbp__geo-globe" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                  <circle cx="32" cy="32" r="28" />
+                  <ellipse cx="32" cy="32" rx="12" ry="28" />
+                  <path d="M32 4v56M4 32h56M8.5 19h47M8.5 45h47" />
+                </svg>
+                @for (axis of coordinateAxes(); track axis.label) {
+                  <li class="wbp__geo-axis">
+                    <span class="wbp__geo-badge" aria-hidden="true"><mat-icon>{{ axis.icon }}</mat-icon></span>
+                    <span class="wbp__geo-label">{{ axis.label }}</span>
+                    <span class="wbp__geo-value">{{ axis.value }}</span>
                   </li>
                 }
               </ul>
@@ -162,6 +213,29 @@
   }
 </section>
 
+<!-- One reading: label, figure, and the well as a hairline with the figure's pictogram on it. -->
+<ng-template #statTile let-stat let-i="i">
+  <div class="wbp__stat" [class.wbp__stat--warn]="stat.warn" [style.--wbp-i]="i">
+    <!-- The inline previews take the shorthand ("TD", "Static WL"): four figures beside a small drawing,
+         read at a glance. The maximised forms have the room for the full label. -->
+    <dt>
+      {{ isFilled() ? stat.label : stat.short }}
+      @if (stat.hint) {
+        <span class="wbp__stat-hint">{{ stat.hint }}</span>
+      }
+    </dt>
+    <dd>{{ stat.value }}</dd>
+    @if (stat.gauge; as gauge) {
+      <!-- How far down the well it is: the line is the well, surface to total depth, filled to the depth
+           (or, for the water column, over the stretch it fills). No pictogram on the line — the fill
+           itself (tinted per stat.glyph) is the marker. -->
+      <span class="wbp__gauge wbp__gauge--{{ stat.glyph }}" aria-hidden="true">
+        <i class="wbp__gauge-fill" [style.left.%]="gauge.fromPct" [style.width.%]="gauge.toPct - gauge.fromPct"></i>
+      </span>
+    }
+  </div>
+</ng-template>
+
 <!-- Opened by Expand. The panel renders itself again, in its dialog form, so there is one
      implementation of the diagram, not two. -->
 <ng-template #expandedTpl>
@@ -171,6 +245,9 @@
     [hasTargetDepth]="hasTargetDepth()"
     [layout]="expandedLayout"
     [title]="title()"
+    [irCode]="irCode()"
+    [coordinates]="coordinates()"
+    [testType]="testType()"
     [expanded]="true"
     (closed)="collapse()"
   />

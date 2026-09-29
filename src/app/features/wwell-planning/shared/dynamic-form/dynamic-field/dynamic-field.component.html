@@ -1,4 +1,24 @@
-@if (mode() === 'review') {
+@if (splitParts(); as parts) {
+  @if (mode() === 'review') {
+    <div class="dyf dyf--review dyf--split" [class.dyf--span-2]="config().colSpan === 2">
+      @for (part of parts; track part.label) {
+        <div class="dyf__split-box">
+          <dt class="dyf__label">{{ part.label }}</dt>
+          <dd class="dyf__value" [class.dyf__value--empty]="part.value === '—'">{{ part.value }}</dd>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="dyf dyf--split" [class.dyf--span-2]="config().colSpan === 2">
+      @for (part of parts; track part.label) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dyf__field dyf__split-box">
+          <mat-label>{{ part.label }}</mat-label>
+          <input matInput type="text" [value]="part.value" readonly />
+        </mat-form-field>
+      }
+    </div>
+  }
+} @else if (mode() === 'review') {
   <div class="dyf dyf--review" [class.dyf--span-2]="config().colSpan === 2">
     <dt class="dyf__label">{{ config().label }}</dt>
     <dd class="dyf__value" [class.dyf__value--empty]="isReviewValueEmpty()">{{ reviewValue() }}</dd>

@@ -120,6 +120,15 @@ export class DynamicFieldComponent {
 
   protected readonly isReviewValueEmpty = computed(() => this.reviewValue() === '—');
 
+  /** Non-null only for a field carrying `splitDisplay` — the parts it renders as separate boxes
+   *  instead of the type-based `@switch` in the template. */
+  protected readonly splitParts = computed(() => {
+    const split = this.config().splitDisplay;
+    if (!split) return null;
+    const value = this.liveValue();
+    return split(typeof value === 'string' ? value : '');
+  });
+
   protected onFilesChange(files: File[]): void {
     this.control().setValue(files);
     this.control().markAsTouched();

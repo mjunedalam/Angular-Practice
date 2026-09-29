@@ -5,6 +5,7 @@ import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentFor } from '../../wwell-ir-attachments.config';
+import { UtmAxis, toUtmAxes } from '../../wwell-ir-coordinates.util';
 import { WellBoreViewComponent } from '../../../../presentation/well-bore-view/well-bore-view.component';
 import { WwellIrDepthScaleComponent } from '../../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import {
@@ -77,6 +78,14 @@ export class WwellIrViewLetterComponent {
       return undefined;
     }
   }
+
+  /** "1. Well Location"'s Coordinates line, split into Northing/Easting/UTM Zone — same rule the
+   *  wellbore panel's Location card and the Request Reference section already follow: shown as the
+   *  raw survey values, no conversion; text that doesn't read as that shape stays one "Coordinates"
+   *  line instead of blank Easting/Zone lines next to it. */
+  protected readonly coordinateAxes: Signal<readonly UtmAxis[]> = computed(() =>
+    toUtmAxes(this.ir().requestReference.coordinates ?? ''),
+  );
 
   protected readonly isOpenHole = computed(() => this.ir().programDetails.completion === OPEN_HOLE_COMPLETION);
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');

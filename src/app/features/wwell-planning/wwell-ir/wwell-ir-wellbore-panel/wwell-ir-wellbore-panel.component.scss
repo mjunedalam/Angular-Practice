@@ -91,6 +91,53 @@ app-wwell-ir-wellbore-panel {
   color: tokens.$muted;
 }
 
+// The record's IR number under its well's name in the dialog: the accent, in the mono face.
+.wbp__sub-code {
+  font-family: tokens.$font-mono;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: tokens.$accent;
+}
+
+// The IR's test type in the dialog's header, as the one word it is with its icon, and nothing round it: PUMP in the accent,
+// FLOW in the drawing's water colour (both follow the theme). Set in the mono face the panel's figures use.
+.wbp__mode {
+  // The pump pictogram cuts its detail lines out in `--wp-surface-alt`; here that is the dialog's own surface.
+  --wp-surface-alt: var(--wp-surface-raised);
+  --wbp-mode: var(--wp-accent);
+
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0.5rem 0 auto;
+  font-family: tokens.$font-mono;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wbp-mode);
+  cursor: default;
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+
+  // Beats the glyph's own `:host([data-kind='pump'])` size.
+  app-wwell-ir-wellbore-glyph[data-kind='pump'] {
+    width: 24px;
+    height: 21px;
+  }
+}
+
+.wbp__mode--flow {
+  --wbp-mode: var(--wp-wb-water);
+}
+
 .wbp__action {
   flex-shrink: 0;
   width: 30px;
@@ -228,15 +275,6 @@ app-wwell-ir-wellbore-panel {
   margin-top: -1.5px;
   border-radius: 2px;
   background: var(--wbp-tone);
-}
-
-// Centred on the line at its point; the tone doubles as the glyph's colour.
-.wbp__gauge-mark {
-  position: absolute;
-  top: 50%;
-  color: var(--wbp-tone);
-  filter: drop-shadow(0 0 1.5px var(--wp-surface));
-  transform: translate(-50%, -50%);
 }
 
 // The qualifier beside the label ("9″ Liner"): prose, not another upper-case label.
@@ -413,14 +451,31 @@ $td-label-gap: 30;
   }
 }
 
-// The drawing's own type is set in viewBox units, so at the sidebar's size it printed at 8–10px. Lifted to about 12px
-// (WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT gives the depth axis the room its numerals then need; the geologic column and the
-// total-depth label had it). The wider forms already print the same type at 12px and more.
+// The drawing's own type is set in viewBox units, so what it prints at follows the drawing's size: at the sidebar's ~200px
+// the depth numerals, geologic labels and total-depth label came to ~11px against leader-less titles at 7–8 — heavier
+// than the well they annotate. Brought down to about 9.5px (24 units; the ground label and casing sizes a little
+// under), and the axis and its ticks set lighter, so the bore and the casing read first and the scale recedes. The wider
+// forms keep their 12px+ type. WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT's depth axis has room to spare at this size.
 .wbp--compact .wbp__stage {
   .tick-label,
   .geo-depth,
   .geo-code {
-    font-size: 28px;
+    font-size: 24px;
+  }
+
+  .tick-label:not(.tick-label--target) {
+    font-weight: 500;
+  }
+
+  .axis-line,
+  .tick-line {
+    stroke-width: 1.5;
+    opacity: 0.7;
+  }
+
+  .geo-axis,
+  .geo-tick:not(.geo-tick--target) {
+    opacity: 0.7;
   }
 
   // The two-line titles keep the renderer's fixed line spacing (19–20 units), which caps their type.
@@ -433,16 +488,32 @@ $td-label-gap: 30;
   }
 
   .ground-label {
-    font-size: 25px;
+    font-size: 21px;
   }
 
-  // Centred on the bore, so its width is what keeps it inside the drawing: 20 characters at 28 units just fit.
+  // Centred on the bore, so its width is what keeps it inside the drawing: 20 characters at 24 units leave room.
   .total-depth-main {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .casing-size-inner {
-    font-size: 27px;
+    font-size: 23px;
+  }
+}
+
+// The card's own type steps down with the drawing: the well's name a size smaller, the four figures one step under the
+// maximised views' (the labels stay on the 12px floor).
+.wbp--compact {
+  .wbp__title {
+    font-size: 1.125rem;
+  }
+
+  .wbp__sub {
+    font-size: var(--wbp-fs-micro);
+  }
+
+  .wbp__stat dd {
+    font-size: 0.9375rem;
   }
 }
 
@@ -460,7 +531,7 @@ $td-label-gap: 30;
 
   .wbp__stage {
     flex: 1;
-    // Below this the drawing's own numerals fall under 11px; a window too short for it scrolls the card instead.
+    // Below this the drawing's own numerals fall under 9px; a window too short for it scrolls the card instead.
     min-height: 22rem;
     container-type: size;
   }
@@ -680,6 +751,153 @@ $td-label-gap: 30;
   color: var(--wp-warning);
 }
 
+// ── Maximised extras: thickness column, well metrics ──
+// The formation tops gain a third column — the interval down to the next top — under a header row of its own.
+.wbp__rows--interval {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+
+  .wbp__row {
+    column-gap: 0.55rem;
+  }
+}
+
+.wbp__row--head {
+  padding-block: 0.2rem;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: tokens.$subtle;
+  background-color: tokens.$surface-alt;
+
+  span:not(:first-child) {
+    text-align: right;
+  }
+}
+
+.wbp__row-interval {
+  font-family: tokens.$font-mono;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: tokens.$muted;
+}
+
+// They sit in the left rail, so they are kept for the wide maximised view (below); the narrower forms print the
+// key depths, casing program and tops only.
+.wbp__metrics {
+  display: none;
+}
+
+// ── Location card (Expand dialog) ──────────────────────────────────
+// The one card in the rails that is lit, and it stands at the foot of the right rail: an accent wash over the surface, an
+// accent rule down its edge, a faint graticule globe in its corner, and per axis a solid accent badge (up-down for
+// latitude, left-right for longitude) beside the degrees as written, the hemisphere as a chip.
+.wbp__eyebrow-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: tokens.$accent;
+}
+
+.wbp__geo {
+  position: relative;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background:
+    linear-gradient(150deg, var(--wp-accent-soft), transparent 75%),
+    tokens.$surface;
+  border: 1px solid color-mix(in srgb, var(--wp-accent) 30%, var(--wp-line-soft));
+  border-radius: tokens.$radius-md;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: tokens.$accent;
+  }
+}
+
+// A wireframe globe, drawn in the accent, rising from the card's right edge and kept clear of the figures: it says "place"
+// without carrying any data.
+.wbp__geo-globe {
+  position: absolute;
+  top: 50%;
+  right: -2.6rem;
+  width: 6.5rem;
+  height: 6.5rem;
+  fill: none;
+  stroke: var(--wp-accent);
+  stroke-width: 1.1;
+  opacity: 0.16;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.wbp__geo-axis {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'badge label'
+    'badge value';
+  align-items: center;
+  column-gap: 0.7rem;
+  padding: 0.55rem 0.8rem 0.55rem 0.95rem;
+  animation: wbp-rise tokens.$duration-slow tokens.$ease-out backwards;
+
+  & + & {
+    border-top: 1px solid color-mix(in srgb, var(--wp-accent) 18%, var(--wp-line-soft));
+    animation-delay: 60ms;
+  }
+}
+
+.wbp__geo-label {
+  grid-area: label;
+  font-size: var(--wbp-fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: tokens.$subtle;
+}
+
+.wbp__geo-badge {
+  grid-area: badge;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--wp-accent-fill);
+  color: #ffffff;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--wp-accent-fill) 35%, transparent);
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+}
+
+.wbp__geo-value {
+  grid-area: value;
+  font-family: tokens.$font-mono;
+  // A raw UTM northing/easting ("3043496.7774 m") runs longer than the old decimal-degree value
+  // this card used to show — shown in full (no rounding), so it wraps instead of overflowing the
+  // rail's fixed width, rather than a `nowrap` forcing it past the card's edge.
+  font-size: 1.0625rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: tokens.$navy-deep;
+}
+
 // ── Empty ──────────────────────────────────────────────────────────
 .wbp__empty {
   display: flex;
@@ -815,12 +1033,21 @@ $td-label-gap: 30;
     font-size: var(--wbp-fs-body);
   }
 
-  // Only if the window is too short for the rail after all does it scroll, on its own.
+  // Only if the window is too short for the rail after all does it scroll, on its own. A column, so the location card
+  // can stand at its foot (`margin-top: auto`) while the tables keep their place at the top.
   .wbp__facts {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: start;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
     overflow-y: auto;
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
+
+  .wbp__table--location {
+    margin-top: auto;
   }
 
   .wbp__title {
@@ -1179,10 +1406,6 @@ $td-label-gap: 30;
 
     .wbp__facts {
       grid-area: facts;
-      grid-template-columns: minmax(0, 1fr);
-      align-content: start;
-      min-height: 0;
-      overflow-y: auto;
     }
 
     // In a column this narrow a label and its figure cannot share a line ("STATIC WATER LEVEL" alone is most of it),
@@ -1202,6 +1425,40 @@ $td-label-gap: 30;
     .wbp__stat-hint {
       width: 100%;
     }
+
+    // Worked-out readings under the key depths (left rail). The rail's height is what it has to spare, so the tiles are
+    // the key depths' own but denser, with the hint on the label's line; and nothing in the rail may shrink to fit — a
+    // rail too short for what it holds scrolls, it does not clip.
+    .wbp__block--stats > * {
+      flex-shrink: 0;
+    }
+
+    .wbp__metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .wbp__stats--metrics {
+      .wbp__stat {
+        row-gap: 0.1rem;
+        padding: 0.22rem 0.8rem 0.18rem;
+
+        dd {
+          font-size: 1.0625rem;
+          line-height: 1.15;
+        }
+      }
+
+      .wbp__stat-hint {
+        width: auto;
+      }
+
+      .wbp__gauge {
+        height: min(var(--wbp-gauge-h, 16px), 8px);
+      }
+    }
   }
 
   // The inline form has no header row of its own (its one action floats over the drawing).
@@ -1210,6 +1467,18 @@ $td-label-gap: 30;
     grid-template-areas:
       'stats stage facts'
       '.     legend .';
+  }
+}
+
+// A window too short for the metrics' gauges as well as the key depths' keeps the figures and drops the hairlines under
+// them; the rail's blocks also sit a little closer.
+@container wbp-dialog (max-height: 720px) {
+  .wbp--expanded .wbp__stats--metrics .wbp__gauge {
+    display: none;
+  }
+
+  .wbp--expanded .wbp__metrics {
+    margin-top: 0;
   }
 }
 

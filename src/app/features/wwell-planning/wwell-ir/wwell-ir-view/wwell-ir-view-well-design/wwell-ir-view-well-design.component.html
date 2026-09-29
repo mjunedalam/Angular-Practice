@@ -7,6 +7,9 @@
       [hasData]="hasWellboreData()"
       [hasTargetDepth]="hasTargetDepth()"
       [layout]="diagramLayout"
+      [irCode]="ir().code"
+      [coordinates]="ir().requestReference.coordinates"
+      [testType]="ir().testProgram.testType"
       [fit]="true"
     />
   </div>

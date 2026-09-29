@@ -8,6 +8,8 @@ export interface WellboreFacts {
   readonly stats: readonly WellboreStat[];
   readonly casingRows: readonly WellboreCasingRow[];
   readonly topRows: readonly WellboreTopRow[];
+  /** Readings worked out from the key depths (pump submergence, uncased length). Only the maximised views print them. */
+  readonly metrics: readonly WellboreStat[];
 }
 
 export interface WellboreStat {
@@ -45,6 +47,8 @@ export interface WellboreCasingRow {
 export interface WellboreTopRow {
   readonly code: string;
   readonly depth: string;
+  /** Feet down to the next top (the last one runs to total depth); "—" when either end is unknown. */
+  readonly interval: string;
 }
 
 export interface WellboreFactsInput {
@@ -84,7 +88,8 @@ export function buildWellboreFacts(input: WellboreFactsInput): WellboreFacts {
       depth: formatFeet(casing.csgDepth),
       belowTarget: total > 0 && casing.csgDepth > total,
     })),
-    topRows: buildTopRows(input.tops),
+    topRows: buildTopRows(input.tops, total),
+    metrics: buildMetrics(input, total, deepest),
   };
 }
 
@@ -128,9 +133,70 @@ function buildStats(input: WellboreFactsInput, total: number, deepest: ICasingIR
   return stats;
 }
 
-function buildTopRows(tops: readonly ITopsIR[]): WellboreTopRow[] {
+interface TopPoint {
+  readonly code: string;
+  readonly depth: number;
+}
+
+/** The tops that have a code, shallow to deep. A top with no depth yet has no place in the well, so it stays out. */
+function sortedTops(tops: readonly ITopsIR[]): TopPoint[] {
   return tops
+    .filter(top => top.stLongCd.trim() !== '' && top.planTvdDepth > 0)
+    .map(top => ({ code: top.stLongCd.trim(), depth: top.planTvdDepth }))
+    .sort((a, b) => a.depth - b.depth);
+}
+
+function buildTopRows(tops: readonly ITopsIR[], total: number): WellboreTopRow[] {
+  const placed = sortedTops(tops);
+  const rows = tops
     .filter(top => top.stLongCd.trim() !== '')
-    .sort((a, b) => a.planTvdDepth - b.planTvdDepth)
-    .map(top => ({ code: top.stLongCd.trim(), depth: top.planTvdDepth > 0 ? formatFeet(top.planTvdDepth) : '—' }));
+    .sort((a, b) => a.planTvdDepth - b.planTvdDepth);
+
+  return rows.map(top => {
+    const depth = top.planTvdDepth;
+    const next = placed.find(other => other.depth > depth)?.depth ?? (total > depth ? total : 0);
+    return {
+      code: top.stLongCd.trim(),
+      depth: depth > 0 ? formatFeet(depth) : '—',
+      interval: depth > 0 && next > depth ? (next - depth).toLocaleString('en-US') : '—',
+    };
+  });
+}
+
+const sharePct = (ft: number, total: number): string => `${Math.round(percentOfTotal(ft, total))}% of TD`;
+
+/** What the key depths imply together. Each one needs the depths it is worked from, so a well that has not
+ *  got that far yet simply shows fewer. */
+function buildMetrics(input: WellboreFactsInput, total: number, deepest: ICasingIR | null): WellboreStat[] {
+  const { staticWaterLevel: water, pumpSetting: pump } = input;
+  const metrics: WellboreStat[] = [];
+
+  if (water > 0 && pump > 0) {
+    const submergence = pump - water;
+    const isDry = submergence < 0;
+    metrics.push({
+      label: 'Submergence',
+      short: 'Submergence',
+      value: formatFeet(Math.abs(submergence)),
+      hint: isDry ? 'above WL' : 'below WL',
+      warn: isDry,
+      glyph: 'pump',
+      gauge: total > 0 && !isDry ? { fromPct: percentOfTotal(water, total), toPct: percentOfTotal(pump, total), markPct: percentOfTotal(pump, total) } : undefined,
+    });
+  }
+
+  if (total > 0 && deepest && deepest.csgDepth <= total) {
+    const open = total - deepest.csgDepth;
+    const start = percentOfTotal(deepest.csgDepth, total);
+    metrics.push({
+      label: 'Uncased',
+      short: 'Uncased',
+      value: formatFeet(open),
+      hint: sharePct(open, total),
+      glyph: 'shoe',
+      gauge: { fromPct: start, toPct: 100, markPct: start },
+    });
+  }
+
+  return metrics;
 }

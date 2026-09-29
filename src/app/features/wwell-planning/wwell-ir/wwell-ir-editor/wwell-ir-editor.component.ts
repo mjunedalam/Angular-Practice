@@ -243,6 +243,13 @@ export class WwellIrEditorComponent implements AfterViewInit {
     const live = this.requestReferenceEdit.liveValue();
     return (live ? live.wellName : this.ir().requestReference.wellName) || 'Untitled Well';
   });
+  /** Follows the live edit like the title: picking a linked request fills the coordinates before Save. */
+  protected readonly headerCoordinates = computed(() => {
+    const live = this.requestReferenceEdit.liveValue();
+    return (live ? live.coordinates : this.ir().requestReference.coordinates) ?? '';
+  });
+  /** Follows the live edit of the Estimated Hydrology step's Test Type toggle. */
+  protected readonly headerTestType = computed(() => this.hydrogeologyEdit.liveValue()?.testType ?? this.ir().testProgram.testType);
   protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));

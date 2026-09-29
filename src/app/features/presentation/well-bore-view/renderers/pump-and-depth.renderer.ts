@@ -71,17 +71,28 @@ export function renderPump({
     .attr('viewBox', '0 0 100 100')
     .attr('overflow', 'visible');
 
+  // Same pump pictogram as `WwellIrWellboreGlyphComponent` (kind="pump", viewBox 0 0 16 14):
+  // motor cap/body, volute, inlet/outlet stubs, with cut-out "shine" highlights on top.
   const iconG = icon.append('g')
-    .attr('stroke', '#1e293b')
-    .attr('stroke-width', '3')
-    .attr('stroke-linecap', 'round')
-    .attr('stroke-linejoin', 'round');
+    .attr('transform', 'translate(30, 28.5) scale(2.5)')
+    .attr('fill', 'var(--accent)');
 
-  iconG.append('line').attr('x1', 35).attr('y1', 52).attr('x2', 65).attr('y2', 52);
-  iconG.append('polygon').attr('points', '30,52 36,48 36,56').attr('fill', '#1e293b').attr('stroke', 'none');
-  iconG.append('polygon').attr('points', '70,52 64,48 64,56').attr('fill', '#1e293b').attr('stroke', 'none');
-  iconG.append('line').attr('x1', 50).attr('y1', 40).attr('x2', 50).attr('y2', 52);
-  iconG.append('polygon').attr('points', '50,34 45,40 55,40').attr('fill', '#1e293b').attr('stroke', 'none');
+  iconG.append('rect').attr('x', 6.6).attr('y', 0.9).attr('width', 2.8).attr('height', 3.2);
+  iconG.append('rect').attr('x', 5.9).attr('y', 0).attr('width', 4.2).attr('height', 1.1).attr('rx', 0.3);
+  iconG.append('circle').attr('cx', 8).attr('cy', 8.6).attr('r', 4.6);
+  iconG.append('rect').attr('x', 12).attr('y', 7.4).attr('width', 2).attr('height', 2.4);
+  iconG.append('rect').attr('x', 13.6).attr('y', 6.9).attr('width', 1.4).attr('height', 3.4).attr('rx', 0.3);
+  iconG.append('rect').attr('x', 3.6).attr('y', 7.7).attr('width', 1.6).attr('height', 1.8);
+  iconG.append('rect').attr('x', 0.4).attr('y', 5.6).attr('width', 3.8).attr('height', 6).attr('rx', 1.1);
+
+  const shineG = iconG.append('g')
+    .attr('fill', 'none')
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 0.8)
+    .attr('stroke-linecap', 'round')
+    .attr('opacity', 0.75);
+  shineG.append('circle').attr('cx', 8).attr('cy', 8.6).attr('r', 2.3);
+  shineG.append('path').attr('d', 'M1.6 7.2v3M2.9 7.2v3');
 
   applyPop(iconWrap, cx, cy, start, animation);
 

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -10,6 +11,7 @@ import { WellBoreViewComponent } from '../../../presentation/well-bore-view/well
 import { WwellIrDepthScaleComponent } from '../wwell-ir-depth-scale/wwell-ir-depth-scale.component';
 import { buildScaleTicks, resolveScaleDepthFt } from '../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { WWELL_IR_EXPANDED_DIAGRAM_LAYOUT, WWELL_IR_PREVIEW_DIAGRAM_LAYOUT } from '../wwell-ir-editor/wwell-ir-preview-diagram-layout';
+import { toUtmAxes } from '../wwell-ir-coordinates.util';
 import { buildWellboreFacts } from './wwell-ir-wellbore-facts.util';
 import { WwellIrWellboreGlyphComponent } from './wwell-ir-wellbore-glyph.component';
 
@@ -25,6 +27,33 @@ const EXPANDED_MIN_WIDTH_PX = 1240;
 const EXPANDED_MIN_HEIGHT_PX = 700;
 const EXPANDED_MAX_WIDTH_PX = 1760;
 const EXPANDED_MAX_HEIGHT_PX = 1100;
+
+interface WellboreTestMode {
+  readonly kind: 'pump' | 'flow';
+  readonly word: string;
+  /** The Material icon; none for the pump, which is drawn with the panel's own pump pictogram (the one the Pump setting
+   *  tile uses) — the installed icon font predates `water_pump` and would print waves for it. */
+  readonly icon: string | null;
+  readonly aria: string;
+  readonly tip: string;
+}
+
+const TEST_MODES: Readonly<Record<string, WellboreTestMode>> = {
+  'pump-test': {
+    kind: 'pump',
+    word: 'Pump',
+    icon: null,
+    aria: 'Test type: pump',
+    tip: 'Pump test — proven by pumping; the estimated water level is drawn below ground',
+  },
+  'flow-test': {
+    kind: 'flow',
+    word: 'Flow',
+    icon: 'water',
+    aria: 'Test type: flow',
+    tip: 'Flow test — the well is expected to flow at surface; its shut-in wellhead pressure is drawn above ground',
+  },
+};
 
 interface WellborePanelLegendKey {
   readonly key: 'ground' | 'water' | 'casing' | 'liner' | 'open-hole' | 'gravel' | 'screen' | 'perforated' | 'tops';
@@ -65,7 +94,7 @@ const isFlagYes = (flag: string | null | undefined): boolean => (flag ?? '').tri
 @Component({
   selector: 'app-wwell-ir-wellbore-panel',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule, WellBoreViewComponent, WwellIrDepthScaleComponent, WwellIrWellboreGlyphComponent],
+  imports: [NgTemplateOutlet, MatButtonModule, MatIconModule, MatTooltipModule, WellBoreViewComponent, WwellIrDepthScaleComponent, WwellIrWellboreGlyphComponent],
   templateUrl: './wwell-ir-wellbore-panel.component.html',
   styleUrl: './wwell-ir-wellbore-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +108,13 @@ export class WwellIrWellborePanelComponent {
   readonly hasTargetDepth = input(true);
   readonly layout = input<DiagramLayout>(WWELL_IR_PREVIEW_DIAGRAM_LAYOUT);
   readonly title = input('Wellbore Preview');
+  /** The record's own identifiers, shown in the Expand dialog (the other forms sit on a page that already names the
+   *  record): the IR number under the well's name, the coordinates as a card in the side rail. Either is left out while
+   *  it is blank. */
+  readonly irCode = input('');
+  readonly coordinates = input('');
+  /** The IR's test type ('flow-test' | 'pump-test'); anything else prints no badge. */
+  readonly testType = input('');
   readonly emptyHint = input('Add a casing or formation top row — with type, size, and depth filled in — to preview the wellbore diagram.');
   /** Caps for the inline figure; whichever binds first sets its width (height follows the ratio). */
   readonly maxWidthPx = input(DEFAULT_MAX_WIDTH_PX);
@@ -195,6 +231,12 @@ export class WwellIrWellborePanelComponent {
       tops: data.geologicTops,
     });
   });
+
+  protected readonly testMode = computed<WellboreTestMode | null>(() => TEST_MODES[this.testType()] ?? null);
+
+  /** The coordinates split into Northing/Easting/UTM Zone, shown exactly as the raw survey values
+   *  (or kept whole when they do not read as that shape). */
+  protected readonly coordinateAxes = computed(() => toUtmAxes(this.coordinates()));
 
   /** Only what the diagram actually draws, from the same data/flags the renderers read. */
   protected readonly legend = computed<readonly WellborePanelLegendKey[]>(() => {

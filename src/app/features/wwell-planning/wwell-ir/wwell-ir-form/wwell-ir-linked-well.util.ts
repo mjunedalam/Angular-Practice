@@ -1,4 +1,5 @@
 import { IntegratedRequirementRequestReference } from '@models/wwell-planning/integrated-requirement.model';
+import { formatUtmCoordinates, parseUtmZone } from '../wwell-ir-coordinates.util';
 import { IrEligibleWell } from './wwell-ir-payload.model';
 
 /**
@@ -25,8 +26,11 @@ export function linkedWellHasElevation(well: IrEligibleWell): boolean {
   return well.surfaceElevation != null;
 }
 
+/** Also requires a readable UTM zone — `surfaceNorth`/`surfaceEast` are real UTM northing/easting
+ *  meters (see wwell-ir-coordinates.util.ts), not usable on their own without knowing which zone
+ *  they're measured against. */
 export function linkedWellHasCoordinates(well: IrEligibleWell): boolean {
-  return well.surfaceNorth != null && well.surfaceEast != null;
+  return well.surfaceNorth != null && well.surfaceEast != null && parseUtmZone(well.utmZone) !== null;
 }
 
 export function linkedWellHasTargetDepth(well: IrEligibleWell): boolean {
@@ -41,8 +45,14 @@ export function linkedWellHasSupportingBusiness(well: IrEligibleWell): boolean {
   return well.supportings != null;
 }
 
+/** `surfaceNorth`/`surfaceEast` are UTM meters (`exad_rcd_prewap.surfacen`/`surfacee`), not
+ *  decimal-degree latitude/longitude — this used to just slap "°N"/"°E" straight onto them as if
+ *  they were degrees. Shown as the raw survey values they are (Northing/Easting/Zone), not
+ *  converted to anything else. Only called after `linkedWellHasCoordinates` confirms a readable
+ *  zone, but falls back to empty rather than a bogus string if that invariant is ever violated. */
 export function formatLinkedWellCoordinates(well: IrEligibleWell): string {
-  return `${well.surfaceNorth}°N, ${well.surfaceEast}°E`;
+  if (well.surfaceNorth == null || well.surfaceEast == null) return '';
+  return formatUtmCoordinates(well.surfaceNorth, well.surfaceEast, well.utmZone) ?? '';
 }
 
 /** Overrides `reference`'s Well Name/Surface Elevation/Coordinates/Target Depth/Target

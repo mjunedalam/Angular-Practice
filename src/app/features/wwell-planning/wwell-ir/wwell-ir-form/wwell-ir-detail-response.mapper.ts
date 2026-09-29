@@ -4,6 +4,7 @@ import {
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { isLegacyIrHtmlText, stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
+import { formatUtmCoordinates } from '../wwell-ir-coordinates.util';
 import {
   IrCasingRow,
   IrHeaderRow,
@@ -106,9 +107,13 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       letterNumber: header?.ltr_no ?? existing.requestReference.letterNumber,
       wellName: linkedWell ? `${linkedWell.w_prim_hid ?? ''}_${linkedWell.w_num ?? ''}` : existing.requestReference.wellName,
       surfaceElevationFtAsl: linkedWell?.sv_surf_elevf ?? existing.requestReference.surfaceElevationFtAsl,
+      // `surfacen`/`surfacee` are UTM northing/easting meters, not decimal-degree lat/long — shown
+      // as the raw survey values (Northing/Easting/Zone), not converted — see
+      // wwell-ir-coordinates.util.ts's doc comment.
       coordinates:
         linkedWell?.surfacen != null && linkedWell?.surfacee != null
-          ? `${linkedWell.surfacen}°N, ${linkedWell.surfacee}°E`
+          ? (formatUtmCoordinates(linkedWell.surfacen, linkedWell.surfacee, linkedWell.sv_utm_zn) ??
+            existing.requestReference.coordinates)
           : existing.requestReference.coordinates,
       targetDepthFt: linkedWell?.target_dpth ?? existing.requestReference.targetDepthFt,
       targetAquifer: linkedWell?.target_form ?? existing.requestReference.targetAquifer,

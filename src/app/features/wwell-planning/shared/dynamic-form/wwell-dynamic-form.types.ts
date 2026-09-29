@@ -78,6 +78,11 @@ export interface WwellFieldConfig {
   /** Disables the control — for values derived elsewhere (e.g. a server-computed metric) rather
    *  than typed in directly. Pair with a `placeholder` like 'auto' to signal that visually. */
   readonly readonly?: boolean;
+  /** Renders this field's single control value as several read-only labelled boxes side by side
+   *  instead of one — e.g. a combined "lat, long" string split into a Latitude box and a
+   *  Longitude box. Applies in both edit and review mode; the control itself is untouched (still
+   *  one value, one key), this only changes how DynamicFieldComponent draws it. */
+  readonly splitDisplay?: (value: string) => readonly { readonly label: string; readonly value: string }[];
 }
 
 export interface WwellRepeatableRowConfig {

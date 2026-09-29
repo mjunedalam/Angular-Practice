@@ -242,6 +242,25 @@ $danger: tokens.$danger;
   color: $muted;
 }
 
+/* A `splitDisplay` field (e.g. Coordinates → Latitude + Longitude) — same footprint as a normal
+ * field/review card, just laid out as an even row of boxes instead of one. */
+.dyf--split {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+/* `.dyf--review` alone sets `flex-direction: column` (one label stacked over one value) — a
+ * split review card needs its boxes laid out as a row instead, so this must win over that. */
+.dyf--review.dyf--split {
+  flex-direction: row;
+}
+
+.dyf__split-box {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .dyf__value {
   margin: 0;
   font-size: 0.98rem;

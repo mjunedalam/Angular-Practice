@@ -1,4 +1,5 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
 /** Flags a value that's actually meaningful, not just informational — e.g. a nonzero H2S
  *  reading should read as amber/danger regardless of which section it sits in. Omitted (or
@@ -43,6 +44,19 @@ function resolveLinkedRequestLabel(
   return wellName || wellOptions.find(option => option.value === linkedRequestId)?.label || linkedRequestId;
 }
 
+/** Splits a "Northing Xm, Easting Ym, Zone Z" coordinate string into its own Northing/Easting/UTM
+ *  Zone rows — falls back to a single "Coordinates" row when the text doesn't read as that shape
+ *  (unset, or hand-typed free text), same fallback `toUtmAxes` uses for the wellbore panel's
+ *  Location card. Shown exactly as the raw survey values, no unit conversion. */
+function coordinateKvRows(coordinates: string | null | undefined): readonly KvRow[] {
+  if (!coordinates) return [{ label: 'Coordinates', value: EMPTY_VALUE, mono: true }];
+  return toUtmAxes(coordinates).map(axis => ({
+    label: axis.label,
+    value: axis.value,
+    mono: true,
+  }));
+}
+
 /** Mirrors the IR wizard's "Request Reference" step (wwell-ir-form.schema.ts) field-for-field,
  *  so the detail page's sections line up 1:1 with the stepper the data was captured through. */
 export function buildRequestReferenceRows(
@@ -63,7 +77,7 @@ export function buildRequestReferenceRows(
     // matching fallback in mapIntegratedRequirementToFormPatch, wwell-ir-edit.mapper.ts).
     { label: 'Target Depth', value: r.targetDepthFt ? fmtNum(r.targetDepthFt, 'ft') : EMPTY_VALUE, mono: true },
     { label: 'Surface Elevation', value: `${fmtNum(r.surfaceElevationFtAsl)} ft ASL`, mono: true },
-    { label: 'Coordinates', value: fmtStr(r.coordinates), mono: true },
+    ...coordinateKvRows(r.coordinates),
   ];
 }
 
