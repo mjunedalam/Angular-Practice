@@ -1172,3 +1172,242 @@ partial moved from `wwell-planning/shared/_wwell-wellbore.scss` to `wwell-ir/_ww
 - **Checked:** `tsc` (app + spec), ESLint on `wwell-planning`, full Jest (85 suites / 481 tests — the two cutaway specs went with the folder); Details / Well Design /
   Letter and the editor screenshotted live in dark and light. No new specs (standing call).
 - **Seen, not changed:** `ng build` production still fails on `wwell-ir-editor.component.scss` (≈35.2 kB vs the 32 kB error budget; it was over before this work).
+
+## 2026-09-28
+
+### wwell-ir wellbore — even ground line, steady Total Depth gap, live casing / formation rows
+
+- **Ask:** the red ground-level line looked uneven wherever the IR draws a wellbore; "TOTAL DEPTH" sometimes overlapped the completion labels; casing and formation rows
+  must show in the diagram as they are typed (no Save / Add), and vanish as they are removed.
+- **IR-only, by instruction:** nothing under `features/presentation/well-bore-view/` was touched (an earlier attempt that did was reverted). The renderer's own ground line is
+  hidden (`.wbp__stage .ground-line`) and the panel draws one in its grid layer, centred on the bore (`groundLine` in the component, from the widest casing / open hole);
+  it is crisp-edged and identical in every form. The Total Depth label is moved by an em-based `translateY` so the gap under the drawing is constant at any type size, and
+  the layouts got the extra bottom room (`wwell-ir-preview-diagram-layout.ts`: preview svgHeight 1020, expanded bottom margin 68).
+- **Live rows:** the editor's `wellboreDiagramData` now reads `casingPreviewRows` / `formationTopsPreviewRows` (saved rows + the row being edited or added, skipping duplicate-key
+  drafts). Row delete reads the row from the list, so deleting no longer crashes on a stale index.
+
+### App theme — neutral light / dark, one Legacy button (replaces Aurora Glass)
+
+- **Ask:** no blue tint in either theme, a proper light and dark, a better light/dark icon, and the Appearance control removed in favour of one toggle back to the legacy layout.
+- Fixed neutral palettes and solid panels with a hairline and a soft shadow; blue only on actions and the current page. The header carries a sun/moon button (one morphing glyph)
+  and a Legacy (history) button; the Appearance popover and contrast dial are gone. `--wp-*` tokens in `_wwell-theme.scss`, `--shell-*` in `layout/_shell-theme.scss`.
+  Contrast was scripted across both themes.
+
+### wwell-ir wellbore panel — quieter small view, more metrics in the maximised view
+
+- **Ask:** the small wellbore (Timeline sidebar) prints its type too big and wants refining; the bigger view should show more statistics / metrics.
+- **Small view (`.wbp--compact`):** depth numerals, geologic labels and the total-depth label 11.1 → 9.6px on screen (28 → 24 viewBox units), ground label 10 → 8.4, casing sizes
+  10.7 → 9.2; axis / ticks / geologic line set lighter (stroke 1.5, opacity .7, tick weight 500) so the bore leads. Card chrome one step down (title 22 → 18px, the four figures
+  18 → 15px, caption 12px). This goes below the 12px floor **for the small drawing's labels only** — the user asked for it; the maximised views and the panel's text stay ≥ 12px.
+- **Maximised view** (`buildWellboreFacts` gains `metrics`, `locations`, `holeSections`; topRows gain `interval`): left rail "Well metrics" — Submergence (pump − static WL; warns when the pump is
+  above the water) and Uncased (TD − deepest shoe), each on the key depths' tile with a gauge. Right rail: formation tops gain a "Thick ft" column (interval to the next top; the last runs to TD). Everything
+  shows only when its inputs exist and only when the dialog is ≥ 1140px wide (the wide two-rail layout); metric gauges drop below 720px of dialog height; the rails never shrink their content
+  (they scroll instead of clipping). The Well Design page (fit form, ~824px) gets the thickness column only. The record's IR number sits in the dialog header (below), and the foot of the right rail is a lit
+  "Location" card: the coordinates split into Latitude and Longitude **as written** (`wwell-ir-wellbore-coordinates.util.ts` parses "27.489°N, 41.698°E" or a plain decimal pair, S / W or negative
+  values included; no degrees-minutes-seconds conversion — the user asked for none), each row with a solid accent badge (`swap_vert` / `swap_horiz`), the degrees large and the hemisphere as a chip, a
+  wireframe globe rising from the card's right edge, and an accent rule down the left. Text that does not read as a coordinate pair is shown whole as "Coordinates". The rail's `.wbp__facts` is a flex
+  column in the dialog so the card sits at the foot (`margin-top: auto`). New `irCode` / `coordinates` inputs on the panel, fed by the editor (coordinates follow the live edit) and the Well Design
+  view, forwarded into the Expand template; dialog only.
+- **Dialog header:** the well name is set as it always was (mono 24px with its accent rule) with the record's IR number under it (accent mono), and the "Depths in ft below ground level" caption is gone from the
+  dialog (the depth axis already says "FT BGL"; the small and inline forms keep it). The test type sits at the header's right as the one word it is — PUMP (`--wp-accent`, with the panel's pump pictogram) or FLOW (`--wp-wb-water`, with the `water` waves icon), in the mono face,
+  nothing round it; both colours follow the theme; `role="img"` with an aria-label and a tooltip. Rejected on the way, as too heavy or not right: a solid gradient pill with a pulsing ring, a two-line
+  "TEST TYPE / PUMP" tile, an object header (IR tag above a bigger name, a chip beside it, a hairline), and a read-only PUMP | FLOW two-way switch (the user did not want both shown at once). Test type comes from the IR's `testProgram.testType` (`pump-test` / `flow-test`); anything else prints nothing. New `testType`
+  input; the editor feeds the live Estimated Hydrology toggle (flipping it to Flow changes the word before Save), the Well Design view the saved value. The installed Material Icons font predates
+  `water_pump` (it prints waves for it), hence the custom pictogram for PUMP. The form defaults Test Type to flow-test, so a record that never chose one reads FLOW.
+- **Changed along the way:** "Strings" (count + size run) was dropped as redundant with the casing program's count badge. A "Design checks" card, a "Water column" tile (TD − static WL) and a
+  "Hole sections" table (footage per string + open hole) were built and then removed at the user's request. "Into <top>" was a tile, then folded into a "Where it sits" list (formation of the water level / pump / TD), which the user then removed too. Candidates not built: elevation view (needs surface
+  elevation → water / pump / TD in ft ASL; tops already carry sub-sea depth), completion summary from the well-design flags, hydrogeology estimates (units unverified).
+- **Checked:** `tsc`, `ngc --noEmit`, ESLint on the panel folder, full Jest (88 / 89 suites — the one failure is the old left-sidenav "Well Profile" order spec); live at 1280×720 and 1353×813
+  in light and dark (Expand dialog: no rail overflow; compact sidebar; Well Design tab); scripted contrast ≥ 5.3:1 on every new text; failing-check and dry-pump paths exercised with a
+  throwaway spec (deleted, before the checks card was removed). No new specs (standing call).
+
+## 2026-09-29 (Tuesday)
+
+**Coordinates split into Latitude/Longitude everywhere in IR**
+
+- User: every place in the IR shows lat and long jammed into one combined box; wanted them split
+  wherever they appear. Scoped to `wwell-ir` only (not the WLDA/Land Affairs/Requests forms, which
+  have their own separate coordinate fields untouched here).
+- `toCoordinateAxes` (the "27.489°N, 41.698°E" → Latitude/Longitude parser already built for the
+  wellbore panel's Location card) moved from `wwell-ir-wellbore-panel/wwell-ir-wellbore-coordinates.util.ts`
+  to `wwell-ir/wwell-ir-coordinates.util.ts` — feature root, since four places import it now.
+- **Request Reference view** (`wwell-ir-detail-rows.util.ts`, `buildRequestReferenceRows`): the one
+  "Coordinates" `KvRow` is now two rows, Latitude / Longitude, each `"27.489° N"` style; falls back
+  to a single "Coordinates" row when the text doesn't parse as a pair (unset or hand-typed), same
+  fallback the util already uses.
+- **Request Reference edit form + the IR wizard's Coordinates field** (`wwell-ir-form.schema.ts`,
+  the shared dynamic-form engine): added a new optional `splitDisplay` hook on `WwellFieldConfig` —
+  a field can supply `(value: string) => {label, value}[]` and `DynamicFieldComponent` renders that
+  many small read-only boxes side by side (in both edit and review mode) instead of the normal
+  one-input `@switch`. Kept the engine itself coordinate-agnostic — the actual lat/long regex stays
+  in `wwell-ir-coordinates.util.ts`, wired in only via the schema's `coordinates` field. Still one
+  underlying FormControl/model key; this only changes how it's drawn. Verified live by patching the
+  control's value through `window.ng.getComponent()` (the New IR draft's Link to Request picker
+  wouldn't return options against the flaky local backend at verification time) — rendered as two
+  boxes, "Latitude 27.489° N" / "Longitude 41.698° E", same width as the old single field.
+- **Letter tab** (`wwell-ir-view-letter.component.html/.ts`): "1. Well Location"'s Coordinates line
+  is now two lines, Latitude / Longitude; added `coordinateAxes` computed using the same util.
+- Wellbore panel's own Location card (already split, prior session) untouched.
+- Checked: `tsc -p tsconfig.app.json --noEmit` clean, ESLint clean on `wwell-ir` + `shared/dynamic-form`,
+  full `wwell-planning` Jest (101/101, no new specs). Verified live on IR-9065 (HAIL_500): Details
+  tab view mode, the New-IR draft's edit-mode Coordinates field, and the Letter tab all show the
+  split. No backend/model change — `coordinates` stays one string field end to end; this is display
+  layer only.
+- Separately: `agwa-planning`'s dev server was found wedged (see `reference_agwa_planning_dev_server_wedge.md`)
+  at the start of this session and restarted (exact-PID kill + `nohup … quarkus:dev < /dev/null`);
+  that also brought up its continuous-testing Testcontainers (Redpanda), which briefly made Oracle
+  flaky (`ORA-17002`) — resolved on its own by the time of this session's live checks.
+
+**Follow-up same day: Well Design tab was missing the Location card**
+
+- User noticed the Well Design tab's wellbore panel was "out of sync" — no Latitude/Longitude,
+  even though that panel already renders at a large size there (`[fit]="true"`).
+- Root cause: `wwell-ir-wellbore-panel.component.html`'s Location card gated on the literal
+  `expanded()` input (dialog only), while its neighbors — the metrics block and the formation
+  tops' "Thick ft" column — already gate on `isFilled()` (`expanded() || fit()`). The doc comment
+  ("dialog only — the other forms sit on a page that already shows it") was true for the editor's
+  compact sidebar preview (that page's Request Reference rows already show it) but not for the
+  Well Design tab, which shows lat/long nowhere else.
+- Fix: changed the Location card's gate from `expanded()` to `isFilled()`, matching its neighbors.
+  No CSS change needed — `.wbp__table--location`'s "foot of the rail" styling already lived in the
+  shared wide-rail container query, not an `.wbp--expanded`-only block. The compact editor preview
+  (`compact` input, `isFilled()` false) still correctly has no Location card.
+- Checked: `tsc`, ESLint on the panel folder, full `wwell-planning` Jest (101/101). Verified live on
+  IR-9065's Well Design tab — Location card now renders at the foot of the right rail exactly as in
+  the Expand dialog.
+
+**Same day, third follow-up: coordinates were UTM meters, not decimal degrees — real bug, not just display**
+
+- User reported the real production API returns `surfaceNorth: 3024586.0, surfaceEast: 697244.0`
+  for a well's surface location — obviously UTM northing/easting in meters (a latitude of
+  3,024,586° is meaningless), not the decimal degrees (`27.489`, `41.698`) every place in this app
+  had been assuming.
+- Root cause, found in two places, both doing the exact same wrong thing — treating
+  `surfaceNorth`/`surfaceEast` as if they were already decimal-degree lat/long and just slapping
+  `°N`/`°E` on them as a template literal, with zero actual unit conversion:
+  - `wwell-ir-linked-well.util.ts` → `formatLinkedWellCoordinates()` — runs when picking "Link to
+    Request" for a new IR.
+  - `wwell-ir-detail-response.mapper.ts` (line ~109) — recomputes `requestReference.coordinates`
+    fresh on every detail load of an already-saved IR, from the joined `exad_rcd_prewap` block.
+    (There is no persisted `coordinates` column anywhere in the backend — confirmed by reading
+    agwa-planning's schema/DTOs — this string is synthesized client-side every time.)
+  - Both bugs only ever looked right locally because the mock Oracle DB's `exad_rcd_prewap.surfacen`/
+    `surfacee` columns had themselves been faked as pre-converted decimal degrees (27.4890/41.6980
+    for HAIL_500), specifically so the broken template literal would happen to print something
+    plausible — see that table's own schema comment in agwa-planning before this fix.
+- Fix: added `wwell-ir-utm.util.ts` (feature root) — a real inverse Transverse Mercator conversion
+  (`utmToLatLon`, standard Snyder formulas, WGS84) plus `parseUtmZone` (reads a bare number like `38`
+  or a lettered string like `"38N"`, defaulting to `N` — every zone this app has ever seen is Saudi
+  Arabia) and `formatUtmAsCoordinates` (ties them together, formats to the same `"27.489°N,
+  41.698°E"` shape everything downstream already parses). Sanity-checked against the trivial
+  easting=500000/northing=0 case (must decode to exactly the zone's central meridian at the equator)
+  and cross-checked round-trip against a hand-rolled forward converter in a throwaway node script
+  before wiring it in. Both buggy call sites now go through it instead of a raw template literal.
+  `linkedWellHasCoordinates()` now also requires a parseable zone, since northing/easting alone are
+  meaningless without one.
+- Also reseeded agwa-planning's mock DB to match: `exad_rcd_prewap.surfacen`/`surfacee` widened from
+  `NUMBER(9,4)` (max 5 integer digits — can't even hold a 7-digit UTM northing) to `NUMBER(12,4)`,
+  and all 10 mock wells' values replaced with genuine UTM meters, each forward-converted from its
+  own existing real decimal-degree position at the zone that actually contains it (verified
+  round-trip lossless, so nothing moved geographically — including HAIL_500, prewap_seq 5009, which
+  stays at its own established 27.489°N/41.698°E, zone 37). RXYD-140/145's zone was corrected 39→38
+  in the process — the old value only ever "worked" because zone was never actually used before; a
+  real UTM easting at zone 39 for that well's actual position comes out negative, which isn't how
+  real UTM data looks. Applied to both the checked-in seed SQL (`03-agwa-queries-schema.sql`, for
+  future reseeds) and the already-running container (`ALTER TABLE` + `UPDATE`, via `sqlplus` inside
+  `agwa-planning-oracle`), so it's testable immediately without a reseed/restart.
+  - **First pass got this wrong**: initially wrote the user's illustrative example numbers
+    (surfaceNorth 3024586.0/surfaceEast 697244.0 — a real payload observed for *some* well, given
+    purely to show the field format/magnitude) literally into HAIL_500's row, overwriting its own
+    established real position with an unrelated well's coordinates. User caught it ("i think u
+    hardcode it... i have given the format so look it") — corrected to forward-convert HAIL_500's
+    own 27.489/41.698 like every other row, instead of treating the example as a fixture to paste in.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101, no new specs — standing call for this
+  feature). Verified live on IR-9065: Details, Well Design, and Letter tabs all show **27.4890°N /
+  41.6980°E** again (HAIL_500's own real position, now genuinely round-tripped through the UTM
+  conversion instead of a pre-faked decimal-degree passthrough). Did not verify the "New IR → Link
+  to Request" picker's live auto-fill for a *different* well end-to-end in the browser (gstack
+  browse couldn't reliably drive that particular mat-select's CDK overlay this session — a tooling
+  limitation, not a code issue); relied instead on a node script that round-tripped all 10 reseeded
+  wells' forward-conversion through the same inverse formula shipped in `wwell-ir-utm.util.ts` and
+  got back their exact original position for every one.
+
+**Same day, reversed: don't convert UTM to lat/long — show Northing/Easting/Zone as-is**
+
+- User: "we no need to convert show as it is and also include the sv_utm_zone it is already in
+  table" — the same "don't convert, show it as written" preference already on record for DMS
+  strings, now applied to UTM too. The lat/long conversion built earlier in this same session was
+  the wrong call — reverted.
+- Deleted `wwell-ir-utm.util.ts` entirely (the inverse-Transverse-Mercator math is now dead code —
+  nothing converts anymore). Rewrote `wwell-ir-coordinates.util.ts`: `CoordinateAxis`/
+  `toCoordinateAxes` (Latitude/Longitude) replaced with `UtmAxis`/`toUtmAxes` (Northing/Easting/UTM
+  Zone), plus `parseUtmZone` and `formatUtmCoordinates` (composes the one "coordinates" string this
+  app threads everywhere as `"Northing Xm, Easting Ym, Zone Z"` — no rounding, no unit conversion,
+  straight from the raw `surfacen`/`surfacee`/`sv_utm_zn` values).
+- Rewired every consumer that used to split lat/long to split Northing/Easting/Zone instead:
+  `wwell-ir-linked-well.util.ts` (`formatLinkedWellCoordinates`), `wwell-ir-detail-response.mapper.ts`
+  (the same per-load derivation as the earlier conversion fix, now composing the raw-value string
+  instead), `wwell-ir-detail-rows.util.ts` (Request Reference view rows — now 3 rows, not 2),
+  `wwell-ir-form.schema.ts`'s `splitDisplay` (now 3 boxes), `wwell-ir-view-letter.component.ts/html`
+  (Letter's "1. Well Location" — now Northing/Easting/UTM Zone/Surface Elevation/Target Aquifer, 5
+  items in the existing 2-col grid), and the wellbore panel's Location card (`swap_vert`/
+  `swap_horiz`/`public` icons; dropped the now-unused degree-symbol/hemisphere-chip markup and its
+  SCSS — `.wbp__geo-deg`/`.wbp__geo-hemi` deleted).
+- Caught and fixed a real overflow while verifying: `.wbp__geo-value` was `white-space: nowrap` at
+  1.3125rem, sized for a short "27.489°N"-style value — a raw "3043496.7774 m" northing overflowed
+  the Location card's fixed-width rail by ~18px. Fixed by dropping the flex/nowrap centering (only
+  needed when the value had a separate deg/hemi child span, which it no longer does) and reducing to
+  1.0625rem with `overflow-wrap: break-word`, rather than rounding the number to make it fit — "show
+  it as-is" means the display adapts to the value, not the other way round.
+- No DB changes this time — the raw `surfacen`/`surfacee`/`sv_utm_zn` values from the earlier UTM
+  reseed are exactly what's needed; only the client-side formatting/parsing changed.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101). Verified live on IR-9065: Details tab
+  shows "Northing 3043496.7774 m / Easting 766571.9346 m / UTM Zone 37" as three separate boxes; Well
+  Design tab's Location card shows the same, no overflow after the SCSS fix; Letter tab's "1. Well
+  Location" shows the same 3 lines plus Surface Elevation/Target Aquifer; the dynamic-form edit-mode
+  split (verified via a scratch New IR draft, coordinates value patched through
+  `window.ng.getComponent()` since the Link-to-Request picker's mat-select still wasn't reliably
+  drivable this session) shows three side-by-side read-only boxes, Northing/Easting/UTM Zone, no
+  overflow.
+
+**Same day: removed the pictogram from each Key Depths/Well Metrics gauge line**
+
+- User: the small pump/droplet icon marker on each KPI's progress line (Key Depths' TD/Static Water
+  Level/Deepest Shoe/Pump Setting, and Well Metrics' Submergence/Uncased, in the maximised dialog and
+  Well Design tab) should go — keep the line/fill, drop the icon.
+- `wwell-ir-wellbore-panel.component.html`'s `#statTile` template: removed the
+  `<app-wwell-ir-wellbore-glyph class="wbp__gauge-mark" ...>` element from each gauge; kept the
+  `<i class="wbp__gauge-fill">` bar (still tinted per `stat.glyph` via the `wbp__gauge--water`/
+  `wbp__gauge--pump` modifier class, since that also colours the fill, not just the removed glyph).
+  Deleted the now-unused `.wbp__gauge-mark` SCSS rule. Left `markPct` untouched in
+  `wwell-ir-wellbore-facts.util.ts` — it's still a meaningful, separately-computed position (not
+  always equal to `toPct`, e.g. the below-target-depth gauge marks the *start* of its fill, not the
+  end) that a future revert or different visual could reuse; removing that data-layer field wasn't
+  part of what was asked.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101). Verified live in the Expand dialog on
+  IR-9065 — all six gauge lines (4 Key Depths + 2 Well Metrics) show as plain tinted progress bars,
+  no icon.
+
+**Same day: tried swapping the diagram's pump marker for the real pump pictogram — reverted**
+
+- User asked for the diagram's pump marker (next to the casing at the pump-setting depth, labelled
+  "PS @ &lt;depth&gt;") to use the same pump icon as the header's "PUMP" word, then recolour it to
+  match the header's accent blue too. Built both (new shape via a D3 copy of
+  `WwellIrWellboreGlyphComponent`'s `kind="pump"` paths, then `fill: var(--accent)`), verified live on
+  IR-9065/HAIL_601 — then asked to keep the old pump icon in the wellbore diagram after all.
+  `pump-and-depth.renderer.ts`'s `renderPump()` is back to its original stroke-based crosshair/arrow
+  icon in `#1e293b` (confirmed identical to HEAD via `git diff`). No trace of the pump-pictogram swap
+  remains in this file; the header's own glyph (`WwellIrWellboreGlyphComponent`) is untouched either
+  way. `tsc`/ESLint/`well-bore-view` Jest (51/51) clean after the revert.
+
+**Same day: removed Deepest Shoe (Key Depths) and Submergence (Well Metrics)**
+
+- User: drop both from the wellbore panel's maximised stats. `wwell-ir-wellbore-facts.util.ts`:
+  `buildStats()` no longer pushes the "Deepest shoe" stat (and no longer takes a `deepest` param, since
+  that was its only use there); `buildMetrics()` no longer pushes "Submergence" (and dropped its now-
+  unused `input`/`water`/`pump` — the "Uncased" metric it still builds only ever needed `total` and
+  `deepest`, so its signature shrank to `buildMetrics(total, deepest)`). Casing-row "below TD" flags
+  and the "Uncased" metric are unaffected — they compute independently of the removed stat/metric.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101, no test named these two so nothing to
+  update). Verified live in the Expand dialog on IR-9065 — Key Depths shows Total Depth/Static Water
+  Level/Pump Setting only; Well Metrics shows Uncased only.

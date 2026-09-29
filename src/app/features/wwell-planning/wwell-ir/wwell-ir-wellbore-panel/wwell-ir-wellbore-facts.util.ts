@@ -81,7 +81,7 @@ export function buildWellboreFacts(input: WellboreFactsInput): WellboreFacts {
   const deepest = casings.at(-1) ?? null;
 
   return {
-    stats: buildStats(input, total, deepest),
+    stats: buildStats(input, total),
     casingRows: casings.map(casing => ({
       size: formatInches(casing.csgSize),
       type: casing.csgType,
@@ -89,7 +89,7 @@ export function buildWellboreFacts(input: WellboreFactsInput): WellboreFacts {
       belowTarget: total > 0 && casing.csgDepth > total,
     })),
     topRows: buildTopRows(input.tops, total),
-    metrics: buildMetrics(input, total, deepest),
+    metrics: buildMetrics(total, deepest),
   };
 }
 
@@ -104,7 +104,7 @@ export function sortCasingsByDepth(casings: readonly ICasingIR[]): ICasingIR[] {
 /** A depth as a share of total depth, 0–100 (clamped: a shoe below TD sits at the end). */
 export const percentOfTotal = (ft: number, total: number): number => Math.min(100, Math.max(0, (ft / total) * 100));
 
-function buildStats(input: WellboreFactsInput, total: number, deepest: ICasingIR | null): WellboreStat[] {
+function buildStats(input: WellboreFactsInput, total: number): WellboreStat[] {
   const { staticWaterLevel: water, pumpSetting: pump } = input;
   // "How much below ground": filled from the surface down to the depth, the glyph at its lower end.
   const below = (ft: number): WellboreGauge | undefined => {
@@ -116,19 +116,6 @@ function buildStats(input: WellboreFactsInput, total: number, deepest: ICasingIR
   const stats: WellboreStat[] = [];
   if (total > 0) stats.push({ label: 'Total depth', short: 'TD', value: formatFeet(total), glyph: 'depth', gauge: below(total) });
   if (water > 0) stats.push({ label: 'Static water level', short: 'Static WL', value: formatFeet(water), glyph: 'water', gauge: below(water) });
-  if (deepest) {
-    const belowTarget = total > 0 && deepest.csgDepth > total;
-    const string = [formatInches(deepest.csgSize), deepest.csgType].filter(Boolean).join(' ');
-    stats.push({
-      label: 'Deepest shoe',
-      short: 'Shoe',
-      value: formatFeet(deepest.csgDepth),
-      hint: [string, belowTarget ? 'below TD' : ''].filter(Boolean).join(' · '),
-      warn: belowTarget,
-      glyph: 'shoe',
-      gauge: below(deepest.csgDepth),
-    });
-  }
   if (pump > 0) stats.push({ label: 'Pump setting', short: 'Pump', value: formatFeet(pump), glyph: 'pump', gauge: below(pump) });
   return stats;
 }
@@ -167,23 +154,8 @@ const sharePct = (ft: number, total: number): string => `${Math.round(percentOfT
 
 /** What the key depths imply together. Each one needs the depths it is worked from, so a well that has not
  *  got that far yet simply shows fewer. */
-function buildMetrics(input: WellboreFactsInput, total: number, deepest: ICasingIR | null): WellboreStat[] {
-  const { staticWaterLevel: water, pumpSetting: pump } = input;
+function buildMetrics(total: number, deepest: ICasingIR | null): WellboreStat[] {
   const metrics: WellboreStat[] = [];
-
-  if (water > 0 && pump > 0) {
-    const submergence = pump - water;
-    const isDry = submergence < 0;
-    metrics.push({
-      label: 'Submergence',
-      short: 'Submergence',
-      value: formatFeet(Math.abs(submergence)),
-      hint: isDry ? 'above WL' : 'below WL',
-      warn: isDry,
-      glyph: 'pump',
-      gauge: total > 0 && !isDry ? { fromPct: percentOfTotal(water, total), toPct: percentOfTotal(pump, total), markPct: percentOfTotal(pump, total) } : undefined,
-    });
-  }
 
   if (total > 0 && deepest && deepest.csgDepth <= total) {
     const open = total - deepest.csgDepth;
