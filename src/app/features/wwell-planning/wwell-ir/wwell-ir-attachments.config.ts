@@ -45,7 +45,9 @@ export const WWELL_IR_ATTACHMENT_ACCEPT = '.pdf,.jpg,.jpeg,.png';
 /** Matches the server-side cap in IrAttachmentStorageService — checked here only to fail fast. */
 export const WWELL_IR_ATTACHMENT_MAX_BYTES = 25 * 1024 * 1024;
 
-/** The file occupying a slot, or null when it's empty — shared by the editor, letter and details views. */
-export function irAttachmentFor(attachments: readonly IrAttachment[], slot: IrAttachmentSlot): IrAttachment | null {
-  return attachments.find(attachment => attachment.slot === slot) ?? null;
+/** Every file occupying a slot, oldest-uploaded first (the order the backend returns them in) —
+ *  shared by the editor, letter and details views. A slot can hold any number of attachments, not
+ *  just one, so callers render this as a list rather than picking a single result. */
+export function irAttachmentsFor(attachments: readonly IrAttachment[], slot: IrAttachmentSlot): readonly IrAttachment[] {
+  return attachments.filter(attachment => attachment.slot === slot);
 }

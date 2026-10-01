@@ -1046,55 +1046,34 @@ app-wwell-ir-editor {
   }
 }
 
-/* Empty slot: hint copy plus one explicit Upload button. The card itself is deliberately NOT the
- * click target — with a real button present, a whole-card hit area just makes stray clicks open a
- * file dialog the user didn't ask for. */
-.ire__attachment-drop {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 1.1rem 1rem;
+/* A slot with nothing attached yet — just the hint copy; the Attach control lives in the section
+ * head (see `.ire__attachment-add-btn`) since it's always visible now, not only for an empty slot. */
+.ire__attachment-empty-hint {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
   border: 1.5px dashed $border;
   border-radius: 10px;
   background: tokens.$surface-alt;
-  text-align: center;
-  transition:
-    border-color 150ms ease,
-    background 150ms ease;
-
-  &:focus-within {
-    border-color: $accent;
-  }
-
-  > mat-icon {
-    width: 22px;
-    height: 22px;
-    font-size: 22px;
-    color: $accent;
-  }
+  color: $muted;
+  font-size: 0.82rem;
 }
 
-/* Icon-only upload control — a round accent button, sized to match the row actions on an occupied
- * slot so the two states read as the same control set rather than two different designs. */
-.ire__attachment-upload-icon {
+/* The section head's "+" control — same footprint as `.ire__edit-btn` (the "Add casing"/"Add area
+ * water well" buttons use), but on a <label> wrapping a hidden file input rather than a <button>,
+ * so picking a file still opens the OS dialog natively with no click-forwarding JS to keep working. */
+.ire__attachment-add-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  margin-top: 0.6rem;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: tokens.$cta-bg;
-  color: tokens.$on-cta;
+  color: $muted;
   cursor: pointer;
-  transition:
-    background 150ms ease,
-    opacity 150ms ease;
+  transition: color 150ms ease;
 
   &:hover {
-    background: tokens.$cta-bg-hover;
+    color: $accent;
   }
 
   /* Keyboard users reach the label through its hidden input, so the ring has to be drawn here. */
@@ -1103,39 +1082,37 @@ app-wwell-ir-editor {
     outline-offset: 2px;
   }
 
-  &--busy {
-    cursor: progress;
-    opacity: 0.65;
-  }
-
   mat-icon {
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
   }
 }
 
+/* One slot's attachments — any number of `.ire__attachment-file` rows, stored ones first. */
+.ire__attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 /* Skinny by design — this sits under a compact card, so a full-height Material bar would read as a
- * separate element rather than as feedback belonging to the slot above it. */
+ * separate element rather than as feedback belonging to the slot above it. The track/indicator
+ * height must be overridden via Material's own tokens, not a plain `height` on the host: MDC draws
+ * both at a fixed 4px internally (see @angular/material/progress-bar/_m3-progress-bar.scss), so a
+ * `height` + `overflow: hidden` here only clips that 4px bar rather than actually thinning it. */
 .ire__attachment-progress {
+  --mat-progress-bar-track-height: 2px;
+  --mat-progress-bar-active-indicator-height: 2px;
   margin-top: 0.5rem;
-  height: 3px;
   border-radius: 999px;
   overflow: hidden;
 }
 
-.ire__attachment-drop-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: $navy;
-}
-
-.ire__attachment-drop-hint {
-  font-size: tokens.$text-2xs;
-  color: $muted;
-}
-
-/* Occupied slot: file identity on the left, actions on the right. */
+/* One row in `.ire__attachment-list`: file identity on the left, actions on the right. */
 .ire__attachment-file {
   display: flex;
   align-items: center;
@@ -1181,6 +1158,14 @@ app-wwell-ir-editor {
 .ire__attachment-file-size {
   font-size: tokens.$text-2xs;
   color: $muted;
+}
+
+/* Informational only — the real object key sits in the tooltip, not inline, since it's a long
+ * opaque path nobody needs to read at a glance; this just confirms the mirror call landed. */
+.ire__attachment-s3-badge {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 
 .ire__attachment-action {

@@ -126,7 +126,9 @@ export class WwellIrService {
   }
 
   /**
-   * Uploads (or replaces) one slot's file, reporting real byte-level progress as it goes.
+   * Adds a new file to one slot, reporting real byte-level progress as it goes. Never replaces an
+   * existing file in that slot — a slot can hold any number of attachments now, each addressed by
+   * its own file name (see `getIrAttachmentFile`/`deleteIrAttachment`).
    *
    * Emits `{ percent, attachment: null }` while the body is still being sent, then one final
    * `{ percent: 100, attachment }` carrying the stored record. Uses `HttpRequest` +
@@ -170,33 +172,30 @@ export class WwellIrService {
     );
   }
 
-  /** Empties one slot. 404s when it was already empty — the caller treats that as "already gone". */
-  deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot): Observable<void> {
+  /** Deletes one specific attachment by slot + file name. 404s when it was already gone — the
+   *  caller treats that as "already gone" too. */
+  deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot, fileName: string): Observable<void> {
     return this.http
-      .delete<ApiResponse<unknown>>(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`, {
-        context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
-      })
+      .delete<ApiResponse<unknown>>(
+        `${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}/${encodeURIComponent(fileName)}`,
+        { context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true) },
+      )
       .pipe(map(() => undefined));
   }
 
   /**
-   * Pulls a stored attachment back as a `File` so it can be handed to FilePreviewDialogComponent,
+   * Pulls one stored attachment back as a `File` so it can be handed to FilePreviewDialogComponent,
    * which previews from a File (it builds its own object URL) rather than from a remote URL.
    * Fetching through HttpClient also means the JWT interceptor authenticates it — a plain
    * `<a href>` to the same endpoint would not carry the token.
    */
   getIrAttachmentFile(irSeq: number, slot: IrAttachmentSlot, fileName: string): Observable<File> {
     return this.http
-      .get(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`, {
+      .get(`${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}/${encodeURIComponent(fileName)}`, {
         responseType: 'blob',
         context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true),
       })
       .pipe(map(blob => new File([blob], fileName, { type: blob.type })));
-  }
-
-  /** Absolute URL of a stored file, for opening it in a viewer tab. */
-  irAttachmentUrl(irSeq: number, slot: IrAttachmentSlot): string {
-    return `${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}`;
   }
 
   /**

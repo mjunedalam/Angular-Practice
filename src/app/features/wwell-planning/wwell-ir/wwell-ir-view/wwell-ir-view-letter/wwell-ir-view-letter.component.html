@@ -199,7 +199,7 @@
     @if (ir().attachments.length) {
       <ul class="letter__attachments-list">
         @for (slot of attachmentSlots; track slot.slot) {
-          @if (attachmentFor(slot.slot); as attachment) {
+          @for (attachment of attachmentsFor(slot.slot); track attachment.fileName) {
             <li>
               <mat-icon>{{ slot.icon }}</mat-icon>
               <span>{{ slot.label }} — {{ attachment.fileName }}</span>

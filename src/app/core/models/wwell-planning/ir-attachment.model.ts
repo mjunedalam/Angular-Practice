@@ -20,6 +20,17 @@ export interface IrAttachmentUploadEvent {
   readonly attachment: IrAttachment | null;
 }
 
+/**
+ * A file picked for a slot but not yet sent — `id` is minted client-side (see
+ * WwellIrStore.addPendingAttachment) purely so the editor can track upload/busy state per staged
+ * file independently, since a slot can hold several of these at once and `File` has no identity of
+ * its own to key off.
+ */
+export interface IrPendingAttachment {
+  readonly id: string;
+  readonly file: File;
+}
+
 export interface IrAttachment {
   readonly slot: IrAttachmentSlot;
   /** Server-supplied display name for the slot ("Location Map"), also used as the PDF page caption. */
@@ -28,4 +39,11 @@ export interface IrAttachment {
   readonly fileName: string;
   readonly sizeBytes: number;
   readonly contentType: string;
+  /**
+   * Key the S3 object-store proxy (mocked locally by s3-client-service) minted when the backend
+   * best-effort mirrored this file into `EXAD_S3_OBJECT_STORAGE_INDEX`. Null whenever that mirror
+   * call never happened or failed — the file itself is always safely stored regardless, so this is
+   * purely informational, never a sign the upload itself failed.
+   */
+  readonly s3ObjectKey?: string | null;
 }

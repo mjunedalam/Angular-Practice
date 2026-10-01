@@ -29,7 +29,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
-import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -76,7 +76,7 @@ import {
   WWELL_IR_ATTACHMENT_ACCEPT,
   WWELL_IR_ATTACHMENT_MAX_BYTES,
   WWELL_IR_ATTACHMENT_SLOTS,
-  irAttachmentFor,
+  irAttachmentsFor,
 } from '../wwell-ir-attachments.config';
 import { WwellIrService } from '../wwell-ir.service';
 import {
@@ -601,51 +601,56 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
   protected readonly acceptedAttachmentTypes = WWELL_IR_ATTACHMENT_ACCEPT;
 
-  protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
-    return irAttachmentFor(this.ir().attachments, slot);
+  /** Every stored attachment in a slot — a slot holds any number of files, not just one. */
+  protected attachmentsFor(slot: IrAttachmentSlot): readonly IrAttachment[] {
+    return irAttachmentsFor(this.ir().attachments, slot);
   }
 
-  protected isAttachmentBusy(slot: IrAttachmentSlot): boolean {
-    return this.store.busyAttachmentSlot() === slot;
+  protected pendingAttachmentsFor(slot: IrAttachmentSlot): readonly IrPendingAttachment[] {
+    return this.store.pendingAttachments()[slot] ?? [];
   }
 
-  protected attachmentUploadPercent(): number | null {
-    return this.store.attachmentUploadPercent();
+  /** Set for a pending file's id for the whole duration of an auto-save kicked off by
+   *  {@link uploadPendingAttachment} for a not-yet-created IR — there's no upload in flight yet at
+   *  that point (nothing has started uploading), but the file is about to be swept by
+   *  `uploadPendingAttachments` the moment the save lands, so it reads as busy too (see
+   *  {@link isPendingUploadBusy}). A `Set` because several rows can each trigger (and share) that
+   *  same auto-save before it resolves. */
+  private readonly awaitingAutoSaveForUploadIds = signal<ReadonlySet<string>>(new Set());
+
+  protected isPendingUploadBusy(id: string): boolean {
+    return this.store.uploadingPendingIds().has(id) || this.awaitingAutoSaveForUploadIds().has(id);
   }
 
-  protected canAttach(): boolean {
-    return this.ir().irSeq != null;
+  protected isStoredAttachmentBusy(slot: IrAttachmentSlot, fileName: string): boolean {
+    return this.store.deletingAttachmentKeys().has(`${slot}:${fileName}`);
   }
 
-  protected pendingAttachmentFor(slot: IrAttachmentSlot): File | null {
-    return this.store.pendingAttachments()[slot] ?? null;
+  /** `null` while busy with no measurable byte progress yet (indeterminate bar) — see
+   *  WwellIrStoreState.uploadProgressByPendingId's own doc comment. */
+  protected uploadPercentFor(id: string): number | null {
+    return this.store.uploadProgressByPendingId()[id] ?? null;
   }
 
-  protected hasAttachment(slot: IrAttachmentSlot): boolean {
-    return this.attachmentFor(slot) !== null || this.pendingAttachmentFor(slot) !== null;
+  protected viewPendingAttachment(item: IrPendingAttachment, slot: IrAttachmentSlot): void {
+    this.openViewer(item.file, this.slotLabel(slot));
   }
 
-  protected viewAttachment(slot: IrAttachmentSlot): void {
-    const config = WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot);
-    const label = config?.label ?? 'Attachment';
-
-    const staged = this.pendingAttachmentFor(slot);
-    if (staged) {
-      this.openViewer(staged, label);
-      return;
-    }
-
-    const attachment = this.attachmentFor(slot);
+  protected viewStoredAttachment(attachment: IrAttachment, slot: IrAttachmentSlot): void {
     const irSeq = this.ir().irSeq;
-    if (!attachment || irSeq == null) return;
+    if (irSeq == null) return;
 
     this.wwellIrService
       .getIrAttachmentFile(irSeq, slot, attachment.fileName)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: file => this.openViewer(file, label),
+        next: file => this.openViewer(file, this.slotLabel(slot)),
         error: () => this.notify.error(`Failed to open ${attachment.fileName}.`),
       });
+  }
+
+  private slotLabel(slot: IrAttachmentSlot): string {
+    return WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot)?.label ?? 'Attachment';
   }
 
   private openViewer(file: File, label: string): void {
@@ -659,13 +664,41 @@ export class WwellIrEditorComponent implements AfterViewInit {
     });
   }
 
-  protected uploadStagedAttachment(slot: IrAttachmentSlot): void {
+  /**
+   * Uploads one staged file immediately on click — never deferred to a separate, explicit Save, and
+   * independent of every other file staged in this or any other slot. `isPendingUploadBusy` (checked
+   * both here and via the row's own `[disabled]`) is what stops a second click on the same row from
+   * firing a second request while the first is still in flight; the `[disabled]` binding alone can
+   * lag a frame behind a rapid double-click, so the guard is repeated here too.
+   *
+   * A record that's never been saved has no `ir_seq` to upload the file under yet — rather than
+   * telling the user to go click Save themselves first, this runs the same save
+   * `saveUnsavedChangesAndWait` already does for the "leave this page" guard, then flushes every
+   * currently-staged file across every slot (this one included) the moment a real `ir_seq` exists,
+   * via the same `uploadPendingAttachments` path a brand-new record's first save already uses
+   * elsewhere. Several rows clicked before that save lands all share the one in-flight save — the
+   * second and later callers just queue onto it (see `saveUnsavedChangesAndWait`'s own doc comment).
+   */
+  protected async uploadPendingAttachment(slot: IrAttachmentSlot, item: IrPendingAttachment): Promise<void> {
+    if (this.isPendingUploadBusy(item.id)) return;
+
     const irSeq = this.ir().irSeq;
-    if (irSeq == null) {
-      this.notify.info('Save the integrated requirement first — this uploads automatically on save.');
+    if (irSeq != null) {
+      this.store.uploadPendingAttachment(irSeq, slot, item.id);
       return;
     }
-    this.store.uploadStagedAttachment(irSeq, slot);
+
+    this.awaitingAutoSaveForUploadIds.update(ids => new Set(ids).add(item.id));
+    const saved = await this.saveUnsavedChangesAndWait();
+    this.awaitingAutoSaveForUploadIds.update(ids => {
+      const next = new Set(ids);
+      next.delete(item.id);
+      return next;
+    });
+    if (!saved) return;
+
+    const newIrSeq = this.store.draftIrSeq();
+    if (newIrSeq != null) this.store.uploadPendingAttachments(newIrSeq);
   }
 
   protected attachmentSizeLabel(bytes: number): string {
@@ -689,17 +722,24 @@ export class WwellIrEditorComponent implements AfterViewInit {
       return;
     }
 
-    this.store.setPendingAttachment(slot, file);
+    this.store.addPendingAttachment(slot, file);
   }
 
-  protected removeAttachment(slot: IrAttachmentSlot): void {
-    if (this.pendingAttachmentFor(slot)) {
-      this.store.removePendingAttachment(slot);
-      return;
-    }
+  /** Un-stages a file that was never sent — purely local, no backend call. */
+  protected removePendingAttachment(slot: IrAttachmentSlot, id: string): void {
+    this.store.removePendingAttachment(slot, id);
+  }
+
+  /**
+   * Deletes an already-uploaded attachment from the server. Guarded the same way
+   * `uploadPendingAttachment` is: the row's own `[disabled]` binding can lag a frame behind a rapid
+   * repeated click, so `isStoredAttachmentBusy` is checked here too rather than trusted alone.
+   */
+  protected deleteStoredAttachment(slot: IrAttachmentSlot, attachment: IrAttachment): void {
+    if (this.isStoredAttachmentBusy(slot, attachment.fileName)) return;
     const irSeq = this.ir().irSeq;
     if (irSeq == null) return;
-    this.store.deleteIrAttachment(irSeq, slot);
+    this.store.deleteIrAttachment(irSeq, slot, attachment.fileName);
   }
 
   @ViewChildren('sectionEl', { read: ElementRef }) private readonly sectionEls?: QueryList<ElementRef<HTMLElement>>;

@@ -1,5 +1,5 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
-import { IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { GwdOpsMember, IrEligibleWell } from '../wwell-ir-form/wwell-ir-payload.model';
 
 export interface WwellIrStoreState {
@@ -33,20 +33,28 @@ export interface WwellIrStoreState {
   /** Fetching one IR's stored attachment slots by ir_seq — again its own call, since attachments
    *  are files on the backend's filesystem rather than exad_gwd_ir_* columns. */
   readonly attachmentsLoading: boolean;
-  /** The slot currently mid-upload or mid-delete, so only that one card shows progress and
-   *  disables its controls — a single boolean would freeze both slots on either operation. */
-  readonly busyAttachmentSlot: IrAttachmentSlot | null;
-  /** Real bytes-sent percentage for an in-flight upload (0-100), or null when the busy slot is
-   *  doing something with no measurable progress (a delete). That null is what tells the editor to
-   *  show a spinner instead of a bar sitting misleadingly at 0%. */
-  readonly attachmentUploadPercent: number | null;
+  /** Ids (see `IrPendingAttachment.id`) of every pending file currently mid-upload — a slot can
+   *  hold several staged files at once, each with its own independent Upload button, so tracking
+   *  this per slot (as a single flag) would freeze every other file in that slot while just one of
+   *  them was sending. */
+  readonly uploadingPendingIds: ReadonlySet<string>;
+  /** Real bytes-sent percentage (0-100) for each id in `uploadingPendingIds`, or `null` for one
+   *  that's busy but has no measurable progress yet (queued behind an auto-save, or no progress
+   *  event has landed yet) — that `null` is what tells the editor to show an indeterminate bar
+   *  instead of one sitting misleadingly at 0%. */
+  readonly uploadProgressByPendingId: Readonly<Record<string, number | null>>;
+  /** Composite `${slot}:${fileName}` keys of every already-stored attachment currently mid-delete —
+   *  same one-row-at-a-time independence as `uploadingPendingIds`, for the delete side instead. */
+  readonly deletingAttachmentKeys: ReadonlySet<string>;
   /**
    * Files picked on a New IR, which has no ir_seq yet — and ir_seq is what an upload is filed
-   * under, so they can't be sent when chosen. Held in memory here, rendered in their slot like any
-   * other attachment, and uploaded by `uploadPendingAttachments` the moment the first save assigns
-   * a real ir_seq. Cleared when the draft is abandoned, so they can't leak onto the next record.
+   * under, so they can't be sent when chosen. A slot holds a list, not a single file: attaching
+   * never replaces what's already staged, only adds to it. Held in memory here, rendered in their
+   * slot like any other attachment, and uploaded by `uploadPendingAttachments` the moment the first
+   * save assigns a real ir_seq. Cleared when the draft is abandoned, so they can't leak onto the
+   * next record.
    */
-  readonly pendingAttachments: Readonly<Partial<Record<IrAttachmentSlot, File>>>;
+  readonly pendingAttachments: Readonly<Partial<Record<IrAttachmentSlot, readonly IrPendingAttachment[]>>>;
   /**
    * One error slot per async operation instead of a single shared `error` field — each
    * operation must only ever read/write its own slot, so an unrelated failure (or a
@@ -85,8 +93,9 @@ export const initialWwellIrState: WwellIrStoreState = {
   irDetailLoading: false,
   irApprovalTimelineLoading: false,
   attachmentsLoading: false,
-  busyAttachmentSlot: null,
-  attachmentUploadPercent: null,
+  uploadingPendingIds: new Set(),
+  uploadProgressByPendingId: {},
+  deletingAttachmentKeys: new Set(),
   pendingAttachments: {},
   irsError: null,
   linkedRequestWellsError: null,

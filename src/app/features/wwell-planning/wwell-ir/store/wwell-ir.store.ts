@@ -3,11 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, concatMap, delay, exhaustMap, from, map, of, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, delay, exhaustMap, map, of, pipe, switchMap, tap } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
-import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
+import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { SapService } from '@services/sap/sap.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { mapSapWorkflowStatusToApprovalChain } from '../wwell-ir-form/wwell-ir-approval.mapper';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
@@ -150,7 +151,7 @@ export const WwellIrStore = signalStore(
     }),
   ),
 
-  withMethods((store, svc = inject(WwellIrService), sap = inject(SapService), authStore = inject(AuthStore)) => {
+  withMethods((store, svc = inject(WwellIrService), sap = inject(SapService), authStore = inject(AuthStore), notify = inject(NotificationService)) => {
     // Step 3, reached only after SAP has accepted the workflow (step 2): stamps the id and a
     // local "In Progress" placeholder status onto the IR header (update_ir_sap_wf_prc — `seq`
     // lands in sap_wf_id, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS in sap_wf_status). Deliberately does
@@ -419,13 +420,73 @@ export const WwellIrStore = signalStore(
       ),
     );
 
-    /** Replaces just this slot's entry on the record, leaving the other slot untouched. */
-    const withAttachment = (irSeq: number, slot: IrAttachmentSlot, attachment: IrAttachment | null) =>
-      store.irs().map(item => {
-        if (item.irSeq !== irSeq) return item;
-        const others = item.attachments.filter(existing => existing.slot !== slot);
-        return { ...item, attachments: attachment ? [...others, attachment] : others };
+    /** Appends a newly-uploaded attachment onto the record, leaving every existing one (in this
+     *  slot or any other) untouched — a slot accumulates attachments rather than holding just one. */
+    const appendAttachment = (irSeq: number, attachment: IrAttachment) =>
+      store.irs().map(item => (item.irSeq === irSeq ? { ...item, attachments: [...item.attachments, attachment] } : item));
+
+    /** Drops one specific stored attachment (matched by slot + file name, its only identity) off
+     *  the record, leaving every other attachment in that slot in place. */
+    const withoutAttachment = (irSeq: number, slot: IrAttachmentSlot, fileName: string) =>
+      store.irs().map(item =>
+        item.irSeq === irSeq
+          ? { ...item, attachments: item.attachments.filter(existing => !(existing.slot === slot && existing.fileName === fileName)) }
+          : item,
+      );
+
+    /** Marks one pending file as mid-upload (or clears that marking) — shared by the single-item
+     *  and sweep upload paths below so both track busy/progress identically per file id. */
+    function setPendingUploadBusy(id: string, percent: number | null): void {
+      patchState(store, {
+        uploadingPendingIds: new Set(store.uploadingPendingIds()).add(id),
+        uploadProgressByPendingId: { ...store.uploadProgressByPendingId(), [id]: percent },
       });
+    }
+
+    function clearPendingUploadBusy(id: string): void {
+      const uploadingPendingIds = new Set(store.uploadingPendingIds());
+      uploadingPendingIds.delete(id);
+      const uploadProgressByPendingId = { ...store.uploadProgressByPendingId() };
+      delete uploadProgressByPendingId[id];
+      patchState(store, { uploadingPendingIds, uploadProgressByPendingId });
+    }
+
+    /** Drops one staged file (by id) from its slot's pending list, leaving any others staged there untouched. */
+    function withoutPendingAttachment(slot: IrAttachmentSlot, id: string): Partial<Record<IrAttachmentSlot, readonly IrPendingAttachment[]>> {
+      const remaining = (store.pendingAttachments()[slot] ?? []).filter(item => item.id !== id);
+      return { ...store.pendingAttachments(), [slot]: remaining };
+    }
+
+    /**
+     * Uploads one staged file. Independent of every other file in flight — each call tracks its own
+     * busy/progress by the pending item's id (see `uploadingPendingIds`/`uploadProgressByPendingId`),
+     * so clicking several rows' Upload buttons in a row fires that many concurrent requests rather
+     * than queuing behind one another. Clears the staging only after the server confirms, so a
+     * failed upload leaves the file in its slot to retry rather than silently dropping the user's
+     * pick — the one thing that would actually lose their work.
+     */
+    function uploadOne(irSeq: number, slot: IrAttachmentSlot, item: IrPendingAttachment): void {
+      setPendingUploadBusy(item.id, null);
+      patchState(store, { attachmentError: null });
+      svc.uploadIrAttachment(irSeq, slot, item.file).subscribe({
+        next: ({ percent, attachment }) => {
+          if (!attachment) {
+            setPendingUploadBusy(item.id, percent);
+            return;
+          }
+          clearPendingUploadBusy(item.id);
+          patchState(store, {
+            irs: appendAttachment(irSeq, attachment),
+            pendingAttachments: withoutPendingAttachment(slot, item.id),
+          });
+          notify.info(`${attachment.label} uploaded.`);
+        },
+        error: (err: unknown) => {
+          clearPendingUploadBusy(item.id);
+          patchState(store, { attachmentError: errorMessage(err, `Failed to upload the ${slot} attachment`) });
+        },
+      });
+    }
 
     return {
       loadIrs(): void {
@@ -441,54 +502,31 @@ export const WwellIrStore = signalStore(
       },
 
       /**
-       * Stages a picked file. Attaching never uploads on its own — the user sends it with the
-       * slot's own upload action (`uploadStagedAttachment`), or, for a New IR that has no ir_seq to
-       * upload against yet, the first save flushes it via `uploadPendingAttachments`.
+       * Stages a picked file alongside whatever else is already staged for that slot — attaching
+       * never replaces, only adds. Attaching never uploads on its own either: the user sends it with
+       * the file's own upload action (`uploadPendingAttachment`), or, for a New IR with no ir_seq to
+       * upload against yet, the first save flushes everything staged via `uploadPendingAttachments`.
        */
-      setPendingAttachment(slot: IrAttachmentSlot, file: File): void {
-        patchState(store, { pendingAttachments: { ...store.pendingAttachments(), [slot]: file }, attachmentError: null });
-      },
-
-      /**
-       * Sends the file staged for one slot. Clears the staging only after the server confirms, so a
-       * failed upload leaves the file in the slot to retry rather than silently dropping the user's
-       * pick — the one thing that would actually lose their work.
-       */
-      uploadStagedAttachment(irSeq: number, slot: IrAttachmentSlot): void {
-        const file = store.pendingAttachments()[slot];
-        if (!file) return;
-
-        patchState(store, { busyAttachmentSlot: slot, attachmentUploadPercent: 0, attachmentError: null });
-        svc.uploadIrAttachment(irSeq, slot, file).subscribe({
-          next: ({ percent, attachment }) => {
-            if (!attachment) {
-              patchState(store, { attachmentUploadPercent: percent });
-              return;
-            }
-            const remaining = Object.fromEntries(
-              Object.entries(store.pendingAttachments()).filter(([key]) => key !== slot),
-            ) as Partial<Record<IrAttachmentSlot, File>>;
-            patchState(store, {
-              irs: withAttachment(irSeq, slot, attachment),
-              pendingAttachments: remaining,
-              busyAttachmentSlot: null,
-              attachmentUploadPercent: null,
-            });
-          },
-          error: (err: unknown) =>
-            patchState(store, {
-              busyAttachmentSlot: null,
-              attachmentUploadPercent: null,
-              attachmentError: errorMessage(err, 'Failed to upload the attachment'),
-            }),
+      addPendingAttachment(slot: IrAttachmentSlot, file: File): void {
+        const item: IrPendingAttachment = { id: crypto.randomUUID(), file };
+        const existing = store.pendingAttachments()[slot] ?? [];
+        patchState(store, {
+          pendingAttachments: { ...store.pendingAttachments(), [slot]: [...existing, item] },
+          attachmentError: null,
         });
       },
 
-      removePendingAttachment(slot: IrAttachmentSlot): void {
-        const remaining = Object.fromEntries(
-          Object.entries(store.pendingAttachments()).filter(([key]) => key !== slot),
-        ) as Partial<Record<IrAttachmentSlot, File>>;
-        patchState(store, { pendingAttachments: remaining });
+      /** Sends one staged file. See `uploadOne` above for why this is safe to call for several
+       *  files at once without them fighting over shared progress/busy state. */
+      uploadPendingAttachment(irSeq: number, slot: IrAttachmentSlot, id: string): void {
+        const item = (store.pendingAttachments()[slot] ?? []).find(candidate => candidate.id === id);
+        if (!item) return;
+        uploadOne(irSeq, slot, item);
+      },
+
+      /** Un-stages one file without sending it — the user changed their mind before uploading. */
+      removePendingAttachment(slot: IrAttachmentSlot, id: string): void {
+        patchState(store, { pendingAttachments: withoutPendingAttachment(slot, id) });
       },
 
       /** Drops every held file — the draft was abandoned, or a different record was selected. */
@@ -497,55 +535,36 @@ export const WwellIrStore = signalStore(
       },
 
       /**
-       * Uploads everything held for a draft that has just been assigned `irSeq`, one slot at a
-       * time. Sequential rather than parallel because `busyAttachmentSlot`/`attachmentUploadPercent`
-       * describe a single in-flight upload — two at once would fight over both.
-       *
-       * State is cleared up front so a second save can't re-upload the same files, and a failure on
-       * one slot doesn't abort the other: each reports its own error and the chain continues.
+       * Uploads everything held for a draft that has just been assigned `irSeq` — every staged file
+       * in every slot, each independently (see `uploadOne`). State is cleared up front so a second
+       * save can't re-upload the same files, and a failure on one file doesn't abort the others:
+       * each reports its own error and the rest continue.
        */
       uploadPendingAttachments(irSeq: number): void {
-        const pending = Object.entries(store.pendingAttachments()) as [IrAttachmentSlot, File][];
-        if (!pending.length) return;
+        const bySlot = store.pendingAttachments();
         patchState(store, { pendingAttachments: {} });
-
-        from(pending)
-          .pipe(
-            concatMap(([slot, file]) => {
-              patchState(store, { busyAttachmentSlot: slot, attachmentUploadPercent: 0, attachmentError: null });
-              return svc.uploadIrAttachment(irSeq, slot, file).pipe(
-                tap(({ percent, attachment }) => {
-                  if (!attachment) {
-                    patchState(store, { attachmentUploadPercent: percent });
-                    return;
-                  }
-                  patchState(store, {
-                    irs: withAttachment(irSeq, slot, attachment),
-                    busyAttachmentSlot: null,
-                    attachmentUploadPercent: null,
-                  });
-                }),
-                catchError((err: unknown) => {
-                  patchState(store, {
-                    busyAttachmentSlot: null,
-                    attachmentUploadPercent: null,
-                    attachmentError: errorMessage(err, `Failed to upload the ${slot} attachment`),
-                  });
-                  return of(null);
-                }),
-              );
-            }),
-          )
-          .subscribe();
+        (Object.entries(bySlot) as [IrAttachmentSlot, readonly IrPendingAttachment[]][]).forEach(([slot, items]) =>
+          items.forEach(item => uploadOne(irSeq, slot, item)),
+        );
       },
 
-      /** Percent stays null throughout: a delete has no measurable progress to report. */
-      deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot): void {
-        patchState(store, { busyAttachmentSlot: slot, attachmentError: null, attachmentUploadPercent: null });
-        svc.deleteIrAttachment(irSeq, slot).subscribe({
-          next: () => patchState(store, { irs: withAttachment(irSeq, slot, null), busyAttachmentSlot: null }),
-          error: (err: unknown) =>
-            patchState(store, { busyAttachmentSlot: null, attachmentError: errorMessage(err, 'Failed to remove the attachment') }),
+      /** Deletes one specific stored attachment by slot + file name — the two together are its only
+       *  identity now that a slot can hold several. Tracked by that same composite key in
+       *  `deletingAttachmentKeys` so only this one row shows busy, not the rest of the slot's list. */
+      deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot, fileName: string): void {
+        const key = `${slot}:${fileName}`;
+        patchState(store, { deletingAttachmentKeys: new Set(store.deletingAttachmentKeys()).add(key), attachmentError: null });
+        svc.deleteIrAttachment(irSeq, slot, fileName).subscribe({
+          next: () => {
+            const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());
+            deletingAttachmentKeys.delete(key);
+            patchState(store, { irs: withoutAttachment(irSeq, slot, fileName), deletingAttachmentKeys });
+          },
+          error: (err: unknown) => {
+            const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());
+            deletingAttachmentKeys.delete(key);
+            patchState(store, { deletingAttachmentKeys, attachmentError: errorMessage(err, 'Failed to remove the attachment') });
+          },
         });
       },
 

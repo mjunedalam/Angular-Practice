@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
-import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentFor } from '../../wwell-ir-attachments.config';
+import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentsFor } from '../../wwell-ir-attachments.config';
 import {
   KvRow,
   buildGeologistContactRows,
@@ -36,8 +36,8 @@ export class WwellIrViewDetailsComponent {
 
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
 
-  protected attachmentFor(slot: IrAttachmentSlot): IrAttachment | null {
-    return irAttachmentFor(this.ir().attachments, slot);
+  protected attachmentsFor(slot: IrAttachmentSlot): readonly IrAttachment[] {
+    return irAttachmentsFor(this.ir().attachments, slot);
   }
   /** Resolves `requestReference.linkedRequestId` to a well name — see
    *  buildRequestReferenceRows' own doc comment. Falls back to the raw id when omitted. */

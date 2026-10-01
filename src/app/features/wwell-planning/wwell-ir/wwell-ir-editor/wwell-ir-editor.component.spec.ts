@@ -73,20 +73,26 @@ const storeMock = {
   geologistOptions: jest.fn(() => [] as string[]),
   geologistEmpNumByName: jest.fn(() => ({}) as Readonly<Record<string, number>>),
   loadGwdOpsMembers: jest.fn(),
-  busyAttachmentSlot: jest.fn(() => null),
-  attachmentUploadPercent: jest.fn(() => null),
+  uploadingPendingIds: jest.fn(() => new Set<string>()),
+  uploadProgressByPendingId: jest.fn(() => ({}) as Record<string, number | null>),
+  deletingAttachmentKeys: jest.fn(() => new Set<string>()),
   attachmentError: jest.fn(() => null),
-  pendingAttachments: jest.fn(() => ({}) as Partial<Record<string, File>>),
+  pendingAttachments: jest.fn(
+    () => ({}) as Partial<Record<string, readonly import('@models/wwell-planning/ir-attachment.model').IrPendingAttachment[]>>,
+  ),
+  draftIrSeq: jest.fn(() => null as number | null),
   deleteIrAttachment: jest.fn(),
-  setPendingAttachment: jest.fn(),
+  addPendingAttachment: jest.fn(),
   removePendingAttachment: jest.fn(),
-  uploadStagedAttachment: jest.fn(),
+  uploadPendingAttachment: jest.fn(),
+  uploadPendingAttachments: jest.fn(),
 };
 
-/** The editor only reaches the service for an attachment's download URL — the uploads themselves
- *  go through the store (mocked above), so this is all the surface the component actually uses. */
+/** The editor only reaches the service directly for a stored attachment's download/view — the
+ *  uploads/deletes themselves go through the store (mocked above), so this is all the surface the
+ *  component actually uses. */
 const wwellIrServiceMock = {
-  irAttachmentUrl: jest.fn((irSeq: number, slot: string) => `/api/integrated-requirements/${irSeq}/attachments/${slot}`),
+  getIrAttachmentFile: jest.fn(),
 };
 
 const notificationServiceMock = {

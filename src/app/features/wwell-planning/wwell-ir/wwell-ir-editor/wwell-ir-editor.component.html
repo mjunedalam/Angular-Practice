@@ -917,7 +917,9 @@
         }
 
         <!-- One #sectionEl per slot, index-aligned with the 7.1/7.2 rail leaves (see
-             wwell-ir-section-rail.config.ts) exactly as 6.1/6.2 above are. -->
+             wwell-ir-section-rail.config.ts) exactly as 6.1/6.2 above are. A slot is a list, not a
+             single file — any number of documents can be attached to it, each its own row with its
+             own independent View/Upload/Delete and its own progress bar. -->
         @for (slot of attachmentSlots; track slot.slot) {
           <section #sectionEl [id]="'ire-sec-' + slot.slot" class="ire__section ire__section--sub">
             <div class="ire__section-head">
@@ -928,142 +930,142 @@
                   <span class="ire__attachment-required" aria-hidden="true">*</span>
                 }
               </h3>
+              <!-- Always visible — attaching never replaces what's already here, only adds to it,
+                   so there's no "occupied" state that would hide this the way a single-file slot
+                   used to. A <label> wrapping a hidden input, not a <button>: this opens the OS
+                   file picker natively, so there's no click-forwarding JS to keep working. -->
+              <label
+                class="ire__attachment-add-btn"
+                [attr.aria-label]="'Attach ' + slot.label"
+                matTooltip="Attach a file"
+                matTooltipClass="ir-attachment-tooltip"
+                matTooltipPosition="above"
+              >
+                <mat-icon>add</mat-icon>
+                <input
+                  type="file"
+                  hidden
+                  [accept]="acceptedAttachmentTypes"
+                  (change)="onAttachmentPicked(slot.slot, $event)"
+                />
+              </label>
             </div>
 
-            @if (hasAttachment(slot.slot)) {
-              <!-- One row for both cases: a file already stored server-side, or one picked on a New
-                   IR and waiting for the first save. The actions are identical either way, so the
-                   only difference is where the name/size come from and the "pending" note below.
-                   A staged file wins over the stored one — on Replace both exist until the upload
-                   lands, and the row must describe what View/Upload will act on (the new file). -->
-              @let stored = attachmentFor(slot.slot);
-              @let pending = pendingAttachmentFor(slot.slot);
+            @if (attachmentsFor(slot.slot).length || pendingAttachmentsFor(slot.slot).length) {
+              <ul class="ire__attachment-list">
+                @for (attachment of attachmentsFor(slot.slot); track attachment.fileName) {
+                  <li class="ire__attachment-file" appWwellCollapseAnimate>
+                    <mat-icon class="ire__attachment-file-icon">{{ attachmentIcon(attachment.contentType) }}</mat-icon>
+                    <span class="ire__attachment-file-meta">
+                      <span class="ire__attachment-file-name">{{ attachment.fileName }}</span>
+                      <span class="ire__attachment-file-size">
+                        {{ attachmentSizeLabel(attachment.sizeBytes) }}
+                        @if (attachment.s3ObjectKey) {
+                          ·
+                          <span
+                            class="ire__attachment-s3-badge"
+                            [matTooltip]="'S3 object key: ' + attachment.s3ObjectKey"
+                            matTooltipClass="ir-attachment-tooltip"
+                            matTooltipPosition="above"
+                          >indexed in S3</span>
+                        }
+                      </span>
+                    </span>
 
-              <div class="ire__attachment-file" [class.ire__attachment-file--pending]="pending" appWwellCollapseAnimate>
-                <mat-icon class="ire__attachment-file-icon">
-                  {{ attachmentIcon(pending ? pending.type : stored!.contentType) }}
-                </mat-icon>
-                <span class="ire__attachment-file-meta">
-                  <span class="ire__attachment-file-name">{{ pending ? pending.name : stored!.fileName }}</span>
-                  <span class="ire__attachment-file-size">
-                    {{ attachmentSizeLabel(pending ? pending.size : stored!.sizeBytes) }}
-                    @if (pending) {
-                      · {{ canAttach() ? "not uploaded yet" : "uploads when you save" }}
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="ire__attachment-action"
+                      [attr.aria-label]="'View ' + attachment.fileName"
+                      matTooltip="View"
+                      matTooltipClass="ir-attachment-tooltip"
+                      matTooltipPosition="above"
+                      (click)="viewStoredAttachment(attachment, slot.slot)"
+                    >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="ire__attachment-action ire__attachment-action--danger"
+                      [attr.aria-label]="'Remove ' + attachment.fileName"
+                      matTooltip="Delete"
+                      matTooltipClass="ir-attachment-tooltip"
+                      matTooltipPosition="above"
+                      [disabled]="isStoredAttachmentBusy(slot.slot, attachment.fileName)"
+                      (click)="deleteStoredAttachment(slot.slot, attachment)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+
+                    @if (isStoredAttachmentBusy(slot.slot, attachment.fileName)) {
+                      <mat-progress-bar class="ire__attachment-progress" mode="indeterminate" />
                     }
-                  </span>
-                </span>
-
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="ire__attachment-action"
-                  [attr.aria-label]="'View ' + slot.label"
-                  matTooltip="View"
-
-                  matTooltipClass="ir-attachment-tooltip"
-
-                  matTooltipPosition="above"
-                  (click)="viewAttachment(slot.slot)"
-                >
-                  <mat-icon>visibility</mat-icon>
-                </button>
-
-                <!-- Only while the file is still staged: once it's on the server there is nothing
-                     left to send, so the icon disappears rather than sitting there inert. -->
-                @if (pending) {
-                  <button
-                    type="button"
-                    mat-icon-button
-                    class="ire__attachment-action ire__attachment-action--upload"
-                    [attr.aria-label]="'Upload ' + slot.label"
-                    matTooltip="Upload"
-
-                    matTooltipClass="ir-attachment-tooltip"
-
-                    matTooltipPosition="above"
-                    [disabled]="isAttachmentBusy(slot.slot)"
-                    (click)="uploadStagedAttachment(slot.slot)"
-                  >
-                    <mat-icon>cloud_upload</mat-icon>
-                  </button>
+                  </li>
                 }
 
-                <label
-                  class="ire__attachment-action ire__attachment-action--replace"
-                  [attr.aria-label]="'Replace ' + slot.label"
-                  matTooltip="Replace"
+                @for (item of pendingAttachmentsFor(slot.slot); track item.id) {
+                  <li class="ire__attachment-file ire__attachment-file--pending" appWwellCollapseAnimate>
+                    <mat-icon class="ire__attachment-file-icon">{{ attachmentIcon(item.file.type) }}</mat-icon>
+                    <span class="ire__attachment-file-meta">
+                      <span class="ire__attachment-file-name">{{ item.file.name }}</span>
+                      <span class="ire__attachment-file-size">{{ attachmentSizeLabel(item.file.size) }} · not uploaded yet</span>
+                    </span>
 
-                  matTooltipClass="ir-attachment-tooltip"
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="ire__attachment-action"
+                      [attr.aria-label]="'View ' + item.file.name"
+                      matTooltip="View"
+                      matTooltipClass="ir-attachment-tooltip"
+                      matTooltipPosition="above"
+                      (click)="viewPendingAttachment(item, slot.slot)"
+                    >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
 
-                  matTooltipPosition="above"
-                >
-                  <mat-icon>swap_horiz</mat-icon>
-                  <input
-                    type="file"
-                    hidden
-                    [accept]="acceptedAttachmentTypes"
-                    [disabled]="isAttachmentBusy(slot.slot)"
-                    (change)="onAttachmentPicked(slot.slot, $event)"
-                  />
-                </label>
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="ire__attachment-action ire__attachment-action--upload"
+                      [attr.aria-label]="'Upload ' + item.file.name"
+                      matTooltip="Upload"
+                      matTooltipClass="ir-attachment-tooltip"
+                      matTooltipPosition="above"
+                      [disabled]="isPendingUploadBusy(item.id)"
+                      (click)="uploadPendingAttachment(slot.slot, item)"
+                    >
+                      <mat-icon>cloud_upload</mat-icon>
+                    </button>
 
-                <!-- Delete only ever renders inside this block, i.e. only when a doc is attached. -->
-                <button
-                  type="button"
-                  mat-icon-button
-                  class="ire__attachment-action ire__attachment-action--danger"
-                  [attr.aria-label]="'Remove ' + slot.label"
-                  matTooltip="Delete"
+                    <button
+                      type="button"
+                      mat-icon-button
+                      class="ire__attachment-action ire__attachment-action--danger"
+                      [attr.aria-label]="'Remove ' + item.file.name"
+                      matTooltip="Delete"
+                      matTooltipClass="ir-attachment-tooltip"
+                      matTooltipPosition="above"
+                      [disabled]="isPendingUploadBusy(item.id)"
+                      (click)="removePendingAttachment(slot.slot, item.id)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
 
-                  matTooltipClass="ir-attachment-tooltip"
-
-                  matTooltipPosition="above"
-                  [disabled]="isAttachmentBusy(slot.slot)"
-                  (click)="removeAttachment(slot.slot)"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
+                    @if (isPendingUploadBusy(item.id)) {
+                      <mat-progress-bar
+                        class="ire__attachment-progress"
+                        [mode]="uploadPercentFor(item.id) === null ? 'indeterminate' : 'determinate'"
+                        [value]="uploadPercentFor(item.id) ?? 0"
+                      />
+                    }
+                  </li>
+                }
+              </ul>
             } @else {
-              <div class="ire__attachment-drop" appWwellCollapseAnimate>
-                <span class="ire__attachment-drop-label">{{ slot.hint }}</span>
-                <span class="ire__attachment-drop-hint">PDF, JPG or PNG · max 25 MB</span>
-
-                <!-- A <label> wrapping a hidden input, not a <button>: this opens the OS file
-                     picker natively, so there's no click-forwarding JS to keep working. -->
-                <!-- "Attach", not "Upload": picking a file only stages it, and the row that appears
-                     then carries the separate upload action that actually sends it. -->
-                <label
-                  class="ire__attachment-upload-icon"
-                  [class.ire__attachment-upload-icon--busy]="isAttachmentBusy(slot.slot)"
-                  [attr.aria-label]="'Attach ' + slot.label"
-                  matTooltip="Attach"
-
-                  matTooltipClass="ir-attachment-tooltip"
-
-                  matTooltipPosition="above"
-                >
-                  <mat-icon>attach_file</mat-icon>
-                  <input
-                    type="file"
-                    hidden
-                    [accept]="acceptedAttachmentTypes"
-                    [disabled]="isAttachmentBusy(slot.slot)"
-                    (change)="onAttachmentPicked(slot.slot, $event)"
-                  />
-                </label>
-              </div>
-            }
-
-            <!-- Skinny progress bar, shared by the empty and occupied states so a Replace shows the
-                 same feedback as a first upload. Determinate off real bytes sent; indeterminate
-                 only when the browser couldn't report a total (see WwellIrService.uploadIrAttachment). -->
-            @if (isAttachmentBusy(slot.slot)) {
-              <mat-progress-bar
-                class="ire__attachment-progress"
-                [mode]="attachmentUploadPercent() === null ? 'indeterminate' : 'determinate'"
-                [value]="attachmentUploadPercent() ?? 0"
-              />
+              <p class="ire__attachment-empty-hint" appWwellCollapseAnimate>{{ slot.hint }} PDF, JPG or PNG · max 25 MB</p>
             }
           </section>
         }
