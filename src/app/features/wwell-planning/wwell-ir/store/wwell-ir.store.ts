@@ -478,6 +478,22 @@ export const WwellIrStore = signalStore(
       });
     }
 
+    /**
+     * Best-effort companion to `mirrorToS3` above: removes the mirrored copy from the S3
+     * object-store proxy, called directly from the browser, once the primary delete against
+     * agwa-planning has already succeeded. A no-op when the attachment was never mirrored in the
+     * first place (`s3ObjectKey` null — e.g. its original upload's own mirror call failed, or it
+     * predates this feature). Never surfaces its own failure: whatever the proxy says — a clean
+     * 200, a 404 because it was already gone, a 400/403/422 rejecting the key/request — the
+     * attachment itself is already gone from the record the user cares about by the time this
+     * runs, so there is nothing left here for the user to act on.
+     */
+    function deleteFromS3(s3ObjectKey: string | null | undefined): void {
+      if (!s3ObjectKey) return;
+      const networkId = authStore.networkId() ?? '';
+      s3.delete(s3ObjectKey, networkId).subscribe({ error: () => undefined });
+    }
+
     /** Marks one pending file as mid-upload (or clears that marking) — shared by the single-item
      *  and sweep upload paths below so both track busy/progress identically per file id. */
     function setPendingUploadBusy(id: string, percent: number | null): void {
@@ -595,15 +611,21 @@ export const WwellIrStore = signalStore(
 
       /** Deletes one specific stored attachment by slot + file name — the two together are its only
        *  identity now that a slot can hold several. Tracked by that same composite key in
-       *  `deletingAttachmentKeys` so only this one row shows busy, not the rest of the slot's list. */
+       *  `deletingAttachmentKeys` so only this one row shows busy, not the rest of the slot's list.
+       *  Once the primary delete (agwa-planning) confirms, best-effort mirrors the removal to the S3
+       *  object-store proxy too (`deleteFromS3`) — the key has to be captured up front, before
+       *  `withoutAttachment` drops the record this attachment's `s3ObjectKey` lives on. */
       deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot, fileName: string): void {
         const key = `${slot}:${fileName}`;
+        const ir = store.irs().find(item => item.irSeq === irSeq);
+        const s3ObjectKey = ir?.attachments.find(existing => existing.slot === slot && existing.fileName === fileName)?.s3ObjectKey;
         patchState(store, { deletingAttachmentKeys: new Set(store.deletingAttachmentKeys()).add(key), attachmentError: null });
         svc.deleteIrAttachment(irSeq, slot, fileName).subscribe({
           next: () => {
             const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());
             deletingAttachmentKeys.delete(key);
             patchState(store, { irs: withoutAttachment(irSeq, slot, fileName), deletingAttachmentKeys });
+            deleteFromS3(s3ObjectKey);
           },
           error: (err: unknown) => {
             const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());

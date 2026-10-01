@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { S3StoreResponse } from '@models/s3/s3-object-store.model';
+import { S3DeleteResponse, S3StoreResponse } from '@models/s3/s3-object-store.model';
 import { SKIP_AUTH } from '@interceptors/auth.interceptor';
 import { SKIP_AUTO_LOGOUT, SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -19,9 +19,9 @@ export class S3Service {
    * The S3 object-store proxy is a third party on a different origin, exactly like SAP AAE — see
    * SapService.sapContext's doc comment for why all three opt-outs are load-bearing rather than
    * convenience: this app's own JWT must never go to it (SKIP_AUTH), a refusal from it is not this
-   * app's session expiring (SKIP_AUTO_LOGOUT), and the caller (WwellIrStore.mirrorToS3) treats this
-   * whole call as best-effort with its own silent handling, so the global interceptor must not also
-   * toast it (SUPPRESS_GLOBAL_ERROR).
+   * app's session expiring (SKIP_AUTO_LOGOUT), and every caller here (WwellIrStore.mirrorToS3 /
+   * deleteFromS3) treats the call as best-effort with its own silent handling, so the global
+   * interceptor must not also toast it (SUPPRESS_GLOBAL_ERROR).
    */
   private get s3Context(): HttpContext {
     return new HttpContext().set(SKIP_AUTH, true).set(SKIP_AUTO_LOGOUT, true).set(SUPPRESS_GLOBAL_ERROR, true);
@@ -39,5 +39,18 @@ export class S3Service {
     body.append('content_type', file.type);
     body.append('custom_metadata', '');
     return this.http.post<S3StoreResponse>(`${this.baseUrl}/store`, body, { context: this.s3Context });
+  }
+
+  /** Removes a previously-mirrored object from the S3 object-store proxy. Purely informational for
+   *  the caller — see WwellIrStore.deleteFromS3, which never lets a failure here (object already
+   *  gone, an unsafe key, the store rejecting the request, etc. — see the proxy's documented 400/
+   *  403/404/422 responses) affect the attachment delete the user actually asked for, since that
+   *  one already succeeded against agwa-planning by the time this runs. */
+  delete(objectKey: string, networkId: string): Observable<S3DeleteResponse> {
+    return this.http.post<S3DeleteResponse>(
+      `${this.baseUrl}/delete`,
+      { object_key: objectKey, network_id: networkId },
+      { context: this.s3Context },
+    );
   }
 }
