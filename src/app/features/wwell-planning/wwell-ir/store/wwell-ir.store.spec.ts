@@ -7,11 +7,7 @@ import { SapService } from '@services/sap/sap.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
-import {
-  WWELL_IR_SAP_PROCESS_ID,
-  WWELL_IR_SAP_SCENARIO_ID,
-  WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
-} from '../wwell-ir-sap.config';
+import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS } from '../wwell-ir-sap.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
 
@@ -26,6 +22,7 @@ const serviceMock = {
 const sapServiceMock = {
   trigger: jest.fn(),
   getWorkflowStatus: jest.fn(),
+  recall: jest.fn(),
 };
 
 const authStoreMock = {
@@ -408,6 +405,126 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.irs()[0].status).toBe('in-progress');
     expect(store.sapTriggerError()).toBe('header locked');
     expect(store.updatingIrStatus()).toBe(false);
+  });
+});
+
+describe('WwellIrStore - recallIr', () => {
+  let store: InstanceType<typeof WwellIrStore>;
+
+  // Real DELETE /recall response shape confirmed live: a bare acknowledgement, not a workflow-status
+  // payload — SAP's own current status/chain only ever comes from a separate GET /display call.
+  const recallAck = { message: 'Request 11054 recalled successfully' };
+
+  const recalledWorkflowStatus = {
+    header: {
+      process_name: 'Geological Operations',
+      initiator_id: 'ALAMMX10',
+      requester_id: 'ALAMMX10',
+      date_initiated: '2026-09-16',
+      time_initiated: '08:28:57',
+      wf_status: 'RCAL',
+      wf_status_text: 'Recalled',
+    },
+    remarks: [{ remark_by: 'ALAMMX10', remarks: '***** by Mohammad Juned Alam ( EASD-BATCH )' }],
+    reject_remarks: [],
+    approval_chain: [
+      {
+        level: '01',
+        received_date: '2026-09-16',
+        received_time: '08:29:01',
+        approver_network_id: null,
+        approver_name: 'Mohammad Juned Alam',
+        approver_title: 'Initiator',
+        approver_category: 'Reviewer',
+        response_date: '0000-00-00',
+        response_time: '00:00:00',
+        response: null,
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    authStoreMock.networkId.mockReturnValue('junedalam');
+    TestBed.configureTestingModule({
+      providers: [
+        WwellIrStore,
+        { provide: WwellIrService, useValue: serviceMock },
+        { provide: SapService, useValue: sapServiceMock },
+        { provide: AuthStore, useValue: authStoreMock },
+      ],
+    });
+    store = TestBed.inject(WwellIrStore);
+  });
+
+  /** Seeds `irs` through the store's own public read path, so the status assertions below run
+   *  against a record the store actually holds rather than a detached object. */
+  function seedIrs(ir: IntegratedRequirement): void {
+    serviceMock.getIrs.mockReturnValue(of([ir]));
+    store.loadIrs();
+  }
+
+  it('calls SAP recall under the existing workflow id, then fetches the real status and chain via a follow-up GET', () => {
+    const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
+    seedIrs(ir);
+    sapServiceMock.recall.mockReturnValue(of(recallAck));
+    sapServiceMock.getWorkflowStatus.mockReturnValue(of(recalledWorkflowStatus));
+
+    store.recallIr(ir);
+
+    expect(sapServiceMock.recall).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6, 'junedalam');
+    // The recall response is a bare ack with no status of its own — the real status/chain only ever
+    // comes from a separate GET /display call, made under the same existing workflow id.
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6);
+    // Recall never PATCHes the IR header: it doesn't mint a new sapWfId (unlike the trigger flow),
+    // and sapWfStatusText is set here straight from the live GET, not from a persisted placeholder.
+    expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
+    // Recalling doesn't change ir.status or sapWfId — only the SAP text badgeMeta reads changes,
+    // same as a real Rejected/Approved response from SAP would.
+    expect(store.irs()[0].status).toBe('submit-for-review');
+    expect(store.irs()[0].sapWfId).toBe(6);
+    expect(store.irs()[0].sapWfStatusText).toBe('Recalled');
+    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'in-progress', date: '2026-09-16' }]);
+    expect(store.recallingIr()).toBe(false);
+    expect(store.sapRecallError()).toBeNull();
+  });
+
+  it('refuses to recall an IR with no SAP workflow, without calling SAP', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001, sapWfId: null });
+
+    store.recallIr(ir);
+
+    expect(sapServiceMock.recall).not.toHaveBeenCalled();
+    expect(store.sapRecallError()).toContain('has not been submitted for review');
+    expect(store.recallingIr()).toBe(false);
+  });
+
+  it('does not touch the IR header at all when the SAP recall itself fails', () => {
+    const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
+    seedIrs(ir);
+    sapServiceMock.recall.mockReturnValue(throwError(() => new Error('SAP unreachable')));
+
+    store.recallIr(ir);
+
+    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+    expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
+    expect(store.sapRecallError()).toBe('SAP unreachable');
+    expect(store.recallingIr()).toBe(false);
+  });
+
+  it('reports a distinct error, and leaves the record\'s status untouched, when the follow-up status fetch fails', () => {
+    const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
+    seedIrs(ir);
+    sapServiceMock.recall.mockReturnValue(of(recallAck));
+    // A non-Error rejection so `sapErrorMessage` falls through to the caller's own fallback text
+    // instead of an `.message` it happens to carry — isolates this assertion to the fallback path.
+    sapServiceMock.getWorkflowStatus.mockReturnValue(throwError(() => ({})));
+
+    store.recallIr(ir);
+
+    expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
+    expect(store.sapRecallError()).toBe('Workflow recalled, but failed to refresh its latest status');
+    expect(store.recallingIr()).toBe(false);
   });
 });
 

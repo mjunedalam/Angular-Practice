@@ -92,6 +92,7 @@ export const WwellIrStore = signalStore(
       gwdOpsMembersError,
       createIrError,
       sapTriggerError,
+      sapRecallError,
       irDetailError,
       irApprovalTimelineError,
       deleteIrError,
@@ -126,6 +127,7 @@ export const WwellIrStore = signalStore(
           gwdOpsMembersError(),
           createIrError(),
           sapTriggerError(),
+          sapRecallError(),
           irDetailError(),
           irApprovalTimelineError(),
           deleteIrError(),
@@ -139,6 +141,7 @@ export const WwellIrStore = signalStore(
           gwdOpsMembersError() !== null ||
           createIrError() !== null ||
           sapTriggerError() !== null ||
+          sapRecallError() !== null ||
           irDetailError() !== null ||
           irApprovalTimelineError() !== null ||
           deleteIrError() !== null ||
@@ -205,6 +208,54 @@ export const WwellIrStore = signalStore(
         // Nothing to trigger or persist without a real id — never call SAP with a fabricated one.
         error: (err: unknown) =>
           patchState(store, { updatingIrStatus: false, sapTriggerError: errorMessage(err, 'Failed to generate a SAP workflow id') }),
+      });
+    }
+
+    // Two calls against SAP AAE: DELETE /recall against the workflow's existing id (no new id to
+    // mint — recall acts on the workflow submitIrForReview already created), then GET /display for
+    // the real, current status/chain. The real recall response is a bare acknowledgement
+    // (`{ message: string }`), not a workflow-status payload — confirmed live in production, where
+    // treating it as one crashed reading `.header.wf_status_text` off a response with no `header` at
+    // all. There's nothing to read a status out of the recall response itself, so ask SAP directly
+    // afterward, the same way loadIrApprovalTimeline does.
+    //
+    // Nothing needs persisting back to the IR header here either: recall doesn't mint a new
+    // sapWfId (the header's existing one is still correct), and every place that shows
+    // sapWfStatusText already gets it fresh from this same live GET on every selection/reload
+    // (loadIrDetail → loadIrApprovalTimeline) — a value guessed from the recall response and PATCHed
+    // onto the header would only be a redundant placeholder, immediately overwritten.
+    //
+    // `recallingIr` deliberately stays true across both calls, not just the first — it's what the
+    // editor's footer button reads for its spinner, and flipping it false the moment the recall ack
+    // lands would stop the spinner mid-action, right as the follow-up status fetch starts.
+    function recallSapWorkflow(irSeq: number, sapWfId: number): void {
+      const networkId = authStore.networkId() ?? '';
+      sap.recall(WWELL_IR_SAP_PROCESS_ID, sapWfId, networkId).subscribe({
+        next: () =>
+          sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, sapWfId).subscribe({
+            next: status =>
+              patchState(store, {
+                recallingIr: false,
+                sapRecallError: null,
+                irs: store.irs().map(item =>
+                  item.irSeq === irSeq
+                    ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status), sapWfStatusText: status.header.wf_status_text }
+                    : item,
+                ),
+              }),
+            error: (err: unknown) =>
+              patchState(store, {
+                recallingIr: false,
+                sapRecallError: sapErrorMessage(err, 'Workflow recalled, but failed to refresh its latest status'),
+              }),
+          }),
+        // SAP refused the recall — surface the failure and leave the header exactly as it was, same
+        // as a refused trigger.
+        error: (err: unknown) =>
+          patchState(store, {
+            recallingIr: false,
+            sapRecallError: sapErrorMessage(err, 'Failed to recall the SAP review workflow'),
+          }),
       });
     }
 
@@ -593,6 +644,19 @@ export const WwellIrStore = signalStore(
         }
         patchState(store, { updatingIrStatus: true, sapTriggerError: null });
         triggerSapWorkflow(ir, ir.irSeq);
+      },
+
+      /** "Recall" pulls back an already-submitted workflow — the editor only shows the button once
+       *  `sapWfId` is set (see WwellIrEditorComponent.canRecallIr), but this guards it again since
+       *  the store method is the one place that actually matters: there is no workflow to recall
+       *  without a real `irSeq`/`sapWfId` pair to act on. */
+      recallIr(ir: IntegratedRequirement): void {
+        if (ir.irSeq == null || ir.sapWfId == null) {
+          patchState(store, { sapRecallError: 'This integrated requirement has not been submitted for review.' });
+          return;
+        }
+        patchState(store, { recallingIr: true, sapRecallError: null });
+        recallSapWorkflow(ir.irSeq, ir.sapWfId);
       },
 
       /** On-demand counterpart to the automatic loadIrDetail → loadIrApprovalTimeline refresh: lets

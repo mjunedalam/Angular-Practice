@@ -53,6 +53,7 @@ const creatingIrSignal = signal(false);
 const createIrErrorSignal = signal<string | null>(null);
 const deletingIrSignal = signal(false);
 const updatingIrStatusSignal = signal(false);
+const recallingIrSignal = signal(false);
 
 const storeMock = {
   creatingIr: creatingIrSignal,
@@ -62,6 +63,8 @@ const storeMock = {
   deletingIr: deletingIrSignal,
   deleteIr: jest.fn(),
   updatingIrStatus: updatingIrStatusSignal,
+  recallingIr: recallingIrSignal,
+  recallIr: jest.fn(),
   irApprovalTimelineLoading: jest.fn(() => false),
   refreshIrApprovalStatus: jest.fn(),
   linkedRequestWells: jest.fn(() => [] as import('../wwell-ir-form/wwell-ir-payload.model').IrEligibleWell[]),
@@ -101,6 +104,16 @@ function findButtonByText(fixture: ComponentFixture<WwellIrEditorComponent>, tex
   );
 }
 
+/** Scoped to `.ire__footer` specifically for the Submit for Review / Recall assertions below —
+ *  the header's approval pill now shows the record's status label inline (e.g. "Recalled"), and a
+ *  plain fixture-wide `includes('Recall')` search would false-positive match that label's own
+ *  substring instead of the real footer action button. */
+function findFooterButtonByText(fixture: ComponentFixture<WwellIrEditorComponent>, text: string): HTMLButtonElement | undefined {
+  return Array.from(fixture.nativeElement.querySelectorAll('.ire__footer button')).find((btn): btn is HTMLButtonElement =>
+    (btn as HTMLButtonElement).textContent?.includes(text) ?? false,
+  );
+}
+
 describe('WwellIrEditorComponent', () => {
   let fixture: ComponentFixture<WwellIrEditorComponent>;
 
@@ -133,6 +146,7 @@ describe('WwellIrEditorComponent', () => {
     createIrErrorSignal.set(null);
     deletingIrSignal.set(false);
     updatingIrStatusSignal.set(false);
+    recallingIrSignal.set(false);
   });
 
   afterEach(() => fixture?.destroy());
@@ -208,12 +222,12 @@ describe('WwellIrEditorComponent', () => {
 
   it('shows Submit for Review while the record is still draft', async () => {
     await setup({ status: 'draft' });
-    expect(findButtonByText(fixture, 'Submit for Review')).toBeTruthy();
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeTruthy();
   });
 
   it('hides Submit for Review once the record is approved', async () => {
     await setup({ status: 'approved' });
-    expect(findButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
   });
 
   /** A page reload can't tell a genuinely untouched 'in-progress' record from one already
@@ -223,15 +237,18 @@ describe('WwellIrEditorComponent', () => {
    *  though `status` alone would still say it's submittable. */
   it('hides Submit for Review once the record already has a real sapWfId, even while status still reads in-progress', async () => {
     await setup({ status: 'in-progress', sapWfId: 11033 });
-    expect(findButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
   });
 
-  it('hides the header status refresh button for a record never submitted (no sapWfId)', async () => {
+  // The refresh button sits outside the header pill's popover (next to the pill itself, so
+  // refreshing never requires opening it) — a plain part of this fixture's own template, not
+  // portaled by CDK the way the popover's own content is, so no need to click the pill open first.
+  it('hides the approval refresh button for a record never submitted (no sapWfId)', async () => {
     await setup({ status: 'draft', sapWfId: null });
     expect(fixture.nativeElement.querySelector('[aria-label="Refresh approval status"]')).toBeFalsy();
   });
 
-  it('the header status refresh button calls store.refreshIrApprovalStatus for the open record', async () => {
+  it('the approval refresh button calls store.refreshIrApprovalStatus for the open record', async () => {
     await setup({ status: 'submit-for-review', irSeq: 9001, sapWfId: 11033 });
 
     const refreshBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Refresh approval status"]');
@@ -243,10 +260,31 @@ describe('WwellIrEditorComponent', () => {
 
   it('Submit for Review calls store.submitIrForReview directly (no re-save first)', async () => {
     await setup({ status: 'in-progress' });
-    findButtonByText(fixture, 'Submit for Review')?.click();
+    findFooterButtonByText(fixture, 'Submit for Review')?.click();
 
     expect(storeMock.createIr).not.toHaveBeenCalled();
     expect(storeMock.submitIrForReview).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows Submit for Review again, not Recall, once the workflow comes back Recalled', async () => {
+    await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'Recalled' });
+
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeTruthy();
+    expect(findFooterButtonByText(fixture, 'Recall')).toBeFalsy();
+  });
+
+  it('shows Recall, not Submit for Review, while the workflow is still in progress', async () => {
+    await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'In Progress' });
+
+    expect(findFooterButtonByText(fixture, 'Recall')).toBeTruthy();
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+  });
+
+  it('shows neither action once the workflow is a terminal, non-recalled outcome', async () => {
+    await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'Rejected' });
+
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+    expect(findFooterButtonByText(fixture, 'Recall')).toBeFalsy();
   });
 
   it('editing a section on an already-submitted record saves it back into in-progress', async () => {

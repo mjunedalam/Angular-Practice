@@ -1,8 +1,20 @@
 <div class="irv">
   <header class="irv__header">
     <div class="irv__heading">
-      <p class="irv__eyebrow">{{ ir().code }}</p>
-      <h2 class="irv__title">{{ ir().requestReference.wellName || 'Untitled Well' }}</h2>
+      <button
+        type="button"
+        mat-icon-button
+        class="irv__back-btn"
+        aria-label="Back to list"
+        title="Back to list"
+        (click)="backRequested.emit()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="irv__heading-text">
+        <p class="irv__eyebrow">{{ ir().code }}</p>
+        <h2 class="irv__title">{{ ir().requestReference.wellName || 'Untitled Well' }}</h2>
+      </div>
     </div>
     <div class="irv__progress" [attr.aria-label]="sectionProgress().completed + ' of ' + sectionProgress().total + ' sections complete'">
       <span class="irv__progress-label">{{ sectionProgress().completed }}/{{ sectionProgress().total }} sections</span>
@@ -12,9 +24,9 @@
     </div>
     <div class="irv__header-actions">
       @if (hasKnownStatus(ir())) {
-        <span class="irv__badge" [style.background]="statusMeta[ir().status].bg" [style.color]="statusMeta[ir().status].color">
-          <span class="irv__badge-dot" [style.background]="statusMeta[ir().status].dot"></span>
-          {{ ir().sapWfStatusText ?? statusMeta[ir().status].label }}
+        <span class="irv__badge" [style.background]="badgeMeta(ir()).bg" [style.color]="badgeMeta(ir()).color">
+          <span class="irv__badge-dot" [style.background]="badgeMeta(ir()).dot"></span>
+          {{ badgeMeta(ir()).label }}
         </span>
       }
       <button type="button" mat-stroked-button class="irv__edit-btn" (click)="editRequested.emit()">

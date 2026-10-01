@@ -14,11 +14,13 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,6 +34,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
+import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
+import { approvalRingPercent, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
@@ -75,7 +79,13 @@ import {
   irAttachmentFor,
 } from '../wwell-ir-attachments.config';
 import { WwellIrService } from '../wwell-ir.service';
-import { WWELL_IR_STATUS_META, WWELL_IR_SUBMITTABLE_STATUSES, hasKnownIrStatus } from '../wwell-ir.config';
+import {
+  WWELL_IR_SUBMITTABLE_STATUSES,
+  hasKnownIrStatus,
+  irBadgeMeta,
+  isSapWorkflowRecalled,
+  isSapWorkflowTerminal,
+} from '../wwell-ir.config';
 import {
   buildGeologistContactRows,
   buildHydrogeologyRows,
@@ -126,6 +136,7 @@ function singleRowSection(section: WwellFormSectionConfig, requiredKeys: readonl
   standalone: true,
   imports: [
     NgTemplateOutlet,
+    OverlayModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
@@ -135,6 +146,7 @@ function singleRowSection(section: WwellFormSectionConfig, requiredKeys: readonl
     DynamicSectionComponent,
     WwellIrWellborePanelComponent,
     WwellIrKvValueComponent,
+    WwellApprovalWorkflowCardComponent,
     WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir-editor.component.html',
@@ -145,6 +157,17 @@ function singleRowSection(section: WwellFormSectionConfig, requiredKeys: readonl
 export class WwellIrEditorComponent implements AfterViewInit {
   readonly ir = input.required<IntegratedRequirement>();
 
+  /** The header's back arrow — WwellIrComponent listens and closes the whole detail panel
+   *  (deselects), going through the same unsaved-changes guard any other "leave this record"
+   *  action does. This component never checks `hasUnsavedChanges()` itself before emitting; the
+   *  guard lives one level up, exactly like every other navigation trigger here (row switch, New IR,
+   *  the view toggle below). */
+  readonly backRequested = output<void>();
+  /** The header's "View" toggle — WwellIrComponent listens and switches this same record's detail
+   *  panel to the read-only stepper, again guarded one level up since that switch destroys this
+   *  editor instance. */
+  readonly viewRequested = output<void>();
+
   private readonly fb = inject(FormBuilder);
   protected readonly store = inject(WwellIrStore);
   private readonly destroyRef = inject(DestroyRef);
@@ -153,24 +176,52 @@ export class WwellIrEditorComponent implements AfterViewInit {
   private readonly wwellIrService = inject(WwellIrService);
   private readonly dialog = inject(MatDialog);
 
-  protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly hasKnownStatus = hasKnownIrStatus;
+  protected readonly badgeMeta = irBadgeMeta;
   protected readonly isSaving = this.store.creatingIr;
   protected readonly isDeleting = this.store.deletingIr;
   protected readonly isSubmittingForReview = this.store.updatingIrStatus;
+  protected readonly isRecalling = this.store.recallingIr;
   protected readonly anyFooterActionPending = computed(
-    () => this.isSaving() || this.isDeleting() || this.isSubmittingForReview(),
+    () => this.isSaving() || this.isDeleting() || this.isSubmittingForReview() || this.isRecalling(),
   );
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
-  protected readonly canSubmitForReview = computed(
-    () => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) && this.ir().sapWfId == null,
-  );
+  /** A never-submitted record (no `sapWfId`), or one whose workflow was recalled — a recall was the
+   *  user's own action, not a terminal SAP decision, so they get "Submit for Review" back to
+   *  resubmit fresh under a new SAP workflow id (submitIrForReview mints one regardless of the old
+   *  sapWfId). Approved/Rejected/Cancelled stay terminal — no way back from here. */
+  protected readonly canSubmitForReview = computed(() => {
+    const ir = this.ir();
+    return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowRecalled(ir.sapWfStatusText);
+  });
+  /** Once a record has been submitted (a real `sapWfId`), "Submit for Review" no longer applies —
+   *  "Recall" takes its place in the same footer slot, but only while the workflow is still live:
+   *  an already-Approved/Rejected/Cancelled/Recalled workflow has nothing left to pull back
+   *  (Recalled instead brings back "Submit for Review", see canSubmitForReview above). */
+  protected readonly canRecallIr = computed(() => this.ir().sapWfId != null && !isSapWorkflowTerminal(this.ir().sapWfStatusText));
 
   protected refreshApprovalStatus(): void {
     const ir = this.ir();
     if (ir.irSeq == null || ir.sapWfId == null) return;
     this.store.refreshIrApprovalStatus(ir.irSeq, ir.sapWfId);
+  }
+
+  // ── Approval-workflow header pill — the editor's own compact stand-in for the main IR page's
+  // persistent approval sidebar (View mode only, see WwellIrComponent's template): reserving a
+  // fixed-width column here would compete with the rail/sections/wellbore-preview columns this
+  // view already has, so instead a small ring+count pill sits in the header and expands into the
+  // exact same WwellApprovalWorkflowCardComponent via a CDK connected overlay, anchored to itself.
+  protected readonly countApprovedSteps = countApprovedSteps;
+  protected readonly approvalRingPercent = approvalRingPercent;
+  protected readonly approvalPopoverOpen = signal(false);
+  protected readonly approvalPopoverPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 8 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -8 },
+  ];
+
+  protected toggleApprovalPopover(): void {
+    this.approvalPopoverOpen.update(open => !open);
   }
 
   protected readonly railGroups = WWELL_IR_SECTION_RAIL;
@@ -997,5 +1048,22 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected submitForReview(): void {
     this.store.submitIrForReview(this.ir());
+  }
+
+  /** Recalling stops a live SAP workflow — the same "confirm, then act" pattern deleteIr() uses,
+   *  since it's not reversible from here (SAP itself would need a fresh Submit for Review). */
+  protected recallIr(): void {
+    const ir = this.ir();
+    this.confirmThenAct(
+      {
+        title: 'Recall this Integrated Requirement?',
+        rows: [
+          { label: 'IR', value: ir.code },
+          { label: 'Well', value: ir.requestReference.wellName || 'Untitled Well' },
+        ],
+        confirmLabel: 'Recall',
+      },
+      () => this.store.recallIr(ir),
+    );
   }
 }

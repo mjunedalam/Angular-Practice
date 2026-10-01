@@ -1,0 +1,204 @@
+@use '../../wwell-design-tokens' as tokens;
+
+$navy: tokens.$navy-deep;
+$muted: tokens.$muted;
+$accent: tokens.$accent;
+
+:host {
+  display: block;
+  height: 100%;
+  font-family: tokens.$font-family;
+}
+
+/* "Elevated glass card with a progress ring" — the panel token's own hairline+shadow (glass-panel)
+ * plus a second, deeper shadow tier stacked under it, so the card reads as floating a notch above
+ * whatever it sits beside rather than flush with it. The top accent strip (chain-status colour)
+ * and a faint diagonal sheen are the two "glass" cues; the ring in the header is the other half of
+ * the direction (see `.approval-card__ring` below). */
+.approval-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  padding: 1.3rem 1rem 1.1rem;
+  @include tokens.glass-panel;
+  box-shadow:
+    var(--wp-panel-shadow),
+    var(--wp-shadow-3);
+  // The timeline's type, a step up from its compact default (see `--wtl-fs` in its own stylesheet).
+  --wtl-fs: #{tokens.$text-xs};
+  --wtl-name-fs: #{tokens.$text-sm};
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--chain-color, #{$accent});
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, tokens.alpha(#fff, 7%) 0%, transparent 40%);
+    pointer-events: none;
+  }
+}
+
+/* The timeline itself grows to fill whatever height the card has (rather than the card
+ * shrink-wrapping to a short chain and leaving the border short of the card's own height) and
+ * scrolls internally if a long chain ever exceeds the available space. */
+.approval-card app-wwell-approval-timeline {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.approval-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  // The rail is narrow and the title wraps: nothing here may push past its edge.
+  min-width: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid tokens.$border-soft;
+}
+
+.approval-card__head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.approval-card__title {
+  font-family: tokens.$font-display;
+  margin: 0;
+  font-size: tokens.$text-md;
+  font-weight: 650;
+  color: $navy;
+  letter-spacing: -0.018em;
+}
+
+.approval-card__progress {
+  margin: 3px 0 0;
+  font-size: tokens.$text-xs;
+  color: $muted;
+}
+
+.approval-card__refresh-btn {
+  flex-shrink: 0;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 28px;
+  color: $muted;
+
+  ::ng-deep .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    color: $accent;
+  }
+}
+
+.approval-card__empty {
+  margin: 0.4rem 0 0;
+  font-size: tokens.$text-xs;
+  color: $muted;
+  line-height: 1.5;
+}
+
+/* ── Progress ring — "N of M approved" at a glance before reading the stepper below. ────────── */
+.approval-card__ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+}
+
+.approval-card__ring {
+  width: 100%;
+  height: 100%;
+  // Starts the fill at 12 o'clock instead of SVG's default 3 o'clock.
+  transform: rotate(-90deg);
+}
+
+.approval-card__ring-track {
+  fill: none;
+  stroke: tokens.$surface-alt;
+  stroke-width: 3.5;
+}
+
+.approval-card__ring-fill {
+  fill: none;
+  stroke: var(--chain-color, #{$accent});
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  transition: stroke-dashoffset tokens.$duration-slow tokens.$ease-out;
+}
+
+.approval-card__ring--loading .approval-card__ring-fill {
+  animation: approval-card-ring-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes approval-card-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.approval-card__ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: tokens.$font-mono;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $navy;
+  font-variant-numeric: tabular-nums;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: $muted;
+  }
+}
+
+.approval-card__ring-total {
+  font-weight: 500;
+  color: $muted;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .approval-card__ring-fill {
+    transition: none;
+  }
+
+  .approval-card__ring--loading .approval-card__ring-fill {
+    animation-duration: 2.8s;
+  }
+}

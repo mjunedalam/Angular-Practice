@@ -63,6 +63,42 @@ $accent: tokens.$accent;
   @include tokens.glass-panel;
 }
 
+.irv__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.irv__heading-text {
+  min-width: 0;
+}
+
+.irv__back-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  line-height: 32px;
+  color: $muted;
+  border-radius: 999px;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  ::ng-deep .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+
+  &:hover {
+    color: $accent;
+    background: tokens.alpha($accent, 8%);
+  }
+}
+
 .irv__eyebrow {
   margin: 0 0 2px;
   font-size: tokens.$text-xs;

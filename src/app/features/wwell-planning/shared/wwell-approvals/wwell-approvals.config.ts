@@ -54,6 +54,21 @@ export function chainCompletionColor(chain: readonly ApprovalChainStep[]): strin
   return WWELL_CHAIN_COMPLETION_COLOR[getChainCompletionStatus(chain)];
 }
 
+/** Shared by every place that reads an approval chain's progress — the main IR page's approval
+ *  sidebar card and the editor header's own compact progress pill — so the ring, the "N of M"
+ *  text and the pill's number never disagree with each other. */
+export function countApprovedSteps(chain: readonly ApprovalChainStep[]): number {
+  return chain.filter(step => step.status === 'approved').length;
+}
+
+/** A chain's progress as a 0–100 fraction — 0 while nothing has been submitted yet (an empty
+ *  chain). Feeds an SVG ring's `stroke-dashoffset` directly (see the ring markup's own comment for
+ *  why `pathLength="100"` makes that a plain subtraction, no circumference math). */
+export function approvalRingPercent(chain: readonly ApprovalChainStep[]): number {
+  if (!chain.length) return 0;
+  return Math.round((countApprovedSteps(chain) / chain.length) * 100);
+}
+
 /** 4 letters + dash + a 2-4 digit "hundreds" suffix, e.g. KHAJ-300, RXYD-100. */
 export const WWELL_APPROVAL_WELL_NAME_PATTERN = /^[A-Za-z]{4}-\d{2,4}$/;
 

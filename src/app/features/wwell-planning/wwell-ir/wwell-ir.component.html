@@ -115,11 +115,11 @@
               @if (hasKnownStatus(ir)) {
                 <span
                   class="wwell-ir__badge"
-                  [style.background]="statusMeta[ir.status].bg"
-                  [style.color]="statusMeta[ir.status].color"
+                  [style.background]="badgeMeta(ir).bg"
+                  [style.color]="badgeMeta(ir).color"
                 >
-                  <span class="wwell-ir__badge-dot" [style.background]="statusMeta[ir.status].dot"></span>
-                  {{ ir.sapWfStatusText ?? statusMeta[ir.status].label }}
+                  <span class="wwell-ir__badge-dot" [style.background]="badgeMeta(ir).dot"></span>
+                  {{ badgeMeta(ir).label }}
                 </span>
               }
             </div>
@@ -158,54 +158,36 @@
       }
     } @else if (selectedIr(); as ir) {
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
-        @if (detailMode() === 'view') {
-          <div class="wwell-ir__view-layout">
-            <app-wwell-ir-view
-              class="wwell-ir__view-main"
-              [ir]="ir"
-              [linkedRequestWellOptions]="store.linkedRequestWellOptions()"
-              [(activeTab)]="viewTab"
-              (editRequested)="setDetailMode('edit')"
-            />
-            <aside class="wwell-ir__view-sidebar">
-              <div class="wwell-ir__approval-card">
-                <header class="wwell-ir__approval-head">
-                  <span class="wwell-ir__approval-icon">
-                    <mat-icon>verified</mat-icon>
-                  </span>
-                  <div class="wwell-ir__approval-head-text">
-                    <h2 class="wwell-ir__approval-title">Approval Workflow</h2>
-                    @if (store.irApprovalTimelineLoading()) {
-                      <p class="wwell-ir__approval-progress">Loading status…</p>
-                    } @else if (ir.sapWfId === null) {
-                      <p class="wwell-ir__approval-progress">Not yet submitted for review.</p>
-                    } @else {
-                      <p class="wwell-ir__approval-progress">{{ approvedStepCount(ir.chain) }} of {{ ir.chain.length }} approved</p>
-                    }
-                  </div>
-                  @if (ir.sapWfId !== null) {
-                    <button
-                      type="button"
-                      mat-icon-button
-                      class="wwell-ir__approval-refresh-btn"
-                      aria-label="Refresh approval status"
-                      title="Refresh approval status"
-                      [disabled]="store.irApprovalTimelineLoading()"
-                      (click)="refreshApprovalStatus(ir)"
-                    >
-                      <mat-icon>refresh</mat-icon>
-                    </button>
-                  }
-                </header>
-                @if (ir.sapWfId !== null) {
-                  <app-wwell-approval-timeline [steps]="ir.chain" [orientation]="'vertical'" />
-                }
-              </div>
-            </aside>
+        <div class="wwell-ir__detail-layout">
+          <div class="wwell-ir__detail-main">
+            @if (detailMode() === 'view') {
+              <app-wwell-ir-view
+                [ir]="ir"
+                [linkedRequestWellOptions]="store.linkedRequestWellOptions()"
+                [(activeTab)]="viewTab"
+                (editRequested)="setDetailMode('edit')"
+                (backRequested)="deselect()"
+              />
+            } @else {
+              <app-wwell-ir-editor
+                [ir]="ir"
+                [(viewMode)]="editorViewMode"
+                (backRequested)="deselect()"
+                (viewRequested)="requestViewMode()"
+              />
+            }
           </div>
-        } @else {
-          <app-wwell-ir-editor [ir]="ir" [(viewMode)]="editorViewMode" />
-        }
+
+          @if (detailMode() === 'view') {
+            <aside class="wwell-ir__approval-sidebar">
+              <app-wwell-approval-workflow-card
+                [ir]="ir"
+                [loading]="store.irApprovalTimelineLoading()"
+                (refresh)="refreshApprovalStatus(ir)"
+              />
+            </aside>
+          }
+        </div>
       </div>
     } @else {
       <div class="wwell-ir__empty">

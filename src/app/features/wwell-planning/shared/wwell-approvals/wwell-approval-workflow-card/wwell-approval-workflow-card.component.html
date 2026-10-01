@@ -1,0 +1,60 @@
+<div class="approval-card" [style.--chain-color]="chainColor()">
+  <header class="approval-card__head">
+    <div class="approval-card__ring-wrap">
+      <!-- `pathLength="100"` on both circles normalizes the path to exactly 100 units regardless
+           of the radius, so `stroke-dasharray: 100` / a plain 0–100 `stroke-dashoffset` (set in the
+           stylesheet / below) map straight onto a 0–100% fill with no circumference math here. -->
+      <svg
+        class="approval-card__ring"
+        [class.approval-card__ring--loading]="loading()"
+        viewBox="0 0 40 40"
+        aria-hidden="true"
+      >
+        <circle class="approval-card__ring-track" cx="20" cy="20" r="17" pathLength="100" />
+        <circle
+          class="approval-card__ring-fill"
+          cx="20"
+          cy="20"
+          r="17"
+          pathLength="100"
+          [style.strokeDashoffset]="100 - ringPercent()"
+        />
+      </svg>
+      <span class="approval-card__ring-label">
+        @if (ir().sapWfId === null) {
+          <mat-icon>hourglass_empty</mat-icon>
+        } @else {
+          {{ approvedCount() }}<span class="approval-card__ring-total">/{{ ir().chain.length }}</span>
+        }
+      </span>
+    </div>
+    <div class="approval-card__head-text">
+      <h2 class="approval-card__title">Approval Workflow</h2>
+      @if (loading()) {
+        <p class="approval-card__progress">Loading status…</p>
+      } @else if (ir().sapWfId === null) {
+        <p class="approval-card__progress">Not yet submitted for review.</p>
+      } @else {
+        <p class="approval-card__progress">{{ approvedCount() }} of {{ ir().chain.length }} approved</p>
+      }
+    </div>
+    @if (ir().sapWfId !== null) {
+      <button
+        type="button"
+        mat-icon-button
+        class="approval-card__refresh-btn"
+        aria-label="Refresh approval status"
+        title="Refresh approval status"
+        [disabled]="loading()"
+        (click)="onRefresh()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
+  </header>
+  @if (ir().sapWfId !== null) {
+    <app-wwell-approval-timeline [steps]="ir().chain" [orientation]="'vertical'" />
+  } @else {
+    <p class="approval-card__empty">Submit this record for review to start a SAP approval workflow.</p>
+  }
+</div>

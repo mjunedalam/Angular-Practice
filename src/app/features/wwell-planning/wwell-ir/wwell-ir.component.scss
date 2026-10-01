@@ -640,33 +640,40 @@ $master-width: 240px;
   flex-direction: column;
   min-height: 0;
 
-  > app-wwell-ir-editor,
-  > .wwell-ir__view-layout {
+  > .wwell-ir__detail-layout {
     flex: 1;
     min-height: 0;
   }
 }
 
-/* ── View mode — read-only stepper + approval-workflow sidebar, side by side ────── */
-.wwell-ir__view-layout {
+/* ── Detail layout — the editor or the read-only stepper (whichever `detailMode()` is showing),
+ * plus the approval-workflow sidebar beside it — same two-column shape for both, so switching
+ * modes never jars the sidebar out of place. ────────────────────────────────────────────── */
+.wwell-ir__detail-layout {
   display: flex;
   gap: var(--wwell-gutter, 0.9rem);
   min-height: 0;
 }
 
-.wwell-ir__view-main {
+.wwell-ir__detail-main {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  display: flex;
+
+  > * {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 /* Skinny — matches the width `app-wwell-approval-timeline`'s own vertical/compact variant was
- * actually designed around (see that component's "~168px column" comment); the previous 280px
- * here fought that sizing instead of using it. `align-items: stretch` (flex default, from
- * `.wwell-ir__view-layout`) is what makes this match `.wwell-ir__view-main`'s full height. */
-.wwell-ir__view-sidebar {
+ * actually designed around (see that component's "~168px column" comment). `align-items: stretch`
+ * (flex default, from `.wwell-ir__detail-layout`) is what makes this match `.wwell-ir__detail-main`'s
+ * full height. A touch wider than the old view-only 200px to give the progress ring room. */
+.wwell-ir__approval-sidebar {
   flex-shrink: 0;
-  width: 200px;
+  width: 216px;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -676,118 +683,10 @@ $master-width: 240px;
   }
 }
 
-/* Same card language as `.irv__header`/`.kv-card` (10px radius, #e8edf4 border, identical
- * shadow) so the sidebar reads as one family with the rest of the view instead of a bolted-on
- * panel — only the top accent strip (chain-status color, replacing the old flat left border) and
- * the richer header below are new. */
-.wwell-ir__approval-card {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  border: 1px solid transparent;
-  border-radius: tokens.$radius-lg;
-  padding: 1.2rem 0.9rem 1rem;
-  @include tokens.glass-panel;
-  // The timeline's type, a step up from its compact default (see `--wtl-fs` in the timeline's stylesheet).
-  --wtl-fs: #{tokens.$text-xs};
-  --wtl-name-fs: #{tokens.$text-sm};
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 3px;
-    background: var(--chain-color, #{$accent});
-  }
-}
-
-/* The timeline itself grows to fill whatever height the card has (rather than the card
- * shrink-wrapping to a short chain and leaving the border short of `.wwell-ir__view-main`'s
- * height) and scrolls internally if a long chain ever exceeds the available space. */
-.wwell-ir__approval-card app-wwell-approval-timeline {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.wwell-ir__approval-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  // The rail is narrow and the title wraps: nothing here may push past its edge.
-  min-width: 0;
-  margin-bottom: 0.9rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid tokens.$border-soft;
-}
-
-.wwell-ir__approval-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  background: tokens.$accent-soft;
-  color: $accent;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-}
-
-.wwell-ir__approval-head-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.wwell-ir__approval-title {
-  font-family: tokens.$font-display;
-  margin: 0;
-  font-size: tokens.$text-md;
-  font-weight: 650;
-  color: $navy;
-  letter-spacing: -0.018em;
-}
-
-.wwell-ir__approval-progress {
-  margin: 3px 0 0;
-  font-size: tokens.$text-xs;
-  color: $muted;
-}
-
-.wwell-ir__approval-refresh-btn {
-  flex-shrink: 0;
-  align-self: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  line-height: 28px;
-  color: $muted;
-
-  ::ng-deep .mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-  }
-
-  &:hover:not(:disabled) {
-    color: $accent;
-  }
-}
+/* The approval card's own visuals (elevated glass, progress ring, timeline) now live in
+ * WwellApprovalWorkflowCardComponent's own stylesheet — shared by this sidebar (View mode) and
+ * the editor's header pill/popover (Edit mode, see wwell-ir-editor.component.scss), so the two
+ * can never drift apart. This sidebar only sizes/scrolls the column that component sits in. */
 
 .wwell-ir__empty {
   height: 100%;
@@ -855,11 +754,11 @@ $master-width: 240px;
     overflow: visible;
   }
 
-  .wwell-ir__view-layout {
+  .wwell-ir__detail-layout {
     flex-direction: column;
   }
 
-  .wwell-ir__view-sidebar {
+  .wwell-ir__approval-sidebar {
     width: 100%;
   }
 }
@@ -876,7 +775,9 @@ $master-width: 240px;
 @media print {
   .wwell-ir__detail,
   .wwell-ir__detail-panel,
-  .wwell-ir__detail-panel > app-wwell-ir-editor {
+  .wwell-ir__detail-layout,
+  .wwell-ir__detail-main,
+  .wwell-ir__detail-main > app-wwell-ir-editor {
     display: block;
     flex: none;
     max-height: none;

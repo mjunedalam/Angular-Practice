@@ -24,7 +24,7 @@ import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwel
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
-import { WwellApprovalTimelineComponent } from '../shared/wwell-approvals/wwell-approval-timeline/wwell-approval-timeline.component';
+import { WwellApprovalWorkflowCardComponent } from '../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
 import { WwellCollapseAnimateDirective } from '../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
@@ -39,7 +39,7 @@ import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-
 import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
-import { WWELL_IR_STATUS_META, hasKnownIrStatus } from './wwell-ir.config';
+import { WWELL_IR_STATUS_META, hasKnownIrStatus, irBadgeMeta } from './wwell-ir.config';
 
 /** Which surface WwellIrEditorComponent's slot in the detail panel currently shows for the
  *  selected record — 'edit' is the existing view-with-inline-edit surface, 'view' is the
@@ -80,7 +80,7 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     MatIconModule,
     WwellIrEditorComponent,
     WwellIrViewComponent,
-    WwellApprovalTimelineComponent,
+    WwellApprovalWorkflowCardComponent,
     WwellDetailLoadingComponent,
     WwellIrEditorLoadingComponent,
     WwellCollapseAnimateDirective,
@@ -155,6 +155,13 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   // user selects an existing row instead (see selectIrRow), discarding whatever was unsaved.
   protected readonly pendingDraftIr = signal<IntegratedRequirement | null>(null);
 
+  // True only right after the detail panel's own back arrow explicitly closes it — the "default to
+  // first visible record" effect below reads this to skip re-opening whatever it just closed. Never
+  // set by anything else that clears `selectedIrSeq` (a delete, a fresh load): those paths *want*
+  // that effect to auto-fill the panel, exactly as a fresh session start already does — only an
+  // explicit deselect should leave it empty. See `deselect()`.
+  private readonly deselected = signal(false);
+
   // Deliberately looks up the *unfiltered* store list (not `rows()`) so narrowing the search
   // never drops the current selection just because it fell outside the filtered results.
   // Water Well Name/Coordinates/Surface Elevation arrive on the record itself once its detail has
@@ -173,6 +180,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly hasKnownStatus = hasKnownIrStatus;
+  protected readonly badgeMeta = irBadgeMeta;
 
   protected readonly skeletonRows = Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => index);
 
@@ -205,6 +213,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   private wasCreatingIr = false;
   private wasDeletingIr = false;
   private wasSubmittingForReview = false;
+  private wasRecallingIr = false;
 
   constructor() {
     effect(() => {
@@ -282,6 +291,25 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     });
 
     effect(() => {
+      const message = this.store.sapRecallError();
+      if (message) this.notify.error(message);
+    });
+
+    // Reports the outcome of a Recall once its own SAP call + follow-up status refetch both settle
+    // (see WwellIrStore.recallSapWorkflow — `recallingIr` deliberately spans both so the editor's
+    // Recall button spinner covers the whole action). Same settled-edge shape as the submit effect
+    // above; a failure is already toasted by the sapRecallError effect just above.
+    effect(() => {
+      const recalling = this.store.recallingIr();
+      const settled = this.wasRecallingIr && !recalling;
+      this.wasRecallingIr = recalling;
+      if (!settled || this.store.sapRecallError()) return;
+
+      const recalledCode = this.store.irs().find(ir => ir.irSeq === this.selectedIrSeq())?.code;
+      this.notify.info(`Workflow for ${recalledCode ?? 'this integrated requirement'} recalled successfully.`);
+    });
+
+    effect(() => {
       const message = this.store.irDetailError();
       if (message) this.notify.error(message);
     });
@@ -314,6 +342,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
       if (this.selectedIrSeq() !== null && !this.store.irs().some(ir => ir.irSeq === this.selectedIrSeq())) {
         this.selectedIrSeq.set(null);
         this.previousSelectedIrSeq = null;
+        this.deselected.set(false);
       }
     });
 
@@ -325,7 +354,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     // drafting (the draft isn't in `rows()`), and this effect would otherwise immediately fetch
     // and select an unrelated real record's detail out from under the still-open draft.
     effect(() => {
-      if (this.pendingDraftIr()) return;
+      if (this.pendingDraftIr() || this.deselected()) return;
       const firstIrSeq = this.rows()[0]?.irSeq;
       if (firstIrSeq != null && this.selectedIrSeq() === null) {
         this.selectedIrSeq.set(firstIrSeq);
@@ -435,6 +464,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
    *  a section *with* real edits is asked about before this ever runs). */
   private performSelectIr(irSeq: number): void {
     this.pendingDraftIr.set(null);
+    this.deselected.set(false);
     this.pendingSelection.select(irSeq, this.selectedIrSeq(), resolved => this.selectedIrSeq.set(resolved));
   }
 
@@ -466,9 +496,31 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   }
 
   /** WwellIrViewComponent's own "Edit" button — switches the currently-open record's detail
-   *  panel back to the inline-edit surface. */
+   *  panel back to the inline-edit surface. Unguarded: the read-only view has no edits of its own
+   *  to lose, so there's nothing this direction could discard. */
   protected setDetailMode(mode: WwellIrDetailMode): void {
     this.detailMode.set(mode);
+  }
+
+  /** The editor's own "View" toggle — switching the same record to the read-only stepper destroys
+   *  this editor instance (see the template's `@if (detailMode() === 'view')` branch), so unlike
+   *  `setDetailMode` above this direction needs the same unsaved-changes guard as an actual row
+   *  switch, even though the selected record itself isn't changing. */
+  protected requestViewMode(): void {
+    this.guardNavigation(() => this.detailMode.set('view'));
+  }
+
+  /** The detail panel's back arrow — closes it entirely and returns to just the list, discarding a
+   *  blank "New IR" draft or prompting to save/discard real edits first, same as any other
+   *  "leave what's open" action. Sets `deselected` so the auto-select-first-record effect doesn't
+   *  immediately reopen whatever this just closed. */
+  protected deselect(): void {
+    this.guardNavigation(() => {
+      this.pendingDraftIr.set(null);
+      this.selectedIrSeq.set(null);
+      this.previousSelectedIrSeq = null;
+      this.deselected.set(true);
+    });
   }
 
   /** `cdkVirtualFor`'s identity function — same identity rule as the old `@for`'s `track`
@@ -496,6 +548,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     this.pendingDraftIr.set(draft);
     this.selectedIrSeq.set(null);
     this.previousSelectedIrSeq = null;
+    this.deselected.set(false);
     // A brand-new draft has nothing committed to view read-only yet — always open it for editing,
     // regardless of whatever mode the previously-open record was left in.
     this.detailMode.set('edit');
@@ -508,12 +561,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     return chainCompletionColor(chain);
   }
 
-  /** Powers the approval-workflow sidebar's "N of M approved" progress line (view mode only). */
-  protected approvedStepCount(chain: readonly ApprovalChainStep[]): number {
-    return chain.filter(step => step.status === 'approved').length;
-  }
-
-  /** Manual "Refresh" action on the Approval Workflow sidebar — pulls SAP's real current
+  /** Manual "Refresh" action on the Approval Workflow sidebar/pill — pulls SAP's real current
    *  status/chain for the open record on demand, without needing to reselect it. A no-op for a
    *  record with no `sapWfId` (never submitted, so there is nothing in SAP to ask about) or no
    *  `irSeq` (a local-only draft) — the store's own `refreshIrApprovalStatus` guards the same

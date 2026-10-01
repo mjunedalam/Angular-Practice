@@ -2,7 +2,7 @@ import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SapTriggerRequest, SapTriggerResponse } from '@models/sap/sap-trigger.model';
-import { SapWorkflowStatusResponse } from '@models/sap/sap-workflow-status.model';
+import { SapRecallResponse, SapWorkflowStatusResponse } from '@models/sap/sap-workflow-status.model';
 import { SKIP_AUTH } from '@interceptors/auth.interceptor';
 import { SKIP_AUTO_LOGOUT, SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -45,5 +45,21 @@ export class SapService {
   getWorkflowStatus(processId: string, wfObjId: number): Observable<SapWorkflowStatusResponse> {
     const params = new HttpParams().set('process_id', processId).set('wf_obj_id', String(wfObjId)).set('native_response', 'false');
     return this.http.get<SapWorkflowStatusResponse>(`${this.baseUrl}/display`, { params, context: this.sapContext });
+  }
+
+  /** Backs the IR "Recall" action, available once a record has a `sapWfId` (i.e. was already
+   *  submitted) — `wfObjId` is the same raw id `getWorkflowStatus` looks up, `recalledBy` the
+   *  acting user's network id (see WwellIrStore.recallIr / AuthStore.networkId). Returns a bare
+   *  acknowledgement (`{ message: "Request <n> recalled successfully" }`), **not** the
+   *  `SapWorkflowStatusResponse` shape `getWorkflowStatus` does — confirmed live in production,
+   *  correcting an earlier assumption that the shapes matched. Callers that need the workflow's
+   *  post-recall status/chain must ask `getWorkflowStatus` for it separately. */
+  recall(processId: string, wfObjId: number, recalledBy: string): Observable<SapRecallResponse> {
+    const params = new HttpParams()
+      .set('process_id', processId)
+      .set('wf_obj_id', String(wfObjId))
+      .set('recalled_by', recalledBy)
+      .set('native_response', 'false');
+    return this.http.delete<SapRecallResponse>(`${this.baseUrl}/recall`, { params, context: this.sapContext });
   }
 }

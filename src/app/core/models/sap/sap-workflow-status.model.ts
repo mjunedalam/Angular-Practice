@@ -38,3 +38,8 @@ export interface SapWorkflowStatusResponse {
   reject_remarks: SapRemark[];
   approval_chain: SapApprovalStep[];
 }
+
+/** Body of `DELETE /recall` — a bare acknowledgement, unlike `GET /display`'s full status snapshot. */
+export interface SapRecallResponse {
+  message: string;
+}

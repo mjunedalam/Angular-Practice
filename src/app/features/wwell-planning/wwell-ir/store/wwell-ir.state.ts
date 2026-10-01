@@ -18,6 +18,11 @@ export interface WwellIrStoreState {
   readonly gwdOpsMembersLoading: boolean;
   readonly creatingIr: boolean;
   readonly updatingIrStatus: boolean;
+  /** Recalling an already-submitted IR's SAP workflow — its own flag rather than reusing
+   *  `updatingIrStatus`, since "Submit for Review" and "Recall" are mutually exclusive actions on
+   *  the same record (see WwellIrEditorComponent.canSubmitForReview / canRecallIr) and each should
+   *  only ever spin its own button. */
+  readonly recallingIr: boolean;
   /** Deleting a whole IR (header + cascaded casing/tops/hydrogeology/water) by ir_seq. */
   readonly deletingIr: boolean;
   /** Fetching one IR's full detail by ir_seq (casing/tops/hydrogeology) after a list selection. */
@@ -56,6 +61,9 @@ export interface WwellIrStoreState {
    *  triggering SAP, and recording the outcome on the header (see WwellIrStore.submitIrForReview).
    *  That action has no separate IR status-transition call to fail on its own. */
   readonly sapTriggerError: string | null;
+  /** The one error slot for the whole "Recall" action — calling SAP's DELETE /recall, then
+   *  recording the outcome on the header (see WwellIrStore.recallIr). */
+  readonly sapRecallError: string | null;
   readonly irDetailError: string | null;
   readonly irApprovalTimelineError: string | null;
   readonly deleteIrError: string | null;
@@ -72,6 +80,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   gwdOpsMembersLoading: false,
   creatingIr: false,
   updatingIrStatus: false,
+  recallingIr: false,
   deletingIr: false,
   irDetailLoading: false,
   irApprovalTimelineLoading: false,
@@ -84,6 +93,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   gwdOpsMembersError: null,
   createIrError: null,
   sapTriggerError: null,
+  sapRecallError: null,
   irDetailError: null,
   irApprovalTimelineError: null,
   deleteIrError: null,
