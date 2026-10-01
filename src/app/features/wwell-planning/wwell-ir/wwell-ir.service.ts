@@ -183,6 +183,23 @@ export class WwellIrService {
       .pipe(map(() => undefined));
   }
 
+  /** Reports the key Angular's direct S3 mirror call minted (see S3Service.store, called from
+   *  WwellIrStore.mirrorToS3) back onto the stored attachment — purely so "indexed in S3" survives
+   *  a reload. The attachment itself already succeeded before this ever runs, so this call is
+   *  irrelevant to that outcome; the caller treats it as best-effort.
+   *
+   *  SUPPRESS_GLOBAL_ERROR: same reasoning as deleteIrAttachment/getIrAttachmentFile above — the
+   *  caller swallows this failure silently rather than showing anything to the user. */
+  recordAttachmentS3Key(irSeq: number, slot: IrAttachmentSlot, fileName: string, s3ObjectKey: string): Observable<void> {
+    return this.http
+      .patch<ApiResponse<never>>(
+        `${this.apiUrl}/integrated-requirements/${irSeq}/attachments/${slot}/${encodeURIComponent(fileName)}/s3-key`,
+        { s3ObjectKey },
+        { context: new HttpContext().set(SUPPRESS_GLOBAL_ERROR, true) },
+      )
+      .pipe(map(() => undefined));
+  }
+
   /**
    * Pulls one stored attachment back as a `File` so it can be handed to FilePreviewDialogComponent,
    * which previews from a File (it builds its own object URL) rather than from a remote URL.

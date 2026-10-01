@@ -8,6 +8,7 @@ import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@mode
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { SapService } from '@services/sap/sap.service';
+import { S3Service } from '@services/s3/s3.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { mapSapWorkflowStatusToApprovalChain } from '../wwell-ir-form/wwell-ir-approval.mapper';
@@ -151,7 +152,14 @@ export const WwellIrStore = signalStore(
     }),
   ),
 
-  withMethods((store, svc = inject(WwellIrService), sap = inject(SapService), authStore = inject(AuthStore), notify = inject(NotificationService)) => {
+  withMethods((
+    store,
+    svc = inject(WwellIrService),
+    sap = inject(SapService),
+    s3 = inject(S3Service),
+    authStore = inject(AuthStore),
+    notify = inject(NotificationService),
+  ) => {
     // Step 3, reached only after SAP has accepted the workflow (step 2): stamps the id and a
     // local "In Progress" placeholder status onto the IR header (update_ir_sap_wf_prc — `seq`
     // lands in sap_wf_id, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS in sap_wf_status). Deliberately does
@@ -434,6 +442,42 @@ export const WwellIrStore = signalStore(
           : item,
       );
 
+    /** Stamps the S3 object-store proxy's key onto one specific attachment once mirrorToS3 below and
+     *  the backend's recordAttachmentS3Key round-trip both succeed — every other attachment, and
+     *  this one's other fields, are left untouched. */
+    const withS3Key = (irSeq: number, slot: IrAttachmentSlot, fileName: string, s3ObjectKey: string) =>
+      store.irs().map(item =>
+        item.irSeq === irSeq
+          ? {
+              ...item,
+              attachments: item.attachments.map(existing =>
+                existing.slot === slot && existing.fileName === fileName ? { ...existing, s3ObjectKey } : existing,
+              ),
+            }
+          : item,
+      );
+
+    /**
+     * Best-effort mirror of a just-uploaded attachment into the S3 object-store proxy, called
+     * directly from the browser (S3Service — same direct-from-Angular pattern as SapService, see
+     * external-config.json's s3ServiceUrl) rather than proxied through agwa-planning. Never surfaces
+     * its own failure to the user and never touches attachmentError: the real file is already
+     * safely stored on agwa-planning by the time this runs, so a mirror failure here only means the
+     * "indexed in S3" badge won't appear — not that the upload the user asked for failed.
+     */
+    function mirrorToS3(irSeq: number, slot: IrAttachmentSlot, file: File, fileName: string): void {
+      const networkId = authStore.networkId() ?? '';
+      const prefix = `ir-attachments/ir-${irSeq}/${slot}`;
+      s3.store(file, prefix, networkId, fileName).subscribe({
+        next: response =>
+          svc.recordAttachmentS3Key(irSeq, slot, fileName, response.key).subscribe({
+            next: () => patchState(store, { irs: withS3Key(irSeq, slot, fileName, response.key) }),
+            error: () => undefined,
+          }),
+        error: () => undefined,
+      });
+    }
+
     /** Marks one pending file as mid-upload (or clears that marking) — shared by the single-item
      *  and sweep upload paths below so both track busy/progress identically per file id. */
     function setPendingUploadBusy(id: string, percent: number | null): void {
@@ -480,6 +524,7 @@ export const WwellIrStore = signalStore(
             pendingAttachments: withoutPendingAttachment(slot, item.id),
           });
           notify.info(`${attachment.label} uploaded.`);
+          mirrorToS3(irSeq, slot, item.file, attachment.fileName);
         },
         error: (err: unknown) => {
           clearPendingUploadBusy(item.id);

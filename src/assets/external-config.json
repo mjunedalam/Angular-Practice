@@ -4,6 +4,7 @@
     "planningServiceUrl": "http://localhost:7070",
     "emailServiceUrl": "http://localhost:8080",
     "sapServiceUrl": "http://localhost:9090",
+    "s3ServiceUrl": "http://localhost:9091",
     "mapServerUrl": "https://eccenterprisegislbsrvr.enp.aramco.com.sa:6443/arcgis/rest/services/EARTH/EARTH_Layers/MapServer",
     "mosaicLayerUrl": "https://gissrv.enp.aramco.com.sa:6443/arcgis/rest/services/CART/ASD_100K_MOSAIC/ImageServer",
     "appId": "M0M4nfZyToqUlgQy",

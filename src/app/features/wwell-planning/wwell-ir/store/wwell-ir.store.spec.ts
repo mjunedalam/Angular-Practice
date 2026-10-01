@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { SapService } from '@services/sap/sap.service';
+import { S3Service } from '@services/s3/s3.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
@@ -23,6 +24,10 @@ const sapServiceMock = {
   trigger: jest.fn(),
   getWorkflowStatus: jest.fn(),
   recall: jest.fn(),
+};
+
+const s3ServiceMock = {
+  store: jest.fn(),
 };
 
 const authStoreMock = {
@@ -117,6 +122,7 @@ describe('WwellIrStore - createIr', () => {
         WwellIrStore,
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -264,6 +270,7 @@ describe('WwellIrStore - submitIrForReview', () => {
         WwellIrStore,
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -451,6 +458,7 @@ describe('WwellIrStore - recallIr', () => {
         WwellIrStore,
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -566,6 +574,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
         WwellIrStore,
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });

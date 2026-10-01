@@ -6,6 +6,7 @@ export interface AgwaConfig {
   presDocsServiceUrl: string;
   emailServiceUrl: string;
   sapServiceUrl: string;
+  s3ServiceUrl: string;
   mapServerUrl: string;
   mosaicLayerUrl: string;
   appId: string;
