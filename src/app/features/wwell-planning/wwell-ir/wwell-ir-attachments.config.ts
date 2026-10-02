@@ -42,12 +42,34 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
  */
 export const WWELL_IR_ATTACHMENT_ACCEPT = '.pdf,.jpg,.jpeg,.png';
 
-/** Matches the server-side cap in IrAttachmentStorageService — checked here only to fail fast. */
+/** Purely a client-side guard now — the S3 object-store proxy enforces no size cap of its own, so
+ *  this exists only to fail fast before spending time on an upload that's almost certainly wrong. */
 export const WWELL_IR_ATTACHMENT_MAX_BYTES = 25 * 1024 * 1024;
 
-/** Every file occupying a slot, oldest-uploaded first (the order the backend returns them in) —
- *  shared by the editor, letter and details views. A slot can hold any number of attachments, not
- *  just one, so callers render this as a list rather than picking a single result. */
+/** Every file occupying a slot, oldest-uploaded first — shared by the editor, letter and details
+ *  views. A slot can hold any number of attachments, not just one, so callers render this as a list
+ *  rather than picking a single result. */
 export function irAttachmentsFor(attachments: readonly IrAttachment[], slot: IrAttachmentSlot): readonly IrAttachment[] {
   return attachments.filter(attachment => attachment.slot === slot);
+}
+
+/**
+ * Recovers the slot from one of this app's own object keys
+ * (`ir-attachments/ir-<irSeq>/<slot>/<uuid>`). Anchored on the literal `ir-attachments` segment
+ * rather than the key's start, because the real S3 proxy prefixes every key with its own
+ * environment segment (e.g. `dev/`) that this app never generates and must simply tolerate.
+ * Returns null for a key that doesn't look like one of this app's own.
+ */
+export function slotFromObjectKey(objectKey: string): IrAttachmentSlot | null {
+  const segments = objectKey.split('/');
+  const anchor = segments.indexOf('ir-attachments');
+  const candidate = anchor >= 0 ? segments[anchor + 2] : undefined;
+  const config = WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === candidate);
+  return config ? config.slot : null;
+}
+
+/** Display label for a slot ("Location Map") — used to build an `IrAttachment` straight from a
+ *  search result, since the proxy itself has no notion of this app's slot labels. */
+export function labelForSlot(slot: IrAttachmentSlot): string {
+  return WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot)?.label ?? slot;
 }

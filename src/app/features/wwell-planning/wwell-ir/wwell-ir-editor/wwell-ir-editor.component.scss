@@ -1160,14 +1160,6 @@ app-wwell-ir-editor {
   color: $muted;
 }
 
-/* Informational only — the real object key sits in the tooltip, not inline, since it's a long
- * opaque path nobody needs to read at a glance; this just confirms the mirror call landed. */
-.ire__attachment-s3-badge {
-  cursor: help;
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
-}
-
 .ire__attachment-action {
   flex: none;
   display: inline-flex;

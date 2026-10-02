@@ -16,6 +16,7 @@ import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/w
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
+import { labelForSlot, slotFromObjectKey } from '../wwell-ir-attachments.config';
 import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS } from '../wwell-ir-sap.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
@@ -406,15 +407,34 @@ export const WwellIrStore = signalStore(
       ),
     );
 
-    // Attachments are files on the backend's filesystem, not exad_gwd_ir_* columns, so they load
-    // through their own endpoint and get merged onto the record the same way the chain above does.
+    /** Every object stored under this IR's prefix (trailing slash so IR 900's query can never match
+     *  IR 9006's objects — see S3Service.search), newest-first from the proxy and reversed here to
+     *  oldest-uploaded-first (matches `irAttachmentsFor`'s doc comment). A key that doesn't parse as
+     *  one of this app's own slots (see `slotFromObjectKey`) is silently skipped rather than shown
+     *  with a broken slot. */
     const loadIrAttachments = rxMethod<number>(
       pipe(
         tap(() => patchState(store, { attachmentsLoading: true, attachmentError: null })),
         switchMap(irSeq =>
-          svc.getIrAttachments(irSeq).pipe(
+          s3.search(`ir-attachments/ir-${irSeq}/`).pipe(
             tapResponse({
-              next: attachments => {
+              next: ({ objects }) => {
+                const attachments: IrAttachment[] = [...objects]
+                  .reverse()
+                  .flatMap(object => {
+                    const slot = slotFromObjectKey(object.OBJ_KEY);
+                    if (!slot) return [];
+                    return [
+                      {
+                        slot,
+                        objectKey: object.OBJ_KEY,
+                        label: labelForSlot(slot),
+                        fileName: object.ORIGINAL_FILENAME,
+                        sizeBytes: object.OBJ_SIZE,
+                        contentType: object.CONTENT_TYPE_CD,
+                      },
+                    ];
+                  });
                 patchState(store, {
                   irs: store.irs().map(item => (item.irSeq === irSeq ? { ...item, attachments } : item)),
                   attachmentsLoading: false,
@@ -433,66 +453,12 @@ export const WwellIrStore = signalStore(
     const appendAttachment = (irSeq: number, attachment: IrAttachment) =>
       store.irs().map(item => (item.irSeq === irSeq ? { ...item, attachments: [...item.attachments, attachment] } : item));
 
-    /** Drops one specific stored attachment (matched by slot + file name, its only identity) off
-     *  the record, leaving every other attachment in that slot in place. */
-    const withoutAttachment = (irSeq: number, slot: IrAttachmentSlot, fileName: string) =>
+    /** Drops one specific stored attachment (matched by its object key, its only identity) off the
+     *  record, leaving every other attachment in place. */
+    const withoutAttachment = (irSeq: number, objectKey: string) =>
       store.irs().map(item =>
-        item.irSeq === irSeq
-          ? { ...item, attachments: item.attachments.filter(existing => !(existing.slot === slot && existing.fileName === fileName)) }
-          : item,
+        item.irSeq === irSeq ? { ...item, attachments: item.attachments.filter(existing => existing.objectKey !== objectKey) } : item,
       );
-
-    /** Stamps the S3 object-store proxy's key onto one specific attachment once mirrorToS3 below and
-     *  the backend's recordAttachmentS3Key round-trip both succeed — every other attachment, and
-     *  this one's other fields, are left untouched. */
-    const withS3Key = (irSeq: number, slot: IrAttachmentSlot, fileName: string, s3ObjectKey: string) =>
-      store.irs().map(item =>
-        item.irSeq === irSeq
-          ? {
-              ...item,
-              attachments: item.attachments.map(existing =>
-                existing.slot === slot && existing.fileName === fileName ? { ...existing, s3ObjectKey } : existing,
-              ),
-            }
-          : item,
-      );
-
-    /**
-     * Best-effort mirror of a just-uploaded attachment into the S3 object-store proxy, called
-     * directly from the browser (S3Service — same direct-from-Angular pattern as SapService, see
-     * external-config.json's s3ServiceUrl) rather than proxied through agwa-planning. Never surfaces
-     * its own failure to the user and never touches attachmentError: the real file is already
-     * safely stored on agwa-planning by the time this runs, so a mirror failure here only means the
-     * "indexed in S3" badge won't appear — not that the upload the user asked for failed.
-     */
-    function mirrorToS3(irSeq: number, slot: IrAttachmentSlot, file: File, fileName: string): void {
-      const networkId = authStore.networkId() ?? '';
-      const prefix = `ir-attachments/ir-${irSeq}/${slot}`;
-      s3.store(file, prefix, networkId, fileName).subscribe({
-        next: response =>
-          svc.recordAttachmentS3Key(irSeq, slot, fileName, response.key).subscribe({
-            next: () => patchState(store, { irs: withS3Key(irSeq, slot, fileName, response.key) }),
-            error: () => undefined,
-          }),
-        error: () => undefined,
-      });
-    }
-
-    /**
-     * Best-effort companion to `mirrorToS3` above: removes the mirrored copy from the S3
-     * object-store proxy, called directly from the browser, once the primary delete against
-     * agwa-planning has already succeeded. A no-op when the attachment was never mirrored in the
-     * first place (`s3ObjectKey` null — e.g. its original upload's own mirror call failed, or it
-     * predates this feature). Never surfaces its own failure: whatever the proxy says — a clean
-     * 200, a 404 because it was already gone, a 400/403/422 rejecting the key/request — the
-     * attachment itself is already gone from the record the user cares about by the time this
-     * runs, so there is nothing left here for the user to act on.
-     */
-    function deleteFromS3(s3ObjectKey: string | null | undefined): void {
-      if (!s3ObjectKey) return;
-      const networkId = authStore.networkId() ?? '';
-      s3.delete(s3ObjectKey, networkId).subscribe({ error: () => undefined });
-    }
 
     /** Marks one pending file as mid-upload (or clears that marking) — shared by the single-item
      *  and sweep upload paths below so both track busy/progress identically per file id. */
@@ -518,29 +484,39 @@ export const WwellIrStore = signalStore(
     }
 
     /**
-     * Uploads one staged file. Independent of every other file in flight — each call tracks its own
-     * busy/progress by the pending item's id (see `uploadingPendingIds`/`uploadProgressByPendingId`),
-     * so clicking several rows' Upload buttons in a row fires that many concurrent requests rather
-     * than queuing behind one another. Clears the staging only after the server confirms, so a
-     * failed upload leaves the file in its slot to retry rather than silently dropping the user's
-     * pick — the one thing that would actually lose their work.
+     * Uploads one staged file straight to the S3 object-store proxy — the sole upload call now,
+     * with no agwa-planning involvement at all (see ir-attachment.model.ts's class doc comment).
+     * Independent of every other file in flight — each call tracks its own busy/progress by the
+     * pending item's id (see `uploadingPendingIds`/`uploadProgressByPendingId`), so clicking several
+     * rows' Upload buttons in a row fires that many concurrent requests rather than queuing behind
+     * one another. Clears the staging only after the proxy confirms, so a failed upload leaves the
+     * file in its slot to retry rather than silently dropping the user's pick.
      */
     function uploadOne(irSeq: number, slot: IrAttachmentSlot, item: IrPendingAttachment): void {
       setPendingUploadBusy(item.id, null);
       patchState(store, { attachmentError: null });
-      svc.uploadIrAttachment(irSeq, slot, item.file).subscribe({
-        next: ({ percent, attachment }) => {
-          if (!attachment) {
+      const networkId = authStore.networkId() ?? '';
+      const prefix = `ir-attachments/ir-${irSeq}/${slot}`;
+      s3.store(item.file, prefix, networkId, item.file.name).subscribe({
+        next: ({ percent, response }) => {
+          if (!response) {
             setPendingUploadBusy(item.id, percent);
             return;
           }
+          const attachment: IrAttachment = {
+            slot,
+            objectKey: response.key,
+            label: labelForSlot(slot),
+            fileName: item.file.name,
+            sizeBytes: item.file.size,
+            contentType: response.content_type,
+          };
           clearPendingUploadBusy(item.id);
           patchState(store, {
             irs: appendAttachment(irSeq, attachment),
             pendingAttachments: withoutPendingAttachment(slot, item.id),
           });
           notify.info(`${attachment.label} uploaded.`);
-          mirrorToS3(irSeq, slot, item.file, attachment.fileName);
         },
         error: (err: unknown) => {
           clearPendingUploadBusy(item.id);
@@ -609,27 +585,22 @@ export const WwellIrStore = signalStore(
         );
       },
 
-      /** Deletes one specific stored attachment by slot + file name — the two together are its only
-       *  identity now that a slot can hold several. Tracked by that same composite key in
-       *  `deletingAttachmentKeys` so only this one row shows busy, not the rest of the slot's list.
-       *  Once the primary delete (agwa-planning) confirms, best-effort mirrors the removal to the S3
-       *  object-store proxy too (`deleteFromS3`) — the key has to be captured up front, before
-       *  `withoutAttachment` drops the record this attachment's `s3ObjectKey` lives on. */
-      deleteIrAttachment(irSeq: number, slot: IrAttachmentSlot, fileName: string): void {
-        const key = `${slot}:${fileName}`;
-        const ir = store.irs().find(item => item.irSeq === irSeq);
-        const s3ObjectKey = ir?.attachments.find(existing => existing.slot === slot && existing.fileName === fileName)?.s3ObjectKey;
-        patchState(store, { deletingAttachmentKeys: new Set(store.deletingAttachmentKeys()).add(key), attachmentError: null });
-        svc.deleteIrAttachment(irSeq, slot, fileName).subscribe({
+      /** Deletes one specific stored attachment by its object key — its only identity now. Tracked
+       *  by that same key in `deletingAttachmentKeys` so only this one row shows busy, not the rest
+       *  of the slot's list. Calls the S3 object-store proxy directly — there is no backend
+       *  round-trip for attachments at all anymore (see ir-attachment.model.ts's class doc comment). */
+      deleteIrAttachment(irSeq: number, objectKey: string): void {
+        const networkId = authStore.networkId() ?? '';
+        patchState(store, { deletingAttachmentKeys: new Set(store.deletingAttachmentKeys()).add(objectKey), attachmentError: null });
+        s3.delete(objectKey, networkId).subscribe({
           next: () => {
             const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());
-            deletingAttachmentKeys.delete(key);
-            patchState(store, { irs: withoutAttachment(irSeq, slot, fileName), deletingAttachmentKeys });
-            deleteFromS3(s3ObjectKey);
+            deletingAttachmentKeys.delete(objectKey);
+            patchState(store, { irs: withoutAttachment(irSeq, objectKey), deletingAttachmentKeys });
           },
           error: (err: unknown) => {
             const deletingAttachmentKeys = new Set(store.deletingAttachmentKeys());
-            deletingAttachmentKeys.delete(key);
+            deletingAttachmentKeys.delete(objectKey);
             patchState(store, { deletingAttachmentKeys, attachmentError: errorMessage(err, 'Failed to remove the attachment') });
           },
         });

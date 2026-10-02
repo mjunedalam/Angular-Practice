@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { S3Service } from '@services/s3/s3.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
-import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrEditorComponent } from './wwell-ir-editor.component';
 import { WWELL_IR_SECTION_RAIL, wwellIrRailLeaves } from './wwell-ir-section-rail.config';
 
@@ -88,11 +88,11 @@ const storeMock = {
   uploadPendingAttachments: jest.fn(),
 };
 
-/** The editor only reaches the service directly for a stored attachment's download/view — the
+/** The editor only reaches S3Service directly for a stored attachment's download/view — the
  *  uploads/deletes themselves go through the store (mocked above), so this is all the surface the
  *  component actually uses. */
-const wwellIrServiceMock = {
-  getIrAttachmentFile: jest.fn(),
+const s3ServiceMock = {
+  download: jest.fn(),
 };
 
 const notificationServiceMock = {
@@ -129,7 +129,7 @@ describe('WwellIrEditorComponent', () => {
       providers: [
         { provide: WwellIrStore, useValue: storeMock },
         { provide: NotificationService, useValue: notificationServiceMock },
-        { provide: WwellIrService, useValue: wwellIrServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
       ],
     }).compileComponents();
 
@@ -170,7 +170,7 @@ describe('WwellIrEditorComponent', () => {
       providers: [
         { provide: WwellIrStore, useValue: storeMock },
         { provide: NotificationService, useValue: notificationServiceMock },
-        { provide: WwellIrService, useValue: wwellIrServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(WwellIrEditorComponent);

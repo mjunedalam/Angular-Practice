@@ -953,23 +953,12 @@
 
             @if (attachmentsFor(slot.slot).length || pendingAttachmentsFor(slot.slot).length) {
               <ul class="ire__attachment-list">
-                @for (attachment of attachmentsFor(slot.slot); track attachment.fileName) {
+                @for (attachment of attachmentsFor(slot.slot); track attachment.objectKey) {
                   <li class="ire__attachment-file" appWwellCollapseAnimate>
                     <mat-icon class="ire__attachment-file-icon">{{ attachmentIcon(attachment.contentType) }}</mat-icon>
                     <span class="ire__attachment-file-meta">
                       <span class="ire__attachment-file-name">{{ attachment.fileName }}</span>
-                      <span class="ire__attachment-file-size">
-                        {{ attachmentSizeLabel(attachment.sizeBytes) }}
-                        @if (attachment.s3ObjectKey) {
-                          ·
-                          <span
-                            class="ire__attachment-s3-badge"
-                            [matTooltip]="'S3 object key: ' + attachment.s3ObjectKey"
-                            matTooltipClass="ir-attachment-tooltip"
-                            matTooltipPosition="above"
-                          >indexed in S3</span>
-                        }
-                      </span>
+                      <span class="ire__attachment-file-size">{{ attachmentSizeLabel(attachment.sizeBytes) }}</span>
                     </span>
 
                     <button
@@ -993,13 +982,13 @@
                       matTooltip="Delete"
                       matTooltipClass="ir-attachment-tooltip"
                       matTooltipPosition="above"
-                      [disabled]="isStoredAttachmentBusy(slot.slot, attachment.fileName)"
-                      (click)="deleteStoredAttachment(slot.slot, attachment)"
+                      [disabled]="isStoredAttachmentBusy(attachment.objectKey)"
+                      (click)="deleteStoredAttachment(attachment)"
                     >
                       <mat-icon>delete</mat-icon>
                     </button>
 
-                    @if (isStoredAttachmentBusy(slot.slot, attachment.fileName)) {
+                    @if (isStoredAttachmentBusy(attachment.objectKey)) {
                       <mat-progress-bar class="ire__attachment-progress" mode="indeterminate" />
                     }
                   </li>

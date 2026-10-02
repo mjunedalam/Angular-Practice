@@ -43,8 +43,8 @@ export interface WwellIrStoreState {
    *  event has landed yet) — that `null` is what tells the editor to show an indeterminate bar
    *  instead of one sitting misleadingly at 0%. */
   readonly uploadProgressByPendingId: Readonly<Record<string, number | null>>;
-  /** Composite `${slot}:${fileName}` keys of every already-stored attachment currently mid-delete —
-   *  same one-row-at-a-time independence as `uploadingPendingIds`, for the delete side instead. */
+  /** Object keys of every already-stored attachment currently mid-delete — same one-row-at-a-time
+   *  independence as `uploadingPendingIds`, for the delete side instead. */
   readonly deletingAttachmentKeys: ReadonlySet<string>;
   /**
    * Files picked on a New IR, which has no ir_seq yet — and ir_seq is what an upload is filed

@@ -1,8 +1,9 @@
 /**
  * The two named documents an IR can carry. Unlike the rest of the IR record — which persists
- * through exad_agwa_iud_pkg's bulk-save procs — these are real files stored on the backend's
- * filesystem (agwa-planning's IrAttachmentStorageService) and fetched per ir_seq, so they arrive
- * via their own endpoint rather than in the detail blocks.
+ * through exad_agwa_iud_pkg's bulk-save procs — these are real files that live entirely in the S3
+ * object-store proxy (s3-client-service locally), addressed by `ir-attachments/ir-<irSeq>/<slot>/`
+ * key prefixes. Angular talks to that proxy directly for upload/list/view/delete — agwa-planning
+ * has no storage or REST surface for attachments at all (see S3Service).
  *
  * Both are appended to the letter PDF as trailing pages in slot order, which is why only formats
  * the server can embed are accepted (see WWELL_IR_ATTACHMENT_ACCEPT).
@@ -33,17 +34,17 @@ export interface IrPendingAttachment {
 
 export interface IrAttachment {
   readonly slot: IrAttachmentSlot;
-  /** Server-supplied display name for the slot ("Location Map"), also used as the PDF page caption. */
+  /** The S3 object-store proxy's key — this attachment's only real identity (globally unique by
+   *  construction: `ir-attachments/ir-<irSeq>/<slot>/<uuid>`). Addresses view/delete directly
+   *  against the proxy; a slot/fileName pair is no longer enough since nothing here disambiguates
+   *  two uploads sharing the same original file name the way the old backend-side storage did. */
+  readonly objectKey: string;
+  /** Display label for the slot ("Location Map"), derived client-side from WWELL_IR_ATTACHMENT_SLOTS
+   *  — also used as the PDF page caption (by agwa-planning, independently, from the same slot). */
   readonly label: string;
-  /** Stored file name — sanitized server-side, so not necessarily what the user picked. */
+  /** The file's original name as picked, exactly as the S3 proxy's ORIGINAL_FILENAME recorded it —
+   *  display only, never addressing (see `objectKey`). */
   readonly fileName: string;
   readonly sizeBytes: number;
   readonly contentType: string;
-  /**
-   * Key the S3 object-store proxy (mocked locally by s3-client-service) minted when the backend
-   * best-effort mirrored this file into `EXAD_S3_OBJECT_STORAGE_INDEX`. Null whenever that mirror
-   * call never happened or failed — the file itself is always safely stored regardless, so this is
-   * purely informational, never a sign the upload itself failed.
-   */
-  readonly s3ObjectKey?: string | null;
 }

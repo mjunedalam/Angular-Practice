@@ -78,7 +78,7 @@ import {
   WWELL_IR_ATTACHMENT_SLOTS,
   irAttachmentsFor,
 } from '../wwell-ir-attachments.config';
-import { WwellIrService } from '../wwell-ir.service';
+import { S3Service } from '@services/s3/s3.service';
 import {
   WWELL_IR_SUBMITTABLE_STATUSES,
   hasKnownIrStatus,
@@ -173,7 +173,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmDialog = inject(ActionConfirmDialogService);
   private readonly notify = inject(NotificationService);
-  private readonly wwellIrService = inject(WwellIrService);
+  private readonly s3 = inject(S3Service);
   private readonly dialog = inject(MatDialog);
 
   protected readonly hasKnownStatus = hasKnownIrStatus;
@@ -622,8 +622,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     return this.store.uploadingPendingIds().has(id) || this.awaitingAutoSaveForUploadIds().has(id);
   }
 
-  protected isStoredAttachmentBusy(slot: IrAttachmentSlot, fileName: string): boolean {
-    return this.store.deletingAttachmentKeys().has(`${slot}:${fileName}`);
+  protected isStoredAttachmentBusy(objectKey: string): boolean {
+    return this.store.deletingAttachmentKeys().has(objectKey);
   }
 
   /** `null` while busy with no measurable byte progress yet (indeterminate bar) — see
@@ -637,11 +637,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected viewStoredAttachment(attachment: IrAttachment, slot: IrAttachmentSlot): void {
-    const irSeq = this.ir().irSeq;
-    if (irSeq == null) return;
-
-    this.wwellIrService
-      .getIrAttachmentFile(irSeq, slot, attachment.fileName)
+    this.s3
+      .download(attachment.objectKey, attachment.fileName)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: file => this.openViewer(file, this.slotLabel(slot)),
@@ -735,11 +732,11 @@ export class WwellIrEditorComponent implements AfterViewInit {
    * `uploadPendingAttachment` is: the row's own `[disabled]` binding can lag a frame behind a rapid
    * repeated click, so `isStoredAttachmentBusy` is checked here too rather than trusted alone.
    */
-  protected deleteStoredAttachment(slot: IrAttachmentSlot, attachment: IrAttachment): void {
-    if (this.isStoredAttachmentBusy(slot, attachment.fileName)) return;
+  protected deleteStoredAttachment(attachment: IrAttachment): void {
+    if (this.isStoredAttachmentBusy(attachment.objectKey)) return;
     const irSeq = this.ir().irSeq;
     if (irSeq == null) return;
-    this.store.deleteIrAttachment(irSeq, slot, attachment.fileName);
+    this.store.deleteIrAttachment(irSeq, attachment.objectKey);
   }
 
   @ViewChildren('sectionEl', { read: ElementRef }) private readonly sectionEls?: QueryList<ElementRef<HTMLElement>>;
