@@ -68,6 +68,21 @@ export function isSapWorkflowRecalled(sapWfStatusText: string | null): boolean {
   return sapWfStatusText !== null && SAP_RECALLED_STATUS_TEXT.test(sapWfStatusText);
 }
 
+/** Classifies the live SAP status text into the IR letter PDF's three stamp states — the exact
+ *  same two patterns `irBadgeMeta` uses to colour the badge red/green, reused here so this is the
+ *  one place that decision gets made. Sent directly to agwa-planning (see
+ *  `WwellIrService.downloadLetterPdf`'s `stampStatus` param / `LetterPdfRequest.stampStatus`) so
+ *  the backend just stamps whatever it's told rather than keeping its own copy of this
+ *  classification. `null` when the IR was never submitted (no SAP text at all) — the backend
+ *  skips the stamp image entirely in that case instead of defaulting to "Pending". */
+export function resolveLetterStampStatus(ir: IntegratedRequirement): 'APPROVED' | 'REJECTED' | 'PENDING' | null {
+  const text = ir.sapWfStatusText;
+  if (!text) return null;
+  if (SAP_TERMINATED_STATUS_TEXT.test(text)) return 'REJECTED';
+  if (SAP_APPROVED_STATUS_TEXT.test(text)) return 'APPROVED';
+  return 'PENDING';
+}
+
 /** Every field the IR form schema marks `required` (wwell-ir-form.schema.ts), outside the
  *  repeatable rows — Casing/Formation Tops/Offset Wells only validate a row once one exists, so
  *  there's no top-level requirement that those sections hold any rows at all. Gates "Submit for

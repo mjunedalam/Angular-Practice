@@ -104,11 +104,14 @@ export class WwellIrService {
    *  components the Letter tab already shows) and its PNG snapshot rides along as the request
    *  body — the backend has no drawing logic of its own for it anymore. `wellboreImageBase64` is
    *  omitted when the IR has no casing/tops data or the client-side capture failed; the letter
-   *  still renders, just without that section. */
-  downloadLetterPdf(irSeq: number, wellboreImageBase64?: string): Observable<Blob> {
+   *  still renders, just without that section. `stampStatus` is the already-resolved
+   *  Approved/Rejected/Pending stamp state (see `resolveLetterStampStatus`, wwell-ir.config.ts) —
+   *  sent as a plain value so agwa-planning just stamps whatever it's told instead of keeping its
+   *  own copy of the SAP-text classification logic. `null` when the IR was never submitted. */
+  downloadLetterPdf(irSeq: number, wellboreImageBase64?: string, stampStatus?: string | null): Observable<Blob> {
     return this.http.post(
       `${this.apiUrl}/integrated-requirements/${irSeq}/letter-pdf`,
-      { wellboreImageBase64: wellboreImageBase64 ?? null },
+      { wellboreImageBase64: wellboreImageBase64 ?? null, stampStatus: stampStatus ?? null },
       { responseType: 'blob' },
     );
   }

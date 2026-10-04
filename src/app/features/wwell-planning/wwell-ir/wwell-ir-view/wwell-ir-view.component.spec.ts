@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { throwError } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrService } from '../wwell-ir.service';
@@ -68,6 +70,13 @@ class WellDesignStub {
 @Component({ selector: 'app-wwell-ir-view-letter', standalone: true, template: 'letter-body' })
 class LetterStub {
   readonly ir = input.required<IntegratedRequirement>();
+
+  // Real WwellIrViewLetterComponent.captureWellboreImage() rasterises a D3 diagram, which
+  // downloadPdf() always awaits before posting — without this, clicking the download button in
+  // a test throws "captureWellboreImage is not a function" before the request is ever made.
+  async captureWellboreImage(): Promise<string | undefined> {
+    return undefined;
+  }
 }
 
 /** Stands in for WwellIrComponent, which is where the selected tab actually lives. */
@@ -167,5 +176,89 @@ describe('WwellIrViewComponent — tab selection', () => {
 
     expect(fixture.componentInstance.tab()).toBe('letter');
     expect(fixture.nativeElement.textContent).toContain('letter-body');
+  });
+});
+
+describe('WwellIrViewComponent — download PDF error message', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let downloadLetterPdf: jest.Mock;
+  let notifyError: jest.Mock;
+
+  beforeEach(async () => {
+    downloadLetterPdf = jest.fn();
+    notifyError = jest.fn();
+
+    await TestBed.configureTestingModule({
+      imports: [HostComponent, NoopAnimationsModule],
+      providers: [
+        { provide: WwellIrService, useValue: { downloadLetterPdf } },
+        { provide: NotificationService, useValue: { error: notifyError, show: jest.fn(), notifications: jest.fn(() => []) } },
+      ],
+    })
+      .overrideComponent(WwellIrViewComponent, {
+        remove: { imports: [WwellIrViewDetailsComponent, WwellIrViewWellDesignComponent, WwellIrViewLetterComponent] },
+        add: { imports: [DetailsStub, WellDesignStub, LetterStub] },
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.ir.set(buildIr({ irSeq: 9074 }));
+    fixture.detectChanges();
+
+    // The download button only renders on the Letter tab (see the template's @if).
+    const letterTab = Array.from(fixture.nativeElement.querySelectorAll('.irv__tab')).find(
+      (element): element is HTMLButtonElement => (element as HTMLElement).textContent?.includes('Letter') ?? false,
+    );
+    letterTab?.click();
+    fixture.detectChanges();
+  });
+
+  function downloadButton(): HTMLButtonElement {
+    const button = fixture.nativeElement.querySelector('.irv__letter-download');
+    if (!button) throw new Error('No download button found — is the Letter tab active?');
+    return button;
+  }
+
+  // FileReader.readAsText fires onload as a real macrotask in jsdom, on a schedule zone.js
+  // doesn't track as a pending task the way it does Promises/timers — so fixture.whenStable()
+  // resolves before it fires, and a single setTimeout(0) flush fires too early too. Polling
+  // for the actual effect (rather than guessing a fixed delay) avoids a flaky fixed wait.
+  async function waitUntilCalled(mock: jest.Mock, timeoutMs = 1000): Promise<void> {
+    const start = Date.now();
+    while (mock.mock.calls.length === 0) {
+      if (Date.now() - start > timeoutMs) throw new Error('waitUntilCalled: timed out waiting for the mock to be called');
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+  }
+
+  it('surfaces the backend\'s specific reason instead of a generic failure message', async () => {
+    // Mirrors agwa-planning's real response for an IR saved before Letter Number became
+    // mandatory (see ApiExceptionMapper/LetterGenerationBlockedException) — the error body
+    // arrives as a Blob because downloadLetterPdf requests responseType: 'blob'.
+    const body = JSON.stringify({
+      statusCode: 400,
+      error: true,
+      message: 'Cannot generate IR letter: missing required field(s): Letter Reference',
+      meta: null,
+      data: [],
+    });
+    const blob = new Blob([body], { type: 'application/json' });
+    downloadLetterPdf.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: blob })));
+
+    downloadButton().click();
+    fixture.detectChanges();
+    await waitUntilCalled(notifyError);
+
+    expect(notifyError).toHaveBeenCalledWith('Cannot generate IR letter: missing required field(s): Letter Reference');
+  });
+
+  it('falls back to a generic message when the error body is not the expected shape', async () => {
+    downloadLetterPdf.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+
+    downloadButton().click();
+    fixture.detectChanges();
+    await waitUntilCalled(notifyError);
+
+    expect(notifyError).toHaveBeenCalledWith('Failed to download the integrated requirement letter PDF.');
   });
 });

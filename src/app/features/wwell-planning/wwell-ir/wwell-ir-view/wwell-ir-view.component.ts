@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, output, signal, viewChild } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -7,7 +8,7 @@ import { IntegratedRequirement } from '@models/wwell-planning/integrated-require
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
-import { hasKnownIrStatus, irBadgeMeta } from '../wwell-ir.config';
+import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
@@ -103,7 +104,7 @@ export class WwellIrViewComponent {
 
     this.downloadingPdf.set(true);
     const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
-    this.wwellIrService.downloadLetterPdf(irSeq, wellboreImageBase64).subscribe({
+    this.wwellIrService.downloadLetterPdf(irSeq, wellboreImageBase64, resolveLetterStampStatus(this.ir())).subscribe({
       next: (blob: Blob) => {
         this.downloadingPdf.set(false);
         const url = URL.createObjectURL(blob);
@@ -113,11 +114,42 @@ export class WwellIrViewComponent {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.downloadingPdf.set(false);
-        this.notify.error('Failed to download the integrated requirement letter PDF.');
+        void this.extractDownloadErrorMessage(err).then(message => {
+          this.notify.error(message ?? 'Failed to download the integrated requirement letter PDF.');
+        });
       },
     });
+  }
+
+  /** `downloadLetterPdf` requests `responseType: 'blob'` so a successful PDF response can be
+   *  turned straight into a download link — but Angular's HttpClient applies that same
+   *  responseType to error bodies too, so even agwa-planning's JSON error envelope
+   *  (`{ message: "Cannot generate IR letter: missing required field(s): ..." }`) arrives as an
+   *  unparsed Blob instead of a plain object. Without this, the backend's specific reason (e.g.
+   *  a missing Letter Number) was silently discarded in favor of a generic failure message.
+   *  Reads it via `FileReader` rather than `Blob.text()` — the latter isn't implemented by
+   *  jsdom (this repo's test environment), while `FileReader.readAsText` is. */
+  private extractDownloadErrorMessage(err: unknown): Promise<string | null> {
+    if (!(err instanceof HttpErrorResponse) || !(err.error instanceof Blob)) return Promise.resolve(null);
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(this.parseErrorMessage(reader.result));
+      reader.onerror = () => resolve(null);
+      reader.readAsText(err.error as Blob);
+    });
+  }
+
+  private parseErrorMessage(text: FileReader['result']): string | null {
+    if (typeof text !== 'string') return null;
+    try {
+      const parsed: unknown = JSON.parse(text);
+      const message = parsed && typeof parsed === 'object' ? (parsed as { message?: unknown }).message : undefined;
+      return typeof message === 'string' ? message : null;
+    } catch {
+      return null;
+    }
   }
 
   /** Header stat: how many of the editor's 7 rail sections (Wellbore, General, Horizons, Casing,
