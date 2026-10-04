@@ -2,8 +2,9 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { S3Service } from '@services/s3/s3.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewComponent, WwellIrViewTab } from './wwell-ir-view.component';
@@ -112,6 +113,7 @@ describe('WwellIrViewComponent — tab selection', () => {
       providers: [
         { provide: WwellIrService, useValue: { downloadLetterPdf: jest.fn() } },
         { provide: NotificationService, useValue: { error: jest.fn(), show: jest.fn(), notifications: jest.fn(() => []) } },
+        { provide: S3Service, useValue: { download: jest.fn() } },
       ],
     })
       .overrideComponent(WwellIrViewComponent, {
@@ -193,6 +195,7 @@ describe('WwellIrViewComponent — download PDF error message', () => {
       providers: [
         { provide: WwellIrService, useValue: { downloadLetterPdf } },
         { provide: NotificationService, useValue: { error: notifyError, show: jest.fn(), notifications: jest.fn(() => []) } },
+        { provide: S3Service, useValue: { download: jest.fn() } },
       ],
     })
       .overrideComponent(WwellIrViewComponent, {
@@ -260,5 +263,190 @@ describe('WwellIrViewComponent — download PDF error message', () => {
     await waitUntilCalled(notifyError);
 
     expect(notifyError).toHaveBeenCalledWith('Failed to download the integrated requirement letter PDF.');
+  });
+});
+
+describe('WwellIrViewComponent — letter attachment merge', () => {
+  let fixture: ComponentFixture<HostComponent>;
+  let downloadLetterPdf: jest.Mock;
+  let s3Download: jest.Mock;
+  let createObjectURLSpy: jest.Mock;
+  let clickSpy: jest.SpyInstance;
+  let originalCreateObjectURL: typeof URL.createObjectURL;
+  let originalRevokeObjectURL: typeof URL.revokeObjectURL;
+
+  async function onePagePdfBlob(): Promise<Blob> {
+    const { PDFDocument } = await import('pdf-lib');
+    const doc = await PDFDocument.create();
+    doc.addPage();
+    const bytes = await doc.save();
+    return new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+  }
+
+  beforeEach(async () => {
+    downloadLetterPdf = jest.fn();
+    s3Download = jest.fn();
+
+    await TestBed.configureTestingModule({
+      imports: [HostComponent, NoopAnimationsModule],
+      providers: [
+        { provide: WwellIrService, useValue: { downloadLetterPdf } },
+        { provide: NotificationService, useValue: { error: jest.fn(), show: jest.fn(), notifications: jest.fn(() => []) } },
+        { provide: S3Service, useValue: { download: s3Download } },
+      ],
+    })
+      .overrideComponent(WwellIrViewComponent, {
+        remove: { imports: [WwellIrViewDetailsComponent, WwellIrViewWellDesignComponent, WwellIrViewLetterComponent] },
+        add: { imports: [DetailsStub, WellDesignStub, LetterStub] },
+      })
+      .compileComponents();
+
+    // jsdom implements neither — downloadPdf()'s success path needs both to build the anchor
+    // click that actually triggers a browser download. jest.spyOn requires the property to
+    // already exist, so these are plain assignments (restored manually in afterEach) rather than
+    // spies.
+    originalCreateObjectURL = URL.createObjectURL;
+    originalRevokeObjectURL = URL.revokeObjectURL;
+    createObjectURLSpy = jest.fn().mockReturnValue('blob:mock-url');
+    URL.createObjectURL = createObjectURLSpy;
+    URL.revokeObjectURL = jest.fn();
+    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    URL.createObjectURL = originalCreateObjectURL;
+    URL.revokeObjectURL = originalRevokeObjectURL;
+    jest.restoreAllMocks();
+  });
+
+  function openLetterTab(ir: IntegratedRequirement): void {
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.ir.set(ir);
+    fixture.detectChanges();
+
+    const letterTab = Array.from(fixture.nativeElement.querySelectorAll('.irv__tab')).find(
+      (element): element is HTMLButtonElement => (element as HTMLElement).textContent?.includes('Letter') ?? false,
+    );
+    letterTab?.click();
+    fixture.detectChanges();
+  }
+
+  function downloadButton(): HTMLButtonElement {
+    const button = fixture.nativeElement.querySelector('.irv__letter-download');
+    if (!button) throw new Error('No download button found — is the Letter tab active?');
+    return button;
+  }
+
+  // See the sibling describe block's identical helper for why polling beats a fixed delay here:
+  // the attachment fetch/merge chain resolves through several more microtask hops than the error
+  // path above, so a guessed fixed wait would be even more likely to flake.
+  async function waitUntilCalled(spy: jest.SpyInstance, timeoutMs = 1000): Promise<void> {
+    const start = Date.now();
+    while (spy.mock.calls.length === 0) {
+      if (Date.now() - start > timeoutMs) throw new Error('waitUntilCalled: timed out waiting for the mock to be called');
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+  }
+
+  async function onePagePdfFile(fileName: string): Promise<File> {
+    const { PDFDocument } = await import('pdf-lib');
+    const doc = await PDFDocument.create();
+    doc.addPage();
+    const bytes = await doc.save();
+    return new File([new Uint8Array(bytes)], fileName, { type: 'application/pdf' });
+  }
+
+  it('fetches every attachment from the S3 proxy, in slot order, and merges them onto the letter', async () => {
+    downloadLetterPdf.mockReturnValue(of(await onePagePdfBlob()));
+    // S3Service.download returns an Observable, not a Promise — `of(...)` here, not an async
+    // mock implementation, so firstValueFrom(...) in fetchAttachmentFile has something to subscribe to.
+    const mapFile = await onePagePdfFile('map.pdf');
+    const requestFile = await onePagePdfFile('request.pdf');
+    s3Download.mockImplementation((objectKey: string) => of(objectKey.includes('location-map') ? mapFile : requestFile));
+
+    openLetterTab(
+      buildIr({
+        irSeq: 9074,
+        attachments: [
+          {
+            slot: 'initiation-request',
+            objectKey: 'ir-attachments/ir-9074/initiation-request/2',
+            label: 'Initiation Request',
+            fileName: 'request.pdf',
+            sizeBytes: 10,
+            contentType: 'application/pdf',
+          },
+          {
+            slot: 'location-map',
+            objectKey: 'ir-attachments/ir-9074/location-map/1',
+            label: 'Location Map',
+            fileName: 'map.pdf',
+            sizeBytes: 10,
+            contentType: 'application/pdf',
+          },
+        ],
+      }),
+    );
+
+    downloadButton().click();
+    fixture.detectChanges();
+    await waitUntilCalled(clickSpy);
+
+    // Appended in WWELL_IR_ATTACHMENT_SLOTS order (Location Map, then Initiation Request) even
+    // though the IR's own attachments array above lists them the other way round.
+    expect(s3Download.mock.calls.map(call => call[0])).toEqual([
+      'ir-attachments/ir-9074/location-map/1',
+      'ir-attachments/ir-9074/initiation-request/2',
+    ]);
+
+    const mergedBlob = createObjectURLSpy.mock.calls[0][0] as Blob;
+    const { PDFDocument } = await import('pdf-lib');
+    const mergedBytes = await new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(mergedBlob);
+    });
+    const merged = await PDFDocument.load(mergedBytes);
+    expect(merged.getPageCount()).toBe(3); // letter + 2 one-page attachments
+  });
+
+  it('downloads the letter without touching the S3 proxy when the IR has no attachments', async () => {
+    downloadLetterPdf.mockReturnValue(of(await onePagePdfBlob()));
+
+    openLetterTab(buildIr({ irSeq: 9074, attachments: [] }));
+
+    downloadButton().click();
+    fixture.detectChanges();
+    await waitUntilCalled(clickSpy);
+
+    expect(s3Download).not.toHaveBeenCalled();
+  });
+
+  it('still downloads the letter when a stored attachment can no longer be fetched', async () => {
+    downloadLetterPdf.mockReturnValue(of(await onePagePdfBlob()));
+    s3Download.mockReturnValue(throwError(() => new Error('object not found')));
+
+    openLetterTab(
+      buildIr({
+        irSeq: 9074,
+        attachments: [
+          {
+            slot: 'location-map',
+            objectKey: 'ir-attachments/ir-9074/location-map/1',
+            label: 'Location Map',
+            fileName: 'map.pdf',
+            sizeBytes: 10,
+            contentType: 'application/pdf',
+          },
+        ],
+      }),
+    );
+
+    downloadButton().click();
+    fixture.detectChanges();
+    await waitUntilCalled(clickSpy);
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
   });
 });

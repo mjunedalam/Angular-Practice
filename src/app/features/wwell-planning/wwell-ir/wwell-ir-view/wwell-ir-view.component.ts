@@ -4,10 +4,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { firstValueFrom } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { IrAttachment } from '@models/wwell-planning/ir-attachment.model';
+import { S3Service } from '@services/s3/s3.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
+import { appendAttachmentsToLetter, IrLetterAttachmentFile } from '../wwell-ir-letter-attachments.util';
+import { irAttachmentsFor, WWELL_IR_ATTACHMENT_SLOTS } from '../wwell-ir-attachments.config';
 import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
@@ -21,6 +26,19 @@ const TABS: readonly { readonly key: WwellIrViewTab; readonly label: string; rea
   { key: 'well-design', label: 'Well Design', icon: 'architecture' },
   { key: 'letter', label: 'Letter', icon: 'mail_outline' },
 ];
+
+/** Reads a `Blob` via `FileReader` rather than `Blob.arrayBuffer()` — the latter isn't implemented
+ *  by jsdom (this repo's test environment), while `FileReader.readAsArrayBuffer` is. Same reason
+ *  `extractDownloadErrorMessage` below reads error bodies via `FileReader.readAsText` instead of
+ *  `Blob.text()`. */
+function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(blob);
+  });
+}
 
 /**
  * Read-only counterpart to `WwellIrEditorComponent`, swapped into the exact same detail-panel
@@ -80,6 +98,7 @@ export class WwellIrViewComponent {
 
   private readonly wwellIrService = inject(WwellIrService);
   private readonly notify = inject(NotificationService);
+  private readonly s3 = inject(S3Service);
 
   /** Only resolves while the `letter` tab is active — the `@switch` in the template below destroys
    *  the child otherwise. Used solely to reach `captureWellboreImage()`, the one piece of the
@@ -106,13 +125,7 @@ export class WwellIrViewComponent {
     const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
     this.wwellIrService.downloadLetterPdf(irSeq, wellboreImageBase64, resolveLetterStampStatus(this.ir())).subscribe({
       next: (blob: Blob) => {
-        this.downloadingPdf.set(false);
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${this.ir().code}-letter.pdf`;
-        link.click();
-        URL.revokeObjectURL(url);
+        void this.finishDownload(blob);
       },
       error: (err: unknown) => {
         this.downloadingPdf.set(false);
@@ -121,6 +134,47 @@ export class WwellIrViewComponent {
         });
       },
     });
+  }
+
+  private async finishDownload(letterBlob: Blob): Promise<void> {
+    const blob = await this.withAttachmentsMerged(letterBlob);
+    this.downloadingPdf.set(false);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.ir().code}-letter.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /** Merges the IR's stored attachments onto the rendered letter entirely client-side — Angular
+   *  already fetches attachment bytes from the same S3 proxy for every other attachment operation
+   *  (view/upload/delete), so there's nothing left for agwa-planning to add server-side. Each
+   *  attachment is fetched independently so one unreadable file is dropped without losing the
+   *  others, and the merge step itself falls back to the unmerged letter on any failure — a broken
+   *  appendix should never turn a working download into a failed one. */
+  private async withAttachmentsMerged(letterBlob: Blob): Promise<Blob> {
+    const attachments = this.ir().attachments;
+    if (attachments.length === 0) return letterBlob;
+
+    try {
+      const ordered: IrAttachment[] = WWELL_IR_ATTACHMENT_SLOTS.flatMap(config => irAttachmentsFor(attachments, config.slot));
+      const fetched = await Promise.all(ordered.map(attachment => this.fetchAttachmentFile(attachment)));
+      const files = fetched.filter((file): file is IrLetterAttachmentFile => file !== null);
+      const merged = await appendAttachmentsToLetter(await blobToArrayBuffer(letterBlob), files);
+      return new Blob([new Uint8Array(merged)], { type: 'application/pdf' });
+    } catch {
+      return letterBlob;
+    }
+  }
+
+  private async fetchAttachmentFile(attachment: IrAttachment): Promise<IrLetterAttachmentFile | null> {
+    try {
+      const file = await firstValueFrom(this.s3.download(attachment.objectKey, attachment.fileName));
+      return { label: attachment.label, contentType: attachment.contentType, bytes: await blobToArrayBuffer(file) };
+    } catch {
+      return null;
+    }
   }
 
   /** `downloadLetterPdf` requests `responseType: 'blob'` so a successful PDF response can be

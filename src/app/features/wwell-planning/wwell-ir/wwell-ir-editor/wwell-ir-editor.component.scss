@@ -1261,19 +1261,6 @@ app-wwell-ir-editor {
   gap: 0.4rem;
 }
 
-// Sits opposite Save/Submit for Review — `margin-right: auto` claims the footer's leading edge
-// against its `justify-content: flex-end`, so a destructive action is never adjacent to Save and
-// can't be misclicked in its place.
-.ire__delete-btn {
-  margin-right: auto;
-
-  .mdc-button__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-}
-
 .ire .mat-mdc-form-field-required-marker {
   color: var(--wp-danger);
 }

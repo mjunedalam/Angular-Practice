@@ -1411,3 +1411,452 @@ partial moved from `wwell-planning/shared/_wwell-wellbore.scss` to `wwell-ir/_ww
 - Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101, no test named these two so nothing to
   update). Verified live in the Expand dialog on IR-9065 — Key Depths shows Total Depth/Static Water
   Level/Pump Setting only; Well Metrics shows Uncased only.
+
+---
+
+## 2026-09-30 (Wednesday)
+
+**IR status badge: colour now follows SAP's real workflow text, not just `ir.status`**
+
+- User: SAP's workflow can come back Recalled/Cancelled/Rejected (free text on `wf_status_text`, per
+  `SapWorkflowHeader` — SAP's own contract, not a fixed enum we control) and those should show red and
+  "more specific" than they currently do. Root cause: the status badge (list row, view header, editor
+  header — `wwell-ir.component.html`, `wwell-ir-view.component.html`, `wwell-ir-editor.component.html`)
+  always coloured itself off `statusMeta[ir.status]`, and only swapped the *label* text for
+  `ir.sapWfStatusText` when SAP returned one. `IntegratedRequirementStatus` has no slot for SAP's own
+  terminal states — `WwellIrStore.loadIrApprovalTimeline` never moves `ir.status` off whatever it was
+  pre-submission — so a Rejected/Cancelled/Recalled record kept showing its old "In Review"/"Submit for
+  Review" colour (purple/blue) with only the text underneath changing to say "Rejected".
+- `wwell-ir.config.ts`: new `irBadgeMeta(ir)` returns the badge's full `{label, bg, color, dot}`. When
+  `sapWfStatusText` is set, it matches the text case-insensitively — `/reject|cancel|recall/i` → red,
+  `/approve/i` → green — the same "match on the word, not a fixed value list" approach
+  `wwell-ir-approval.mapper.ts`'s `stepStatus()` already uses per approval-chain step, since SAP's exact
+  wording isn't part of the /display contract. Unrecognised SAP text (e.g. "In Process") keeps riding on
+  `ir.status`'s own colour, label only — unchanged behaviour for the common case. No SAP text yet →
+  `WWELL_IR_STATUS_META[ir.status]`, same as before.
+- All three badges now call `badgeMeta(ir)` instead of `statusMeta[ir.status]` + the `??` label
+  fallback; `statusMeta` dropped entirely from the view/editor components (no longer referenced) but
+  kept in the list component, which still uses it for an unrelated filter-dropdown label.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (101/101). Verified live: patched a real IR's
+  `sapWfStatusText` at runtime via the store's signal (`store.irs.set(...)`, since `patchState` isn't
+  reachable from outside the store) to `'Rejected'` and to `'Cancelled by initiator'` — both rendered
+  red immediately in the list row and the editor header, with the full SAP text as the label; reloaded
+  after to discard the in-memory patch (no DB/backend change involved, this is client-side only).
+
+---
+
+## 2026-09-30 (Wednesday)
+
+**IR "Recall" action — mocked SAP's `DELETE /recall`, wired the editor's Submit ↔ Recall footer button**
+
+- User showed a real DevTools capture of SAP's `DELETE /recall?process_id=...&wf_obj_id=...&
+  recalled_by=...&native_response=false` call and asked for: the endpoint mocked in `sap-service`,
+  a "Recall" button that replaces "Submit for Review" once an IR has been submitted, and the local
+  state updated on success. Two real-response corrections arrived mid-build (a DevTools capture,
+  then a live-recall JSON paste) that changed the design from my first pass — both incorporated below.
+- **sap-service** (`~/Downloads/Misc/sap-service`, separate repo):
+  - New `DELETE /recall` (`SapRecallResource`) — validates `process_id`/`wf_obj_id`/`recalled_by`
+    (422 on any missing, same shape as the other two endpoints).
+  - **Correction 1**: the response is NOT a bare `{message}` ack — it's the exact same
+    `SapWorkflowStatusResponse` shape `GET /display` returns, since SAP reports the workflow's new
+    status back immediately. Extracted the chain/hash-building logic out of `SapDisplayResource` into
+    a shared `SapWorkflowStatusBuilder` bean, injected by both resources, so recall's response and a
+    follow-up display's response are never two different code paths that could drift apart. Deleted
+    the now-unused `SapRecallResponse` DTO.
+  - New `SapRecallRegistry` (`@ApplicationScoped`, in-memory `Set<wf_obj_id>`) — the one piece of
+    state this otherwise-stateless mock needed: once recalled, `GET /display` for that `wf_obj_id`
+    must keep reporting it recalled on every later fetch (the sidebar's refresh button re-asks SAP
+    directly), not fall back to the deterministic hash status.
+  - **Correction 2**: user pasted a real recalled workflow's actual `/display` response —
+    `header.wf_status` is `"RCAL"` (not `"RECAL"`, my first guess from the DevTools capture alone),
+    and `remarks` is NOT extended with a recall note (stays the single original initiation remark).
+    Fixed both in `SapWorkflowStatusBuilder`.
+  - CORS gap found live: `application.properties` only allowed `GET,POST,OPTIONS` — a cross-origin
+    `DELETE` always preflights, and without `DELETE` in `quarkus.http.cors.methods` the browser
+    rejected the preflight before the real request ever left the browser (confirmed via
+    `store.sapRecallError()` reading "Failed to recall the SAP review workflow" with nothing in the
+    server log). Added `DELETE`; Quarkus's live-coding hot-reloaded it without a restart.
+  - Added `SapRecallResourceTest` (4 cases, distinct `wf_obj_id`s from `SapDisplayResourceTest`'s
+    `11033` since the registry is shared JVM-wide state for the whole test run) — full suite 13/13.
+    README updated with the corrected contract.
+- **Angular-Practice**:
+  - `SapService.recall(processId, wfObjId, recalledBy)` — `DELETE`, returns
+    `Observable<SapWorkflowStatusResponse>` (not a bare-message type — deleted the
+    `sap-recall.model.ts` file that first assumed one).
+  - `WwellIrStore`: new `recallIr(ir)` method + `recallingIr`/`sapRecallError` state (own slots, not
+    reusing `updatingIrStatus`/`sapTriggerError` — Submit and Recall are mutually exclusive actions on
+    the same record and each should only spin its own button). Mints no new workflow id — recalls
+    under the IR's existing `sapWfId`. Since the recall response already IS a full workflow-status
+    payload, `recallIr` reads `status.header.wf_status_text` and
+    `mapSapWorkflowStatusToApprovalChain(status)` straight from it (same as
+    `loadIrApprovalTimeline` does for a display response) and needs no separate GET /display
+    round-trip — simpler than my first draft, which wrote a hardcoded local `'Recalled'` placeholder
+    the way `submitIrForReview` does for `'In Progress'` (removed that
+    `WWELL_IR_SAP_WF_STATUS_RECALLED` constant and `markRecalled` helper once the real response made
+    them unnecessary). Persists via the same `updateIrSapWorkflow` PATCH the trigger flow already
+    uses, just with SAP's real text instead of a fixed one.
+  - `wwell-ir.config.ts`: new `isSapWorkflowTerminal(sapWfStatusText)`, reusing `irBadgeMeta`'s own
+    reject/cancel/recall/approve regexes — an already-terminal workflow has nothing left to recall.
+  - `WwellIrEditorComponent`: `canRecallIr` (`sapWfId != null && !isSapWorkflowTerminal(...)`) gates a
+    new footer button in the same slot `canSubmitForReview` used to occupy exclusively (`@else if`) —
+    `mat-stroked-button color="warn"`, same visual weight as the existing Delete IR button, confirm-
+    then-act through the same dialog helper `deleteIr()` uses.
+  - Added 4 `WwellIrStore - recallIr` Jest cases (guard with no `sapWfId`, happy path incl. chain
+    update, SAP failure, PATCH failure) using a fixture built from the real pasted recall response.
+    Added `recallingIr`/`recallIr` to the editor's spec store mock (was missing, broke
+    `anyFooterActionPending` in 14 unrelated existing tests until fixed).
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (105/105). Verified live end-to-end on IR-9065
+  (already had a real `sapWfId` from an earlier session's submit): clicked Recall → confirm dialog →
+  confirmed → list badge and editor header badge both turned red "Recalled" immediately, footer
+  buttons dropped to Save-only (workflow now terminal, so neither Submit nor Recall show), store's
+  `sapRecallError` stayed `null`. First attempt failed on the CORS gap above; retried after the fix
+  and it worked. Also called `DELETE /recall` directly via curl to confirm the exact response shape
+  the browser was receiving.
+
+**Follow-up, same day: Recalled brings "Submit for Review" back**
+
+- User: unlike Approved/Rejected/Cancelled, a Recall was the user's own action, not a terminal SAP
+  decision — the editor should let them resubmit rather than leaving the footer with no action at all.
+- `wwell-ir.config.ts`: new `isSapWorkflowRecalled(sapWfStatusText)` — a narrower sibling of
+  `isSapWorkflowTerminal`, matching only `/recall/i` (not reject/cancel/approve too).
+  `WwellIrEditorComponent.canSubmitForReview` now also returns true when the record's SAP text is
+  Recalled, regardless of `ir.status`/`sapWfId` (previously gated purely on `sapWfId == null`).
+  `canRecallIr` is unchanged — still false once terminal (recalled included), so the two conditions
+  stay mutually exclusive: Recalled shows Submit, everything else terminal shows neither, anything
+  live shows Recall. Resubmitting goes through the exact same `submitIrForReview` as a first-time
+  submit — it mints a brand-new SAP workflow id regardless of the old (now-dead) `sapWfId`, so a
+  resubmit after recall is a genuinely fresh workflow, not a revival of the recalled one.
+- Added 3 editor component tests (Recalled → shows Submit not Recall; In Progress → shows Recall not
+  Submit; Rejected → shows neither) — editor suite 17/17, full `wwell-planning` Jest 108/108.
+  Verified live on IR-9065: after a real recall, the footer's Recall button was replaced by "Submit
+  for Review"; clicking it minted a new `sapWfId` (9067 → 9069) and both badges flipped back to blue
+  "In Progress", with the footer correctly showing "Recall" again for the new live workflow.
+
+**Follow-up, same day: back navigation, an in-place View/Edit toggle, and a persistent SAP sidebar**
+
+- User: wanted a way to switch/go back between the main IR screen and the read-only View, and asked
+  whether the Approval Workflow panel could show on the main (edit) screen too, not just View —
+  "unique and very attractive design". Resolved three open design calls via AskUserQuestion before
+  writing anything: (1) both a back arrow *and* a separate View/Edit toggle, not just one; (2) the SAP
+  sidebar becomes a persistent right-side card in both modes, same placement View already used; (3)
+  visual direction — an elevated glass card with a progress ring, not a plain restyle.
+- `WwellIrEditorComponent` / `WwellIrViewComponent`: both gained a `backRequested` output, wired to a
+  new `arrow_back` icon button at the head of `.ire__heading`/`.irv__heading`. The editor also gained
+  a `viewRequested` output behind a new "View" `mat-stroked-button`, next to (not replacing) the
+  existing Sections/Timeline `ire__view-toggle` group — a different concept (that one picks a layout
+  within edit mode; this one leaves edit mode entirely). `WwellIrViewComponent`'s own back arrow is
+  unguarded (a read-only surface has nothing to lose); the editor's back arrow and View button both go
+  through `WwellIrComponent.guardNavigation` since either can discard in-progress section edits.
+- `WwellIrComponent`: new `deselect()` (guarded) clears `pendingDraftIr`/`selectedIrSeq` and closes the
+  panel back to the list's empty state, and a new `requestViewMode()` (guarded) switches the same
+  record to the read-only stepper. Neither is a trivial null-set: the pre-existing "default to first
+  visible record" effect re-selects row 1 the instant `selectedIrSeq` goes null (so the panel is never
+  empty on load, and after a delete) — that would have silently undone an explicit Back click. Added a
+  `deselected` signal the effect now checks and skips; `deselect()` sets it, every other path that
+  clears the selection (a real row pick, New IR, a record disappearing from a delete) clears it back to
+  `false` so the auto-select behaviour is untouched everywhere else.
+- `wwell-ir.component.html`: the Approval Workflow sidebar was previously inside the
+  `@if (detailMode() === 'view')` branch only — lifted it out to a shared `.wwell-ir__detail-layout`
+  wrapping both the `@if`/`@else` (view/editor) and the sidebar, so it renders unconditionally.
+  Renamed `.wwell-ir__view-layout`/`__view-main`/`__view-sidebar` to `__detail-layout`/`__detail-main`/
+  `__approval-sidebar` (no longer view-only); sidebar widened 200px → 216px for the new ring header.
+- Redesigned `.wwell-ir__approval-card`: kept the existing chain-colour top accent strip, added a
+  second shadow tier stacked under the existing glass-panel token (`box-shadow: var(--wp-panel-shadow),
+  var(--wp-shadow-3)`) plus a faint diagonal white-sheen `::after` for the "elevated glass" half of the
+  direction, and a new SVG progress ring (`pathLength="100"` on both circles normalizes path length so
+  `stroke-dasharray`/`stroke-dashoffset` map straight onto a 0–100 percent, no circumference math) for
+  the "N of M approved" reading — pulses while `irApprovalTimelineLoading()`, shows an hourglass icon
+  instead of a number while `sapWfId === null`. Dropped the old icon-badge header (`verified` icon in a
+  tinted chip) in favour of the ring. Added a one-line empty state ("Submit this record for review to
+  start a SAP approval workflow.") for the never-submitted case, previously just blank space below the
+  header.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (108/108, unchanged — no new tests per this
+  project's standing guidance to skip new unit tests on wwell-ir UI/navigation work and rely on the
+  existing suite for regressions). Verified live on IR-9065 via gstack browse: back arrow in both
+  modes closes the panel to the list's empty state without the auto-select effect reopening it;
+  clicking a row afterwards re-selects normally; the View/Edit toggle switches the same record's
+  detail surface with the sidebar staying mounted throughout (ring correctly read 2/3 in both modes,
+  offset math confirmed: 2/3 ≈ 67% → `stroke-dashoffset` 33); the unsaved-changes confirm dialog
+  correctly intercepted the new back-arrow click while a section was open for edit ("Discard Changes"
+  completed the navigation, "Stay Here" would have cancelled it). Checked both light and dark themes —
+  the sheen and shadow layering read as intentional in both.
+
+**Follow-up, same day: the persistent sidebar in Edit mode was too cramped — swapped for a header pill**
+
+- User, looking at the live result above: the main IR (edit) page already has the rail + sections +
+  compact wellbore-preview columns competing for width, so a fourth, always-open 216px sidebar read
+  as cramped there, unlike the View page (only two columns) where it has room to breathe. Asked for a
+  better way to show it on the edit page specifically — "no need to touch" the View page.
+- Extracted the card's markup/styles (ring header, title, progress line, refresh button, the
+  timeline-or-empty-state body, the elevated-glass shell) out of `wwell-ir.component.html`/`.scss`
+  into a new standalone `WwellApprovalWorkflowCardComponent`
+  (`shared/wwell-approvals/wwell-approval-workflow-card/`), typed to the whole `IntegratedRequirement`
+  (both call sites already have it on hand). Moved `countApprovedSteps`/`approvalRingPercent` into
+  `shared/wwell-approvals/wwell-approvals.config.ts` alongside the existing `chainCompletionColor` —
+  they started in `wwell-ir.config.ts`, but that would have made `shared/` depend on a specific
+  feature folder (`wwell-ir/`), backwards from the project's own `shared/` ← `features/` convention;
+  caught before commit, not after.
+- `wwell-ir.component.html`: the sidebar (`.wwell-ir__approval-sidebar`) now renders only inside
+  `@if (detailMode() === 'view')`, using the new component — View mode's markup, styling and behaviour
+  are otherwise untouched, per the "no need to touch" ask.
+- `WwellIrEditorComponent`: the header's old standalone refresh-icon button is gone, replaced by a
+  compact `.ire__approval-pill` (a small ring + "N/M" + chevron, same ring math as the card) sitting
+  where that button was. Clicking it opens the *same* `WwellApprovalWorkflowCardComponent` — full
+  ring, title, refresh button, vertical stepper — in a CDK `cdkConnectedOverlay` anchored to the pill,
+  with a transparent backdrop that closes it on any outside click. Chose CDK Overlay over a hand-rolled
+  click-outside directive since it's already structurally available (`mat.core()` is called globally
+  in `styles.scss`, confirmed via the app's existing `MatDialog` usage) and gives escape/backdrop/
+  positioning for free, the same pattern Material's own `mat-select`/`mat-menu` use internally.
+- Gotcha caught while fixing the 2 tests this broke: CDK overlay content renders into a global
+  `.cdk-overlay-container` appended to `document.body`, **outside** the component fixture's own DOM
+  subtree — `fixture.nativeElement.querySelector(...)` can never find it; tests have to query
+  `document` once the pill's been clicked open.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (108/108 — 2 existing tests updated for the
+  popover's `document`-scoped queries above, no net-new test files, consistent with the standing
+  no-new-tests guidance since this was fixing tests broken by the refactor, not adding coverage).
+  Verified live on IR-9065: Edit mode's wellbore-preview column visibly reclaimed the ~216px the old
+  sidebar took; the pill shows the correct ring/count, opens the full card on click, closes on
+  backdrop click; the popover's own refresh button calls through correctly; View mode screenshot
+  compared side-by-side with the pre-change one — pixel-identical.
+
+**Follow-up, same day: merged the plain status badge into the approval pill**
+
+- User: the header still had two adjacent chips (a plain status badge, then the ring+count pill)
+  right next to each other — asked to merge them into one, since both describe the same underlying
+  SAP workflow.
+- `WwellIrEditorComponent`'s old standalone `<span class="ire__badge">` is gone. `.ire__approval-pill`
+  now opens with the badge's own dot + label (`badgeMeta(ir())`, same colours the list row's badge
+  uses) when `hasKnownIrStatus(ir())`, then a hairline divider, then the same ring+count it already
+  had. The whole button's `background`/`color` are set inline from `badgeMeta(ir()).bg`/`.color` when
+  known (falling back to a neutral `--muted` look otherwise), and every element inside — dot aside —
+  reads `currentColor` rather than its own hard-coded tone, so a Rejected/Recalled record's pill turns
+  fully red as one unit instead of a red badge sitting next to a still-blue ring.
+- Real regression caught by the existing suite, not by eye: merging the badge's label text into a
+  `<button>` broke `findButtonByText(fixture, 'Recall')` for the "Recalled" status case — the badge
+  text "Recalled" itself contains "Recall" as a substring, so the shared fixture-wide button-text
+  search started matching the header pill instead of the real footer Recall button. Fixed by adding
+  a `findFooterButtonByText` scoped to `.ire__footer button`, used only for the Submit-for-Review/
+  Recall assertions (the ones actually about footer buttons); the original `findButtonByText` and its
+  other call sites (Save, Add Casing) were left untouched.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (108/108 — same test-fixing-not-adding scope as
+  the pill work above). Verified live on IR-9065: merged pill reads "● In Process | 2/3 ⌄" as one
+  blue-tinted control, click still opens the same popover, box-shadow ring shows the expanded state
+  instead of the old border-colour change. Checked the muted (`hasKnownIrStatus` false) case on a
+  fresh New IR draft — outlined accent-blue pill with just the ring (hourglass, since no `sapWfId`
+  yet) and chevron, no dot/label/divider, reads as intentional rather than a missing state.
+
+**Follow-up, same day: moved the refresh action outside the popover**
+
+- User: refreshing shouldn't require opening the pill's dropdown first — wanted the refresh button
+  moved outside it.
+- `WwellApprovalWorkflowCardComponent` gained a `showRefreshButton` input (default `true`), gating
+  its own internal refresh button. The main IR page's sidebar (View mode) passes nothing, so it keeps
+  its refresh button exactly where it was. The editor's popover usage passes `[showRefreshButton]="false"`
+  and dropped its now-pointless `(refresh)` binding.
+- `WwellIrEditorComponent`: reintroduced a standalone `.ire__approval-refresh-btn` icon button, same
+  markup/behaviour as the one removed when the badge first got merged into the pill, but now
+  positioned right after the pill (outside the `ng-template`/overlay entirely) instead of after the
+  old plain badge — same `refreshApprovalStatus()` call, same `sapWfId !== null` gate.
+- The 2 tests covering this got rewritten, not just re-pointed: they used to click the pill open and
+  query `document` (since the button briefly lived inside the CDK-portaled popover) — now the button
+  is an ordinary part of the fixture again, so the click-to-open step and the `document` query are
+  both gone, back to a plain `fixture.nativeElement.querySelector(...)`.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (108/108). Verified live on IR-9065: refresh icon
+  sits directly after the merged pill in the header, clicking it calls through without opening the
+  popover; opening the popover afterward shows the card with no internal refresh button (title row is
+  just ring + title + progress text now); View mode's sidebar card confirmed unchanged — still has its
+  own refresh button in the card header, `showRefreshButton` defaulting to `true` there.
+
+**Follow-up, same day: keep the popover's own refresh button too, not instead-of**
+
+- User: keep the card's internal refresh button as well — both should exist, not one replacing the
+  other. Removed the just-added `showRefreshButton` input entirely (nothing was ever going to set it
+  `false` any more, so keeping it as a toggle would've been speculative — see the project's own YAGNI
+  guidance): the card's refresh button is unconditional again (`ir().sapWfId !== null`, same as
+  before it ever had a hide switch). The editor's popover usage got its `(refresh)="refreshApprovalStatus()"`
+  binding back.
+- Net result: two refresh entry points that both call the same `refreshApprovalStatus()` — the
+  standalone `.ire__approval-refresh-btn` next to the pill (works without opening anything), and the
+  card's own button inside the popover once it's open (convenient when already reviewing the chain).
+  Neither conflicts; both trigger the same store call.
+- Checked: `tsc`, ESLint, full `wwell-planning` Jest (108/108, no test changes needed — the outside
+  button's test from the prior follow-up was already querying `fixture.nativeElement` directly and
+  didn't care whether the card had its own button too). Verified live on IR-9065: both buttons present
+  with the popover open, each calls through independently.
+
+**Follow-up, same day: fixed a production crash on Recall — the real endpoint returns a bare ack, not a status payload**
+
+- User reported a live crash in "the office application" (their real production/office backend, not
+  the sap-service Quarkus mock this feature was built against): clicking Recall threw
+  `TypeError: Cannot read properties of undefined (reading 'wf_status_text')` in
+  `wwell-ir.store.ts`. Root cause: `recallSapWorkflow` assumed `DELETE /recall`'s response mirrored
+  `GET /display`'s full `SapWorkflowStatusResponse` shape (`{ header, remarks, ... }`) — an assumption
+  from earlier in this same session, based on what looked like a real recall response at the time.
+  The user's fresh live evidence contradicts it: the real endpoint returns a bare acknowledgement,
+  `{"message": "Request 11054 recalled successfully"}`, so `status.header` was `undefined`.
+- Fixed `SapService.recall()`'s return type to a new `SapRecallResponse` (`{ message: string }`,
+  `core/models/sap/sap-workflow-status.model.ts`) instead of `SapWorkflowStatusResponse`, and
+  corrected its doc comment (the old one flatly asserted the shapes matched, "confirmed against a
+  real recall response" — that confirmation was wrong, or was against a different environment).
+- Rewrote `recallSapWorkflow`: on a successful (bare-ack) recall, it now calls
+  `sap.getWorkflowStatus(processId, sapWfId)` as a second, separate call to get the real post-recall
+  status/chain — the same GET `loadIrApprovalTimeline` already uses — instead of trying to read a
+  status out of the recall response itself. Also dropped the `updateIrSapWorkflow` PATCH the old code
+  called after recall: recall never mints a new `sapWfId` (unlike the trigger flow), and
+  `sapWfStatusText` is always re-fetched live on every selection/reload anyway
+  (`loadIrDetail` → `loadIrApprovalTimeline`), so persisting a value here would only ever be a
+  redundant placeholder immediately overwritten by that live GET.
+- `recallingIr` deliberately stays `true` across *both* calls (recall + the follow-up GET), not just
+  the first — this is what the editor's Recall button spinner reads, and flipping it `false` right
+  after the recall ack would stop the spinner mid-action just as the status fetch starts.
+- Added the success notification the user asked for: `WwellIrComponent` gained a
+  `wasRecallingIr`/`recallingIr` settled-edge effect (same shape as the existing Submit for Review
+  one) that shows `Workflow for <code> recalled successfully.` once `recallingIr` settles with no
+  `sapRecallError` — there was no such effect before; recall's only prior feedback was the header
+  pill's colour changing, which read as silent. Also added the missing `sapRecallError` → toast effect
+  (every other store error signal already had one; this one had been skipped).
+- "Fix the loading … in button beautifully": found a real, separate CSS gap while in there — Save and
+  Delete IR's buttons had a `.mdc-button__label { display: inline-flex; align-items: center;
+  gap: 0.4rem }` rule so the icon-or-spinner swap never lands flush against the label text, but
+  Submit for Review and Recall never got the same treatment (no class hook for it at all). Added a
+  shared `.ire__action-btn` class + rule covering both.
+- `wwell-ir.store.spec.ts`'s `WwellIrStore - recallIr` block rewritten (not just re-pointed) for the
+  new two-call shape: `recall` now mocked to return the bare ack, a new `getWorkflowStatus` mock
+  return supplies the chain/status, `updateIrSapWorkflow` assertions flipped to
+  `not.toHaveBeenCalled()`, and a new case covers the follow-up GET itself failing (distinct error
+  message, record's status left untouched).
+- Checked: `tsc`, ESLint (all touched files), full `wwell-planning` Jest (108/108 — same count, all
+  4 recall-block tests rewritten in place, no net-new coverage). Not verified live against the user's
+  real office backend (no access to it from here) — verification here is unit-test-only.
+
+**Same day, later: sap-service mock updated to match — user asked explicitly ("must be same as office")**
+
+- `~/Downloads/Misc/sap-service` (separate repo) — `SapRecallResource.recall(...)` now returns a new
+  `SapRecallResponse` (`{ "message": "Request <wf_obj_id> recalled successfully" }`) instead of the
+  full `SapWorkflowStatusBuilder` payload it used to build; the `SapWorkflowStatusBuilder` injection
+  was dropped from this class entirely (still used by `SapDisplayResource`). `registry.recall(wfObjId)`
+  is still called first, unchanged — that's what makes a follow-up `/display` GET keep reporting
+  "Recalled", which the Angular fix's second call now depends on.
+- Corrected the Javadoc on `SapRecallResource` and `SapWorkflowStatusBuilder` (both used to claim the
+  two endpoints shared one response shape) and rewrote the README's `DELETE /recall` section and its
+  example body to match.
+- Rewrote `SapRecallResourceTest`'s first test for the bare-ack shape; its sibling
+  (`aRecalledWorkflowReportsRecalledOnDisplayToo`) needed no change since it only ever asserted the
+  follow-up GET's body, not the recall response's own.
+- Checked: confirmed the mock's `quarkus:dev` was already running on :9090 before touching anything
+  (`lsof -i :9090`) — never ran `mvn clean` against it. Ran `mvn test-compile` (not the full `mvn
+  test`) to confirm both main and test sources compile. Verified live via `curl -X DELETE
+  ".../recall?...&wf_obj_id=99999&..."` → hot-reloaded automatically, returned the new bare-ack body;
+  an immediate follow-up `curl ".../display?...&wf_obj_id=99999"` still correctly reported
+  `wf_status_text: "Recalled"` — confirms the full recall → notify → refetch sequence now works
+  end-to-end against the local mock the same way it does against the real office backend.
+
+---
+
+## 2026-10-01
+
+**IR attachments: full migration off agwa-planning's local filesystem onto s3-client-service as the sole storage**
+
+The day's work was one continuous thread that went through several intermediate designs before landing
+on the final architecture — each step driven by a specific user correction, not planned up front.
+
+- **Upload-progress fix**: clicking an attachment's Upload icon on a not-yet-saved IR silently did
+  nothing until the next global Save; fixed to auto-save-then-upload immediately with a real progress
+  bar and a duplicate-click guard (`wwell-ir-editor.component.ts`'s `uploadStagedAttachment`, the
+  `awaitingAutoSaveForUpload` signal).
+- **`POST /delete` integrated** against the real S3 object-store proxy's documented contract
+  (`{object_key, network_id}` → `{object_key, object_deleted, index_deleted}`, plus its 400/403/404/422
+  error shapes) — added to both the `s3-client-service` mock and `S3Service.delete()`/
+  `WwellIrStore.deleteFromS3()` (best-effort, mirrored the existing upload-mirror philosophy).
+- **A reported "delete bug" that wasn't one**: the user said delete "is still calling old url" /
+  "it must call directly" twice; extensive live re-verification (gstack, curl, byte-level comparison
+  of stored keys) found the delete flow already matched the contract exactly. The real, different ask
+  only became clear once the user sent an actual DevTools Network-tab screenshot: the complaint was
+  about a `PATCH .../s3-key` call back to agwa-planning on *upload*, not delete. Lesson captured in
+  memory (`feedback_ask_for_screenshot_when_bug_unreproducible`) — when live verification keeps saying
+  the code is right, stop guessing and ask for the literal screenshot.
+- **Removed the `PATCH .../s3-key` backend round-trip**: confirmed via AskUserQuestion (trade-off:
+  "indexed in S3" stops surviving a reload) — upload became exactly two calls, agwa-planning's primary
+  store + `POST :9091/store` direct from the browser, no round-trip back to persist the key.
+- **FINAL architecture, same day**: user asked to stop storing attachments in agwa-planning's primary
+  storage at all — "create one service ... s3-client-service ... store the table
+  EXAD_S3_OBJECT_STORAGE_INDEX." Three decisions via AskUserQuestion: bytes live on s3-client-service's
+  own local disk (table stays metadata-only), agwa-planning's attachment REST endpoints are removed
+  entirely, and attachment *listing* also goes straight from Angular to `GET /search`.
+  - `s3-client-service`: new `S3ObjectByteStore` writes/reads/deletes real bytes alongside the existing
+    DB-backed metadata repo; new local-only `GET /object?key=...` endpoint (not part of the real
+    documented contract) to serve bytes back for view/download/PDF-embedding.
+  - `agwa-planning`: `IrAttachmentStorageService`, `IrAttachmentInfo`, and all 4 attachment REST
+    endpoints deleted outright. The only thing left is a new backend-to-backend `S3AttachmentClient`
+    (plain JDK `HttpClient`) that `IrLetterService` uses to fetch attachment bytes server-side for
+    letter-PDF generation — the one case that isn't Angular, since PDF rendering has no browser.
+  - Angular: `IrAttachment.s3ObjectKey?` → required `objectKey: string` as the sole identity (a slot +
+    fileName pair is no longer unique). `WwellIrService` lost all 4 attachment methods. `S3Service`
+    gained `search()`/`download()` and `store()` was upgraded to report real upload progress (it's now
+    the only upload call, so it inherited that responsibility). `WwellIrStore.loadIrAttachments` now
+    calls `s3.search()` directly; `uploadOne`/`deleteIrAttachment` call `s3.store()`/`s3.delete()` with
+    zero backend involvement; the old `mirrorToS3`/`deleteFromS3`/`withS3Key` helpers are gone — there's
+    nothing left to mirror.
+- Checked: `tsc --noEmit`, `ng build`, ESLint (all touched files), all 86 `wwell-ir` Jest tests green
+  throughout (one mock swap: the editor spec's `WwellIrService` mock → `S3Service` with `download`).
+  Verified live via gstack on IR-9065, full round trip: upload → exactly `POST :9091/store`; view →
+  `GET :9091/object?key=...`; delete → exactly `POST :9091/delete`; page reload + reselect →
+  `GET :9091/search?q=ir-attachments/ir-9065/` with the attachment still there (real DB persistence,
+  no longer session-only). Letter-PDF generation re-verified separately — `s3-client-service`'s own log
+  showed the backend-to-backend search+fetch calls landing exactly as expected. Test attachment cleaned
+  up afterward.
+
+## 2026-10-04
+
+**IR list "Updated" date always showing today — root cause was a field-name mismatch, not missing data**
+
+- User reported the IR list's `Updated {{ ir.updatedDate }}` row-meta line always shows the current
+  date regardless of the record.
+- Root cause (systematic-debugging): `wwell-ir-summary.mapper.ts` computed `updatedDate` from
+  `row.updatedDt ?? row.createdDt ?? todayIsoDate()`, and the frontend `IrHeaderSummary` interface
+  declared those two fields — but `EXAD_GWD_IR_HEADER` has no `created_dt`/`updated_dt` column at all
+  (confirmed against `docs/ir/EXAD_GWD_IR_HEADER.md` and agwa-planning's `IrHeaderSummary.java` DTO/
+  MyBatis `@Result` mappings). The real columns are `ep_cr_data_dt` (created) and `ep_lt_data_mod_dt`
+  (last modified), serialized as `epCrDataDt`/`epLtDataModDt`. Both assumed fields were `undefined` on
+  every row, so the `??` chain always fell through to `todayIsoDate()`. A prior comment in the mapper
+  had misdiagnosed this as "every row came back with both dates null" — the fields never existed on
+  the payload in the first place.
+- Fix: renamed `IrHeaderSummary.createdDt`/`updatedDt` → `epCrDataDt`/`epLtDataModDt`
+  (`wwell-ir-form/wwell-ir-payload.model.ts`), and `wwell-ir-summary.mapper.ts` now computes
+  `updatedDate` from `row.epLtDataModDt ?? row.epCrDataDt ?? todayIsoDate()` (fallback kept since
+  real rows can still have both columns null). Updated the one stale test fixture that constructed
+  an `IrHeaderSummary` literal (`well-profile-live.spec.ts`).
+- Checked: `tsc --noEmit` clean, targeted Jest run (`wwell-ir-summary`, `well-profile-live`,
+  `wwell-ir.store`, `wwell-ir-view.component`, `wwell-ir-editor.component`) — 46 passed.
+
+**Follow-up same day: the field-name fix wasn't enough — user still saw "today" on untouched records**
+
+- Also had to fully restart the dev stack first: Docker Desktop's backend daemon had been wedged for
+  5 days (`docker info` → "Cannot connect to the Docker daemon" even though `com.docker.backend` was
+  still running and port 1521 looked listening) — this was the actual cause of the backend's "Socket
+  read" exception / IR list failing to load entirely. Fixed via exact-PID kill of `com.docker.backend`
+  + relaunch, `docker compose stop/up` the `agwa-planning-oracle` container once the daemon responded,
+  then an exact-PID-kill + detached-nohup restart of the `quarkus:dev` app itself (its Agroal pool was
+  still holding dead sockets to the old Oracle instance). New variant logged in
+  `reference_agwa_planning_dev_server_wedge.md`.
+- With the stack healthy again, live-curled the list endpoint directly: `epCrDataDt`/`epLtDataModDt`
+  are `null` on every real record (IR-9062/9063/9065). Traced why end-to-end: agwa-planning's
+  `05-agwa-iud-package.sql` (the actual insert/update/delete package for `exad_gwd_ir_header`) has
+  **zero `SYSDATE` references anywhere in the file** — neither `insert_ir_data_prc` nor
+  `update_ir_data_prc` ever stamps a date column on save. `ep_cr_data_dt`/`ep_lt_data_mod_dt` are
+  legacy "EP" (external feed) columns with no write path from this app at all, so they stay null
+  forever for every IR created or edited through the UI — the column-name fix was necessary but the
+  previous `?? todayIsoDate()` fallback was still fabricating "today" for every one of them. There is
+  genuinely no reliable last-modified timestamp in this table for app-originated records.
+- Real fix: stopped treating "unknown" as "today". `IntegratedRequirement.updatedDate` is now
+  `string | null`; the mapper returns `null` instead of defaulting (no more `todayIsoDate()` import
+  there at all). Updated the three consumers: the list row-meta now reads "Update date unknown" when
+  null instead of a fabricated date (`wwell-ir.component.html`); the Details tab's "Last Updated" KV
+  row falls back to the existing `EMPTY_VALUE` ("—") convention (`wwell-ir-view-details.component.ts`);
+  the Letter preview's masthead "Date" field was decoupled from the record entirely and given its own
+  `issueDate = todayIsoDate()` — that field is legitimately supposed to always read today, matching
+  agwa-planning's real server-rendered PDF (`IrLetterDataAssembler.issueDate = LocalDate.now()`), not
+  the record's last-modified date, so it would have broken (gone blank) if left pointed at the now-
+  nullable field.
+- Checked: `tsc --noEmit` clean; full `wwell-ir` Jest suite — 86 passed, no spec changes needed. Per
+  [[feedback_skip_tests_wwell_ir]], no new tests were written for this UI change.

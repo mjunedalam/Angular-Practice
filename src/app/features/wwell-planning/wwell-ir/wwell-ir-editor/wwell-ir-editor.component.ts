@@ -193,11 +193,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hasKnownStatus = hasKnownIrStatus;
   protected readonly badgeMeta = irBadgeMeta;
   protected readonly isSaving = this.store.creatingIr;
-  protected readonly isDeleting = this.store.deletingIr;
   protected readonly isSubmittingForReview = this.store.updatingIrStatus;
   protected readonly isRecalling = this.store.recallingIr;
   protected readonly anyFooterActionPending = computed(
-    () => this.isSaving() || this.isDeleting() || this.isSubmittingForReview() || this.isRecalling(),
+    () => this.isSaving() || this.isSubmittingForReview() || this.isRecalling(),
   );
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
@@ -1043,22 +1042,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.confirmThenAct({ title, rows, confirmLabel: 'Delete' }, onConfirmed);
   }
 
-  protected deleteIr(): void {
-    const irSeq = this.ir().irSeq;
-    if (irSeq === null || irSeq === undefined) return;
-    this.confirmThenAct(
-      {
-        title: 'Delete this Integrated Requirement?',
-        rows: [
-          { label: 'IR', value: this.ir().code },
-          { label: 'Well', value: this.ir().requestReference.wellName || 'Untitled Well' },
-        ],
-        confirmLabel: 'Delete',
-      },
-      () => this.store.deleteIr(irSeq),
-    );
-  }
-
   private currentRawFormValue(): WwellIrFormRawValue {
     return mapIntegratedRequirementToRawFormValue(this.ir());
   }
@@ -1177,8 +1160,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.store.submitIrForReview(this.ir());
   }
 
-  /** Recalling stops a live SAP workflow — the same "confirm, then act" pattern deleteIr() uses,
-   *  since it's not reversible from here (SAP itself would need a fresh Submit for Review). */
+  /** Recalling stops a live SAP workflow — uses the same "confirm, then act" pattern as the other
+   *  row-delete actions above, since it's not reversible from here (SAP itself would need a fresh
+   *  Submit for Review). */
   protected recallIr(): void {
     const ir = this.ir();
     this.confirmThenAct(
