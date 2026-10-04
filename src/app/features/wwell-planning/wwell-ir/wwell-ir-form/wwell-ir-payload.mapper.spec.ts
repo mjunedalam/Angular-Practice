@@ -177,7 +177,7 @@ describe('buildWwellIrBulkSavePayload', () => {
       prewap_seq: 1198,
       pump_lvl: null,
       oh_flg: 'Y',
-      oh_remarks: '8 1/2"',
+      oh_remarks: '8 1/2" Open Hole',
       gp_flg: 'N',
       gp_remarks: null,
       perforated_flg: 'N',

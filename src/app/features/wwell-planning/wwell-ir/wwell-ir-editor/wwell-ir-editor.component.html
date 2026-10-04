@@ -405,7 +405,7 @@
               <app-dynamic-section [section]="formationTopAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
               <div class="ire__edit-actions">
                 <button type="button" mat-button (click)="formationTopAdd.close()">Cancel</button>
-                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addFormationTopRow()">Add horizon</button>
+                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid || addCtrl.length === 0" (click)="addFormationTopRow()">Add horizon</button>
               </div>
             </div>
           }
@@ -555,7 +555,7 @@
             <app-dynamic-section [section]="casingAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
             <div class="ire__edit-actions">
               <button type="button" mat-button (click)="casingAdd.close()">Cancel</button>
-              <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addCasingRow()">Add casing</button>
+              <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid || addCtrl.length === 0" (click)="addCasingRow()">Add casing</button>
             </div>
           </div>
         }
@@ -776,7 +776,7 @@
               <app-dynamic-section [section]="offsetWellAddSection" [control]="addCtrl" mode="edit" [selectPanelClass]="selectPanelClass" />
               <div class="ire__edit-actions">
                 <button type="button" mat-button (click)="offsetWellAdd.close()">Cancel</button>
-                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid" (click)="addOffsetWellRow()">Add well</button>
+                <button type="button" mat-flat-button color="primary" [disabled]="addCtrl.invalid || addCtrl.length === 0" (click)="addOffsetWellRow()">Add well</button>
               </div>
             </div>
           }
@@ -999,7 +999,9 @@
                     <mat-icon class="ire__attachment-file-icon">{{ attachmentIcon(item.file.type) }}</mat-icon>
                     <span class="ire__attachment-file-meta">
                       <span class="ire__attachment-file-name">{{ item.file.name }}</span>
-                      <span class="ire__attachment-file-size">{{ attachmentSizeLabel(item.file.size) }} · not uploaded yet</span>
+                      <span class="ire__attachment-file-size">
+                        {{ attachmentSizeLabel(item.file.size) }} · {{ editorIrSeq() === null ? 'save the IR to upload' : 'not uploaded yet' }}
+                      </span>
                     </span>
 
                     <button
@@ -1020,10 +1022,10 @@
                       mat-icon-button
                       class="ire__attachment-action ire__attachment-action--upload"
                       [attr.aria-label]="'Upload ' + item.file.name"
-                      matTooltip="Upload"
+                      [matTooltip]="editorIrSeq() === null ? 'Save the IR before uploading' : 'Upload'"
                       matTooltipClass="ir-attachment-tooltip"
                       matTooltipPosition="above"
-                      [disabled]="isPendingUploadBusy(item.id)"
+                      [disabled]="isPendingUploadBusy(item.id) || editorIrSeq() === null"
                       (click)="uploadPendingAttachment(slot.slot, item)"
                     >
                       <mat-icon>cloud_upload</mat-icon>
@@ -1038,7 +1040,7 @@
                       matTooltipClass="ir-attachment-tooltip"
                       matTooltipPosition="above"
                       [disabled]="isPendingUploadBusy(item.id)"
-                      (click)="removePendingAttachment(slot.slot, item.id)"
+                      (click)="removePendingAttachment(slot.slot, item)"
                     >
                       <mat-icon>delete</mat-icon>
                     </button>

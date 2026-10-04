@@ -16,8 +16,8 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     updatedDate: '2026-08-01',
     status: 'draft',
     requestReference: {
-      linkedRequestId: null,
-      letterNumber: null,
+      linkedRequestId: '5001',
+      letterNumber: 'LTR-2026-0456',
       client: 'BI-12',
       supportingBusiness: 'Agriculture',
       wellName: 'HAIL-500',
@@ -41,7 +41,16 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     offsetWellsRemarks: null,
     hydrogeology: { aquifer: 'Saq', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: null },
     testProgram: { testType: 'flow-test', estimatedRateGpm: null, estimatedWaterLevelFt: null, siwhpPsi: null },
-    attachments: [],
+    attachments: [
+      {
+        slot: 'initiation-request',
+        objectKey: 'ir-attachments/ir-9001/initiation-request/test-uuid',
+        label: 'Initiation Request',
+        fileName: 'initiation-request.pdf',
+        sizeBytes: 1024,
+        contentType: 'application/pdf',
+      },
+    ],
     chain: [],
     sapWfId: null,
     sapWfStatusText: null,

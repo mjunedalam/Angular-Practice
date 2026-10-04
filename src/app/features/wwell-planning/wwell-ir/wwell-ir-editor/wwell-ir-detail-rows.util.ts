@@ -83,13 +83,20 @@ export function buildRequestReferenceRows(
 
 /** Mirrors the schema's "Program Details" section (2.1) — its own rail leaf/edit unit, separate
  *  from Development & Testing (2.2) below. `openHoleSizeIn` only ever means something when the
- *  completion type is 'Open Hole' (see the field's `visibleWhen` gate in the schema), so it's
- *  only included then rather than showing a dangling "—" the rest of the time. */
+ *  completion type includes 'Open Hole' (see the field's `visibleWhen` gate in the schema), so
+ *  it's only included then rather than showing a dangling "—" the rest of the time.
+ *
+ *  `completion` is a multi-select — any number of `WWELL_COMPLETION_OPTIONS` can be checked at
+ *  once, each becoming its own `\n`-joined line (see wwell-ir-wellbore-diagram.mapper.ts's own
+ *  doc comment on this same shape) — so this must check "is 'Open Hole' one of the checked
+ *  lines?", the same `includesLine` semantics the schema's `visibleWhen` gate uses
+ *  (dynamic-section.component.ts), not a straight equality that only ever matched the
+ *  single-selection case and otherwise silently hid an already-entered size. */
 export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[] {
   const p = ir.programDetails;
   const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completion), options: true }];
 
-  if (p.completion === 'Open Hole') {
+  if (p.completion.split('\n').some(line => line.trim() === 'Open Hole')) {
     rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
   }
 

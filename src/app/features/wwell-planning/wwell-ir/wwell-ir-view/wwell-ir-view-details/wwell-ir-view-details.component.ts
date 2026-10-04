@@ -15,7 +15,7 @@ import {
   buildRequestReferenceRows,
 } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
 import { WwellIrStore } from '../../store/wwell-ir.store';
-import { WWELL_IR_SUBMITTABLE_STATUSES } from '../../wwell-ir.config';
+import { WWELL_IR_SUBMITTABLE_STATUSES, wwellIrHasRequiredSubmitFields } from '../../wwell-ir.config';
 import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-view-kv-card.component';
 
 /** "Details" step of the read-only IR view: General Information, Program Details, Geologist
@@ -60,9 +60,15 @@ export class WwellIrViewDetailsComponent {
 
   // "Request Approval" only makes sense before the record has already left the author's hands —
   // same gate WwellIrEditorComponent's own "Submit for Review" button uses, `sapWfId` check
-  // included (see that gate's own doc comment for why `status` alone can't be trusted here).
+  // included (see that gate's own doc comment for why `status` alone can't be trusted here). An
+  // unsaved draft has no `ir_seq` to file the SAP workflow under, so it's excluded too, as is a
+  // saved-but-incomplete record (missing a field the schema itself marks required).
   protected readonly canRequestApproval = computed(
-    () => WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) && this.ir().sapWfId == null,
+    () =>
+      this.ir().irSeq != null &&
+      wwellIrHasRequiredSubmitFields(this.ir()) &&
+      WWELL_IR_SUBMITTABLE_STATUSES.includes(this.ir().status) &&
+      this.ir().sapWfId == null,
   );
 
   protected requestApproval(): void {

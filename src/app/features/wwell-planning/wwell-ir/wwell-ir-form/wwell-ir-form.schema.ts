@@ -42,7 +42,13 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             validators: { required: true },
             searchable: true,
           },
-          { key: 'letterNumber', label: 'Letter Number', type: 'text', placeholder: 'e.g., LTR-2026-0456' },
+          {
+            key: 'letterNumber',
+            label: 'Letter Number',
+            type: 'text',
+            placeholder: 'e.g., LTR-2026-0456',
+            validators: { required: true },
+          },
           { key: 'client', label: 'BI Number', type: 'text', readonly: true },
           {
             key: 'supportingBusiness',

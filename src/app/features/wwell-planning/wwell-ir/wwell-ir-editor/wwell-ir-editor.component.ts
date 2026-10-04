@@ -85,6 +85,7 @@ import {
   irBadgeMeta,
   isSapWorkflowRecalled,
   isSapWorkflowTerminal,
+  wwellIrHasRequiredSubmitFields,
 } from '../wwell-ir.config';
 import {
   buildGeologistContactRows,
@@ -118,16 +119,29 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
   return { ...section, title: null };
 }
 
-/** A repeatable section's row fields as one flat form — what the section's "+" button opens. `requiredKeys`
- *  are the fields Save identifies a row by (see the payload mapper's row keys), so a row can't be added without them. */
-function singleRowSection(section: WwellFormSectionConfig, requiredKeys: readonly string[]): WwellFormSectionConfig {
+/** A repeatable config for the section's "+" add-form — same row shape as the full section's own
+ *  repeatable config, `requiredKeys` (the fields Save identifies a row by, so a row can't be added
+ *  without them) additionally marked required, seeded with exactly one empty row on open.
+ *  Deliberately still `.repeatable`, not a flat one-row `.fields` group — rendering through the
+ *  same `<app-repeatable-group>` the full section's own edit view uses gives the add-form its own
+ *  "+ Add Row"/remove-row UI for free, so the user can stage any number of rows before committing
+ *  them all at once (see `commitNewRows`), instead of the old one-row-then-closed form where a
+ *  second "+" click on the section head no-opped (`SectionEditState.open()` never rebuilds an
+ *  already-open control) until the first row was committed. */
+function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly string[], addLabel: string): WwellFormSectionConfig {
   const rowFields = section.repeatable?.rowFields ?? [];
+  const key = `${section.key}NewRows`;
   return {
-    key: `${section.key}NewRow`,
+    key,
     title: null,
-    fields: rowFields.map(field =>
-      requiredKeys.includes(field.key) ? { ...field, validators: { ...field.validators, required: true } } : field,
-    ),
+    repeatable: {
+      key,
+      addLabel,
+      minRows: 1,
+      rowFields: rowFields.map(field =>
+        requiredKeys.includes(field.key) ? { ...field, validators: { ...field.validators, required: true } } : field,
+      ),
+    },
   };
 }
 
@@ -190,9 +204,15 @@ export class WwellIrEditorComponent implements AfterViewInit {
   /** A never-submitted record (no `sapWfId`), or one whose workflow was recalled — a recall was the
    *  user's own action, not a terminal SAP decision, so they get "Submit for Review" back to
    *  resubmit fresh under a new SAP workflow id (submitIrForReview mints one regardless of the old
-   *  sapWfId). Approved/Rejected/Cancelled stay terminal — no way back from here. */
+   *  sapWfId). Approved/Rejected/Cancelled stay terminal — no way back from here.
+   *
+   *  Requires `hasSavedIrSeq()` first — an unsaved draft has no `ir_seq` to file the SAP workflow
+   *  under, so it must be created (Save) before it can be submitted. Also requires
+   *  `wwellIrHasRequiredSubmitFields` — a saved-but-incomplete record (missing fields the schema
+   *  itself marks required) shouldn't be submittable just because *something* was saved. */
   protected readonly canSubmitForReview = computed(() => {
     const ir = this.ir();
+    if (!this.hasSavedIrSeq() || !wwellIrHasRequiredSubmitFields(ir)) return false;
     return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowRecalled(ir.sapWfStatusText);
   });
   /** Once a record has been submitted (a real `sapWfId`), "Submit for Review" no longer applies —
@@ -283,9 +303,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hydrogeologySection = findSection(this.schema, 'hydrogeology', 'main');
   protected readonly offsetWellsSection = findSection(this.schema, 'contacts', 'offsetWells');
   protected readonly offsetRemarksSection = findSection(this.schema, 'contacts', 'remarks');
-  protected readonly formationTopAddSection = singleRowSection(this.formationTopsSection, ['name', 'depthFt']);
-  protected readonly casingAddSection = singleRowSection(this.casingSection, ['type', 'sizeIn', 'depthFtBgl']);
-  protected readonly offsetWellAddSection = singleRowSection(this.offsetWellsSection, ['epANum', 'aquifer']);
+  protected readonly formationTopAddSection = addRowsSection(this.formationTopsSection, ['name', 'depthFt'], '+ Add Formation Top');
+  protected readonly casingAddSection = addRowsSection(this.casingSection, ['type', 'sizeIn', 'depthFtBgl'], '+ Add Casing');
+  protected readonly offsetWellAddSection = addRowsSection(this.offsetWellsSection, ['epANum', 'aquifer'], '+ Add Offset Well');
 
   protected readonly requestReferenceRows = computed(() =>
     buildRequestReferenceRows(this.ir(), this.store.linkedRequestWellOptions()),
@@ -395,16 +415,19 @@ export class WwellIrEditorComponent implements AfterViewInit {
     });
   });
 
-  /** The "+" buttons' one-row forms. Their control is a standalone group — a row only reaches the section's live
-   *  FormArray (the one Save diffs) once "Add" commits it — so opening one never flips the section into its edit form. */
-  protected readonly formationTopAdd = new SectionEditState<FormGroup, WwellIrRawFormationTop>(
-    () => buildSectionGroup(this.formationTopAddSection, this.fb) as FormGroup,
+  /** The "+" buttons' add-forms. Their control is a standalone array — rows only reach the section's live
+   *  FormArray (the one Save diffs) once "Add" commits them — so opening one never flips the section into
+   *  its edit form. Starts at one empty row (`addRowsSection`'s `minRows: 1`); the add-form's own
+   *  `<app-repeatable-group>` "+ Add Row" button grows it further, so any number of rows can be staged
+   *  and filled in before a single "Add" click commits all of them together (see `commitNewRows`). */
+  protected readonly formationTopAdd = new SectionEditState<FormArray, WwellIrRawFormationTop[]>(
+    () => buildSectionGroup(this.formationTopAddSection, this.fb) as FormArray,
   );
-  protected readonly casingAdd = new SectionEditState<FormGroup, WwellIrRawCasingRow>(
-    () => buildSectionGroup(this.casingAddSection, this.fb) as FormGroup,
+  protected readonly casingAdd = new SectionEditState<FormArray, WwellIrRawCasingRow[]>(
+    () => buildSectionGroup(this.casingAddSection, this.fb) as FormArray,
   );
-  protected readonly offsetWellAdd = new SectionEditState<FormGroup>(
-    () => buildSectionGroup(this.offsetWellAddSection, this.fb) as FormGroup,
+  protected readonly offsetWellAdd = new SectionEditState<FormArray, WwellIrRawOffsetWell[]>(
+    () => buildSectionGroup(this.offsetWellAddSection, this.fb) as FormArray,
   );
 
   protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
@@ -430,13 +453,21 @@ export class WwellIrEditorComponent implements AfterViewInit {
   private previewRows<TRow>(
     live: readonly TRow[] | null,
     saved: () => readonly TRow[],
-    draft: TRow | null,
+    draftRows: readonly TRow[] | null,
     keyOf: (row: TRow) => string,
   ): readonly TRow[] | null {
-    if (!draft) return live;
+    if (!draftRows?.length) return live;
     const rows = live ?? saved();
-    // "Add" refuses a row whose natural key is taken (it would overwrite that row), so it is not drawn either.
-    return rows.some(row => keyOf(row) === keyOf(draft)) ? live : [...rows, draft];
+    const keys = new Set(rows.map(keyOf));
+    // "Add" refuses a row whose natural key is already taken (it would overwrite that row) — including by
+    // another staged draft row — so a colliding draft is not drawn either.
+    const additions = draftRows.filter(draft => {
+      const key = keyOf(draft);
+      if (keys.has(key)) return false;
+      keys.add(key);
+      return true;
+    });
+    return additions.length ? [...rows, ...additions] : live;
   }
 
   protected readonly formationTopsInlineEdit = new InlineRowEditState();
@@ -527,7 +558,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected addFormationTopRow(): void {
-    this.commitNewRow<WwellIrRawFormationTop>(this.formationTopAdd, this.formationTopsSection, {
+    this.commitNewRows<WwellIrRawFormationTop>(this.formationTopAdd, this.formationTopsSection, {
       existingKeys: this.formationTopsRows().map(row => topKey(row)),
       keyOf: topKey,
       liveArray: () => {
@@ -535,12 +566,12 @@ export class WwellIrEditorComponent implements AfterViewInit {
         return this.formationTopsEdit.control();
       },
       duplicate: key => `Formation ${key} already has a horizon — edit that row instead.`,
-      added: 'Formation top added — click Save to apply.',
+      added: count => `${count} formation top${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
   }
 
   protected addCasingRow(): void {
-    this.commitNewRow<WwellIrRawCasingRow>(this.casingAdd, this.casingSection, {
+    this.commitNewRows<WwellIrRawCasingRow>(this.casingAdd, this.casingSection, {
       existingKeys: this.casingRows().map(row => casingKey(row)),
       keyOf: casingKey,
       liveArray: () => {
@@ -548,12 +579,12 @@ export class WwellIrEditorComponent implements AfterViewInit {
         return this.casingEdit.control();
       },
       duplicate: key => `Casing ${key} already exists — edit that row instead.`,
-      added: 'Casing row added — click Save to apply.',
+      added: count => `${count} casing row${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
   }
 
   protected addOffsetWellRow(): void {
-    this.commitNewRow<WwellIrRawOffsetWell>(this.offsetWellAdd, this.offsetWellsSection, {
+    this.commitNewRows<WwellIrRawOffsetWell>(this.offsetWellAdd, this.offsetWellsSection, {
       existingKeys: this.offsetWellsRows().map(row => waterKey(row.epANum ?? 0)),
       keyOf: row => waterKey(row.epANum ?? 0),
       liveArray: () => {
@@ -562,40 +593,48 @@ export class WwellIrEditorComponent implements AfterViewInit {
         return ctrl ? this.offsetWellsArrayControl(ctrl) : null;
       },
       duplicate: key => `Area well ${key} already exists — edit that row instead.`,
-      added: 'Offset well added — click Save to apply.',
+      added: count => `${count} offset well${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
   }
 
-  /** Commits a "+" form's row into the section's live FormArray — the same array inline edits and deletes write to,
-   *  so Save diffs it like any other change. Save matches rows on their natural key, so a row whose key is already
-   *  taken is refused: it would silently overwrite that row instead of being added. */
-  private commitNewRow<TRow>(
-    add: SectionEditState<FormGroup>,
+  /** Commits every row staged in a "+" add-form's own FormArray into the section's live FormArray — the
+   *  same array inline edits and deletes write to, so Save diffs it like any other change. All-or-nothing:
+   *  Save matches rows on their natural key, so if ANY staged row's key is already taken (by an existing
+   *  row, or by another row in the same batch) the whole commit is refused rather than silently overwriting
+   *  that row, or committing some rows and leaving the colliding one stranded in the add-form. */
+  private commitNewRows<TRow>(
+    add: SectionEditState<FormArray>,
     section: WwellFormSectionConfig,
     commit: {
       readonly existingKeys: readonly string[];
       readonly keyOf: (row: TRow) => string;
       readonly liveArray: () => FormArray | null;
       readonly duplicate: (key: string) => string;
-      readonly added: string;
+      readonly added: (count: number) => string;
     },
   ): void {
     const form = add.control();
-    if (!form || form.invalid) return;
+    if (!form || form.invalid || form.length === 0) return;
 
-    const row = form.getRawValue() as TRow;
-    const key = commit.keyOf(row);
-    if (commit.existingKeys.includes(key)) {
-      this.notify.warn(commit.duplicate(key));
-      return;
+    const rows = form.getRawValue() as TRow[];
+    const keys = new Set(commit.existingKeys);
+    for (const row of rows) {
+      const key = commit.keyOf(row);
+      if (keys.has(key)) {
+        this.notify.warn(commit.duplicate(key));
+        return;
+      }
+      keys.add(key);
     }
 
     const array = commit.liveArray();
     if (!array) return;
-    addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
-    array.at(array.length - 1).patchValue(row as object);
+    rows.forEach(row => {
+      addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
+      array.at(array.length - 1).patchValue(row as object);
+    });
     add.close();
-    this.notify.info(commit.added);
+    this.notify.info(commit.added(rows.length));
   }
 
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
@@ -610,16 +649,14 @@ export class WwellIrEditorComponent implements AfterViewInit {
     return this.store.pendingAttachments()[slot] ?? [];
   }
 
-  /** Set for a pending file's id for the whole duration of an auto-save kicked off by
-   *  {@link uploadPendingAttachment} for a not-yet-created IR — there's no upload in flight yet at
-   *  that point (nothing has started uploading), but the file is about to be swept by
-   *  `uploadPendingAttachments` the moment the save lands, so it reads as busy too (see
-   *  {@link isPendingUploadBusy}). A `Set` because several rows can each trigger (and share) that
-   *  same auto-save before it resolves. */
-  private readonly awaitingAutoSaveForUploadIds = signal<ReadonlySet<string>>(new Set());
+  /** Normalizes the model's `irSeq?: number | null` to a plain `number | null` for the template
+   *  (which can't express an `== null` check under the eqeqeq lint rule). */
+  protected editorIrSeq(): number | null {
+    return this.ir().irSeq ?? null;
+  }
 
   protected isPendingUploadBusy(id: string): boolean {
-    return this.store.uploadingPendingIds().has(id) || this.awaitingAutoSaveForUploadIds().has(id);
+    return this.store.uploadingPendingIds().has(id);
   }
 
   protected isStoredAttachmentBusy(objectKey: string): boolean {
@@ -662,40 +699,31 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   /**
-   * Uploads one staged file immediately on click — never deferred to a separate, explicit Save, and
-   * independent of every other file staged in this or any other slot. `isPendingUploadBusy` (checked
-   * both here and via the row's own `[disabled]`) is what stops a second click on the same row from
-   * firing a second request while the first is still in flight; the `[disabled]` binding alone can
-   * lag a frame behind a rapid double-click, so the guard is repeated here too.
+   * Uploads one staged file for the clicked row only — never any other file staged in this or any
+   * other slot, and never the rest of the form. `isPendingUploadBusy` (checked both here and via the
+   * row's own `[disabled]`) is what stops a second click on the same row from firing a second request
+   * while the first is still in flight; the `[disabled]` binding alone can lag a frame behind a rapid
+   * double-click, so the guard is repeated here too.
    *
-   * A record that's never been saved has no `ir_seq` to upload the file under yet — rather than
-   * telling the user to go click Save themselves first, this runs the same save
-   * `saveUnsavedChangesAndWait` already does for the "leave this page" guard, then flushes every
-   * currently-staged file across every slot (this one included) the moment a real `ir_seq` exists,
-   * via the same `uploadPendingAttachments` path a brand-new record's first save already uses
-   * elsewhere. Several rows clicked before that save lands all share the one in-flight save — the
-   * second and later callers just queue onto it (see `saveUnsavedChangesAndWait`'s own doc comment).
+   * A record that's never been saved has no `ir_seq` to upload the file under yet. The row's Upload
+   * button is disabled in that case (see the template), and this guard repeats that rather than
+   * silently saving the whole IR as a side effect of an attachment click — that used to auto-save via
+   * `saveUnsavedChangesAndWait` and then flush every staged file in every slot, which surprised users
+   * by persisting unrelated, still-being-edited form fields and uploading files they hadn't asked to
+   * send yet. The user must explicitly save the IR first; once it has an `ir_seq`,
+   * `uploadPendingAttachments` (plural) already flushes every staged file as part of that save — see
+   * its call site in `wwell-ir.component.ts`.
    */
-  protected async uploadPendingAttachment(slot: IrAttachmentSlot, item: IrPendingAttachment): Promise<void> {
+  protected uploadPendingAttachment(slot: IrAttachmentSlot, item: IrPendingAttachment): void {
     if (this.isPendingUploadBusy(item.id)) return;
 
     const irSeq = this.ir().irSeq;
-    if (irSeq != null) {
-      this.store.uploadPendingAttachment(irSeq, slot, item.id);
+    if (irSeq == null) {
+      this.notify.info('Save this Integrated Requirement before uploading attachments.');
       return;
     }
 
-    this.awaitingAutoSaveForUploadIds.update(ids => new Set(ids).add(item.id));
-    const saved = await this.saveUnsavedChangesAndWait();
-    this.awaitingAutoSaveForUploadIds.update(ids => {
-      const next = new Set(ids);
-      next.delete(item.id);
-      return next;
-    });
-    if (!saved) return;
-
-    const newIrSeq = this.store.draftIrSeq();
-    if (newIrSeq != null) this.store.uploadPendingAttachments(newIrSeq);
+    this.store.uploadPendingAttachment(irSeq, slot, item.id);
   }
 
   protected attachmentSizeLabel(bytes: number): string {
@@ -722,9 +750,18 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.store.addPendingAttachment(slot, file);
   }
 
-  /** Un-stages a file that was never sent — purely local, no backend call. */
-  protected removePendingAttachment(slot: IrAttachmentSlot, id: string): void {
-    this.store.removePendingAttachment(slot, id);
+  /** Un-stages a file that was never sent — purely local, no backend call — but still behind a
+   *  confirm dialog, same as every other delete action in this editor: a wrong click shouldn't
+   *  silently drop a file the user just attached. */
+  protected removePendingAttachment(slot: IrAttachmentSlot, item: IrPendingAttachment): void {
+    this.confirmThenDelete(
+      'Remove this attachment?',
+      [
+        { label: 'Section', value: this.slotLabel(slot) },
+        { label: 'File', value: item.file.name },
+      ],
+      () => this.store.removePendingAttachment(slot, item.id),
+    );
   }
 
   /**
@@ -736,7 +773,14 @@ export class WwellIrEditorComponent implements AfterViewInit {
     if (this.isStoredAttachmentBusy(attachment.objectKey)) return;
     const irSeq = this.ir().irSeq;
     if (irSeq == null) return;
-    this.store.deleteIrAttachment(irSeq, attachment.objectKey);
+    this.confirmThenDelete(
+      'Delete this attachment?',
+      [
+        { label: 'Section', value: this.slotLabel(attachment.slot) },
+        { label: 'File', value: attachment.fileName },
+      ],
+      () => this.store.deleteIrAttachment(irSeq, attachment.objectKey),
+    );
   }
 
   @ViewChildren('sectionEl', { read: ElementRef }) private readonly sectionEls?: QueryList<ElementRef<HTMLElement>>;
@@ -806,8 +850,15 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   public saveUnsavedChangesAndWait(): Promise<boolean> {
     return new Promise(resolve => {
-      this.saveSettledResolvers.push(resolve);
-      if (!this.store.creatingIr()) this.saveAll();
+      if (this.store.creatingIr()) {
+        this.saveSettledResolvers.push(resolve);
+        return;
+      }
+      if (this.saveAll()) {
+        this.saveSettledResolvers.push(resolve);
+      } else {
+        resolve(false);
+      }
     });
   }
 
@@ -1002,18 +1053,33 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.store.createIr(payload, irBulkPayload);
   }
 
-  protected saveAll(): void {
+  /** Returns whether a save was actually kicked off — `false` on every early-return branch below
+   *  (nothing to save, or a blocked validation). `saveUnsavedChangesAndWait` needs this to settle
+   *  its own promise immediately in those cases instead of waiting forever for a `creatingIr`
+   *  transition that will now never happen. */
+  protected saveAll(): boolean {
     // A record whose stored remarks still carry legacy HTML is saved even with nothing edited — the form already
     // holds the cleaned text, and saving is what writes it back.
     if (this.ir().irSeq !== null && !this.hasUnsavedChanges() && !this.ir().hasLegacyMarkup) {
       this.notify.info('No changes to save.');
-      return;
+      return false;
     }
 
     let raw = this.currentRawFormValue();
 
     const referenceCtrl = this.requestReferenceEdit.control();
     if (referenceCtrl) raw = { ...raw, reference: { main: referenceCtrl.getRawValue() } };
+
+    // `letterNumber` carries a `Validators.required` in the schema (wwell-ir-form.schema.ts), but
+    // nothing elsewhere in this method ever checks form validity before saving — it only gathers
+    // raw values. Without this explicit gate, a blank Letter Number saved silently; the asterisk
+    // and mat-error only ever showed once the field itself had been touched.
+    if (!raw.reference.main.letterNumber?.trim()) {
+      this.requestReferenceEdit.open();
+      this.requestReferenceEdit.control()?.get('letterNumber')?.markAsTouched();
+      this.notify.error('Letter Number is required before saving.');
+      return false;
+    }
 
     const programCtrl = this.programEdit.control();
     if (programCtrl) {
@@ -1067,6 +1133,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
     this.saveMergedRaw(raw);
     this.closeAllSections();
+    return true;
   }
 
   private closeAllSections(): void {

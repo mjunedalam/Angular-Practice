@@ -67,3 +67,23 @@ export function isSapWorkflowTerminal(sapWfStatusText: string | null): boolean {
 export function isSapWorkflowRecalled(sapWfStatusText: string | null): boolean {
   return sapWfStatusText !== null && SAP_RECALLED_STATUS_TEXT.test(sapWfStatusText);
 }
+
+/** Every field the IR form schema marks `required` (wwell-ir-form.schema.ts), outside the
+ *  repeatable rows — Casing/Formation Tops/Offset Wells only validate a row once one exists, so
+ *  there's no top-level requirement that those sections hold any rows at all. Gates "Submit for
+ *  Review": checked against the already-saved `ir` itself, not a live, possibly-still-open form,
+ *  because submitting sends exactly this record (WwellIrEditorComponent.submitForReview calls
+ *  `store.submitIrForReview(this.ir())`) — an in-progress edit elsewhere doesn't change whether
+ *  the saved record is actually ready. */
+export function wwellIrHasRequiredSubmitFields(ir: IntegratedRequirement): boolean {
+  return (
+    !!ir.requestReference.linkedRequestId &&
+    !!ir.requestReference.letterNumber?.trim() &&
+    !!ir.requestReference.wellName.trim() &&
+    !!ir.programDetails.completion.trim() &&
+    !!ir.contacts.geologistPrimary.trim() &&
+    !!ir.hydrogeology.aquifer.trim() &&
+    !!ir.testProgram.testType &&
+    ir.attachments.some(attachment => attachment.slot === 'initiation-request')
+  );
+}

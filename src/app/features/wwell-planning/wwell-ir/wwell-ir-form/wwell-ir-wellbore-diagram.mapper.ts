@@ -308,10 +308,16 @@ export function deriveCompletionElementFlags(
   const isLinerPerforated = selected.has(COMPLETION_LINER_PERFORATED);
   const isCasedPerforated = selected.has(COMPLETION_CASED_PERFORATED);
   const isPerforated = isLinerPerforated || isCasedPerforated;
+  const ohSizeText = openHoleSizeIn?.trim() || null;
 
   return {
     ohFlg: isOpenHole ? 'Y' : 'N',
-    ohRemarks: isOpenHole ? (openHoleSizeIn || null) : null,
+    // exad_gwd_well_design has no column of its own for the open hole size — oh_remarks is the
+    // only place it can travel to the backend, so it's baked in as "<size> Open Hole" (matching
+    // this app's other size-prefixed labels, e.g. perforatedRemarks' '7" Pre-Perforated Liner',
+    // and completion.renderer.ts's own hardcoded '8 1/2" Open Hole' fallback). See
+    // `parseOpenHoleSizeFromRemarks` for the reverse: pulling the size back out on load.
+    ohRemarks: isOpenHole && ohSizeText ? `${ohSizeText} ${COMPLETION_OPEN_HOLE}` : null,
     gpFlg: isGravelPack ? 'Y' : 'N',
     gpRemarks: isGravelPack ? 'Gravel Pack' : null,
     perforatedFlg: isPerforated ? 'Y' : 'N',
@@ -319,6 +325,18 @@ export function deriveCompletionElementFlags(
     lsFlg: isScreened ? 'Y' : 'N',
     lsRemarks: isScreened ? 'Screen' : null,
   };
+}
+
+/** Reverses the `"<size> Open Hole"` encoding `deriveCompletionElementFlags` bakes into
+ *  `ohRemarks` above — the only way the open hole size round-trips through a save/reload, since
+ *  there's no dedicated backend column for it. Anything that doesn't end in the expected suffix
+ *  (a legacy record saved before this encoding existed, or genuinely unrelated free text) is left
+ *  blank rather than guessed at. */
+export function parseOpenHoleSizeFromRemarks(ohRemarks: string | null | undefined): string | null {
+  if (!ohRemarks) return null;
+  const suffix = ` ${COMPLETION_OPEN_HOLE}`;
+  if (!ohRemarks.endsWith(suffix)) return null;
+  return ohRemarks.slice(0, -suffix.length).trim() || null;
 }
 
 /**

@@ -45,6 +45,7 @@ describe('LeftSidenavComponent', () => {
       'WLDA Approvals',
       'Land Affairs Approvals',
       'Integrated Requirements',
+      'Well Profile',
       'Active Water Well',
       'Report',
       'Presentation',

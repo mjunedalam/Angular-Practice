@@ -4,6 +4,7 @@ import {
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { isLegacyIrHtmlText, stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
+import { parseOpenHoleSizeFromRemarks } from './wwell-ir-wellbore-diagram.mapper';
 import { formatUtmCoordinates } from '../wwell-ir-coordinates.util';
 import {
   IrCasingRow,
@@ -157,6 +158,13 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     programDetails: {
       ...existing.programDetails,
       completion: completionText,
+      // oh_remarks is the only backend column open hole size ever reached (see
+      // deriveCompletionElementFlags/parseOpenHoleSizeFromRemarks in wwell-ir-wellbore-diagram.mapper.ts)
+      // — without parsing it back out here, the Open Hole Size input silently reverted to blank
+      // after every save+reload even though the value was sitting right there in oh_remarks.
+      openHoleSizeIn: wellDesignRowBelongsToThisIr
+        ? parseOpenHoleSizeFromRemarks(wellDesignRow.oh_remarks)
+        : existing.programDetails.openHoleSizeIn,
       acidization: resolveLegacyText(header?.acidization, existing.programDetails.acidization),
       transmission: resolveLegacyText(header?.dt_rmks, existing.programDetails.transmission),
       developmentTesting: {
