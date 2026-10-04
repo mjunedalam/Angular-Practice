@@ -126,7 +126,7 @@
             @if (ir.requestReference.wellName) {
               <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
             }
-            <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; Updated {{ ir.updatedDate }}</p>
+            <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; {{ ir.updatedDate ? 'Updated ' + ir.updatedDate : 'Update date unknown' }}</p>
           </button>
 
           @if (rowIrSeq(ir); as irSeq) {

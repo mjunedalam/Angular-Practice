@@ -129,7 +129,10 @@ export interface IntegratedRequirement {
    *  irSeq. Known only once a detail fetch has resolved one; threaded through purely so a later
    *  save of Estimated Pump Depth UPDATEs that same row instead of INSERTing a duplicate. */
   readonly wellDesignSeq?: number | null;
-  readonly updatedDate: string;
+  /** Null when neither real last-modified column is populated — exad_gwd_ir_header's own
+   *  insert/update procs never stamp a date on save (see wwell-ir-summary.mapper.ts), so this is
+   *  genuinely unknown for most records rather than a value to default away. */
+  readonly updatedDate: string | null;
   readonly status: IntegratedRequirementStatus;
   readonly requestReference: IntegratedRequirementRequestReference;
   readonly formationTops: readonly IntegratedRequirementFormationTop[];

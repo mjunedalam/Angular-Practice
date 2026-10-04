@@ -6,6 +6,7 @@ import { IntegratedRequirement } from '@models/wwell-planning/integrated-require
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_IR_ATTACHMENT_SLOTS, irAttachmentsFor } from '../../wwell-ir-attachments.config';
 import {
+  EMPTY_VALUE,
   KvRow,
   buildGeologistContactRows,
   buildHydrogeologyRows,
@@ -51,7 +52,7 @@ export class WwellIrViewDetailsComponent {
   protected readonly generalInfoRows = computed<readonly KvRow[]>(() => [
     { label: 'IR #', value: this.ir().code, mono: true },
     ...buildRequestReferenceRows(this.ir(), this.linkedRequestWellOptions()),
-    { label: 'Last Updated', value: this.ir().updatedDate, mono: true },
+    { label: 'Last Updated', value: this.ir().updatedDate ?? EMPTY_VALUE, mono: true },
   ]);
   protected readonly programDetailsRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));

@@ -1,5 +1,4 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
-import { todayIsoDate } from '../../shared/wwell-approvals/wwell-approval-request.util';
 import { IrHeaderSummary } from './wwell-ir-payload.model';
 
 /**
@@ -14,10 +13,13 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     id: code,
     code,
     irSeq: row.irSeq,
-    // Neither date column is guaranteed to be populated on exad_gwd_ir_header (see the real
-    // payload that motivated this: every row came back with both createdDt and updatedDt null) —
-    // fall back to today rather than crashing the whole list map on a null .slice() call.
-    updatedDate: (row.updatedDt ?? row.createdDt ?? todayIsoDate()).slice(0, 10),
+    // ep_lt_data_mod_dt (last modified) / ep_cr_data_dt (created) are the real date columns on
+    // exad_gwd_ir_header — the previous createdDt/updatedDt field names never existed on the API
+    // response, so this always fell through to today's date. Both are legacy "EP" feed columns
+    // that insert_ir_data_prc/update_ir_data_prc never stamp on save (confirmed: no SYSDATE anywhere
+    // in that package), so they stay null for every record created/edited through this app — a
+    // fallback to today would misreport "updated today" for records nobody touched. null is honest.
+    updatedDate: (row.epLtDataModDt ?? row.epCrDataDt)?.slice(0, 10) ?? null,
     // publish_flg is the only status-shaped signal this table carries — collapses the domain
     // model's finer-grained statuses (draft/in-progress/submit-for-review/in-review) into one.
     status: row.publishFlg === 'Y' ? 'approved' : 'in-progress',

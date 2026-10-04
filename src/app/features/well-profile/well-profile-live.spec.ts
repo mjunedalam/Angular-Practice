@@ -6,7 +6,7 @@ import { WwellIrDetailTableBlock } from '../wwell-planning/wwell-ir/wwell-ir-for
 import { WellProfileStore } from './well-profile.store';
 import { buildProfile } from './well-profile.data';
 
-const ir = mapIrHeaderSummaryToIntegratedRequirement({ irSeq: 1, prewapSeq: null, ltrNo: null, cmplType: null, testType: 'pump-test', publishFlg: 'N', createdDt: null, updatedDt: null });
+const ir = mapIrHeaderSummaryToIntegratedRequirement({ irSeq: 1, prewapSeq: null, ltrNo: null, cmplType: null, testType: 'pump-test', publishFlg: 'N', epCrDataDt: null, epLtDataModDt: null });
 
 describe('live well profile', () => {
   it('uses actual target depth, fractional diameters and explicit liner top and marks fallback liner attachment separately from actual TOL', () => {

@@ -140,8 +140,10 @@ export interface IrHeaderSummary {
   readonly cmplType: string | null;
   readonly testType: string | null;
   readonly publishFlg: 'Y' | 'N';
-  readonly createdDt: string | null;
-  readonly updatedDt: string | null;
+  // Real exad_gwd_ir_header columns (see docs/ir/EXAD_GWD_IR_HEADER.md) — this table has no
+  // created_dt/updated_dt column at all, so those never existed on the API response.
+  readonly epCrDataDt: string | null;
+  readonly epLtDataModDt: string | null;
 }
 
 export interface WwellIrDetailTableBlock {
