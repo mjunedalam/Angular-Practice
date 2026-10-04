@@ -121,13 +121,13 @@ function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey:
 
 /** A repeatable config for the section's "+" add-form — same row shape as the full section's own
  *  repeatable config, `requiredKeys` (the fields Save identifies a row by, so a row can't be added
- *  without them) additionally marked required, seeded with exactly one empty row on open.
- *  Deliberately still `.repeatable`, not a flat one-row `.fields` group — rendering through the
- *  same `<app-repeatable-group>` the full section's own edit view uses gives the add-form its own
- *  "+ Add Row"/remove-row UI for free, so the user can stage any number of rows before committing
- *  them all at once (see `commitNewRows`), instead of the old one-row-then-closed form where a
- *  second "+" click on the section head no-opped (`SectionEditState.open()` never rebuilds an
- *  already-open control) until the first row was committed. */
+ *  without them) additionally marked required. Rendered through the same `<app-repeatable-group>`
+ *  the full section's own edit view uses, so each staged row gets its own remove (✕) button for
+ *  free — but `showAddButton: false` hides that component's own "+ Add Row" button, since the
+ *  section-head "+" icon already appends a row on every click (`addStagedRow`); keeping both would
+ *  be two buttons doing the same thing. `minRows` is deliberately omitted (defaults to 0) — the
+ *  array starts empty and `addStagedRow` adds exactly one row per click, including the first,
+ *  rather than the click handler and a `minRows: 1` seed both trying to supply that first row. */
 function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly string[], addLabel: string): WwellFormSectionConfig {
   const rowFields = section.repeatable?.rowFields ?? [];
   const key = `${section.key}NewRows`;
@@ -137,7 +137,7 @@ function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly 
     repeatable: {
       key,
       addLabel,
-      minRows: 1,
+      showAddButton: false,
       rowFields: rowFields.map(field =>
         requiredKeys.includes(field.key) ? { ...field, validators: { ...field.validators, required: true } } : field,
       ),
@@ -555,6 +555,29 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected cancelOffsetWellRowInline(): void {
     const index = this.offsetWellsInlineEdit.index();
     this.offsetWellsInlineEdit.cancel(index !== null ? this.offsetWellsRowGroup(index) : null);
+  }
+
+  /** The section-head "+" icon's handler — opens the add-form if it isn't already (a no-op on the
+   *  control if it is, same as `SectionEditState.open()` always does), then unconditionally appends
+   *  one more empty row. Every click adds exactly one row, including the first, since the add-form's
+   *  own section config seeds none (`addRowsSection` omits `minRows`) — this is the only thing that
+   *  ever adds a row to it now that `showAddButton: false` hides the repeatable-group's own button. */
+  private addStagedRow(add: SectionEditState<FormArray>, section: WwellFormSectionConfig): void {
+    add.open();
+    const array = add.control();
+    if (array) addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
+  }
+
+  protected addFormationTopAddRow(): void {
+    this.addStagedRow(this.formationTopAdd, this.formationTopAddSection);
+  }
+
+  protected addCasingAddRow(): void {
+    this.addStagedRow(this.casingAdd, this.casingAddSection);
+  }
+
+  protected addOffsetWellAddRow(): void {
+    this.addStagedRow(this.offsetWellAdd, this.offsetWellAddSection);
   }
 
   protected addFormationTopRow(): void {

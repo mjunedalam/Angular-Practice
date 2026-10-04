@@ -93,6 +93,10 @@ export interface WwellRepeatableRowConfig {
   readonly minRows?: number;
   /** If set, the array itself is invalid until it holds at least this many rows — an empty array is not "complete" just because it has no invalid children. */
   readonly minRequiredRows?: number;
+  /** `false` hides `RepeatableGroupComponent`'s own "+ Add Row" button — for a caller that drives
+   *  adding rows itself (e.g. a section-head "+" icon that appends a row on every click), so there's
+   *  exactly one add affordance instead of two doing the same thing. Defaults to shown (`true`). */
+  readonly showAddButton?: boolean;
 }
 
 export interface WwellFormSectionConfig {

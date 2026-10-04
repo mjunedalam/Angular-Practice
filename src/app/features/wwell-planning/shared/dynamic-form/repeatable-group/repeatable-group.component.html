@@ -31,7 +31,7 @@
     </div>
   }
 
-  @if (mode() === 'edit') {
+  @if (mode() === 'edit' && config().showAddButton !== false) {
     <button type="button" mat-stroked-button class="rpg__add" (click)="addRow()">
       <mat-icon>add</mat-icon>
       {{ config().addLabel }}

@@ -390,7 +390,7 @@
             <h3 class="ire__subsection-title">3.1 Horizons</h3>
             @if (!formationTopsEdit.visible()) {
               <div class="ire__section-actions">
-                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add horizon" matTooltip="Add horizon" (click)="formationTopAdd.open()">
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add horizon" matTooltip="Add horizon" (click)="addFormationTopAddRow()">
                   <mat-icon>add</mat-icon>
                 </button>
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Horizons" (click)="formationTopAdd.close(); formationTopsEdit.open()">
@@ -538,7 +538,7 @@
           }
           @if (!casingEdit.visible() && isTimelineStepExpanded('casing')) {
             <div class="ire__section-actions">
-              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add casing" matTooltip="Add casing" (click)="$event.stopPropagation(); casingAdd.open()">
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add casing" matTooltip="Add casing" (click)="$event.stopPropagation(); addCasingAddRow()">
                 <mat-icon>add</mat-icon>
               </button>
               <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Casing" (click)="$event.stopPropagation(); casingAdd.close(); casingEdit.open()">
@@ -761,7 +761,7 @@
             <h3 class="ire__subsection-title">6.1 Area Water Wells</h3>
             @if (!offsetWellsEdit.visible()) {
               <div class="ire__section-actions">
-                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add area water well" matTooltip="Add area water well" (click)="offsetWellAdd.open()">
+                <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Add area water well" matTooltip="Add area water well" (click)="addOffsetWellAddRow()">
                   <mat-icon>add</mat-icon>
                 </button>
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells" (click)="offsetWellAdd.close(); offsetWellsEdit.open()">
