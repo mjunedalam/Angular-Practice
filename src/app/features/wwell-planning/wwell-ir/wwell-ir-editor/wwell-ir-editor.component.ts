@@ -292,7 +292,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     });
   }
 
-  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions, this.store.geologistOptions, this.store.lookups);
+  private readonly schema = buildWwellIrFormSchema(this.store.linkedRequestWellOptions, this.store.geologistOptions, this.store.dropdownMenus);
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
   protected readonly programSection = findSection(this.schema, 'programDetails', 'main');
   protected readonly geologistSection = findSection(this.schema, 'contacts', 'geologist');

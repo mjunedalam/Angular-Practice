@@ -86,11 +86,11 @@ export class WwellIrService {
    * `completion_menu`) — feeds the Program Details dropdowns instead of hardcoded lists. Read-only:
    * whatever a user picks or types is saved on the IR itself, never back to this table.
    */
-  getLookups(): Observable<Record<string, string[]>> {
-    return this.http.get<ApiResponse<{ lkupName: string; lkupValue: string }>>(`${this.apiUrl}/lookups`).pipe(
+  getDropdownMenus(): Observable<Record<string, string[]>> {
+    return this.http.get<ApiResponse<{ menuName: string; optionValue: string }>>(`${this.apiUrl}/dropdown-menus`).pipe(
       map(res =>
         res.data.reduce<Record<string, string[]>>((byMenu, row) => {
-          (byMenu[row.lkupName] ??= []).push(row.lkupValue);
+          (byMenu[row.menuName] ??= []).push(row.optionValue);
           return byMenu;
         }, {}),
       ),

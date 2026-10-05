@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, delay, exhaustMap, map, of, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, catchError, concatMap, delay, exhaustMap, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
@@ -17,7 +17,14 @@ import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
 import { labelForSlot, slotFromObjectKey } from '../wwell-ir-attachments.config';
-import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS } from '../wwell-ir-sap.config';
+import {
+  WWELL_IR_SAP_PROCESS_ID,
+  WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
+  WWELL_IR_SAP_RECALL_POLL_MS,
+  WWELL_IR_SAP_SCENARIO_ID,
+  WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
+} from '../wwell-ir-sap.config';
+import { isSapWorkflowRecalled } from '../wwell-ir.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
 /** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
@@ -241,24 +248,36 @@ export const WwellIrStore = signalStore(
     function recallSapWorkflow(irSeq: number, sapWfId: number): void {
       const networkId = authStore.networkId() ?? '';
       sap.recall(WWELL_IR_SAP_PROCESS_ID, sapWfId, networkId).subscribe({
-        next: () =>
-          sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, sapWfId).subscribe({
-            next: status =>
-              patchState(store, {
-                recallingIr: false,
-                sapRecallError: null,
-                irs: store.irs().map(item =>
-                  item.irSeq === irSeq
-                    ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status), sapWfStatusText: status.header.wf_status_text }
-                    : item,
-                ),
+        // SAP applies a recall asynchronously (~5-7s), so one immediate GET /display still reads the
+        // old status. Poll until it reports Recalled (each read is shown as it arrives), capped at
+        // WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS; a failed read is just retried on the next tick.
+        next: () => {
+          let sawStatus = false;
+          timer(WWELL_IR_SAP_RECALL_POLL_MS, WWELL_IR_SAP_RECALL_POLL_MS)
+            .pipe(
+              take(WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS),
+              concatMap(() => sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, sapWfId).pipe(catchError(() => of(null)))),
+              tap(status => {
+                if (!status) return;
+                sawStatus = true;
+                patchState(store, {
+                  irs: store.irs().map(item =>
+                    item.irSeq === irSeq
+                      ? { ...item, chain: mapSapWorkflowStatusToApprovalChain(status), sapWfStatusText: status.header.wf_status_text }
+                      : item,
+                  ),
+                });
               }),
-            error: (err: unknown) =>
-              patchState(store, {
-                recallingIr: false,
-                sapRecallError: sapErrorMessage(err, 'Workflow recalled, but failed to refresh its latest status'),
-              }),
-          }),
+              takeWhile(status => !status || !isSapWorkflowRecalled(status.header.wf_status_text), true),
+            )
+            .subscribe({
+              complete: () =>
+                patchState(store, {
+                  recallingIr: false,
+                  sapRecallError: sawStatus ? null : 'Workflow recalled, but failed to refresh its latest status',
+                }),
+            });
+        },
         // SAP refused the recall — surface the failure and leave the header exactly as it was, same
         // as a refused trigger.
         error: (err: unknown) =>
@@ -329,12 +348,12 @@ export const WwellIrStore = signalStore(
       ),
     );
 
-    const loadLookups = rxMethod<void>(
+    const loadDropdownMenus = rxMethod<void>(
       pipe(
         switchMap(() =>
-          svc.getLookups().pipe(
+          svc.getDropdownMenus().pipe(
             tapResponse({
-              next: lookups => patchState(store, { lookups }),
+              next: dropdownMenus => patchState(store, { dropdownMenus }),
               // Non-fatal: the form schema falls back to its built-in option lists.
               error: () => undefined,
             }),
@@ -628,8 +647,8 @@ export const WwellIrStore = signalStore(
         loadGwdOpsMembers();
       },
 
-      loadLookups(): void {
-        loadLookups();
+      loadDropdownMenus(): void {
+        loadDropdownMenus();
       },
 
       /**

@@ -3,6 +3,13 @@
 export const WWELL_IR_SAP_PROCESS_ID = '1406';
 export const WWELL_IR_SAP_SCENARIO_ID = 'IRA';
 
+/** SAP takes roughly 5-7s after a recall's DELETE is acknowledged before GET /display reports the
+ *  workflow as Recalled. Rather than one fixed delay (too slow when SAP is quick, still stale when
+ *  it's slow), the store polls every WWELL_IR_SAP_RECALL_POLL_MS until the status turns Recalled,
+ *  giving up after WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS (~18s) and keeping the last status read. */
+export const WWELL_IR_SAP_RECALL_POLL_MS = 1500;
+export const WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS = 12;
+
 /** Written to exad_gwd_ir_header.sap_wf_status (update_ir_sap_wf_prc, docs/ir/update_ir_sap_wf_prc.sql)
  *  the moment SAP has accepted the workflow — a refused trigger leaves the header untouched, so
  *  there is deliberately no FAILED counterpart to this. A local placeholder, not SAP's own text:

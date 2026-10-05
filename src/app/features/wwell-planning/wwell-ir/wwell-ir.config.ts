@@ -89,7 +89,8 @@ export function resolveLetterStampStatus(ir: IntegratedRequirement): 'APPROVED' 
  *  Review": checked against the already-saved `ir` itself, not a live, possibly-still-open form,
  *  because submitting sends exactly this record (WwellIrEditorComponent.submitForReview calls
  *  `store.submitIrForReview(this.ir())`) — an in-progress edit elsewhere doesn't change whether
- *  the saved record is actually ready. */
+ *  the saved record is actually ready. Attachments are deliberately not part of this gate — a record
+ *  with none uploaded (or whose workflow was recalled) still offers "Submit for Review". */
 export function wwellIrHasRequiredSubmitFields(ir: IntegratedRequirement): boolean {
   return (
     !!ir.requestReference.linkedRequestId &&
@@ -98,7 +99,6 @@ export function wwellIrHasRequiredSubmitFields(ir: IntegratedRequirement): boole
     !!ir.programDetails.completion.trim() &&
     !!ir.contacts.geologistPrimary.trim() &&
     !!ir.hydrogeology.aquifer.trim() &&
-    !!ir.testProgram.testType &&
-    ir.attachments.some(attachment => attachment.slot === 'initiation-request')
+    !!ir.testProgram.testType
   );
 }

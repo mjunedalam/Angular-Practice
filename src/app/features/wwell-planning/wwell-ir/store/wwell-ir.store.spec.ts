@@ -8,7 +8,13 @@ import { S3Service } from '@services/s3/s3.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
-import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS } from '../wwell-ir-sap.config';
+import {
+  WWELL_IR_SAP_PROCESS_ID,
+  WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
+  WWELL_IR_SAP_RECALL_POLL_MS,
+  WWELL_IR_SAP_SCENARIO_ID,
+  WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
+} from '../wwell-ir-sap.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
 
@@ -478,7 +484,10 @@ describe('WwellIrStore - recallIr', () => {
     sapServiceMock.recall.mockReturnValue(of(recallAck));
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(recalledWorkflowStatus));
 
+    jest.useFakeTimers();
     store.recallIr(ir);
+    jest.advanceTimersByTime(WWELL_IR_SAP_RECALL_POLL_MS);
+    jest.useRealTimers();
 
     expect(sapServiceMock.recall).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6, 'junedalam');
     // The recall response is a bare ack with no status of its own — the real status/chain only ever
@@ -528,11 +537,57 @@ describe('WwellIrStore - recallIr', () => {
     // instead of an `.message` it happens to carry — isolates this assertion to the fallback path.
     sapServiceMock.getWorkflowStatus.mockReturnValue(throwError(() => ({})));
 
+    jest.useFakeTimers();
     store.recallIr(ir);
+    jest.advanceTimersByTime(WWELL_IR_SAP_RECALL_POLL_MS * WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS);
+    jest.useRealTimers();
 
     expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
     expect(store.sapRecallError()).toBe('Workflow recalled, but failed to refresh its latest status');
     expect(store.recallingIr()).toBe(false);
+  });
+});
+
+describe('WwellIrStore - recallIr polling', () => {
+  it('keeps polling until SAP reports Recalled, showing each status read, then stops and clears the spinner', () => {
+    jest.clearAllMocks();
+    authStoreMock.networkId.mockReturnValue('junedalam');
+    TestBed.configureTestingModule({
+      providers: [
+        WwellIrStore,
+        { provide: WwellIrService, useValue: serviceMock },
+        { provide: SapService, useValue: sapServiceMock },
+        { provide: S3Service, useValue: s3ServiceMock },
+        { provide: AuthStore, useValue: authStoreMock },
+      ],
+    });
+    const store = TestBed.inject(WwellIrStore);
+    const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
+    serviceMock.getIrs.mockReturnValue(of([ir]));
+    store.loadIrs();
+    const statusWith = (text: string) => ({
+      header: { process_name: 'x', initiator_id: 'a', requester_id: 'a', date_initiated: '2026-09-16', time_initiated: '08:28:57', wf_status: 'S', wf_status_text: text },
+      remarks: [],
+      reject_remarks: [],
+      approval_chain: [],
+    });
+    sapServiceMock.recall.mockReturnValue(of({ message: 'ok' }));
+    sapServiceMock.getWorkflowStatus
+      .mockReturnValueOnce(of(statusWith('In Progress')))
+      .mockReturnValueOnce(of(statusWith('In Progress')))
+      .mockReturnValue(of(statusWith('Recalled')));
+
+    jest.useFakeTimers();
+    store.recallIr(ir);
+    jest.advanceTimersByTime(WWELL_IR_SAP_RECALL_POLL_MS);
+    expect(store.recallingIr()).toBe(true);
+    expect(store.irs()[0].sapWfStatusText).toBe('In Progress');
+    jest.advanceTimersByTime(WWELL_IR_SAP_RECALL_POLL_MS * 2);
+    jest.useRealTimers();
+
+    expect(store.irs()[0].sapWfStatusText).toBe('Recalled');
+    expect(store.recallingIr()).toBe(false);
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledTimes(3);
   });
 });
 

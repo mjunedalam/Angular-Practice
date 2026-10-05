@@ -13,7 +13,7 @@ export interface WwellIrStoreState {
   readonly gwdOpsMembers: GwdOpsMember[];
   /** EXAD_DHUB_LKUP_DATA dropdown values keyed by LKUP_NAME (`completion_menu`, ...). Empty until
    *  loaded — the form schema falls back to its built-in lists meanwhile, or if the load fails. */
-  readonly lookups: Readonly<Record<string, readonly string[]>>;
+  readonly dropdownMenus: Readonly<Record<string, readonly string[]>>;
   /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
   readonly draftIrSeq: number | null;
   readonly irsLoading: boolean;
@@ -85,7 +85,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   irs: [],
   linkedRequestWells: [],
   gwdOpsMembers: [],
-  lookups: {},
+  dropdownMenus: {},
   draftIrSeq: null,
   irsLoading: false,
   linkedRequestWellsLoading: false,

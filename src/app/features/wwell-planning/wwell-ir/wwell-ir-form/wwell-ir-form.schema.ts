@@ -14,7 +14,7 @@ import {
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
 import { WWELL_IR_FORMATION_OPTIONS } from './wwell-ir-form.config';
-import { WWELL_IR_LOOKUP_MENU_BY_FIELD } from './wwell-ir-lookup.config';
+import { WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
 /** Splits the field's single "Northing Xm, Easting Ym, Zone Z" value into its own Northing/
@@ -368,7 +368,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
 export function buildWwellIrFormSchema(
   linkedRequestOptions: Signal<readonly WwellFieldOption[]>,
   geologistOptions: Signal<readonly string[]>,
-  lookups: Signal<Readonly<Record<string, readonly string[]>>> = signal({}),
+  dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>> = signal({}),
 ): readonly WwellFormStepConfig[] {
   return WWELL_IR_FORM_SCHEMA.map(step => {
     if (step.key === 'programDetails') {
@@ -376,7 +376,7 @@ export function buildWwellIrFormSchema(
         ...step,
         sections: step.sections.map(section => ({
           ...section,
-          fields: section.fields?.map(field => withLookupOptions(field, lookups)),
+          fields: section.fields?.map(field => withDropdownMenuOptions(field, dropdownMenus)),
         })),
       };
     }
@@ -414,9 +414,9 @@ export function buildWwellIrFormSchema(
 
 /** Swaps a Program Details dropdown's built-in list for its EXAD_DHUB_LKUP_DATA menu once loaded;
  *  until then (or if the load failed / the menu is empty) the built-in list stays in effect. */
-function withLookupOptions(field: WwellFieldConfig, lookups: Signal<Readonly<Record<string, readonly string[]>>>): WwellFieldConfig {
-  const menu = WWELL_IR_LOOKUP_MENU_BY_FIELD[field.key];
+function withDropdownMenuOptions(field: WwellFieldConfig, dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>>): WwellFieldConfig {
+  const menu = WWELL_IR_DROPDOWN_MENU_BY_FIELD[field.key];
   if (!menu || !Array.isArray(field.options)) return field;
   const builtIn = field.options;
-  return { ...field, options: computed(() => (lookups()[menu]?.length ? lookups()[menu] : builtIn)) };
+  return { ...field, options: computed(() => (dropdownMenus()[menu]?.length ? dropdownMenus()[menu] : builtIn)) };
 }
