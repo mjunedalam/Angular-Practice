@@ -43,3 +43,12 @@ export interface S3SearchResponse {
   readonly count: number;
   readonly objects: readonly S3SearchResult[];
 }
+
+/** Response shape for `POST /fetch` — the stored object's metadata plus its bytes in `content`,
+ *  base64-encoded. Only the fields this app reads are declared. */
+export interface S3FetchResponse {
+  readonly object_key: string;
+  readonly size_bytes: number;
+  readonly content_type: string;
+  readonly content: string;
+}

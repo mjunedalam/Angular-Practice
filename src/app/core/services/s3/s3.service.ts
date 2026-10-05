@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpEventType, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
-import { S3DeleteResponse, S3SearchResponse, S3StoreResponse, S3StoreUploadEvent } from '@models/s3/s3-object-store.model';
+import { S3DeleteResponse, S3FetchResponse, S3SearchResponse, S3StoreResponse, S3StoreUploadEvent } from '@models/s3/s3-object-store.model';
 import { SKIP_AUTH } from '@interceptors/auth.interceptor';
 import { SKIP_AUTO_LOGOUT, SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -88,15 +88,16 @@ export class S3Service {
 
   /** Pulls one stored object back as a `File` so it can be handed to the attachment viewer the same
    *  way a locally-picked file is — the viewer builds its own object URL from a File rather than a
-   *  remote URL. `fileName` comes from the caller (the attachment's own display name) since the
-   *  proxy's `/object` response carries it only in a header, not worth parsing back out here. */
+   *  remote URL. The proxy's `POST /fetch` answers with a JSON envelope whose `content` is the bytes
+   *  base64-encoded, so it's decoded here. `fileName` comes from the caller (the attachment's own
+   *  display name); the type prefers the envelope's own `content_type`. */
   download(objectKey: string, fileName: string): Observable<File> {
     return this.http
-      .get(`${this.baseUrl}/object`, {
-        params: new HttpParams().set('key', objectKey),
-        responseType: 'blob',
-        context: this.s3Context,
-      })
-      .pipe(map(blob => new File([blob], fileName, { type: blob.type })));
+      .post<S3FetchResponse>(`${this.baseUrl}/fetch`, { object_key: objectKey }, { context: this.s3Context })
+      .pipe(map(response => new File([decodeBase64(response.content)], fileName, { type: response.content_type })));
   }
+}
+
+function decodeBase64(content: string): Uint8Array<ArrayBuffer> {
+  return Uint8Array.from(atob(content), char => char.charCodeAt(0));
 }
