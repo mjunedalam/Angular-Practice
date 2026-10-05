@@ -13,7 +13,6 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
 import { mapSapWorkflowStatusToApprovalChain } from '../wwell-ir-form/wwell-ir-approval.mapper';
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
-import { withDropdownMenuMockFallback } from '../wwell-ir-form/wwell-ir-dropdown-menu.mock';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import { WwellIrService } from '../wwell-ir.service';
@@ -354,9 +353,9 @@ export const WwellIrStore = signalStore(
         switchMap(() =>
           svc.getDropdownMenus().pipe(
             tapResponse({
-              next: dropdownMenus => patchState(store, { dropdownMenus: withDropdownMenuMockFallback(dropdownMenus) }),
-              // Non-fatal: every menu falls back to the mock options (wwell-ir-dropdown-menu.mock.ts).
-              error: () => patchState(store, { dropdownMenus: withDropdownMenuMockFallback({}) }),
+              next: dropdownMenus => patchState(store, { dropdownMenus }),
+              // Non-fatal: the dropdowns just stay empty (no arrow) until a reload succeeds.
+              error: () => undefined,
             }),
           ),
         ),
