@@ -416,6 +416,8 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     // Geologist Contact picker's option list — stable reference data, unlike linkedRequestWells
     // above, so it's only loaded once here rather than re-fetched on every IR selection.
     this.store.loadGwdOpsMembers();
+    // Dropdown options (EXAD_DHUB_LKUP_DATA) for the Program Details fields — stable reference data.
+    this.store.loadLookups();
   }
 
   ngOnDestroy(): void {

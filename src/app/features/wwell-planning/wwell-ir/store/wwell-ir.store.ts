@@ -329,6 +329,20 @@ export const WwellIrStore = signalStore(
       ),
     );
 
+    const loadLookups = rxMethod<void>(
+      pipe(
+        switchMap(() =>
+          svc.getLookups().pipe(
+            tapResponse({
+              next: lookups => patchState(store, { lookups }),
+              // Non-fatal: the form schema falls back to its built-in option lists.
+              error: () => undefined,
+            }),
+          ),
+        ),
+      ),
+    );
+
     // Keyed by ir_seq (the real primary key once an IR is saved) — switchMap cancels a still-in-
     // flight fetch for a previously-selected row if the user picks another one before it resolves,
     // so a slow first response can never land after (and clobber) a faster later selection.
@@ -612,6 +626,10 @@ export const WwellIrStore = signalStore(
 
       loadGwdOpsMembers(): void {
         loadGwdOpsMembers();
+      },
+
+      loadLookups(): void {
+        loadLookups();
       },
 
       /**

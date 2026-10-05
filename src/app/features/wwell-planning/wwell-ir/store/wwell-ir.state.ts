@@ -11,6 +11,9 @@ export interface WwellIrStoreState {
   /** GWD ops members — feeds the IR editor's Geologist Contact "Primary"/"Secondary" pickers (see
    *  the store's `geologistOptions` computed for the trimmed FULL_NAME option view). */
   readonly gwdOpsMembers: GwdOpsMember[];
+  /** EXAD_DHUB_LKUP_DATA dropdown values keyed by LKUP_NAME (`completion_menu`, ...). Empty until
+   *  loaded — the form schema falls back to its built-in lists meanwhile, or if the load fails. */
+  readonly lookups: Readonly<Record<string, readonly string[]>>;
   /** ir_seq of the IR currently being authored on the "new" page — reused so repeat draft saves UPDATE, not re-INSERT. */
   readonly draftIrSeq: number | null;
   readonly irsLoading: boolean;
@@ -82,6 +85,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   irs: [],
   linkedRequestWells: [],
   gwdOpsMembers: [],
+  lookups: {},
   draftIrSeq: null,
   irsLoading: false,
   linkedRequestWellsLoading: false,

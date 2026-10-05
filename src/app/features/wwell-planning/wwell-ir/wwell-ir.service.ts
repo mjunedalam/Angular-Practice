@@ -82,6 +82,22 @@ export class WwellIrService {
   }
 
   /**
+   * Dropdown values stored in EXAD_DHUB_LKUP_DATA, grouped by menu name (LKUP_NAME, e.g.
+   * `completion_menu`) — feeds the Program Details dropdowns instead of hardcoded lists. Read-only:
+   * whatever a user picks or types is saved on the IR itself, never back to this table.
+   */
+  getLookups(): Observable<Record<string, string[]>> {
+    return this.http.get<ApiResponse<{ lkupName: string; lkupValue: string }>>(`${this.apiUrl}/lookups`).pipe(
+      map(res =>
+        res.data.reduce<Record<string, string[]>>((byMenu, row) => {
+          (byMenu[row.lkupName] ??= []).push(row.lkupValue);
+          return byMenu;
+        }, {}),
+      ),
+    );
+  }
+
+  /**
    * ir_seq is the real primary key once an IR is saved — selecting a row in the list passes it
    * here to fetch the full { table, data } detail (casing/tops/hydrogeology) for that one record.
    * No offline-mock fallback here (unlike the other reads above): faking detail for a specific,
