@@ -412,11 +412,10 @@ export function buildWwellIrFormSchema(
   });
 }
 
-/** Swaps a Program Details dropdown's built-in list for its EXAD_DHUB_LKUP_DATA menu once loaded;
- *  until then (or if the load failed / the menu is empty) the built-in list stays in effect. */
+/** Drives a Program Details dropdown purely from its EXAD_DHUB_LKUP_DATA menu — empty until loaded,
+ *  and empty if the table has no rows for it (any fallback lives in WwellIrStore.loadDropdownMenus). */
 function withDropdownMenuOptions(field: WwellFieldConfig, dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>>): WwellFieldConfig {
   const menu = WWELL_IR_DROPDOWN_MENU_BY_FIELD[field.key];
-  if (!menu || !Array.isArray(field.options)) return field;
-  const builtIn = field.options;
-  return { ...field, options: computed(() => (dropdownMenus()[menu]?.length ? dropdownMenus()[menu] : builtIn)) };
+  if (!menu) return field;
+  return { ...field, options: computed(() => dropdownMenus()[menu] ?? []) };
 }
