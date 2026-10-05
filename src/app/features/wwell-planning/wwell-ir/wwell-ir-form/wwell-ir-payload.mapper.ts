@@ -284,8 +284,6 @@ const waterRowUnchanged = (existingRow: IntegratedRequirementOffsetWell, row: Ww
   (existingRow.rpm ?? null) === row.rpm &&
   (existingRow.swlFt ?? null) === row.swlFt &&
   (existingRow.pwlFt ?? null) === row.pwlFt &&
-  (existingRow.drawdownFt ?? null) === row.drawdownFt &&
-  (existingRow.specificCapacity ?? null) === row.specificCapacity &&
   (existingRow.tdsPpm ?? null) === row.tdsPpm &&
   (existingRow.h2sPpm ?? null) === row.h2sPpm;
 
@@ -302,8 +300,8 @@ const toWaterRow = (row: WwellIrRawOffsetWell, action: IrRowAction, irSeq: numbe
   rpm: row.rpm,
   swl: row.swlFt,
   final_pwl: row.pwlFt,
-  drawdown: row.drawdownFt,
-  spec_capacity: row.specificCapacity,
+  drawdown: row.drawdownFt ?? null,
+  spec_capacity: row.specificCapacity ?? null,
   temp: null,
   field_tds: row.tdsPpm,
   test_duration: row.testDurationMin,
@@ -325,10 +323,14 @@ function buildWaterRows(
   const existingByKey = new Map(existing.map(row => [waterKey(row.epANum), row]));
   const keptKeys = new Set<string>();
 
-  const upserts: IrWaterRow[] = currentRows.map(row => {
-    const key = waterKey(row.epANum ?? 0);
+  const upserts: IrWaterRow[] = currentRows.map(formRow => {
+    const key = waterKey(formRow.epANum ?? 0);
     const existingRow = existingByKey.get(key);
     if (existingRow) keptKeys.add(key);
+    // Drawdown / Spec. Cap. have no form control — keep whatever is already stored for this well.
+    const row = existingRow
+      ? { ...formRow, drawdownFt: existingRow.drawdownFt ?? null, specificCapacity: existingRow.specificCapacity ?? null }
+      : formRow;
     const action: IrRowAction = existingRow ? (waterRowUnchanged(existingRow, row) ? '' : 'UPDATE') : 'INSERT';
     return toWaterRow(row, action, existingRow ? irSeq : null);
   });

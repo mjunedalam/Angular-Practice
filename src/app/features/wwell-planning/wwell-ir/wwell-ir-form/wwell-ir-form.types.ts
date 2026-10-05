@@ -65,9 +65,10 @@ export interface WwellIrRawOffsetWell {
   readonly rpm: number | null;
   readonly swlFt: number | null;
   readonly pwlFt: number | null;
-  /** Disabled/computed control — see the `readonly` flag on this field in wwell-ir-form.schema.ts. */
-  readonly drawdownFt: number | null;
-  readonly specificCapacity: number | null;
+  /** No form control (removed from the Area Water Wells UI) — carried over from the stored row on
+   *  save so existing database values are never wiped (see buildWaterRows). */
+  readonly drawdownFt?: number | null;
+  readonly specificCapacity?: number | null;
   readonly tdsPpm: number | null;
   readonly h2sPpm: number | null;
 }

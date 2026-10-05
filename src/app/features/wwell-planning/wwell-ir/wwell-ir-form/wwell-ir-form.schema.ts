@@ -13,7 +13,6 @@ import {
   WWELL_TEST_TYPE_OPTIONS,
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
-import { WWELL_IR_FORMATION_OPTIONS } from './wwell-ir-form.config';
 import { WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
@@ -116,7 +115,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           addLabel: '+ Add Formation Top',
           minRequiredRows: 1,
           rowFields: [
-            { key: 'name', label: 'Formation', type: 'select', options: WWELL_IR_FORMATION_OPTIONS },
+            { key: 'name', label: 'Formation', type: 'select', options: [] },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
             { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
           ],
@@ -250,22 +249,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             { key: 'rpm', label: 'RPM', type: 'number', placeholder: 'e.g., 1200' },
             { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number', placeholder: 'e.g., 85' },
             { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number', placeholder: 'e.g., 110' },
-            {
-              key: 'drawdownFt',
-              label: 'Drawdown (ft)',
-              type: 'number',
-              placeholder: 'auto',
-              hint: 'Calculated from PWL − SWL',
-              readonly: true,
-            },
-            {
-              key: 'specificCapacity',
-              label: 'Spec. Cap. (GPM/ft)',
-              type: 'number',
-              placeholder: 'auto',
-              hint: 'Calculated from Rate ÷ Drawdown',
-              readonly: true,
-            },
             { key: 'tdsPpm', label: 'TDS (ppm)', type: 'number', placeholder: 'e.g., 1200' },
             { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number', placeholder: 'e.g., 5' },
           ],
@@ -307,7 +290,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             key: 'aquifer',
             label: 'Aquifer',
             type: 'select',
-            options: WWELL_IR_FORMATION_OPTIONS,
+            options: [],
             validators: { required: true },
           },
           { key: 'estimatedTdsPpm', label: 'Estimated TDS', type: 'number', suffix: 'ppm' },
@@ -369,8 +352,34 @@ export function buildWwellIrFormSchema(
   linkedRequestOptions: Signal<readonly WwellFieldOption[]>,
   geologistOptions: Signal<readonly string[]>,
   dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>> = signal({}),
+  aquiferOptions: Signal<readonly WwellFieldOption[]> = signal([]),
 ): readonly WwellFormStepConfig[] {
   return WWELL_IR_FORM_SCHEMA.map(step => {
+    if (step.key === 'subsurface') {
+      return {
+        ...step,
+        sections: step.sections.map(section =>
+          section.key === 'formationTops' && section.repeatable
+            ? {
+                ...section,
+                repeatable: {
+                  ...section.repeatable,
+                  rowFields: section.repeatable.rowFields.map(field => (field.key === 'name' ? { ...field, options: aquiferOptions } : field)),
+                },
+              }
+            : section,
+        ),
+      };
+    }
+    if (step.key === 'hydrogeology') {
+      return {
+        ...step,
+        sections: step.sections.map(section => ({
+          ...section,
+          fields: section.fields?.map(field => (field.key === 'aquifer' ? { ...field, options: aquiferOptions } : field)),
+        })),
+      };
+    }
     if (step.key === 'programDetails') {
       return {
         ...step,

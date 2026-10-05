@@ -37,8 +37,6 @@
             <th>RPM</th>
             <th>SWL</th>
             <th>PWL</th>
-            <th>DD</th>
-            <th>Spec Cap</th>
             <th>TDS</th>
             <th>H2S</th>
           </tr>
@@ -56,14 +54,12 @@
               <td class="ir-details__num">{{ row.rpm ?? '—' }}</td>
               <td class="ir-details__num">{{ row.swlFt ?? '—' }}</td>
               <td class="ir-details__num">{{ row.pwlFt ?? '—' }}</td>
-              <td class="ir-details__num">{{ row.drawdownFt ?? '—' }}</td>
-              <td class="ir-details__num">{{ row.specificCapacity ?? '—' }}</td>
               <td class="ir-details__num">{{ row.tdsPpm ?? '—' }}</td>
               <td class="ir-details__num">{{ row.h2sPpm ?? '—' }}</td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="14" class="ir-details__table-empty">No offset water wells recorded.</td>
+              <td colspan="12" class="ir-details__table-empty">No offset water wells recorded.</td>
             </tr>
           }
         </tbody>

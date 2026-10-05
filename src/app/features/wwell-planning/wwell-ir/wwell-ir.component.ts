@@ -418,6 +418,8 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     this.store.loadGwdOpsMembers();
     // Dropdown options (EXAD_DHUB_LKUP_DATA) for the Program Details fields — stable reference data.
     this.store.loadDropdownMenus();
+    // Formation/Aquifer dropdown options (daily-operations /aquifers) for Formation Tops and Estimated Hydrology.
+    this.store.loadAquifers();
   }
 
   ngOnDestroy(): void {

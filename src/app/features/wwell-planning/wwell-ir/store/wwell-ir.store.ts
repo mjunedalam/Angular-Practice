@@ -97,6 +97,7 @@ export const WwellIrStore = signalStore(
       linkedRequestWells,
       linkedRequestWellsLoading,
       gwdOpsMembers,
+      aquifers,
       irsError,
       linkedRequestWellsError,
       gwdOpsMembersError,
@@ -116,6 +117,11 @@ export const WwellIrStore = signalStore(
       /** FULL_NAME option list for the Geologist Contact "Primary"/"Secondary" pickers — value and
        *  label are the same string; the real EMPNUM to persist is resolved separately via
        *  `geologistEmpNumByName` below at save time. */
+      /** {value: code, label: "CODE - description"} for every Formation/Aquifer dropdown — the code is
+       *  what gets saved; the description (absent in the JSON fallback list) is display only. */
+      aquiferOptions: computed(() =>
+        aquifers().map(aquifer => ({ value: aquifer.code, label: aquifer.description ? `${aquifer.code} - ${aquifer.description}` : aquifer.code })),
+      ),
       geologistOptions: computed(() => gwdOpsMembers().map(member => member.fullName)),
       /** FULL_NAME → EMPNUM, threaded into buildWwellIrBulkSavePayload's WwellIrSaveContext so
        *  cont_geologist/sub_cont_geologist persist the real employee number, not a display name. */
@@ -342,6 +348,19 @@ export const WwellIrStore = signalStore(
               next: gwdOpsMembers => patchState(store, { gwdOpsMembers, gwdOpsMembersLoading: false }),
               error: (err: unknown) =>
                 patchState(store, { gwdOpsMembersLoading: false, gwdOpsMembersError: errorMessage(err, 'Failed to load GWD ops members') }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    const loadAquifers = rxMethod<void>(
+      pipe(
+        switchMap(() =>
+          svc.getAquifers().pipe(
+            tapResponse({
+              next: aquifers => patchState(store, { aquifers }),
+              error: (err: unknown) => notify.error(errorMessage(err, 'Failed to load aquifer list')),
             }),
           ),
         ),
@@ -645,6 +664,10 @@ export const WwellIrStore = signalStore(
 
       loadGwdOpsMembers(): void {
         loadGwdOpsMembers();
+      },
+
+      loadAquifers(): void {
+        loadAquifers();
       },
 
       loadDropdownMenus(): void {

@@ -4,6 +4,8 @@ import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+import { DailyOperationService } from '@services/daily-operation.service';
+import { Aquifer } from '@models/daily-operation/aquifer.model';
 import { SUPPRESS_GLOBAL_ERROR } from '@interceptors/error.interceptor';
 import {
   GwdOpsMember,
@@ -49,6 +51,7 @@ function extractIrSeqFromMisreportedSuccess(err: unknown): number | null {
 export class WwellIrService {
   private readonly http = inject(HttpClient);
   private readonly extConfigService = inject(ExternalConfigService);
+  private readonly dailyOperationService = inject(DailyOperationService);
 
   private get apiUrl(): string {
     const serverUrl = this.extConfigService.settings.planningServiceUrl ?? '';
@@ -79,6 +82,12 @@ export class WwellIrService {
    */
   getGwdOpsMembers(): Observable<GwdOpsMember[]> {
     return this.http.get<ApiResponse<GwdOpsMemberRaw>>(`${this.apiUrl}/gwd-ops-members`).pipe(map(res => res.data.map(mapGwdOpsMemberRaw)));
+  }
+
+  /** Aquifer/formation reference list (daily-operations GET /aquifers, same call the Active Water
+   *  Well page uses) — feeds every Formation/Aquifer dropdown in the IR form. */
+  getAquifers(): Observable<Aquifer[]> {
+    return this.dailyOperationService.getAquifers();
   }
 
   /**
