@@ -34,6 +34,7 @@ const sapServiceMock = {
 
 const s3ServiceMock = {
   store: jest.fn(),
+  fetch: jest.fn(),
 };
 
 const authStoreMock = {
@@ -240,7 +241,16 @@ function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = 
     offsetWellsRemarks: null,
     hydrogeology: { aquifer: 'Saq', estimatedTdsPpm: 1200, h2sPpm: 5, estimatedPumpDepthFt: 150 },
     testProgram: { testType: 'pump-test', estimatedRateGpm: 350, estimatedWaterLevelFt: 95 },
-    attachments: [],
+    attachments: [
+      {
+        slot: 'location-map',
+        objectKey: 'ir-attachments/ir-9001/location-map/test-uuid',
+        label: 'Location Map',
+        fileName: 'location-map.pdf',
+        sizeBytes: 1024,
+        contentType: 'application/pdf',
+      },
+    ],
     chain: [],
     sapWfId: null,
     sapWfStatusText: null,
@@ -270,6 +280,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     authStoreMock.networkId.mockReturnValue('junedalam');
+    s3ServiceMock.fetch.mockReturnValue(of({ content: 'QUJD', content_type: 'application/pdf' }));
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(emptyWorkflowStatus));
     TestBed.configureTestingModule({
       providers: [
@@ -294,6 +305,16 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.loadIrs();
   }
 
+  it('refuses to submit, and never calls SAP, when no Location Map is attached', () => {
+    const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001, attachments: [] });
+
+    store.submitIrForReview(ir);
+
+    expect(serviceMock.getNextSapWorkflowSeq).not.toHaveBeenCalled();
+    expect(sapServiceMock.trigger).not.toHaveBeenCalled();
+    expect(store.sapTriggerError()).toBe('Attach a Location Map before submitting for review.');
+  });
+
   it('runs the three steps in order — mint id, trigger SAP, record a local "in progress" placeholder — without ever asking SAP for a real status', () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
@@ -304,6 +325,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.submitIrForReview(ir);
 
     const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
+    expect(sentRequest.attachment_files).toEqual([{ file_name: 'location-map.pdf', b64: 'QUJD' }]);
     expect(sentRequest).toMatchObject({
       process_id: WWELL_IR_SAP_PROCESS_ID,
       scenario_id: WWELL_IR_SAP_SCENARIO_ID,
@@ -312,7 +334,6 @@ describe('WwellIrStore - submitIrForReview', () => {
       workflow_id: '6',
       body: [],
     });
-    expect(sentRequest).not.toHaveProperty('attachment_files');
     // Submitting must stay a fast, local-only write — no round-trip to SAP's own GET /display.
     expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
     expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);

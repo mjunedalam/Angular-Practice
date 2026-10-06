@@ -614,13 +614,14 @@ export const WwellIrStore = signalStore(
        * the file's own upload action (`uploadPendingAttachment`), or, for a New IR with no ir_seq to
        * upload against yet, the first save flushes everything staged via `uploadPendingAttachments`.
        */
-      addPendingAttachment(slot: IrAttachmentSlot, file: File): void {
+      addPendingAttachment(slot: IrAttachmentSlot, file: File): string {
         const item: IrPendingAttachment = { id: crypto.randomUUID(), file };
         const existing = store.pendingAttachments()[slot] ?? [];
         patchState(store, {
           pendingAttachments: { ...store.pendingAttachments(), [slot]: [...existing, item] },
           attachmentError: null,
         });
+        return item.id;
       },
 
       /** Sends one staged file. See `uploadOne` above for why this is safe to call for several
@@ -775,6 +776,10 @@ export const WwellIrStore = signalStore(
         // nothing to record the outcome against — refuse before calling SAP rather than after.
         if (ir.irSeq == null) {
           patchState(store, { sapTriggerError: 'Save the integrated requirement before submitting it for review.' });
+          return;
+        }
+        if (!ir.attachments.some(attachment => attachment.slot === 'location-map')) {
+          patchState(store, { sapTriggerError: 'Attach a Location Map before submitting for review.' });
           return;
         }
         patchState(store, { updatingIrStatus: true, sapTriggerError: null });

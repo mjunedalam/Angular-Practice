@@ -7,7 +7,7 @@ export interface WwellIrAttachmentSlotConfig {
   readonly label: string;
   /** Material icon ligature — topic-specific, the same way the rail's group icons are chosen. */
   readonly icon: string;
-  /** Mirrors the schema's own validator on the Initiation Request file field (wwell-ir-form.schema.ts). */
+  /** Mirrors the schema's own validator on each slot's file field (wwell-ir-form.schema.ts). */
   readonly required: boolean;
   readonly hint: string;
 }
@@ -22,7 +22,7 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
     number: '7.1',
     label: 'Location Map',
     icon: 'map',
-    required: false,
+    required: true,
     hint: 'Site location map — appended to the letter as its own page.',
   },
   {

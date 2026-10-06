@@ -1,0 +1,55 @@
+<div class="iud" [class.iud--done]="done()">
+  <header class="iud__head">
+    <mat-icon class="iud__slot-icon">{{ data.slotIcon }}</mat-icon>
+    <h2 mat-dialog-title class="iud__title">Upload {{ data.slotLabel }}</h2>
+  </header>
+
+  <mat-dialog-content class="iud__body">
+    <div class="iud__card">
+      <div class="iud__thumb">
+        @if (previewUrl) {
+          <img [src]="previewUrl" alt="" />
+        } @else {
+          <mat-icon>{{ isPdf ? 'picture_as_pdf' : 'description' }}</mat-icon>
+        }
+        @if (done()) {
+          <span class="iud__check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+        }
+      </div>
+      <span class="iud__meta">
+        <span class="iud__name" [title]="file?.name">{{ file?.name }}</span>
+        <span class="iud__sub"><span class="iud__badge">{{ typeLabel }}</span>{{ sizeLabel }}</span>
+      </span>
+    </div>
+
+    <div class="iud__status" aria-live="polite">
+      @if (done()) {
+        <p class="iud__success">Uploaded successfully</p>
+      } @else if (busy()) {
+        <mat-progress-bar [mode]="percent() === null ? 'indeterminate' : 'determinate'" [value]="percent() ?? 0" />
+        <p class="iud__percent">{{ percent() === null ? 'Uploading…' : 'Uploading… ' + percent() + '%' }}</p>
+      } @else if (!canUpload) {
+        <p class="iud__hint">This requirement isn't saved yet — the file will upload when you save it.</p>
+      } @else if (error()) {
+        <p class="iud__error" role="alert">{{ error() }}</p>
+      } @else {
+        <p class="iud__hint">Ready to upload.</p>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="busy() || done()" (click)="cancel()">Cancel</button>
+    @if (canUpload) {
+      <button mat-flat-button type="button" cdkFocusInitial [disabled]="busy() || done()" (click)="upload()">
+        <mat-icon>cloud_upload</mat-icon>
+        {{ error() && !busy() ? 'Retry upload' : 'Upload' }}
+      </button>
+    } @else {
+      <button mat-flat-button type="button" cdkFocusInitial (click)="attachForLater()">
+        <mat-icon>attach_file</mat-icon>
+        Attach
+      </button>
+    }
+  </mat-dialog-actions>
+</div>

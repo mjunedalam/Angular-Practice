@@ -43,6 +43,14 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     testProgram: { testType: 'flow-test', estimatedRateGpm: null, estimatedWaterLevelFt: null, siwhpPsi: null },
     attachments: [
       {
+        slot: 'location-map',
+        objectKey: 'ir-attachments/ir-9001/location-map/test-uuid',
+        label: 'Location Map',
+        fileName: 'location-map.pdf',
+        sizeBytes: 1024,
+        contentType: 'application/pdf',
+      },
+      {
         slot: 'initiation-request',
         objectKey: 'ir-attachments/ir-9001/initiation-request/test-uuid',
         label: 'Initiation Request',
@@ -238,6 +246,11 @@ describe('WwellIrEditorComponent', () => {
   it('shows Submit for Review while the record is still draft', async () => {
     await setup({ status: 'draft' });
     expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeTruthy();
+  });
+
+  it('hides Submit for Review while no Location Map is attached', async () => {
+    await setup({ status: 'draft', attachments: [] });
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
   });
 
   it('hides Submit for Review once the record is approved', async () => {

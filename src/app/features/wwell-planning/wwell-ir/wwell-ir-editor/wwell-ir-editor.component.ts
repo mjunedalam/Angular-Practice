@@ -33,6 +33,7 @@ import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwe
 import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
+import { WwellIrAttachmentUploadDialogComponent } from '../wwell-ir-attachment-upload-dialog/wwell-ir-attachment-upload-dialog.component';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
 import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { approvalRingPercent, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
@@ -709,6 +710,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
     return WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot)?.label ?? 'Attachment';
   }
 
+  private slotIcon(slot: IrAttachmentSlot): string {
+    return WWELL_IR_ATTACHMENT_SLOTS.find(entry => entry.slot === slot)?.icon ?? 'attach_file';
+  }
+
   private openViewer(file: File, label: string): void {
     this.dialog.open(WwellIrAttachmentViewerComponent, {
       data: { file, label },
@@ -718,34 +723,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
       height: '92vh',
       autoFocus: false,
     });
-  }
-
-  /**
-   * Uploads one staged file for the clicked row only — never any other file staged in this or any
-   * other slot, and never the rest of the form. `isPendingUploadBusy` (checked both here and via the
-   * row's own `[disabled]`) is what stops a second click on the same row from firing a second request
-   * while the first is still in flight; the `[disabled]` binding alone can lag a frame behind a rapid
-   * double-click, so the guard is repeated here too.
-   *
-   * A record that's never been saved has no `ir_seq` to upload the file under yet. The row's Upload
-   * button is disabled in that case (see the template), and this guard repeats that rather than
-   * silently saving the whole IR as a side effect of an attachment click — that used to auto-save via
-   * `saveUnsavedChangesAndWait` and then flush every staged file in every slot, which surprised users
-   * by persisting unrelated, still-being-edited form fields and uploading files they hadn't asked to
-   * send yet. The user must explicitly save the IR first; once it has an `ir_seq`,
-   * `uploadPendingAttachments` (plural) already flushes every staged file as part of that save — see
-   * its call site in `wwell-ir.component.ts`.
-   */
-  protected uploadPendingAttachment(slot: IrAttachmentSlot, item: IrPendingAttachment): void {
-    if (this.isPendingUploadBusy(item.id)) return;
-
-    const irSeq = this.ir().irSeq;
-    if (irSeq == null) {
-      this.notify.info('Save this Integrated Requirement before uploading attachments.');
-      return;
-    }
-
-    this.store.uploadPendingAttachment(irSeq, slot, item.id);
   }
 
   protected attachmentSizeLabel(bytes: number): string {
@@ -769,7 +746,13 @@ export class WwellIrEditorComponent implements AfterViewInit {
       return;
     }
 
-    this.store.addPendingAttachment(slot, file);
+    const pendingId = this.store.addPendingAttachment(slot, file);
+    // Straight into the upload dialog; dismissing it leaves the file staged on its row.
+    this.dialog.open(WwellIrAttachmentUploadDialogComponent, {
+      data: { store: this.store, slot, slotLabel: this.slotLabel(slot), slotIcon: this.slotIcon(slot), pendingId, irSeq: this.editorIrSeq() },
+      autoFocus: false,
+      disableClose: false,
+    });
   }
 
   /** Un-stages a file that was never sent — purely local, no backend call — but still behind a

@@ -1000,7 +1000,7 @@
                     <span class="ire__attachment-file-meta">
                       <span class="ire__attachment-file-name">{{ item.file.name }}</span>
                       <span class="ire__attachment-file-size">
-                        {{ attachmentSizeLabel(item.file.size) }} · {{ editorIrSeq() === null ? 'save the IR to upload' : 'not uploaded yet' }}
+                        {{ attachmentSizeLabel(item.file.size) }} · uploads when the IR is saved
                       </span>
                     </span>
 
@@ -1015,20 +1015,6 @@
                       (click)="viewPendingAttachment(item, slot.slot)"
                     >
                       <mat-icon>visibility</mat-icon>
-                    </button>
-
-                    <button
-                      type="button"
-                      mat-icon-button
-                      class="ire__attachment-action ire__attachment-action--upload"
-                      [attr.aria-label]="'Upload ' + item.file.name"
-                      [matTooltip]="editorIrSeq() === null ? 'Save the IR before uploading' : 'Upload'"
-                      matTooltipClass="ir-attachment-tooltip"
-                      matTooltipPosition="above"
-                      [disabled]="isPendingUploadBusy(item.id) || editorIrSeq() === null"
-                      (click)="uploadPendingAttachment(slot.slot, item)"
-                    >
-                      <mat-icon>cloud_upload</mat-icon>
                     </button>
 
                     <button

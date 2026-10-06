@@ -329,7 +329,15 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
       {
         key: 'locationMap',
         title: 'Location Map',
-        fields: [{ key: 'file', label: 'Location Map', type: 'file', placeholder: 'Click to attach file...' }],
+        fields: [
+          {
+            key: 'file',
+            label: 'Location Map',
+            type: 'file',
+            placeholder: 'Click to attach file...',
+            validators: { required: true },
+          },
+        ],
       },
       {
         key: 'initiationRequest',

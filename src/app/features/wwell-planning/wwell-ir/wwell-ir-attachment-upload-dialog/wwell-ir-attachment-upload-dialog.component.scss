@@ -1,0 +1,125 @@
+.iud {
+  min-width: min(420px, 82vw);
+}
+
+.iud__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px 0;
+}
+
+.iud__title {
+  margin: 0;
+  padding: 0;
+}
+
+.iud__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.iud__card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--mat-sys-outline-variant, rgb(128 128 128 / 30%));
+  border-radius: 12px;
+}
+
+.iud__thumb {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgb(128 128 128 / 12%);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.iud__check {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgb(34 160 90 / 88%);
+  animation: iud-pop 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.iud__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.iud__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.iud__sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.iud__badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgb(128 128 128 / 18%);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+// Reserved height so swapping hint → progress → success doesn't resize the dialog.
+.iud__status {
+  min-height: 44px;
+
+  p {
+    margin: 8px 0 0;
+    font-size: 13px;
+  }
+}
+
+.iud__hint,
+.iud__percent {
+  opacity: 0.75;
+}
+
+.iud__success {
+  color: #1f9d55;
+  font-weight: 600;
+}
+
+.iud__error {
+  color: var(--mat-sys-error, #d32f2f);
+}
+
+@keyframes iud-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iud__check {
+    animation: none;
+  }
+}
