@@ -129,9 +129,16 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   // how many remain after some other filter already trimmed the set.
   private readonly lifecycleScopedIrs = computed(() => {
     const all = this.store.irs();
-    return this.lifecycleFilter() === 'inactive'
-      ? all.filter(ir => ir.status === 'approved')
-      : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
+    const scoped =
+      this.lifecycleFilter() === 'inactive'
+        ? all.filter(ir => ir.status === 'approved')
+        : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
+    // Newest first: updatedDate already falls back to the created date; irSeq (monotonic) breaks
+    // same-day ties, and undated records sink below dated ones.
+    return [...scoped].sort(
+      (a, b) =>
+        (b.updatedDate ?? '').localeCompare(a.updatedDate ?? '') || (b.irSeq ?? 0) - (a.irSeq ?? 0),
+    );
   });
 
   protected readonly rows = computed(() => {
