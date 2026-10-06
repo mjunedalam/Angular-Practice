@@ -63,14 +63,14 @@ export class LeftSidenavComponent {
   protected readonly glideReady = signal(false);
 
   constructor() {
-    // Re-measure whenever the current page or the rail's width changes.
+    //   Re-measure whenever the current page or the rail's width changes.
     effect(() => {
       this.activeRoute();
       this.collapsed();
       requestAnimationFrame(() => this.placeHighlight());
     });
 
-    // The rail animates its width and labels re-wrap as it does, so follow the list's size frame by frame.
+    //   The rail animates its width and labels re-wrap as it does, so follow the list's size frame by frame.
     afterNextRender(() => {
       const list = this.list()?.nativeElement;
       if (!list || typeof ResizeObserver === 'undefined') return;
@@ -88,25 +88,26 @@ export class LeftSidenavComponent {
       active: true,
     },
 
-    // PLANNING (open to all roles for now — no RBAC gating yet)
-    {
-      id: 'requests',
-      label: 'Requests',
-      section: 'PLANNING',
-      icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
-    },
-    {
-      id: 'wlda-approvals',
-      label: 'WLDA Approvals',
-      section: 'PLANNING',
-      icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
-    },
-    {
-      id: 'land-affairs-approvals',
-      label: 'Land Affairs Approvals',
-      section: 'PLANNING',
-      icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
-    },
+    //   PLANNING (open to all roles for now — no RBAC gating yet)
+    // Temporarily hidden from the nav (routes still exist) — uncomment to restore.
+    // {
+    //   id: 'requests',
+    //   label: 'Requests',
+    //   section: 'PLANNING',
+    //   icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8',
+    // },
+    // {
+    //   id: 'wlda-approvals',
+    //   label: 'WLDA Approvals',
+    //   section: 'PLANNING',
+    //   icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
+    // },
+    // {
+    //   id: 'land-affairs-approvals',
+    //   label: 'Land Affairs Approvals',
+    //   section: 'PLANNING',
+    //   icon: 'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',
+    // },
     {
       id: 'integrated-requirements',
       label: 'Integrated Requirements',
@@ -121,7 +122,7 @@ export class LeftSidenavComponent {
       icon: 'M5 3h14v4H5z M7 7v6h10V7 M9 13v8h6v-8',
     },
 
-    // OPERATIONS
+    //   OPERATIONS
     {
       id: 'active-wwell',
       label: 'Active Water Well',
@@ -188,7 +189,7 @@ export class LeftSidenavComponent {
     list.style.setProperty('--hl-w', `${active.offsetWidth}px`);
     list.style.setProperty('--hl-h', `${active.offsetHeight}px`);
 
-    // Enabled a frame after the first placement, so the highlight doesn't slide in from the corner.
+    //   Enabled a frame after the first placement, so the highlight doesn't slide in from the corner.
     if (!this.glideReady()) {
       requestAnimationFrame(() => this.glideReady.set(true));
     }

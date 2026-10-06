@@ -41,9 +41,6 @@ describe('LeftSidenavComponent', () => {
 
     expect(labels).toEqual([
       'Home',
-      'Requests',
-      'WLDA Approvals',
-      'Land Affairs Approvals',
       'Integrated Requirements',
       'Well Profile',
       'Active Water Well',
@@ -53,13 +50,13 @@ describe('LeftSidenavComponent', () => {
   });
 
   it('should mark only the active route as the current page', () => {
-    fixture.componentRef.setInput('activeRoute', 'requests');
+    fixture.componentRef.setInput('activeRoute', 'integrated-requirements');
     fixture.detectChanges();
 
     const active: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.sidenav__btn--active'));
 
     expect(active).toHaveLength(1);
-    expect(active[0].textContent).toContain('Requests');
+    expect(active[0].textContent).toContain('Integrated Requirements');
     expect(active[0].getAttribute('aria-current')).toBe('page');
   });
 
@@ -73,7 +70,7 @@ describe('LeftSidenavComponent', () => {
       return 0;
     });
 
-    fixture.componentRef.setInput('activeRoute', 'requests');
+    fixture.componentRef.setInput('activeRoute', 'integrated-requirements');
     fixture.detectChanges();
 
     const list: HTMLElement = fixture.nativeElement.querySelector('.sidenav__list');
