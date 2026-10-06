@@ -253,3 +253,16 @@ transition: 0.3s ease;
   flex-direction: column;
   overflow: hidden;
 }
+
+/* ── IR attachment upload dialog — opaque surface ────────────────────────────── */
+// Portaled to <body>; pinned to the global `--wp-*` tokens like the other IR dialogs so it can never
+// render see-through, whatever other dialog styles happen to be loaded.
+.ir-upload-panel .mat-mdc-dialog-surface {
+  border-radius: var(--wp-radius-lg) !important;
+  overflow: hidden !important;
+  background-color: var(--wp-surface-raised) !important;
+  color: var(--wp-text) !important;
+  color-scheme: var(--wp-scheme);
+  border: 1px solid var(--wp-line) !important;
+  box-shadow: var(--wp-shadow-3) !important;
+}

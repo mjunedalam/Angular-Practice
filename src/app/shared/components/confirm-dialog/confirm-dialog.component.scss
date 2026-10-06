@@ -21,7 +21,9 @@ $missing:      #cc0000;
 }
 
 /* ── Material surface reset ───────────────────────────────────── */
-.mat-mdc-dialog-container .mdc-dialog__surface {
+/* Scoped to this dialog's own panelClass: the component is ViewEncapsulation.None, so an unscoped
+   rule stays in <head> after the first open and turned every later dialog's surface transparent. */
+.cd-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
   background: transparent !important;
   box-shadow: none !important;
   border-radius: 10px !important;

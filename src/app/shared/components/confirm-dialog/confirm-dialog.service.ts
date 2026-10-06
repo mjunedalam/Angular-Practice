@@ -9,7 +9,7 @@ export class ConfirmDialogService {
 
   open(data: ConfirmDialogData): Observable<boolean> {
     return this.dialog
-      .open(ConfirmDialogComponent, { data, disableClose: false, width: '480px' })
+      .open(ConfirmDialogComponent, { data, disableClose: false, width: '480px', panelClass: 'cd-dialog-panel' })
       .afterClosed()
       .pipe(map((result: boolean | undefined) => result === true));
   }

@@ -750,8 +750,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     // Straight into the upload dialog; dismissing it leaves the file staged on its row.
     this.dialog.open(WwellIrAttachmentUploadDialogComponent, {
       data: { store: this.store, slot, slotLabel: this.slotLabel(slot), slotIcon: this.slotIcon(slot), pendingId, irSeq: this.editorIrSeq() },
+      panelClass: 'ir-upload-panel',
       autoFocus: false,
-      disableClose: false,
     });
   }
 
