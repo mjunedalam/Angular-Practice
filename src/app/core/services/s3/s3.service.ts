@@ -92,9 +92,15 @@ export class S3Service {
    *  base64-encoded, so it's decoded here. `fileName` comes from the caller (the attachment's own
    *  display name); the type prefers the envelope's own `content_type`. */
   download(objectKey: string, fileName: string): Observable<File> {
-    return this.http
-      .post<S3FetchResponse>(`${this.baseUrl}/fetch`, { object_key: objectKey }, { context: this.s3Context })
-      .pipe(map(response => new File([decodeBase64(response.content)], fileName, { type: response.content_type })));
+    return this.fetch(objectKey).pipe(
+      map(response => new File([decodeBase64(response.content)], fileName, { type: response.content_type })),
+    );
+  }
+
+  /** The raw `POST /fetch` envelope — `content` is already base64, so callers that need base64
+   *  (e.g. the SAP trigger's `attachment_files`) can use it as-is instead of decoding and re-encoding. */
+  fetch(objectKey: string): Observable<S3FetchResponse> {
+    return this.http.post<S3FetchResponse>(`${this.baseUrl}/fetch`, { object_key: objectKey }, { context: this.s3Context });
   }
 }
 

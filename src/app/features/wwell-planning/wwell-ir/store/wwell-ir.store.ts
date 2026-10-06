@@ -3,10 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, concatMap, delay, exhaustMap, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
+import { EMPTY, catchError, concatMap, delay, exhaustMap, forkJoin, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
+import { SapAttachmentFile } from '@models/sap/sap-trigger.model';
 import { SapService } from '@services/sap/sap.service';
 import { S3Service } from '@services/s3/s3.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -201,26 +202,43 @@ export const WwellIrStore = signalStore(
       });
     }
 
+    // Pulls every stored attachment's bytes back from the S3 proxy as base64 for the trigger's
+    // `attachment_files`. All-or-nothing: if any read fails the submit fails, rather than silently
+    // sending SAP a review package with documents missing.
+    function loadSapAttachmentFiles(attachments: readonly IrAttachment[]) {
+      if (attachments.length === 0) return of<SapAttachmentFile[]>([]);
+      return forkJoin(
+        attachments.map(attachment =>
+          s3.fetch(attachment.objectKey).pipe(map((response): SapAttachmentFile => ({ file_name: attachment.fileName, b64: response.content }))),
+        ),
+      );
+    }
+
     // Steps 1-2: mint a workflow id (get_wf_next_id_fnc), then push the workflow to SAP under it.
     // workflow_id sent to SAP is the raw minted seq, as-is — no network id or scenario suffix.
     function triggerSapWorkflow(ir: IntegratedRequirement, irSeq: number): void {
       const networkId = authStore.networkId() ?? '';
       svc.getNextSapWorkflowSeq().subscribe({
         next: seq => {
-          sap
-            .trigger({
-              workflow_title: `Integrated Requirement ${ir.code} - ${ir.requestReference.wellName}`,
-              initiator_network_id: networkId,
-              requester_network_id: networkId,
-              process_id: WWELL_IR_SAP_PROCESS_ID,
-              scenario_id: WWELL_IR_SAP_SCENARIO_ID,
-              workflow_id: String(seq),
-              body: [],
-            })
+          loadSapAttachmentFiles(ir.attachments)
+            .pipe(
+              switchMap(attachmentFiles =>
+                sap.trigger({
+                  workflow_title: `Integrated Requirement ${ir.code} - ${ir.requestReference.wellName}`,
+                  initiator_network_id: networkId,
+                  requester_network_id: networkId,
+                  process_id: WWELL_IR_SAP_PROCESS_ID,
+                  scenario_id: WWELL_IR_SAP_SCENARIO_ID,
+                  workflow_id: String(seq),
+                  ...(attachmentFiles.length > 0 ? { attachment_files: attachmentFiles } : {}),
+                  body: [],
+                }),
+              ),
+            )
             .subscribe({
               next: () => persistSapWorkflow(ir, irSeq, seq),
-              // SAP refused the workflow, so there is nothing to stamp — surface the failure and
-              // leave the header exactly as it was.
+              // SAP refused the workflow (or an attachment couldn't be read), so there is nothing to
+              // stamp — surface the failure and leave the header exactly as it was.
               error: (err: unknown) =>
                 patchState(store, {
                   updatingIrStatus: false,
