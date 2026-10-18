@@ -1,0 +1,70 @@
+{
+  "chapter": 8,
+  "design_note": "Show on-demand context as a retained source, a lightweight locator and an actually loaded excerpt. The reader sees why a heading can guide retrieval without supplying the underlying evidence needed for a factual claim.",
+  "source": {
+    "title": "Effective context engineering for AI agents",
+    "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    "publisher": "Anthropic",
+    "concept": "An agent can retain lightweight source references and load relevant content on demand rather than placing complete data objects in every model context.",
+    "scope": "Original incident, source version and token counts illustrate a constrained loader. They are not measured savings or claims that locators establish source truth.",
+    "id": "R08",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Provenance and explainability",
+    "title": "Carry the address; open the needed passage",
+    "intro": "AegisOps retains incident INC-8 but needs only its connection-pool observation. A locator directs an authorized read to section 4. The constructed token counts describe source bodies, not the complete request.",
+    "kind": "workspace",
+    "data": {
+      "zones": [
+        {
+          "title": "Retained incident",
+          "object": "vault",
+          "items": [
+            "INC-8 / version v2",
+            "Full body: 9000 tokens",
+            "Source retained under policy"
+          ],
+          "role": "data"
+        },
+        {
+          "title": "Locator catalog",
+          "object": "folder",
+          "items": [
+            "INC-8 / v2 / section 4",
+            "Heading: pool observations",
+            "Locator is not the passage"
+          ],
+          "role": "runtime"
+        },
+        {
+          "title": "Current model view",
+          "object": "window",
+          "items": [
+            "E7: section 4; 350 tokens",
+            "Pool at limit at 10:02",
+            "Source: INC-8 / v2 / section 4"
+          ],
+          "role": "model"
+        }
+      ],
+      "relations": [
+        "Catalog locators identify retrievable source units.",
+        "A permitted read loads only the selected passage."
+      ]
+    },
+    "read": [
+      "The vault retains the full source independently of this model call.",
+      "The catalog tells the loader where to look.",
+      "Only the loaded E7 passage supplies the displayed observation."
+    ],
+    "question": "If section 4 cannot be loaded, may its catalog heading prove that the pool reached its limit?",
+    "answer": "No. The heading is navigation metadata, not the observation. Retrieve an available permitted source or report the missing evidence. Keep the locator for investigation, but do not substitute it for the source body or claim that the absent passage was inspected.",
+    "takeaway": "References make context lighter; retrieved content still supplies the evidence.",
+    "assumption": "Constructed source-body token counts exclude request overhead. The loader rechecks access and version; a locator alone does not verify a fact.",
+    "source_label": "Anthropic: on-demand context retrieval",
+    "id": "8C",
+    "placement": "before_heading",
+    "source_key": "R08"
+  }
+}

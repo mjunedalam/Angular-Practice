@@ -1,0 +1,80 @@
+{
+  "chapter": 25,
+  "design_note": "The earlier labs teach sample-size bounds and judge false acceptance. This evidence map adds order sensitivity in pairwise grading. A switched winner flags instability while the sparse stochastic evidence prevents the stronger causal claim that position alone explains the change.",
+  "source": {
+    "title": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+    "url": "https://arxiv.org/abs/2306.05685",
+    "publisher": "Lianmin Zheng et al.",
+    "concept": "LLM judges can exhibit position bias when comparing responses. Judge agreement should be assessed with attention to evaluation design and known sources of bias.",
+    "scope": "Reply R, reply S and both verdicts are fictional. Two observations illustrate an order-consistency check, not an estimated bias rate or a reproduced experimental result.",
+    "id": "R25",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Paired comparisons, slices and failure taxonomies",
+    "title": "Swap the display order before trusting the winner",
+    "intro": "A ShopAssist judge compares fixed replies R and S under one rubric. In one constructed trial R appears first; in the other S appears first. Each trial uses a fresh stochastic judgment.",
+    "kind": "evidence",
+    "data": {
+      "claims": [
+        {
+          "id": "C1",
+          "text": "The same reply won both presentations."
+        },
+        {
+          "id": "C2",
+          "text": "The first displayed reply won in both trials."
+        },
+        {
+          "id": "C3",
+          "text": "Display position alone caused the winner to change."
+        }
+      ],
+      "sources": [
+        {
+          "id": "S1",
+          "text": "Pair audit: R won the R/S presentation; S won the S/R presentation."
+        },
+        {
+          "id": "S2",
+          "text": "Verdict log: the first slot was selected in both presentations."
+        },
+        {
+          "id": "S3",
+          "text": "Only one stochastic judgment was collected for each display order."
+        }
+      ],
+      "links": [
+        {
+          "claim": 0,
+          "source": 0,
+          "relation": "conflicts"
+        },
+        {
+          "claim": 1,
+          "source": 1,
+          "relation": "supports"
+        },
+        {
+          "claim": 2,
+          "source": 2,
+          "relation": "insufficient"
+        }
+      ],
+      "verdict": "Order consistency failed; neither a sole cause nor a best reply is established."
+    },
+    "read": [
+      "Map verdicts back to reply identities, not only first or second labels.",
+      "The visible pair is inconsistent about which content is better.",
+      "One stochastic trial per order cannot isolate position as the only cause."
+    ],
+    "question": "Can the original R-first verdict alone establish that R is the better reply?",
+    "answer": "No. The swapped presentation chooses S, so this pair provides no stable winner. Use balanced orders, repeated or appropriately controlled judgments, and rubric-based adjudication. The two rows flag an evaluation weakness without proving a population bias rate or which reply is actually better.",
+    "takeaway": "Test judge consistency under harmless presentation changes.",
+    "assumption": "Constructed pair; reply content and rubric stay fixed. Stochastic judgment remains uncontrolled, and neither reply's true quality is established.",
+    "source_label": "Zheng et al.: LLM judge position bias",
+    "id": "25C",
+    "placement": "before_heading",
+    "source_key": "R25"
+  }
+}

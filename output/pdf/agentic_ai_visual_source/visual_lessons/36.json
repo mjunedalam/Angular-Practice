@@ -1,0 +1,118 @@
+{
+  "chapter": 36,
+  "chapter_title": "The AegisOps Blueprint",
+  "audit": "The emergency-team analogy joins diagnosis, consent, treatment and observation, but a reader can still collapse approval, command completion and recovery into one success marker. Lesson A assigns those events to separate owners using one incident, proposal and rollback identity; only the complete independent window closes the run. Lesson B inspects an approved rollback whose expected revision has become stale. Passing schema and human authority checks cannot overcome the live precondition failure. These pages give the blueprint's conceptual boundaries specific records and timing while retaining the risk 4 two-person requirement. All times and observations are fictional, and neither local intent nor a successful command is presented as an external execution guarantee.",
+  "lessons": [
+    {
+      "id": "36A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Follow INC-82 through three owners",
+      "intro": "In a fictional order-api incident, new pods show errors. AegisOps proposes rollback P-9, obtains risk 4 authority, then waits for independent evidence after applied effect RB-82.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Commander",
+          "Approval service",
+          "Executor/verifier"
+        ],
+        "steps": [
+          {
+            "time": "10:00",
+            "lane": 0,
+            "label": "E-17: new-pod errors"
+          },
+          {
+            "time": "10:04",
+            "lane": 0,
+            "label": "Persist P-9 and effect RB-82"
+          },
+          {
+            "time": "10:08",
+            "lane": 1,
+            "label": "Two privileged approvers"
+          },
+          {
+            "time": "10:09",
+            "lane": 2,
+            "label": "RB-82 applied; record time"
+          },
+          {
+            "time": "10:19",
+            "lane": 2,
+            "label": "10/10 buckets; criteria pass"
+          }
+        ],
+        "wait_after": 3,
+        "wait_label": "Complete post-action observation",
+        "result": "RESOLVED follows covered criteria, not the rollback receipt."
+      },
+      "read": [
+        "The proposal and effect identity exist before authority is consumed or reserved.",
+        "Approval belongs to its service; the commander cannot manufacture it.",
+        "The final evidence window starts after confirmed application, at 10:09."
+      ],
+      "question": "At 10:10, may the commander announce verified recovery because RB-82 applied at 10:09?",
+      "answer": "No. Only one post-action minute has elapsed. The required ten-minute covered window and the alert, dependency and new-failure checks must pass. Report rollback applied and verification pending. An applied receipt proves the command outcome under its contract, not the incident outcome.",
+      "takeaway": "Trace diagnosis, authority, effect and recovery as distinct owned facts.",
+      "assumption": "Fictional timings and passing observations; current preconditions, scoped execution and all required recovery checks are stipulated."
+    },
+    {
+      "id": "36B",
+      "placement": "before_heading",
+      "anchor": "Approval and risk matrix",
+      "title": "Approved rollback, changed live revision",
+      "intro": "P-9 has two valid privileged approvals for rollback from revision 42 to 41. Before dispatch, another authorized deployment advances order-api to revision 43.",
+      "kind": "packet",
+      "data": {
+        "name": "Rollback proposal P-9",
+        "fields": [
+          {
+            "key": "target",
+            "value": "Northwind order-api/prod"
+          },
+          {
+            "key": "expected",
+            "value": "revision 42"
+          },
+          {
+            "key": "change",
+            "value": "rollback to revision 41"
+          },
+          {
+            "key": "effect",
+            "value": "RB-82"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Bound approvals",
+            "detail": "Two distinct valid privileged approvers",
+            "status": "pass"
+          },
+          {
+            "label": "Atomic revision check",
+            "detail": "Expected 42; live resource is 43",
+            "status": "fail"
+          },
+          {
+            "label": "Effect dispatch",
+            "detail": "No rollback applied after conflict",
+            "status": "wait"
+          }
+        ],
+        "result": "Conflict: retain revision 43; replan from new evidence.",
+        "result_status": "fail"
+      },
+      "read": [
+        "The approval remains evidence about the exact immutable proposal.",
+        "The live revision invalidates a precondition without invalidating the record of approval.",
+        "The executor blocks before changing production state."
+      ],
+      "question": "May the executor replace expected revision 42 with 43 and reuse P-9 approval?",
+      "answer": "No. That changes the proposal's bound assumptions and canonical arguments. Reinvestigate current state and create a new proposal with its required approval. Preserve P-9 and its conflict outcome for audit. A hash match or valid approver cannot authorize an edited action.",
+      "takeaway": "Valid approval does not excuse stale live preconditions.",
+      "assumption": "Fictional rollback; the domain change service checks expected revision and mutates atomically. P-9 has not already applied."
+    }
+  ]
+}

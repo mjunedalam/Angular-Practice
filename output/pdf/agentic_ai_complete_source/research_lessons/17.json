@@ -1,0 +1,58 @@
+{
+  "chapter": 17,
+  "design_note": "The existing labs cover evidence ownership and money reservations. These constructed durations expose the critical path and coordination overhead of three independent reads. Capacity changes the benefit even with unchanged workers, avoiding an empirical claim that more agents always improve speed.",
+  "source": {
+    "title": "How we built our multi-agent research system",
+    "url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+    "publisher": "Anthropic",
+    "concept": "Independent investigations can run concurrently, while coordination and dependencies limit the benefit of adding workers. Parallelizable work is a reason to consider multiple agents, not a universal advantage.",
+    "scope": "All timings and schedules are original toy values. No speedup, token-use figure or benchmark from the article is reproduced or implied.",
+    "id": "R17",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Parallel specialists and ensembles",
+    "title": "Parallel workers still wait for the longest read",
+    "intro": "Constructed metrics, logs and change-history reads take 3, 5 and 4 seconds. All plans merge for 1 second; team plans add 1 second of dispatch before any read starts.",
+    "kind": "bars",
+    "data": {
+      "unit": "elapsed seconds",
+      "items": [
+        {
+          "label": "Serial reads + merge",
+          "value": 13,
+          "role": "runtime"
+        },
+        {
+          "label": "Team: 3 read slots",
+          "value": 7,
+          "role": "success"
+        },
+        {
+          "label": "Team: 2 read slots",
+          "value": 9,
+          "role": "model"
+        },
+        {
+          "label": "Team: 1 read slot",
+          "value": 14,
+          "role": "external"
+        }
+      ],
+      "rule": "Two slots start 3 s and 5 s reads; the 4 s read follows the 3 s read."
+    },
+    "read": [
+      "Serial completion is 3 + 5 + 4 + 1 = 13 seconds.",
+      "Three slots finish in 1 + max(3, 5, 4) + 1 = 7 seconds.",
+      "With two slots, reads finish after 7 seconds; dispatch and merge make 9."
+    ],
+    "question": "Could a fourth read worker reduce the 7-second plan under these assumptions?",
+    "answer": "No. Three slots already start every independent read together. The 5-second read remains the critical path, with 1 second each for dispatch and merge. Extra workers cannot shorten those fixed durations in this constructed model.",
+    "takeaway": "Add concurrency where dependencies and capacity actually permit overlap.",
+    "assumption": "Toy durations, not measurements; independent reads, fixed durations, no retries or contention. Only team dispatch adds overhead.",
+    "source_label": "Anthropic: multi-agent research engineering",
+    "id": "17C",
+    "placement": "before_heading",
+    "source_key": "R17"
+  }
+}

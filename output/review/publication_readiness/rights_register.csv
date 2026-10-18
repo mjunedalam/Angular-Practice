@@ -1,0 +1,9 @@
+asset,record,evidence,status,remaining_action
+Manuscript,User-supplied book and AI-assisted revisions,Source files and revision reports,Author confirmation needed,Confirm ownership and any quoted material before release
+Technical diagrams,Original editable vectors,build_book.py visual_learning.py analytical_figures.py edition_design.py,Provenance recorded,Publisher final rights review
+Selected covers,AI-generated images,ARTWORK_PROVENANCE.md and COVER_DESIGN_PROMPTS.md,Provenance recorded,Confirm submission disclosure and distribution terms
+Bundled fonts,SIL Open Font License,font notices and 18 matching provenance hashes,Notices retained,Keep notices with redistributed fonts
+Companion code,Author reuse selection pending,LICENSE_STATUS.txt,Open decision,Select code licence and synchronize all packages
+Third-party dependencies,Installed separately not vendored,Requirement files and environment guides,Separate licences apply,Review dependencies if later bundled or redistributed
+Biography,Omitted by author instruction,publication.json,Complete,None
+Technical references,Retained,Chapters and appendices,Reachability and targeted claim checks recorded,Human reviewers verify assigned claims and quotations

@@ -1,0 +1,107 @@
+{
+  "chapter": 34,
+  "design_note": "Makes hidden-test execution a second untrusted execution surface. The same patch crosses into another sandbox, while credentials stay outside both; a trusted test definition does not sanitize candidate code.",
+  "source": {
+    "id": "R34",
+    "title": "Security Model",
+    "url": "https://gvisor.dev/docs/architecture_guide/security/",
+    "publisher": "gVisor project",
+    "accessed": "2026-10-17",
+    "concept": "Sandboxing limits exposure to untrusted code but does not replace secure architecture. Mapped files, network paths and resource controls still require deliberate policy.",
+    "scope": "Original maintenance-agent boundaries; no sandbox product or diagram alone is claimed to enforce the shown credential and publication rules."
+  },
+  "lesson": {
+    "anchor": "What changes and what stays universal",
+    "title": "Hidden tests still execute untrusted code",
+    "intro": "A maintenance agent submits patch P-18. A harness checks permitted paths, then evaluates that same candidate in a separate test sandbox. Hidden test definitions do not make the patched application trusted.",
+    "kind": "faultmap",
+    "data": {
+      "zones": [
+        {
+          "title": "Candidate sandbox",
+          "nodes": [
+            {
+              "id": "C",
+              "label": "Untrusted candidate code",
+              "role": "external"
+            },
+            {
+              "id": "P",
+              "label": "Export patch P-18",
+              "role": "data"
+            }
+          ]
+        },
+        {
+          "title": "Judge sandbox",
+          "nodes": [
+            {
+              "id": "J",
+              "label": "Untrusted P-18 copy",
+              "role": "external"
+            },
+            {
+              "id": "T",
+              "label": "Hidden test runner",
+              "role": "runtime"
+            }
+          ]
+        },
+        {
+          "title": "Trusted control",
+          "nodes": [
+            {
+              "id": "G",
+              "label": "Trusted-base path guard",
+              "role": "policy"
+            },
+            {
+              "id": "K",
+              "label": "Scoped PR credential",
+              "role": "policy"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "P",
+          "to": "G",
+          "label": "Patch artifact; check paths and links",
+          "status": "allow"
+        },
+        {
+          "from": "G",
+          "to": "J",
+          "label": "Admit checked artifact; keep sandboxed",
+          "status": "allow"
+        },
+        {
+          "from": "T",
+          "to": "J",
+          "label": "Run tests against candidate in sandbox",
+          "status": "allow"
+        },
+        {
+          "from": "J",
+          "to": "K",
+          "label": "No credential mount or secret access",
+          "status": "deny"
+        }
+      ]
+    },
+    "read": [
+      "The path guard inspects the artifact; it does not prove the code is harmless.",
+      "The hidden runner executes the candidate inside the judge boundary.",
+      "Publication credentials remain outside candidate execution in both sandboxes."
+    ],
+    "question": "Would hiding the test files justify running P-18 on the host with publication credentials?",
+    "answer": "No. Candidate code can execute during testing even when test definitions are secret. Keep both ordinary and hidden checks isolated without host or publication authority, and enforce mounts, egress and resources. A permitted diff and passing tests remain review evidence, not permission to merge or publish unrelated changes.",
+    "takeaway": "Keep candidate code isolated everywhere it executes, including independent evaluation.",
+    "assumption": "Fictional enforced boundaries; both sandboxes exclude credentials. Network, mounts and resource controls need actual configuration and tests beyond this drawing.",
+    "id": "34C",
+    "placement": "before_heading",
+    "source_key": "R34",
+    "source_label": "gVisor: Security Model"
+  }
+}

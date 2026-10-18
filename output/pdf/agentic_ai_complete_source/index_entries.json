@@ -1,0 +1,2680 @@
+[
+  {
+    "term": "A2A (Agent2Agent)",
+    "references": [
+      {
+        "pdf_page": 266,
+        "page": 253
+      },
+      {
+        "pdf_page": 585,
+        "page": 572
+      },
+      {
+        "pdf_page": 679,
+        "page": 666
+      },
+      {
+        "pdf_page": 735,
+        "page": 722
+      }
+    ]
+  },
+  {
+    "term": "ABAC",
+    "references": [
+      {
+        "pdf_page": 368,
+        "page": 355
+      }
+    ]
+  },
+  {
+    "term": "Activity (durable execution)",
+    "references": [
+      {
+        "pdf_page": 298,
+        "page": 285
+      },
+      {
+        "pdf_page": 542,
+        "page": 529
+      }
+    ]
+  },
+  {
+    "term": "ADR (architecture decision record)",
+    "references": [
+      {
+        "pdf_page": 589,
+        "page": 576
+      }
+    ]
+  },
+  {
+    "term": "Agent card",
+    "references": [
+      {
+        "pdf_page": 266,
+        "page": 253
+      }
+    ]
+  },
+  {
+    "term": "Agent definition",
+    "references": [
+      {
+        "pdf_page": 88,
+        "page": 75
+      }
+    ]
+  },
+  {
+    "term": "Agent harness",
+    "references": [
+      {
+        "pdf_page": 86,
+        "page": 73
+      },
+      {
+        "pdf_page": 185,
+        "page": 172
+      },
+      {
+        "pdf_page": 649,
+        "page": 636
+      },
+      {
+        "pdf_page": 698,
+        "page": 685
+      }
+    ]
+  },
+  {
+    "term": "AgentOps",
+    "references": [
+      {
+        "pdf_page": 498,
+        "page": 485
+      },
+      {
+        "pdf_page": 725,
+        "page": 712
+      }
+    ]
+  },
+  {
+    "term": "Amazon Bedrock AgentCore",
+    "references": [
+      {
+        "pdf_page": 585,
+        "page": 572
+      },
+      {
+        "pdf_page": 619,
+        "page": 606
+      }
+    ]
+  },
+  {
+    "term": "Approval",
+    "references": [
+      {
+        "pdf_page": 186,
+        "page": 173
+      },
+      {
+        "pdf_page": 323,
+        "page": 310
+      },
+      {
+        "pdf_page": 593,
+        "page": 580
+      },
+      {
+        "pdf_page": 671,
+        "page": 658
+      },
+      {
+        "pdf_page": 695,
+        "page": 682
+      },
+      {
+        "pdf_page": 740,
+        "page": 727
+      }
+    ]
+  },
+  {
+    "term": "Approval card",
+    "references": [
+      {
+        "pdf_page": 335,
+        "page": 322
+      },
+      {
+        "pdf_page": 673,
+        "page": 660
+      },
+      {
+        "pdf_page": 744,
+        "page": 731
+      }
+    ]
+  },
+  {
+    "term": "Approval interrupt",
+    "references": [
+      {
+        "pdf_page": 193,
+        "page": 180
+      },
+      {
+        "pdf_page": 327,
+        "page": 314
+      }
+    ]
+  },
+  {
+    "term": "Argument hash",
+    "references": [
+      {
+        "pdf_page": 680,
+        "page": 667
+      }
+    ]
+  },
+  {
+    "term": "Artifact (A2A)",
+    "references": [
+      {
+        "pdf_page": 267,
+        "page": 254
+      }
+    ]
+  },
+  {
+    "term": "Audit log",
+    "references": [
+      {
+        "pdf_page": 405,
+        "page": 392
+      },
+      {
+        "pdf_page": 605,
+        "page": 592
+      }
+    ]
+  },
+  {
+    "term": "Authorisation",
+    "references": [
+      {
+        "pdf_page": 86,
+        "page": 73
+      },
+      {
+        "pdf_page": 101,
+        "page": 88
+      },
+      {
+        "pdf_page": 193,
+        "page": 180
+      },
+      {
+        "pdf_page": 254,
+        "page": 241
+      },
+      {
+        "pdf_page": 361,
+        "page": 348
+      },
+      {
+        "pdf_page": 574,
+        "page": 561
+      }
+    ]
+  },
+  {
+    "term": "AutoGen",
+    "references": [
+      {
+        "pdf_page": 585,
+        "page": 572
+      }
+    ]
+  },
+  {
+    "term": "Autonomy level",
+    "references": [
+      {
+        "pdf_page": 44,
+        "page": 31
+      },
+      {
+        "pdf_page": 399,
+        "page": 386
+      }
+    ]
+  },
+  {
+    "term": "BM25",
+    "references": [
+      {
+        "pdf_page": 209,
+        "page": 196
+      }
+    ]
+  },
+  {
+    "term": "Browser agent",
+    "references": [
+      {
+        "pdf_page": 389,
+        "page": 376
+      },
+      {
+        "pdf_page": 641,
+        "page": 628
+      }
+    ]
+  },
+  {
+    "term": "Budget",
+    "references": [
+      {
+        "pdf_page": 41,
+        "page": 28
+      },
+      {
+        "pdf_page": 95,
+        "page": 82
+      },
+      {
+        "pdf_page": 135,
+        "page": 122
+      },
+      {
+        "pdf_page": 421,
+        "page": 408
+      },
+      {
+        "pdf_page": 602,
+        "page": 589
+      },
+      {
+        "pdf_page": 677,
+        "page": 664
+      }
+    ]
+  },
+  {
+    "term": "C4 model (context and container views)",
+    "references": [
+      {
+        "pdf_page": 675,
+        "page": 662
+      },
+      {
+        "pdf_page": 735,
+        "page": 722
+      }
+    ]
+  },
+  {
+    "term": "Canary release",
+    "references": [
+      {
+        "pdf_page": 505,
+        "page": 492
+      },
+      {
+        "pdf_page": 665,
+        "page": 652
+      },
+      {
+        "pdf_page": 729,
+        "page": 716
+      }
+    ]
+  },
+  {
+    "term": "Capstone track",
+    "references": [
+      {
+        "pdf_page": 740,
+        "page": 727
+      }
+    ]
+  },
+  {
+    "term": "Cascade (model routing)",
+    "references": [
+      {
+        "pdf_page": 521,
+        "page": 508
+      }
+    ]
+  },
+  {
+    "term": "Cedar",
+    "references": [
+      {
+        "pdf_page": 368,
+        "page": 355
+      }
+    ]
+  },
+  {
+    "term": "Chaos testing",
+    "references": [
+      {
+        "pdf_page": 746,
+        "page": 733
+      }
+    ]
+  },
+  {
+    "term": "Checkpoint",
+    "references": [
+      {
+        "pdf_page": 89,
+        "page": 76
+      },
+      {
+        "pdf_page": 121,
+        "page": 108
+      },
+      {
+        "pdf_page": 192,
+        "page": 179
+      },
+      {
+        "pdf_page": 285,
+        "page": 272
+      },
+      {
+        "pdf_page": 535,
+        "page": 522
+      },
+      {
+        "pdf_page": 595,
+        "page": 582
+      }
+    ]
+  },
+  {
+    "term": "Chunking",
+    "references": [
+      {
+        "pdf_page": 206,
+        "page": 193
+      }
+    ]
+  },
+  {
+    "term": "Circuit breaker",
+    "references": [
+      {
+        "pdf_page": 425,
+        "page": 412
+      }
+    ]
+  },
+  {
+    "term": "Citation",
+    "references": [
+      {
+        "pdf_page": 204,
+        "page": 191
+      },
+      {
+        "pdf_page": 243,
+        "page": 230
+      },
+      {
+        "pdf_page": 636,
+        "page": 623
+      },
+      {
+        "pdf_page": 679,
+        "page": 666
+      },
+      {
+        "pdf_page": 746,
+        "page": 733
+      }
+    ]
+  },
+  {
+    "term": "Claude Agent SDK",
+    "references": [
+      {
+        "pdf_page": 583,
+        "page": 570
+      }
+    ]
+  },
+  {
+    "term": "Code interpreter",
+    "references": [
+      {
+        "pdf_page": 380,
+        "page": 367
+      }
+    ]
+  },
+  {
+    "term": "Cohen's kappa",
+    "references": [
+      {
+        "pdf_page": 467,
+        "page": 454
+      }
+    ]
+  },
+  {
+    "term": "Command (LangGraph)",
+    "references": [
+      {
+        "pdf_page": 598,
+        "page": 585
+      }
+    ]
+  },
+  {
+    "term": "Compensation",
+    "references": [
+      {
+        "pdf_page": 107,
+        "page": 94
+      },
+      {
+        "pdf_page": 417,
+        "page": 404
+      },
+      {
+        "pdf_page": 503,
+        "page": 490
+      },
+      {
+        "pdf_page": 656,
+        "page": 643
+      },
+      {
+        "pdf_page": 720,
+        "page": 707
+      }
+    ]
+  },
+  {
+    "term": "Confused deputy",
+    "references": [
+      {
+        "pdf_page": 361,
+        "page": 348
+      }
+    ]
+  },
+  {
+    "term": "Consent",
+    "references": [
+      {
+        "pdf_page": 249,
+        "page": 236
+      },
+      {
+        "pdf_page": 671,
+        "page": 658
+      }
+    ]
+  },
+  {
+    "term": "Context compaction",
+    "references": [
+      {
+        "pdf_page": 141,
+        "page": 128
+      }
+    ]
+  },
+  {
+    "term": "Context engineering",
+    "references": [
+      {
+        "pdf_page": 135,
+        "page": 122
+      }
+    ]
+  },
+  {
+    "term": "Context manifest",
+    "references": [
+      {
+        "pdf_page": 147,
+        "page": 134
+      },
+      {
+        "pdf_page": 488,
+        "page": 475
+      }
+    ]
+  },
+  {
+    "term": "Context window",
+    "references": [
+      {
+        "pdf_page": 17,
+        "page": 4
+      },
+      {
+        "pdf_page": 149,
+        "page": 136
+      }
+    ]
+  },
+  {
+    "term": "Continuous batching",
+    "references": [
+      {
+        "pdf_page": 564,
+        "page": 551
+      }
+    ]
+  },
+  {
+    "term": "Corrective retrieval",
+    "references": [
+      {
+        "pdf_page": 228,
+        "page": 215
+      }
+    ]
+  },
+  {
+    "term": "Cost ledger",
+    "references": [
+      {
+        "pdf_page": 518,
+        "page": 505
+      }
+    ]
+  },
+  {
+    "term": "Cost per successful task",
+    "references": [
+      {
+        "pdf_page": 518,
+        "page": 505
+      }
+    ]
+  },
+  {
+    "term": "CrewAI",
+    "references": [
+      {
+        "pdf_page": 586,
+        "page": 573
+      }
+    ]
+  },
+  {
+    "term": "Critic",
+    "references": [
+      {
+        "pdf_page": 52,
+        "page": 39
+      }
+    ]
+  },
+  {
+    "term": "Cross-tenant access",
+    "references": [
+      {
+        "pdf_page": 378,
+        "page": 365
+      },
+      {
+        "pdf_page": 727,
+        "page": 714
+      }
+    ]
+  },
+  {
+    "term": "Data classification",
+    "references": [
+      {
+        "pdf_page": 397,
+        "page": 384
+      }
+    ]
+  },
+  {
+    "term": "Data residency",
+    "references": [
+      {
+        "pdf_page": 410,
+        "page": 397
+      }
+    ]
+  },
+  {
+    "term": "Dead-letter queue",
+    "references": [
+      {
+        "pdf_page": 430,
+        "page": 417
+      }
+    ]
+  },
+  {
+    "term": "Degraded mode",
+    "references": [
+      {
+        "pdf_page": 433,
+        "page": 420
+      }
+    ]
+  },
+  {
+    "term": "Delegation",
+    "references": [
+      {
+        "pdf_page": 272,
+        "page": 259
+      },
+      {
+        "pdf_page": 304,
+        "page": 291
+      }
+    ]
+  },
+  {
+    "term": "Dense retrieval",
+    "references": [
+      {
+        "pdf_page": 207,
+        "page": 194
+      },
+      {
+        "pdf_page": 526,
+        "page": 513
+      }
+    ]
+  },
+  {
+    "term": "Deterministic replay",
+    "references": [
+      {
+        "pdf_page": 293,
+        "page": 280
+      },
+      {
+        "pdf_page": 436,
+        "page": 423
+      },
+      {
+        "pdf_page": 488,
+        "page": 475
+      },
+      {
+        "pdf_page": 607,
+        "page": 594
+      },
+      {
+        "pdf_page": 706,
+        "page": 693
+      }
+    ]
+  },
+  {
+    "term": "Durable execution",
+    "references": [
+      {
+        "pdf_page": 299,
+        "page": 286
+      },
+      {
+        "pdf_page": 542,
+        "page": 529
+      },
+      {
+        "pdf_page": 695,
+        "page": 682
+      }
+    ]
+  },
+  {
+    "term": "Elicitation (MCP)",
+    "references": [
+      {
+        "pdf_page": 251,
+        "page": 238
+      }
+    ]
+  },
+  {
+    "term": "Embeddings",
+    "references": [
+      {
+        "pdf_page": 158,
+        "page": 145
+      }
+    ]
+  },
+  {
+    "term": "Episodic memory",
+    "references": [
+      {
+        "pdf_page": 156,
+        "page": 143
+      }
+    ]
+  },
+  {
+    "term": "Escalation",
+    "references": [
+      {
+        "pdf_page": 73,
+        "page": 60
+      },
+      {
+        "pdf_page": 289,
+        "page": 276
+      },
+      {
+        "pdf_page": 323,
+        "page": 310
+      },
+      {
+        "pdf_page": 419,
+        "page": 406
+      },
+      {
+        "pdf_page": 459,
+        "page": 446
+      },
+      {
+        "pdf_page": 721,
+        "page": 708
+      }
+    ]
+  },
+  {
+    "term": "Eval gate",
+    "references": [
+      {
+        "pdf_page": 746,
+        "page": 733
+      }
+    ]
+  },
+  {
+    "term": "Evaluation (evals)",
+    "references": [
+      {
+        "pdf_page": 456,
+        "page": 443
+      },
+      {
+        "pdf_page": 518,
+        "page": 505
+      },
+      {
+        "pdf_page": 554,
+        "page": 541
+      },
+      {
+        "pdf_page": 583,
+        "page": 570
+      },
+      {
+        "pdf_page": 667,
+        "page": 654
+      },
+      {
+        "pdf_page": 718,
+        "page": 705
+      }
+    ]
+  },
+  {
+    "term": "Evaluator\u2013optimizer",
+    "references": [
+      {
+        "pdf_page": 60,
+        "page": 47
+      }
+    ]
+  },
+  {
+    "term": "Event sourcing",
+    "references": [
+      {
+        "pdf_page": 124,
+        "page": 111
+      }
+    ]
+  },
+  {
+    "term": "Evidence ledger",
+    "references": [
+      {
+        "pdf_page": 227,
+        "page": 214
+      },
+      {
+        "pdf_page": 748,
+        "page": 735
+      }
+    ]
+  },
+  {
+    "term": "Excessive agency",
+    "references": [
+      {
+        "pdf_page": 347,
+        "page": 334
+      }
+    ]
+  },
+  {
+    "term": "Fake model",
+    "references": [
+      {
+        "pdf_page": 437,
+        "page": 424
+      }
+    ]
+  },
+  {
+    "term": "Fan-out / fan-in",
+    "references": [
+      {
+        "pdf_page": 294,
+        "page": 281
+      },
+      {
+        "pdf_page": 601,
+        "page": 588
+      }
+    ]
+  },
+  {
+    "term": "Few-shot examples",
+    "references": [
+      {
+        "pdf_page": 75,
+        "page": 62
+      }
+    ]
+  },
+  {
+    "term": "Function calling",
+    "references": [
+      {
+        "pdf_page": 247,
+        "page": 234
+      }
+    ]
+  },
+  {
+    "term": "Gemini Enterprise Agent Platform",
+    "references": [
+      {
+        "pdf_page": 621,
+        "page": 608
+      }
+    ]
+  },
+  {
+    "term": "Golden dataset",
+    "references": [
+      {
+        "pdf_page": 462,
+        "page": 449
+      }
+    ]
+  },
+  {
+    "term": "Golden trajectory",
+    "references": [
+      {
+        "pdf_page": 444,
+        "page": 431
+      }
+    ]
+  },
+  {
+    "term": "Graph orchestration",
+    "references": [
+      {
+        "pdf_page": 285,
+        "page": 272
+      }
+    ]
+  },
+  {
+    "term": "Groundedness / faithfulness",
+    "references": [
+      {
+        "pdf_page": 220,
+        "page": 207
+      },
+      {
+        "pdf_page": 461,
+        "page": 448
+      }
+    ]
+  },
+  {
+    "term": "Guardrails",
+    "references": [
+      {
+        "pdf_page": 399,
+        "page": 386
+      },
+      {
+        "pdf_page": 578,
+        "page": 565
+      },
+      {
+        "pdf_page": 711,
+        "page": 698
+      }
+    ]
+  },
+  {
+    "term": "Hallucination",
+    "references": [
+      {
+        "pdf_page": 26,
+        "page": 13
+      }
+    ]
+  },
+  {
+    "term": "Handoff",
+    "references": [
+      {
+        "pdf_page": 127,
+        "page": 114
+      },
+      {
+        "pdf_page": 275,
+        "page": 262
+      },
+      {
+        "pdf_page": 308,
+        "page": 295
+      },
+      {
+        "pdf_page": 578,
+        "page": 565
+      },
+      {
+        "pdf_page": 602,
+        "page": 589
+      },
+      {
+        "pdf_page": 704,
+        "page": 691
+      }
+    ]
+  },
+  {
+    "term": "Hidden tests",
+    "references": [
+      {
+        "pdf_page": 753,
+        "page": 740
+      }
+    ]
+  },
+  {
+    "term": "Hooks",
+    "references": [
+      {
+        "pdf_page": 86,
+        "page": 73
+      }
+    ]
+  },
+  {
+    "term": "Human-in-the-loop",
+    "references": [
+      {
+        "pdf_page": 323,
+        "page": 310
+      },
+      {
+        "pdf_page": 599,
+        "page": 586
+      }
+    ]
+  },
+  {
+    "term": "Hybrid retrieval",
+    "references": [
+      {
+        "pdf_page": 210,
+        "page": 197
+      }
+    ]
+  },
+  {
+    "term": "Idempotency key",
+    "references": [
+      {
+        "pdf_page": 109,
+        "page": 96
+      },
+      {
+        "pdf_page": 424,
+        "page": 411
+      },
+      {
+        "pdf_page": 600,
+        "page": 587
+      }
+    ]
+  },
+  {
+    "term": "Indirect prompt injection",
+    "references": [
+      {
+        "pdf_page": 347,
+        "page": 334
+      }
+    ]
+  },
+  {
+    "term": "Instruction hierarchy",
+    "references": [
+      {
+        "pdf_page": 71,
+        "page": 58
+      }
+    ]
+  },
+  {
+    "term": "Instruction pack",
+    "references": [
+      {
+        "pdf_page": 72,
+        "page": 59
+      }
+    ]
+  },
+  {
+    "term": "Interrupt",
+    "references": [
+      {
+        "pdf_page": 200,
+        "page": 187
+      },
+      {
+        "pdf_page": 291,
+        "page": 278
+      },
+      {
+        "pdf_page": 577,
+        "page": 564
+      },
+      {
+        "pdf_page": 599,
+        "page": 586
+      }
+    ]
+  },
+  {
+    "term": "JSON-RPC",
+    "references": [
+      {
+        "pdf_page": 249,
+        "page": 236
+      }
+    ]
+  },
+  {
+    "term": "Kafka",
+    "references": [
+      {
+        "pdf_page": 619,
+        "page": 606
+      }
+    ]
+  },
+  {
+    "term": "Kill switch",
+    "references": [
+      {
+        "pdf_page": 508,
+        "page": 495
+      },
+      {
+        "pdf_page": 666,
+        "page": 653
+      },
+      {
+        "pdf_page": 730,
+        "page": 717
+      }
+    ]
+  },
+  {
+    "term": "KV cache",
+    "references": [
+      {
+        "pdf_page": 564,
+        "page": 551
+      }
+    ]
+  },
+  {
+    "term": "LangChain",
+    "references": [
+      {
+        "pdf_page": 586,
+        "page": 573
+      }
+    ]
+  },
+  {
+    "term": "LangGraph",
+    "references": [
+      {
+        "pdf_page": 573,
+        "page": 560
+      },
+      {
+        "pdf_page": 593,
+        "page": 580
+      }
+    ]
+  },
+  {
+    "term": "Latency budget",
+    "references": [
+      {
+        "pdf_page": 641,
+        "page": 628
+      }
+    ]
+  },
+  {
+    "term": "Lease (worker)",
+    "references": [
+      {
+        "pdf_page": 534,
+        "page": 521
+      }
+    ]
+  },
+  {
+    "term": "Least privilege",
+    "references": [
+      {
+        "pdf_page": 106,
+        "page": 93
+      },
+      {
+        "pdf_page": 306,
+        "page": 293
+      },
+      {
+        "pdf_page": 355,
+        "page": 342
+      }
+    ]
+  },
+  {
+    "term": "LlamaIndex",
+    "references": [
+      {
+        "pdf_page": 586,
+        "page": 573
+      }
+    ]
+  },
+  {
+    "term": "LLM gateway",
+    "references": [
+      {
+        "pdf_page": 260,
+        "page": 247
+      },
+      {
+        "pdf_page": 536,
+        "page": 523
+      },
+      {
+        "pdf_page": 554,
+        "page": 541
+      },
+      {
+        "pdf_page": 617,
+        "page": 604
+      },
+      {
+        "pdf_page": 667,
+        "page": 654
+      }
+    ]
+  },
+  {
+    "term": "LLM-as-judge",
+    "references": [
+      {
+        "pdf_page": 465,
+        "page": 452
+      }
+    ]
+  },
+  {
+    "term": "Long-term memory",
+    "references": [
+      {
+        "pdf_page": 154,
+        "page": 141
+      }
+    ]
+  },
+  {
+    "term": "Loop detection",
+    "references": [
+      {
+        "pdf_page": 316,
+        "page": 303
+      },
+      {
+        "pdf_page": 419,
+        "page": 406
+      }
+    ]
+  },
+  {
+    "term": "MCP (Model Context Protocol)",
+    "references": [
+      {
+        "pdf_page": 247,
+        "page": 234
+      },
+      {
+        "pdf_page": 268,
+        "page": 255
+      },
+      {
+        "pdf_page": 581,
+        "page": 568
+      },
+      {
+        "pdf_page": 679,
+        "page": 666
+      },
+      {
+        "pdf_page": 697,
+        "page": 684
+      },
+      {
+        "pdf_page": 735,
+        "page": 722
+      }
+    ]
+  },
+  {
+    "term": "MCP gateway",
+    "references": [
+      {
+        "pdf_page": 260,
+        "page": 247
+      }
+    ]
+  },
+  {
+    "term": "MCP registry",
+    "references": [
+      {
+        "pdf_page": 106,
+        "page": 93
+      },
+      {
+        "pdf_page": 181,
+        "page": 168
+      },
+      {
+        "pdf_page": 190,
+        "page": 177
+      },
+      {
+        "pdf_page": 248,
+        "page": 235
+      },
+      {
+        "pdf_page": 270,
+        "page": 257
+      }
+    ]
+  },
+  {
+    "term": "Memory",
+    "references": [
+      {
+        "pdf_page": 121,
+        "page": 108
+      },
+      {
+        "pdf_page": 137,
+        "page": 124
+      },
+      {
+        "pdf_page": 152,
+        "page": 139
+      },
+      {
+        "pdf_page": 337,
+        "page": 324
+      },
+      {
+        "pdf_page": 397,
+        "page": 384
+      },
+      {
+        "pdf_page": 603,
+        "page": 590
+      }
+    ]
+  },
+  {
+    "term": "Memory write gate",
+    "references": [
+      {
+        "pdf_page": 158,
+        "page": 145
+      },
+      {
+        "pdf_page": 603,
+        "page": 590
+      }
+    ]
+  },
+  {
+    "term": "Microsoft Agent Framework",
+    "references": [
+      {
+        "pdf_page": 585,
+        "page": 572
+      }
+    ]
+  },
+  {
+    "term": "Model routing",
+    "references": [
+      {
+        "pdf_page": 26,
+        "page": 13
+      },
+      {
+        "pdf_page": 89,
+        "page": 76
+      },
+      {
+        "pdf_page": 230,
+        "page": 217
+      },
+      {
+        "pdf_page": 516,
+        "page": 503
+      },
+      {
+        "pdf_page": 554,
+        "page": 541
+      },
+      {
+        "pdf_page": 596,
+        "page": 583
+      }
+    ]
+  },
+  {
+    "term": "Multi-agent systems",
+    "references": [
+      {
+        "pdf_page": 304,
+        "page": 291
+      },
+      {
+        "pdf_page": 586,
+        "page": 573
+      }
+    ]
+  },
+  {
+    "term": "Multimodal agent",
+    "references": [
+      {
+        "pdf_page": 646,
+        "page": 633
+      }
+    ]
+  },
+  {
+    "term": "OAuth",
+    "references": [
+      {
+        "pdf_page": 365,
+        "page": 352
+      }
+    ]
+  },
+  {
+    "term": "Observability",
+    "references": [
+      {
+        "pdf_page": 248,
+        "page": 235
+      },
+      {
+        "pdf_page": 479,
+        "page": 466
+      },
+      {
+        "pdf_page": 576,
+        "page": 563
+      },
+      {
+        "pdf_page": 618,
+        "page": 605
+      },
+      {
+        "pdf_page": 675,
+        "page": 662
+      },
+      {
+        "pdf_page": 702,
+        "page": 689
+      }
+    ]
+  },
+  {
+    "term": "OpenAI Agents SDK",
+    "references": [
+      {
+        "pdf_page": 573,
+        "page": 560
+      }
+    ]
+  },
+  {
+    "term": "OpenTelemetry",
+    "references": [
+      {
+        "pdf_page": 483,
+        "page": 470
+      },
+      {
+        "pdf_page": 576,
+        "page": 563
+      },
+      {
+        "pdf_page": 624,
+        "page": 611
+      }
+    ]
+  },
+  {
+    "term": "OWASP LLM Top 10",
+    "references": [
+      {
+        "pdf_page": 347,
+        "page": 334
+      }
+    ]
+  },
+  {
+    "term": "Parallel tool calls",
+    "references": [
+      {
+        "pdf_page": 106,
+        "page": 93
+      }
+    ]
+  },
+  {
+    "term": "Pgvector",
+    "references": [
+      {
+        "pdf_page": 619,
+        "page": 606
+      }
+    ]
+  },
+  {
+    "term": "PII",
+    "references": [
+      {
+        "pdf_page": 404,
+        "page": 391
+      }
+    ]
+  },
+  {
+    "term": "Plan-and-execute",
+    "references": [
+      {
+        "pdf_page": 54,
+        "page": 41
+      }
+    ]
+  },
+  {
+    "term": "Policy-as-code",
+    "references": [
+      {
+        "pdf_page": 368,
+        "page": 355
+      },
+      {
+        "pdf_page": 686,
+        "page": 673
+      }
+    ]
+  },
+  {
+    "term": "Precondition re-validation",
+    "references": [
+      {
+        "pdf_page": 329,
+        "page": 316
+      },
+      {
+        "pdf_page": 673,
+        "page": 660
+      },
+      {
+        "pdf_page": 712,
+        "page": 699
+      },
+      {
+        "pdf_page": 734,
+        "page": 721
+      }
+    ]
+  },
+  {
+    "term": "Prefix caching",
+    "references": [
+      {
+        "pdf_page": 526,
+        "page": 513
+      }
+    ]
+  },
+  {
+    "term": "Progress file",
+    "references": [
+      {
+        "pdf_page": 754,
+        "page": 741
+      }
+    ]
+  },
+  {
+    "term": "Progressive disclosure",
+    "references": [
+      {
+        "pdf_page": 175,
+        "page": 162
+      }
+    ]
+  },
+  {
+    "term": "Prompt injection",
+    "references": [
+      {
+        "pdf_page": 79,
+        "page": 66
+      },
+      {
+        "pdf_page": 347,
+        "page": 334
+      },
+      {
+        "pdf_page": 450,
+        "page": 437
+      },
+      {
+        "pdf_page": 477,
+        "page": 464
+      },
+      {
+        "pdf_page": 683,
+        "page": 670
+      }
+    ]
+  },
+  {
+    "term": "Property-based testing",
+    "references": [
+      {
+        "pdf_page": 444,
+        "page": 431
+      },
+      {
+        "pdf_page": 692,
+        "page": 679
+      },
+      {
+        "pdf_page": 715,
+        "page": 702
+      }
+    ]
+  },
+  {
+    "term": "Provenance",
+    "references": [
+      {
+        "pdf_page": 135,
+        "page": 122
+      },
+      {
+        "pdf_page": 158,
+        "page": 145
+      },
+      {
+        "pdf_page": 397,
+        "page": 384
+      },
+      {
+        "pdf_page": 479,
+        "page": 466
+      },
+      {
+        "pdf_page": 603,
+        "page": 590
+      }
+    ]
+  },
+  {
+    "term": "Quantisation",
+    "references": [
+      {
+        "pdf_page": 563,
+        "page": 550
+      }
+    ]
+  },
+  {
+    "term": "Query rewriting",
+    "references": [
+      {
+        "pdf_page": 231,
+        "page": 218
+      }
+    ]
+  },
+  {
+    "term": "RAG (retrieval-augmented generation)",
+    "references": [
+      {
+        "pdf_page": 204,
+        "page": 191
+      },
+      {
+        "pdf_page": 227,
+        "page": 214
+      }
+    ]
+  },
+  {
+    "term": "Rate limits",
+    "references": [
+      {
+        "pdf_page": 25,
+        "page": 12
+      }
+    ]
+  },
+  {
+    "term": "RBAC",
+    "references": [
+      {
+        "pdf_page": 368,
+        "page": 355
+      }
+    ]
+  },
+  {
+    "term": "ReAct",
+    "references": [
+      {
+        "pdf_page": 54,
+        "page": 41
+      }
+    ]
+  },
+  {
+    "term": "Reader/actor split",
+    "references": [
+      {
+        "pdf_page": 344,
+        "page": 331
+      }
+    ]
+  },
+  {
+    "term": "Recursion limit",
+    "references": [
+      {
+        "pdf_page": 604,
+        "page": 591
+      }
+    ]
+  },
+  {
+    "term": "Reducer",
+    "references": [
+      {
+        "pdf_page": 124,
+        "page": 111
+      },
+      {
+        "pdf_page": 293,
+        "page": 280
+      },
+      {
+        "pdf_page": 594,
+        "page": 581
+      }
+    ]
+  },
+  {
+    "term": "Reflection",
+    "references": [
+      {
+        "pdf_page": 54,
+        "page": 41
+      },
+      {
+        "pdf_page": 654,
+        "page": 641
+      }
+    ]
+  },
+  {
+    "term": "Regression set",
+    "references": [
+      {
+        "pdf_page": 473,
+        "page": 460
+      },
+      {
+        "pdf_page": 692,
+        "page": 679
+      },
+      {
+        "pdf_page": 715,
+        "page": 702
+      },
+      {
+        "pdf_page": 727,
+        "page": 714
+      }
+    ]
+  },
+  {
+    "term": "Remote agent",
+    "references": [
+      {
+        "pdf_page": 266,
+        "page": 253
+      }
+    ]
+  },
+  {
+    "term": "Reranker",
+    "references": [
+      {
+        "pdf_page": 214,
+        "page": 201
+      }
+    ]
+  },
+  {
+    "term": "Retry budget",
+    "references": [
+      {
+        "pdf_page": 421,
+        "page": 408
+      }
+    ]
+  },
+  {
+    "term": "Retry policy",
+    "references": [
+      {
+        "pdf_page": 25,
+        "page": 12
+      },
+      {
+        "pdf_page": 90,
+        "page": 77
+      },
+      {
+        "pdf_page": 604,
+        "page": 591
+      }
+    ]
+  },
+  {
+    "term": "Risk score",
+    "references": [
+      {
+        "pdf_page": 331,
+        "page": 318
+      }
+    ]
+  },
+  {
+    "term": "Rollback",
+    "references": [
+      {
+        "pdf_page": 78,
+        "page": 65
+      },
+      {
+        "pdf_page": 323,
+        "page": 310
+      },
+      {
+        "pdf_page": 503,
+        "page": 490
+      },
+      {
+        "pdf_page": 671,
+        "page": 658
+      },
+      {
+        "pdf_page": 698,
+        "page": 685
+      },
+      {
+        "pdf_page": 718,
+        "page": 705
+      }
+    ]
+  },
+  {
+    "term": "Router",
+    "references": [
+      {
+        "pdf_page": 54,
+        "page": 41
+      },
+      {
+        "pdf_page": 229,
+        "page": 216
+      },
+      {
+        "pdf_page": 288,
+        "page": 275
+      },
+      {
+        "pdf_page": 308,
+        "page": 295
+      }
+    ]
+  },
+  {
+    "term": "Run state",
+    "references": [
+      {
+        "pdf_page": 123,
+        "page": 110
+      },
+      {
+        "pdf_page": 154,
+        "page": 141
+      },
+      {
+        "pdf_page": 543,
+        "page": 530
+      }
+    ]
+  },
+  {
+    "term": "Runbook",
+    "references": [
+      {
+        "pdf_page": 331,
+        "page": 318
+      },
+      {
+        "pdf_page": 501,
+        "page": 488
+      },
+      {
+        "pdf_page": 656,
+        "page": 643
+      },
+      {
+        "pdf_page": 674,
+        "page": 661
+      },
+      {
+        "pdf_page": 698,
+        "page": 685
+      },
+      {
+        "pdf_page": 732,
+        "page": 719
+      }
+    ]
+  },
+  {
+    "term": "Saga",
+    "references": [
+      {
+        "pdf_page": 418,
+        "page": 405
+      }
+    ]
+  },
+  {
+    "term": "Sampling (MCP)",
+    "references": [
+      {
+        "pdf_page": 251,
+        "page": 238
+      }
+    ]
+  },
+  {
+    "term": "Sandbox",
+    "references": [
+      {
+        "pdf_page": 354,
+        "page": 341
+      },
+      {
+        "pdf_page": 380,
+        "page": 367
+      },
+      {
+        "pdf_page": 545,
+        "page": 532
+      },
+      {
+        "pdf_page": 751,
+        "page": 738
+      }
+    ]
+  },
+  {
+    "term": "Schema drift",
+    "references": [
+      {
+        "pdf_page": 252,
+        "page": 239
+      },
+      {
+        "pdf_page": 350,
+        "page": 337
+      },
+      {
+        "pdf_page": 683,
+        "page": 670
+      }
+    ]
+  },
+  {
+    "term": "Scopes (OAuth)",
+    "references": [
+      {
+        "pdf_page": 112,
+        "page": 99
+      },
+      {
+        "pdf_page": 260,
+        "page": 247
+      },
+      {
+        "pdf_page": 271,
+        "page": 258
+      },
+      {
+        "pdf_page": 366,
+        "page": 353
+      },
+      {
+        "pdf_page": 696,
+        "page": 683
+      }
+    ]
+  },
+  {
+    "term": "Secrets management",
+    "references": [
+      {
+        "pdf_page": 145,
+        "page": 132
+      },
+      {
+        "pdf_page": 361,
+        "page": 348
+      },
+      {
+        "pdf_page": 381,
+        "page": 368
+      },
+      {
+        "pdf_page": 616,
+        "page": 603
+      },
+      {
+        "pdf_page": 648,
+        "page": 635
+      },
+      {
+        "pdf_page": 752,
+        "page": 739
+      }
+    ]
+  },
+  {
+    "term": "Self-hosted inference",
+    "references": [
+      {
+        "pdf_page": 554,
+        "page": 541
+      }
+    ]
+  },
+  {
+    "term": "Semantic cache",
+    "references": [
+      {
+        "pdf_page": 526,
+        "page": 513
+      }
+    ]
+  },
+  {
+    "term": "Semantic memory",
+    "references": [
+      {
+        "pdf_page": 156,
+        "page": 143
+      }
+    ]
+  },
+  {
+    "term": "Send (LangGraph)",
+    "references": [
+      {
+        "pdf_page": 601,
+        "page": 588
+      }
+    ]
+  },
+  {
+    "term": "Session",
+    "references": [
+      {
+        "pdf_page": 585,
+        "page": 572
+      }
+    ]
+  },
+  {
+    "term": "Shadow release",
+    "references": [
+      {
+        "pdf_page": 263,
+        "page": 250
+      },
+      {
+        "pdf_page": 506,
+        "page": 493
+      }
+    ]
+  },
+  {
+    "term": "Skill",
+    "references": [
+      {
+        "pdf_page": 168,
+        "page": 155
+      },
+      {
+        "pdf_page": 263,
+        "page": 250
+      },
+      {
+        "pdf_page": 270,
+        "page": 257
+      },
+      {
+        "pdf_page": 678,
+        "page": 665
+      },
+      {
+        "pdf_page": 705,
+        "page": 692
+      }
+    ]
+  },
+  {
+    "term": "Slice analysis",
+    "references": [
+      {
+        "pdf_page": 306,
+        "page": 293
+      },
+      {
+        "pdf_page": 456,
+        "page": 443
+      },
+      {
+        "pdf_page": 502,
+        "page": 489
+      },
+      {
+        "pdf_page": 662,
+        "page": 649
+      },
+      {
+        "pdf_page": 728,
+        "page": 715
+      }
+    ]
+  },
+  {
+    "term": "SLO / SLI",
+    "references": [
+      {
+        "pdf_page": 678,
+        "page": 665
+      },
+      {
+        "pdf_page": 735,
+        "page": 722
+      }
+    ]
+  },
+  {
+    "term": "Spring AI",
+    "references": [
+      {
+        "pdf_page": 573,
+        "page": 560
+      }
+    ]
+  },
+  {
+    "term": "SQL agent",
+    "references": [
+      {
+        "pdf_page": 238,
+        "page": 225
+      }
+    ]
+  },
+  {
+    "term": "Stop reason",
+    "references": [
+      {
+        "pdf_page": 18,
+        "page": 5
+      }
+    ]
+  },
+  {
+    "term": "Strands Agents",
+    "references": [
+      {
+        "pdf_page": 585,
+        "page": 572
+      }
+    ]
+  },
+  {
+    "term": "Streamable HTTP",
+    "references": [
+      {
+        "pdf_page": 254,
+        "page": 241
+      }
+    ]
+  },
+  {
+    "term": "Streaming",
+    "references": [
+      {
+        "pdf_page": 15,
+        "page": 2
+      },
+      {
+        "pdf_page": 274,
+        "page": 261
+      },
+      {
+        "pdf_page": 604,
+        "page": 591
+      },
+      {
+        "pdf_page": 641,
+        "page": 628
+      }
+    ]
+  },
+  {
+    "term": "Structured output",
+    "references": [
+      {
+        "pdf_page": 15,
+        "page": 2
+      }
+    ]
+  },
+  {
+    "term": "Subgraph",
+    "references": [
+      {
+        "pdf_page": 575,
+        "page": 562
+      },
+      {
+        "pdf_page": 594,
+        "page": 581
+      }
+    ]
+  },
+  {
+    "term": "Super-step",
+    "references": [
+      {
+        "pdf_page": 596,
+        "page": 583
+      }
+    ]
+  },
+  {
+    "term": "Supervisor pattern",
+    "references": [
+      {
+        "pdf_page": 54,
+        "page": 41
+      },
+      {
+        "pdf_page": 305,
+        "page": 292
+      },
+      {
+        "pdf_page": 602,
+        "page": 589
+      },
+      {
+        "pdf_page": 704,
+        "page": 691
+      }
+    ]
+  },
+  {
+    "term": "Synthetic data",
+    "references": [
+      {
+        "pdf_page": 462,
+        "page": 449
+      }
+    ]
+  },
+  {
+    "term": "Task lifecycle (A2A)",
+    "references": [
+      {
+        "pdf_page": 279,
+        "page": 266
+      }
+    ]
+  },
+  {
+    "term": "Temperature",
+    "references": [
+      {
+        "pdf_page": 17,
+        "page": 4
+      }
+    ]
+  },
+  {
+    "term": "Temporal",
+    "references": [
+      {
+        "pdf_page": 298,
+        "page": 285
+      }
+    ]
+  },
+  {
+    "term": "Tenant",
+    "references": [
+      {
+        "pdf_page": 136,
+        "page": 123
+      },
+      {
+        "pdf_page": 153,
+        "page": 140
+      },
+      {
+        "pdf_page": 362,
+        "page": 349
+      },
+      {
+        "pdf_page": 504,
+        "page": 491
+      },
+      {
+        "pdf_page": 517,
+        "page": 504
+      },
+      {
+        "pdf_page": 536,
+        "page": 523
+      }
+    ]
+  },
+  {
+    "term": "Threat modelling",
+    "references": [
+      {
+        "pdf_page": 358,
+        "page": 345
+      },
+      {
+        "pdf_page": 683,
+        "page": 670
+      }
+    ]
+  },
+  {
+    "term": "Time travel",
+    "references": [
+      {
+        "pdf_page": 599,
+        "page": 586
+      }
+    ]
+  },
+  {
+    "term": "Token exchange",
+    "references": [
+      {
+        "pdf_page": 260,
+        "page": 247
+      },
+      {
+        "pdf_page": 366,
+        "page": 353
+      }
+    ]
+  },
+  {
+    "term": "Tokens",
+    "references": [
+      {
+        "pdf_page": 15,
+        "page": 2
+      },
+      {
+        "pdf_page": 136,
+        "page": 123
+      },
+      {
+        "pdf_page": 260,
+        "page": 247
+      },
+      {
+        "pdf_page": 365,
+        "page": 352
+      },
+      {
+        "pdf_page": 518,
+        "page": 505
+      },
+      {
+        "pdf_page": 688,
+        "page": 675
+      }
+    ]
+  },
+  {
+    "term": "Tool annotations",
+    "references": [
+      {
+        "pdf_page": 247,
+        "page": 234
+      }
+    ]
+  },
+  {
+    "term": "Tool contract",
+    "references": [
+      {
+        "pdf_page": 88,
+        "page": 75
+      },
+      {
+        "pdf_page": 170,
+        "page": 157
+      },
+      {
+        "pdf_page": 265,
+        "page": 252
+      },
+      {
+        "pdf_page": 441,
+        "page": 428
+      }
+    ]
+  },
+  {
+    "term": "Tool description",
+    "references": [
+      {
+        "pdf_page": 101,
+        "page": 88
+      }
+    ]
+  },
+  {
+    "term": "Tool poisoning",
+    "references": [
+      {
+        "pdf_page": 252,
+        "page": 239
+      },
+      {
+        "pdf_page": 350,
+        "page": 337
+      }
+    ]
+  },
+  {
+    "term": "Tool registry",
+    "references": [
+      {
+        "pdf_page": 106,
+        "page": 93
+      }
+    ]
+  },
+  {
+    "term": "Trace / span",
+    "references": [
+      {
+        "pdf_page": 305,
+        "page": 292
+      },
+      {
+        "pdf_page": 397,
+        "page": 384
+      },
+      {
+        "pdf_page": 479,
+        "page": 466
+      },
+      {
+        "pdf_page": 672,
+        "page": 659
+      },
+      {
+        "pdf_page": 696,
+        "page": 683
+      },
+      {
+        "pdf_page": 719,
+        "page": 706
+      }
+    ]
+  },
+  {
+    "term": "Trajectory",
+    "references": [
+      {
+        "pdf_page": 444,
+        "page": 431
+      },
+      {
+        "pdf_page": 458,
+        "page": 445
+      },
+      {
+        "pdf_page": 727,
+        "page": 714
+      }
+    ]
+  },
+  {
+    "term": "Trust boundary",
+    "references": [
+      {
+        "pdf_page": 735,
+        "page": 722
+      }
+    ]
+  },
+  {
+    "term": "TTFT (time to first token)",
+    "references": [
+      {
+        "pdf_page": 25,
+        "page": 12
+      }
+    ]
+  },
+  {
+    "term": "Unanswerable set",
+    "references": [
+      {
+        "pdf_page": 750,
+        "page": 737
+      }
+    ]
+  },
+  {
+    "term": "Untrusted content",
+    "references": [
+      {
+        "pdf_page": 79,
+        "page": 66
+      },
+      {
+        "pdf_page": 343,
+        "page": 330
+      },
+      {
+        "pdf_page": 389,
+        "page": 376
+      },
+      {
+        "pdf_page": 641,
+        "page": 628
+      }
+    ]
+  },
+  {
+    "term": "vLLM",
+    "references": [
+      {
+        "pdf_page": 564,
+        "page": 551
+      }
+    ]
+  },
+  {
+    "term": "Voice agent",
+    "references": [
+      {
+        "pdf_page": 641,
+        "page": 628
+      }
+    ]
+  },
+  {
+    "term": "Wilson interval",
+    "references": [
+      {
+        "pdf_page": 457,
+        "page": 444
+      }
+    ]
+  },
+  {
+    "term": "Workflow vs agent",
+    "references": [
+      {
+        "pdf_page": 34,
+        "page": 21
+      },
+      {
+        "pdf_page": 54,
+        "page": 41
+      },
+      {
+        "pdf_page": 285,
+        "page": 272
+      },
+      {
+        "pdf_page": 534,
+        "page": 521
+      },
+      {
+        "pdf_page": 617,
+        "page": 604
+      },
+      {
+        "pdf_page": 675,
+        "page": 662
+      }
+    ]
+  },
+  {
+    "term": "Workload identity",
+    "references": [
+      {
+        "pdf_page": 365,
+        "page": 352
+      },
+      {
+        "pdf_page": 546,
+        "page": 533
+      },
+      {
+        "pdf_page": 619,
+        "page": 606
+      }
+    ]
+  }
+]

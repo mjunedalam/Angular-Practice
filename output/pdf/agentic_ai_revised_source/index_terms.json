@@ -1,0 +1,2326 @@
+[
+  {
+    "term": "A2A (Agent2Agent)",
+    "source_pages": [
+      311,
+      587,
+      711,
+      769
+    ],
+    "chapters": [
+      15,
+      31,
+      36,
+      38
+    ]
+  },
+  {
+    "term": "ABAC",
+    "source_pages": [
+      409
+    ],
+    "chapters": [
+      20
+    ]
+  },
+  {
+    "term": "Activity (durable execution)",
+    "source_pages": [
+      342,
+      562
+    ],
+    "chapters": [
+      16,
+      29
+    ]
+  },
+  {
+    "term": "ADR (architecture decision record)",
+    "source_pages": [
+      588
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Agent card",
+    "source_pages": [
+      314
+    ],
+    "chapters": [
+      15
+    ]
+  },
+  {
+    "term": "Agent definition",
+    "source_pages": [
+      114,
+      658
+    ],
+    "chapters": [
+      5,
+      33
+    ]
+  },
+  {
+    "term": "Agent harness",
+    "source_pages": [
+      106,
+      226,
+      426,
+      586,
+      665,
+      730
+    ],
+    "chapters": [
+      5,
+      11,
+      21,
+      31,
+      34,
+      37
+    ]
+  },
+  {
+    "term": "AgentOps",
+    "source_pages": [
+      522,
+      752
+    ],
+    "chapters": [
+      27,
+      38
+    ]
+  },
+  {
+    "term": "Amazon Bedrock AgentCore",
+    "source_pages": [
+      602,
+      647
+    ],
+    "chapters": [
+      31,
+      33
+    ]
+  },
+  {
+    "term": "Approval",
+    "source_pages": [
+      226,
+      369,
+      618,
+      706,
+      729,
+      780
+    ],
+    "chapters": [
+      11,
+      18,
+      32,
+      36,
+      37,
+      39
+    ]
+  },
+  {
+    "term": "Approval card",
+    "source_pages": [
+      368,
+      701,
+      781
+    ],
+    "chapters": [
+      18,
+      36,
+      39
+    ]
+  },
+  {
+    "term": "Approval interrupt",
+    "source_pages": [
+      227,
+      369
+    ],
+    "chapters": [
+      11,
+      18
+    ]
+  },
+  {
+    "term": "Argument hash",
+    "source_pages": [
+      713
+    ],
+    "chapters": [
+      36
+    ]
+  },
+  {
+    "term": "Artifact (A2A)",
+    "source_pages": [
+      317
+    ],
+    "chapters": [
+      15
+    ]
+  },
+  {
+    "term": "Audit log",
+    "source_pages": [
+      137,
+      378,
+      440,
+      621
+    ],
+    "chapters": [
+      6,
+      18,
+      22,
+      32
+    ]
+  },
+  {
+    "term": "Authorisation",
+    "source_pages": [
+      110,
+      137,
+      243,
+      291,
+      404,
+      598
+    ],
+    "chapters": [
+      5,
+      6,
+      11,
+      14,
+      20,
+      31
+    ]
+  },
+  {
+    "term": "AutoGen",
+    "source_pages": [
+      603
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Autonomy level",
+    "source_pages": [
+      54,
+      442
+    ],
+    "chapters": [
+      2,
+      22
+    ]
+  },
+  {
+    "term": "BM25",
+    "source_pages": [
+      254
+    ],
+    "chapters": [
+      12
+    ]
+  },
+  {
+    "term": "Browser agent",
+    "source_pages": [
+      418,
+      665
+    ],
+    "chapters": [
+      21,
+      34
+    ]
+  },
+  {
+    "term": "Budget",
+    "source_pages": [
+      44,
+      108,
+      169,
+      454,
+      630,
+      701
+    ],
+    "chapters": [
+      2,
+      5,
+      8,
+      23,
+      32,
+      36
+    ]
+  },
+  {
+    "term": "C4 model (context and container views)",
+    "source_pages": [
+      704,
+      766
+    ],
+    "chapters": [
+      36,
+      38
+    ]
+  },
+  {
+    "term": "Canary release",
+    "source_pages": [
+      528,
+      688,
+      758
+    ],
+    "chapters": [
+      27,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "Capstone track",
+    "source_pages": [
+      778
+    ],
+    "chapters": [
+      39
+    ]
+  },
+  {
+    "term": "Cascade (model routing)",
+    "source_pages": [
+      544
+    ],
+    "chapters": [
+      28
+    ]
+  },
+  {
+    "term": "Cedar",
+    "source_pages": [
+      409
+    ],
+    "chapters": [
+      20
+    ]
+  },
+  {
+    "term": "Chaos testing",
+    "source_pages": [
+      475,
+      781
+    ],
+    "chapters": [
+      24,
+      39
+    ]
+  },
+  {
+    "term": "Checkpoint",
+    "source_pages": [
+      107,
+      159,
+      227,
+      335,
+      562,
+      619
+    ],
+    "chapters": [
+      5,
+      7,
+      11,
+      16,
+      29,
+      32
+    ]
+  },
+  {
+    "term": "Chunking",
+    "source_pages": [
+      256
+    ],
+    "chapters": [
+      12
+    ]
+  },
+  {
+    "term": "Circuit breaker",
+    "source_pages": [
+      457
+    ],
+    "chapters": [
+      23
+    ]
+  },
+  {
+    "term": "Citation",
+    "source_pages": [
+      76,
+      259,
+      284,
+      667,
+      709,
+      784
+    ],
+    "chapters": [
+      3,
+      12,
+      13,
+      34,
+      36,
+      39
+    ]
+  },
+  {
+    "term": "Claude Agent SDK",
+    "source_pages": [
+      598
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Code interpreter",
+    "source_pages": [
+      425
+    ],
+    "chapters": [
+      21
+    ]
+  },
+  {
+    "term": "Cohen's kappa",
+    "source_pages": [
+      490
+    ],
+    "chapters": [
+      25
+    ]
+  },
+  {
+    "term": "Command (LangGraph)",
+    "source_pages": [
+      613
+    ],
+    "chapters": [
+      32
+    ]
+  },
+  {
+    "term": "Compensation",
+    "source_pages": [
+      140,
+      458,
+      526,
+      686,
+      753
+    ],
+    "chapters": [
+      6,
+      23,
+      27,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "Confused deputy",
+    "source_pages": [
+      403
+    ],
+    "chapters": [
+      20
+    ]
+  },
+  {
+    "term": "Consent",
+    "source_pages": [
+      292,
+      697
+    ],
+    "chapters": [
+      14,
+      36
+    ]
+  },
+  {
+    "term": "Context compaction",
+    "source_pages": [
+      172
+    ],
+    "chapters": [
+      8
+    ]
+  },
+  {
+    "term": "Context engineering",
+    "source_pages": [
+      169
+    ],
+    "chapters": [
+      8
+    ]
+  },
+  {
+    "term": "Context manifest",
+    "source_pages": [
+      179,
+      515
+    ],
+    "chapters": [
+      8,
+      26
+    ]
+  },
+  {
+    "term": "Context window",
+    "source_pages": [
+      19,
+      170
+    ],
+    "chapters": [
+      1,
+      8
+    ]
+  },
+  {
+    "term": "Continuous batching",
+    "source_pages": [
+      578
+    ],
+    "chapters": [
+      30
+    ]
+  },
+  {
+    "term": "Corrective retrieval",
+    "source_pages": [
+      278
+    ],
+    "chapters": [
+      13
+    ]
+  },
+  {
+    "term": "Cost ledger",
+    "source_pages": [
+      552
+    ],
+    "chapters": [
+      28
+    ]
+  },
+  {
+    "term": "Cost per successful task",
+    "source_pages": [
+      543
+    ],
+    "chapters": [
+      28
+    ]
+  },
+  {
+    "term": "CrewAI",
+    "source_pages": [
+      603
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Critic",
+    "source_pages": [
+      66
+    ],
+    "chapters": [
+      3
+    ]
+  },
+  {
+    "term": "Cross-tenant access",
+    "source_pages": [
+      404,
+      756
+    ],
+    "chapters": [
+      20,
+      38
+    ]
+  },
+  {
+    "term": "Data classification",
+    "source_pages": [
+      436
+    ],
+    "chapters": [
+      22
+    ]
+  },
+  {
+    "term": "Data residency",
+    "source_pages": [
+      442
+    ],
+    "chapters": [
+      22
+    ]
+  },
+  {
+    "term": "Dead-letter queue",
+    "source_pages": [
+      460
+    ],
+    "chapters": [
+      23
+    ]
+  },
+  {
+    "term": "Degraded mode",
+    "source_pages": [
+      461
+    ],
+    "chapters": [
+      23
+    ]
+  },
+  {
+    "term": "Delegation",
+    "source_pages": [
+      312,
+      354
+    ],
+    "chapters": [
+      15,
+      17
+    ]
+  },
+  {
+    "term": "Dense retrieval",
+    "source_pages": [
+      198,
+      254,
+      546
+    ],
+    "chapters": [
+      9,
+      12,
+      28
+    ]
+  },
+  {
+    "term": "Deterministic replay",
+    "source_pages": [
+      343,
+      468,
+      517,
+      615,
+      732
+    ],
+    "chapters": [
+      16,
+      24,
+      26,
+      32,
+      37
+    ]
+  },
+  {
+    "term": "Durable execution",
+    "source_pages": [
+      342,
+      562,
+      732
+    ],
+    "chapters": [
+      16,
+      29,
+      37
+    ]
+  },
+  {
+    "term": "Elicitation (MCP)",
+    "source_pages": [
+      293
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Embeddings",
+    "source_pages": [
+      198
+    ],
+    "chapters": [
+      9
+    ]
+  },
+  {
+    "term": "Episodic memory",
+    "source_pages": [
+      192
+    ],
+    "chapters": [
+      9
+    ]
+  },
+  {
+    "term": "Escalation",
+    "source_pages": [
+      85,
+      338,
+      369,
+      462,
+      487,
+      753
+    ],
+    "chapters": [
+      4,
+      16,
+      18,
+      23,
+      25,
+      38
+    ]
+  },
+  {
+    "term": "Eval gate",
+    "source_pages": [
+      492,
+      778
+    ],
+    "chapters": [
+      25,
+      39
+    ]
+  },
+  {
+    "term": "Evaluation (evals)",
+    "source_pages": [
+      484,
+      544,
+      581,
+      589,
+      687,
+      752
+    ],
+    "chapters": [
+      25,
+      28,
+      30,
+      31,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "Evaluator\u2013optimizer",
+    "source_pages": [
+      76
+    ],
+    "chapters": [
+      3
+    ]
+  },
+  {
+    "term": "Event sourcing",
+    "source_pages": [
+      156
+    ],
+    "chapters": [
+      7
+    ]
+  },
+  {
+    "term": "Evidence ledger",
+    "source_pages": [
+      283,
+      785
+    ],
+    "chapters": [
+      13,
+      39
+    ]
+  },
+  {
+    "term": "Excessive agency",
+    "source_pages": [
+      396
+    ],
+    "chapters": [
+      19
+    ]
+  },
+  {
+    "term": "Fake model",
+    "source_pages": [
+      468
+    ],
+    "chapters": [
+      24
+    ]
+  },
+  {
+    "term": "Fan-out / fan-in",
+    "source_pages": [
+      340,
+      625
+    ],
+    "chapters": [
+      16,
+      32
+    ]
+  },
+  {
+    "term": "Few-shot examples",
+    "source_pages": [
+      92
+    ],
+    "chapters": [
+      4
+    ]
+  },
+  {
+    "term": "Function calling",
+    "source_pages": [
+      306
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Gemini Enterprise Agent Platform",
+    "source_pages": [
+      646
+    ],
+    "chapters": [
+      33
+    ]
+  },
+  {
+    "term": "Golden dataset",
+    "source_pages": [
+      264,
+      474,
+      484
+    ],
+    "chapters": [
+      12,
+      24,
+      25
+    ]
+  },
+  {
+    "term": "Golden trajectory",
+    "source_pages": [
+      474
+    ],
+    "chapters": [
+      24
+    ]
+  },
+  {
+    "term": "Graph orchestration",
+    "source_pages": [
+      331
+    ],
+    "chapters": [
+      16
+    ]
+  },
+  {
+    "term": "Groundedness / faithfulness",
+    "source_pages": [
+      263,
+      488
+    ],
+    "chapters": [
+      12,
+      25
+    ]
+  },
+  {
+    "term": "Guardrails",
+    "source_pages": [
+      435,
+      589,
+      730
+    ],
+    "chapters": [
+      22,
+      31,
+      37
+    ]
+  },
+  {
+    "term": "Hallucination",
+    "source_pages": [
+      29
+    ],
+    "chapters": [
+      1
+    ]
+  },
+  {
+    "term": "Handoff",
+    "source_pages": [
+      161,
+      319,
+      355,
+      588,
+      630,
+      730
+    ],
+    "chapters": [
+      7,
+      15,
+      17,
+      31,
+      32,
+      37
+    ]
+  },
+  {
+    "term": "Hidden tests",
+    "source_pages": [
+      779
+    ],
+    "chapters": [
+      39
+    ]
+  },
+  {
+    "term": "Hooks",
+    "source_pages": [
+      117
+    ],
+    "chapters": [
+      5
+    ]
+  },
+  {
+    "term": "Human-in-the-loop",
+    "source_pages": [
+      367,
+      621
+    ],
+    "chapters": [
+      18,
+      32
+    ]
+  },
+  {
+    "term": "Hybrid retrieval",
+    "source_pages": [
+      254
+    ],
+    "chapters": [
+      12
+    ]
+  },
+  {
+    "term": "Idempotency key",
+    "source_pages": [
+      137,
+      154,
+      228,
+      455,
+      560,
+      623
+    ],
+    "chapters": [
+      6,
+      7,
+      11,
+      23,
+      29,
+      32
+    ]
+  },
+  {
+    "term": "Indirect prompt injection",
+    "source_pages": [
+      388
+    ],
+    "chapters": [
+      19
+    ]
+  },
+  {
+    "term": "Instruction hierarchy",
+    "source_pages": [
+      86
+    ],
+    "chapters": [
+      4
+    ]
+  },
+  {
+    "term": "Instruction pack",
+    "source_pages": [
+      93
+    ],
+    "chapters": [
+      4
+    ]
+  },
+  {
+    "term": "Interrupt",
+    "source_pages": [
+      235,
+      341,
+      368,
+      589,
+      612
+    ],
+    "chapters": [
+      11,
+      16,
+      18,
+      31,
+      32
+    ]
+  },
+  {
+    "term": "JSON-RPC",
+    "source_pages": [
+      292
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Kafka",
+    "source_pages": [
+      654
+    ],
+    "chapters": [
+      33
+    ]
+  },
+  {
+    "term": "Kill switch",
+    "source_pages": [
+      532,
+      688,
+      752
+    ],
+    "chapters": [
+      27,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "KV cache",
+    "source_pages": [
+      578
+    ],
+    "chapters": [
+      30
+    ]
+  },
+  {
+    "term": "LangChain",
+    "source_pages": [
+      602
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "LangGraph",
+    "source_pages": [
+      590,
+      612
+    ],
+    "chapters": [
+      31,
+      32
+    ]
+  },
+  {
+    "term": "Latency budget",
+    "source_pages": [
+      674
+    ],
+    "chapters": [
+      34
+    ]
+  },
+  {
+    "term": "Lease (worker)",
+    "source_pages": [
+      556
+    ],
+    "chapters": [
+      29
+    ]
+  },
+  {
+    "term": "Least privilege",
+    "source_pages": [
+      141,
+      353,
+      386
+    ],
+    "chapters": [
+      6,
+      17,
+      19
+    ]
+  },
+  {
+    "term": "LlamaIndex",
+    "source_pages": [
+      602
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "LLM gateway",
+    "source_pages": [
+      290,
+      560,
+      572,
+      647,
+      691,
+      759
+    ],
+    "chapters": [
+      14,
+      29,
+      30,
+      33,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "LLM-as-judge",
+    "source_pages": [
+      259,
+      489
+    ],
+    "chapters": [
+      12,
+      25
+    ]
+  },
+  {
+    "term": "Long-term memory",
+    "source_pages": [
+      190
+    ],
+    "chapters": [
+      9
+    ]
+  },
+  {
+    "term": "Loop detection",
+    "source_pages": [
+      352,
+      460
+    ],
+    "chapters": [
+      17,
+      23
+    ]
+  },
+  {
+    "term": "MCP (Model Context Protocol)",
+    "source_pages": [
+      290,
+      322,
+      587,
+      711,
+      732,
+      767
+    ],
+    "chapters": [
+      14,
+      15,
+      31,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "MCP gateway",
+    "source_pages": [
+      291
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "MCP registry",
+    "source_pages": [
+      142,
+      210,
+      231,
+      304,
+      313
+    ],
+    "chapters": [
+      6,
+      10,
+      11,
+      14,
+      15
+    ]
+  },
+  {
+    "term": "Memory",
+    "source_pages": [
+      151,
+      170,
+      202,
+      370,
+      436,
+      631
+    ],
+    "chapters": [
+      7,
+      8,
+      9,
+      18,
+      22,
+      32
+    ]
+  },
+  {
+    "term": "Memory write gate",
+    "source_pages": [
+      196,
+      632
+    ],
+    "chapters": [
+      9,
+      32
+    ]
+  },
+  {
+    "term": "Microsoft Agent Framework",
+    "source_pages": [
+      602
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Model routing",
+    "source_pages": [
+      30,
+      110,
+      271,
+      539,
+      575,
+      614
+    ],
+    "chapters": [
+      1,
+      5,
+      13,
+      28,
+      30,
+      32
+    ]
+  },
+  {
+    "term": "Multi-agent systems",
+    "source_pages": [
+      352,
+      589
+    ],
+    "chapters": [
+      17,
+      31
+    ]
+  },
+  {
+    "term": "Multimodal agent",
+    "source_pages": [
+      676
+    ],
+    "chapters": [
+      34
+    ]
+  },
+  {
+    "term": "OAuth",
+    "source_pages": [
+      406
+    ],
+    "chapters": [
+      20
+    ]
+  },
+  {
+    "term": "Observability",
+    "source_pages": [
+      304,
+      507,
+      588,
+      654,
+      709,
+      732
+    ],
+    "chapters": [
+      14,
+      26,
+      31,
+      33,
+      36,
+      37
+    ]
+  },
+  {
+    "term": "OpenAI Agents SDK",
+    "source_pages": [
+      593
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "OpenTelemetry",
+    "source_pages": [
+      511,
+      589,
+      654
+    ],
+    "chapters": [
+      26,
+      31,
+      33
+    ]
+  },
+  {
+    "term": "OWASP LLM Top 10",
+    "source_pages": [
+      388
+    ],
+    "chapters": [
+      19
+    ]
+  },
+  {
+    "term": "Parallel tool calls",
+    "source_pages": [
+      135
+    ],
+    "chapters": [
+      6
+    ]
+  },
+  {
+    "term": "Pgvector",
+    "source_pages": [
+      647
+    ],
+    "chapters": [
+      33
+    ]
+  },
+  {
+    "term": "PII",
+    "source_pages": [
+      437
+    ],
+    "chapters": [
+      22
+    ]
+  },
+  {
+    "term": "Plan-and-execute",
+    "source_pages": [
+      73
+    ],
+    "chapters": [
+      3
+    ]
+  },
+  {
+    "term": "Policy-as-code",
+    "source_pages": [
+      404,
+      706
+    ],
+    "chapters": [
+      20,
+      36
+    ]
+  },
+  {
+    "term": "Precondition re-validation",
+    "source_pages": [
+      370,
+      701,
+      732,
+      762
+    ],
+    "chapters": [
+      18,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Prefix caching",
+    "source_pages": [
+      175,
+      547
+    ],
+    "chapters": [
+      8,
+      28
+    ]
+  },
+  {
+    "term": "Progress file",
+    "source_pages": [
+      791
+    ],
+    "chapters": [
+      39
+    ]
+  },
+  {
+    "term": "Progressive disclosure",
+    "source_pages": [
+      216
+    ],
+    "chapters": [
+      10
+    ]
+  },
+  {
+    "term": "Prompt injection",
+    "source_pages": [
+      88,
+      128,
+      388,
+      468,
+      499,
+      701
+    ],
+    "chapters": [
+      4,
+      6,
+      19,
+      24,
+      25,
+      36
+    ]
+  },
+  {
+    "term": "Property-based testing",
+    "source_pages": [
+      468,
+      702,
+      730
+    ],
+    "chapters": [
+      24,
+      36,
+      37
+    ]
+  },
+  {
+    "term": "Provenance",
+    "source_pages": [
+      179,
+      187,
+      440,
+      509,
+      632
+    ],
+    "chapters": [
+      8,
+      9,
+      22,
+      26,
+      32
+    ]
+  },
+  {
+    "term": "Quantisation",
+    "source_pages": [
+      578
+    ],
+    "chapters": [
+      30
+    ]
+  },
+  {
+    "term": "Query rewriting",
+    "source_pages": [
+      275
+    ],
+    "chapters": [
+      13
+    ]
+  },
+  {
+    "term": "RAG (retrieval-augmented generation)",
+    "source_pages": [
+      262,
+      270,
+      589,
+      685,
+      698
+    ],
+    "chapters": [
+      12,
+      13,
+      31,
+      35,
+      36
+    ]
+  },
+  {
+    "term": "Rate limits",
+    "source_pages": [
+      19,
+      546
+    ],
+    "chapters": [
+      1,
+      28
+    ]
+  },
+  {
+    "term": "RBAC",
+    "source_pages": [
+      409
+    ],
+    "chapters": [
+      20
+    ]
+  },
+  {
+    "term": "ReAct",
+    "source_pages": [
+      67
+    ],
+    "chapters": [
+      3
+    ]
+  },
+  {
+    "term": "Reader/actor split",
+    "source_pages": [
+      397
+    ],
+    "chapters": [
+      19
+    ]
+  },
+  {
+    "term": "Recursion limit",
+    "source_pages": [
+      632
+    ],
+    "chapters": [
+      32
+    ]
+  },
+  {
+    "term": "Reducer",
+    "source_pages": [
+      156,
+      331,
+      356,
+      589,
+      614
+    ],
+    "chapters": [
+      7,
+      16,
+      17,
+      31,
+      32
+    ]
+  },
+  {
+    "term": "Reflection",
+    "source_pages": [
+      76,
+      684
+    ],
+    "chapters": [
+      3,
+      35
+    ]
+  },
+  {
+    "term": "Regression set",
+    "source_pages": [
+      486,
+      526,
+      703,
+      732,
+      751
+    ],
+    "chapters": [
+      25,
+      27,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Remote agent",
+    "source_pages": [
+      310,
+      509
+    ],
+    "chapters": [
+      15,
+      26
+    ]
+  },
+  {
+    "term": "Reranker",
+    "source_pages": [
+      258
+    ],
+    "chapters": [
+      12
+    ]
+  },
+  {
+    "term": "Retry budget",
+    "source_pages": [
+      454
+    ],
+    "chapters": [
+      23
+    ]
+  },
+  {
+    "term": "Retry policy",
+    "source_pages": [
+      37,
+      110,
+      140,
+      342,
+      452,
+      632
+    ],
+    "chapters": [
+      1,
+      5,
+      6,
+      16,
+      23,
+      32
+    ]
+  },
+  {
+    "term": "Risk score",
+    "source_pages": [
+      303,
+      377
+    ],
+    "chapters": [
+      14,
+      18
+    ]
+  },
+  {
+    "term": "Rollback",
+    "source_pages": [
+      96,
+      375,
+      531,
+      699,
+      732,
+      752
+    ],
+    "chapters": [
+      4,
+      18,
+      27,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Router",
+    "source_pages": [
+      71,
+      274,
+      334,
+      355
+    ],
+    "chapters": [
+      3,
+      13,
+      16,
+      17
+    ]
+  },
+  {
+    "term": "Run state",
+    "source_pages": [
+      150,
+      189,
+      562
+    ],
+    "chapters": [
+      7,
+      9,
+      29
+    ]
+  },
+  {
+    "term": "Runbook",
+    "source_pages": [
+      368,
+      525,
+      685,
+      699,
+      732,
+      762
+    ],
+    "chapters": [
+      18,
+      27,
+      35,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Saga",
+    "source_pages": [
+      458
+    ],
+    "chapters": [
+      23
+    ]
+  },
+  {
+    "term": "Sampling (MCP)",
+    "source_pages": [
+      293
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Sandbox",
+    "source_pages": [
+      386,
+      418,
+      564,
+      686,
+      791
+    ],
+    "chapters": [
+      19,
+      21,
+      29,
+      35,
+      39
+    ]
+  },
+  {
+    "term": "Schema drift",
+    "source_pages": [
+      175,
+      299,
+      393,
+      523,
+      711
+    ],
+    "chapters": [
+      8,
+      14,
+      19,
+      27,
+      36
+    ]
+  },
+  {
+    "term": "Scopes (OAuth)",
+    "source_pages": [
+      86,
+      134,
+      300,
+      312,
+      403,
+      732
+    ],
+    "chapters": [
+      4,
+      6,
+      14,
+      15,
+      20,
+      37
+    ]
+  },
+  {
+    "term": "Secrets management",
+    "source_pages": [
+      180,
+      406,
+      418,
+      654,
+      670,
+      791
+    ],
+    "chapters": [
+      8,
+      20,
+      21,
+      33,
+      34,
+      39
+    ]
+  },
+  {
+    "term": "Self-hosted inference",
+    "source_pages": [
+      572
+    ],
+    "chapters": [
+      30
+    ]
+  },
+  {
+    "term": "Semantic cache",
+    "source_pages": [
+      540
+    ],
+    "chapters": [
+      28
+    ]
+  },
+  {
+    "term": "Semantic memory",
+    "source_pages": [
+      192
+    ],
+    "chapters": [
+      9
+    ]
+  },
+  {
+    "term": "Send (LangGraph)",
+    "source_pages": [
+      613
+    ],
+    "chapters": [
+      32
+    ]
+  },
+  {
+    "term": "Session",
+    "source_pages": [
+      589
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Shadow release",
+    "source_pages": [
+      299,
+      528
+    ],
+    "chapters": [
+      14,
+      27
+    ]
+  },
+  {
+    "term": "Skill",
+    "source_pages": [
+      210,
+      304,
+      320,
+      698,
+      732
+    ],
+    "chapters": [
+      10,
+      14,
+      15,
+      36,
+      37
+    ]
+  },
+  {
+    "term": "Slice analysis",
+    "source_pages": [
+      353,
+      493,
+      525,
+      688,
+      757
+    ],
+    "chapters": [
+      17,
+      25,
+      27,
+      35,
+      38
+    ]
+  },
+  {
+    "term": "SLO / SLI",
+    "source_pages": [
+      524,
+      703,
+      732,
+      751
+    ],
+    "chapters": [
+      27,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Spring AI",
+    "source_pages": [
+      596
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "SQL agent",
+    "source_pages": [
+      281
+    ],
+    "chapters": [
+      13
+    ]
+  },
+  {
+    "term": "Stop reason",
+    "source_pages": [
+      35
+    ],
+    "chapters": [
+      1
+    ]
+  },
+  {
+    "term": "Strands Agents",
+    "source_pages": [
+      602
+    ],
+    "chapters": [
+      31
+    ]
+  },
+  {
+    "term": "Streamable HTTP",
+    "source_pages": [
+      297
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Streaming",
+    "source_pages": [
+      27,
+      112,
+      318,
+      633,
+      674
+    ],
+    "chapters": [
+      1,
+      5,
+      15,
+      32,
+      34
+    ]
+  },
+  {
+    "term": "Structured output",
+    "source_pages": [
+      23
+    ],
+    "chapters": [
+      1
+    ]
+  },
+  {
+    "term": "Subgraph",
+    "source_pages": [
+      589,
+      626
+    ],
+    "chapters": [
+      31,
+      32
+    ]
+  },
+  {
+    "term": "Super-step",
+    "source_pages": [
+      614
+    ],
+    "chapters": [
+      32
+    ]
+  },
+  {
+    "term": "Supervisor pattern",
+    "source_pages": [
+      67,
+      354,
+      630,
+      730
+    ],
+    "chapters": [
+      3,
+      17,
+      32,
+      37
+    ]
+  },
+  {
+    "term": "Synthetic data",
+    "source_pages": [
+      484
+    ],
+    "chapters": [
+      25
+    ]
+  },
+  {
+    "term": "Task lifecycle (A2A)",
+    "source_pages": [
+      311
+    ],
+    "chapters": [
+      15
+    ]
+  },
+  {
+    "term": "Temperature",
+    "source_pages": [
+      19
+    ],
+    "chapters": [
+      1
+    ]
+  },
+  {
+    "term": "Temporal",
+    "source_pages": [
+      342
+    ],
+    "chapters": [
+      16
+    ]
+  },
+  {
+    "term": "Tenant",
+    "source_pages": [
+      180,
+      198,
+      404,
+      526,
+      539,
+      555
+    ],
+    "chapters": [
+      8,
+      9,
+      20,
+      27,
+      28,
+      29
+    ]
+  },
+  {
+    "term": "Threat modelling",
+    "source_pages": [
+      388,
+      687,
+      716,
+      767
+    ],
+    "chapters": [
+      19,
+      35,
+      36,
+      38
+    ]
+  },
+  {
+    "term": "Time travel",
+    "source_pages": [
+      620
+    ],
+    "chapters": [
+      32
+    ]
+  },
+  {
+    "term": "Token exchange",
+    "source_pages": [
+      302,
+      406
+    ],
+    "chapters": [
+      14,
+      20
+    ]
+  },
+  {
+    "term": "Tokens",
+    "source_pages": [
+      21,
+      172,
+      302,
+      406,
+      542,
+      701
+    ],
+    "chapters": [
+      1,
+      8,
+      14,
+      20,
+      28,
+      36
+    ]
+  },
+  {
+    "term": "Tool annotations",
+    "source_pages": [
+      298
+    ],
+    "chapters": [
+      14
+    ]
+  },
+  {
+    "term": "Tool contract",
+    "source_pages": [
+      108,
+      144,
+      220,
+      295,
+      471,
+      728
+    ],
+    "chapters": [
+      5,
+      6,
+      10,
+      14,
+      24,
+      37
+    ]
+  },
+  {
+    "term": "Tool description",
+    "source_pages": [
+      132
+    ],
+    "chapters": [
+      6
+    ]
+  },
+  {
+    "term": "Tool poisoning",
+    "source_pages": [
+      188,
+      304,
+      393
+    ],
+    "chapters": [
+      9,
+      14,
+      19
+    ]
+  },
+  {
+    "term": "Tool registry",
+    "source_pages": [
+      128
+    ],
+    "chapters": [
+      6
+    ]
+  },
+  {
+    "term": "Trace / span",
+    "source_pages": [
+      354,
+      438,
+      509,
+      699,
+      732,
+      755
+    ],
+    "chapters": [
+      17,
+      22,
+      26,
+      36,
+      37,
+      38
+    ]
+  },
+  {
+    "term": "Trajectory",
+    "source_pages": [
+      468,
+      487,
+      756
+    ],
+    "chapters": [
+      24,
+      25,
+      38
+    ]
+  },
+  {
+    "term": "Trust boundary",
+    "source_pages": [
+      399,
+      767,
+      793
+    ],
+    "chapters": [
+      19,
+      38,
+      39
+    ]
+  },
+  {
+    "term": "TTFT (time to first token)",
+    "source_pages": [
+      28
+    ],
+    "chapters": [
+      1
+    ]
+  },
+  {
+    "term": "Unanswerable set",
+    "source_pages": [
+      786
+    ],
+    "chapters": [
+      39
+    ]
+  },
+  {
+    "term": "Untrusted content",
+    "source_pages": [
+      22,
+      85,
+      141,
+      387,
+      418,
+      666
+    ],
+    "chapters": [
+      1,
+      4,
+      6,
+      19,
+      21,
+      34
+    ]
+  },
+  {
+    "term": "vLLM",
+    "source_pages": [
+      578
+    ],
+    "chapters": [
+      30
+    ]
+  },
+  {
+    "term": "Voice agent",
+    "source_pages": [
+      673
+    ],
+    "chapters": [
+      34
+    ]
+  },
+  {
+    "term": "Wilson interval",
+    "source_pages": [
+      493
+    ],
+    "chapters": [
+      25
+    ]
+  },
+  {
+    "term": "Workflow vs agent",
+    "source_pages": [
+      44,
+      66,
+      342,
+      562,
+      645,
+      706
+    ],
+    "chapters": [
+      2,
+      3,
+      16,
+      29,
+      33,
+      36
+    ]
+  },
+  {
+    "term": "Workload identity",
+    "source_pages": [
+      406,
+      565,
+      658
+    ],
+    "chapters": [
+      20,
+      29,
+      33
+    ]
+  }
+]

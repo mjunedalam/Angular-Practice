@@ -1,0 +1,12 @@
+Agentic AI Engineering - companion 1.0-rc.1
+Prepared 17 October 2026
+
+A general code reuse licence has not yet been selected by the author.
+This review candidate does not supply an MIT or other open-source licence.
+Ask Muhammed Juned Alam at juned.alam.dev@gmail.com about reuse terms.
+
+Third-party dependencies are installed separately, not bundled here. Their
+own licences apply. Bundled fonts in the full editable source retain their
+SIL Open Font License notices; this does not license the manuscript or code.
+
+Resolve and replace this status notice before public release.

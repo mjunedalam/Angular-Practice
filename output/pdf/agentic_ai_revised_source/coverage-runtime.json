@@ -1,0 +1,1336 @@
+[
+  {
+    "chapter": 15,
+    "source_title": "15. A2A & Remote-Agent Interoperability",
+    "source_pages": [
+      309,
+      328
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/15.md",
+    "word_count": 2929,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Why agents are not just tools",
+        "revised_heading": "Why a remote agent is more than a simple tool call",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Identity, discovery and capability cards",
+        "revised_heading": "Identity, discovery and capability cards",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Task delegation, status and artifacts",
+        "revised_heading": "Task delegation, status, messages and artifacts",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Synchronous, streaming and asynchronous interaction",
+        "revised_heading": "Synchronous, streaming and asynchronous interaction",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Handoffs versus remote-agent calls",
+        "revised_heading": "Handoffs versus remote-agent calls",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Authentication, authorisation, tenant boundaries and trust",
+        "revised_heading": "Authentication, authorisation and tenant boundaries",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Timeouts, partial failure, retries and idempotent delegation",
+        "revised_heading": "Timeouts, partial failure and idempotent delegation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Protocol gateways, versioning and cross-platform interoperability",
+        "revised_heading": "Gateways, versions and cross-platform interoperability",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "MCP versus A2A",
+        "revised_heading": "MCP versus A2A, and the final design choice",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: supervisor delegating to a remote worker",
+        "revised_heading": "Timeouts, partial failure and idempotent delegation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-05",
+      "runtime-06",
+      "runtime-07",
+      "runtime-08"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 16,
+    "source_title": "16. Workflow & Graph Orchestration",
+    "source_pages": [
+      329,
+      349
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/16.md",
+    "word_count": 2955,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Graph shapes",
+        "revised_heading": "Graph shapes and the work they fit",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Nodes, edges, routers and loop guards",
+        "revised_heading": "Nodes, edges, routers and loop guards",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "A minimal graph engine",
+        "revised_heading": "A minimal graph engine and its exact limits",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: plan → execute → evaluate → retry → finish",
+        "revised_heading": "Build it: plan, investigate, evaluate, act and verify",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "State passing, reducers and joins",
+        "revised_heading": "State passing, reducers and joins",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Fan-out / fan-in and parallel branches",
+        "revised_heading": "Fan-out, fan-in and parallel branches",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interrupts, checkpointing, persistence and resume",
+        "revised_heading": "Interrupts, checkpoints and resume",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Long-running timers, waits and durable execution",
+        "revised_heading": "Long-running timers and durable execution",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "When to use a graph versus a free-form loop",
+        "revised_heading": "Choosing a graph or a free-form loop",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Choosing a graph or a free-form loop",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-10",
+      "runtime-11"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 17,
+    "source_title": "17. Multi-Agent Architectures",
+    "source_pages": [
+      350,
+      365
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/17.md",
+    "word_count": 3061,
+    "source_heading_mapping": [
+      {
+        "source_heading": "When multiple agents are justified",
+        "revised_heading": "When multiple agents are justified",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Core patterns",
+        "revised_heading": "Core patterns and their ownership rules",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Shared state versus message passing",
+        "revised_heading": "Shared state versus message passing",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: supervisor with research, data and action agents",
+        "revised_heading": "Build it: supervisor with research, data and action workers",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Parallel specialists and ensembles",
+        "revised_heading": "Parallel specialists and ensembles",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Coordination overhead, duplicate work and emergent loops",
+        "revised_heading": "Coordination overhead, duplicate work and loop detection",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Termination, ownership and accountability",
+        "revised_heading": "Termination, ownership and accountability",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    },
+    "diagram_semantic_fixes": [
+      "Terminal outcomes do not loop; graph form agrees with explicit state/continuation semantics."
+    ]
+  },
+  {
+    "chapter": 18,
+    "source_title": "18. Human-in-the-Loop, Approval & Escalation",
+    "source_pages": [
+      366,
+      383
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/18.md",
+    "word_count": 2913,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Where humans belong",
+        "revised_heading": "Where humans belong",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Approval interrupts and resumable waits",
+        "revised_heading": "Approval interrupts and resumable waits",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Risk-based approval policies",
+        "revised_heading": "Risk-based approval policies",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Escalation, override, rejection and correction",
+        "revised_heading": "Escalation, override, rejection and correction",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Approval UX: presenting evidence so approvers decide well",
+        "revised_heading": "Approval UX: evidence for an informed decision",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Human feedback for evaluation and improvement",
+        "revised_heading": "Human feedback for evaluation and improvement",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "SLAs, expiry and reassignment",
+        "revised_heading": "SLAs, expiry and reassignment",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Audit trails and accountability",
+        "revised_heading": "Audit trails, accountability and failure modes",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Audit trails, accountability and failure modes",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-01",
+      "runtime-02"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 19,
+    "source_title": "19. Agent Security Fundamentals",
+    "source_pages": [
+      384,
+      401
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/19.md",
+    "word_count": 3005,
+    "source_heading_mapping": [
+      {
+        "source_heading": "The agent attack surface",
+        "revised_heading": "The agent attack surface",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Threat taxonomies as a checklist",
+        "revised_heading": "Threat taxonomies as a checklist",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Prompt injection and indirect prompt injection",
+        "revised_heading": "Direct and indirect prompt injection",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Tool poisoning and malicious tool outputs",
+        "revised_heading": "Tool poisoning and malicious tool outputs",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Data exfiltration and secret leakage",
+        "revised_heading": "Data exfiltration and secret leakage",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "SSRF, path traversal and unsafe network or file access",
+        "revised_heading": "SSRF, path traversal and unsafe access",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Code, shell and browser execution risks",
+        "revised_heading": "Code, shell and browser execution risks",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Capability isolation, allowlists and least privilege",
+        "revised_heading": "Capability isolation, allowlists and least privilege",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Input and output sanitisation and untrusted-content labelling",
+        "revised_heading": "Sanitisation, labelling and output handling",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Threat modelling and security test cases",
+        "revised_heading": "Threat modelling and security test cases",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-12"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 20,
+    "source_title": "20. Identity, Authorization & Delegated Access",
+    "source_pages": [
+      402,
+      416
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/20.md",
+    "word_count": 2769,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Three identities in every agent action",
+        "revised_heading": "Three identities in an agent action",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "OAuth 2.0, OIDC, service identities and workload identity",
+        "revised_heading": "OAuth, OIDC and workload identity",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Delegated authorisation and scoped tokens",
+        "revised_heading": "Delegated authorisation and scoped tokens",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "RBAC, ABAC and policy-as-code",
+        "revised_heading": "RBAC, ABAC and relationship-based policy",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Per-tool authorisation and resource-level permissions",
+        "revised_heading": "Per-tool, resource and argument permissions",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Multi-tenant isolation",
+        "revised_heading": "Multi-tenant isolation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Credential lifetimes, rotation and audit",
+        "revised_heading": "Credential lifetimes, rotation and audit",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: user → agent → tool delegated auth",
+        "revised_heading": "Build it: review the complete delegated path",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-13"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 21,
+    "source_title": "21. Sandboxing & Safe Execution",
+    "source_pages": [
+      417,
+      432
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/21.md",
+    "word_count": 2856,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Why application-level validation is not enough",
+        "revised_heading": "Why application-level validation is not enough",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Isolation models",
+        "revised_heading": "Isolation models and their trade-offs",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Resource controls: filesystem, network, CPU, memory, time",
+        "revised_heading": "Resource controls: files, network, CPU, memory and time",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Ephemeral workspaces and cleanup",
+        "revised_heading": "Ephemeral workspaces and cleanup",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Browser and computer-use isolation",
+        "revised_heading": "Browser and computer-use isolation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Code execution, package installation and dependency controls",
+        "revised_heading": "Package installation and dependency controls",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Artefact scanning and output validation",
+        "revised_heading": "Artifact scanning and output validation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Egress control and secret separation",
+        "revised_heading": "Egress control and secret separation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: an isolated Python execution tool",
+        "revised_heading": "Build it: an isolated Python execution tool",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes and design review",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-14"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 3,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 22,
+    "source_title": "22. Enterprise Governance, Privacy & Compliance",
+    "source_pages": [
+      433,
+      449
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/22.md",
+    "word_count": 3049,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Governance versus guardrails",
+        "revised_heading": "Governance versus guardrails",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Data classification and policy enforcement",
+        "revised_heading": "Data classification and policy enforcement",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "PII, PHI and confidential-data handling",
+        "revised_heading": "PII, PHI and confidential-data handling",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Retention, deletion and purpose limitation",
+        "revised_heading": "Retention, deletion and purpose limitation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Auditability and decision/action provenance",
+        "revised_heading": "Auditability and decision/action provenance",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Tenant isolation, data residency and provider boundaries",
+        "revised_heading": "Tenant isolation, residency and provider boundaries",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Policy versioning, approvals and exceptions",
+        "revised_heading": "Policy versioning, approvals and exceptions",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Governance review before increasing autonomy",
+        "revised_heading": "Governance review before increasing autonomy",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Regulatory and standards landscape",
+        "revised_heading": "Regulatory and standards landscape",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: a data-classification matrix and audit schema",
+        "revised_heading": "Build it: a governance starter kit",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-15"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    },
+    "diagram_semantic_fixes": [
+      "Terminal outcomes do not loop; graph form agrees with explicit state/continuation semantics."
+    ]
+  },
+  {
+    "chapter": 23,
+    "source_title": "23. Reliability Engineering for Agents",
+    "source_pages": [
+      450,
+      465
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/23.md",
+    "word_count": 2939,
+    "source_heading_mapping": [
+      {
+        "source_heading": "The failure landscape",
+        "revised_heading": "The failure landscape",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Timeouts, retries, backoff, jitter and retry budgets",
+        "revised_heading": "Timeouts, retries, backoff and retry budgets",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Idempotency keys and duplicate side-effect prevention",
+        "revised_heading": "Idempotency keys and duplicate side effects",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Circuit breakers, dependency health and fallbacks",
+        "revised_heading": "Circuit breakers, dependency health and fallbacks",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Compensation and saga-style recovery",
+        "revised_heading": "Compensation and saga-style recovery",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Checkpoint and resume for long-running tasks",
+        "revised_heading": "Checkpoints and resume for long-running tasks",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Dead-letter handling and manual recovery",
+        "revised_heading": "Dead-letter handling and manual recovery",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Loop detection and multi-dimensional budgets",
+        "revised_heading": "Loop detection and multi-dimensional budgets",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Graceful degradation and partial success",
+        "revised_heading": "Graceful degradation and partial success",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Retry versus replan",
+        "revised_heading": "Retry versus replan",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-03",
+      "runtime-04",
+      "runtime-09",
+      "runtime-22"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    },
+    "diagram_semantic_fixes": [
+      "Terminal outcomes do not loop; graph form agrees with explicit state/continuation semantics."
+    ]
+  },
+  {
+    "chapter": 24,
+    "source_title": "24. Agent Testing Strategy",
+    "source_pages": [
+      466,
+      481
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/24.md",
+    "word_count": 2800,
+    "source_heading_mapping": [
+      {
+        "source_heading": "The agent test pyramid",
+        "revised_heading": "The agent test pyramid",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Unit tests for pure logic and validators",
+        "revised_heading": "Unit tests for pure logic and validators",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Tool contract tests and provider adapter tests",
+        "revised_heading": "Tool contract and provider adapter tests",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "State-machine and graph path tests",
+        "revised_heading": "State-machine and graph path tests",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Simulation and fake-model tests",
+        "revised_heading": "Simulation and property-based fake-model tests",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Golden trajectory tests",
+        "revised_heading": "Golden trajectory tests",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Fault injection and chaos-style dependency tests",
+        "revised_heading": "Fault injection and chaos-style tests",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Adversarial security tests and prompt-injection suites",
+        "revised_heading": "Adversarial security and prompt-injection suites",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Deterministic replay and regression baselines",
+        "revised_heading": "Deterministic replay and regression baselines",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Wiring it into CI",
+        "revised_heading": "Wiring the layers into CI",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-16"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 25,
+    "source_title": "25. Evaluation & Quality Measurement",
+    "source_pages": [
+      482,
+      505
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/25.md",
+    "word_count": 3659,
+    "source_heading_mapping": [
+      {
+        "source_heading": "What to evaluate",
+        "revised_heading": "What to evaluate",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Tool-selection and argument correctness",
+        "revised_heading": "Tool selection and argument correctness",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Trajectory quality and unnecessary steps",
+        "revised_heading": "Trajectory quality and unnecessary steps",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Goal success, groundedness, factuality, safety and policy compliance",
+        "revised_heading": "Goal success, grounding, factuality, safety and policy",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Retrieval and evidence quality",
+        "revised_heading": "Retrieval and evidence quality",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Datasets: golden, synthetic and adversarial",
+        "revised_heading": "Golden, production, synthetic and adversarial datasets",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "LLM-as-judge calibration and human review",
+        "revised_heading": "LLM-as-judge calibration and human review",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Offline evals, online evals and CI quality gates",
+        "revised_heading": "Offline evaluations, online monitoring and quality gates",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Statistical confidence, slice analysis and failure taxonomies",
+        "revised_heading": "Confidence intervals and independent cases",
+        "treatment": "Substantive topic rewritten in connected prose.",
+        "additional_revised_headings": [
+          "Paired comparisons, slices and failure taxonomies"
+        ]
+      },
+      {
+        "source_heading": "Build it: a support-agent eval harness",
+        "revised_heading": "Build it: a support-agent evaluation harness",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Worked example: from golden set to release decision",
+        "revised_heading": "Worked example: from cases to a release decision",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Evaluating harness changes",
+        "revised_heading": "Evaluating harness changes",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-17"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked; Wilson pure arithmetic and invalid-input guards executed successfully. Provider/tool pseudocode not executed."
+    }
+  },
+  {
+    "chapter": 26,
+    "source_title": "26. Observability for Agent Systems",
+    "source_pages": [
+      506,
+      520
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/26.md",
+    "word_count": 2827,
+    "source_heading_mapping": [
+      {
+        "source_heading": "The telemetry model",
+        "revised_heading": "The telemetry model",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Span design for agents",
+        "revised_heading": "Span design for agents",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: instrumenting the harness with OpenTelemetry",
+        "revised_heading": "Build it: instrumentation with OpenTelemetry",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Metrics that matter",
+        "revised_heading": "Metrics that matter",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Provenance: prompt, context, configuration and model versions",
+        "revised_heading": "Provenance: prompt, context and configuration versions",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Redaction and privacy in telemetry",
+        "revised_heading": "Redaction and privacy in telemetry",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Agent-native trace views",
+        "revised_heading": "Agent-native trace views",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Linking traces to evals and incidents",
+        "revised_heading": "Linking traces to evaluations and incidents",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Debugging a bad trajectory: a worked example",
+        "revised_heading": "Debugging a bad trajectory: a worked example",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-18"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 27,
+    "source_title": "27. AgentOps & Production Operations",
+    "source_pages": [
+      521,
+      537
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/27.md",
+    "word_count": 2897,
+    "source_heading_mapping": [
+      {
+        "source_heading": "What makes agent operations different",
+        "revised_heading": "What makes agent operations different",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "SLOs and SLIs for agents",
+        "revised_heading": "SLOs and SLIs for agents",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Runbooks, alerting and incident response",
+        "revised_heading": "Runbooks, alerting and incident response",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Rollout management for prompts, policies, models and configuration",
+        "revised_heading": "Rollouts for prompts, policies, models and configuration",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Canary, shadow and staged releases",
+        "revised_heading": "Shadow, canary and staged release",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Feature flags and autonomy-level controls",
+        "revised_heading": "Feature flags and autonomy controls",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Online quality monitoring and drift detection",
+        "revised_heading": "Online quality monitoring and drift",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Rollback and kill switches",
+        "revised_heading": "Rollback and kill switches",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Capacity planning and dependency quotas",
+        "revised_heading": "Capacity and dependency quotas",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Build it: a production runbook skeleton",
+        "revised_heading": "Build it: operate one release end to end",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-19"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 28,
+    "source_title": "28. Cost, Latency & Model Routing Engineering",
+    "source_pages": [
+      538,
+      553
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/28.md",
+    "word_count": 2894,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Where the money goes",
+        "revised_heading": "Where the money goes",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Token and tool-call cost accounting",
+        "revised_heading": "Token and tool-call cost accounting",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Model tiering and task-aware routing",
+        "revised_heading": "Model tiering and task-aware routing",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Provider and model fallback policies",
+        "revised_heading": "Provider and model fallback policies",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Caching: prefix, semantic and result caches",
+        "revised_heading": "Prefix, exact, semantic and tool caches",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Context compression and unnecessary-loop detection",
+        "revised_heading": "Context compression and loop detection",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Batch and parallel execution trade-offs",
+        "revised_heading": "Batching, parallelism and latency",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Budget enforcement per user, tenant and run",
+        "revised_heading": "Budget enforcement per user, tenant and run",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Quality versus cost versus latency",
+        "revised_heading": "Quality versus cost versus latency",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-20",
+      "runtime-21"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 29,
+    "source_title": "29. Production Agent Platform Architecture",
+    "source_pages": [
+      554,
+      570
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/29.md",
+    "word_count": 3005,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Reference architecture",
+        "revised_heading": "Reference architecture and separation of responsibility",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "The agent gateway; synchronous versus asynchronous execution",
+        "revised_heading": "The gateway: synchronous and asynchronous execution",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Workers, queues and backpressure",
+        "revised_heading": "Workers, queues and backpressure",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Durable workflows for long-running tasks",
+        "revised_heading": "Durable workflows for long-running tasks",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "State, checkpoint and object-store patterns",
+        "revised_heading": "State, checkpoints and object stores",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Vector and search architecture and multi-tenancy",
+        "revised_heading": "Vector/search architecture and multi-tenancy",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Containers, Kubernetes/OpenShift, autoscaling and isolation",
+        "revised_heading": "Kubernetes/OpenShift, autoscaling and isolation",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "CI/CD, infrastructure as code, GitOps and environment promotion",
+        "revised_heading": "CI/CD, infrastructure as code and GitOps",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Secret management, network policy and service identity",
+        "revised_heading": "Secrets, network policy and service identity",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "High availability, disaster recovery, backup and regional design",
+        "revised_heading": "HA, disaster recovery and regional design",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Scaling a stateful agent horizontally",
+        "revised_heading": "Scaling a stateful agent horizontally",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-22"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  },
+  {
+    "chapter": 30,
+    "source_title": "30. LLM Gateway, Provider Abstraction & Self-Hosted Inference",
+    "source_pages": [
+      571,
+      584
+    ],
+    "revised_file": "output/pdf/agentic_ai_revised_source/chapters/30.md",
+    "word_count": 3117,
+    "source_heading_mapping": [
+      {
+        "source_heading": "Why an LLM gateway",
+        "revised_heading": "Why an LLM gateway",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Provider adapters and OpenAI-compatible interfaces",
+        "revised_heading": "Provider adapters and compatible interfaces",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Routing, quotas, fallback, caching and policy enforcement",
+        "revised_heading": "Routing, quotas, fallback, caching and policy",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Managed APIs versus self-hosted serving",
+        "revised_heading": "Managed APIs versus self-hosted serving",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "How high-throughput serving works",
+        "revised_heading": "How high-throughput serving works",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Scalable serving on Kubernetes",
+        "revised_heading": "Scalable serving on Kubernetes",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Observability, cost and model lifecycle for inference",
+        "revised_heading": "Observability, cost and model lifecycle",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "When to fine-tune or distil small models",
+        "revised_heading": "When to fine-tune or distil small models",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Avoiding provider lock-in",
+        "revised_heading": "Avoiding provider lock-in",
+        "treatment": "Substantive topic rewritten in connected prose."
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Self-checks",
+        "treatment": "Recall drills and repeated takeaways integrated into worked prose, checks and exercises."
+      }
+    ],
+    "corrected_audit_ids": [
+      "runtime-23",
+      "runtime-24"
+    ],
+    "limitations": [
+      "Compact code is explicitly labelled as pseudocode or teaching interface; no production runtime or benchmark execution is claimed."
+    ],
+    "validation": {
+      "diagram_blocks": 4,
+      "answered_checks": 4,
+      "exercises_with_solutions": 3,
+      "python_snippets": "AST syntax checked only; not executed as production implementations"
+    }
+  }
+]

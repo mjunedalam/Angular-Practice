@@ -1,0 +1,5 @@
+Ch24: executed_at=10; decided_at=20; expires_at=30; problems= []
+OpenTelemetry SDK: 1.45.1
+Ch26 manuscript: [{'span': 'agent.model.call', 'message_leaks': True, 'stack_leaks': True, 'status_leaks': True}]
+Ch26 both flags off (in-memory change only): [{'span': 'agent.model.call', 'message_leaks': False, 'stack_leaks': False, 'status_leaks': False}]
+Ch26 fixed child with default enclosing span: [{'span': 'agent.model.call', 'message_leaks': False, 'stack_leaks': False, 'status_leaks': False}, {'span': 'outer.default', 'message_leaks': True, 'stack_leaks': True, 'status_leaks': True}]

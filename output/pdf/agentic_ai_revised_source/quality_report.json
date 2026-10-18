@@ -1,0 +1,28 @@
+{
+  "pdf": "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/pdf/Agentic_AI_Engineering_revised.pdf",
+  "pages": 641,
+  "chapters": 39,
+  "chapter_source_words": 117143,
+  "chapter_diagrams": 141,
+  "total_diagrams": 146,
+  "self_checks": 156,
+  "exercises": 117,
+  "code_units": 61,
+  "intact_page_units": 2293,
+  "text_fragments_checked": 4926,
+  "diagram_labels_checked": 1585,
+  "diagram_forms": {
+    "flow": 21,
+    "boundary": 17,
+    "layers": 13,
+    "comparison": 24,
+    "anatomy": 11,
+    "cycle": 6,
+    "network": 10,
+    "state": 10,
+    "timeline": 16,
+    "budget": 7,
+    "sequence": 11
+  },
+  "issues": []
+}

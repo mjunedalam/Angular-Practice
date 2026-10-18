@@ -1,0 +1,99 @@
+{
+  "chapter": 11,
+  "chapter_title": "11. Build a Mini Agent Harness From Scratch",
+  "audit": "The model-railway analogy honestly limits the demonstration but does not show how its persisted allowances behave across a wait or why the crash test is decisive. Lesson A follows the companion's fixed accounting unit through lookup, proposal, restart and final response, with no replenishment during review. Lesson B places persistence, external commit and process exit on separate lanes before a new worker reconciles. Its sequence makes the missing local result visible even though the separate payment database already committed. Both lessons retain the single-writer, synchronous, fake-service scope and explicitly avoid presenting local checks as production network or distributed-ownership guarantees.",
+  "lessons": [
+    {
+      "id": "11A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The model train does not receive a new allowance",
+      "intro": "The scripted harness starts with 3 model accounting units. Each scripted response reserves and consumes exactly 1; approval waiting consumes none.",
+      "kind": "ledger",
+      "data": {
+        "unit": "model units",
+        "start": 3,
+        "entries": [
+          {
+            "label": "Response 1: request payment lookup",
+            "delta": -1
+          },
+          {
+            "label": "Response 2: propose refund",
+            "delta": -1
+          },
+          {
+            "label": "Wait, restart and valid review",
+            "delta": 0
+          },
+          {
+            "label": "Response 3: final completion claim",
+            "delta": -1
+          }
+        ],
+        "rule": "Reserve and settle 1 per response. Restart preserves used units and the absolute deadline."
+      },
+      "read": [
+        "The first two responses leave 1 unit available.",
+        "Review and process restart do not replenish the ledger.",
+        "The last unit buys a claim that still requires independent verification."
+      ],
+      "question": "After the final response, may a fourth scripted response run because the process restarted?",
+      "answer": "No. The remaining model allowance is 0. A new process reloads consumed usage rather than issuing a new budget. Tool-call allowances and the absolute deadline are checked separately, and the final response cannot become success without the companion's acceptance evidence.",
+      "takeaway": "Durable limits count consumed work across waiting and restart.",
+      "assumption": "Constructed companion accounting: each response costs exactly 1 unit, reserved before generation. No currency, token pricing or concurrent-permit guarantee is implied."
+    },
+    {
+      "id": "11B",
+      "placement": "before_heading",
+      "anchor": "Stage 7: error envelopes, idempotency and the executor",
+      "title": "Crash where the two databases disagree",
+      "intro": "A valid approved refund reaches the companion's separate payment database. The process exits before the run database receives its result checkpoint.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Run database",
+          "Payment database",
+          "Worker"
+        ],
+        "steps": [
+          {
+            "time": "1",
+            "lane": 0,
+            "label": "Save approved K-17: pending"
+          },
+          {
+            "time": "2",
+            "lane": 1,
+            "label": "Atomically commit RF-9 + key"
+          },
+          {
+            "time": "3",
+            "lane": 2,
+            "label": "Exit before result save"
+          },
+          {
+            "time": "4",
+            "lane": 2,
+            "label": "Reload pending K-17"
+          },
+          {
+            "time": "5",
+            "lane": 1,
+            "label": "Read RF-9 by retained key"
+          }
+        ],
+        "result": "Verify RF-9, then save confirmed state; service refund count: 1."
+      },
+      "read": [
+        "The run record still says pending after the payment commit.",
+        "The new worker keeps the original identity and consumed allowances.",
+        "The service's atomic key record resolves the uncertain window."
+      ],
+      "question": "If the absolute deadline expired before step 4, does the companion automatically finish this recovery?",
+      "answer": "No. Its executor stops before reconciliation and preserves the pending intent for separately authorized manual reconciliation. It schedules no new mutation. The retained key and payment record make investigation possible, but automatic completion is not guaranteed after deadline or authority loss.",
+      "takeaway": "Test the crash after external commit and before local confirmation.",
+      "assumption": "Fictional trace of the companion contract: one writer, local synchronous SQLite, unexpired authority and deadline on the shown recovery path."
+    }
+  ]
+}

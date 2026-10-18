@@ -1,0 +1,80 @@
+{
+  "chapter": 13,
+  "design_note": "Keep generated search aids separate from admissible evidence. A hypothetical incident explanation may guide retrieval, but actual metrics and sampled traces determine which claims can survive in the answer.",
+  "source": {
+    "title": "Precise Zero-Shot Dense Retrieval without Relevance Labels",
+    "url": "https://arxiv.org/abs/2212.10496",
+    "publisher": "Luyu Gao, Xueguang Ma, Jimmy Lin and Jamie Callan",
+    "concept": "HyDE generates a hypothetical document to guide embedding retrieval. That generated document may contain false details; the retrieved corpus supplies the actual source material.",
+    "scope": "Original incident hypothesis, metrics and trace samples teach evidence boundaries. They do not reproduce HyDE evaluation results or establish an incident cause.",
+    "id": "R13",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Keeping evidence traceable across sources",
+    "title": "A useful search hypothesis is still not evidence",
+    "intro": "AegisOps generates H1 to improve an incident search: perhaps the connection pool was exhausted. Authorized retrieval then returns metrics and sampled traces. Inspect which claims the actual records support.",
+    "kind": "evidence",
+    "data": {
+      "claims": [
+        {
+          "id": "C1",
+          "text": "Pool exhaustion caused the checkout slowdown."
+        },
+        {
+          "id": "C2",
+          "text": "Recorded pool use peaked at 40 of 100 connections."
+        },
+        {
+          "id": "C3",
+          "text": "All sampled requests waited for a pool slot."
+        }
+      ],
+      "sources": [
+        {
+          "id": "H1",
+          "text": "Generated search draft guesses pool exhaustion; it contains no observations."
+        },
+        {
+          "id": "E1",
+          "text": "Metrics M-8, 10:00-10:10: maximum connections 40; configured limit 100."
+        },
+        {
+          "id": "E2",
+          "text": "Trace T-9, same window: 0 of 20 sampled requests waited for a pool slot."
+        }
+      ],
+      "links": [
+        {
+          "claim": 0,
+          "source": 0,
+          "relation": "insufficient"
+        },
+        {
+          "claim": 1,
+          "source": 1,
+          "relation": "supports"
+        },
+        {
+          "claim": 2,
+          "source": 2,
+          "relation": "conflicts"
+        }
+      ],
+      "verdict": "Retain C2; reject C3; keep the causal question unresolved without citing H1."
+    },
+    "read": [
+      "H1 influences where to search but cannot substantiate the guessed explanation.",
+      "E1 supports a bounded observation about the displayed metric window.",
+      "E2 contradicts the claim about these sampled requests, not every possible request."
+    ],
+    "question": "May H1 support the causal conclusion merely because it helped retrieve E1 and E2?",
+    "answer": "No. H1 is generated search text, not an observation. E1 supports the displayed utilization claim, while E2 contradicts the sampled-wait claim. Neither establishes the incident cause. Keep the hypothesis separate and obtain appropriate additional evidence or report the unresolved causal question.",
+    "takeaway": "Generated search text can guide discovery without becoming a source for factual claims.",
+    "assumption": "Fictional records and samples for the stated window; no conclusion about unsampled requests. HyDE is a search aid, and causation remains unresolved.",
+    "source_label": "HyDE: hypothetical documents for retrieval",
+    "id": "13C",
+    "placement": "before_heading",
+    "source_key": "R13"
+  }
+}

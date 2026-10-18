@@ -1,0 +1,61 @@
+{
+  "chapter": 36,
+  "design_note": "Adds a small hypothesis-testing tree before plan authority. Equal symptom words lead to different next investigations when failure populations and dependency observations differ; no leaf authorizes remediation.",
+  "source": {
+    "id": "R36",
+    "title": "Effective Troubleshooting",
+    "url": "https://sre.google/sre-book/effective-troubleshooting/",
+    "publisher": "Google SRE; Chris Jones",
+    "accessed": "2026-10-17",
+    "concept": "Troubleshooting develops competing explanations and tests their predicted observations. Correlated events alone do not establish causation; confirming and contradicting evidence should guide the next investigation.",
+    "scope": "Original matched-request cases and diagnostic choices. The source supplies the troubleshooting principle, not a causal verdict or remediation authorization."
+  },
+  "lesson": {
+    "anchor": "Failure modes",
+    "title": "Use failure populations to test the story",
+    "intro": "Constructed order-api cases have errors on new pods. Authorized telemetry covers matched requests and both revisions. Compare cases where only new pods fail with cases where both revisions fail.",
+    "kind": "tree",
+    "data": {
+      "root": "Errors include new pods; compare both revisions",
+      "branches": [
+        {
+          "edge": "Only new pods fail",
+          "question": "Dependency checks degraded too?",
+          "yes": {
+            "label": "YES: test version/dependency interaction",
+            "role": "wait"
+          },
+          "no": {
+            "label": "NO: investigate new-version behavior",
+            "role": "wait"
+          }
+        },
+        {
+          "edge": "Both revisions fail",
+          "question": "Dependency checks degraded too?",
+          "yes": {
+            "label": "YES: investigate a shared dependency",
+            "role": "wait"
+          },
+          "no": {
+            "label": "NO: test other shared causes",
+            "role": "wait"
+          }
+        }
+      ]
+    },
+    "read": [
+      "The branches partition these cases by observed revision coverage.",
+      "A degraded dependency changes the next test rather than settling causation.",
+      "Every leaf remains investigation; none grants rollback authority."
+    ],
+    "question": "If only new pods fail and dependency checks pass, is rollback now proven correct and authorized?",
+    "answer": "No. Those observations prioritize a new-version hypothesis within their coverage; they do not exclude every confounder or prove a remedy. Gather sufficient evidence for an immutable proposal. Rollback remains risk 4 with two distinct authorized privileged approvers and atomic live preconditions. Risk 5 stays blocked regardless of diagnostic confidence.",
+    "takeaway": "Use observations to narrow the next test, then keep diagnosis separate from action authority.",
+    "assumption": "Constructed complete matched-request cases; old-only and no-error populations are outside this tree. Dependency checks have a stated, limited scope.",
+    "id": "36C",
+    "placement": "before_heading",
+    "source_key": "R36",
+    "source_label": "Google SRE: Effective Troubleshooting"
+  }
+}

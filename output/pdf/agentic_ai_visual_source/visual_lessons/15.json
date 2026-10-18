@@ -1,0 +1,101 @@
+{
+  "chapter": 15,
+  "chapter_title": "A2A & Remote-Agent Interoperability",
+  "audit": "The contractor analogy explains distributed ownership, but an abstract task lifecycle can hide which identifier survives a question and which recovery guarantee belongs to an adapter. Lesson A follows incident INC-77 through one input-required pause, preserving the same remote task while the commander supplies a scoped cluster identifier. Lesson B contrasts recovery after a lost creation response with and without an agreed remote deduplication contract. Its unresolved branch stops instead of silently creating a replacement. The examples preserve the distinction between A2A collaboration and MCP capability access, avoid equating duration with protocol choice, and treat received artifacts as evidence requiring acceptance.",
+  "lessons": [
+    {
+      "id": "15A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "A question does not create a second investigation",
+      "intro": "The database worker accepts incident INC-77 as task T-904, then needs a cluster identifier. The commander owns the incident throughout this delegated investigation.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Commander",
+          "DB worker",
+          "Task record"
+        ],
+        "steps": [
+          {
+            "time": "09:00",
+            "lane": 0,
+            "label": "Send INC-77 diagnosis brief"
+          },
+          {
+            "time": "09:01",
+            "lane": 1,
+            "label": "Accept as task T-904"
+          },
+          {
+            "time": "09:02",
+            "lane": 2,
+            "label": "Save T-904; input required"
+          },
+          {
+            "time": "09:08",
+            "lane": 0,
+            "label": "Reply: cluster nw-db-2"
+          },
+          {
+            "time": "09:09",
+            "lane": 1,
+            "label": "Continue T-904 diagnosis"
+          }
+        ],
+        "wait_after": 2,
+        "wait_label": "Wait for an authorized cluster ID",
+        "result": "One task continues; artifact acceptance remains pending."
+      },
+      "read": [
+        "Follow T-904 across the pause and continuation.",
+        "The saved task survives the missing-information wait.",
+        "The commander remains responsible for the incident and final decision."
+      ],
+      "question": "Should the commander submit a new diagnosis task when the cluster becomes known?",
+      "answer": "No. It should answer within scope and continue T-904. Input-required is a pause in this existing task, not evidence that the investigation failed or needs replacement.",
+      "takeaway": "Continue the owned task when supplying missing input.",
+      "assumption": "Fictional events; authenticated messages and durable storage are assumed. A2A work ownership does not depend on task duration."
+    },
+    {
+      "id": "15B",
+      "placement": "before_heading",
+      "anchor": "Timeouts, partial failure and idempotent delegation",
+      "title": "Recovering a lost task-creation response",
+      "intro": "Both callers persisted delegation D-77. The worker accepted the job, but its creation response was lost before either caller learned the remote task ID.",
+      "kind": "fork",
+      "data": {
+        "input": "D-77 exists locally; remote creation response is missing.",
+        "left": {
+          "title": "Agreed remote dedupe",
+          "steps": [
+            "Contract retains D-77 mappings for 24 hours",
+            "Retry same key and identical brief at 5 min",
+            "Atomic mapping returns original task T-904"
+          ],
+          "result": "Bind D-77 to T-904; continue the existing investigation",
+          "status": "pass"
+        },
+        "right": {
+          "title": "No dedupe contract",
+          "steps": [
+            "Same message ID has no promised dedupe",
+            "Record creation outcome as unknown",
+            "Reconcile with the owner before resubmission"
+          ],
+          "result": "Wait for task identification; do not create replacement work",
+          "status": "wait"
+        }
+      },
+      "read": [
+        "Both callers saved the same local logical identity.",
+        "Only the left service promises atomic remote deduplication.",
+        "The right caller preserves uncertainty instead of guessing that creation failed."
+      ],
+      "question": "Can the right caller obtain the left outcome merely by reusing its message ID?",
+      "answer": "No. A stable message ID alone does not require A2A Send Message deduplication. The service must implement and document the key scope, retention, same-payload checks and recovery path.",
+      "takeaway": "A local key needs a remote recovery contract.",
+      "assumption": "Fictional adapter extension; the left retry occurs inside its retention window. A2A itself does not require this behavior."
+    }
+  ]
+}

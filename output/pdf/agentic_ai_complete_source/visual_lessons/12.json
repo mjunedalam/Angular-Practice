@@ -1,0 +1,126 @@
+{
+  "chapter": 12,
+  "chapter_title": "12. RAG Foundations for Agents",
+  "audit": "The open-book examination analogy suggests that a real citation is reassuring, but it does not require readers to inspect whether the cited passage supports the answer. Lesson A uses a returns rule, a warranty exception and a warranty-assessment passage to distinguish support, contradiction and insufficiency for specific blender claims. Lesson B turns evaluation denominators into visible uncertainty intervals using constructed counts for retrieval hits, citation validity, actual support and appropriate abstention. The measures remain separate and no rate is presented as a benchmark. This highlights why unanswerable questions need their own outcome measure and why impressive citation membership alone cannot establish groundedness.",
+  "lessons": [
+    {
+      "id": "12A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Three real pages, three different relationships",
+      "intro": "A customer asks whether a used blender can be returned. All three evidence IDs exist, are current, and are permitted for this customer.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "Unused blenders qualify for returns within 30 days."
+          },
+          {
+            "id": "C2",
+            "text": "Used blenders qualify for ordinary returns within 30 days."
+          },
+          {
+            "id": "C3",
+            "text": "The warranty guarantees a full refund tomorrow."
+          }
+        ],
+        "sources": [
+          {
+            "id": "E1",
+            "text": "Returns v3, section 2: unused blenders may be returned within 30 days."
+          },
+          {
+            "id": "E2",
+            "text": "Returns v3, section 2: used items are excluded; faulty items use warranty."
+          },
+          {
+            "id": "E3",
+            "text": "Warranty v2, section 4: submit fault details for assessment and remedy."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "conflicts"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "insufficient"
+          }
+        ],
+        "verdict": "Explain the used-item exclusion; assess faults without promising a remedy."
+      },
+      "read": [
+        "Every ID is valid, so identifier membership alone accepts all three.",
+        "The ordinary return rule explicitly excludes the used item.",
+        "Warranty assessment does not establish either refund amount or arrival time."
+      ],
+      "question": "If all three claims carry valid IDs, which claims may be published unchanged under this evidence?",
+      "answer": "Only C1. C2 contradicts E2, while E3 does not establish the promised remedy or timing in C3. The answer should explain the used-item exclusion and, if relevant, the warranty assessment path. Validity, completeness and semantic support are separate checks.",
+      "takeaway": "A real citation is inspectable evidence, not automatic support for its attached claim.",
+      "assumption": "Fictional policy excerpts; the exam analogy does not guarantee correct interpretation. Semantic judgments are explicit here, not measured verifier performance."
+    },
+    {
+      "id": "12B",
+      "placement": "before_heading",
+      "anchor": "Evaluating retrieval separately",
+      "title": "Rates need the right denominator and uncertainty",
+      "intro": "Constructed evaluation counts illustrate four different checks. Treat each row as independent Bernoulli trials within its stated population; these are teaching data, not measured system results.",
+      "kind": "intervals",
+      "data": {
+        "rows": [
+          {
+            "label": "Answerable: retrieval hit",
+            "n": 40,
+            "k": 32,
+            "estimate": 0.8,
+            "low": 0.6524239261814333,
+            "high": 0.8950013502683314
+          },
+          {
+            "label": "Citation IDs valid",
+            "n": 40,
+            "k": 40,
+            "estimate": 1.0,
+            "low": 0.9123754607496077,
+            "high": 1.0
+          },
+          {
+            "label": "Cited claims supported",
+            "n": 40,
+            "k": 28,
+            "estimate": 0.7,
+            "low": 0.545696893456796,
+            "high": 0.8192532908430471
+          },
+          {
+            "label": "Unanswerable: abstained",
+            "n": 20,
+            "k": 17,
+            "estimate": 0.85,
+            "low": 0.6395767041130426,
+            "high": 0.9476322080405041
+          }
+        ],
+        "method": "Constructed counts; two-sided 95% Wilson intervals, z = 1.96; distinct populations."
+      },
+      "read": [
+        "Retrieval hit means at least one relevant item, not full relevant-set recall.",
+        "Valid IDs can coexist with a much lower claim-support rate.",
+        "Unanswerable questions use abstention, not a zero-denominator recall calculation."
+      ],
+      "question": "Does 40 valid citation IDs out of 40 prove every cited claim is supported?",
+      "answer": "No. Identifier validity and semantic support measure different properties. Here only 28 of 40 separately judged cited claims are supported. Even the 40 of 40 validity row has uncertainty below perfect reliability under the stated sampling model. These constructed counts teach interpretation; they do not establish a deployment gate.",
+      "takeaway": "Measure the property you need, name its denominator, and retain statistical uncertainty.",
+      "assumption": "Constructed independent-trial illustration; Wilson uses z = 1.96. Real clustered queries or repeated runs need dependence-aware analysis."
+    }
+  ]
+}

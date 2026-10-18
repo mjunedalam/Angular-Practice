@@ -1,0 +1,151 @@
+{
+  "chapter": 26,
+  "chapter_title": "Observability for Agent Systems",
+  "audit": "The parcel-tracking analogy distinguishes individual traces from aggregates, but a missing scan can still invite the wrong conclusion about an external effect. Lesson A shows a refund across a sampled or lost response span and later authoritative reconciliation, retaining one operation identity and explicit uncertainty. Lesson B asks where four concrete telemetry fields may be stored under a stated metadata policy. It makes high-cardinality run identifiers, private content and bearer tokens visibly different from bounded tool names. The pair preserves privacy and audit retention distinctions, avoids claiming access to private model reasoning, and shows why neither trace completeness nor metadata anonymity can be assumed.",
+  "lessons": [
+    {
+      "id": "26A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "A missing span is not a missing refund",
+      "intro": "Run R-77 submitted refund OP-61. Its response span is unavailable. A linked resume segment later records an authoritative provider lookup, allowing the durable effect record to resolve uncertainty.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "Before submission",
+            "event": "Persist OP-61 and begin tool span",
+            "fields": [
+              {
+                "key": "operation",
+                "value": "OP-61",
+                "changed": false
+              },
+              {
+                "key": "trace",
+                "value": "request span recorded",
+                "changed": false
+              },
+              {
+                "key": "effect_record",
+                "value": "pending",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "Response gap",
+            "event": "No usable response span arrives",
+            "fields": [
+              {
+                "key": "operation",
+                "value": "OP-61",
+                "changed": false
+              },
+              {
+                "key": "trace",
+                "value": "response span missing",
+                "changed": true
+              },
+              {
+                "key": "effect_record",
+                "value": "outcome unknown",
+                "changed": true
+              }
+            ]
+          },
+          {
+            "title": "Linked resume",
+            "event": "Provider lookup confirms R-61",
+            "fields": [
+              {
+                "key": "operation",
+                "value": "OP-61",
+                "changed": false
+              },
+              {
+                "key": "trace",
+                "value": "resume linked to R-77",
+                "changed": true
+              },
+              {
+                "key": "effect_record",
+                "value": "refund R-61 confirmed",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "Missing telemetry cannot prove effect absence; reconcile with source."
+      },
+      "read": [
+        "The operation identity remains stable while telemetry visibility changes.",
+        "The middle record states uncertainty instead of asserting that nothing happened.",
+        "The final effect status comes from the provider, not inferred span structure."
+      ],
+      "question": "May an operator create a replacement refund while only the middle frame is available?",
+      "answer": "No. The original outcome is unknown. Reconcile OP-61 through its authoritative status or supported deduplication contract before choosing recovery. The missing span does not authorize a new financial effect.",
+      "takeaway": "Use traces to investigate and authoritative records to establish effects.",
+      "assumption": "Fictional run; operational traces may be incomplete. Consequential effect records use separate durable access, integrity and retention controls."
+    },
+    {
+      "id": "26B",
+      "placement": "before_heading",
+      "anchor": "Redaction and privacy in telemetry",
+      "title": "Choose the destination before recording the field",
+      "intro": "This fictional telemetry policy permits bounded metadata in general metrics, restricts detailed traces, and requires approved purpose and short retention for private debugging content. Tokens are excluded everywhere.",
+      "kind": "matrix",
+      "data": {
+        "columns": [
+          "Metric label",
+          "Trace attribute",
+          "Debug content"
+        ],
+        "rows": [
+          {
+            "label": "Approved tool name",
+            "cells": [
+              "allow",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "Unique run ID",
+            "cells": [
+              "deny",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "Raw customer message",
+            "cells": [
+              "deny",
+              "deny",
+              "review"
+            ]
+          },
+          {
+            "label": "Bearer access token",
+            "cells": [
+              "deny",
+              "deny",
+              "deny"
+            ]
+          }
+        ],
+        "rule": "Allow means eligible; access and retention controls still apply at storage."
+      },
+      "read": [
+        "Approved tool names come from a bounded registry.",
+        "Per-run metric labels create unbounded series; detailed identifiers belong in controlled records.",
+        "Private content needs a reviewed purpose; credentials never belong in telemetry."
+      ],
+      "question": "Should an exception message containing a customer email bypass this policy because it is diagnostic?",
+      "answer": "No. Error paths follow the same classification rules. Record a safe error category and an authorized reference when needed; raw exception text can disclose content even when prompt fields are filtered.",
+      "takeaway": "Apply telemetry privacy rules to errors and every export route.",
+      "assumption": "Fictional destination policy; metadata may remain sensitive. A review cell is not permission until purpose, entitlement and retention checks pass."
+    }
+  ]
+}

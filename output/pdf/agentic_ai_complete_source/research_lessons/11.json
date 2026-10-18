@@ -1,0 +1,72 @@
+{
+  "chapter": 11,
+  "design_note": "Test a payment-service invariant independently of an attractive runtime outcome. A deliberately torn test fixture has a legal balance but lacks the key-to-receipt record, exposing why balance correctness alone cannot establish recoverable effect identity.",
+  "source": {
+    "title": "Atomic Commit In SQLite",
+    "url": "https://www.sqlite.org/atomiccommit.html",
+    "publisher": "SQLite project",
+    "concept": "A transaction commits its changes together or none at all. Crash testing verifies the recovered database against this all-or-nothing condition.",
+    "scope": "Original deliberately broken payment fixture illustrates an application invariant. It is not a SQLite failure report, executed test result or claim about distributed atomicity.",
+    "id": "R11",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Stage 8: packaging the harness as reusable interfaces",
+    "title": "A valid balance can conceal a torn effect record",
+    "intro": "A deliberately broken payment test fixture commits its refunded balance but omits the key receipt. The shipped companion instead commits both atomically. These constructed records describe a contract defect to detect.",
+    "kind": "packet",
+    "data": {
+      "name": "Broken fixture PAY-B",
+      "fields": [
+        {
+          "key": "captured",
+          "value": "2499 INR minor units"
+        },
+        {
+          "key": "refunded",
+          "value": "2499 INR minor units"
+        },
+        {
+          "key": "accepted key",
+          "value": "K-17"
+        },
+        {
+          "key": "key receipt",
+          "value": "missing"
+        }
+      ],
+      "checks": [
+        {
+          "label": "Balance range",
+          "detail": "0 <= refunded <= captured",
+          "status": "pass"
+        },
+        {
+          "label": "Effect attribution",
+          "detail": "K-17 has no retained matching receipt",
+          "status": "fail"
+        },
+        {
+          "label": "Verified recovery",
+          "detail": "Cannot prove the submitted operation result",
+          "status": "wait"
+        }
+      ],
+      "result": "Fail the service contract test; retain uncertainty.",
+      "result_status": "fail"
+    },
+    "read": [
+      "The balance passes its local numeric invariant.",
+      "The missing key receipt breaks the promised attribution and recovery contract.",
+      "A correct fixture commits balance and key result in the same transaction."
+    ],
+    "question": "Does the passing balance check alone establish that K-17 can be recovered correctly?",
+    "answer": "No. It shows only that the stored refunded amount is within the captured balance. The missing receipt cannot establish which operation produced it or return the promised result for K-17. Fail this fixture and repair the atomic service transaction; do not infer successful recovery from the balance alone.",
+    "takeaway": "Verify the complete transaction invariant, including the evidence needed for recovery.",
+    "assumption": "Constructed broken fixture, not a reported test run. Correct SQLite transaction behavior depends on its supported storage and durability assumptions; databases remain separate.",
+    "source_label": "SQLite: atomic commit and crash testing",
+    "id": "11C",
+    "placement": "before_heading",
+    "source_key": "R11"
+  }
+}

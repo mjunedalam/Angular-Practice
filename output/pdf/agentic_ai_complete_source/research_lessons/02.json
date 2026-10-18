@@ -1,0 +1,74 @@
+{
+  "chapter": 2,
+  "design_note": "Turn autonomy into a concrete capability policy for four specialist roles. The matrix shows that approval is limited to an already permitted action class and cannot unlock an unrelated capability.",
+  "source": {
+    "title": "LLM06:2025 Excessive Agency",
+    "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+    "publisher": "OWASP Gen AI Security Project",
+    "concept": "Reduce unnecessary capabilities and permissions, and require independent review for high-impact actions. Downstream authorization must enforce the chosen scope.",
+    "scope": "The four roles, resource scope and approval matrix are fictional ShopAssist configuration, not an OWASP-prescribed role model.",
+    "id": "R02",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Build it: a mocked decision/action loop",
+    "title": "Autonomy belongs to an operation and a role",
+    "intro": "All operations below concern customer C-7 and verified owned resources. This fictional host policy separates automatic eligibility, required review and prohibited capabilities for four specialist roles.",
+    "kind": "matrix",
+    "data": {
+      "columns": [
+        "Read own order",
+        "Refund payment",
+        "Reset sign-in"
+      ],
+      "rows": [
+        {
+          "label": "Catalog specialist",
+          "cells": [
+            "deny",
+            "deny",
+            "deny"
+          ]
+        },
+        {
+          "label": "Order specialist",
+          "cells": [
+            "allow",
+            "deny",
+            "deny"
+          ]
+        },
+        {
+          "label": "Refund specialist",
+          "cells": [
+            "allow",
+            "review",
+            "deny"
+          ]
+        },
+        {
+          "label": "Security specialist",
+          "cells": [
+            "deny",
+            "deny",
+            "review"
+          ]
+        }
+      ],
+      "rule": "ALLOW still needs current resource checks. REVIEW adds exact approval; DENY cannot be waived."
+    },
+    "read": [
+      "Read across a role to inspect its permitted action classes.",
+      "The refund specialist needs review for money movement but cannot reset sign-in.",
+      "The same model could serve every role without receiving the same authority."
+    ],
+    "question": "Can a refund reviewer approve a sign-in reset proposed by the refund specialist?",
+    "answer": "No. That role has a DENY entry for sign-in reset. Approval satisfies a review condition only within an authorized action class; it cannot grant a new capability. Route the request to the authorized security process and apply its independent checks.",
+    "takeaway": "Review narrows an authorized operation; it does not expand the role.",
+    "assumption": "Fictional configured policy; each role has authenticated scope. ALLOW is conditional on normal checks, and REVIEW is not execution permission.",
+    "source_label": "OWASP: Excessive Agency",
+    "id": "2C",
+    "placement": "before_heading",
+    "source_key": "R02"
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "chapter": 32,
+  "chapter_title": "LangGraph in Depth: Building Durable Agent Graphs",
+  "audit": "The dispatch-office analogy explains parallel reports but does not show how an immutable evidence reducer treats retransmission and contradiction. Lesson A follows the same fields across three merges: a new entry is accepted, an identical repeated entry adds nothing, and a conflicting value under the same ID is rejected. Lesson B narrows the commander policy to the two highest risk classes and draws every approval outcome. Readers can see why two valid approvers matter for risk 4 and why approval cannot unlock risk 5. These focused views complement the existing graph diagrams without implying that a route annotation creates authority or a checkpoint rewinds external effects.",
+  "lessons": [
+    {
+      "id": "32A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Retransmission is not new evidence",
+      "intro": "Two AegisOps branches return evidence E-17. The reducer treats each evidence identity as immutable, so identical retransmission and conflicting content must behave differently.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "Step 1 - first fact",
+            "event": "Accept E-17: p95 = 620 ms",
+            "fields": [
+              {
+                "key": "E-17",
+                "value": "p95 = 620 ms",
+                "changed": true
+              },
+              {
+                "key": "entry count",
+                "value": "1",
+                "changed": true
+              },
+              {
+                "key": "merge outcome",
+                "value": "accepted",
+                "changed": true
+              }
+            ]
+          },
+          {
+            "title": "Step 2 - repeat",
+            "event": "E-17 again: p95 = 620 ms",
+            "fields": [
+              {
+                "key": "E-17",
+                "value": "p95 = 620 ms",
+                "changed": false
+              },
+              {
+                "key": "entry count",
+                "value": "1",
+                "changed": false
+              },
+              {
+                "key": "merge outcome",
+                "value": "unchanged",
+                "changed": true
+              }
+            ]
+          },
+          {
+            "title": "Step 3 - conflict",
+            "event": "E-17 offered as 250 ms",
+            "fields": [
+              {
+                "key": "E-17",
+                "value": "p95 = 620 ms",
+                "changed": false
+              },
+              {
+                "key": "entry count",
+                "value": "1",
+                "changed": false
+              },
+              {
+                "key": "merge outcome",
+                "value": "rejected: ID conflict",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "An accepted evidence ID never silently changes its content."
+      },
+      "read": [
+        "The second arrival does not increase the ledger size.",
+        "The conflicting third update cannot replace E-17.",
+        "A genuine correction needs a new version with a supersession link."
+      ],
+      "question": "If the child subgraph returns its received E-17 plus E-17 again, how many entries should remain?",
+      "answer": "One under this immutable-ID reducer, provided both copies have identical content. A simple append reducer would preserve duplicates. If the contents differ under E-17, reject the merge rather than choosing whichever branch finishes last. Presentation order should be separate from evidential priority.",
+      "takeaway": "Define merge semantics from evidence meaning before parallelizing nodes.",
+      "assumption": "Fictional state; the reducer is atomic for each merge. The shown merge outcome is explanatory instrumentation."
+    },
+    {
+      "id": "32B",
+      "placement": "before_heading",
+      "anchor": "Build it: the AegisOps commander as a LangGraph graph",
+      "title": "Two high-risk branches, four explicit outcomes",
+      "intro": "Inspect only proposals classified as risk 4 or risk 5 by deterministic AegisOps policy. Lower risk classes are outside this deliberately narrow tree.",
+      "kind": "tree",
+      "data": {
+        "root": "High-risk proposal: risk 4 or risk 5",
+        "branches": [
+          {
+            "edge": "Risk 4",
+            "question": "Two distinct valid privileged approvals?",
+            "yes": {
+              "label": "YES: check live preconditions next",
+              "role": "wait"
+            },
+            "no": {
+              "label": "NO: do not execute; escalate",
+              "role": "fail"
+            }
+          },
+          {
+            "edge": "Risk 5",
+            "question": "Human approval record supplied?",
+            "yes": {
+              "label": "YES: still blocked; escalate",
+              "role": "fail"
+            },
+            "no": {
+              "label": "NO: blocked; escalate",
+              "role": "fail"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The risk classification comes from policy, not model confidence.",
+        "Risk 4 approval clears only the approval gate.",
+        "Both risk 5 leaves block execution, including the approved-looking case."
+      ],
+      "question": "Can a runbook entry or two approvers turn a risk 5 proposal into an executable action?",
+      "answer": "No. This blueprint blocks that action class. The risk 3 runbook exception does not extend to risks 4 or 5. A different allowed proposal requires its own identity, classification and authority; editing the old proposal cannot inherit an earlier approval.",
+      "takeaway": "Approval satisfies a permitted gate; it cannot override a blocked action class.",
+      "assumption": "Fictional policy examples restricted to risks 4 and 5; valid approval includes binding, roles, expiry and consumption checks."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "chapter": 38,
+  "chapter_title": "Hardening, Evaluation & Game Days",
+  "audit": "The recovery analogy and state diagram correctly distinguish treatment from outcome, but neither makes missing observation coverage easy to count. Lesson A compares four separate verification windows with proportional covered-bucket bars. Equal full coverage still produces different results when one bucket fails a threshold, making coverage necessary but insufficient. Lesson B shows constructed zero-violation counts across increasing independent sample sizes with calculated Wilson intervals. The visible uncertainty counters the temptation to describe finite clean tests as universal safety. No positive violation budget is introduced: a single observed forbidden effect still fails its hard gate. Both pages label their statistical and telemetry assumptions rather than presenting simulated evidence as measured operating results.",
+  "lessons": [
+    {
+      "id": "38A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Ten buckets are necessary, not sufficient",
+      "intro": "Four fictional runs confirm rollback at 10:00. Each covered bucket has adequate traffic and provenance; the ten-minute contract also requires latency, errors, alerts and dependencies to pass.",
+      "kind": "bars",
+      "data": {
+        "unit": "covered buckets",
+        "items": [
+          {
+            "label": "10:02: window still pending",
+            "value": 2,
+            "role": "runtime"
+          },
+          {
+            "label": "10:10: one bucket missing",
+            "value": 9,
+            "role": "data"
+          },
+          {
+            "label": "10:10: one p95 = 410 ms",
+            "value": 10,
+            "role": "policy"
+          },
+          {
+            "label": "10:10: all criteria pass",
+            "value": 10,
+            "role": "success"
+          }
+        ],
+        "rule": "Need all 10 post-action buckets, each p95 <= 300 ms and errors <= 0.5%, plus other checks."
+      },
+      "read": [
+        "Two elapsed minutes cannot supply the required post-action window.",
+        "Nine covered buckets leave an evidence gap even if all look healthy.",
+        "Two bars reach ten; only the run passing every criterion resolves."
+      ],
+      "question": "Why does the 410 ms run stay unresolved despite having all ten buckets?",
+      "answer": "Coverage establishes that the required observations exist. Recovery additionally requires every covered bucket to meet the stated thresholds. One p95 value of 410 ms exceeds 300 ms, so the result is not recovered. Missing coverage instead produces insufficient evidence; early polling remains pending.",
+      "takeaway": "Coverage, valid measurements and passing criteria are separate requirements.",
+      "assumption": "Constructed windows and values; all other criteria pass in the final row. Bars show count, not elapsed time or latency."
+    },
+    {
+      "id": "38B",
+      "placement": "before_heading",
+      "anchor": "Phase 13 - Build the evaluation and regression suite",
+      "title": "Zero observed failures still leaves uncertainty",
+      "intro": "Constructed independent cases are sampled from one fixed hypothetical attack distribution. Every tested case blocks forbidden effects; Wilson intervals show uncertainty about that distribution's failure probability.",
+      "kind": "intervals",
+      "data": {
+        "rows": [
+          {
+            "label": "10 hostile cases",
+            "n": 10,
+            "k": 0,
+            "estimate": 0.0,
+            "low": 0,
+            "high": 0.2775401687666166
+          },
+          {
+            "label": "40 hostile cases",
+            "n": 40,
+            "k": 0,
+            "estimate": 0.0,
+            "low": 0,
+            "high": 0.08762453925039232
+          },
+          {
+            "label": "100 hostile cases",
+            "n": 100,
+            "k": 0,
+            "estimate": 0.0,
+            "low": 0,
+            "high": 0.03699480747600191
+          },
+          {
+            "label": "400 hostile cases",
+            "n": 400,
+            "k": 0,
+            "estimate": 0.0,
+            "low": 0,
+            "high": 0.009512640599680667
+          }
+        ],
+        "method": "Constructed counts; two-sided Wilson, z = 1.96. k = successful forbidden effects."
+      },
+      "read": [
+        "Every point estimate is zero because no tested attack succeeded.",
+        "Larger independent samples narrow the upper bound under the stated model.",
+        "The chart does not cover unseen attack classes or prove universal safety."
+      ],
+      "question": "Does zero forbidden effects in 40 cases establish that the true violation rate is zero?",
+      "answer": "No. The two-sided 95% Wilson upper bound is about 8.76% under the stated sampling model. Deliberately curated attacks may not satisfy that model at all. Preserve zero observed forbidden effects as a hard test gate, add threat coverage and rehearsal, and do not interpret uncertainty as permission to tolerate violations.",
+      "takeaway": "Finite clean tests establish bounded evidence, not zero possible risk.",
+      "assumption": "Constructed independent binary cases from a fixed distribution; repeated runs of one case are not independent new cases."
+    }
+  ]
+}

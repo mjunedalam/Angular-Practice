@@ -1,0 +1,100 @@
+{
+  "chapter": 30,
+  "design_note": "Replaces an abstract scheduler cycle with three concrete batch rosters. Completed work leaves while a longer request remains, so changing membership becomes visible without a throughput claim.",
+  "source": {
+    "id": "R30",
+    "title": "Orca: A Distributed Serving System for Transformer-Based Generative Models",
+    "url": "https://www.usenix.org/conference/osdi22/presentation/yu",
+    "publisher": "Gyeong-In Yu and coauthors; USENIX OSDI 2022",
+    "accessed": "2026-10-17",
+    "concept": "Scheduling generation at iteration boundaries allows the active batch membership to change before every request in the earlier batch finishes.",
+    "scope": "Original three-request roster; capacity, admission and preprocessing are simplified. No ORCA performance result or figure is reproduced."
+  },
+  "lesson": {
+    "anchor": "Scalable serving on Kubernetes",
+    "title": "A finished request gives up its place",
+    "intro": "A constructed decoder has two request slots. A and B are active; C is eligible and prepared to enter. B needs two more steps and A needs four. Track only membership.",
+    "kind": "snapshots",
+    "data": {
+      "frames": [
+        {
+          "title": "Boundary 0",
+          "event": "A and B continue; C waits",
+          "fields": [
+            {
+              "key": "slot 1",
+              "value": "A: 4 steps left",
+              "changed": false
+            },
+            {
+              "key": "slot 2",
+              "value": "B: 2 steps left",
+              "changed": false
+            },
+            {
+              "key": "waiting",
+              "value": "C: 3 steps needed",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "Boundary 2",
+          "event": "B finishes; C takes free slot",
+          "fields": [
+            {
+              "key": "slot 1",
+              "value": "A: 2 steps left",
+              "changed": true
+            },
+            {
+              "key": "slot 2",
+              "value": "C: 3 steps left",
+              "changed": true
+            },
+            {
+              "key": "waiting",
+              "value": "none",
+              "changed": true
+            }
+          ]
+        },
+        {
+          "title": "Boundary 4",
+          "event": "A finishes; C continues",
+          "fields": [
+            {
+              "key": "slot 1",
+              "value": "empty",
+              "changed": true
+            },
+            {
+              "key": "slot 2",
+              "value": "C: 1 step left",
+              "changed": true
+            },
+            {
+              "key": "waiting",
+              "value": "none",
+              "changed": false
+            }
+          ]
+        }
+      ],
+      "invariant": "A long request does not force a finished request to keep its slot."
+    },
+    "read": [
+      "At boundary 2, A is still running but B has left.",
+      "C enters the available slot before A finishes.",
+      "At boundary 4, C has completed two of its three required steps."
+    ],
+    "question": "Must C wait until boundary 4 solely because A and B entered the earlier batch together?",
+    "answer": "No. This scheduler can admit prepared C at boundary 2 when B finishes. C then completes at boundary 5 under the toy one-step-per-iteration assumption. Real admission also depends on memory, prefill, scheduling policy and fairness; two depicted slots do not establish device capacity or a speedup guarantee.",
+    "takeaway": "Continuous batching changes the active roster as requests become ready or finish.",
+    "assumption": "Constructed two-slot scheduler; each active request advances one step per iteration. C is prefilled; memory, prefill scheduling and timing are omitted.",
+    "id": "30C",
+    "placement": "before_heading",
+    "source_key": "R30",
+    "source_label": "ORCA: Iteration-level scheduling"
+  }
+}

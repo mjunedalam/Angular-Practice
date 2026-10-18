@@ -1,0 +1,158 @@
+{
+  "chapter": 33,
+  "chapter_title": "Cloud & Enterprise Integration Tracks",
+  "audit": "Cloud catalogue mappings can look complete while hiding who owns the authority record and where a model proposal stops being data. Lesson A separates managed execution, application authority and the domain change service, then marks the tempting direct mutation route as denied. The trust map explicitly treats generated intent as untrusted and assumes enforcement rather than crediting the drawing itself. Lesson B inspects four concrete principals against one incident and one rollback. Its review cell distinguishes an operator's ability to request approval from an executor's narrow accepted grant. Both pages deepen enterprise identity and managed-runtime boundaries without asserting new service features, cloud equivalence or automatic portability.",
+  "lessons": [
+    {
+      "id": "33A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Managed execution stops at business authority",
+      "intro": "A managed runtime investigates INC-82. The application owns proposal approval and effect intent; the deployment service owns the atomic revision check and actual rollback.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Managed execution",
+            "nodes": [
+              {
+                "id": "M",
+                "label": "Untrusted model intent",
+                "role": "model"
+              },
+              {
+                "id": "S",
+                "label": "Managed session state",
+                "role": "external"
+              }
+            ]
+          },
+          {
+            "title": "App authority",
+            "nodes": [
+              {
+                "id": "P",
+                "label": "Policy + approval P-9",
+                "role": "policy"
+              },
+              {
+                "id": "L",
+                "label": "Intent ledger RB-82",
+                "role": "data"
+              }
+            ]
+          },
+          {
+            "title": "Domain service",
+            "nodes": [
+              {
+                "id": "E",
+                "label": "Scoped change executor",
+                "role": "action"
+              },
+              {
+                "id": "R",
+                "label": "Revision + effect record",
+                "role": "data"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "to": "P",
+            "label": "Proposal data; no authority",
+            "status": "allow",
+            "from": "M"
+          },
+          {
+            "to": "L",
+            "label": "Owned run reference, not approval",
+            "status": "allow",
+            "from": "S"
+          },
+          {
+            "to": "E",
+            "label": "Bound grant; executor checks live state",
+            "status": "allow",
+            "from": "P"
+          },
+          {
+            "to": "E",
+            "label": "Direct model-to-mutation path blocked",
+            "status": "deny",
+            "from": "M"
+          }
+        ]
+      },
+      "read": [
+        "The provider operates execution; application policy owns the action grant.",
+        "Session state can identify a run but cannot certify approval.",
+        "The denied route must be enforced by credentials and executor policy."
+      ],
+      "question": "If the managed runtime reports success, which record proves the rollback actually applied?",
+      "answer": "The domain service effect record tied to RB-82 establishes the applied change under its contract. The application must retain its linked intent and authority evidence. A managed session completion or generated sentence does not prove the effect, and an applied rollback still needs independent recovery verification.",
+      "takeaway": "Managed infrastructure does not inherit application authority or establish domain outcomes.",
+      "assumption": "Fictional deployment; drawn boundaries assume tested identity, credential and executor enforcement. Model intent remains untrusted data."
+    },
+    {
+      "id": "33B",
+      "placement": "before_heading",
+      "anchor": "Identity and networking differences to plan for",
+      "title": "One incident, four different principals",
+      "intro": "All cells concern Northwind order-api incident INC-82 and rollback P-9. The executor row assumes a valid narrow grant with two distinct privileged approvers.",
+      "kind": "matrix",
+      "data": {
+        "columns": [
+          "Read order-api",
+          "Rollback P-9",
+          "Resume INC-82"
+        ],
+        "rows": [
+          {
+            "label": "Northwind reader",
+            "cells": [
+              "allow",
+              "deny",
+              "deny"
+            ]
+          },
+          {
+            "label": "On-call Asha",
+            "cells": [
+              "allow",
+              "review",
+              "allow"
+            ]
+          },
+          {
+            "label": "P-9 scoped executor",
+            "cells": [
+              "deny",
+              "allow",
+              "deny"
+            ]
+          },
+          {
+            "label": "Tenant B operator",
+            "cells": [
+              "deny",
+              "deny",
+              "deny"
+            ]
+          }
+        ],
+        "rule": "Review requests bound approval; allow still requires scope and live resource checks."
+      },
+      "read": [
+        "A read workload cannot convert observation access into mutation rights.",
+        "Asha can resume owned work but cannot substitute for the required second approver.",
+        "The executor grant is narrower than a general operator account."
+      ],
+      "question": "Does a private network path let the Tenant B operator read INC-82?",
+      "answer": "No. Network reachability and workload authentication do not establish tenant or record authorization. Trusted context must scope the request before retrieval, state access or resume. The same checks remain necessary after a cloud migration even if the new identity connector authenticates successfully.",
+      "takeaway": "Transport access, delegated authority and resource permission are separate decisions.",
+      "assumption": "Fictional access policy; all principal bindings are trusted. Execution additionally enforces approval, revision and effect-identity contracts."
+    }
+  ]
+}

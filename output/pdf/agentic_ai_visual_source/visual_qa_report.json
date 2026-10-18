@@ -1,0 +1,84 @@
+{
+  "status": "pass",
+  "edition_date": "2026-10-17",
+  "verified_at_utc": "2026-10-17T06:29:27.257083+00:00",
+  "deliverables": {
+    "Agentic_AI_Engineering_visual_learning.pdf": {
+      "sha256": "d574595eeb4a74291701f0f0300df3d3048ee3a5092aa853014cdcb483a045f8",
+      "bytes": 2241452
+    },
+    "Agentic_AI_Engineering_visual_atlas.pdf": {
+      "sha256": "8e48b1e40ea8650f0d900c9a7506f71f91ee1f1b39b1921bae1aeade598c5538",
+      "bytes": 532405
+    }
+  },
+  "full_book_pages": 764,
+  "atlas_pages": 109,
+  "chapters": 39,
+  "new_visual_labs": 78,
+  "new_semantic_diagram_forms": 13,
+  "full_book_diagrams": 224,
+  "coverage": {
+    "all_atlas_pages_rendered": 109,
+    "all_atlas_lessons_inspected_full_size": 78,
+    "atlas_front_and_answer_pages_inspected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109
+    ],
+    "all_book_pages_rendered": 764,
+    "all_book_contact_sheets_inspected": 22,
+    "affected_pages_reinspected": true,
+    "identical_lesson_artwork_in_book_and_atlas": true
+  },
+  "checks": {
+    "all_page_units_inside_frame": true,
+    "all_diagram_labels_preserved": true,
+    "no_text_box_overlaps": true,
+    "internal_links_resolved": 1205,
+    "index_entries": 198,
+    "index_fallbacks": 0,
+    "chapter_manuscripts_unchanged": 39,
+    "executable_example_unchanged": true,
+    "current_example_tests_not_rerun": "The unchanged example retains its previous 19-test verification; this revision changes the publication and visual lesson data."
+  },
+  "resolved_visual_findings": [
+    "Swimlane connectors now use gutters and elbows instead of crossing event labels.",
+    "Nonadjacent trust routes use an inter-row corridor; route badges are separated.",
+    "Interval values are outside the plot; counts use neutral wording for success or failure events.",
+    "Packet values fit long identifiers; a lane label wraps at a word boundary.",
+    "Five short pre-lab sections or code/explanation pairs are grouped to prevent isolated spill paragraphs.",
+    "The final 24B event label was shortened to Save approved OP-8 intent and reinspected in both publications."
+  ],
+  "remaining_findings": [],
+  "page_unit_scope": "Paragraphs, analogies, code blocks, complete figures with captions, questions and answers remain intact. Every added visual lesson is one full page; whole chapters span pages.",
+  "source_check_dates": "The added fictional examples do not refresh the original chapter source checks of 12-13 October 2026."
+}

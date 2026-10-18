@@ -1,0 +1,119 @@
+{
+  "chapter": 1,
+  "chapter_title": "1. LLM Runtime Fundamentals for Agent Engineers",
+  "audit": "The consultant analogy identifies separate responsibilities but does not let the reader inspect the actual contents of a call or a rejected proposal. Lesson A places a specific order, current payment evidence, required continuation reference and execution restrictions in separate containers. It makes selective context and retained state visible without claiming every endpoint is stateless. Lesson B presents a syntactically valid refund request against a smaller remaining balance and missing approval. The reader must distinguish parsing success, domain failure and deferred authority. Together the lessons expose why plausible structured text cannot establish a financial result.",
+  "lessons": [
+    {
+      "id": "1A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "What goes into this consultation?",
+      "intro": "ShopAssist prepares a second consultation about ORD-104233. The first lookup found two captures; no refund has been approved.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Call folder",
+            "object": "folder",
+            "items": [
+              "Order: ORD-104233",
+              "Captures: PAY-A and PAY-B",
+              "Policy: duplicate-v3"
+            ],
+            "role": "data"
+          },
+          {
+            "title": "Retained run",
+            "object": "vault",
+            "items": [
+              "Lookup result: OBS-7",
+              "Continuation: opaque REF-9",
+              "Refund status: not proposed"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Action desk",
+            "object": "shield",
+            "items": [
+              "Allowed: own-order lookup",
+              "Refund needs exact approval",
+              "Verify external receipt"
+            ],
+            "role": "policy"
+          }
+        ],
+        "relations": [
+          "The call folder selects retained, permitted facts.",
+          "Action checks apply to every proposed operation."
+        ]
+      },
+      "read": [
+        "Inspect the payment identifiers supplied to this call.",
+        "The continuation reference stays in the runtime, where the adapter can preserve required provider items.",
+        "The action desk decides whether a proposal may execute."
+      ],
+      "question": "If the next folder omits OBS-7, may the model assume the duplicate captures still exist?",
+      "answer": "No. The runtime should supply the retained observation or obtain current records. Training knowledge and a fluent continuation cannot establish this order's payment state. Provider continuation may help preserve protocol state, but it does not replace application evidence or authorization.",
+      "takeaway": "A call receives selected evidence; authority remains outside the generated response.",
+      "assumption": "Fictional records; folder contents simplify serialized context. Provider continuation requirements vary, and the consultant analogy supplies no human accountability."
+    },
+    {
+      "id": "1B",
+      "placement": "before_heading",
+      "anchor": "Build it: a minimal typed model client",
+      "title": "A valid request can still fail",
+      "intro": "A complete model response proposes a USD 24.99 refund. PAY-B has only USD 14.99 remaining after an earlier partial refund.",
+      "kind": "packet",
+      "data": {
+        "name": "Refund proposal RF-12",
+        "fields": [
+          {
+            "key": "payment_id",
+            "value": "PAY-B"
+          },
+          {
+            "key": "amount_minor",
+            "value": "2499"
+          },
+          {
+            "key": "currency",
+            "value": "USD"
+          },
+          {
+            "key": "order_id",
+            "value": "ORD-104233"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Shape",
+            "detail": "Complete response; fields parse correctly",
+            "status": "pass"
+          },
+          {
+            "label": "Remaining balance",
+            "detail": "2499 requested > 1499 refundable",
+            "status": "fail"
+          },
+          {
+            "label": "Approval",
+            "detail": "No approval for this exact proposal",
+            "status": "wait"
+          }
+        ],
+        "result": "Do not dispatch; correct and re-evaluate the proposal",
+        "result_status": "fail"
+      },
+      "read": [
+        "The integer is valid even though its financial meaning fails.",
+        "The remaining balance comes from the payment service.",
+        "Approval cannot repair an amount that violates the balance rule."
+      ],
+      "question": "If approval arrives for 2499 minor units, can RF-12 execute unchanged?",
+      "answer": "No. Approval is only one independent condition. The requested amount still exceeds the current refundable balance. Create a valid proposal, check fresh preconditions, and obtain approval bound to its exact effect before dispatch.",
+      "takeaway": "Schema, current business rules and authority are independent gates.",
+      "assumption": "Fictional complete response and payment records; amounts are exact USD minor units. No payment has been dispatched."
+    }
+  ]
+}

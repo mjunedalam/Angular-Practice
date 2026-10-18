@@ -1,0 +1,80 @@
+{
+  "chapter": 31,
+  "design_note": "Makes the reasoning and limits of a framework choice inspectable. Readers distinguish a documented decision from evidence of universal fitness or completed recovery testing.",
+  "source": {
+    "id": "R31",
+    "title": "Documenting Architecture Decisions",
+    "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
+    "publisher": "Michael Nygard; Cognitect",
+    "accessed": "2026-10-17",
+    "concept": "An architecture decision record retains the context, chosen decision, status and consequences. Keeping those reasons visible supports later reassessment when conditions change.",
+    "scope": "Original ShopAssist ADR and claims; F-2 is a fictional runtime. The record describes a choice, not a measured product capability."
+  },
+  "lesson": {
+    "anchor": "Build it: the same agent in two frameworks, and an ADR",
+    "title": "A decision record carries its limits",
+    "intro": "ShopAssist chose fictional runtime F-2 for its refund workflow. Inspect three claims about the accepted decision against separate excerpts from the same original ADR-7.",
+    "kind": "evidence",
+    "data": {
+      "claims": [
+        {
+          "id": "C1",
+          "text": "F-2 was chosen to meet the long approval-wait requirement."
+        },
+        {
+          "id": "C2",
+          "text": "Choosing F-2 adds no operating responsibility."
+        },
+        {
+          "id": "C3",
+          "text": "F-2 is suitable for every future agent workload."
+        }
+      ],
+      "sources": [
+        {
+          "id": "D1",
+          "text": "ADR-7 accepted: choose F-2 for refunds needing approval waits of two hours."
+        },
+        {
+          "id": "D2",
+          "text": "ADR-7 consequence: the team must operate and restore the checkpoint database."
+        },
+        {
+          "id": "D3",
+          "text": "ADR-7 scope: one-region ShopAssist refunds. Revisit if lifecycle needs change."
+        }
+      ],
+      "links": [
+        {
+          "claim": 0,
+          "source": 0,
+          "relation": "supports"
+        },
+        {
+          "claim": 1,
+          "source": 1,
+          "relation": "conflicts"
+        },
+        {
+          "claim": 2,
+          "source": 2,
+          "relation": "insufficient"
+        }
+      ],
+      "verdict": "The record explains the choice and its cost; it cannot establish universal fitness."
+    },
+    "read": [
+      "D1 explains why the team selected F-2 for this workload.",
+      "D2 records a consequence that a feature comparison might hide.",
+      "D3 limits the decision to a stated context and names a revisit condition."
+    ],
+    "question": "Does accepted status in ADR-7 prove that a waiting refund actually survives a database restore?",
+    "answer": "No. Acceptance records a design decision. A restore rehearsal with owned run, approval and effect evidence must demonstrate recovery. Attach that evidence to the decision and retain any limitations. If lifecycle requirements change, reassess the choice without erasing the reasons for the earlier decision.",
+    "takeaway": "Preserve the reason and consequences of a framework choice alongside the evidence that tests it.",
+    "assumption": "Fictional ADR excerpts, runtime and requirement; accepted status is not a benchmark, migration result or business-action approval.",
+    "id": "31C",
+    "placement": "before_heading",
+    "source_key": "R31",
+    "source_label": "Nygard: Architecture decision records"
+  }
+}

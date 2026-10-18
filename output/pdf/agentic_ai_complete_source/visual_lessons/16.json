@@ -1,0 +1,138 @@
+{
+  "chapter": 16,
+  "chapter_title": "Workflow & Graph Orchestration",
+  "audit": "The railway analogy makes allowed transitions intuitive, but the existing route drawings do not force a reader to test every entrance to a loop. Lesson A partitions the two retry causes and applies the same investigation counter to each, exposing the often missed verification route. Lesson B displays an approval checkpoint across a wait while the live deployment changes. The unchanged proposal and decision remain available for audit, yet the new resource version blocks execution. These examples connect routing, persistent state and fresh preconditions without implying that a checkpoint creates exclusive ownership or that a legal edge grants the node permission to mutate production.",
+  "lessons": [
+    {
+      "id": "16A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Two return tracks share one attempt guard",
+      "intro": "AegisOps has only two reasons to re-enter investigation: an evaluator needs evidence, or post-action verification failed. Each investigation entry increments one persisted counter; the limit is 3.",
+      "kind": "tree",
+      "data": {
+        "root": "Retry reaches the investigation guard",
+        "branches": [
+          {
+            "edge": "Evaluator retry",
+            "question": "attempts < 3 before re-entry?",
+            "yes": {
+              "label": "Enter; increment before reading",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Escalate with current evidence",
+              "role": "wait"
+            }
+          },
+          {
+            "edge": "Verification retry",
+            "question": "attempts < 3 before re-entry?",
+            "yes": {
+              "label": "Record effect; enter and increment",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Stop as not recovered; retain effect",
+              "role": "fail"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The root partitions the two stated retry causes.",
+        "Both branches test the same counter before entering investigation.",
+        "Failed verification preserves the action history even when the loop stops."
+      ],
+      "question": "With attempts = 3 and failed verification, may the graph investigate once more?",
+      "answer": "No. The shared entry budget is exhausted. It records the observed effect and a not-recovered outcome rather than using verification as an unguarded route into another attempt.",
+      "takeaway": "Guard every entrance to a loop with a shared invariant.",
+      "assumption": "Fictional bounded graph; only the two displayed retry causes exist. Persistence and executor authorization are separate required controls."
+    },
+    {
+      "id": "16B",
+      "placement": "before_heading",
+      "anchor": "Interrupts, checkpoints and resume",
+      "title": "The checkpoint survives; the old facts do not",
+      "intro": "A rollback proposal expects deployment v12. During a durable approval wait, another authorized deployment advances production to v13. The resumed worker must compare both records.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "10:00 checkpoint",
+            "event": "Save proposal P-31; release worker",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-31 expects v12",
+                "changed": false
+              },
+              {
+                "key": "decision",
+                "value": "pending",
+                "changed": false
+              },
+              {
+                "key": "live_version",
+                "value": "v12",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "10:12 decision",
+            "event": "Approver approves exact P-31",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-31 expects v12",
+                "changed": false
+              },
+              {
+                "key": "decision",
+                "value": "approved P-31",
+                "changed": true
+              },
+              {
+                "key": "live_version",
+                "value": "v12",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "10:15 resume",
+            "event": "Fresh read finds a new deployment",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-31 expects v12",
+                "changed": false
+              },
+              {
+                "key": "decision",
+                "value": "approved P-31",
+                "changed": false
+              },
+              {
+                "key": "live_version",
+                "value": "v13; execution blocked",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "Approval for P-31 cannot authorize a different deployment version."
+      },
+      "read": [
+        "The proposal remains unchanged across all three records.",
+        "Approval arrives for the old precondition, not for every future state.",
+        "The live version mismatch prevents the resumed worker from acting."
+      ],
+      "question": "Does loading the saved approval justify rolling back v13?",
+      "answer": "No. Current resource state no longer matches the exact approved proposal. Replan against v13 and obtain any required new approval. Worker ownership and effect recovery must also be enforced independently of this checkpoint.",
+      "takeaway": "Durable state preserves history; authorization needs current facts.",
+      "assumption": "Fictional deployment; the resume has valid ownership. The diagram tests freshness, not locking or external effect deduplication."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": "1.0-rc.1",
+  "prepared_date": "2026-10-17",
+  "artifacts": [
+    {
+      "file": "Agentic_AI_Engineering_complete.pdf",
+      "bytes": 9987512,
+      "sha256": "cff3e4d7b8040bba9953f89e3f0a9cbe8a56b169eea87c470782d35a8383dcb5"
+    },
+    {
+      "file": "Agentic_AI_Engineering_publication_readiness.pdf",
+      "bytes": 62060,
+      "sha256": "ac071d9d2efbc46463c6aca8f034727a0351c7b488b4507211a0812695a65b91"
+    },
+    {
+      "file": "Agentic_AI_Engineering_companion.zip",
+      "bytes": 402559,
+      "sha256": "eda59e65b9385cce7f4b3073bca32fd578f825a29482037121277fc6ace1b1bd"
+    },
+    {
+      "file": "Agentic_AI_Engineering_complete_source.zip",
+      "bytes": 8919459,
+      "sha256": "5a5473b48e69e17d4164bb4f187ba98a1a61af3d884d7309ea58c2346e607db8"
+    },
+    {
+      "file": "Agentic_AI_Engineering_review_packet.zip",
+      "bytes": 98922,
+      "sha256": "92d397595d200d428e88fcc8ee195f755e63a4c993d5005be88910025d32bc44"
+    }
+  ],
+  "source_zip_files_verified": 202
+}

@@ -1,0 +1,116 @@
+{
+  "chapter": 29,
+  "chapter_title": "Production Agent Platform Architecture",
+  "audit": "The hospital handover analogy explains why records survive shifts, but it can leave readers imagining that possession of the chart grants exclusive ownership. Lesson A places worker-local state, durable ownership records and the external operation ledger in separate containers with concrete identifiers. Their relationships show why a restored checkpoint cannot settle an unknown effect. Lesson B follows a stale worker after a takeover and makes both rejected state writes and rejected new effects visible. The sequence assumes fencing is actually enforced at both consumers, making its dependency explicit. Together the pages turn horizontal scaling from a list of services into inspectable record and authority contracts.",
+  "lessons": [
+    {
+      "id": "29A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Three records behind a worker handover",
+      "intro": "AegisOps run INC-82 moves from worker A to worker B. Its rollback request RB-82 may already have reached the deployment system.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Worker memory",
+            "object": "window",
+            "items": [
+              "A retains epoch 7",
+              "B loaded epoch 8",
+              "Both know run INC-82"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Owned run store",
+            "object": "vault",
+            "items": [
+              "INC-82: version 19",
+              "Current owner: B, epoch 8",
+              "RB-82: outcome unknown"
+            ],
+            "role": "data"
+          },
+          {
+            "title": "Deployment service",
+            "object": "server",
+            "items": [
+              "RB-82 operation record",
+              "Revision and receipt lookup",
+              "Downstream dedupe contract"
+            ],
+            "role": "external"
+          }
+        ],
+        "relations": [
+          "Run store fences stale worker updates by epoch.",
+          "Operation lookup resolves what checkpoint cannot."
+        ]
+      },
+      "read": [
+        "Two workers can hold copies of the same run simultaneously.",
+        "The durable owner record decides whose new progress is accepted.",
+        "The deployment record, not copied memory, establishes RB-82 outcome."
+      ],
+      "question": "Can B infer that no rollback happened because its checkpoint says outcome unknown?",
+      "answer": "No. Unknown records the missing knowledge, not absence of an effect. B must reconcile RB-82 through the deployment service while preserving the logical operation identity. It may resume protected work only under current ownership, authority and resource checks. The downstream dedupe retention contract must still cover any retry.",
+      "takeaway": "Shared state preserves continuity; ownership and effect evidence establish safe continuation.",
+      "assumption": "Fictional records; trusted atomic ownership and a documented deployment lookup/deduplication contract are assumed."
+    },
+    {
+      "id": "29B",
+      "placement": "before_heading",
+      "anchor": "Scaling a stateful agent horizontally",
+      "title": "A living worker can have stale authority",
+      "intro": "Worker A pauses while holding epoch 7. The coordinator assigns epoch 8 to B. A later resumes and tries to advance INC-82.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Worker A",
+          "Owner/store",
+          "Effect gateway"
+        ],
+        "steps": [
+          {
+            "time": "t0",
+            "lane": 0,
+            "label": "Load INC-82 at epoch 7"
+          },
+          {
+            "time": "t1",
+            "lane": 1,
+            "label": "Takeover: B owns epoch 8"
+          },
+          {
+            "time": "t2",
+            "lane": 0,
+            "label": "Resume with old epoch 7"
+          },
+          {
+            "time": "t3",
+            "lane": 1,
+            "label": "Reject epoch-7 state write"
+          },
+          {
+            "time": "t4",
+            "lane": 2,
+            "label": "Reject epoch-7 new effect"
+          }
+        ],
+        "wait_after": 0,
+        "wait_label": "A pauses beyond lease expiry",
+        "result": "A is alive, but cannot write state or start a protected effect."
+      },
+      "read": [
+        "The pause ends after ownership has already changed.",
+        "State rejection protects the latest run record from stale overwrite.",
+        "The effect gateway independently rejects stale authority for a new operation."
+      ],
+      "question": "What breaks if only the state store checks the epoch?",
+      "answer": "A stale worker could still start a new external operation even though its state write is rejected. The protected effect boundary needs an ownership contract too. Effects accepted before takeover can remain uncertain and require their operation ledger; later fencing does not undo them.",
+      "takeaway": "Fence both state advancement and new protected effects.",
+      "assumption": "Fictional sequence; all protected effect routes consult authoritative epochs. Positions show order, not elapsed duration."
+    }
+  ]
+}

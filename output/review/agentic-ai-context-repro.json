@@ -1,0 +1,10 @@
+{
+  "original_result": "required item does not fit",
+  "required_only_fits": [
+    {
+      "id": "R",
+      "source": "required",
+      "tokens": 50
+    }
+  ]
+}

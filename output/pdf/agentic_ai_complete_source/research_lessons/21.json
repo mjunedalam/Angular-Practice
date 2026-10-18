@@ -1,0 +1,72 @@
+{
+  "chapter": 21,
+  "design_note": "The two earlier labs cover input isolation and streaming limits. This package envelope adds the build-time boundary: a name, version and approved mirror do not prove the downloaded bytes match the reviewed artifact. It also distinguishes hash integrity from code safety.",
+  "source": {
+    "title": "Secure installs",
+    "url": "https://pip.pypa.io/en/stable/topics/secure-installs/",
+    "publisher": "The pip developers",
+    "concept": "Hash-checking mode compares downloads with locally recorded hashes. Full coverage requires pinned requirements and hashes for dependencies; hashes supplied only by the remote index do not provide the same trust anchor.",
+    "scope": "The invented wheel and abbreviated SHA-256 identifiers illustrate a trusted local lock. The example makes no claim that a matching wheel is harmless.",
+    "id": "R21",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Package installation and dependency controls",
+    "title": "An approved package name can carry different bytes",
+    "intro": "A sandbox image build allows the fictional chartkit 2.4 wheel from an approved mirror. Its reviewed lock expects digest a71. The downloaded archive has digest b82, while its name and version match.",
+    "kind": "packet",
+    "data": {
+      "name": "chartkit wheel inspection",
+      "fields": [
+        {
+          "key": "package",
+          "value": "chartkit 2.4"
+        },
+        {
+          "key": "source",
+          "value": "approved wheel mirror"
+        },
+        {
+          "key": "locked digest",
+          "value": "SHA-256 a71..."
+        },
+        {
+          "key": "actual digest",
+          "value": "SHA-256 b82..."
+        }
+      ],
+      "checks": [
+        {
+          "label": "Name and version",
+          "detail": "chartkit 2.4 is in the reviewed lock",
+          "status": "pass"
+        },
+        {
+          "label": "Source policy",
+          "detail": "Fetch used the approved mirror",
+          "status": "pass"
+        },
+        {
+          "label": "Artifact integrity",
+          "detail": "Downloaded bytes do not match local hash",
+          "status": "fail"
+        }
+      ],
+      "result": "Reject archive; do not install or run it",
+      "result_status": "fail"
+    },
+    "read": [
+      "The package metadata satisfies the first two checks.",
+      "The trusted lock and downloaded bytes disagree.",
+      "The installer rejects before introducing this archive into the environment."
+    ],
+    "question": "Would copying b82 from the mirror into the lock resolve the review requirement?",
+    "answer": "No. That would replace the trusted expectation with the unreviewed download. Establish the intended artifact through the review process first. Even a matching hash establishes identity of bytes, not safe behavior; isolation and patch review still apply.",
+    "takeaway": "Verify downloaded bytes against a trusted local expectation.",
+    "assumption": "Fictional wheel; hashes abbreviated. The full dependency set is pinned and hashed, and source distributions are excluded by build policy.",
+    "source_label": "pip: secure installs and hash checking",
+    "id": "21C",
+    "placement": "before_heading",
+    "source_key": "R21"
+  }
+}

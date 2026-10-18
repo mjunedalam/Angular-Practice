@@ -1,0 +1,115 @@
+{
+  "chapter": 3,
+  "chapter_title": "3. Reasoning & Control Patterns",
+  "audit": "The reporting-desk analogy names planning, critique and delegation but does not show what an evaluator actually verifies or how overhead accumulates. Lesson A pins three claims to fictional policy and payment excerpts, including a direct contradiction and an insufficient citation. The critic therefore contributes a check rather than an unexplained confidence score. Lesson B counts model invocations for four explicitly constructed traces, including worker and reducer overhead. These are arithmetic examples rather than benchmark results. Readers can separate evidence quality, model-call count and control-pattern choice without mistaking parallel wall-time reduction for reduced total work.",
+  "lessons": [
+    {
+      "id": "3A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "An editor checks the cited passage",
+      "intro": "ShopAssist drafts three claims. The reviewer opens the cited records instead of merely rereading the draft.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "PAY-B is a captured duplicate of PAY-A."
+          },
+          {
+            "id": "C2",
+            "text": "PAY-B has already been refunded."
+          },
+          {
+            "id": "C3",
+            "text": "The customer will receive funds tomorrow."
+          }
+        ],
+        "sources": [
+          {
+            "id": "S1",
+            "text": "Ledger: PAY-A and PAY-B captured for ORD-104233; duplicate flag confirmed."
+          },
+          {
+            "id": "S2",
+            "text": "Refund ledger: PAY-B refunded amount is 0 minor units."
+          },
+          {
+            "id": "S3",
+            "text": "Policy v3: eligible duplicates may be refunded after required approval."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "conflicts"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "insufficient"
+          }
+        ],
+        "verdict": "Retain C1; correct C2; remove or qualify unsupported timing C3."
+      },
+      "read": [
+        "C1 has matching transaction evidence.",
+        "C2 conflicts with the authoritative refund ledger.",
+        "S3 gives eligibility, not a next-day arrival guarantee."
+      ],
+      "question": "Would a second reviewer reading only the same draft resolve C2?",
+      "answer": "Not reliably. The improvement here comes from inspecting the refund ledger, not from the number of reviewers. A revision must be checked again, and any unchecked final draft retains an unverified status.",
+      "takeaway": "Review adds value when it contributes a concrete check or new evidence.",
+      "assumption": "Fictional excerpts; the editor analogy does not make model reviewers independent. No critic accuracy is measured here."
+    },
+    {
+      "id": "3B",
+      "placement": "before_heading",
+      "anchor": "Comparing the patterns quantitatively",
+      "title": "Count calls before comparing patterns",
+      "intro": "These four constructed traces solve the same read-only support question. Count all model invocations, including planning, review and reduction.",
+      "kind": "bars",
+      "data": {
+        "unit": "model calls",
+        "items": [
+          {
+            "label": "Router + fixed handler",
+            "value": 2,
+            "role": "model"
+          },
+          {
+            "label": "ReAct: 4 decisions",
+            "value": 4,
+            "role": "model"
+          },
+          {
+            "label": "Plan + 3 steps + answer",
+            "value": 5,
+            "role": "model"
+          },
+          {
+            "label": "4 workers + reducer",
+            "value": 5,
+            "role": "model"
+          }
+        ],
+        "rule": "Scripts count calls only; equal totals do not imply equal tokens, quality or latency."
+      },
+      "read": [
+        "The router trace includes one routing call and one drafting call.",
+        "The planning trace pays for the plan and final synthesis.",
+        "The parallel trace still pays for all four workers and reduction."
+      ],
+      "question": "If the four workers run together, does the parallel trace fall from 5 calls to 2?",
+      "answer": "No. Its model-call count remains 5. Independent workers may overlap in wall time, but each invocation still consumes resources and the reducer waits for usable results. Real comparisons also need tokens, accepted outcomes, failures and latency distributions on the same case set.",
+      "takeaway": "Parallel scheduling changes overlap; it does not erase worker or reducer work.",
+      "assumption": "Constructed call counts, not measurements. Each named step invokes one model; authorized tool reads are excluded from this unit."
+    }
+  ]
+}

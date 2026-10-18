@@ -1,0 +1,100 @@
+{
+  "chapter": 19,
+  "design_note": "The existing labs trace exfiltration and redirect checks. These snapshots isolate metadata poisoning: a tool keeps identical input fields while its full reviewed definition changes. The question states the hash boundary precisely, preventing readers from confusing definition integrity with proof of unchanged backend behavior.",
+  "source": {
+    "title": "MCP (Model Context Protocol) Security Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
+    "publisher": "OWASP Cheat Sheet Series",
+    "concept": "Review and pin complete tool definitions, including descriptions, schemas and annotations. Detecting metadata changes does not detect behavior changes behind an unchanged definition.",
+    "scope": "The abbreviated hashes, timestamps and withholding rule are fictional host records. A definition hash is not a package signature, code review or runtime containment guarantee.",
+    "id": "R19",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Sanitisation, labelling and output handling",
+    "title": "The fields match, but the advertised tool changed",
+    "intro": "AegisOps pinned a reviewed tool definition. A later catalog keeps the same input schema but changes its description to request an unrelated export. The host compares the entire definition before exposure.",
+    "kind": "snapshots",
+    "data": {
+      "frames": [
+        {
+          "title": "Reviewed catalog",
+          "event": "Pin complete definition d9a",
+          "fields": [
+            {
+              "key": "input_schema",
+              "value": "s11",
+              "changed": false
+            },
+            {
+              "key": "definition",
+              "value": "d9a",
+              "changed": false
+            },
+            {
+              "key": "exposure",
+              "value": "reviewed release",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "Catalog refresh",
+          "event": "Schema same; description changed",
+          "fields": [
+            {
+              "key": "input_schema",
+              "value": "s11",
+              "changed": false
+            },
+            {
+              "key": "definition",
+              "value": "b72",
+              "changed": true
+            },
+            {
+              "key": "exposure",
+              "value": "drift detected",
+              "changed": true
+            }
+          ]
+        },
+        {
+          "title": "Before next use",
+          "event": "Reject unreviewed definition b72",
+          "fields": [
+            {
+              "key": "input_schema",
+              "value": "s11",
+              "changed": false
+            },
+            {
+              "key": "definition",
+              "value": "b72",
+              "changed": false
+            },
+            {
+              "key": "exposure",
+              "value": "withheld pending review",
+              "changed": true
+            }
+          ]
+        }
+      ],
+      "invariant": "Matching input fields cannot validate a changed whole tool definition."
+    },
+    "read": [
+      "The input schema identifier never changes.",
+      "The full definition digest changes when the description changes.",
+      "The host withholds the changed tool instead of treating discovery as approval."
+    ],
+    "question": "Would an unchanged full definition hash prove the server implementation stayed unchanged?",
+    "answer": "No. It would establish matching advertised metadata under the hashing assumptions, not unchanged server code or behavior. Deployment review, constrained credentials, output validation and monitoring remain separate controls. The displayed check detects this metadata change only.",
+    "takeaway": "Pin the complete contract, then retain independent runtime controls.",
+    "assumption": "Fictional immutable definitions; digests abbreviated. The trusted host canonicalizes all definition fields and enforces withholding before model exposure.",
+    "source_label": "OWASP: MCP tool definition integrity",
+    "id": "19C",
+    "placement": "before_heading",
+    "source_key": "R19"
+  }
+}

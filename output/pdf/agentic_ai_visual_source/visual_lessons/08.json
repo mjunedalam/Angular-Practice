@@ -1,0 +1,125 @@
+{
+  "chapter": 8,
+  "chapter_title": "8. Context Engineering",
+  "audit": "The suitcase analogy makes limited capacity intuitive but can blur the difference between input tokens and room reserved for generation. Lesson A fills a constructed capacity tray exactly, allocating output separately and excluding both irrelevant and unauthorized candidates. It states serialization assumptions rather than presenting a universal provider budget. Lesson B confronts a polished summary with its original proposal and pending-approval records, then checks a freshly fetched but superseded policy. The reader must distinguish operational truth, retrieval time and source validity. These lessons add arithmetic and evidence inspection while preserving paired provenance and exact financial state.",
+  "lessons": [
+    {
+      "id": "8A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Pack for this decision, including output room",
+      "intro": "A constructed 8000-token request budget must fit one refund decision. Required contracts and exact current state enter before optional history.",
+      "kind": "packing",
+      "data": {
+        "capacity": 8000,
+        "unit": "tokens",
+        "segments": [
+          {
+            "label": "Instructions + overhead",
+            "value": 2000,
+            "role": "policy"
+          },
+          {
+            "label": "Exact state + request",
+            "value": 1000,
+            "role": "runtime"
+          },
+          {
+            "label": "Selected evidence",
+            "value": 3000,
+            "role": "data"
+          },
+          {
+            "label": "Reserved output",
+            "value": 2000,
+            "role": "model"
+          }
+        ],
+        "excluded": [
+          {
+            "label": "Old greeting transcript",
+            "reason": "Optional; no effect on this decision"
+          },
+          {
+            "label": "Foreign tenant order",
+            "reason": "Denied by access policy before ranking"
+          }
+        ]
+      },
+      "read": [
+        "The four segments sum to the complete 8000-token allowance.",
+        "Only 6000 tokens represent serialized input in this simplified example.",
+        "The foreign order stays excluded even if spare space appears."
+      ],
+      "question": "If evidence grows by 700 tokens, may the builder quietly consume the reserved output segment?",
+      "answer": "No. It must apply an explicit supported budget policy: shrink optional evidence, retrieve a smaller representation, or select another valid configuration. Required exact facts cannot be silently truncated, and provider-specific output or reasoning requirements must still fit the final serialized request.",
+      "takeaway": "Capacity budgeting preserves required meaning and distinct room for generated output.",
+      "assumption": "Constructed allocation; overhead is included in 2000 tokens. This provider simplification has no separate reasoning reserve; suitcase weight does not model attention."
+    },
+    {
+      "id": "8B",
+      "placement": "before_heading",
+      "anchor": "Stale, contradictory and poisoned context",
+      "title": "Check what the summary compressed away",
+      "intro": "A compact context says the refund is handled and cites a policy fetched today. Inspect the underlying records before trusting either conclusion.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "K-17 refund has completed."
+          },
+          {
+            "id": "C2",
+            "text": "K-17 is waiting for approval."
+          },
+          {
+            "id": "C3",
+            "text": "Policy v2 is current because it was fetched today."
+          }
+        ],
+        "sources": [
+          {
+            "id": "S1",
+            "text": "Intent K-17: proposed 2499; submitted=false; no provider receipt."
+          },
+          {
+            "id": "S2",
+            "text": "Approval A-6: pending; bound to K-17; no review decision recorded."
+          },
+          {
+            "id": "S3",
+            "text": "Register: v3 effective 01 Oct; v2 superseded. Cache fetched v2 today."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "conflicts"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "supports"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "conflicts"
+          }
+        ],
+        "verdict": "Restore pending status; refresh policy from the authoritative version register."
+      },
+      "read": [
+        "A proposed amount is not an executed effect.",
+        "The approval record preserves a distinction the summary erased.",
+        "Fresh retrieval time cannot make a superseded source current."
+      ],
+      "question": "Which two exact facts should replace the phrase refund handled in the next context?",
+      "answer": "The refund has not been submitted, and approval A-6 remains pending for K-17. Include those structured facts with their source references. Fetch the current policy version separately; do not infer policy validity from today's retrieval timestamp.",
+      "takeaway": "Compression may shorten wording, but it must preserve operational distinctions and source validity.",
+      "assumption": "Fictional original records and register; the authoritative provider receipt is absent. The example tests summary fidelity, not measured model accuracy."
+    }
+  ]
+}

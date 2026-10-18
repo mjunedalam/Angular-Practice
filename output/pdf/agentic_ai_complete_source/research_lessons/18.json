@@ -1,0 +1,74 @@
+{
+  "chapter": 18,
+  "design_note": "The earlier labs address lost entitlement and modified proposals. This matrix makes the independence requirement concrete: two decision events can represent only one person, or include the requester. It separates distinct identities, present entitlement and separation of duties without presenting a universal approval count.",
+  "source": {
+    "title": "Security and Privacy Controls for Information Systems and Organizations",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+    "publisher": "NIST Joint Task Force",
+    "concept": "Control AC-5 calls for identifying duties that require separation and defining access authorizations that support that separation. Organizations define the duties and associated policy.",
+    "scope": "The two-approver refund rule and people are fictional. NIST does not prescribe this example threshold, and passing these identity checks alone does not permit execution.",
+    "id": "R18",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "SLAs, expiry and reassignment",
+    "title": "Two approval events may still be one approver",
+    "intro": "Priya requested refund P-77. This fictional rule requires two distinct, currently entitled approvers, neither of whom is Priya. Each row contains two authenticated approval events for that exact proposal.",
+    "kind": "matrix",
+    "data": {
+      "columns": [
+        "Two distinct",
+        "Both entitled",
+        "No requester"
+      ],
+      "rows": [
+        {
+          "label": "Mira + Noor",
+          "cells": [
+            "allow",
+            "allow",
+            "allow"
+          ]
+        },
+        {
+          "label": "Mira + Mira",
+          "cells": [
+            "deny",
+            "allow",
+            "allow"
+          ]
+        },
+        {
+          "label": "Mira + Priya",
+          "cells": [
+            "allow",
+            "allow",
+            "deny"
+          ]
+        },
+        {
+          "label": "Mira + ex-member",
+          "cells": [
+            "allow",
+            "deny",
+            "allow"
+          ]
+        }
+      ],
+      "rule": "All columns must allow; binding, expiry and current resource conditions still apply."
+    },
+    "read": [
+      "The columns test three separate conditions on the same pair of decisions.",
+      "Mira signing twice does not create a second independent principal.",
+      "Priya is entitled generally but cannot independently approve her own request here."
+    ],
+    "question": "Do two valid signatures by Mira satisfy the stated rule?",
+    "answer": "No. Signature validity establishes the source of each decision, not distinct reviewers. Both events resolve to Mira, so the pair lacks a second principal. A currently entitled, independent second approver is required, along with the remaining execution checks.",
+    "takeaway": "Count distinct entitled principals, not clicks or signatures.",
+    "assumption": "Fictional two-person rule; all decisions are approved, correctly bound and unexpired. The ex-member has no current approval role.",
+    "source_label": "NIST SP 800-53: separation of duties",
+    "id": "18C",
+    "placement": "before_heading",
+    "source_key": "R18"
+  }
+}

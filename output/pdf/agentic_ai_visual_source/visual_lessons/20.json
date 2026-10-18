@@ -1,0 +1,123 @@
+{
+  "chapter": 20,
+  "chapter_title": "Identity, Authorization & Delegated Access",
+  "audit": "The courier analogy separates subject, actor and credential, but readers need to apply the permission intersection to specific orders rather than remember identity terminology. Lesson A varies one permission ceiling at a time across four concrete refund cases; an all-allow row still requires downstream financial and approval checks. Lesson B presents a verified token with the expected refund scope but the wrong audience, demonstrating why apparently strong claims cannot be repurposed. Neither lesson promises that token exchange automatically narrows scopes or makes a token one-use. Background jobs remain outside the explicitly user-directed setup, preserving their separate principal and policy model.",
+  "lessons": [
+    {
+      "id": "20A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Three permission ceilings must overlap",
+      "intro": "Priya asks the refunds workload to act on an order. These constructed cases vary user entitlement, workload authority and the current task scope independently.",
+      "kind": "matrix",
+      "data": {
+        "columns": [
+          "User entitled",
+          "Workload allowed",
+          "Task in scope"
+        ],
+        "rows": [
+          {
+            "label": "O-481: scoped refund",
+            "cells": [
+              "allow",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "O-902: other tenant",
+            "cells": [
+              "deny",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "O-481: reader workload",
+            "cells": [
+              "allow",
+              "deny",
+              "allow"
+            ]
+          },
+          {
+            "label": "O-481: status-only task",
+            "cells": [
+              "allow",
+              "allow",
+              "deny"
+            ]
+          }
+        ],
+        "rule": "All three must allow; approval, credential and downstream financial checks still apply."
+      },
+      "read": [
+        "Compare each row with the scoped-refund baseline.",
+        "A single denial defeats the intersection even when the other two columns allow.",
+        "The first row passes these ceilings, not every execution requirement."
+      ],
+      "question": "Can the refunds workload compensate for Priya lacking access to O-902?",
+      "answer": "No. User-directed authority is constrained by both principals and the task, not the union of their powers. The workload's permission cannot supply the missing user entitlement.",
+      "takeaway": "Intersect authority; never combine privileges to bypass a denial.",
+      "assumption": "Fictional user-directed cases; background jobs use a separate reviewed workload policy. Other refund conditions are not represented in this matrix."
+    },
+    {
+      "id": "20B",
+      "placement": "before_heading",
+      "anchor": "Per-tool, resource and argument permissions",
+      "title": "Right scope, wrong audience",
+      "intro": "The executor is about to call payments-api. Its credential is cryptographically valid and current, but was issued for the reporting service. The model never receives the credential.",
+      "kind": "packet",
+      "data": {
+        "name": "Decoded credential summary",
+        "fields": [
+          {
+            "key": "subject",
+            "value": "user:priya"
+          },
+          {
+            "key": "actor",
+            "value": "agent:refunds"
+          },
+          {
+            "key": "audience",
+            "value": "reporting-api"
+          },
+          {
+            "key": "scope",
+            "value": "refunds:create"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Issuer and lifetime",
+            "detail": "Trusted signature; currently within lifetime",
+            "status": "pass"
+          },
+          {
+            "label": "Required scope",
+            "detail": "refunds:create is present",
+            "status": "pass"
+          },
+          {
+            "label": "Expected audience",
+            "detail": "payments-api does not match reporting-api",
+            "status": "fail"
+          }
+        ],
+        "result": "Payments API rejects the credential",
+        "result_status": "fail"
+      },
+      "read": [
+        "The summary is claim metadata, not a usable bearer token.",
+        "Scope presence does not override the intended resource server.",
+        "The payments boundary must reject the wrong audience."
+      ],
+      "question": "Should the executor retry using a broad service token after this denial?",
+      "answer": "No. It should resolve the incorrect credential profile through the authorized broker. Any replacement must satisfy the user, workload, task and resource policy; a broader credential is not a recovery shortcut.",
+      "takeaway": "Validate destination binding independently of scope.",
+      "assumption": "Fictional validated claim summary, not a credential. Exchange policy determines audience and delegation claims; scope does not prove business entitlement."
+    }
+  ]
+}

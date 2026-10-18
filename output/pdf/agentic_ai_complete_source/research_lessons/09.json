@@ -1,0 +1,80 @@
+{
+  "chapter": 9,
+  "design_note": "Use derivation records to identify what a forgetting operation must revisit. The example distinguishes a removed source, a surviving embedding and a mixed summary without incorrectly deleting an independent supporting record.",
+  "source": {
+    "title": "PROV-DM: The PROV Data Model",
+    "url": "https://www.w3.org/TR/prov-dm/",
+    "publisher": "World Wide Web Consortium",
+    "concept": "Provenance can record which entities were derived from other entities and which activities produced them, enabling dependency analysis across representations.",
+    "scope": "Original ShopAssist forgetting policy uses derivation metadata to find copies. PROV describes provenance; it does not perform deletion or prescribe this retention policy.",
+    "id": "R09",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Privacy, retention and user control",
+    "title": "Deleting a note leaves a lineage question",
+    "intro": "A user withdraws preference M-31. ShopAssist policy removes its derivatives and rebuilds mixed summaries while retaining unrelated records. Inspect the fictional lineage report before declaring the operation complete.",
+    "kind": "evidence",
+    "data": {
+      "claims": [
+        {
+          "id": "C1",
+          "text": "Deleting M-31 removed all of its derivatives."
+        },
+        {
+          "id": "C2",
+          "text": "Summary S-44 needs removal or recomputation."
+        },
+        {
+          "id": "C3",
+          "text": "Independent note M-42 must also be deleted."
+        }
+      ],
+      "sources": [
+        {
+          "id": "L1",
+          "text": "M-31 is deleted; embedding E-31 derived from M-31 remains stored."
+        },
+        {
+          "id": "L2",
+          "text": "S-44 derives from M-31 and independently retained note M-42."
+        },
+        {
+          "id": "L3",
+          "text": "M-42 came from a separate statement; it was not derived from M-31."
+        }
+      ],
+      "links": [
+        {
+          "claim": 0,
+          "source": 0,
+          "relation": "conflicts"
+        },
+        {
+          "claim": 1,
+          "source": 1,
+          "relation": "supports"
+        },
+        {
+          "claim": 2,
+          "source": 2,
+          "relation": "insufficient"
+        }
+      ],
+      "verdict": "Suppress derived recall; remove E-31; rebuild or remove S-44."
+    },
+    "read": [
+      "L1 exposes a surviving stored derivative even though the source is gone.",
+      "L2 identifies the summary that needs cleanup under the stated product policy.",
+      "L3 does not establish a reason to delete independent M-42."
+    ],
+    "question": "Can deleting M-31 alone justify a completed-forgetting status under this policy?",
+    "answer": "No. E-31 remains stored, and S-44 still derives from the withdrawn preference. Suppress affected recall while cleanup removes E-31 and rebuilds or removes S-44. Verify that work before marking completion. The lineage does not itself require deleting the unrelated M-42 record.",
+    "takeaway": "Follow derivation links to clean up copies without confusing shared use with shared origin.",
+    "assumption": "Fictional complete lineage and product policy with no retention exception. Provenance locates dependencies; a separate deletion workflow must suppress and remove them.",
+    "source_label": "W3C PROV-DM: derivation and lineage",
+    "id": "9C",
+    "placement": "before_heading",
+    "source_key": "R09"
+  }
+}

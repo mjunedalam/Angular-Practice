@@ -1,0 +1,55 @@
+{
+  "chapter": 29,
+  "design_note": "Shows the lost-continuation gap between a saved run and a queue publish. The paired crash traces isolate what committing an outbox record adds, while retaining duplicate-delivery and external-effect limits.",
+  "source": {
+    "id": "R29",
+    "title": "Transactional outbox pattern",
+    "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
+    "publisher": "Amazon Web Services",
+    "accessed": "2026-10-17",
+    "concept": "Persisting the state change and an outgoing event in one database transaction leaves recoverable publication work after a crash. Relays can publish duplicates, so consumers still need idempotent handling.",
+    "scope": "Original INC-93 crash traces; assumes a durable atomic database transaction, a recovering relay and stable consumer deduplication."
+  },
+  "lesson": {
+    "anchor": "Durable workflows for long-running tasks",
+    "title": "Save the next obligation with the state",
+    "intro": "AegisOps saves INC-93 after gathering evidence, then must schedule hypothesis work. Compare a crash at the same point: after committing local state but before queue publication.",
+    "kind": "fork",
+    "data": {
+      "input": "INC-93: evidence ready; hypothesis step must be scheduled",
+      "left": {
+        "title": "Separate state and send",
+        "steps": [
+          "Commit state: ready for hypothesis",
+          "Crash before publishing queue message",
+          "Restart: no durable dispatch record"
+        ],
+        "result": "Continuation can be lost without a separate repair scan.",
+        "status": "fail"
+      },
+      "right": {
+        "title": "State plus outbox",
+        "steps": [
+          "Commit state + event H-93 atomically",
+          "Crash before publishing queue message",
+          "Relay recovers H-93 and publishes it"
+        ],
+        "result": "Durable scheduling obligation survives; duplicates possible.",
+        "status": "pass"
+      }
+    },
+    "read": [
+      "Both traces lose the worker before any queue publication.",
+      "The right transaction stores the pending message alongside the state.",
+      "A relay repairs delivery; the consumer still deduplicates event H-93."
+    ],
+    "question": "If the relay publishes H-93 and crashes before marking it sent, what must the consumer tolerate?",
+    "answer": "A repeat delivery of H-93. The relay may publish again because its local record is still pending. The consumer needs a durable idempotent handling contract for that event. This scheduling mechanism does not establish permission for a rollback or guarantee a single external effect; those retain their separate authority and operation contracts.",
+    "takeaway": "Commit the next scheduling obligation with progress, then make its delivery safe to repeat.",
+    "assumption": "Fictional crash traces; the left design has no repair scan. The right relay eventually runs; consumer deduplication remains necessary.",
+    "id": "29C",
+    "placement": "before_heading",
+    "source_key": "R29",
+    "source_label": "AWS: Transactional outbox pattern"
+  }
+}

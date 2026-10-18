@@ -1,0 +1,72 @@
+{
+  "chapter": 15,
+  "design_note": "The earlier labs cover task continuation and lost creation responses. This artifact inspection separates remote terminal status from local acceptance. An authentic report for the correct task can still describe the wrong observation window; rejection preserves task identity instead of pretending the task is still running.",
+  "source": {
+    "title": "Life of a Task",
+    "url": "https://a2a-protocol.org/latest/topics/life-of-a-task/",
+    "publisher": "Agent2Agent Project, The Linux Foundation",
+    "concept": "Terminal task state and client acceptance are separate concerns. Clients manage which artifact versions they accept; a completed task is not restarted for a refinement.",
+    "scope": "The fictional diagnosis contract requires a specific cluster and time window. These acceptance criteria are application rules, not additional A2A protocol guarantees.",
+    "id": "R15",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Gateways, versions and cross-platform interoperability",
+    "title": "Completed remotely, rejected locally",
+    "intro": "Task T-904 completed a database diagnosis for cluster nw-db-2. The brief required 09:00-09:15 UTC. The authenticated worker delivered an artifact covering 08:00-08:15 UTC instead.",
+    "kind": "packet",
+    "data": {
+      "name": "Diagnosis artifact A-904",
+      "fields": [
+        {
+          "key": "task",
+          "value": "T-904: completed"
+        },
+        {
+          "key": "cluster",
+          "value": "nw-db-2"
+        },
+        {
+          "key": "report window",
+          "value": "08:00-08:15 UTC"
+        },
+        {
+          "key": "required window",
+          "value": "09:00-09:15 UTC"
+        }
+      ],
+      "checks": [
+        {
+          "label": "Origin and binding",
+          "detail": "Verified worker; expected task and cluster",
+          "status": "pass"
+        },
+        {
+          "label": "Window applicability",
+          "detail": "Artifact covers the wrong 15-minute window",
+          "status": "fail"
+        },
+        {
+          "label": "Local acceptance",
+          "detail": "Withheld; requested interval unexamined",
+          "status": "wait"
+        }
+      ],
+      "result": "Keep T-904 terminal; do not accept A-904 as diagnosis",
+      "result_status": "fail"
+    },
+    "read": [
+      "The artifact belongs to the expected worker and task.",
+      "The observation interval differs from the commissioned interval.",
+      "Completed describes remote lifecycle; accepted describes the caller's evidence decision."
+    ],
+    "question": "Should the commander mark the requested interval investigated?",
+    "answer": "No. Authenticity and terminal status cannot make the wrong interval relevant. Retain T-904 and its rejected artifact for provenance. If correction is authorized, request a distinct follow-up task referencing the prior work, then validate its deliverable.",
+    "takeaway": "Check applicability before accepting a completed task's artifact.",
+    "assumption": "Fictional read-only task; authenticated transport and scoped access are assumed. The caller owns the stated acceptance rule.",
+    "source_label": "A2A: life of a task",
+    "id": "15C",
+    "placement": "before_heading",
+    "source_key": "R15"
+  }
+}

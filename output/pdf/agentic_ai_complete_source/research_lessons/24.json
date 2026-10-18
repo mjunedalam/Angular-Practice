@@ -1,0 +1,55 @@
+{
+  "chapter": 24,
+  "design_note": "The original tests inspect financial effects and crash boundaries. This comparison tests the test fixture itself: two generated cases are independent by specification but accidentally share a mutable retry balance. The visible leftover token explains a false failure without blaming the budget implementation.",
+  "source": {
+    "title": "API Reference",
+    "url": "https://hypothesis.readthedocs.io/en/latest/reference/api.html#hypothesis.HealthCheck.function_scoped_fixture",
+    "publisher": "Hypothesis developers",
+    "concept": "A function-scoped pytest fixture resets once per test, not once for every generated Hypothesis input. Shared mutable fixture state can therefore make a property test unsound.",
+    "scope": "Two fictional generated examples consume tokens from a correct budget implementation. Their intended starting conditions require a fresh budget per example, not a continuous stateful sequence.",
+    "id": "R24",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Deterministic replay and regression baselines",
+    "title": "A leftover token can make a good rule look broken",
+    "intro": "Every generated example must start with 2 retry tokens. Example A consumes 1; independent example B attempts 2 reservations. Compare a shared fixture with a newly constructed budget for each example.",
+    "kind": "fork",
+    "data": {
+      "input": "Independent A uses 1 token; B needs 2; each starts with 2.",
+      "left": {
+        "title": "Reuse mutable fixture",
+        "steps": [
+          "A starts with 2 and leaves 1 token",
+          "B inherits the same object with 1 token",
+          "B's second reservation is denied correctly"
+        ],
+        "result": "Test setup violates B's required starting condition",
+        "status": "fail"
+      },
+      "right": {
+        "title": "Fresh per example",
+        "steps": [
+          "A starts with 2; discard its remaining 1",
+          "Construct B's own budget with 2 tokens",
+          "B makes 2 reservations and finishes with 0"
+        ],
+        "result": "B tests the intended rule without A's residual state",
+        "status": "pass"
+      }
+    },
+    "read": [
+      "The budget implementation behaves consistently in both traces.",
+      "The left fixture carries state between examples intended to be independent.",
+      "The right fixture restores the declared initial condition for B."
+    ],
+    "question": "Would suppressing the fixture health check restore B's missing token?",
+    "answer": "No. Suppression changes the warning, not object lifetime or state. Create/reset mutable systems inside each independent example. Intentionally stateful testing is different: its generated action sequence must explicitly define shared state and the invariant that spans that sequence.",
+    "takeaway": "A property test is only meaningful under its declared initial state.",
+    "assumption": "Constructed examples and correct two-token budget; no real provider calls. Independent examples are intentionally distinct from actions inside one stateful test.",
+    "source_label": "Hypothesis: function-scoped fixture health check",
+    "id": "24C",
+    "placement": "before_heading",
+    "source_key": "R24"
+  }
+}

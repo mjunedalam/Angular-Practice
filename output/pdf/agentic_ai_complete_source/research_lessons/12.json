@@ -1,0 +1,58 @@
+{
+  "chapter": 12,
+  "design_note": "Compute rank fusion with simple integer-scaled contributions. Two different first-place documents become a new fused ordering, and the prediction removes one list to show that fusion uses rank evidence rather than raw-score addition.",
+  "source": {
+    "title": "Reciprocal rank fusion",
+    "url": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion",
+    "publisher": "Elastic",
+    "concept": "Reciprocal rank fusion adds contributions based on each document position in each result list, allowing rankings to combine without comparing incompatible raw scores.",
+    "scope": "Original four-document lists use constant 1 and a display scale of 12 for exact arithmetic. They are not retrieval measurements or recommended tuning.",
+    "id": "R12",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Production lens",
+    "title": "Fuse ranks without pretending scores share units",
+    "intro": "Two authorized current-source searches use different raw-score scales. Fuse their ranks with constant 1, then multiply every fused score by 12 so the arithmetic is visible. These lists are constructed.",
+    "kind": "bars",
+    "data": {
+      "unit": "12 x RRF score",
+      "items": [
+        {
+          "label": "B: lexical 2, dense 1",
+          "value": 10,
+          "role": "success"
+        },
+        {
+          "label": "A: lexical 1, dense 3",
+          "value": 9,
+          "role": "data"
+        },
+        {
+          "label": "D: dense 2 only",
+          "value": 4,
+          "role": "data"
+        },
+        {
+          "label": "C: lexical 3 only",
+          "value": 3,
+          "role": "data"
+        }
+      ],
+      "rule": "Lists: lexical A,B,C; dense B,D,A. Sum 12 / (1 + rank); absence contributes 0."
+    },
+    "read": [
+      "B receives 12 / 3 + 12 / 2 = 10.",
+      "A receives 12 / 2 + 12 / 4 = 9.",
+      "The numbers encode rank agreement, not factual support or calibrated relevance."
+    ],
+    "question": "If the dense list contributes nothing, which document ranks first and what is its displayed score?",
+    "answer": "A ranks first with 12 / (1 + 1) = 6. B receives 4, C receives 3, and D receives 0. The original fused ordering changes because B loses its dense-search contribution. Authorization, source validity and evidence support remain separate checks after this arithmetic.",
+    "takeaway": "Rank fusion combines ordered evidence without equating the original retrieval scores.",
+    "assumption": "Constructed unique document lists with identical access filters; one-based ranks, constant 1 and display multiplier 12. Scores are not measured quality.",
+    "source_label": "Elastic: reciprocal rank fusion",
+    "id": "12C",
+    "placement": "before_heading",
+    "source_key": "R12"
+  }
+}

@@ -1,0 +1,1192 @@
+[
+  {
+    "chapter": 1,
+    "title": "1. LLM Runtime Fundamentals for Agent Engineers",
+    "source_pages": [
+      17,
+      41
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/01.txt",
+    "heading_map": [
+      {
+        "source_heading": "What the model actually does",
+        "revised_heading": "What the model actually does"
+      },
+      {
+        "source_heading": "Structured outputs: making the model speak in contracts",
+        "revised_heading": "Structured outputs: making the model speak in contracts"
+      },
+      {
+        "source_heading": "Tool calling is intent, not execution",
+        "revised_heading": "Tool calling is intent, not execution"
+      },
+      {
+        "source_heading": "Streaming, latency, rate limits and provider behaviour",
+        "revised_heading": "Streaming, latency, rate limits and provider behaviour"
+      },
+      {
+        "source_heading": "Hallucination, uncertainty and grounding",
+        "revised_heading": "Hallucination, uncertainty and grounding"
+      },
+      {
+        "source_heading": "The stateless model and the stateful runtime",
+        "revised_heading": "The stateless model and the stateful runtime"
+      },
+      {
+        "source_heading": "Provider abstraction and basic routing",
+        "revised_heading": "Provider abstraction and basic routing"
+      },
+      {
+        "source_heading": "Build it: a minimal typed model client",
+        "revised_heading": "Build it: a minimal typed model client"
+      },
+      {
+        "source_heading": "Failure modes and how to recognise them",
+        "revised_heading": "Failure modes and how to recognise them"
+      },
+      {
+        "source_heading": "Production lens",
+        "revised_heading": "Production lens"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Repair/transport accounting separated",
+      "Explicit stop reasons",
+      "Client TTFT definition",
+      "Opaque provider continuation retained"
+    ],
+    "index_term_crosscheck": [
+      "Context window",
+      "Hallucination",
+      "Model routing",
+      "Rate limits",
+      "Retry policy",
+      "Stop reason",
+      "Streaming",
+      "Structured output",
+      "Temperature",
+      "Tokens",
+      "TTFT (time to first token)",
+      "Untrusted content"
+    ],
+    "word_count": 3033,
+    "diagram_kinds": [
+      "boundary",
+      "flow",
+      "layers"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 2,
+    "title": "2. What Is an AI Agent? Anatomy, Autonomy & Boundaries",
+    "source_pages": [
+      42,
+      63
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/02.txt",
+    "heading_map": [
+      {
+        "source_heading": "Chatbot, LLM app, workflow or agent?",
+        "revised_heading": "Chatbot, LLM app, workflow or agent?"
+      },
+      {
+        "source_heading": "The anatomy of an agent",
+        "revised_heading": "The anatomy of an agent"
+      },
+      {
+        "source_heading": "The agent loop: observe, decide, act, update",
+        "revised_heading": "The agent loop: observe, decide, act, update"
+      },
+      {
+        "source_heading": "Deterministic boundaries around probabilistic decisions",
+        "revised_heading": "Deterministic boundaries around probabilistic decisions"
+      },
+      {
+        "source_heading": "Autonomy levels",
+        "revised_heading": "Autonomy levels"
+      },
+      {
+        "source_heading": "Termination: budgets, loop limits and completion criteria",
+        "revised_heading": "Termination: budgets, loop limits and completion criteria"
+      },
+      {
+        "source_heading": "Build it: a mocked decision/action loop",
+        "revised_heading": "Build it: a mocked decision/action loop"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Working definition scoped",
+      "Tool uncertainty explicit",
+      "Controller-verified finish",
+      "Autonomy promotion is evidence/risk-based"
+    ],
+    "index_term_crosscheck": [
+      "Autonomy level",
+      "Budget",
+      "Workflow vs agent"
+    ],
+    "word_count": 2738,
+    "diagram_kinds": [
+      "comparison",
+      "anatomy",
+      "cycle"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 3,
+    "title": "3. Reasoning & Control Patterns",
+    "source_pages": [
+      64,
+      83
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/03.txt",
+    "heading_map": [
+      {
+        "source_heading": "The pattern landscape",
+        "revised_heading": "The pattern landscape"
+      },
+      {
+        "source_heading": "ReAct: the tool-use loop",
+        "revised_heading": "ReAct: the tool-use loop"
+      },
+      {
+        "source_heading": "Routers: cheap, reliable specialisation",
+        "revised_heading": "Routers: cheap, reliable specialisation"
+      },
+      {
+        "source_heading": "Plan-and-execute",
+        "revised_heading": "Plan-and-execute"
+      },
+      {
+        "source_heading": "Reflection, critics and evaluator\u2013optimizer loops",
+        "revised_heading": "Reflection, critics and evaluator-optimizer loops"
+      },
+      {
+        "source_heading": "Parallel workers, map-reduce and hierarchy",
+        "revised_heading": "Parallel workers, map-reduce and hierarchy"
+      },
+      {
+        "source_heading": "Comparing the patterns quantitatively",
+        "revised_heading": "Comparing the patterns quantitatively"
+      },
+      {
+        "source_heading": "When a deterministic workflow beats an agent",
+        "revised_heading": "When a deterministic workflow beats an agent"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Orthogonal sequencing/review patterns",
+      "Valid JSON result bounding",
+      "No forced unsupported stall answer",
+      "Unverified critic outcome preserved"
+    ],
+    "index_term_crosscheck": [
+      "Citation",
+      "Critic",
+      "Evaluator\u2013optimizer",
+      "Plan-and-execute",
+      "ReAct",
+      "Reflection",
+      "Router",
+      "Supervisor pattern",
+      "Workflow vs agent"
+    ],
+    "word_count": 2693,
+    "diagram_kinds": [
+      "comparison",
+      "cycle",
+      "flow"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 4,
+    "title": "4. Prompt & Instruction Architecture",
+    "source_pages": [
+      84,
+      104
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/04.txt",
+    "heading_map": [
+      {
+        "source_heading": "The instruction hierarchy",
+        "revised_heading": "The instruction hierarchy"
+      },
+      {
+        "source_heading": "Anatomy of a production system prompt",
+        "revised_heading": "Anatomy of a production system prompt"
+      },
+      {
+        "source_heading": "Templates, variables and task policies",
+        "revised_heading": "Templates, variables and task policies"
+      },
+      {
+        "source_heading": "Few-shot examples and behavioural constraints",
+        "revised_heading": "Few-shot examples and behavioural constraints"
+      },
+      {
+        "source_heading": "Prompt decomposition and role-specific packs",
+        "revised_heading": "Prompt decomposition and role-specific packs"
+      },
+      {
+        "source_heading": "Versioning, provenance and change control",
+        "revised_heading": "Versioning, provenance and change control"
+      },
+      {
+        "source_heading": "Trusted and untrusted content",
+        "revised_heading": "Trusted and untrusted content"
+      },
+      {
+        "source_heading": "Writing instructions for today's models",
+        "revised_heading": "Writing instructions for today's models"
+      },
+      {
+        "source_heading": "Testing instructions",
+        "revised_heading": "Testing instructions"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Application versus provider hierarchy",
+      "Duplicate pack rejection",
+      "Bounded tag kinds and escaping",
+      "Dated model-specific guidance"
+    ],
+    "index_term_crosscheck": [
+      "Escalation",
+      "Few-shot examples",
+      "Instruction hierarchy",
+      "Instruction pack",
+      "Prompt injection",
+      "Rollback",
+      "Scopes (OAuth)",
+      "Untrusted content"
+    ],
+    "word_count": 2760,
+    "diagram_kinds": [
+      "boundary",
+      "layers",
+      "flow"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 5,
+    "title": "5. Agent Harness Architecture",
+    "source_pages": [
+      105,
+      125
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/05.txt",
+    "heading_map": [
+      {
+        "source_heading": "Harness, model, agent, framework, runtime",
+        "revised_heading": "Harness, model, agent, framework, runtime"
+      },
+      {
+        "source_heading": "Prompt, context and harness: three layers of agent engineering",
+        "revised_heading": "Prompt, context and harness: three layers of agent engineering"
+      },
+      {
+        "source_heading": "The components of a harness",
+        "revised_heading": "The components of a harness"
+      },
+      {
+        "source_heading": "The run lifecycle",
+        "revised_heading": "The run lifecycle"
+      },
+      {
+        "source_heading": "A framework-neutral runtime interface",
+        "revised_heading": "A framework-neutral runtime interface"
+      },
+      {
+        "source_heading": "Where cross-cutting concerns live",
+        "revised_heading": "Where cross-cutting concerns live"
+      },
+      {
+        "source_heading": "Cancellation, pause and resume",
+        "revised_heading": "Cancellation, pause and resume"
+      },
+      {
+        "source_heading": "Hooks for policy, tracing and evaluation",
+        "revised_heading": "Hooks for policy, tracing and evaluation"
+      },
+      {
+        "source_heading": "The execution loop, end to end",
+        "revised_heading": "The execution loop, end to end"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Production lens",
+        "revised_heading": "Production lens"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Outcome verification",
+      "Cancellation versus in-flight effect",
+      "Explicit cross-cutting owners"
+    ],
+    "index_term_crosscheck": [
+      "Agent definition",
+      "Agent harness",
+      "Authorisation",
+      "Budget",
+      "Checkpoint",
+      "Hooks",
+      "Model routing",
+      "Retry policy",
+      "Streaming",
+      "Tool contract"
+    ],
+    "word_count": 2716,
+    "diagram_kinds": [
+      "layers",
+      "network",
+      "state"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 6,
+    "title": "6. Tool Calling & Action Architecture",
+    "source_pages": [
+      126,
+      147
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/06.txt",
+    "heading_map": [
+      {
+        "source_heading": "Anatomy of a tool",
+        "revised_heading": "Anatomy of a tool"
+      },
+      {
+        "source_heading": "Writing contracts models use correctly",
+        "revised_heading": "Writing contracts models use correctly"
+      },
+      {
+        "source_heading": "Tool choice: automatic, constrained, required and policy-filtered",
+        "revised_heading": "Tool choice: automatic, constrained, required and policy-filtered"
+      },
+      {
+        "source_heading": "Serial and parallel calls",
+        "revised_heading": "Serial and parallel calls"
+      },
+      {
+        "source_heading": "Read-only versus mutating tools",
+        "revised_heading": "Read-only versus mutating tools"
+      },
+      {
+        "source_heading": "Idempotency, retries and compensation",
+        "revised_heading": "Idempotency, retries and compensation"
+      },
+      {
+        "source_heading": "Tool authentication, scoped credentials and least privilege",
+        "revised_heading": "Tool authentication, scoped credentials and least privilege"
+      },
+      {
+        "source_heading": "Tool-output injection, poisoning and trust boundaries",
+        "revised_heading": "Tool-output injection, poisoning and trust boundaries"
+      },
+      {
+        "source_heading": "Registry lifecycle, versioning and deprecation",
+        "revised_heading": "Registry lifecycle, versioning and deprecation"
+      },
+      {
+        "source_heading": "Build it: a mutating tool with approval and idempotency",
+        "revised_heading": "Build it: a mutating tool with approval and idempotency"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F05",
+      "F06",
+      "Exact money units",
+      "Dependency-aware batches",
+      "Hidden tool still denied at execution"
+    ],
+    "index_term_crosscheck": [
+      "Audit log",
+      "Authorisation",
+      "Compensation",
+      "Idempotency key",
+      "Least privilege",
+      "MCP registry",
+      "Parallel tool calls",
+      "Prompt injection",
+      "Retry policy",
+      "Scopes (OAuth)",
+      "Tool contract",
+      "Tool description",
+      "Tool registry",
+      "Untrusted content"
+    ],
+    "word_count": 2831,
+    "diagram_kinds": [
+      "anatomy",
+      "timeline",
+      "flow"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 7,
+    "title": "7. Agent State & Checkpointing",
+    "source_pages": [
+      148,
+      167
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/07.txt",
+    "heading_map": [
+      {
+        "source_heading": "State, context and memory",
+        "revised_heading": "State, context and memory"
+      },
+      {
+        "source_heading": "What belongs in run state",
+        "revised_heading": "What belongs in run state"
+      },
+      {
+        "source_heading": "Typed state, reducers and event-sourced updates",
+        "revised_heading": "Typed state, reducers and event-sourced updates"
+      },
+      {
+        "source_heading": "State transitions and graph state",
+        "revised_heading": "State transitions and graph state"
+      },
+      {
+        "source_heading": "Persistence, serialisation, checkpointing and resume",
+        "revised_heading": "Persistence, serialisation, checkpointing and resume"
+      },
+      {
+        "source_heading": "Handoff records: resuming long-running work across sessions",
+        "revised_heading": "Handoff records: resuming long-running work across sessions"
+      },
+      {
+        "source_heading": "Concurrency, conflicts and shared state",
+        "revised_heading": "Concurrency, conflicts and shared state"
+      },
+      {
+        "source_heading": "State schema evolution",
+        "revised_heading": "State schema evolution"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Approval outcome/legal transition semantics",
+      "Future schema rejected",
+      "Absolute/active deadline records",
+      "Fencing versus state concurrency"
+    ],
+    "index_term_crosscheck": [
+      "Checkpoint",
+      "Event sourcing",
+      "Handoff",
+      "Idempotency key",
+      "Memory",
+      "Reducer",
+      "Run state"
+    ],
+    "word_count": 2695,
+    "diagram_kinds": [
+      "comparison",
+      "timeline",
+      "boundary"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 8,
+    "title": "8. Context Engineering",
+    "source_pages": [
+      168,
+      185
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/08.txt",
+    "heading_map": [
+      {
+        "source_heading": "Context assembly and source prioritisation",
+        "revised_heading": "Context assembly and source prioritisation"
+      },
+      {
+        "source_heading": "Token budgeting",
+        "revised_heading": "Token budgeting"
+      },
+      {
+        "source_heading": "Pruning, summarisation and compression",
+        "revised_heading": "Pruning, summarisation and compression"
+      },
+      {
+        "source_heading": "Context caching and reusable prefixes",
+        "revised_heading": "Context caching and reusable prefixes"
+      },
+      {
+        "source_heading": "Stale, contradictory and poisoned context",
+        "revised_heading": "Stale, contradictory and poisoned context"
+      },
+      {
+        "source_heading": "Provenance and explainability",
+        "revised_heading": "Provenance and explainability"
+      },
+      {
+        "source_heading": "Context policies for multi-tenant and sensitive data",
+        "revised_heading": "Context policies for multi-tenant and sensitive data"
+      },
+      {
+        "source_heading": "Build it: a token-budgeted, attributed context builder",
+        "revised_heading": "Build it: a token-budgeted, attributed context builder"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F04",
+      "F08",
+      "Paired selection manifest",
+      "Provider serialization overhead",
+      "Reserved output is capacity"
+    ],
+    "index_term_crosscheck": [
+      "Budget",
+      "Context compaction",
+      "Context engineering",
+      "Context manifest",
+      "Context window",
+      "Memory",
+      "Prefix caching",
+      "Provenance",
+      "Schema drift",
+      "Secrets management",
+      "Tenant",
+      "Tokens"
+    ],
+    "word_count": 2610,
+    "diagram_kinds": [
+      "flow",
+      "budget",
+      "comparison"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 9,
+    "title": "9. Memory Architecture",
+    "source_pages": [
+      186,
+      207
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/09.txt",
+    "heading_map": [
+      {
+        "source_heading": "Working, session and long-term memory",
+        "revised_heading": "Working, session and long-term memory"
+      },
+      {
+        "source_heading": "Semantic, episodic and procedural memory",
+        "revised_heading": "Semantic, episodic and procedural memory"
+      },
+      {
+        "source_heading": "The memory lifecycle",
+        "revised_heading": "The memory lifecycle"
+      },
+      {
+        "source_heading": "Confidence, provenance and source-of-truth reconciliation",
+        "revised_heading": "Confidence, provenance and source-of-truth reconciliation"
+      },
+      {
+        "source_heading": "Storage patterns",
+        "revised_heading": "Storage patterns"
+      },
+      {
+        "source_heading": "Privacy, retention and user control",
+        "revised_heading": "Privacy, retention and user control"
+      },
+      {
+        "source_heading": "Memory poisoning, staleness and contradiction",
+        "revised_heading": "Memory poisoning, staleness and contradiction"
+      },
+      {
+        "source_heading": "Build it: short-term, semantic and episodic memory",
+        "revised_heading": "Build it: short-term, semantic and episodic memory"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "Source-aware transactional supersession",
+      "Runtime subject binding",
+      "Retirement is lifecycle exit",
+      "Deletion lineage"
+    ],
+    "index_term_crosscheck": [
+      "Dense retrieval",
+      "Embeddings",
+      "Episodic memory",
+      "Long-term memory",
+      "Memory",
+      "Memory write gate",
+      "Provenance",
+      "Run state",
+      "Semantic memory",
+      "Tenant",
+      "Tool poisoning"
+    ],
+    "word_count": 2560,
+    "diagram_kinds": [
+      "layers",
+      "comparison",
+      "timeline"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 10,
+    "title": "10. Skills & Reusable Capability Architecture",
+    "source_pages": [
+      208,
+      224
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/10.txt",
+    "heading_map": [
+      {
+        "source_heading": "Tool, skill, workflow, agent",
+        "revised_heading": "Tool, skill, workflow, agent"
+      },
+      {
+        "source_heading": "Anatomy of a skill",
+        "revised_heading": "Anatomy of a skill"
+      },
+      {
+        "source_heading": "Composite skills and deterministic sub-workflows",
+        "revised_heading": "Composite skills and deterministic sub-workflows"
+      },
+      {
+        "source_heading": "Progressive disclosure",
+        "revised_heading": "Progressive disclosure"
+      },
+      {
+        "source_heading": "Skill packages with resources, scripts and templates",
+        "revised_heading": "Skill packages with resources, scripts and templates"
+      },
+      {
+        "source_heading": "Discovery, versioning, trust and access control",
+        "revised_heading": "Discovery, versioning, trust and access control"
+      },
+      {
+        "source_heading": "Testing, lifecycle and deprecation",
+        "revised_heading": "Testing, lifecycle and deprecation"
+      },
+      {
+        "source_heading": "Exposing skills through standard capability layers",
+        "revised_heading": "Exposing skills through standard capability layers"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F07",
+      "Local versus interoperable skill manifests",
+      "Exact resolved dependency versions",
+      "Script context overhead"
+    ],
+    "index_term_crosscheck": [
+      "MCP registry",
+      "Progressive disclosure",
+      "Skill",
+      "Tool contract"
+    ],
+    "word_count": 2655,
+    "diagram_kinds": [
+      "layers",
+      "flow",
+      "anatomy"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 11,
+    "title": "11. Build a Mini Agent Harness From Scratch",
+    "source_pages": [
+      225,
+      247
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/11.txt",
+    "heading_map": [
+      {
+        "source_heading": "Stage 0: the twenty-line loop",
+        "revised_heading": "Stage 0: the twenty-line loop"
+      },
+      {
+        "source_heading": "Stage 1: typed messages and decisions",
+        "revised_heading": "Stage 1: typed messages and decisions"
+      },
+      {
+        "source_heading": "Stage 2: the model interface",
+        "revised_heading": "Stage 2: the model interface"
+      },
+      {
+        "source_heading": "Stage 3: tool registry, validation and executor",
+        "revised_heading": "Stage 3: tool registry, validation and executor"
+      },
+      {
+        "source_heading": "Stage 4: loop controller, budgets and stop conditions",
+        "revised_heading": "Stage 4: loop controller, budgets and stop conditions"
+      },
+      {
+        "source_heading": "Stage 5: state, events and checkpoints",
+        "revised_heading": "Stage 5: state, events and checkpoints"
+      },
+      {
+        "source_heading": "Stage 6: authorisation and approval interrupts",
+        "revised_heading": "Stage 6: authorisation and approval interrupts"
+      },
+      {
+        "source_heading": "Stage 7: error envelopes, idempotency and the executor",
+        "revised_heading": "Stage 7: error envelopes, idempotency and the executor"
+      },
+      {
+        "source_heading": "Running it",
+        "revised_heading": "Running it"
+      },
+      {
+        "source_heading": "Stage 8: packaging the harness as reusable interfaces",
+        "revised_heading": "Stage 8: packaging the harness as reusable interfaces"
+      },
+      {
+        "source_heading": "Comparing with frameworks",
+        "revised_heading": "Comparing with frameworks"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F01",
+      "F02",
+      "F03",
+      "Separate effect identity/approval digest",
+      "Cross-run replay rejection",
+      "Review actor/time audit",
+      "Post-deadline manual reconciliation obligation"
+    ],
+    "index_term_crosscheck": [
+      "Agent harness",
+      "Approval",
+      "Approval interrupt",
+      "Authorisation",
+      "Checkpoint",
+      "Idempotency key",
+      "Interrupt",
+      "MCP registry"
+    ],
+    "word_count": 3024,
+    "diagram_kinds": [
+      "layers",
+      "state",
+      "timeline"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Complete stdlib single-writer SQLite demo plus19 deterministic checks. Local synchronous calls; no distributed fencing, arbitrary network hard timeout or built-in web authentication. One logical fake refund per effect tuple. Expired/revoked crash recovery preserves pending intent for manual reconciliation."
+  },
+  {
+    "chapter": 12,
+    "title": "12. RAG Foundations for Agents",
+    "source_pages": [
+      248,
+      268
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/12.txt",
+    "heading_map": [
+      {
+        "source_heading": "The RAG pipeline",
+        "revised_heading": "The RAG pipeline"
+      },
+      {
+        "source_heading": "Retrieval methods",
+        "revised_heading": "Retrieval methods"
+      },
+      {
+        "source_heading": "Chunking and document structure",
+        "revised_heading": "Chunking and document structure"
+      },
+      {
+        "source_heading": "Reranking and evidence selection",
+        "revised_heading": "Reranking and evidence selection"
+      },
+      {
+        "source_heading": "Citations, provenance, freshness and the knowledge lifecycle",
+        "revised_heading": "Citations, provenance, freshness and the knowledge lifecycle"
+      },
+      {
+        "source_heading": "RAG failure modes",
+        "revised_heading": "RAG failure modes"
+      },
+      {
+        "source_heading": "Evaluating retrieval separately",
+        "revised_heading": "Evaluating retrieval separately"
+      },
+      {
+        "source_heading": "Production lens",
+        "revised_heading": "Production lens"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F12",
+      "Validity/completeness/support separated",
+      "Expanded-source locators",
+      "Unanswerable metric treatment",
+      "Synthetic versus measured figures"
+    ],
+    "index_term_crosscheck": [
+      "BM25",
+      "Chunking",
+      "Citation",
+      "Dense retrieval",
+      "Golden dataset",
+      "Groundedness / faithfulness",
+      "Hybrid retrieval",
+      "LLM-as-judge",
+      "RAG (retrieval-augmented generation)",
+      "Reranker"
+    ],
+    "word_count": 2807,
+    "diagram_kinds": [
+      "comparison",
+      "flow",
+      "boundary"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 13,
+    "title": "13. Agentic RAG & Advanced Retrieval",
+    "source_pages": [
+      269,
+      288
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/13.txt",
+    "heading_map": [
+      {
+        "source_heading": "What makes RAG agentic",
+        "revised_heading": "What makes RAG agentic"
+      },
+      {
+        "source_heading": "Retrieval routing and source selection",
+        "revised_heading": "Retrieval routing and source selection"
+      },
+      {
+        "source_heading": "Query rewriting, decomposition and multi-query search",
+        "revised_heading": "Query rewriting, decomposition and multi-query search"
+      },
+      {
+        "source_heading": "Iterative retrieval and evidence sufficiency",
+        "revised_heading": "Iterative retrieval and evidence sufficiency"
+      },
+      {
+        "source_heading": "Corrective retrieval and recovery from weak evidence",
+        "revised_heading": "Corrective retrieval and recovery from weak evidence"
+      },
+      {
+        "source_heading": "Self-RAG and critique-oriented patterns",
+        "revised_heading": "Self-RAG and critique-oriented patterns"
+      },
+      {
+        "source_heading": "Graph RAG and knowledge-graph retrieval",
+        "revised_heading": "Graph RAG and knowledge-graph retrieval"
+      },
+      {
+        "source_heading": "SQL and structured data as governed knowledge tools",
+        "revised_heading": "SQL and structured data as governed knowledge tools"
+      },
+      {
+        "source_heading": "Keeping evidence traceable across sources",
+        "revised_heading": "Keeping evidence traceable across sources"
+      },
+      {
+        "source_heading": "Production lens",
+        "revised_heading": "Production lens"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F10",
+      "F11",
+      "Unique evidence stop rule",
+      "Access filters never broaden",
+      "Scoped SQL/CTE/column limitations",
+      "Hypotheses versus causal claims"
+    ],
+    "index_term_crosscheck": [
+      "Citation",
+      "Corrective retrieval",
+      "Evidence ledger",
+      "Model routing",
+      "Query rewriting",
+      "RAG (retrieval-augmented generation)",
+      "Router",
+      "SQL agent"
+    ],
+    "word_count": 2855,
+    "diagram_kinds": [
+      "comparison",
+      "sequence",
+      "cycle"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "Ordinary snippets state their supplied service interfaces; no blanket production guarantee."
+  },
+  {
+    "chapter": 14,
+    "title": "14. MCP - Model Context Protocol",
+    "source_pages": [
+      289,
+      308
+    ],
+    "source_extract": "tmp/pdfs/agentic-revision/source/14.txt",
+    "heading_map": [
+      {
+        "source_heading": "Roles: host, client, server",
+        "revised_heading": "Roles: host, client, server"
+      },
+      {
+        "source_heading": "Capabilities: tools, resources and prompts",
+        "revised_heading": "Capabilities: tools, resources and prompts"
+      },
+      {
+        "source_heading": "Lifecycle and discovery",
+        "revised_heading": "Lifecycle and discovery"
+      },
+      {
+        "source_heading": "Transports: local and remote servers",
+        "revised_heading": "Transports: local and remote servers"
+      },
+      {
+        "source_heading": "Build it: a read-only MCP server",
+        "revised_heading": "Build it: a read-only MCP server"
+      },
+      {
+        "source_heading": "The client side: MCP behind your tool registry",
+        "revised_heading": "The client side: MCP behind your tool registry"
+      },
+      {
+        "source_heading": "Authentication, permissions, consent and trust",
+        "revised_heading": "Authentication, permissions, consent and trust"
+      },
+      {
+        "source_heading": "MCP tool versus ordinary application tool",
+        "revised_heading": "MCP tool versus ordinary application tool"
+      },
+      {
+        "source_heading": "Enterprise patterns: registry, gateway, versioning and governance",
+        "revised_heading": "Enterprise patterns: registry, gateway, versioning and governance"
+      },
+      {
+        "source_heading": "Portability of skills and capabilities",
+        "revised_heading": "Portability of skills and capabilities"
+      },
+      {
+        "source_heading": "Failure modes",
+        "revised_heading": "Failure modes"
+      },
+      {
+        "source_heading": "Interview drills",
+        "revised_heading": "Interview drills"
+      },
+      {
+        "source_heading": "Key takeaways",
+        "revised_heading": "Key takeaways"
+      }
+    ],
+    "corrected_audit_ids": [
+      "F09",
+      "Coherent async MCP interface",
+      "Local synthetic server scope",
+      "Optional extension support",
+      "Compatible modern/legacy protocol contracts"
+    ],
+    "index_term_crosscheck": [
+      "Authorisation",
+      "Consent",
+      "Elicitation (MCP)",
+      "Function calling",
+      "JSON-RPC",
+      "LLM gateway",
+      "MCP (Model Context Protocol)",
+      "MCP gateway",
+      "MCP registry",
+      "Observability",
+      "Risk score",
+      "Sampling (MCP)",
+      "Schema drift",
+      "Scopes (OAuth)",
+      "Shadow release",
+      "Skill",
+      "Streamable HTTP",
+      "Token exchange",
+      "Tokens",
+      "Tool annotations",
+      "Tool contract",
+      "Tool poisoning"
+    ],
+    "word_count": 2844,
+    "diagram_kinds": [
+      "boundary",
+      "sequence",
+      "layers"
+    ],
+    "self_checks": 4,
+    "exercises_with_solutions": 3,
+    "limitations": "SDK2 definitions checked against primary docs, not installed/executed during authoring. Sample server uses public synthetic data; real auth/tenant/deadline contracts require an integration."
+  }
+]

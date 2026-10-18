@@ -1,0 +1,1660 @@
+{
+  "owner": "production",
+  "editorial_contract": "EDITORIAL_CONTRACT.md",
+  "edition": "October 2026",
+  "chapters": [
+    {
+      "chapter": 31,
+      "original_title": "31. Framework Mapping: LangGraph, OpenAI Agents SDK, Spring AI & Others",
+      "source_extract": "tmp/pdfs/agentic-revision/source/31.txt",
+      "original_pdf_pages": [
+        585,
+        608
+      ],
+      "revised_file": "chapters/31.md",
+      "heading_mapping": [
+        {
+          "original_heading": "The concept map",
+          "revised_headings": [
+            "The concept map"
+          ]
+        },
+        {
+          "original_heading": "LangGraph: state graphs, checkpoints, interrupts, durable orchestration",
+          "revised_headings": [
+            "LangGraph: state graphs, checkpoints, interrupts, durable orchestration"
+          ]
+        },
+        {
+          "original_heading": "OpenAI Agents SDK: agents, tools, handoffs, sessions, guardrails, tracing",
+          "revised_headings": [
+            "OpenAI Agents SDK: agents, tools, handoffs, sessions, guardrails, tracing"
+          ]
+        },
+        {
+          "original_heading": "Spring AI: the Java enterprise path",
+          "revised_headings": [
+            "Spring AI: the Java enterprise path"
+          ]
+        },
+        {
+          "original_heading": "Claude Agent SDK: a production agent loop with built-in tools",
+          "revised_headings": [
+            "Claude Agent SDK: a production agent loop with built-in tools"
+          ]
+        },
+        {
+          "original_heading": "The Microsoft, Google and AWS agent stacks",
+          "revised_headings": [
+            "The Microsoft, Google and AWS agent stacks"
+          ]
+        },
+        {
+          "original_heading": "LlamaIndex and LangChain components",
+          "revised_headings": [
+            "LlamaIndex and LangChain components"
+          ]
+        },
+        {
+          "original_heading": "CrewAI and AutoGen as multi-agent pattern exposure",
+          "revised_headings": [
+            "CrewAI and AutoGen as multi-agent pattern exposure"
+          ]
+        },
+        {
+          "original_heading": "Selection criteria",
+          "revised_headings": [
+            "Selection criteria"
+          ]
+        },
+        {
+          "original_heading": "Build it: the same agent in two frameworks, and an ADR",
+          "revised_headings": [
+            "Build it: the same agent in two frameworks, and an ADR"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-01",
+        "T20",
+        "T21",
+        "T22",
+        "T41"
+      ],
+      "word_count_including_structured_blocks": 3230,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 32,
+      "original_title": "32. LangGraph in Depth: Building Durable Agent Graphs",
+      "source_extract": "tmp/pdfs/agentic-revision/source/32.txt",
+      "original_pdf_pages": [
+        609,
+        643
+      ],
+      "revised_file": "chapters/32.md",
+      "heading_mapping": [
+        {
+          "original_heading": "How LangGraph thinks: nodes, channels and super-steps",
+          "revised_headings": [
+            "How LangGraph thinks: nodes, channels and super-steps"
+          ]
+        },
+        {
+          "original_heading": "State and reducers",
+          "revised_headings": [
+            "State and reducers"
+          ]
+        },
+        {
+          "original_heading": "Nodes, edges and routing",
+          "revised_headings": [
+            "Nodes, edges and routing"
+          ]
+        },
+        {
+          "original_heading": "Checkpointers, threads and state history",
+          "revised_headings": [
+            "Checkpointers, threads and state history"
+          ]
+        },
+        {
+          "original_heading": "Human-in-the-loop with interrupt",
+          "revised_headings": [
+            "Human-in-the-loop with interrupt"
+          ]
+        },
+        {
+          "original_heading": "Fan-out and fan-in with Send",
+          "revised_headings": [
+            "Fan-out and fan-in with Send"
+          ]
+        },
+        {
+          "original_heading": "Subgraphs: composing graphs",
+          "revised_headings": [
+            "Subgraphs: composing graphs"
+          ]
+        },
+        {
+          "original_heading": "Tools and the ReAct loop",
+          "revised_headings": [
+            "Tools and the ReAct loop"
+          ]
+        },
+        {
+          "original_heading": "Multi-agent graphs: supervisors and handoffs",
+          "revised_headings": [
+            "Multi-agent graphs: supervisors and handoffs"
+          ]
+        },
+        {
+          "original_heading": "Long-term memory with stores",
+          "revised_headings": [
+            "Long-term memory with stores"
+          ]
+        },
+        {
+          "original_heading": "Reliability: retries, recursion limits and durability",
+          "revised_headings": [
+            "Reliability: retries, recursion limits and durability"
+          ]
+        },
+        {
+          "original_heading": "Streaming",
+          "revised_headings": [
+            "Streaming"
+          ]
+        },
+        {
+          "original_heading": "Testing LangGraph graphs",
+          "revised_headings": [
+            "Testing LangGraph graphs"
+          ]
+        },
+        {
+          "original_heading": "Observability and deployment",
+          "revised_headings": [
+            "Observability and deployment"
+          ]
+        },
+        {
+          "original_heading": "Build it: the AegisOps commander as a LangGraph graph",
+          "revised_headings": [
+            "Build it: the AegisOps commander as a LangGraph graph"
+          ]
+        },
+        {
+          "original_heading": "Failure modes",
+          "revised_headings": [
+            "Failure modes"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-02",
+        "P1-03",
+        "P1-05",
+        "P1-06",
+        "T22",
+        "T35",
+        "T36"
+      ],
+      "word_count_including_structured_blocks": 3608,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 33,
+      "original_title": "33. Cloud & Enterprise Integration Tracks",
+      "source_extract": "tmp/pdfs/agentic-revision/source/33.txt",
+      "original_pdf_pages": [
+        644,
+        663
+      ],
+      "revised_file": "chapters/33.md",
+      "heading_mapping": [
+        {
+          "original_heading": "Building blocks across clouds",
+          "revised_headings": [
+            "Building blocks across clouds"
+          ]
+        },
+        {
+          "original_heading": "Track 1 \u2014 AWS",
+          "revised_headings": [
+            "Track 1 - AWS"
+          ]
+        },
+        {
+          "original_heading": "Track 2 \u2014 Microsoft Azure",
+          "revised_headings": [
+            "Track 2 - Microsoft Azure"
+          ]
+        },
+        {
+          "original_heading": "Track 3 \u2014 Google Cloud",
+          "revised_headings": [
+            "Track 3 - Google Cloud"
+          ]
+        },
+        {
+          "original_heading": "Track 4 \u2014 enterprise integration fabric",
+          "revised_headings": [
+            "Track 4 - enterprise integration fabric"
+          ]
+        },
+        {
+          "original_heading": "Managed agent runtime versus self-managed",
+          "revised_headings": [
+            "Managed agent runtime versus self-managed"
+          ]
+        },
+        {
+          "original_heading": "What is portable, and what is cloud-specific",
+          "revised_headings": [
+            "What is portable, and what is cloud-specific"
+          ]
+        },
+        {
+          "original_heading": "Identity and networking differences to plan for",
+          "revised_headings": [
+            "Identity and networking differences to plan for"
+          ]
+        },
+        {
+          "original_heading": "Build it: one reference deployment",
+          "revised_headings": [
+            "Build it: one reference deployment"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "T25",
+        "T35",
+        "T41"
+      ],
+      "word_count_including_structured_blocks": 3159,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 34,
+      "original_title": "34. Specialized Agent Systems",
+      "source_extract": "tmp/pdfs/agentic-revision/source/34.txt",
+      "original_pdf_pages": [
+        664,
+        680
+      ],
+      "revised_file": "chapters/34.md",
+      "heading_mapping": [
+        {
+          "original_heading": "Research agents and evidence synthesis",
+          "revised_headings": [
+            "Research agents and evidence synthesis"
+          ]
+        },
+        {
+          "original_heading": "Coding and repository agents",
+          "revised_headings": [
+            "Coding and repository agents"
+          ]
+        },
+        {
+          "original_heading": "Data and SQL agents",
+          "revised_headings": [
+            "Data and SQL agents"
+          ]
+        },
+        {
+          "original_heading": "Browser and computer-use agents",
+          "revised_headings": [
+            "Browser and computer-use agents"
+          ]
+        },
+        {
+          "original_heading": "Voice and real-time agents",
+          "revised_headings": [
+            "Voice and real-time agents"
+          ]
+        },
+        {
+          "original_heading": "Event-driven, scheduled and long-running agents",
+          "revised_headings": [
+            "Event-driven, scheduled and long-running agents"
+          ]
+        },
+        {
+          "original_heading": "IoT and operations agents",
+          "revised_headings": [
+            "IoT and operations agents"
+          ]
+        },
+        {
+          "original_heading": "Multimodal agents",
+          "revised_headings": [
+            "Multimodal agents"
+          ]
+        },
+        {
+          "original_heading": "What changes and what stays universal",
+          "revised_headings": [
+            "What changes and what stays universal"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-07",
+        "T12",
+        "T23",
+        "T24",
+        "T33"
+      ],
+      "word_count_including_structured_blocks": 3149,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 35,
+      "original_title": "35. Architecture Selection Patterns & Senior Design Review",
+      "source_extract": "tmp/pdfs/agentic-revision/source/35.txt",
+      "original_pdf_pages": [
+        681,
+        695
+      ],
+      "revised_file": "chapters/35.md",
+      "heading_mapping": [
+        {
+          "original_heading": "Pattern reference",
+          "revised_headings": [
+            "Pattern reference"
+          ]
+        },
+        {
+          "original_heading": "Decision matrix: choosing the architecture",
+          "revised_headings": [
+            "Decision matrix: choosing the architecture"
+          ]
+        },
+        {
+          "original_heading": "The architecture review",
+          "revised_headings": [
+            "The architecture review"
+          ]
+        },
+        {
+          "original_heading": "Production-readiness gates and launch checklist",
+          "revised_headings": [
+            "Production-readiness gates and launch checklist"
+          ]
+        },
+        {
+          "original_heading": "Senior system-design interview drills",
+          "revised_headings": [
+            "Senior system-design interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "T27",
+        "T28",
+        "T29",
+        "T40"
+      ],
+      "word_count_including_structured_blocks": 2901,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 36,
+      "original_title": "36. The AegisOps Blueprint",
+      "source_extract": "tmp/pdfs/agentic-revision/source/36.txt",
+      "original_pdf_pages": [
+        696,
+        726
+      ],
+      "revised_file": "chapters/36.md",
+      "heading_mapping": [
+        {
+          "original_heading": "The business scenario",
+          "revised_headings": [
+            "The business scenario"
+          ]
+        },
+        {
+          "original_heading": "Who AegisOps serves: personas and user stories",
+          "revised_headings": [
+            "Who AegisOps serves: personas and user stories"
+          ]
+        },
+        {
+          "original_heading": "Why this needs an agent",
+          "revised_headings": [
+            "Why this needs an agent"
+          ]
+        },
+        {
+          "original_heading": "What the final demo must prove",
+          "revised_headings": [
+            "What the final demo must prove"
+          ]
+        },
+        {
+          "original_heading": "Non-functional requirements and SLOs",
+          "revised_headings": [
+            "Non-functional requirements and SLOs"
+          ]
+        },
+        {
+          "original_heading": "System context and containers",
+          "revised_headings": [
+            "System context and containers"
+          ]
+        },
+        {
+          "original_heading": "Architecture",
+          "revised_headings": [
+            "Architecture"
+          ]
+        },
+        {
+          "original_heading": "The agent team",
+          "revised_headings": [
+            "The agent team"
+          ]
+        },
+        {
+          "original_heading": "Tool registry \u2014 minimum production tool set",
+          "revised_headings": [
+            "Tool registry - minimum production tool set"
+          ]
+        },
+        {
+          "original_heading": "Composite skills",
+          "revised_headings": [
+            "Composite skills"
+          ]
+        },
+        {
+          "original_heading": "MCP and A2A boundaries",
+          "revised_headings": [
+            "MCP and A2A boundaries"
+          ]
+        },
+        {
+          "original_heading": "Canonical incident state",
+          "revised_headings": [
+            "Canonical incident state"
+          ]
+        },
+        {
+          "original_heading": "Memory design",
+          "revised_headings": [
+            "Memory design"
+          ]
+        },
+        {
+          "original_heading": "Approval and risk matrix",
+          "revised_headings": [
+            "Approval and risk matrix"
+          ]
+        },
+        {
+          "original_heading": "Threat model",
+          "revised_headings": [
+            "Threat model"
+          ]
+        },
+        {
+          "original_heading": "The core state machine",
+          "revised_headings": [
+            "The core state machine"
+          ]
+        },
+        {
+          "original_heading": "Technology stack",
+          "revised_headings": [
+            "Technology stack"
+          ]
+        },
+        {
+          "original_heading": "Cost model",
+          "revised_headings": [
+            "Cost model"
+          ]
+        },
+        {
+          "original_heading": "Reference repository structure",
+          "revised_headings": [
+            "Reference repository structure"
+          ]
+        },
+        {
+          "original_heading": "Failure modes",
+          "revised_headings": [
+            "Failure modes"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-02",
+        "P1-03",
+        "P1-04",
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17",
+        "T21",
+        "T26",
+        "T29",
+        "T30",
+        "T31"
+      ],
+      "word_count_including_structured_blocks": 3729,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 37,
+      "original_title": "37. Building AegisOps Phase by Phase",
+      "source_extract": "tmp/pdfs/agentic-revision/source/37.txt",
+      "original_pdf_pages": [
+        727,
+        749
+      ],
+      "revised_file": "chapters/37.md",
+      "heading_mapping": [
+        {
+          "original_heading": "The build at a glance",
+          "revised_headings": [
+            "The build at a glance"
+          ]
+        },
+        {
+          "original_heading": "Phase 0 \u2014 Define the contract before writing agent code",
+          "revised_headings": [
+            "Phase 0 - Define the contract before writing agent code"
+          ]
+        },
+        {
+          "original_heading": "Phase 1 \u2014 Build the agent harness skeleton",
+          "revised_headings": [
+            "Phase 1 - Build the agent harness skeleton"
+          ]
+        },
+        {
+          "original_heading": "Phase 2 \u2014 Build typed read-only tools first",
+          "revised_headings": [
+            "Phase 2 - Build typed read-only tools first"
+          ]
+        },
+        {
+          "original_heading": "Phase 3 \u2014 Add enterprise RAG and evidence discipline",
+          "revised_headings": [
+            "Phase 3 - Add enterprise RAG and evidence discipline"
+          ]
+        },
+        {
+          "original_heading": "Phase 4 \u2014 Implement triage and observability agents",
+          "revised_headings": [
+            "Phase 4 - Implement triage and observability agents"
+          ]
+        },
+        {
+          "original_heading": "Phase 5 \u2014 Add change intelligence and hypothesis falsification",
+          "revised_headings": [
+            "Phase 5 - Add change intelligence and hypothesis falsification"
+          ]
+        },
+        {
+          "original_heading": "Phase 6 \u2014 Introduce the supervisor and multi-agent handoffs",
+          "revised_headings": [
+            "Phase 6 - Introduce the supervisor and multi-agent handoffs"
+          ]
+        },
+        {
+          "original_heading": "Phase 7 \u2014 Add composite skills and MCP",
+          "revised_headings": [
+            "Phase 7 - Add composite skills and MCP"
+          ]
+        },
+        {
+          "original_heading": "Phase 8 \u2014 Make the incident durable with Temporal",
+          "revised_headings": [
+            "Phase 8 - Make the incident durable with Temporal"
+          ]
+        },
+        {
+          "original_heading": "Phase 9 \u2014 Add identity, authorisation and security guardrails",
+          "revised_headings": [
+            "Phase 9 - Add identity, authorisation and security guardrails"
+          ]
+        },
+        {
+          "original_heading": "Phase 10 \u2014 Implement human approval and safe mutations",
+          "revised_headings": [
+            "Phase 10 - Implement human approval and safe mutations"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-04",
+        "T11",
+        "T18",
+        "T19",
+        "T23",
+        "T30",
+        "T31",
+        "T35",
+        "T36"
+      ],
+      "word_count_including_structured_blocks": 3731,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 38,
+      "original_title": "38. Hardening, Evaluation & Game Days",
+      "source_extract": "tmp/pdfs/agentic-revision/source/38.txt",
+      "original_pdf_pages": [
+        750,
+        776
+      ],
+      "revised_file": "chapters/38.md",
+      "heading_mapping": [
+        {
+          "original_heading": "Phase 11 \u2014 Verification, compensation and failure recovery",
+          "revised_headings": [
+            "Phase 11 - Verification, compensation and failure recovery"
+          ]
+        },
+        {
+          "original_heading": "Phase 12 \u2014 Add AgentOps, SLOs and cost controls",
+          "revised_headings": [
+            "Phase 12 - Add AgentOps, SLOs and cost controls"
+          ]
+        },
+        {
+          "original_heading": "Phase 13 \u2014 Build the evaluation and regression suite",
+          "revised_headings": [
+            "Phase 13 - Build the evaluation and regression suite"
+          ]
+        },
+        {
+          "original_heading": "Phase 14 \u2014 Productionise on Kubernetes/OpenShift",
+          "revised_headings": [
+            "Phase 14 - Productionise on Kubernetes/OpenShift"
+          ]
+        },
+        {
+          "original_heading": "Phase 15 \u2014 Run enterprise game days",
+          "revised_headings": [
+            "Phase 15 - Run enterprise game days"
+          ]
+        },
+        {
+          "original_heading": "The end-to-end recipe: bad deployment incident",
+          "revised_headings": [
+            "The end-to-end recipe: bad deployment incident"
+          ]
+        },
+        {
+          "original_heading": "Required architecture deliverables",
+          "revised_headings": [
+            "Required architecture deliverables"
+          ]
+        },
+        {
+          "original_heading": "Definition of done",
+          "revised_headings": [
+            "Definition of done"
+          ]
+        },
+        {
+          "original_heading": "The capstone scorecard",
+          "revised_headings": [
+            "The capstone scorecard"
+          ]
+        },
+        {
+          "original_heading": "Final interview / demo walkthrough",
+          "revised_headings": [
+            "Final interview / demo walkthrough"
+          ]
+        },
+        {
+          "original_heading": "The portfolio package",
+          "revised_headings": [
+            "The portfolio package"
+          ]
+        },
+        {
+          "original_heading": "Extension challenges",
+          "revised_headings": [
+            "Extension challenges"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-10",
+        "T25",
+        "T28",
+        "T29",
+        "T39"
+      ],
+      "word_count_including_structured_blocks": 3375,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    },
+    {
+      "chapter": 39,
+      "original_title": "39. More Capstone Projects",
+      "source_extract": "tmp/pdfs/agentic-revision/source/39.txt",
+      "original_pdf_pages": [
+        777,
+        802
+      ],
+      "revised_file": "chapters/39.md",
+      "heading_mapping": [
+        {
+          "original_heading": "Choosing a track",
+          "revised_headings": [
+            "Choosing a track"
+          ]
+        },
+        {
+          "original_heading": "Track A \u2014 ShopAssist Refunds",
+          "revised_headings": [
+            "Track A - ShopAssist Refunds"
+          ]
+        },
+        {
+          "original_heading": "Track B \u2014 Policy Research Analyst",
+          "revised_headings": [
+            "Track B - Policy Research Analyst"
+          ]
+        },
+        {
+          "original_heading": "Track C \u2014 Repository Maintenance Agent",
+          "revised_headings": [
+            "Track C - Repository Maintenance Agent"
+          ]
+        },
+        {
+          "original_heading": "The architecture pack for each track",
+          "revised_headings": [
+            "The architecture pack for each track"
+          ]
+        },
+        {
+          "original_heading": "One rubric for every track",
+          "revised_headings": [
+            "One rubric for every track"
+          ]
+        },
+        {
+          "original_heading": "Failure modes",
+          "revised_headings": [
+            "Failure modes"
+          ]
+        },
+        {
+          "original_heading": "Interview drills",
+          "revised_headings": [
+            "Interview drills"
+          ]
+        },
+        {
+          "original_heading": "Key takeaways",
+          "revised_headings": [
+            "Key takeaways"
+          ]
+        }
+      ],
+      "corrected_audit_ids": [
+        "P1-04",
+        "P1-08",
+        "P1-09",
+        "T21",
+        "T26",
+        "T27",
+        "T28",
+        "T30",
+        "T32",
+        "T33"
+      ],
+      "word_count_including_structured_blocks": 3765,
+      "diagrams": 4,
+      "checks": 4,
+      "exercises": 3,
+      "limitations": [
+        "Code units illustrate explicitly stated contracts; no full framework or live service integration executed.",
+        "Scenario sizes, targets and prices are illustrative learning assumptions where identified."
+      ]
+    }
+  ],
+  "appendices": [
+    {
+      "appendix": "A",
+      "source_pages": [
+        803,
+        808
+      ],
+      "original_title": "Glossary & Critical Distinctions",
+      "heading_mapping": [
+        {
+          "original_heading": "Critical distinctions",
+          "revised_headings": [
+            "Critical distinctions"
+          ]
+        },
+        {
+          "original_heading": "Glossary",
+          "revised_headings": [
+            "Glossary"
+          ]
+        }
+      ],
+      "corrections": [
+        "Separate persistence, external effects and authority; retain all original glossary terms."
+      ],
+      "glossary_entry_mapping": [
+        {
+          "original_heading": "A2A (Agent2Agent)",
+          "revised_headings": [
+            "A2A (Agent2Agent)"
+          ]
+        },
+        {
+          "original_heading": "ABAC",
+          "revised_headings": [
+            "ABAC"
+          ]
+        },
+        {
+          "original_heading": "Activity (durable execution)",
+          "revised_headings": [
+            "Activity (durable execution)"
+          ]
+        },
+        {
+          "original_heading": "Agent card",
+          "revised_headings": [
+            "Agent card"
+          ]
+        },
+        {
+          "original_heading": "Approval interrupt",
+          "revised_headings": [
+            "Approval interrupt"
+          ]
+        },
+        {
+          "original_heading": "Autonomy level",
+          "revised_headings": [
+            "Autonomy level"
+          ]
+        },
+        {
+          "original_heading": "Budget",
+          "revised_headings": [
+            "Budget"
+          ]
+        },
+        {
+          "original_heading": "Canary release",
+          "revised_headings": [
+            "Canary release"
+          ]
+        },
+        {
+          "original_heading": "Cascade",
+          "revised_headings": [
+            "Cascade"
+          ]
+        },
+        {
+          "original_heading": "Checkpoint",
+          "revised_headings": [
+            "Checkpoint"
+          ]
+        },
+        {
+          "original_heading": "Circuit breaker",
+          "revised_headings": [
+            "Circuit breaker"
+          ]
+        },
+        {
+          "original_heading": "Compensation",
+          "revised_headings": [
+            "Compensation"
+          ]
+        },
+        {
+          "original_heading": "Confused deputy",
+          "revised_headings": [
+            "Confused deputy"
+          ]
+        },
+        {
+          "original_heading": "Context engineering",
+          "revised_headings": [
+            "Context engineering"
+          ]
+        },
+        {
+          "original_heading": "Context manifest",
+          "revised_headings": [
+            "Context manifest"
+          ]
+        },
+        {
+          "original_heading": "Continuous batching",
+          "revised_headings": [
+            "Continuous batching"
+          ]
+        },
+        {
+          "original_heading": "Corrective retrieval",
+          "revised_headings": [
+            "Corrective retrieval"
+          ]
+        },
+        {
+          "original_heading": "Durable execution",
+          "revised_headings": [
+            "Durable execution"
+          ]
+        },
+        {
+          "original_heading": "Evaluator-optimizer",
+          "revised_headings": [
+            "Evaluator-optimizer"
+          ]
+        },
+        {
+          "original_heading": "Event sourcing",
+          "revised_headings": [
+            "Event sourcing"
+          ]
+        },
+        {
+          "original_heading": "Evidence ledger",
+          "revised_headings": [
+            "Evidence ledger"
+          ]
+        },
+        {
+          "original_heading": "Excessive agency",
+          "revised_headings": [
+            "Excessive agency"
+          ]
+        },
+        {
+          "original_heading": "Golden trajectory",
+          "revised_headings": [
+            "Golden trajectory"
+          ]
+        },
+        {
+          "original_heading": "Graph orchestration",
+          "revised_headings": [
+            "Graph orchestration"
+          ]
+        },
+        {
+          "original_heading": "Groundedness / faithfulness",
+          "revised_headings": [
+            "Groundedness / faithfulness"
+          ]
+        },
+        {
+          "original_heading": "Handoff",
+          "revised_headings": [
+            "Handoff"
+          ]
+        },
+        {
+          "original_heading": "Hybrid retrieval",
+          "revised_headings": [
+            "Hybrid retrieval"
+          ]
+        },
+        {
+          "original_heading": "Idempotency key",
+          "revised_headings": [
+            "Idempotency key"
+          ]
+        },
+        {
+          "original_heading": "Indirect prompt injection",
+          "revised_headings": [
+            "Indirect prompt injection"
+          ]
+        },
+        {
+          "original_heading": "Instruction pack",
+          "revised_headings": [
+            "Instruction pack"
+          ]
+        },
+        {
+          "original_heading": "KV cache",
+          "revised_headings": [
+            "KV cache"
+          ]
+        },
+        {
+          "original_heading": "Kill switch",
+          "revised_headings": [
+            "Kill switch"
+          ]
+        },
+        {
+          "original_heading": "LLM-as-judge",
+          "revised_headings": [
+            "LLM-as-judge"
+          ]
+        },
+        {
+          "original_heading": "LLM gateway",
+          "revised_headings": [
+            "LLM gateway"
+          ]
+        },
+        {
+          "original_heading": "MCP (Model Context Protocol)",
+          "revised_headings": [
+            "MCP (Model Context Protocol)"
+          ]
+        },
+        {
+          "original_heading": "Plan-and-execute",
+          "revised_headings": [
+            "Plan-and-execute"
+          ]
+        },
+        {
+          "original_heading": "Policy-as-code",
+          "revised_headings": [
+            "Policy-as-code"
+          ]
+        },
+        {
+          "original_heading": "Progressive disclosure",
+          "revised_headings": [
+            "Progressive disclosure"
+          ]
+        },
+        {
+          "original_heading": "Provenance",
+          "revised_headings": [
+            "Provenance"
+          ]
+        },
+        {
+          "original_heading": "RBAC",
+          "revised_headings": [
+            "RBAC"
+          ]
+        },
+        {
+          "original_heading": "ReAct",
+          "revised_headings": [
+            "ReAct"
+          ]
+        },
+        {
+          "original_heading": "Reducer",
+          "revised_headings": [
+            "Reducer"
+          ]
+        },
+        {
+          "original_heading": "Reranker",
+          "revised_headings": [
+            "Reranker"
+          ]
+        },
+        {
+          "original_heading": "Retry budget",
+          "revised_headings": [
+            "Retry budget"
+          ]
+        },
+        {
+          "original_heading": "Router",
+          "revised_headings": [
+            "Router"
+          ]
+        },
+        {
+          "original_heading": "Saga",
+          "revised_headings": [
+            "Saga"
+          ]
+        },
+        {
+          "original_heading": "Sandbox",
+          "revised_headings": [
+            "Sandbox"
+          ]
+        },
+        {
+          "original_heading": "Shadow release",
+          "revised_headings": [
+            "Shadow release"
+          ]
+        },
+        {
+          "original_heading": "Skill",
+          "revised_headings": [
+            "Skill"
+          ]
+        },
+        {
+          "original_heading": "SLO / SLI",
+          "revised_headings": [
+            "SLO / SLI"
+          ]
+        },
+        {
+          "original_heading": "Structured output",
+          "revised_headings": [
+            "Structured output"
+          ]
+        },
+        {
+          "original_heading": "Token exchange",
+          "revised_headings": [
+            "Token exchange"
+          ]
+        },
+        {
+          "original_heading": "Tool poisoning",
+          "revised_headings": [
+            "Tool poisoning"
+          ]
+        },
+        {
+          "original_heading": "Trajectory",
+          "revised_headings": [
+            "Trajectory"
+          ]
+        },
+        {
+          "original_heading": "Workload identity",
+          "revised_headings": [
+            "Workload identity"
+          ]
+        }
+      ],
+      "glossary_entries_retained": 55
+    },
+    {
+      "appendix": "B",
+      "source_pages": [
+        809,
+        812
+      ],
+      "original_title": "Production Readiness & Architecture Review Checklist",
+      "heading_mapping": [
+        {
+          "original_heading": "Architecture & autonomy",
+          "revised_headings": [
+            "Architecture & autonomy"
+          ]
+        },
+        {
+          "original_heading": "Tools & side effects",
+          "revised_headings": [
+            "Tools & side effects"
+          ]
+        },
+        {
+          "original_heading": "State, context & memory",
+          "revised_headings": [
+            "State, context & memory"
+          ]
+        },
+        {
+          "original_heading": "Knowledge",
+          "revised_headings": [
+            "Knowledge"
+          ]
+        },
+        {
+          "original_heading": "Security & identity",
+          "revised_headings": [
+            "Security & identity"
+          ]
+        },
+        {
+          "original_heading": "Human oversight",
+          "revised_headings": [
+            "Human oversight"
+          ]
+        },
+        {
+          "original_heading": "Reliability",
+          "revised_headings": [
+            "Reliability"
+          ]
+        },
+        {
+          "original_heading": "Testing & evals",
+          "revised_headings": [
+            "Testing & evals"
+          ]
+        },
+        {
+          "original_heading": "Observability & AgentOps",
+          "revised_headings": [
+            "Observability & AgentOps"
+          ]
+        },
+        {
+          "original_heading": "Cost & scale",
+          "revised_headings": [
+            "Cost & scale"
+          ]
+        },
+        {
+          "original_heading": "Governance",
+          "revised_headings": [
+            "Governance"
+          ]
+        }
+      ],
+      "corrections": [
+        "Add ownership and artifact evidence, atomic current-condition checks, immediate approval replay, separate serving deletion/backup expiry, isolated hidden tests."
+      ]
+    },
+    {
+      "appendix": "C",
+      "source_pages": [
+        813,
+        817
+      ],
+      "original_title": "Senior Interview Question Bank",
+      "heading_mapping": [
+        {
+          "original_heading": "1. DEFINE AN AGENT PRECISELY. HOW DOES IT DIFFER FROM A WORKFLOW AND A CHATBOT? (CH. 2)",
+          "revised_headings": [
+            "1. Define an agent precisely. How does it differ from a workflow and a chatbot?"
+          ]
+        },
+        {
+          "original_heading": "2. DRAW THE AGENT ANATOMY AND EXPLAIN THE LOOP. (CH. 2)",
+          "revised_headings": [
+            "2. Draw the anatomy and explain the loop"
+          ]
+        },
+        {
+          "original_heading": "3. AN AGENT KEEPS REPORTING TASKS AS DONE THAT ARE NOT DONE. HOW DO YOU FIX IT? (CH. 5, 24, 25)",
+          "revised_headings": [
+            "3. The agent reports work done when it is incomplete. How do you fix it?"
+          ]
+        },
+        {
+          "original_heading": "4. TRACE A TOOL CALL END TO END. (CH. 1, 6)",
+          "revised_headings": [
+            "4. Trace a tool call end to end"
+          ]
+        },
+        {
+          "original_heading": "5. DIFFERENTIATE STATE, CONTEXT, MEMORY AND RAG WITH EXAMPLES. (CH. 7-9, 12)",
+          "revised_headings": [
+            "5. Differentiate state, context, memory and RAG"
+          ]
+        },
+        {
+          "original_heading": "6. COMPARE REACT, PLAN-AND-EXECUTE, EVALUATOR-OPTIMIZER AND DETERMINISTIC GRAPHS. (CH. 3, 16)",
+          "revised_headings": [
+            "6. Compare the major control patterns"
+          ]
+        },
+        {
+          "original_heading": "7. TOOLS VERSUS SKILLS - HOW ARE CAPABILITIES DISCOVERED AND COMPOSED? (CH. 6, 10)",
+          "revised_headings": [
+            "7. How are tools and skills discovered and composed?"
+          ]
+        },
+        {
+          "original_heading": "8. A CODING AGENT'S TASK SPANS SEVERAL DAYS AND MANY SESSIONS. HOW DO YOU MAKE IT RESUMABLE AND SAFE? (CH. 7, 23, 34)",
+          "revised_headings": [
+            "8. How do you resume a coding task spanning several sessions?"
+          ]
+        },
+        {
+          "original_heading": "9. DESIGN CHECKPOINT/RESUME AND IDEMPOTENCY FOR A LONG-RUNNING AGENT. (CH. 7, 16, 23)",
+          "revised_headings": [
+            "9. Design checkpoint continuation and idempotency"
+          ]
+        },
+        {
+          "original_heading": "10. THREAT-MODEL PROMPT INJECTION, TOOL POISONING, EXFILTRATION AND UNSAFE EXECUTION. (CH. 19, 21)",
+          "revised_headings": [
+            "10. Threat-model injection, poisoning, exfiltration and execution"
+          ]
+        },
+        {
+          "original_heading": "11. USER IDENTITY VERSUS AGENT IDENTITY VERSUS SERVICE IDENTITY. (CH. 20)",
+          "revised_headings": [
+            "11. Distinguish user, agent and service identity"
+          ]
+        },
+        {
+          "original_heading": "12. DESIGN HUMAN-IN-THE-LOOP APPROVAL FOR HIGH-RISK ACTIONS. (CH. 18)",
+          "revised_headings": [
+            "12. Design human approval for a high-risk action"
+          ]
+        },
+        {
+          "original_heading": "13. TESTING VERSUS EVALUATION - HOW DO BOTH FIT CI/CD? (CH. 24, 25)",
+          "revised_headings": [
+            "13. How do testing and evaluation fit release work?"
+          ]
+        },
+        {
+          "original_heading": "14. DESIGN OPENTELEMETRY TRACING FOR ONE AGENT RUN. (CH. 26)",
+          "revised_headings": [
+            "14. Trace one complete agent run with OpenTelemetry"
+          ]
+        },
+        {
+          "original_heading": "15. DEFINE AGENTOPS SLOS, CANARY RELEASE, ROLLBACK AND KILL-SWITCH STRATEGY. (CH. 27)",
+          "revised_headings": [
+            "15. Define AgentOps SLOs, rollout and emergency controls"
+          ]
+        },
+        {
+          "original_heading": "16. DESIGN MODEL ROUTING, COST BUDGETS AND GRACEFUL DEGRADATION. (CH. 28, 30)",
+          "revised_headings": [
+            "16. Design model routing, budgets and degraded modes"
+          ]
+        },
+        {
+          "original_heading": "17. SCALE A STATEFUL AGENT SYSTEM ON KUBERNETES. (CH. 29)",
+          "revised_headings": [
+            "17. Scale a stateful agent on Kubernetes"
+          ]
+        },
+        {
+          "original_heading": "18. CHOOSE BETWEEN SINGLE-AGENT, GRAPH WORKFLOW AND MULTI-AGENT ARCHITECTURES. (CH. 16, 17, 35)",
+          "revised_headings": [
+            "18. Choose among single-agent, graph and multi-agent designs"
+          ]
+        },
+        {
+          "original_heading": "19. YOU CHANGE THE HARNESS'S CONTEXT POLICY. HOW DO YOU KNOW IT HELPED? (CH. 8, 25, 28)",
+          "revised_headings": [
+            "19. How do you establish that a context-policy change helped?"
+          ]
+        },
+        {
+          "original_heading": "20. PERFORM A PRODUCTION-READINESS REVIEW - WHAT WOULD YOU SIMPLIFY? (CH. 35, APPENDIX B)",
+          "revised_headings": [
+            "20. Perform a readiness review and simplify the design"
+          ]
+        }
+      ],
+      "corrections": [
+        "T36",
+        "T40",
+        "Clarify deterministic controls versus uncertain external systems; keep all twenty original question learning targets."
+      ]
+    },
+    {
+      "appendix": "D",
+      "source_pages": [
+        818,
+        821
+      ],
+      "original_title": "Tooling Map & Further Reading",
+      "heading_mapping": [
+        {
+          "original_heading": "Enterprise tooling map",
+          "revised_headings": [
+            "Enterprise tooling map"
+          ]
+        },
+        {
+          "original_heading": "Primary deep-learning path",
+          "revised_headings": [
+            "Primary deep-learning path"
+          ]
+        },
+        {
+          "original_heading": "Further reading",
+          "revised_headings": [
+            "Further reading: reasoning, retrieval and agents",
+            "Further reading: serving and systems",
+            "Protocols and standards",
+            "Security, risk and governance",
+            "Frameworks and platforms: official references"
+          ]
+        }
+      ],
+      "corrections": [
+        "T41",
+        "Preserve papers, protocols, governance sources and tooling; supply primary direct links and edition qualification."
+      ]
+    },
+    {
+      "appendix": "E",
+      "source_pages": [
+        822,
+        831
+      ],
+      "original_title": "Case Studies - Four Production Failures",
+      "heading_mapping": [
+        {
+          "original_heading": "Case 1 - The refund that ran twice",
+          "revised_headings": [
+            "Case 1 - The refund that ran twice"
+          ]
+        },
+        {
+          "original_heading": "Case 2 - The helpful email",
+          "revised_headings": [
+            "Case 2 - The helpful email"
+          ]
+        },
+        {
+          "original_heading": "Case 3 - The quiet cost explosion",
+          "revised_headings": [
+            "Case 3 - The quiet cost explosion"
+          ]
+        },
+        {
+          "original_heading": "Case 4 - The eval that lied",
+          "revised_headings": [
+            "Case 4 - The eval that lied"
+          ]
+        },
+        {
+          "original_heading": "What the four cases have in common",
+          "revised_headings": [
+            "What the four cases have in common"
+          ]
+        }
+      ],
+      "corrections": [
+        "T26",
+        "T39",
+        "Financial effects, recipient authority, cost accounting and grader-version ownership corrected; fictional composite disclosure retained."
+      ]
+    }
+  ],
+  "appendix_file": "appendices.md",
+  "author_note": {
+    "file": "author_note.md",
+    "source_pages": [
+      867,
+      868
+    ],
+    "preserved_topics": [
+      "Biography and experience",
+      "Current work and prior domains",
+      "Education and languages",
+      "LinkedIn and GitHub contacts"
+    ],
+    "limitation": "Author-supplied biographical claims retained, not independently verified."
+  },
+  "generated_answers": "Appendices F/G are generated by the lead from each chapter exercise/check JSON, rather than manually duplicated.",
+  "shared_audit_fixes": [
+    "Pagination: complete standalone code units, compact paragraphs and custom diagram/check/exercise blocks.",
+    "T37: numerical learning targets and composite cases explicitly labeled illustrative; no invented measurements.",
+    "T34: deletion separates served copies, derived indexes, backup expiry and restore suppression.",
+    "T38: cascade cost assumptions and outcome comparison retained in interview guidance; full derivation belongs to Chapter28."
+  ],
+  "validation_errors": [],
+  "final_source_validation": {
+    "chapter_count": 9,
+    "chapter_words_including_custom_blocks": 30647,
+    "diagram_count": 36,
+    "self_check_count": 36,
+    "exercise_count": 27,
+    "glossary_entries_matched": 55,
+    "original_interview_question_headings_mapped": 20,
+    "python_listings": "All parse with ast.parse; each at most 32 lines and 72 characters per line.",
+    "pure_function_spotchecks": "Passed exact-tool denial, schema drift, immutable evidence conflict, route allowlist, risk-5 rejection, rejected approval, approval-record preservation, scoped metric requests, and complete/missing/failed/non-finite recovery buckets.",
+    "execution_limit": "Only illustrative pure functions were executed; SDK integrations, durable workflows and full capstone deployments were not executed.",
+    "author_biography": "Preserved original substantive biography. Production-lessons and refund/audit/peak-load sentence is from original physical page 867; biographical claims were not independently verified.",
+    "appendix_typography": "Normalized nine chapter-reference lists with spaces after commas."
+  }
+}

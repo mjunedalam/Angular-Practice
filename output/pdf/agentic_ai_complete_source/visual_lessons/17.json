@@ -1,0 +1,102 @@
+{
+  "chapter": 17,
+  "chapter_title": "Multi-Agent Architectures",
+  "audit": "The manager analogy clarifies ownership, yet the existing organizational diagrams can still leave readers equating a worker report with a completed refund. Lesson A puts different evidence fragments into three owned containers, including the exact missing link that prevents the supervisor from finishing the case. Lesson B turns the global budget rule into a reservation ledger with unused funds released only after settlement. Readers calculate whether another delegation fits rather than assuming each worker receives a fresh allowance. Both lessons preserve report provenance, limit worker authority and keep the supervisor accountable for the overall outcome without asserting that multiple agents automatically improve quality.",
+  "lessons": [
+    {
+      "id": "17A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Three desks, one unresolved refund",
+      "intro": "ShopAssist investigates order O-481. The payment worker found two captures; the policy worker found an exception. The supervisor must reconcile both before drafting an action.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Supervisor case",
+            "object": "folder",
+            "items": [
+              "Order O-481; tenant Northwind",
+              "Owns final outcome and budget",
+              "Refund proposal: not ready"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Payment worker",
+            "object": "window",
+            "items": [
+              "Capture C-1: USD 42",
+              "Capture C-2: USD 42",
+              "E-17: both reference O-481"
+            ],
+            "role": "data"
+          },
+          {
+            "title": "Policy worker",
+            "object": "window",
+            "items": [
+              "Rule R-8: duplicate eligible",
+              "Exception: separate shipments",
+              "Shipment evidence: missing"
+            ],
+            "role": "data"
+          }
+        ],
+        "relations": [
+          "Workers return evidence; owner validates scope.",
+          "Missing shipment evidence blocks final synthesis."
+        ]
+      },
+      "read": [
+        "Both captures match the order but do not explain their purpose.",
+        "The policy report names an exception requiring another fact.",
+        "The supervisor owns resolving that gap and any later action proposal."
+      ],
+      "question": "Can two matching captures alone establish that USD 42 should be refunded?",
+      "answer": "No. Two captures support a possible duplicate, but the separate-shipment exception remains unresolved. The supervisor needs authorized shipment evidence before deciding eligibility; an eventual refund still requires independent policy and execution checks.",
+      "takeaway": "Merge qualifications with findings, not just conclusions.",
+      "assumption": "Fictional records; workers have read-only capabilities. The containers describe ownership, not a required three-model architecture."
+    },
+    {
+      "id": "17B",
+      "placement": "before_heading",
+      "anchor": "Termination, ownership and accountability",
+      "title": "A child worker cannot mint a new budget",
+      "intro": "One investigation starts with USD 1.00 available for delegated work. The supervisor reserves money before dispatch and releases only the unused portion after verified settlement.",
+      "kind": "ledger",
+      "data": {
+        "unit": "USD available",
+        "start": 1.0,
+        "entries": [
+          {
+            "label": "Reserve policy worker ceiling",
+            "delta": -0.3
+          },
+          {
+            "label": "Settle at 0.18; release 0.12",
+            "delta": 0.12
+          },
+          {
+            "label": "Reserve payment worker ceiling",
+            "delta": -0.4
+          },
+          {
+            "label": "Settle at 0.35; release 0.05",
+            "delta": 0.05
+          }
+        ],
+        "rule": "Available = total limit - settled spend - outstanding reservations; all children share it."
+      },
+      "read": [
+        "The first reservation leaves USD 0.70 available before the worker runs.",
+        "Settlement releases USD 0.12, not the entire USD 0.30.",
+        "Final spend is USD 0.53, leaving USD 0.47 for all remaining work."
+      ],
+      "question": "May a new worker reserve USD 0.50 after these settlements?",
+      "answer": "No. Only USD 0.47 remains, so the supervisor must reduce the bounded allocation or stop. A nested delegation consumes the same parent budget rather than resetting it.",
+      "takeaway": "Account for every child against one owned budget.",
+      "assumption": "Constructed costs; reservations are atomic and enforceable. Actual charges settle once. This ledger tracks money, not concurrent execution permits."
+    }
+  ]
+}

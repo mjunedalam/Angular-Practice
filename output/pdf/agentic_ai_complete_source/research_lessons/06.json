@@ -1,0 +1,61 @@
+{
+  "chapter": 6,
+  "design_note": "Distinguish a retry of one accepted business operation from a second legitimate equal-value transaction. The decision tree makes operation identity and parameter matching explicit instead of treating identical amounts as universal duplicate proof.",
+  "source": {
+    "title": "Making retries safe with idempotent APIs",
+    "url": "https://builder.aws.com/content/3Ev0BENTyBr0XxzRk5FDZzgNYos/making-retries-safe-with-idempotent-apis",
+    "publisher": "Amazon Web Services; Malcolm Featonby",
+    "concept": "Identical parameters can represent different intended operations. Caller-provided request identities distinguish retries, while a reused identity with changed parameters needs explicit rejection semantics.",
+    "scope": "Original partial-refund domain allows separate approved equal-value refunds. Business operation IDs, balance checks and approval rules are fictional application contracts.",
+    "id": "R06",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Build it: a mutating tool with approval and idempotency",
+    "title": "Equal amounts do not always mean the same intent",
+    "intro": "PAY-B captured 5000 INR minor units. Approved operation OP-A refunded 1000; OP-B requests another 1000 for a separate accepted return. The fictional service distinguishes authenticated business operation IDs.",
+    "kind": "tree",
+    "data": {
+      "root": "Refund request: which operation ID?",
+      "branches": [
+        {
+          "edge": "ID already recorded",
+          "question": "Exact effect matches retained operation?",
+          "yes": {
+            "label": "Return that operation receipt; no new debit",
+            "role": "pass"
+          },
+          "no": {
+            "label": "Reject mismatched reuse of the ID",
+            "role": "fail"
+          }
+        },
+        {
+          "edge": "New operation ID",
+          "question": "New approval and remaining balance valid?",
+          "yes": {
+            "label": "Commit new effect and ID atomically",
+            "role": "pass"
+          },
+          "no": {
+            "label": "No new effect; record unmet gate",
+            "role": "fail"
+          }
+        }
+      ]
+    },
+    "read": [
+      "OP-A identifies one accepted refund even when its response is retried.",
+      "OP-B is a distinct operation; its equal amount does not make it OP-A.",
+      "A new ID still needs independent authority, approval and sufficient balance."
+    ],
+    "question": "May OP-B reuse OP-A solely because both requested amounts are 1000 minor units?",
+    "answer": "No. OP-A identifies the first return, while OP-B represents a separately accepted return. Returning OP-A would falsely report the second operation as completed. Keep distinct business identities and enforce the remaining balance. Reusing OP-A with changed effect fields must fail parameter matching.",
+    "takeaway": "Idempotency identifies an intended operation, not merely similar-looking parameters.",
+    "assumption": "Fictional partial-refund contract with authenticated IDs, atomic deduplication and current authority. Two legitimate equal-value refunds are allowed; ordinary gates still apply.",
+    "source_label": "AWS: safe retries and intent identity",
+    "id": "6C",
+    "placement": "before_heading",
+    "source_key": "R06"
+  }
+}

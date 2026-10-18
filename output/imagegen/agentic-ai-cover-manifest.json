@@ -1,0 +1,22 @@
+{
+  "mode": "built-in image generation",
+  "status": "design mockups",
+  "images": [
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/imagegen/agentic-ai-cover-01-control-room.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "sha256": "b33bbcca43f99bdf28d87a5d6dab253e94a6ec1184adcff6eef8512a2c5a4cf9"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/imagegen/agentic-ai-cover-02-blueprint.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "sha256": "0be5ad0cedad55f6f935c30f51ed2c2f542dc2b068215a385d5f5983d57228c7"
+    }
+  ]
+}

@@ -1,0 +1,1337 @@
+{
+  "checked_date": "2026-10-17",
+  "method": "HTTP GET, streaming headers only",
+  "scope": "All chapter, lesson, preface and appendix URLs; no claim of content validation",
+  "unique_urls": 143,
+  "status_counts": {
+    "200": 139,
+    "None": 2,
+    "403": 1,
+    "202": 1
+  },
+  "sources": [
+    {
+      "url": "https://a2a-protocol.org/latest/topics/life-of-a-task/",
+      "locations": [
+        "research_lessons/15.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://a2a-protocol.org/latest/topics/life-of-a-task/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://a2a-protocol.org/v0.3.0/specification/",
+      "locations": [
+        "chapters/15.md:152"
+      ],
+      "status": 200,
+      "final_url": "https://a2a-protocol.org/v0.3.0/specification/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://a2a-protocol.org/v1.0.0/specification",
+      "locations": [
+        "appendices.md:491"
+      ],
+      "status": 200,
+      "final_url": "https://a2a-protocol.org/v1.0.0/specification/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://a2a-protocol.org/v1.0.0/specification/",
+      "locations": [
+        "chapters/15.md:152",
+        "chapters/17.md:157"
+      ],
+      "status": 200,
+      "final_url": "https://a2a-protocol.org/v1.0.0/specification/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://agentskills.io/specification",
+      "locations": [
+        "chapters/10.md:114",
+        "research_lessons/10.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://agentskills.io/specification",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/1706.03762",
+      "locations": [
+        "chapters/01.md:45"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/1706.03762",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2004.04906",
+      "locations": [
+        "chapters/12.md:29"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2004.04906",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2005.11401",
+      "locations": [
+        "chapters/12.md:176",
+        "appendices.md:474"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2005.11401",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2210.03629",
+      "locations": [
+        "chapters/03.md:118",
+        "research_lessons/03.json:6",
+        "appendices.md:472"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2210.03629",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2212.10496",
+      "locations": [
+        "chapters/13.md:198",
+        "research_lessons/13.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2212.10496",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2303.11366",
+      "locations": [
+        "appendices.md:473"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2303.11366",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2306.05685",
+      "locations": [
+        "research_lessons/25.json:6",
+        "research_lessons/38.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2306.05685",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2307.03172",
+      "locations": [
+        "appendices.md:478"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2307.03172",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2309.06180",
+      "locations": [
+        "appendices.md:483"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2309.06180",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2310.11511",
+      "locations": [
+        "chapters/13.md:198",
+        "appendices.md:475"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2310.11511",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2401.15884",
+      "locations": [
+        "appendices.md:476"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2401.15884",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2403.17710",
+      "locations": [
+        "chapters/25.md:208"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2403.17710",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://arxiv.org/abs/2404.16130",
+      "locations": [
+        "appendices.md:477"
+      ],
+      "status": 200,
+      "final_url": "https://arxiv.org/abs/2404.16130",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+      "locations": [
+        "research_lessons/01.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://builder.aws.com/content/3EumjoZascWd1oZiEgL8ORlv3qE/timeouts-retries-and-backoff-with-jitter",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+      "locations": [
+        "appendices.md:491"
+      ],
+      "status": 200,
+      "final_url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://builder.aws.com/content/3Ev0BENTyBr0XxzRk5FDZzgNYos/making-retries-safe-with-idempotent-apis",
+      "locations": [
+        "research_lessons/06.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://builder.aws.com/content/3Ev0BENTyBr0XxzRk5FDZzgNYos/making-retries-safe-with-idempotent-apis",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+      "locations": [
+        "research_lessons/20.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
+      "locations": [
+        "research_lessons/19.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html",
+      "locations": [
+        "chapters/24.md:181"
+      ],
+      "status": 200,
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html#26-transaction-data-should-be-protected-against-modification",
+      "locations": [
+        "chapters/18.md:167"
+      ],
+      "status": 200,
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html#26-transaction-data-should-be-protected-against-modification",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cloud.google.com/blog/products/ai-machine-learning/whats-new-in-gemini-enterprise-agent-platform/",
+      "locations": [
+        "appendices.md:508"
+      ],
+      "status": 200,
+      "final_url": "https://cloud.google.com/blog/products/ai-machine-learning/whats-new-in-gemini-enterprise-agent-platform/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://code.claude.com/docs/en/agent-sdk/permissions",
+      "locations": [
+        "chapters/31.md:101",
+        "appendices.md:506"
+      ],
+      "status": 200,
+      "final_url": "https://code.claude.com/docs/en/agent-sdk/permissions",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
+      "locations": [
+        "research_lessons/31.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://cormack.uwaterloo.ca/cormack/cormacksigir09-rrf.pdf",
+      "locations": [
+        "appendices.md:479"
+      ],
+      "status": 200,
+      "final_url": "https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf",
+      "content_type": "application/pdf"
+    },
+    {
+      "url": "https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/",
+      "locations": [
+        "chapters/31.md:109"
+      ],
+      "status": 200,
+      "final_url": "https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/prompt-caching",
+      "locations": [
+        "chapters/04.md:148",
+        "chapters/08.md:125"
+      ],
+      "status": 200,
+      "final_url": "https://developers.openai.com/api/docs/guides/prompt-caching",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/reasoning",
+      "locations": [
+        "chapters/01.md:168",
+        "chapters/08.md:125"
+      ],
+      "status": 200,
+      "final_url": "https://developers.openai.com/api/docs/guides/reasoning",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/reasoning-best-practices",
+      "locations": [
+        "chapters/01.md:168",
+        "chapters/04.md:148"
+      ],
+      "status": 200,
+      "final_url": "https://developers.openai.com/api/docs/guides/reasoning-best-practices",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      "locations": [
+        "chapters/22.md:153"
+      ],
+      "status": 200,
+      "final_url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html",
+      "locations": [
+        "research_lessons/33.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/",
+      "locations": [
+        "appendices.md:509"
+      ],
+      "status": 200,
+      "final_url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-core-concepts.html",
+      "locations": [
+        "chapters/33.md:29",
+        "appendices.md:509"
+      ],
+      "status": 200,
+      "final_url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy-core-concepts.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
+      "locations": [
+        "research_lessons/29.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/agents",
+      "locations": [
+        "chapters/33.md:47"
+      ],
+      "status": 200,
+      "final_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/agents",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.crewai.com/",
+      "locations": [
+        "appendices.md:507"
+      ],
+      "status": 200,
+      "final_url": "https://docs.crewai.com/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.docker.com/reference/cli/docker/container/run/",
+      "locations": [
+        "appendices.md:487"
+      ],
+      "status": 200,
+      "final_url": "https://docs.docker.com/reference/cli/docker/container/run/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langchain/overview",
+      "locations": [
+        "appendices.md:503"
+      ],
+      "status": 200,
+      "final_url": "https://docs.langchain.com/oss/python/langchain/overview",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+      "locations": [
+        "chapters/32.md:5",
+        "research_lessons/32.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "locations": [
+        "appendices.md:503"
+      ],
+      "status": 200,
+      "final_url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "locations": [
+        "chapters/32.md:5"
+      ],
+      "status": 200,
+      "final_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.llamaindex.ai/",
+      "locations": [
+        "appendices.md:507"
+      ],
+      "status": 200,
+      "final_url": "https://developers.llamaindex.ai/python/framework/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.pydantic.dev/latest/concepts/models/",
+      "locations": [
+        "chapters/06.md:134"
+      ],
+      "status": 200,
+      "final_url": "https://pydantic.dev/docs/validation/latest/concepts/models/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.pydantic.dev/latest/concepts/validators/",
+      "locations": [
+        "chapters/01.md:168"
+      ],
+      "status": 200,
+      "final_url": "https://pydantic.dev/docs/validation/latest/concepts/validators/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.python.org/3/library/decimal.html",
+      "locations": [
+        "chapters/06.md:134"
+      ],
+      "status": 200,
+      "final_url": "https://docs.python.org/3/library/decimal.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.ray.io/en/latest/serve/",
+      "locations": [
+        "appendices.md:510"
+      ],
+      "status": 200,
+      "final_url": "https://docs.ray.io/en/latest/serve/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.ray.io/en/latest/serve/llm/index.html",
+      "locations": [
+        "chapters/30.md:160"
+      ],
+      "status": 200,
+      "final_url": "https://docs.ray.io/en/latest/serve/llm/index.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html",
+      "locations": [
+        "chapters/25.md:208"
+      ],
+      "status": 200,
+      "final_url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.spring.io/spring-ai/reference/",
+      "locations": [
+        "appendices.md:505"
+      ],
+      "status": 200,
+      "final_url": "https://docs.spring.io/spring-ai/reference/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://docs.stripe.com/api/idempotent_requests",
+      "locations": [
+        "chapters/39.md:33"
+      ],
+      "status": 200,
+      "final_url": "https://docs.stripe.com/api/idempotent_requests",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/activity-definition",
+      "locations": [
+        "chapters/36.md:55",
+        "appendices.md:486"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/activity-definition",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/develop/python/message-passing",
+      "locations": [
+        "chapters/37.md:132"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/develop/python/workflows/message-passing",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/develop/python/workflows/cancellation",
+      "locations": [
+        "chapters/37.md:148"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/develop/python/workflows/cancellation",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/develop/python/workflows/message-passing",
+      "locations": [
+        "appendices.md:486"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/develop/python/workflows/message-passing",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/encyclopedia/event-history",
+      "locations": [
+        "chapters/16.md:173",
+        "chapters/18.md:165",
+        "chapters/23.md:168",
+        "chapters/29.md:149"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/encyclopedia/event-history",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.temporal.io/workflow-definition",
+      "locations": [
+        "chapters/16.md:173",
+        "chapters/23.md:168",
+        "research_lessons/16.json:6",
+        "research_lessons/37.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://docs.temporal.io/workflow-definition",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.vendor.test",
+      "locations": [
+        "visual_lessons/19.json:106"
+      ],
+      "status": null,
+      "error": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "url": "https://docs.vllm.ai/",
+      "locations": [
+        "appendices.md:510"
+      ],
+      "status": 200,
+      "final_url": "https://docs.vllm.ai/en/latest/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/design/prefix_caching/",
+      "locations": [
+        "chapters/28.md:168",
+        "chapters/30.md:160"
+      ],
+      "status": 200,
+      "final_url": "https://docs.vllm.ai/en/latest/design/prefix_caching/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/features/quantization/",
+      "locations": [
+        "chapters/30.md:160"
+      ],
+      "status": 200,
+      "final_url": "https://docs.vllm.ai/en/latest/features/quantization/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/serving/online_serving/",
+      "locations": [
+        "chapters/30.md:160"
+      ],
+      "status": 200,
+      "final_url": "https://docs.vllm.ai/en/latest/serving/online_serving/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://doi.org/10.1145/38713.38742",
+      "locations": [
+        "appendices.md:485"
+      ],
+      "status": 403,
+      "final_url": "https://portal.acm.org/citation.cfm?doid=38713.38742",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "locations": [
+        "appendices.md:499"
+      ],
+      "status": 202,
+      "final_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://genai.owasp.org/",
+      "locations": [
+        "appendices.md:497"
+      ],
+      "status": 200,
+      "final_url": "https://genai.owasp.org/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://genai.owasp.org/2025/12/09/owasp-genai-security-project-releases-top-10-risks-and-mitigations-for-agentic-ai-security/",
+      "locations": [
+        "appendices.md:497"
+      ],
+      "status": 200,
+      "final_url": "https://genai.owasp.org/2025/12/09/owasp-genai-security-project-releases-top-10-risks-and-mitigations-for-agentic-ai-security/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://genai.owasp.org/2025/12/09/owasp-top-10-for-agentic-applications-the-benchmark-for-agentic-security-in-the-age-of-autonomous-ai/",
+      "locations": [
+        "chapters/19.md:147"
+      ],
+      "status": 200,
+      "final_url": "https://genai.owasp.org/2025/12/09/owasp-top-10-for-agentic-applications-the-benchmark-for-agentic-security-in-the-age-of-autonomous-ai/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "locations": [
+        "chapters/19.md:147"
+      ],
+      "status": 200,
+      "final_url": "https://genai.owasp.org/llm-top-10/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "locations": [
+        "research_lessons/02.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://github.com/firecracker-microvm/firecracker/blob/main/docs/prod-host-setup.md",
+      "locations": [
+        "chapters/21.md:154"
+      ],
+      "status": 200,
+      "final_url": "https://github.com/firecracker-microvm/firecracker/blob/main/docs/prod-host-setup.md",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://github.com/kserve/website/tree/main/versioned_docs",
+      "locations": [
+        "chapters/30.md:160"
+      ],
+      "status": 200,
+      "final_url": "https://github.com/kserve/website/tree/main/versioned_docs",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://github.com/modelcontextprotocol/ext-tasks/blob/main/specification/2026-07-28/tasks.md",
+      "locations": [
+        "chapters/15.md:152"
+      ],
+      "status": 200,
+      "final_url": "https://github.com/modelcontextprotocol/ext-tasks/blob/main/specification/2026-07-28/tasks.md",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://github.com/pgvector/pgvector",
+      "locations": [
+        "chapters/12.md:176"
+      ],
+      "status": 200,
+      "final_url": "https://github.com/pgvector/pgvector",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://github.com/pgvector/pgvector#filtering",
+      "locations": [
+        "chapters/12.md:69"
+      ],
+      "status": 200,
+      "final_url": "https://github.com/pgvector/pgvector#filtering",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://google.github.io/adk-docs/",
+      "locations": [
+        "appendices.md:508"
+      ],
+      "status": 200,
+      "final_url": "https://adk.dev/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://grpc.io/docs/guides/deadlines/",
+      "locations": [
+        "research_lessons/05.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://grpc.io/docs/guides/deadlines/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://gvisor.dev/docs/architecture_guide/intro/",
+      "locations": [
+        "chapters/19.md:147",
+        "chapters/21.md:154"
+      ],
+      "status": 200,
+      "final_url": "https://gvisor.dev/docs/architecture_guide/intro/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://gvisor.dev/docs/architecture_guide/security/",
+      "locations": [
+        "research_lessons/34.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://gvisor.dev/docs/architecture_guide/security/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://gvisor.dev/docs/user_guide/production/",
+      "locations": [
+        "chapters/21.md:154"
+      ],
+      "status": 200,
+      "final_url": "https://gvisor.dev/docs/user_guide/production/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://hypothesis.readthedocs.io/en/latest/",
+      "locations": [
+        "chapters/24.md:179"
+      ],
+      "status": 200,
+      "final_url": "https://hypothesis.readthedocs.io/en/latest/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://hypothesis.readthedocs.io/en/latest/reference/api.html#hypothesis.HealthCheck.function_scoped_fixture",
+      "locations": [
+        "research_lessons/24.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://hypothesis.readthedocs.io/en/latest/reference/api.html#hypothesis.HealthCheck.function_scoped_fixture",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://identity.example",
+      "locations": [
+        "chapters/20.md:41"
+      ],
+      "status": null,
+      "error": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "url": "https://itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "locations": [
+        "chapters/25.md:206"
+      ],
+      "status": 200,
+      "final_url": "https://itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://keda.sh/docs/",
+      "locations": [
+        "chapters/29.md:149"
+      ],
+      "status": 200,
+      "final_url": "https://keda.sh/docs/2.21/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://kserve.github.io/website/",
+      "locations": [
+        "appendices.md:510"
+      ],
+      "status": 200,
+      "final_url": "https://kserve.github.io/website/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://kubernetes.io/docs/",
+      "locations": [
+        "appendices.md:487"
+      ],
+      "status": 200,
+      "final_url": "https://kubernetes.io/docs/home/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://kubernetes.io/docs/home/",
+      "locations": [
+        "chapters/29.md:149"
+      ],
+      "status": 200,
+      "final_url": "https://kubernetes.io/docs/home/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/agent-framework/overview/",
+      "locations": [
+        "appendices.md:507"
+      ],
+      "status": 200,
+      "final_url": "https://learn.microsoft.com/en-us/agent-framework/overview/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing",
+      "locations": [
+        "research_lessons/07.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://microsoft.github.io/graphrag/",
+      "locations": [
+        "chapters/13.md:198"
+      ],
+      "status": 200,
+      "final_url": "https://microsoft.github.io/graphrag/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "locations": [
+        "research_lessons/14.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "locations": [
+        "chapters/14.md:185",
+        "chapters/36.md:77",
+        "appendices.md:491"
+      ],
+      "status": 200,
+      "final_url": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+      "locations": [
+        "chapters/14.md:185"
+      ],
+      "status": 200,
+      "final_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning",
+      "locations": [
+        "chapters/14.md:185"
+      ],
+      "status": 200,
+      "final_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "locations": [
+        "research_lessons/18.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+      "content_type": "application/pdf"
+    },
+    {
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "locations": [
+        "chapters/22.md:153"
+      ],
+      "status": 200,
+      "final_url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "content_type": "application/pdf"
+    },
+    {
+      "url": "https://openai.github.io/openai-agents-python/",
+      "locations": [
+        "appendices.md:504"
+      ],
+      "status": 200,
+      "final_url": "https://openai.github.io/openai-agents-python/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+      "locations": [
+        "chapters/31.md:71"
+      ],
+      "status": 200,
+      "final_url": "https://openai.github.io/openai-agents-python/human_in_the_loop/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://openai.github.io/openai-agents-python/ref/run_state/",
+      "locations": [
+        "chapters/31.md:71",
+        "appendices.md:504"
+      ],
+      "status": 200,
+      "final_url": "https://openai.github.io/openai-agents-python/ref/run_state/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+      "locations": [
+        "chapters/20.md:162",
+        "appendices.md:493"
+      ],
+      "status": 200,
+      "final_url": "https://openid.net/specs/openid-connect-core-1_0.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://opentelemetry-python.readthedocs.io/en/latest/_modules/opentelemetry/trace.html#use_span",
+      "locations": [
+        "chapters/26.md:167"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry-python.readthedocs.io/en/latest/_modules/opentelemetry/trace.html#use_span",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://opentelemetry-python.readthedocs.io/en/latest/api/trace.html#opentelemetry.trace.Tracer.start_as_current_span",
+      "locations": [
+        "chapters/26.md:167"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry-python.readthedocs.io/en/latest/api/trace.html#opentelemetry.trace.Tracer.start_as_current_span",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/",
+      "locations": [
+        "chapters/24.md:179",
+        "chapters/26.md:165"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry.io/docs/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+      "locations": [
+        "research_lessons/26.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/specs/otel/semantic-conventions/",
+      "locations": [
+        "appendices.md:493"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry.io/docs/specs/otel/semantic-conventions/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "locations": [
+        "chapters/26.md:165"
+      ],
+      "status": 200,
+      "final_url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://pip.pypa.io/en/stable/topics/secure-installs/",
+      "locations": [
+        "research_lessons/21.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://pip.pypa.io/en/stable/topics/secure-installs/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://prometheus.io/docs/practices/histograms/",
+      "locations": [
+        "chapters/38.md:65"
+      ],
+      "status": 200,
+      "final_url": "https://prometheus.io/docs/practices/histograms/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://py.sdk.modelcontextprotocol.io/",
+      "locations": [
+        "chapters/14.md:185"
+      ],
+      "status": 200,
+      "final_url": "https://py.sdk.modelcontextprotocol.io/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://py.sdk.modelcontextprotocol.io/client/",
+      "locations": [
+        "chapters/14.md:185"
+      ],
+      "status": 200,
+      "final_url": "https://py.sdk.modelcontextprotocol.io/client/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://py.sdk.modelcontextprotocol.io/client/transports/",
+      "locations": [
+        "chapters/14.md:145"
+      ],
+      "status": 200,
+      "final_url": "https://py.sdk.modelcontextprotocol.io/client/transports/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://redis.io/docs/latest/develop/use/patterns/distributed-locks/",
+      "locations": [
+        "chapters/16.md:173",
+        "chapters/23.md:168",
+        "chapters/29.md:149"
+      ],
+      "status": 200,
+      "final_url": "https://redis.io/docs/latest/develop/use/patterns/distributed-locks/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://reference.langchain.com/python/langgraph/types/Durability",
+      "locations": [
+        "chapters/32.md:121"
+      ],
+      "status": 200,
+      "final_url": "https://reference.langchain.com/python/langgraph/types/Durability",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://sbert.net/examples/cross_encoder/applications/README.html",
+      "locations": [
+        "chapters/12.md:89"
+      ],
+      "status": 200,
+      "final_url": "https://sbert.net/examples/cross_encoder/applications/README.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://scikit-learn.org/0.24/modules/generated/sklearn.metrics.cohen_kappa_score.html",
+      "locations": [
+        "chapters/25.md:206"
+      ],
+      "status": 200,
+      "final_url": "https://scikit-learn.org/0.24/modules/generated/sklearn.metrics.cohen_kappa_score.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://spiffe.io/docs/latest/spiffe-about/overview/",
+      "locations": [
+        "chapters/20.md:162"
+      ],
+      "status": 200,
+      "final_url": "https://spiffe.io/docs/latest/spiffe-about/overview/",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://spring.io/blog/2026/06/12/spring-ai-2-0-0-GA-available-now/",
+      "locations": [
+        "chapters/31.md:77",
+        "appendices.md:505"
+      ],
+      "status": 200,
+      "final_url": "https://spring.io/blog/2026/06/12/spring-ai-2-0-0-GA-available-now/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://sre.google/books/",
+      "locations": [
+        "appendices.md:484"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/books/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/sre-book/effective-troubleshooting/",
+      "locations": [
+        "research_lessons/36.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/sre-book/effective-troubleshooting/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/sre-book/handling-overload/",
+      "locations": [
+        "research_lessons/23.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/sre-book/handling-overload/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/sre-book/release-engineering/",
+      "locations": [
+        "research_lessons/04.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/sre-book/release-engineering/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/sre-book/simplicity/",
+      "locations": [
+        "research_lessons/35.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/sre-book/simplicity/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/sre-book/table-of-contents/",
+      "locations": [
+        "chapters/27.md:164"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/sre-book/table-of-contents/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://sre.google/workbook/alerting-on-slos/",
+      "locations": [
+        "research_lessons/27.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://sre.google/workbook/alerting-on-slos/",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://strandsagents.com/docs/",
+      "locations": [
+        "appendices.md:509"
+      ],
+      "status": 200,
+      "final_url": "https://strandsagents.com/docs/",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "locations": [
+        "chapters/03.md:118",
+        "research_lessons/28.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "locations": [
+        "research_lessons/08.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+      "locations": [
+        "research_lessons/17.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion",
+      "locations": [
+        "chapters/12.md:41",
+        "research_lessons/12.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://www.iso.org/standard/42001",
+      "locations": [
+        "chapters/22.md:153",
+        "appendices.md:499"
+      ],
+      "status": 200,
+      "final_url": "https://www.iso.org/standard/42001",
+      "content_type": "text/html;charset=UTF-8"
+    },
+    {
+      "url": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "locations": [
+        "research_lessons/39.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "locations": [
+        "chapters/18.md:165",
+        "chapters/22.md:153",
+        "appendices.md:497"
+      ],
+      "status": 200,
+      "final_url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "content_type": "text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+      "locations": [
+        "chapters/13.md:119"
+      ],
+      "status": 200,
+      "final_url": "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/queries-with.html",
+      "locations": [
+        "chapters/13.md:198"
+      ],
+      "status": 200,
+      "final_url": "https://www.postgresql.org/docs/current/queries-with.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/sql-createview.html",
+      "locations": [
+        "chapters/13.md:119"
+      ],
+      "status": 200,
+      "final_url": "https://www.postgresql.org/docs/current/sql-createview.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc6749.html",
+      "locations": [
+        "appendices.md:493"
+      ],
+      "status": 200,
+      "final_url": "https://www.rfc-editor.org/rfc/rfc6749.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc8693.html",
+      "locations": [
+        "chapters/20.md:162",
+        "appendices.md:493"
+      ],
+      "status": 200,
+      "final_url": "https://www.rfc-editor.org/rfc/rfc8693.html",
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://www.sqlite.org/atomiccommit.html",
+      "locations": [
+        "research_lessons/11.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://www.sqlite.org/atomiccommit.html",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.usenix.org/conference/osdi22/presentation/yu",
+      "locations": [
+        "research_lessons/30.json:7"
+      ],
+      "status": 200,
+      "final_url": "https://www.usenix.org/conference/osdi22/presentation/yu",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.w3.org/TR/prov-dm/",
+      "locations": [
+        "research_lessons/09.json:6",
+        "research_lessons/22.json:6"
+      ],
+      "status": 200,
+      "final_url": "https://www.w3.org/TR/prov-dm/",
+      "content_type": "text/html; charset=utf-8"
+    }
+  ]
+}

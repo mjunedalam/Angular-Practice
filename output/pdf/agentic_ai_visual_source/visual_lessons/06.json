@@ -1,0 +1,104 @@
+{
+  "chapter": 6,
+  "chapter_title": "6. Tool Calling & Action Architecture",
+  "audit": "The service-counter analogy suggests that a correct form and a receipt are helpful, but readers need to see the checks and the limits of that receipt. Lesson A uses exact INR minor units, an authenticated principal and a pending approval to show a valid request that must wait. Lesson B holds a lost refund response constant while varying the downstream effect contract. An atomic deduplication service can return the original result; a service without safe status or retry semantics leaves the effect unknown. This preserves the distinction between local identity, external execution guarantees and ordinary narrative evidence.",
+  "lessons": [
+    {
+      "id": "6A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The counter accepts a form, not permission",
+      "intro": "Customer C-7 owns ORD-104233. A refund request passes local validation and current eligibility, but its exact financial effect still needs review.",
+      "kind": "packet",
+      "data": {
+        "name": "issue_refund proposal P-6",
+        "fields": [
+          {
+            "key": "order_id",
+            "value": "ORD-104233"
+          },
+          {
+            "key": "payment_id",
+            "value": "PAY-AB12CD34EF"
+          },
+          {
+            "key": "amount_minor",
+            "value": "2499 INR minor units"
+          },
+          {
+            "key": "reason",
+            "value": "duplicate_charge"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Arguments + evidence",
+            "detail": "Strict schema and retained evidence IDs valid",
+            "status": "pass"
+          },
+          {
+            "label": "Authority + balance",
+            "detail": "C-7 owns payment; 2499 remains refundable",
+            "status": "pass"
+          },
+          {
+            "label": "Exact approval",
+            "detail": "P-6 has no authenticated review decision",
+            "status": "wait"
+          }
+        ],
+        "result": "Persist proposal P-6; release worker; no refund yet",
+        "result_status": "wait"
+      },
+      "read": [
+        "The principal comes from authenticated runtime context, not generated fields.",
+        "Exact amount and currency define the financial proposal.",
+        "Passing eligibility does not satisfy the missing approval."
+      ],
+      "question": "If the model adds approved=true to its arguments, can the counter issue the refund?",
+      "answer": "No. The strict request contract rejects unrecognized fields, and approval must come through an authenticated review path bound to P-6. Even a structurally accepted request cannot grant its own execution authority.",
+      "takeaway": "Tool contracts express intended work; trusted checks decide whether it may execute.",
+      "assumption": "Fictional INR example with 100 minor units per rupee. Evidence IDs are retained separately; the four displayed fields are a projection."
+    },
+    {
+      "id": "6B",
+      "placement": "before_heading",
+      "anchor": "Idempotency, retries and compensation",
+      "title": "A receipt key needs a downstream contract",
+      "intro": "The payment request using accepted intent K-17 timed out. The runtime cannot tell whether the provider committed its refund.",
+      "kind": "fork",
+      "data": {
+        "input": "K-17 submitted; response lost; local result is unknown",
+        "left": {
+          "title": "Atomic key support",
+          "steps": [
+            "Retain the exact intent and original K-17",
+            "Retry K-17 within documented retention",
+            "Provider returns original committed RF-9"
+          ],
+          "result": "Record confirmed RF-9; one intended refund effect",
+          "status": "pass"
+        },
+        "right": {
+          "title": "No safe retry contract",
+          "steps": [
+            "Retain exact intent and uncertainty",
+            "Status lookup cannot resolve the submission",
+            "Withhold second write; request reconciliation"
+          ],
+          "result": "Outcome remains unknown; no blind resubmission",
+          "status": "wait"
+        }
+      },
+      "read": [
+        "Both paths begin with the same saved intent and lost response.",
+        "The left result depends on provider enforcement and retained key semantics.",
+        "The right path preserves uncertainty instead of inventing success or absence."
+      ],
+      "question": "If the model rewrites only its explanation, should recovery create a new key?",
+      "answer": "No. The accepted effect is unchanged. Reuse its retained identity under the applicable provider contract. A changed narrative must not turn recovery into a new financial operation, and a local hash alone supplies no external deduplication guarantee.",
+      "takeaway": "Unknown outcomes require effect-aware recovery, not a new proposal with new wording.",
+      "assumption": "Fictional alternatives; the left service guarantees atomic key matching within retention. The right service offers no conclusive status or safe retry."
+    }
+  ]
+}

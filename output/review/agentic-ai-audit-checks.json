@@ -1,0 +1,280 @@
+{
+  "pdf_sha256": "7366dfff99c4d132d12a029556f839454c3a9994bfd0495ecdd19a8f74ac9016",
+  "pdf_pages": 822,
+  "python_blocks_checked": 54,
+  "syntax_issues": [],
+  "pdf_embedded_files": [],
+  "pdf_has_structure_tree": false,
+  "python_blocks": [
+    {
+      "chapter": "01",
+      "line": 41,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "01",
+      "line": 109,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "02",
+      "line": 77,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "03",
+      "line": 31,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "04",
+      "line": 37,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "04",
+      "line": 72,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "04",
+      "line": 106,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "05",
+      "line": 57,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "06",
+      "line": 27,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "06",
+      "line": 71,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "07",
+      "line": 31,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "07",
+      "line": 66,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "07",
+      "line": 116,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "08",
+      "line": 81,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "09",
+      "line": 83,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "12",
+      "line": 31,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "12",
+      "line": 80,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "12",
+      "line": 113,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "13",
+      "line": 49,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "13",
+      "line": 99,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "14",
+      "line": 53,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "14",
+      "line": 95,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "15",
+      "line": 87,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "15",
+      "line": 98,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "16",
+      "line": 37,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "16",
+      "line": 61,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "17",
+      "line": 51,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "18",
+      "line": 33,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "18",
+      "line": 48,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "19",
+      "line": 77,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "20",
+      "line": 75,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "21",
+      "line": 91,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "22",
+      "line": 33,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "23",
+      "line": 33,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "23",
+      "line": 80,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "24",
+      "line": 45,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "24",
+      "line": 85,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "25",
+      "line": 89,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "25",
+      "line": 121,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "26",
+      "line": 41,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "27",
+      "line": 77,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "28",
+      "line": 25,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "28",
+      "line": 61,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "30",
+      "line": 39,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "31",
+      "line": 51,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "31",
+      "line": 87,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "32",
+      "line": 27,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "32",
+      "line": 46,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "32",
+      "line": 145,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "34",
+      "line": 17,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "36",
+      "line": 85,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "37",
+      "line": 35,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "37",
+      "line": 62,
+      "status": "syntax valid"
+    },
+    {
+      "chapter": "38",
+      "line": 17,
+      "status": "syntax valid"
+    }
+  ]
+}

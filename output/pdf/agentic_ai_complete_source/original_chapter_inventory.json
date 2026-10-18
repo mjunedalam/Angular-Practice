@@ -1,0 +1,780 @@
+[
+  {
+    "chapter": 1,
+    "title": "1. LLM Runtime Fundamentals for Agent Engineers",
+    "source_start": 17,
+    "source_end": 41,
+    "original_headings": [
+      "What the model actually does",
+      "Structured outputs: making the model speak in contracts",
+      "Tool calling is intent, not execution",
+      "Streaming, latency, rate limits and provider behaviour",
+      "Hallucination, uncertainty and grounding",
+      "The stateless model and the stateful runtime",
+      "Provider abstraction and basic routing",
+      "Build it: a minimal typed model client",
+      "Failure modes and how to recognise them",
+      "Production lens",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 2,
+    "title": "2. What Is an AI Agent? Anatomy, Autonomy & Boundaries",
+    "source_start": 42,
+    "source_end": 63,
+    "original_headings": [
+      "Chatbot, LLM app, workflow or agent?",
+      "The anatomy of an agent",
+      "The agent loop: observe, decide, act, update",
+      "Deterministic boundaries around probabilistic decisions",
+      "Autonomy levels",
+      "Termination: budgets, loop limits and completion criteria",
+      "Build it: a mocked decision/action loop",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 3,
+    "title": "3. Reasoning & Control Patterns",
+    "source_start": 64,
+    "source_end": 83,
+    "original_headings": [
+      "The pattern landscape",
+      "ReAct: the tool-use loop",
+      "Routers: cheap, reliable specialisation",
+      "Plan-and-execute",
+      "Reflection, critics and evaluator\u2013optimizer loops",
+      "Parallel workers, map-reduce and hierarchy",
+      "Comparing the patterns quantitatively",
+      "When a deterministic workflow beats an agent",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 4,
+    "title": "4. Prompt & Instruction Architecture",
+    "source_start": 84,
+    "source_end": 104,
+    "original_headings": [
+      "The instruction hierarchy",
+      "Anatomy of a production system prompt",
+      "Templates, variables and task policies",
+      "Few-shot examples and behavioural constraints",
+      "Prompt decomposition and role-specific packs",
+      "Versioning, provenance and change control",
+      "Trusted and untrusted content",
+      "Writing instructions for today's models",
+      "Testing instructions",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 5,
+    "title": "5. Agent Harness Architecture",
+    "source_start": 105,
+    "source_end": 125,
+    "original_headings": [
+      "Harness, model, agent, framework, runtime",
+      "Prompt, context and harness: three layers of agent engineering",
+      "The components of a harness",
+      "The run lifecycle",
+      "A framework-neutral runtime interface",
+      "Where cross-cutting concerns live",
+      "Cancellation, pause and resume",
+      "Hooks for policy, tracing and evaluation",
+      "The execution loop, end to end",
+      "Failure modes",
+      "Production lens",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 6,
+    "title": "6. Tool Calling & Action Architecture",
+    "source_start": 126,
+    "source_end": 147,
+    "original_headings": [
+      "Anatomy of a tool",
+      "Writing contracts models use correctly",
+      "Tool choice: automatic, constrained, required and policy-filtered",
+      "Serial and parallel calls",
+      "Read-only versus mutating tools",
+      "Idempotency, retries and compensation",
+      "Tool authentication, scoped credentials and least privilege",
+      "Tool-output injection, poisoning and trust boundaries",
+      "Registry lifecycle, versioning and deprecation",
+      "Build it: a mutating tool with approval and idempotency",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 7,
+    "title": "7. Agent State & Checkpointing",
+    "source_start": 148,
+    "source_end": 167,
+    "original_headings": [
+      "State, context and memory",
+      "What belongs in run state",
+      "Typed state, reducers and event-sourced updates",
+      "State transitions and graph state",
+      "Persistence, serialisation, checkpointing and resume",
+      "Handoff records: resuming long-running work across sessions",
+      "Concurrency, conflicts and shared state",
+      "State schema evolution",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 8,
+    "title": "8. Context Engineering",
+    "source_start": 168,
+    "source_end": 185,
+    "original_headings": [
+      "Context assembly and source prioritisation",
+      "Token budgeting",
+      "Pruning, summarisation and compression",
+      "Context caching and reusable prefixes",
+      "Stale, contradictory and poisoned context",
+      "Provenance and explainability",
+      "Context policies for multi-tenant and sensitive data",
+      "Build it: a token-budgeted, attributed context builder",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 9,
+    "title": "9. Memory Architecture",
+    "source_start": 186,
+    "source_end": 207,
+    "original_headings": [
+      "Working, session and long-term memory",
+      "Semantic, episodic and procedural memory",
+      "The memory lifecycle",
+      "Confidence, provenance and source-of-truth reconciliation",
+      "Storage patterns",
+      "Privacy, retention and user control",
+      "Memory poisoning, staleness and contradiction",
+      "Build it: short-term, semantic and episodic memory",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 10,
+    "title": "10. Skills & Reusable Capability Architecture",
+    "source_start": 208,
+    "source_end": 224,
+    "original_headings": [
+      "Tool, skill, workflow, agent",
+      "Anatomy of a skill",
+      "Composite skills and deterministic sub-workflows",
+      "Progressive disclosure",
+      "Skill packages with resources, scripts and templates",
+      "Discovery, versioning, trust and access control",
+      "Testing, lifecycle and deprecation",
+      "Exposing skills through standard capability layers",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 11,
+    "title": "11. Build a Mini Agent Harness From Scratch",
+    "source_start": 225,
+    "source_end": 247,
+    "original_headings": [
+      "Stage 0: the twenty-line loop",
+      "Stage 1: typed messages and decisions",
+      "Stage 2: the model interface",
+      "Stage 3: tool registry, validation and executor",
+      "Stage 4: loop controller, budgets and stop conditions",
+      "Stage 5: state, events and checkpoints",
+      "Stage 6: authorisation and approval interrupts",
+      "Stage 7: error envelopes, idempotency and the executor",
+      "Running it",
+      "Stage 8: packaging the harness as reusable interfaces",
+      "Comparing with frameworks",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 12,
+    "title": "12. RAG Foundations for Agents",
+    "source_start": 248,
+    "source_end": 268,
+    "original_headings": [
+      "The RAG pipeline",
+      "Retrieval methods",
+      "Chunking and document structure",
+      "Reranking and evidence selection",
+      "Citations, provenance, freshness and the knowledge lifecycle",
+      "RAG failure modes",
+      "Evaluating retrieval separately",
+      "Production lens",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 13,
+    "title": "13. Agentic RAG & Advanced Retrieval",
+    "source_start": 269,
+    "source_end": 288,
+    "original_headings": [
+      "What makes RAG agentic",
+      "Retrieval routing and source selection",
+      "Query rewriting, decomposition and multi-query search",
+      "Iterative retrieval and evidence sufficiency",
+      "Corrective retrieval and recovery from weak evidence",
+      "Self-RAG and critique-oriented patterns",
+      "Graph RAG and knowledge-graph retrieval",
+      "SQL and structured data as governed knowledge tools",
+      "Keeping evidence traceable across sources",
+      "Production lens",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 14,
+    "title": "14. MCP \u2014 Model Context Protocol",
+    "source_start": 289,
+    "source_end": 308,
+    "original_headings": [
+      "Roles: host, client, server",
+      "Capabilities: tools, resources and prompts",
+      "Lifecycle and discovery",
+      "Transports: local and remote servers",
+      "Build it: a read-only MCP server",
+      "The client side: MCP behind your tool registry",
+      "Authentication, permissions, consent and trust",
+      "MCP tool versus ordinary application tool",
+      "Enterprise patterns: registry, gateway, versioning and governance",
+      "Portability of skills and capabilities",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 15,
+    "title": "15. A2A & Remote-Agent Interoperability",
+    "source_start": 309,
+    "source_end": 328,
+    "original_headings": [
+      "Why agents are not just tools",
+      "Identity, discovery and capability cards",
+      "Task delegation, status and artifacts",
+      "Synchronous, streaming and asynchronous interaction",
+      "Handoffs versus remote-agent calls",
+      "Authentication, authorisation, tenant boundaries and trust",
+      "Timeouts, partial failure, retries and idempotent delegation",
+      "Protocol gateways, versioning and cross-platform interoperability",
+      "MCP versus A2A",
+      "Build it: supervisor delegating to a remote worker",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 16,
+    "title": "16. Workflow & Graph Orchestration",
+    "source_start": 329,
+    "source_end": 349,
+    "original_headings": [
+      "Graph shapes",
+      "Nodes, edges, routers and loop guards",
+      "A minimal graph engine",
+      "Build it: plan \u2192 execute \u2192 evaluate \u2192 retry \u2192 finish",
+      "State passing, reducers and joins",
+      "Fan-out / fan-in and parallel branches",
+      "Interrupts, checkpointing, persistence and resume",
+      "Long-running timers, waits and durable execution",
+      "When to use a graph versus a free-form loop",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 17,
+    "title": "17. Multi-Agent Architectures",
+    "source_start": 350,
+    "source_end": 365,
+    "original_headings": [
+      "When multiple agents are justified",
+      "Core patterns",
+      "Shared state versus message passing",
+      "Build it: supervisor with research, data and action agents",
+      "Parallel specialists and ensembles",
+      "Coordination overhead, duplicate work and emergent loops",
+      "Termination, ownership and accountability",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 18,
+    "title": "18. Human-in-the-Loop, Approval & Escalation",
+    "source_start": 366,
+    "source_end": 383,
+    "original_headings": [
+      "Where humans belong",
+      "Approval interrupts and resumable waits",
+      "Risk-based approval policies",
+      "Escalation, override, rejection and correction",
+      "Approval UX: presenting evidence so approvers decide well",
+      "Human feedback for evaluation and improvement",
+      "SLAs, expiry and reassignment",
+      "Audit trails and accountability",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 19,
+    "title": "19. Agent Security Fundamentals",
+    "source_start": 384,
+    "source_end": 401,
+    "original_headings": [
+      "The agent attack surface",
+      "Threat taxonomies as a checklist",
+      "Prompt injection and indirect prompt injection",
+      "Tool poisoning and malicious tool outputs",
+      "Data exfiltration and secret leakage",
+      "SSRF, path traversal and unsafe network or file access",
+      "Code, shell and browser execution risks",
+      "Capability isolation, allowlists and least privilege",
+      "Input and output sanitisation and untrusted-content labelling",
+      "Threat modelling and security test cases",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 20,
+    "title": "20. Identity, Authorization & Delegated Access",
+    "source_start": 402,
+    "source_end": 416,
+    "original_headings": [
+      "Three identities in every agent action",
+      "OAuth 2.0, OIDC, service identities and workload identity",
+      "Delegated authorisation and scoped tokens",
+      "RBAC, ABAC and policy-as-code",
+      "Per-tool authorisation and resource-level permissions",
+      "Multi-tenant isolation",
+      "Credential lifetimes, rotation and audit",
+      "Build it: user \u2192 agent \u2192 tool delegated auth",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 21,
+    "title": "21. Sandboxing & Safe Execution",
+    "source_start": 417,
+    "source_end": 432,
+    "original_headings": [
+      "Why application-level validation is not enough",
+      "Isolation models",
+      "Resource controls: filesystem, network, CPU, memory, time",
+      "Ephemeral workspaces and cleanup",
+      "Browser and computer-use isolation",
+      "Code execution, package installation and dependency controls",
+      "Artefact scanning and output validation",
+      "Egress control and secret separation",
+      "Build it: an isolated Python execution tool",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 22,
+    "title": "22. Enterprise Governance, Privacy & Compliance",
+    "source_start": 433,
+    "source_end": 449,
+    "original_headings": [
+      "Governance versus guardrails",
+      "Data classification and policy enforcement",
+      "PII, PHI and confidential-data handling",
+      "Retention, deletion and purpose limitation",
+      "Auditability and decision/action provenance",
+      "Tenant isolation, data residency and provider boundaries",
+      "Policy versioning, approvals and exceptions",
+      "Governance review before increasing autonomy",
+      "Regulatory and standards landscape",
+      "Build it: a data-classification matrix and audit schema",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 23,
+    "title": "23. Reliability Engineering for Agents",
+    "source_start": 450,
+    "source_end": 465,
+    "original_headings": [
+      "The failure landscape",
+      "Timeouts, retries, backoff, jitter and retry budgets",
+      "Idempotency keys and duplicate side-effect prevention",
+      "Circuit breakers, dependency health and fallbacks",
+      "Compensation and saga-style recovery",
+      "Checkpoint and resume for long-running tasks",
+      "Dead-letter handling and manual recovery",
+      "Loop detection and multi-dimensional budgets",
+      "Graceful degradation and partial success",
+      "Retry versus replan",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 24,
+    "title": "24. Agent Testing Strategy",
+    "source_start": 466,
+    "source_end": 481,
+    "original_headings": [
+      "The agent test pyramid",
+      "Unit tests for pure logic and validators",
+      "Tool contract tests and provider adapter tests",
+      "State-machine and graph path tests",
+      "Simulation and fake-model tests",
+      "Golden trajectory tests",
+      "Fault injection and chaos-style dependency tests",
+      "Adversarial security tests and prompt-injection suites",
+      "Deterministic replay and regression baselines",
+      "Wiring it into CI",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 25,
+    "title": "25. Evaluation & Quality Measurement",
+    "source_start": 482,
+    "source_end": 505,
+    "original_headings": [
+      "What to evaluate",
+      "Tool-selection and argument correctness",
+      "Trajectory quality and unnecessary steps",
+      "Goal success, groundedness, factuality, safety and policy compliance",
+      "Retrieval and evidence quality",
+      "Datasets: golden, synthetic and adversarial",
+      "LLM-as-judge calibration and human review",
+      "Offline evals, online evals and CI quality gates",
+      "Statistical confidence, slice analysis and failure taxonomies",
+      "Build it: a support-agent eval harness",
+      "Worked example: from golden set to release decision",
+      "Evaluating harness changes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 26,
+    "title": "26. Observability for Agent Systems",
+    "source_start": 506,
+    "source_end": 520,
+    "original_headings": [
+      "The telemetry model",
+      "Span design for agents",
+      "Build it: instrumenting the harness with OpenTelemetry",
+      "Metrics that matter",
+      "Provenance: prompt, context, configuration and model versions",
+      "Redaction and privacy in telemetry",
+      "Agent-native trace views",
+      "Linking traces to evals and incidents",
+      "Debugging a bad trajectory: a worked example",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 27,
+    "title": "27. AgentOps & Production Operations",
+    "source_start": 521,
+    "source_end": 537,
+    "original_headings": [
+      "What makes agent operations different",
+      "SLOs and SLIs for agents",
+      "Runbooks, alerting and incident response",
+      "Rollout management for prompts, policies, models and configuration",
+      "Canary, shadow and staged releases",
+      "Feature flags and autonomy-level controls",
+      "Online quality monitoring and drift detection",
+      "Rollback and kill switches",
+      "Capacity planning and dependency quotas",
+      "Build it: a production runbook skeleton",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 28,
+    "title": "28. Cost, Latency & Model Routing Engineering",
+    "source_start": 538,
+    "source_end": 553,
+    "original_headings": [
+      "Where the money goes",
+      "Token and tool-call cost accounting",
+      "Model tiering and task-aware routing",
+      "Provider and model fallback policies",
+      "Caching: prefix, semantic and result caches",
+      "Context compression and unnecessary-loop detection",
+      "Batch and parallel execution trade-offs",
+      "Budget enforcement per user, tenant and run",
+      "Quality versus cost versus latency",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 29,
+    "title": "29. Production Agent Platform Architecture",
+    "source_start": 554,
+    "source_end": 570,
+    "original_headings": [
+      "Reference architecture",
+      "The agent gateway; synchronous versus asynchronous execution",
+      "Workers, queues and backpressure",
+      "Durable workflows for long-running tasks",
+      "State, checkpoint and object-store patterns",
+      "Vector and search architecture and multi-tenancy",
+      "Containers, Kubernetes/OpenShift, autoscaling and isolation",
+      "CI/CD, infrastructure as code, GitOps and environment promotion",
+      "Secret management, network policy and service identity",
+      "High availability, disaster recovery, backup and regional design",
+      "Scaling a stateful agent horizontally",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 30,
+    "title": "30. LLM Gateway, Provider Abstraction & Self-Hosted Inference",
+    "source_start": 571,
+    "source_end": 584,
+    "original_headings": [
+      "Why an LLM gateway",
+      "Provider adapters and OpenAI-compatible interfaces",
+      "Routing, quotas, fallback, caching and policy enforcement",
+      "Managed APIs versus self-hosted serving",
+      "How high-throughput serving works",
+      "Scalable serving on Kubernetes",
+      "Observability, cost and model lifecycle for inference",
+      "When to fine-tune or distil small models",
+      "Avoiding provider lock-in",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 31,
+    "title": "31. Framework Mapping: LangGraph, OpenAI Agents SDK, Spring AI & Others",
+    "source_start": 585,
+    "source_end": 608,
+    "original_headings": [
+      "The concept map",
+      "LangGraph: state graphs, checkpoints, interrupts, durable orchestration",
+      "OpenAI Agents SDK: agents, tools, handoffs, sessions, guardrails, tracing",
+      "Spring AI: the Java enterprise path",
+      "Claude Agent SDK: a production agent loop with built-in tools",
+      "The Microsoft, Google and AWS agent stacks",
+      "LlamaIndex and LangChain components",
+      "CrewAI and AutoGen as multi-agent pattern exposure",
+      "Selection criteria",
+      "Build it: the same agent in two frameworks, and an ADR",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 32,
+    "title": "32. LangGraph in Depth: Building Durable Agent Graphs",
+    "source_start": 609,
+    "source_end": 643,
+    "original_headings": [
+      "How LangGraph thinks: nodes, channels and super-steps",
+      "State and reducers",
+      "Nodes, edges and routing",
+      "Checkpointers, threads and state history",
+      "Human-in-the-loop with interrupt",
+      "Fan-out and fan-in with Send",
+      "Subgraphs: composing graphs",
+      "Tools and the ReAct loop",
+      "Multi-agent graphs: supervisors and handoffs",
+      "Long-term memory with stores",
+      "Reliability: retries, recursion limits and durability",
+      "Streaming",
+      "Testing LangGraph graphs",
+      "Observability and deployment",
+      "Build it: the AegisOps commander as a LangGraph graph",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 33,
+    "title": "33. Cloud & Enterprise Integration Tracks",
+    "source_start": 644,
+    "source_end": 663,
+    "original_headings": [
+      "Building blocks across clouds",
+      "Track 1 \u2014 AWS",
+      "Track 2 \u2014 Microsoft Azure",
+      "Track 3 \u2014 Google Cloud",
+      "Track 4 \u2014 enterprise integration fabric",
+      "Managed agent runtime versus self-managed",
+      "What is portable, and what is cloud-specific",
+      "Identity and networking differences to plan for",
+      "Build it: one reference deployment",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 34,
+    "title": "34. Specialized Agent Systems",
+    "source_start": 664,
+    "source_end": 680,
+    "original_headings": [
+      "Research agents and evidence synthesis",
+      "Coding and repository agents",
+      "Data and SQL agents",
+      "Browser and computer-use agents",
+      "Voice and real-time agents",
+      "Event-driven, scheduled and long-running agents",
+      "IoT and operations agents",
+      "Multimodal agents",
+      "What changes and what stays universal",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 35,
+    "title": "35. Architecture Selection Patterns & Senior Design Review",
+    "source_start": 681,
+    "source_end": 695,
+    "original_headings": [
+      "Pattern reference",
+      "Decision matrix: choosing the architecture",
+      "The architecture review",
+      "Production-readiness gates and launch checklist",
+      "Senior system-design interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 36,
+    "title": "36. The AegisOps Blueprint",
+    "source_start": 696,
+    "source_end": 726,
+    "original_headings": [
+      "The business scenario",
+      "Who AegisOps serves: personas and user stories",
+      "Why this needs an agent",
+      "What the final demo must prove",
+      "Non-functional requirements and SLOs",
+      "System context and containers",
+      "Architecture",
+      "The agent team",
+      "Tool registry \u2014 minimum production tool set",
+      "Composite skills",
+      "MCP and A2A boundaries",
+      "Canonical incident state",
+      "Memory design",
+      "Approval and risk matrix",
+      "Threat model",
+      "The core state machine",
+      "Technology stack",
+      "Cost model",
+      "Reference repository structure",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 37,
+    "title": "37. Building AegisOps Phase by Phase",
+    "source_start": 727,
+    "source_end": 749,
+    "original_headings": [
+      "The build at a glance",
+      "Phase 0 \u2014 Define the contract before writing agent code",
+      "Phase 1 \u2014 Build the agent harness skeleton",
+      "Phase 2 \u2014 Build typed read-only tools first",
+      "Phase 3 \u2014 Add enterprise RAG and evidence discipline",
+      "Phase 4 \u2014 Implement triage and observability agents",
+      "Phase 5 \u2014 Add change intelligence and hypothesis falsification",
+      "Phase 6 \u2014 Introduce the supervisor and multi-agent handoffs",
+      "Phase 7 \u2014 Add composite skills and MCP",
+      "Phase 8 \u2014 Make the incident durable with Temporal",
+      "Phase 9 \u2014 Add identity, authorisation and security guardrails",
+      "Phase 10 \u2014 Implement human approval and safe mutations",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 38,
+    "title": "38. Hardening, Evaluation & Game Days",
+    "source_start": 750,
+    "source_end": 776,
+    "original_headings": [
+      "Phase 11 \u2014 Verification, compensation and failure recovery",
+      "Phase 12 \u2014 Add AgentOps, SLOs and cost controls",
+      "Phase 13 \u2014 Build the evaluation and regression suite",
+      "Phase 14 \u2014 Productionise on Kubernetes/OpenShift",
+      "Phase 15 \u2014 Run enterprise game days",
+      "The end-to-end recipe: bad deployment incident",
+      "Required architecture deliverables",
+      "Definition of done",
+      "The capstone scorecard",
+      "Final interview / demo walkthrough",
+      "The portfolio package",
+      "Extension challenges",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  },
+  {
+    "chapter": 39,
+    "title": "39. More Capstone Projects",
+    "source_start": 777,
+    "source_end": 802,
+    "original_headings": [
+      "Choosing a track",
+      "Track A \u2014 ShopAssist Refunds",
+      "Track B \u2014 Policy Research Analyst",
+      "Track C \u2014 Repository Maintenance Agent",
+      "The architecture pack for each track",
+      "One rubric for every track",
+      "Failure modes",
+      "Interview drills",
+      "Key takeaways"
+    ]
+  }
+]

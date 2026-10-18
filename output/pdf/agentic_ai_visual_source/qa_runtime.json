@@ -1,0 +1,134 @@
+{
+  "scope": "Chapters 14-26 visual lessons; full atlas pages 35-60; book contact sheets 08-14",
+  "checked_at_utc": "2026-10-17T06:22:27.495793+00:00",
+  "status": "fixes_requested",
+  "images_inspected": {
+    "atlas_full_pages": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-035.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-036.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-037.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-038.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-039.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-040.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-041.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-042.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-043.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-044.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-045.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-046.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-047.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-048.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-049.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-050.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-051.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-052.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-053.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-054.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-055.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-056.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-057.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-058.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-059.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-060.jpg"
+    ],
+    "book_contact_sheets": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-08.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-09.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-10.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-11.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-12.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-13.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-14.jpg"
+    ],
+    "book_full_pages": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-272.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-382.jpg"
+    ]
+  },
+  "metadata_inspected": [
+    "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/pdf/agentic_ai_visual_source/atlas_layout.json",
+    "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/pdf/agentic_ai_visual_source/preview_layout.json"
+  ],
+  "findings": [
+    {
+      "id": "runtime-qa-01",
+      "severity": "P2",
+      "category": "connector_text_collision",
+      "lessons": [
+        "15A",
+        "24B"
+      ],
+      "atlas_pdf_pages": [
+        37,
+        56
+      ],
+      "book_pdf_pages": [
+        227,
+        383
+      ],
+      "finding": "Diagonal swimlane connectors intersect event-label text. On 24B, the paths cross Persist approved, Drop response; crash worker, and Return original; 15A has the same routing pattern near Send INC-77 and Reply: cluster.",
+      "fix": "Route connectors through inter-event gutters using orthogonal elbows, or put event labels on opaque backgrounds with a clear margin. Keep numbered events and wait boundaries unambiguous. Re-render both pages and inspect at full size."
+    },
+    {
+      "id": "runtime-qa-02",
+      "severity": "P2",
+      "category": "chart_guide_text_collision",
+      "lessons": [
+        "25A"
+      ],
+      "atlas_pdf_pages": [
+        57
+      ],
+      "book_pdf_pages": [
+        391
+      ],
+      "finding": "The vertical 95% dashed gate extends through the right-aligned interval-value labels below the whiskers, including the 100.0% upper-bound text. The actual interval data and proportional scale are correct.",
+      "fix": "Move numeric labels into a dedicated text gutter, give them an opaque background, or break the gate line around their text bounds. Preserve the shared 0-100% axis and the exact calculated interval values."
+    },
+    {
+      "id": "runtime-qa-03",
+      "severity": "P3",
+      "category": "ambiguous_title",
+      "lessons": [
+        "20B"
+      ],
+      "atlas_pdf_pages": [
+        48
+      ],
+      "book_pdf_pages": [
+        317
+      ],
+      "finding": "The title The right scope on the wrong destination pass is awkward and its final word pass can be mistaken for an outcome, while the lesson demonstrates rejection.",
+      "fix": "Use Right scope, wrong audience, or another short title that names the failed audience check."
+    },
+    {
+      "id": "runtime-qa-04",
+      "severity": "P3",
+      "category": "sparse_continuation_page",
+      "lessons": [
+        "17B",
+        "24B"
+      ],
+      "atlas_pdf_pages": [],
+      "book_pdf_pages": [
+        272,
+        382
+      ],
+      "finding": "Each page contains only one continuation paragraph of approximately 100 layout points, leaving over 80% of the body frame unused immediately before a full-page visual lab. Full-size inspection confirms the pages are not missing images; they are pagination stragglers.",
+      "fix": "Rebalance the preceding prose/figure or prose/code page, or keep each explanatory tail with its preceding unit before the lab. Preserve paragraph order and the full-page lesson contract; avoid shrinking text solely to fill the page."
+    }
+  ],
+  "clean_findings": [
+    "All 26 atlas pages inspected individually: titles, introductions, reading cues, prediction questions, takeaways, assumptions and answer-link labels remain visible.",
+    "No clipping, missing labels, split lesson panels or accidental blank pages found in the assigned atlas range.",
+    "Packet check statuses, snapshot changed-cell highlights, matrix decisions, ledger balances and evidence-link endpoints agree with their lesson data.",
+    "Ledger bars preserve the 0.70, 0.82, 0.42 and 0.47 balances; calibration bars preserve 64, 6, 9 and 21 counts.",
+    "Wilson whiskers, point estimates, gate placement and printed intervals agree with the calculated data; the remaining issue is guide-line placement behind labels.",
+    "Book contact sheets 08-14 show intact visual units and consistent headers/footers; no other obvious clipping or blank pages observed at contact-sheet resolution."
+  ],
+  "limitations": [
+    "Book flow review used contact sheets covering PDF pages 253-504, with full-size checks of the two sparse pages; ordinary book body text was not proofread at full size throughout.",
+    "This report describes the supplied final-atlas/final-book images. Renderer fixes made concurrently require targeted re-render verification.",
+    "Only this QA report was written during the review; lesson JSON and renderer were not changed."
+  ]
+}

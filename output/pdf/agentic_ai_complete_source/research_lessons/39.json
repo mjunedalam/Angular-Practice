@@ -1,0 +1,70 @@
+{
+  "chapter": 39,
+  "design_note": "Visualizes the chapter's two-part refund evaluation gate at adjacent success counts. A passing point estimate can still miss the lower-bound requirement; meeting both leaves hard authority and accounting gates intact.",
+  "source": {
+    "id": "R39",
+    "title": "7.2.4.1. Confidence intervals",
+    "url": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+    "publisher": "NIST/SEMATECH e-Handbook of Statistical Methods",
+    "accessed": "2026-10-17",
+    "concept": "Wilson intervals estimate uncertainty for a binary proportion using the observed count and sample size. The lower endpoint differs from the observed success rate.",
+    "scope": "Original 120-case hypothetical outcomes and curriculum gate. Counts are constructed; this chart is neither a production result nor a safety certificate."
+  },
+  "lesson": {
+    "anchor": "One rubric for every track",
+    "title": "Ninety percent alone misses the refund gate",
+    "intro": "Track A requires observed conversation success of at least 90% and a two-sided 95% Wilson lower bound of at least 85%. Compare four alternative constructed results for 120 independent cases.",
+    "kind": "intervals",
+    "data": {
+      "rows": [
+        {
+          "label": "108 of 120 successful",
+          "n": 120,
+          "k": 108,
+          "estimate": 0.9,
+          "low": 0.8333168001483641,
+          "high": 0.9418669830068925
+        },
+        {
+          "label": "109 of 120 successful",
+          "n": 120,
+          "k": 109,
+          "estimate": 0.9083333333333333,
+          "low": 0.843290092093749,
+          "high": 0.9480433532105753
+        },
+        {
+          "label": "110 of 120 successful",
+          "n": 120,
+          "k": 110,
+          "estimate": 0.9166666666666666,
+          "low": 0.8533762622701224,
+          "high": 0.9541068451832697
+        },
+        {
+          "label": "111 of 120 successful",
+          "n": 120,
+          "k": 111,
+          "estimate": 0.925,
+          "low": 0.8635894316089088,
+          "high": 0.9600433379935513
+        }
+      ],
+      "threshold": 0.85,
+      "method": "Constructed counts; k = successful conversations. Two-sided Wilson, z = 1.96."
+    },
+    "read": [
+      "All four point estimates reach the separate 90% requirement.",
+      "The 85% line tests the lower endpoint, not the point estimate.",
+      "Only 110 and 111 successes put that lower endpoint above 85%."
+    ],
+    "question": "Does 109 successful conversations pass both statistical requirements, and would 110 override an unauthorized refund?",
+    "answer": "109 / 120 is about 90.83%, but its Wilson lower bound is about 84.33%, so it fails the lower-bound requirement. At 110 successes the lower bound is about 85.34%, clearing these statistical gates. Any unauthorized refund still fails its independent hard gate; an aggregate quality score cannot erase it.",
+    "takeaway": "Check the point estimate and uncertainty requirement separately, then apply every hard safety gate.",
+    "assumption": "Constructed independent binary cases from one fixed hypothetical population; one fixed analysis. Alternative rows are not repeated peeks during a sequential test.",
+    "id": "39C",
+    "placement": "before_heading",
+    "source_key": "R39",
+    "source_label": "NIST: Wilson proportion intervals"
+  }
+}

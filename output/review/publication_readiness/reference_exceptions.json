@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-17",
+  "unique_urls": 143,
+  "actual_references": 141,
+  "fictional_urls": 2,
+  "exceptions": [
+    {
+      "url": "https://docs.vendor.test",
+      "status": null,
+      "classification": "intentional fictional example",
+      "action": "No replacement required; not proof of a broken reference."
+    },
+    {
+      "url": "https://doi.org/10.1145/38713.38742",
+      "status": 403,
+      "classification": "restricted or challenge response; retain primary reference",
+      "action": "No replacement required; not proof of a broken reference."
+    },
+    {
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "status": 202,
+      "classification": "restricted or challenge response; retain primary reference",
+      "action": "No replacement required; not proof of a broken reference."
+    },
+    {
+      "url": "https://identity.example",
+      "status": null,
+      "classification": "intentional fictional example",
+      "action": "No replacement required; not proof of a broken reference."
+    }
+  ],
+  "repairs": [
+    "Research 06 AWS idempotency page refreshed after old page returned a content shell.",
+    "Appendix E Strands docs updated from /latest/ to /docs/."
+  ]
+}

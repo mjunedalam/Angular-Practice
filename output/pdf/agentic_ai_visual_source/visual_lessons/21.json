@@ -1,0 +1,102 @@
+{
+  "chapter": 21,
+  "chapter_title": "Sandboxing & Safe Execution",
+  "audit": "The glovebox analogy explains containment but can obscure the fact that the harness should retain credentials while the program receives only projected data. Lesson A supplies literal input files, sandbox limits and release criteria in separately owned containers. The learner identifies why a safe chart workflow does not need a production token inside generated code. Lesson B compares two output collectors under a constructed hostile stream: one stops capture at its configured cap, while the other exceeds its available buffer before final truncation. This isolates an enforcement-timing defect without inventing a benchmark or claiming any sandbox technology is universally stronger than another.",
+  "lessons": [
+    {
+      "id": "21A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Pass the CSV through the glovebox opening",
+      "intro": "An authorized analyst requests a sales chart for store S-7. The harness obtains only the required rows and exposes them to a disposable execution environment.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Protected harness",
+            "object": "vault",
+            "items": [
+              "Credential stays here",
+              "Fetch S-7 rows only",
+              "Write sales.csv read-only"
+            ],
+            "role": "policy"
+          },
+          {
+            "title": "Execution chamber",
+            "object": "server",
+            "items": [
+              "sales.csv: 240 scoped rows",
+              "Network denied; no secrets",
+              "Scratch 20 MiB; time 30 s"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Release inspection",
+            "object": "shield",
+            "items": [
+              "out/chart.png: parse image",
+              "Check size and user entitlement",
+              "Reject unrelated output files"
+            ],
+            "role": "policy"
+          }
+        ],
+        "relations": [
+          "Harness passes scoped data, not its credential.",
+          "Only inspected, authorized artifacts may leave."
+        ]
+      },
+      "read": [
+        "Locate the credential outside the execution chamber.",
+        "The generated program receives the authorized data slice only.",
+        "The output gate checks content and entitlement before release."
+      ],
+      "question": "Does a chart.png filename alone satisfy the release gate?",
+      "answer": "No. The gate must parse the actual type, enforce size limits and verify that the content is appropriate for the requester. An extension does not establish safe format or authorized disclosure.",
+      "takeaway": "Contain input authority and inspect output release separately.",
+      "assumption": "Fictional limits; the runtime enforces them externally. Destruction removes the execution copy under its contract, not every retained artifact."
+    },
+    {
+      "id": "21B",
+      "placement": "before_heading",
+      "anchor": "Build it: an isolated Python execution tool",
+      "title": "A limit must act before the collector fills",
+      "intro": "A hostile program attempts to emit 10 MiB. Both designs promise a 64 KiB returned transcript. The collector can hold only 1 MiB; compare when each cap is enforced.",
+      "kind": "fork",
+      "data": {
+        "input": "10 MiB stream; 64 KiB return cap; 1 MiB collector limit.",
+        "left": {
+          "title": "Cap during capture",
+          "steps": [
+            "Count bytes as each stream chunk arrives",
+            "At 64 KiB, stop capture and signal limit",
+            "Terminate controlled execution; bound cleanup"
+          ],
+          "result": "Captured output stays within 64 KiB; report output limit",
+          "status": "pass"
+        },
+        "right": {
+          "title": "Truncate after capture",
+          "steps": [
+            "Append all emitted bytes to the collector",
+            "Cross 1 MiB before the program completes",
+            "Final truncation never protects the buffer"
+          ],
+          "result": "Collector limit is exceeded before any final 64 KiB slice",
+          "status": "fail"
+        }
+      },
+      "read": [
+        "Both designs advertise the same final transcript size.",
+        "Only the left design enforces the bound while bytes arrive.",
+        "Artifact and scratch quotas remain separate from the stdout limit."
+      ],
+      "question": "Would increasing the final truncation strictness to 32 KiB repair the right path?",
+      "answer": "No. The failure occurs while accumulating bytes, before truncation. Enforce a streaming cap and bounded cleanup; separately constrain memory, artifacts, scratch storage and child processes.",
+      "takeaway": "Enforce resource bounds during consumption, not after it.",
+      "assumption": "Constructed sizes, not measured performance. The left provider enforces chunk accounting and termination; this example isolates output collection."
+    }
+  ]
+}

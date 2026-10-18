@@ -1,0 +1,33 @@
+{
+  "pdf": "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/pdf/Agentic_AI_Engineering_visual_atlas.pdf",
+  "pages": 109,
+  "chapters": 39,
+  "chapter_source_words": 0,
+  "chapter_diagrams": 0,
+  "total_diagrams": 78,
+  "visual_lessons": 78,
+  "internal_links_checked": 234,
+  "visual_forms": {
+    "workspace": 8,
+    "packet": 9,
+    "fork": 8,
+    "tree": 7,
+    "evidence": 7,
+    "bars": 5,
+    "faultmap": 6,
+    "swimlane": 6,
+    "snapshots": 7,
+    "packing": 3,
+    "ledger": 4,
+    "intervals": 4,
+    "matrix": 4
+  },
+  "self_checks": 0,
+  "exercises": 0,
+  "code_units": 0,
+  "intact_page_units": 197,
+  "text_fragments_checked": 2561,
+  "diagram_labels_checked": 2155,
+  "diagram_forms": {},
+  "issues": []
+}

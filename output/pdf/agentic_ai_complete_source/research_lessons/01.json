@@ -1,0 +1,58 @@
+{
+  "chapter": 1,
+  "design_note": "Expose how independent retry owners multiply backend attempts. The reader computes request amplification from constructed attempt caps instead of confusing one logical generation with one network operation.",
+  "source": {
+    "title": "Timeouts, retries, and backoff with jitter",
+    "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+    "publisher": "Amazon Web Services; Marc Brooker",
+    "concept": "Retries at multiple layers can multiply downstream work during failures. Choosing an explicit retry owner limits this amplification.",
+    "scope": "Original two-layer arithmetic uses constructed attempt caps and persistent retryable failures; it is not an AWS measurement or recommended configuration.",
+    "id": "R01",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Failure modes and how to recognise them",
+    "title": "Two retry owners can multiply one request",
+    "intro": "ShopAssist requests one model response. Every network attempt fails with a retryable error. Compare four constructed configurations; each cap includes the first attempt, and the deadline permits every listed attempt.",
+    "kind": "bars",
+    "data": {
+      "unit": "network attempts",
+      "items": [
+        {
+          "label": "Application 1 x adapter 1",
+          "value": 1,
+          "role": "runtime"
+        },
+        {
+          "label": "Application 3 x adapter 1",
+          "value": 3,
+          "role": "runtime"
+        },
+        {
+          "label": "Application 1 x adapter 3",
+          "value": 3,
+          "role": "model"
+        },
+        {
+          "label": "Application 3 x adapter 3",
+          "value": 9,
+          "role": "external"
+        }
+      ],
+      "rule": "Worst-case attempts = application cap x adapter cap; successful earlier calls stop retrying."
+    },
+    "read": [
+      "Each application attempt starts a fresh adapter attempt allowance.",
+      "Both layers owning three attempts permits nine requests to the failing provider.",
+      "One retry owner keeps the total allowance explicit."
+    ],
+    "question": "With the adapter capped at 3 attempts, what application cap reduces the worst case from 9 to 3?",
+    "answer": "Set the application cap to 1, leaving transport retry ownership with the adapter. The bound becomes 1 x 3 = 3 network attempts for this logical request. A deadline can reduce attempts further; separate structured-output repairs still need their own accounting.",
+    "takeaway": "Count retries across the whole call stack, not one loop at a time.",
+    "assumption": "Constructed worst case: serial attempts, persistent retryable failures, no hidden retries and enough deadline. Counts are attempts, not extra retries.",
+    "source_label": "AWS: timeouts, retries and jitter",
+    "id": "1C",
+    "placement": "before_heading",
+    "source_key": "R01"
+  }
+}

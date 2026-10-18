@@ -1,0 +1,58 @@
+{
+  "chapter": 26,
+  "design_note": "The prior labs distinguish missing telemetry from missing effects and enforce recording policy. These durations add a debugging trap: child spans are already included in their parent's elapsed time. The reader reconstructs the timeline instead of summing overlapping measurements into a false latency.",
+  "source": {
+    "title": "Traces",
+    "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+    "publisher": "OpenTelemetry Authors",
+    "concept": "Spans record units of work with start/end times and parent identifiers. Child spans represent sub-operations, so nested span durations are not disjoint pieces of elapsed time.",
+    "scope": "All intervals and durations are constructed. One synchronous run contains sequential model and tool spans inside its investigation span; no general timing relationship for all traces is implied.",
+    "id": "R26",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Debugging a bad trajectory: a worked example",
+    "title": "Nested spans are not extra seconds",
+    "intro": "This constructed trace has a run from 0-12 s, investigation from 2-10 s, model call from 2-7 s, and tool read from 7-10 s. Model and tool are children of investigation.",
+    "kind": "bars",
+    "data": {
+      "unit": "elapsed seconds",
+      "items": [
+        {
+          "label": "Run: 0-12 s",
+          "value": 12,
+          "role": "runtime"
+        },
+        {
+          "label": "Investigation: 2-10 s",
+          "value": 8,
+          "role": "data"
+        },
+        {
+          "label": "Model child: 2-7 s",
+          "value": 5,
+          "role": "model"
+        },
+        {
+          "label": "Tool child: 7-10 s",
+          "value": 3,
+          "role": "action"
+        }
+      ],
+      "rule": "Parent intervals contain their children; summing all four bars counts time repeatedly."
+    },
+    "read": [
+      "The run's wall-clock duration is 12 seconds.",
+      "The 5-second model call and 3-second tool read occupy the 8-second investigation.",
+      "Four seconds of the run lie outside investigation: 0-2 s and 10-12 s."
+    ],
+    "question": "Does adding the four durations mean the customer waited 28 seconds?",
+    "answer": "No. The sum counts nested work repeatedly. The customer-visible run spans 12 seconds; the investigation already contains its two children. Use actual start/end relationships to calculate elapsed time and distinguish parent duration from time spent outside child operations.",
+    "takeaway": "Read span containment before adding durations.",
+    "assumption": "Toy trace, not measured performance; one clock and synchronous nesting. No omitted wait or concurrent branch exists within the shown investigation.",
+    "source_label": "OpenTelemetry: traces and nested spans",
+    "id": "26C",
+    "placement": "before_heading",
+    "source_key": "R26"
+  }
+}

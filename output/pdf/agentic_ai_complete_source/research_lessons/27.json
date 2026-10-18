@@ -1,0 +1,58 @@
+{
+  "chapter": 27,
+  "design_note": "Adds the arithmetic behind an operational signal. Four constructed error ratios share one availability objective, so readers can distinguish burn rate from raw failure percentage and from a safety exception.",
+  "source": {
+    "id": "R27",
+    "title": "Alerting on SLOs",
+    "url": "https://sre.google/workbook/alerting-on-slos/",
+    "publisher": "Google SRE; Steven Thurgood and contributors",
+    "accessed": "2026-10-17",
+    "concept": "Burn rate compares the observed bad-event ratio with the error allowance implied by the SLO. A value above one consumes that allowance faster than the target rate.",
+    "scope": "Original ShopAssist rates and objective; no production measurements or recommended alert thresholds are claimed."
+  },
+  "lesson": {
+    "anchor": "Online quality monitoring and drift",
+    "title": "Turn failure percentage into budget burn",
+    "intro": "ShopAssist has a constructed 99.5% request-availability objective. Compare four hypothetical, equally defined windows. Their bad-event allowance is 0.5%; unauthorized effects remain a separate hard incident condition.",
+    "kind": "bars",
+    "data": {
+      "unit": "burn-rate multiple",
+      "items": [
+        {
+          "label": "0.5% failed requests",
+          "value": 1,
+          "role": "runtime"
+        },
+        {
+          "label": "1.0% failed requests",
+          "value": 2,
+          "role": "runtime"
+        },
+        {
+          "label": "2.5% failed requests",
+          "value": 5,
+          "role": "runtime"
+        },
+        {
+          "label": "5.0% failed requests",
+          "value": 10,
+          "role": "policy"
+        }
+      ],
+      "rule": "Burn = observed failure ratio / 0.005. This is availability, not an authority budget."
+    },
+    "read": [
+      "All bars use the same request definition, objective and window length.",
+      "A 1% failure ratio means twice the allowance rate, not one unit of burn.",
+      "The chart cannot convert a forbidden refund into an acceptable availability error."
+    ],
+    "question": "At 2.5% failed requests, what is burn rate, and does it authorize five forbidden refunds?",
+    "answer": "The burn rate is 2.5 / 0.5 = 5 times the target allowance rate. It does not authorize any forbidden refund. Availability budgets describe an operating objective; an observed unauthorized effect triggers its own containment rule. Alert decisions also need the declared windows, traffic and response policy.",
+    "takeaway": "Normalize operational error ratios before comparing them; keep authority violations outside tolerable error budgets.",
+    "assumption": "Constructed request rates over equal windows; no traffic-volume projection, alert threshold, safety allowance or measured service result is implied.",
+    "id": "27C",
+    "placement": "before_heading",
+    "source_key": "R27",
+    "source_label": "Google SRE: Alerting on SLOs"
+  }
+}

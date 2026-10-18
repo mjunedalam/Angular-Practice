@@ -1,0 +1,125 @@
+{
+  "chapter": 39,
+  "chapter_title": "More Capstone Projects",
+  "audit": "The examination-board analogy asks for proof but can leave project completion judged by the polish of its narrative. Lesson A compares three concrete portfolio claims with the actual receipts for refunds, research and coding. One claim is supported within a fake provider's contract, one exceeds the available schema, and one is contradicted by a protected-path guard. Lesson B shows what a resumed coding session should carry into a bounded context: trusted task limits, past attempts, reconciled current evidence and output capacity. Stale completion prose and credentials are excluded. These pages make the tracks' different acceptance standards visible while keeping simulation, state reconciliation and live operating approval distinct.",
+  "lessons": [
+    {
+      "id": "39A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Bring receipts to the capstone review",
+      "intro": "A reviewer inspects three fictional portfolio artifacts. Decide what each record establishes before accepting the author's broader completion statement.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "A",
+            "text": "RF-40 produced one refund across the injected retry."
+          },
+          {
+            "id": "B",
+            "text": "Marketplace orders are excluded from the approved view."
+          },
+          {
+            "id": "C",
+            "text": "The repair changed only permitted production paths."
+          }
+        ],
+        "sources": [
+          {
+            "id": "RA",
+            "text": "Fake provider ledger: RF-40 has one effect; retry returned its stored receipt."
+          },
+          {
+            "id": "RB",
+            "text": "Approved view schema has no seller-type field; population scope is unspecified."
+          },
+          {
+            "id": "RC",
+            "text": "Trusted-base diff guard: repair edited protected tests/payment_test.py; denied."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "insufficient"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "conflicts"
+          }
+        ],
+        "verdict": "A holds for the fake; B lacks population evidence; C fails the path-policy gate."
+      },
+      "read": [
+        "A cites the provider-side record rather than repeated assistant confirmation.",
+        "B turns an absent dimension into an unsupported population claim.",
+        "C conflicts with the independent guard even if the edited tests pass."
+      ],
+      "question": "Does artifact RA certify that a real provider will never duplicate a refund?",
+      "answer": "No. It demonstrates the injected case under that fake provider's specified deduplication behavior. Live use needs the actual provider contract, retention horizon, current accounting checks and recovery evidence. The portfolio should state what was simulated and which real integration assumptions remain untested.",
+      "takeaway": "Judge each capstone by evidence specific to its risky boundary.",
+      "assumption": "Fictional portfolio receipts; the refund fake retains the operation key throughout this retry. No live deployment outcome is claimed."
+    },
+    {
+      "id": "39B",
+      "placement": "before_heading",
+      "anchor": "The architecture pack for each track",
+      "title": "Resume from reconciled facts, not old confidence",
+      "intro": "Session two resumes repair ticket T-18. A constructed 6,000-token budget includes current diff and check evidence after reconciling the progress file with the actual checkout.",
+      "kind": "packing",
+      "data": {
+        "capacity": 6000,
+        "unit": "tokens",
+        "segments": [
+          {
+            "label": "Task + protected paths",
+            "value": 1400,
+            "role": "policy"
+          },
+          {
+            "label": "Progress + failed ideas",
+            "value": 1000,
+            "role": "runtime"
+          },
+          {
+            "label": "Current diff + check refs",
+            "value": 2600,
+            "role": "data"
+          },
+          {
+            "label": "Reserved output capacity",
+            "value": 1000,
+            "role": "model"
+          }
+        ],
+        "excluded": [
+          {
+            "label": "Old claim: all tests pass",
+            "reason": "Recheck against current commit before reuse"
+          },
+          {
+            "label": "Git publication secret",
+            "reason": "Only the scoped PR writer holds credentials"
+          }
+        ]
+      },
+      "read": [
+        "Past attempts guide investigation without proving the current checkout is correct.",
+        "Current commit, diff and command evidence anchor the resumed session.",
+        "Output capacity stays reserved; publication authority stays outside candidate context."
+      ],
+      "question": "If the progress file says PR created but has no receipt, should session two immediately create another?",
+      "answer": "No. Reconcile external state using the logical task or publication identity under the permitted interface. The earlier request may have succeeded before its response was lost. Recover the existing PR reference or establish a definite non-creation before retrying under the publication contract. A progress sentence is not an effect ledger.",
+      "takeaway": "Resume with actual-state reconciliation and preserve publication identity.",
+      "assumption": "Constructed allocation assumes a combined input/output limit. Real adapter accounting may differ; no publication or test result is executed here."
+    }
+  ]
+}

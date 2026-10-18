@@ -1,0 +1,90 @@
+{
+  "chapter": 13,
+  "chapter_title": "13. Agentic RAG & Advanced Retrieval",
+  "audit": "The reporter analogy warns that copied stories are not independent evidence, but an ordinary loop diagram still rewards visible activity. Lesson A holds the first incomplete search constant while comparing a justified follow-up to another permitted source with a forbidden expansion into another tenant. The boundary remains intact even when research cannot finish. Lesson B counts newly accepted unique relevant records across four constructed rounds. The zero bars reveal repetition and irrelevant novelty, and the prediction asks whether another identical search is justified. These examples make source authority and progress measurable without inventing causal findings, backend performance results or a universal sufficiency threshold.",
+  "lessons": [
+    {
+      "id": "13A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "A weak result does not widen access",
+      "intro": "AegisOps can read tenant A metrics and changes. Its first incident search finds only a copied summary, leaving the cause unresolved.",
+      "kind": "fork",
+      "data": {
+        "input": "Tenant A: latency rose; copied summary does not establish cause",
+        "left": {
+          "title": "Authorized correction",
+          "steps": [
+            "Name gap: which deployment changed?",
+            "Query tenant A change records within scope",
+            "Retain deployment D-8 as a testable lead"
+          ],
+          "result": "Association found; cause still requires further evidence",
+          "status": "wait"
+        },
+        "right": {
+          "title": "Cross-tenant proposal",
+          "steps": [
+            "Model proposes searching tenant B incidents",
+            "Executor checks the original tenant binding",
+            "Deny expanded access; retain the source gap"
+          ],
+          "result": "No tenant B data read; investigation remains incomplete",
+          "status": "fail"
+        }
+      },
+      "read": [
+        "The left route changes the source while retaining access restrictions.",
+        "A nearby deployment is a lead, not a proven cause.",
+        "The right route fails at authorization before reading foreign data."
+      ],
+      "question": "If tenant B probably contains the exact answer, may corrective retrieval remove the tenant filter?",
+      "answer": "No. Relevance does not grant entitlement. Continue within authorized sources, request a legitimate access change through the appropriate process, or report the evidence gap. The reporter's freedom to follow leads is bounded by the runtime's data-access contract.",
+      "takeaway": "Corrective retrieval changes permitted search strategy, never silently broadens authority.",
+      "assumption": "Fictional investigation and scopes; the reporter analogy supplies neither source independence nor access permission. No causal conclusion has been established."
+    },
+    {
+      "id": "13B",
+      "placement": "before_heading",
+      "anchor": "Corrective retrieval and recovery from weak evidence",
+      "title": "Four search rounds can add only three facts",
+      "intro": "Constructed rounds return 3, 3, 2 and 1 candidates. After permission, relevance and stable-identity checks, only three unique records enter the ledger.",
+      "kind": "bars",
+      "data": {
+        "unit": "new ledger records",
+        "items": [
+          {
+            "label": "Round 1: 2 unique accepted",
+            "value": 2,
+            "role": "data"
+          },
+          {
+            "label": "Round 2: repeats only",
+            "value": 0,
+            "role": "data"
+          },
+          {
+            "label": "Round 3: 1 new relevant",
+            "value": 1,
+            "role": "data"
+          },
+          {
+            "label": "Round 4: new but irrelevant",
+            "value": 0,
+            "role": "data"
+          }
+        ],
+        "rule": "Key: source + version + locator. Count only new, permitted, relevant records."
+      },
+      "read": [
+        "Round 1 accepts E1 and E2; its third candidate duplicates E1.",
+        "Round 3 accepts E3 and discards a repeated E2.",
+        "Round 4 has a new identity but no relevance to the required gap."
+      ],
+      "question": "After round 4, does another identical query promise progress because the candidate list grew?",
+      "answer": "No. The ledger still contains only E1, E2 and E3. Check whether those records cover the required questions and support the claims. If a gap remains, choose a justified different authorized source within allowance or stop incomplete; list growth cannot substitute for accepted evidence.",
+      "takeaway": "Progress counts new relevant evidence, not repeated arrivals or unrelated novelty.",
+      "assumption": "Constructed counts, not retrieval measurements. Four rounds use an allowance of 4; identical retries require a separate freshness or wait contract."
+    }
+  ]
+}

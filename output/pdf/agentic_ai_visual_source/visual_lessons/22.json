@@ -1,0 +1,112 @@
+{
+  "chapter": 22,
+  "chapter_title": "Enterprise Governance, Privacy & Compliance",
+  "audit": "The records-office analogy names retention and exceptions without making a reader inspect how the same deletion request yields different lawful handling under a verified hold. Lesson A follows one record through live copies, backup obligations and a narrowly scoped hold; neither branch claims instantaneous universal erasure. Lesson B pairs three audit claims with concrete receipts, exposing the gap between a readable hash chain and integrity anchored outside the writer's control. The exercise also challenges an unsupported backup-erasure claim. Both lessons separate evidence from assurance and retain the chapter's distinctions among minimization, purpose, access, integrity and recordkeeping obligations without prescribing universal retention periods.",
+  "lessons": [
+    {
+      "id": "22A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "One deletion request, two retention conditions",
+      "intro": "Record C-7 appears in live state, a derived evaluation sample and backups. A verified deletion request arrives. Compare handling with no applicable hold against a verified hold covering C-7.",
+      "kind": "fork",
+      "data": {
+        "input": "Delete C-7 and derived copies under the applicable policy.",
+        "left": {
+          "title": "No applicable hold",
+          "steps": [
+            "Locate live and derived copies by lineage",
+            "Delete eligible copies; record completion",
+            "Schedule backup expiry and restore suppression"
+          ],
+          "result": "Live deletion confirmed; backup expiration remains pending",
+          "status": "wait"
+        },
+        "right": {
+          "title": "Verified scoped hold",
+          "steps": [
+            "Validate hold H-3 covers C-7 and its purpose",
+            "Restrict held copies; delete eligible extras",
+            "Record deferred deletion and next hold review"
+          ],
+          "result": "Covered records retained under hold, with controlled access",
+          "status": "wait"
+        }
+      },
+      "read": [
+        "Both paths start with the same record lineage and verified request.",
+        "The hold changes which copies are currently eligible for deletion.",
+        "Neither live deletion nor a hold proves all backup copies disappeared."
+      ],
+      "question": "May the no-hold path report immediate deletion from all backups?",
+      "answer": "No. Its stated contract provides scheduled backup expiry and prevents deleted data from returning through restores. It must report that timing accurately rather than equating live-store deletion with universal immediate erasure.",
+      "takeaway": "Deletion follows lineage, eligibility and each storage contract.",
+      "assumption": "Fictional retention policy; verified holds and backup schedules are organization-specific. No universal legal rule or deletion deadline is implied."
+    },
+    {
+      "id": "22B",
+      "placement": "before_heading",
+      "anchor": "Auditability and decision/action provenance",
+      "title": "Which audit claims do these receipts support?",
+      "intro": "A reviewer inspects three claims about C-7. The receipts are deliberately narrow: a live-delete acknowledgement, a writer-controlled hash-chain check, and a protected external checkpoint digest.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "C-7 was removed from the live state store."
+          },
+          {
+            "id": "C2",
+            "text": "C-7 was erased immediately from every backup."
+          },
+          {
+            "id": "C3",
+            "text": "The export matches the externally retained digest."
+          }
+        ],
+        "sources": [
+          {
+            "id": "S1",
+            "text": "Live-state receipt: C-7 delete committed at 14:03; 1 row removed."
+          },
+          {
+            "id": "S2",
+            "text": "Local audit chain verifies; writer can replace every event and hash."
+          },
+          {
+            "id": "S3",
+            "text": "Protected checkpoint: export digest 7ac; recomputed export digest 7ac."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "insufficient"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "supports"
+          }
+        ],
+        "verdict": "Scope every assurance to the copy, event and trust boundary its evidence covers."
+      },
+      "read": [
+        "The live receipt supports one specific store deletion.",
+        "A local hash check says nothing about backup deletion.",
+        "An independently protected digest helps detect later rewriting of this export."
+      ],
+      "question": "Does the third receipt prove every original audit event was truthful?",
+      "answer": "No. It supports consistency with an independently retained checkpoint. It does not establish truth at event creation, complete lineage, confidentiality or deletion of other copies. Those need their own controls and evidence.",
+      "takeaway": "Audit integrity and operational truth require different evidence.",
+      "assumption": "Fictional receipts; digest values are abbreviated. The external anchor is outside the writer's control; its protection is an explicit assumption."
+    }
+  ]
+}

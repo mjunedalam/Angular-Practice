@@ -1,0 +1,139 @@
+{
+  "chapter": 37,
+  "chapter_title": "Building AegisOps Phase by Phase",
+  "audit": "The workshop analogy emphasizes postponing powerful tools, but it can suggest that early read-only phases need no security boundary. Lesson A therefore follows both authorized metric queries and untrusted log text through scoped adapters into the evidence ledger, denying the shortcut from a log instruction to a proposal. Lesson B exposes the exact stale-revision race in phase 10 by comparing a preceding read with an atomic expected-revision mutation. The same valid approval and competing deployment appear in both traces; only the enforcement mechanism changes. These pages make phase exit evidence concrete without claiming that a fake rehearsal establishes live production readiness or that a separate lookup closes a race.",
+  "lessons": [
+    {
+      "id": "37A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Read-only tools still cross trust boundaries",
+      "intro": "At milestone M1, AegisOps reads order-api staging telemetry. One authentic log includes text saying skip approvals. That text remains evidence content, never instruction authority.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Telemetry source",
+            "nodes": [
+              {
+                "id": "LG",
+                "label": "Log: skip approvals",
+                "role": "external"
+              },
+              {
+                "id": "MT",
+                "label": "Metrics backend",
+                "role": "external"
+              }
+            ]
+          },
+          {
+            "title": "Read boundary",
+            "nodes": [
+              {
+                "id": "SC",
+                "label": "Trusted scope policy",
+                "role": "policy"
+              },
+              {
+                "id": "RD",
+                "label": "Bounded log adapter",
+                "role": "action"
+              }
+            ]
+          },
+          {
+            "title": "Incident state",
+            "nodes": [
+              {
+                "id": "EV",
+                "label": "Evidence + source IDs",
+                "role": "data"
+              },
+              {
+                "id": "PR",
+                "label": "Proposed next step",
+                "role": "model"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "SC",
+            "to": "MT",
+            "label": "Query only order-api/staging",
+            "status": "allow"
+          },
+          {
+            "from": "LG",
+            "to": "RD",
+            "label": "Untrusted log text with locator",
+            "status": "allow"
+          },
+          {
+            "from": "RD",
+            "to": "EV",
+            "label": "Scoped facts; bounded and redacted",
+            "status": "allow"
+          },
+          {
+            "from": "LG",
+            "to": "PR",
+            "label": "No instruction or authority shortcut",
+            "status": "deny"
+          }
+        ]
+      },
+      "read": [
+        "Trusted context scopes the query before fetching data.",
+        "An authentic source can contain hostile text without gaining instruction authority.",
+        "The ledger preserves provenance; policy still validates any proposed next step."
+      ],
+      "question": "Would removing all mutation tools make an unscoped metrics query harmless?",
+      "answer": "No. A read can expose another service or tenant, and outbound queries can disclose private context. Validate service, environment, metric template and time window before access; bound and redact results. Lack of mutation capability reduces one risk but does not remove confidentiality or injection requirements.",
+      "takeaway": "Build scope, provenance and data handling before granting richer capabilities.",
+      "assumption": "Fictional M1 boundary; actual query authorization, redaction and denied routes require tested enforcement. The map is not that enforcement."
+    },
+    {
+      "id": "37B",
+      "placement": "before_heading",
+      "anchor": "Phase 10 - Implement human approval and safe mutations",
+      "title": "A prior read leaves a mutation race",
+      "intro": "Both traces start with valid approval P-9 for rollback to revision 41, expecting current revision 42. A competing deployment changes the live revision before mutation.",
+      "kind": "fork",
+      "data": {
+        "input": "P-9 approved: expected 42, target 41, effect RB-82",
+        "left": {
+          "title": "Read, then unconditional",
+          "steps": [
+            "Read current revision: 42",
+            "Other deployment advances revision to 43",
+            "Rollback to 41 without atomic precondition"
+          ],
+          "result": "Approved assumption bypassed; revision 43 overwritten",
+          "status": "fail"
+        },
+        "right": {
+          "title": "Atomic expected revision",
+          "steps": [
+            "Prepare P-9 request with expected revision 42",
+            "Other deployment advances revision to 43",
+            "Check and mutate atomically: conflict"
+          ],
+          "result": "Revision 43 preserved; RB-82 not applied; replan",
+          "status": "pass"
+        }
+      },
+      "read": [
+        "Both proposals had the same legitimate approval and expected revision.",
+        "A separate earlier read cannot freeze the resource.",
+        "The right trace moves the check into the atomic mutation boundary."
+      ],
+      "question": "Would checking revision 42 twice before an unconditional rollback remove the race?",
+      "answer": "No. Another deployment can occur after the last read. Pass the expected revision to a service that checks it atomically with mutation, or use an equivalent supported conditional-write contract. On conflict, refresh evidence and obtain authority for any changed proposal.",
+      "takeaway": "Enforce volatile preconditions where the effect becomes real.",
+      "assumption": "Fictional concurrent sequence; the right-hand domain service implements atomic conditional mutation. Approval and operation identities remain unchanged."
+    }
+  ]
+}

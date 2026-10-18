@@ -1,0 +1,184 @@
+{
+  "chapter": 7,
+  "chapter_title": "7. Agent State & Checkpointing",
+  "audit": "The shift-handover analogy correctly separates a chart from a consultation but does not expose which cells survive the critical crash window. Lesson A shows three versions of the same run record, preserving the intent while the known outcome changes from pending through unknown to confirmed. The highlighted changes distinguish new evidence from new execution. Lesson B gives stale and current workers different ownership epochs and traces their requests to separate state and effect gates. It makes the limitation of optimistic concurrency visible: protecting a record is insufficient unless the resource performing the mutation also rejects stale authority.",
+  "lessons": [
+    {
+      "id": "7A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The handover keeps the same intent",
+      "intro": "A worker saves K-17, submits the refund, then crashes before saving a result. Its replacement reconciles the retained intent.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "09:40 saved",
+            "event": "Accepted intent persisted",
+            "fields": [
+              {
+                "key": "intent",
+                "value": "K-17",
+                "changed": false
+              },
+              {
+                "key": "receipt",
+                "value": "none recorded",
+                "changed": false
+              },
+              {
+                "key": "status",
+                "value": "pending submission",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "09:42 resumed",
+            "event": "No durable result after crash",
+            "fields": [
+              {
+                "key": "intent",
+                "value": "K-17",
+                "changed": false
+              },
+              {
+                "key": "receipt",
+                "value": "none recorded",
+                "changed": false
+              },
+              {
+                "key": "status",
+                "value": "outcome unknown",
+                "changed": true
+              }
+            ]
+          },
+          {
+            "title": "09:43 reconciled",
+            "event": "Provider confirms original refund",
+            "fields": [
+              {
+                "key": "intent",
+                "value": "K-17",
+                "changed": false
+              },
+              {
+                "key": "receipt",
+                "value": "RF-9 confirmed",
+                "changed": true
+              },
+              {
+                "key": "status",
+                "value": "effect confirmed",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "K-17 always identifies the same accepted payment, currency and amount."
+      },
+      "read": [
+        "The intent is durable before submission.",
+        "Missing local receipt means uncertainty, not proof of no refund.",
+        "Reconciliation adds outcome evidence without creating another business intent."
+      ],
+      "question": "If the provider cannot resolve K-17, which cells may safely change to confirmed?",
+      "answer": "None. Keep the receipt unresolved and the outcome unknown, retaining the effect identity for later reconciliation or human review. A replacement worker cannot infer external absence from an incomplete local chart.",
+      "takeaway": "A saved intent tells a new worker what to reconcile, not what to repeat.",
+      "assumption": "Fictional record projection; provider status resolves K-17 here. The handover analogy does not provide exclusive ownership or external atomicity."
+    },
+    {
+      "id": "7B",
+      "placement": "before_heading",
+      "anchor": "Concurrency, conflicts and shared state",
+      "title": "A stale worker must stop at the effect gate",
+      "intro": "Worker A resumes with epoch 8 after worker B acquired epoch 9. Both the state store and payment gateway enforce the current epoch.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Worker claims",
+            "nodes": [
+              {
+                "id": "OLD",
+                "label": "A: stale epoch 8",
+                "role": "external"
+              },
+              {
+                "id": "NEW",
+                "label": "B: current epoch 9",
+                "role": "runtime"
+              }
+            ]
+          },
+          {
+            "title": "Enforced checks",
+            "nodes": [
+              {
+                "id": "CAS",
+                "label": "State version + epoch",
+                "role": "policy"
+              },
+              {
+                "id": "FENCE",
+                "label": "Effect epoch must be 9",
+                "role": "policy"
+              }
+            ]
+          },
+          {
+            "title": "Protected records",
+            "nodes": [
+              {
+                "id": "STATE",
+                "label": "Run R-42 state",
+                "role": "data"
+              },
+              {
+                "id": "PAY",
+                "label": "K-17 refund submission",
+                "role": "action"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "OLD",
+            "to": "CAS",
+            "label": "Deny stale state update",
+            "status": "deny"
+          },
+          {
+            "from": "OLD",
+            "to": "FENCE",
+            "label": "Deny stale external mutation",
+            "status": "deny"
+          },
+          {
+            "from": "NEW",
+            "to": "FENCE",
+            "label": "Current epoch; other gates already pass",
+            "status": "allow"
+          },
+          {
+            "from": "FENCE",
+            "to": "PAY",
+            "label": "Forward protected intent K-17",
+            "status": "allow"
+          }
+        ]
+      },
+      "read": [
+        "Worker A can wake after its lease expires.",
+        "The state check and the effect check protect different consequences.",
+        "Only the current, otherwise authorized intent reaches the payment gateway."
+      ],
+      "question": "What breaks if the payment gateway ignores the epoch while state writes still reject epoch 8?",
+      "answer": "A may submit a stale external mutation before its later state save is rejected. State concurrency protects the record, not an already issued effect. Require supported effect-level fencing or deduplication with a defined reconciliation contract; checkpoint durability alone is insufficient.",
+      "takeaway": "Ownership must be enforced where the protected effect occurs.",
+      "assumption": "Fictional enforced gateway contract; worker claims are untrusted until checked. Other authorization gates pass only for B; the fence is not self-enforcing."
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "file": "SourceSerif4-Regular.ttf",
+    "matches_record": true,
+    "sha256": "e5a4ee6a3d87bb9024796be390c6771e2a0eb1883dae25effaf57ca01668e24b",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/TTF/SourceSerif4-Regular.ttf"
+  },
+  {
+    "file": "SourceSerif4-Semibold.ttf",
+    "matches_record": true,
+    "sha256": "36db62940cb5728b12b1802476dc7fcf4c6c519a7bdd476ba23a4e555fc4655f",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/TTF/SourceSerif4-Semibold.ttf"
+  },
+  {
+    "file": "SourceSerif4-It.ttf",
+    "matches_record": true,
+    "sha256": "9d2950a8f1da66e21502c35d646a1d2148e79f9ea43fd2158cf02f5232e7f430",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/TTF/SourceSerif4-It.ttf"
+  },
+  {
+    "file": "SourceSerif4-SemiboldIt.ttf",
+    "matches_record": true,
+    "sha256": "d6a0a4317102a255a55850640332ba3acc7c872606a555516b4ecdb66f3c9899",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/TTF/SourceSerif4-SemiboldIt.ttf"
+  },
+  {
+    "file": "SourceSerif4Display-Semibold.ttf",
+    "matches_record": true,
+    "sha256": "ba711c7443224e9c95bc5fcd24a98f3d921e50b3873c27667884351067927a03",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/TTF/SourceSerif4Display-Semibold.ttf"
+  },
+  {
+    "file": "SourceSans3-Regular.ttf",
+    "matches_record": true,
+    "sha256": "4644c81b86ec9caaa76b634889968ed3c4f4f52f054855933acc7c2b21e53b0f",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/TTF/SourceSans3-Regular.ttf"
+  },
+  {
+    "file": "SourceSans3-Semibold.ttf",
+    "matches_record": true,
+    "sha256": "a3f4f8dcf343a8f24dc61951de93f3ba1558b15cd250ba24af8a40e957081b7d",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/TTF/SourceSans3-Semibold.ttf"
+  },
+  {
+    "file": "SourceSans3-It.ttf",
+    "matches_record": true,
+    "sha256": "192afd78f0f54a3c69eaf02d43f4d9a821e9d6110e41d3d25d61a7385cd580e4",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/TTF/SourceSans3-It.ttf"
+  },
+  {
+    "file": "SourceSans3-SemiboldIt.ttf",
+    "matches_record": true,
+    "sha256": "8221d5e4bd3cf249e8023a5f8fad024d37c2def0f3d3aa7fd1f5830afda51f34",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/TTF/SourceSans3-SemiboldIt.ttf"
+  },
+  {
+    "file": "SourceSans3-Bold.ttf",
+    "matches_record": true,
+    "sha256": "9214b9d95e4231c609802815c2646c98174e2102d0d37f88978a7f8e71006e6a",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/TTF/SourceSans3-Bold.ttf"
+  },
+  {
+    "file": "SourceCodePro-Regular.ttf",
+    "matches_record": true,
+    "sha256": "74bd80d3e42a08517cd7e1108ba3d86f2da29ac0f3065be95e0357956ab9db37",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-code-pro/release/TTF/SourceCodePro-Regular.ttf"
+  },
+  {
+    "file": "source-serif-LICENSE.md",
+    "matches_record": true,
+    "sha256": "c21d7293d87b6d7ab1d0229a2f55b77f33a7613a6a4e66f6693d68d7d8d09464",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-serif/release/LICENSE.md"
+  },
+  {
+    "file": "source-sans-LICENSE.md",
+    "matches_record": true,
+    "sha256": "56af9b9c6715597e458284a474dc118a50a4150e9d547c70f7b4a33c3e6a9328",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/release/LICENSE.md"
+  },
+  {
+    "file": "source-code-pro-LICENSE.md",
+    "matches_record": true,
+    "sha256": "7c940e28a5388e9bba866cf0e408edda45fe0899ba98665b8f6ab31dc5e4b8ff",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-code-pro/release/LICENSE.md"
+  },
+  {
+    "file": "SpaceGrotesk-Bold.ttf",
+    "matches_record": true,
+    "sha256": "7209bbb75fc0f5c546a5f5773b0db74ffc6abf04c2148c1105cace5765a96bdb",
+    "source": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/ttf/static/SpaceGrotesk-Bold.ttf"
+  },
+  {
+    "file": "SpaceGrotesk-Regular.ttf",
+    "matches_record": true,
+    "sha256": "5ede28c4425f3fe4830c8f4754b39e9a87a93d0c3baa5e0a9924532aaa8a98bd",
+    "source": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/ttf/static/SpaceGrotesk-Regular.ttf"
+  },
+  {
+    "file": "SpaceGrotesk-Medium.ttf",
+    "matches_record": true,
+    "sha256": "3183b7eb0b4241476360e2cd8e527868616cc16d3ce332c4376505989b772b44",
+    "source": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/ttf/static/SpaceGrotesk-Medium.ttf"
+  },
+  {
+    "file": "space-grotesk-OFL.txt",
+    "matches_record": true,
+    "sha256": "564ce565c371c5e5bbf286006565a7c9aa55a9f56e7ca58d56e05d649dd61a72",
+    "source": "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/OFL.txt"
+  }
+]

@@ -1,0 +1,133 @@
+{
+  "review": "Chapters 27-39: final repaired visual QA",
+  "status": "pass",
+  "prior_report": "qa_production.json",
+  "method": "Full-page view_image inspection of all eight repaired atlas page JPEGs. No renderer or lesson JSON edits.",
+  "images_inspected": [
+    {
+      "atlas_pdf_page": 62,
+      "lesson": "27B",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-062.jpg",
+      "sha256": "08ecc5b3459f8a6f5b5261daaea72c85dbbed4af6718dafbe4e00f000abca875"
+    },
+    {
+      "atlas_pdf_page": 66,
+      "lesson": "29B",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-066.jpg",
+      "sha256": "98fd81ea75564f2977d18f199413237f24d58317f71e65b041371643a1fad8ac"
+    },
+    {
+      "atlas_pdf_page": 70,
+      "lesson": "31B",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-070.jpg",
+      "sha256": "ddaddeeeca7f4cf8465e64e7a939953fc5afef9b1b57f334f76c5b5b663982f5"
+    },
+    {
+      "atlas_pdf_page": 73,
+      "lesson": "33A",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-073.jpg",
+      "sha256": "0e133d76e071ecc809a69284f57d78695bfda228b71bea9c5f877a38320eaf2f"
+    },
+    {
+      "atlas_pdf_page": 79,
+      "lesson": "36A",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-079.jpg",
+      "sha256": "7acb0c4d6262c02f8600d814b4626437e70b5c132839d274866032c1ea017749"
+    },
+    {
+      "atlas_pdf_page": 80,
+      "lesson": "36B",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-080.jpg",
+      "sha256": "d895d27c8330aeefb33cdc01f41d73eae8b2db9ab0b9205f877c173fe4a3f840"
+    },
+    {
+      "atlas_pdf_page": 81,
+      "lesson": "37A",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-081.jpg",
+      "sha256": "d2e1e45c4e92911addd72748224e6f21b88725138211aa0e77ab8cfaa49965af"
+    },
+    {
+      "atlas_pdf_page": 84,
+      "lesson": "38B",
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-084.jpg",
+      "sha256": "eb42aae6b6e61d3690ee19fb08f0239ad0a512663c6ff12e4947daa35b78e07e"
+    }
+  ],
+  "resolved_findings": [
+    {
+      "id": "PROD-QA-1",
+      "pages": [
+        66,
+        79
+      ],
+      "result": "Elbow connectors avoid event labels in both upward and downward lane transitions."
+    },
+    {
+      "id": "PROD-QA-2",
+      "pages": [
+        73
+      ],
+      "result": "The denied long route uses the inter-row gutter, avoids the approval node, and stops before the intended executor boundary."
+    },
+    {
+      "id": "PROD-QA-3",
+      "pages": [
+        81
+      ],
+      "result": "All four route badges are visible; offset ports separate the opposing adjacent routes, and the denied path avoids node text."
+    },
+    {
+      "id": "PROD-QA-4",
+      "pages": [
+        79
+      ],
+      "result": "Executor / verifier wraps between words with no isolated character."
+    },
+    {
+      "id": "PROD-QA-5",
+      "pages": [
+        84
+      ],
+      "result": "Neutral Count: k / n wording no longer labels forbidden effects as generic successes. Method explicitly defines k; numeric intervals sit outside the plot."
+    }
+  ],
+  "additional_checks": [
+    {
+      "pages": [
+        62,
+        84
+      ],
+      "result": "Count and interval annotations are readable beside the plot; point and whisker values remain consistent with the lesson data."
+    },
+    {
+      "pages": [
+        70,
+        80
+      ],
+      "result": "Packet values fit their cells. Revision 41 remains attached to its rollback phrase; no clipping or overlap."
+    },
+    {
+      "pages": [
+        62,
+        66,
+        70,
+        73,
+        79,
+        80,
+        81,
+        84
+      ],
+      "result": "Titles, introductions, diagrams, reading cues, prediction prompts, takeaways, assumptions and links remain intact."
+    }
+  ],
+  "remaining_findings": [],
+  "nonblocking_observations": [
+    {
+      "page": 70,
+      "lesson": "31B",
+      "note": "The long exact tool identifier occupies two lines inside its narrow field; every character is visible, and the full identifier is repeated in the introduction. No corrective action required."
+    }
+  ],
+  "coverage_note": "The earlier review covered all 26 production-range atlas pages and book contact sheets 15-22. This follow-up inspects all eight changed pages supplied by the lead; the lead reports that the other reviewed page image hashes are unchanged.",
+  "conclusion": "All five initial findings are resolved. No remaining actionable visual defects found in the repaired pages."
+}

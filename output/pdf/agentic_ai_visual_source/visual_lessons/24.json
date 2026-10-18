@@ -1,0 +1,107 @@
+{
+  "chapter": 24,
+  "chapter_title": "Agent Testing Strategy",
+  "audit": "The simulator analogy encourages controlled tests but does not show why a persuasive refusal can coexist with a broken executor. Lesson A gives two exact test branches with protected-effect assertions: rejection must leave zero effects, while recovery of one approved operation must leave exactly one. It states the fake service's deduplication assumption rather than transferring that guarantee to a real API. Lesson B orders a post-commit response loss, worker restart and same-operation recovery around the durable intent. The reader must choose the fault boundary that exercises the ambiguous gap. Both examples keep the actual validator under test and separate deterministic enforcement evidence from live-model quality.",
+  "lessons": [
+    {
+      "id": "24A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Grade the simulator by its effect ledger",
+      "intro": "Two scripted tests force refund attempts through the real approval validator. Fresh fake payment stores expose effects by operation ID; the timeout fixture implements atomic deduplication.",
+      "kind": "tree",
+      "data": {
+        "root": "Run one of two controlled refund tests",
+        "branches": [
+          {
+            "edge": "Rejected P-8",
+            "question": "Does the payment ledger contain 0 effects?",
+            "yes": {
+              "label": "Rejection invariant holds in this test",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Fail: refusal wording cannot excuse effect",
+              "role": "fail"
+            }
+          },
+          {
+            "edge": "Approved OP-8",
+            "question": "After timeout recovery, count(OP-8) = 1?",
+            "yes": {
+              "label": "Same-operation recovery holds in fixture",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Fail: missing or duplicate refund effect",
+              "role": "fail"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The fake model deliberately requests the protected operation.",
+        "The rejected branch grades the payment ledger, not the final answer.",
+        "The recovery branch counts one logical operation rather than every refund globally."
+      ],
+      "question": "The answer says refund refused, but the ledger contains one effect under rejection. Does that test pass?",
+      "answer": "No. The protected invariant failed even though the response text sounds safe. Record the forbidden effect and repair the execution boundary; wording cannot reverse the mutation.",
+      "takeaway": "Assert on protected state, not comforting response text.",
+      "assumption": "Constructed tests with fresh fixtures; fake downstream dedupe is modeled explicitly. Passing demonstrates these conditions, not live API compatibility or model quality."
+    },
+    {
+      "id": "24B",
+      "placement": "before_heading",
+      "anchor": "Fault injection and chaos-style tests",
+      "title": "Place the fault after commit and before acknowledgement",
+      "intro": "The test intends one approved refund, OP-8. The fake provider commits it, then deliberately drops the response. A restarted worker must recover that same logical operation.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Harness",
+          "Fake payments",
+          "Recovered worker"
+        ],
+        "steps": [
+          {
+            "time": "t0",
+            "lane": 0,
+            "label": "Save approved OP-8 intent"
+          },
+          {
+            "time": "t1",
+            "lane": 1,
+            "label": "Commit refund for OP-8"
+          },
+          {
+            "time": "t2",
+            "lane": 0,
+            "label": "Drop response; crash worker"
+          },
+          {
+            "time": "t3",
+            "lane": 2,
+            "label": "Load OP-8; reconcile status"
+          },
+          {
+            "time": "t4",
+            "lane": 1,
+            "label": "Return original effect R-8"
+          }
+        ],
+        "wait_after": 2,
+        "wait_label": "Restart with a fresh worker process",
+        "result": "Assert one effect for OP-8 and a recorded reconciled outcome."
+      },
+      "read": [
+        "Persistence precedes the first effect request.",
+        "The injected fault occurs after commit but before local success recording.",
+        "Recovery reads the original identity instead of inventing a replacement refund."
+      ],
+      "question": "Would dropping the request before it reached payments exercise the same recovery gap?",
+      "answer": "No. That tests a no-effect failure. The displayed post-commit fault tests whether recovery handles an effect that happened without a local acknowledgement. Both positions matter and require different fixture evidence.",
+      "takeaway": "Inject faults around commits, not only before calls.",
+      "assumption": "Constructed fault schedule; fake service provides authoritative status lookup. Approval validation is real, and external financial effects remain stubbed."
+    }
+  ]
+}

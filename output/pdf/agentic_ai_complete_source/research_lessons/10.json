@@ -1,0 +1,68 @@
+{
+  "chapter": 10,
+  "design_note": "Quantify progressive disclosure without calling executable helpers free. A capacity tray includes the chosen instructions, resource and invocation/result overhead while leaving unrelated procedures and unread helper source outside the model call.",
+  "source": {
+    "title": "Specification",
+    "url": "https://agentskills.io/specification",
+    "publisher": "Agent Skills",
+    "concept": "Skill information is disclosed progressively: discovery metadata, activated instructions, then supporting resources when the task requires them.",
+    "scope": "Original token allocation and helper execution policy are constructed. They are not specification limits, measured savings or permission granted by the folder format.",
+    "id": "R10",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Testing, lifecycle and deprecation",
+    "title": "Unread helper code can still create token overhead",
+    "intro": "A refund kit uses a 6000-token envelope. Helper code runs in an authorized sandbox; the model receives its invocation and result, not its full source. All values are constructed.",
+    "kind": "packing",
+    "data": {
+      "capacity": 6000,
+      "unit": "tokens",
+      "segments": [
+        {
+          "label": "Catalog + protocol",
+          "value": 600,
+          "role": "runtime"
+        },
+        {
+          "label": "Selected instructions",
+          "value": 1800,
+          "role": "policy"
+        },
+        {
+          "label": "Resource + call + result",
+          "value": 1600,
+          "role": "data"
+        },
+        {
+          "label": "Reserved output",
+          "value": 2000,
+          "role": "model"
+        }
+      ],
+      "excluded": [
+        {
+          "label": "Unselected skill bodies",
+          "reason": "Descriptions suffice for this selection"
+        },
+        {
+          "label": "Helper source: 4000 tokens",
+          "reason": "Not read by model; its call/result counted"
+        }
+      ]
+    },
+    "read": [
+      "The serialized input occupies 4000 tokens; output capacity reserves another 2000.",
+      "The selected resource, invocation and helper result occupy the 1600-token segment.",
+      "Unread source code remains an executable artifact governed by sandbox and permission policy."
+    ],
+    "question": "Does keeping 4000 tokens of helper source outside this call make the helper token overhead zero?",
+    "answer": "No. Its invocation and returned content still occupy part of the 1600-token segment. Only the unread source body stays outside this model call. Execution resources are accounted separately, and the helper remains subject to authorization, sandboxing and its effect contract.",
+    "takeaway": "Progressive disclosure avoids unnecessary source loading, not all information or execution cost.",
+    "assumption": "Constructed provider envelope includes protocol overhead and no separate reasoning reserve. Source code is executed without model inspection; output capacity is not input.",
+    "source_label": "Agent Skills: progressive disclosure",
+    "id": "10C",
+    "placement": "before_heading",
+    "source_key": "R10"
+  }
+}

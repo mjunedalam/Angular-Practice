@@ -1,0 +1,55 @@
+{
+  "chapter": 5,
+  "design_note": "Make a run-wide deadline visible as diminishing time rather than fresh per-component timeouts. The arithmetic shows why a downstream default must be clipped to the remaining allowance even though the component itself has barely started.",
+  "source": {
+    "title": "Deadlines",
+    "url": "https://grpc.io/docs/guides/deadlines/",
+    "publisher": "gRPC project",
+    "concept": "A downstream call should honor the original deadline by accounting for time already elapsed. Cancellation also requires the server application to stop spawned work.",
+    "scope": "Original serial ShopAssist timing uses constructed durations. It illustrates deadline propagation without claiming universal automatic propagation or hard preemption of arbitrary code.",
+    "id": "R05",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "The execution loop, end to end",
+    "title": "Every boundary inherits the time already spent",
+    "intro": "A read-only ShopAssist run has 20 seconds until its absolute deadline. These constructed durations show the remaining allowance before the final drafting call; each stage runs serially.",
+    "kind": "ledger",
+    "data": {
+      "unit": "seconds remaining",
+      "start": 20,
+      "entries": [
+        {
+          "label": "Context assembly: 3 seconds elapsed",
+          "delta": -3
+        },
+        {
+          "label": "Model decision: 7 seconds elapsed",
+          "delta": -7
+        },
+        {
+          "label": "Order lookup: 4 seconds elapsed",
+          "delta": -4
+        },
+        {
+          "label": "Before final drafting: no time used",
+          "delta": 0
+        }
+      ],
+      "rule": "Debit elapsed time, not reservations. The next timeout cannot exceed the remaining 6 seconds."
+    },
+    "read": [
+      "The original deadline has already lost 14 seconds to completed work.",
+      "The final adapter receives at most 6 seconds, even if its default is 30.",
+      "A new component does not create a new run deadline."
+    ],
+    "question": "If the final adapter has a default timeout of 30 seconds, what maximum timeout fits this remaining run allowance?",
+    "answer": "At most 6 seconds, reduced further by any time spent before dispatch. Pass the remaining deadline through the call chain and stop scheduling when it expires. The runtime still needs a supported cancellation or timeout contract; recording a deadline alone cannot preempt arbitrary work.",
+    "takeaway": "Propagate remaining time instead of restarting the clock at each component.",
+    "assumption": "Constructed serial timing with no clock skew; entries debit elapsed time, not spend reservations. Timeout cancellation is cooperative and does not undo effects.",
+    "source_label": "gRPC: deadline propagation",
+    "id": "5C",
+    "placement": "before_heading",
+    "source_key": "R05"
+  }
+}

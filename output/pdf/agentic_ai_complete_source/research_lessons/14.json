@@ -1,0 +1,55 @@
+{
+  "chapter": 14,
+  "design_note": "The existing labs separate discovery and resource entitlement. This comparison adds credential audience separation across an MCP server and its backend, showing the precise rejection before a handler runs. The successful read still depends on independently enforced scope and resource checks.",
+  "source": {
+    "title": "Security Best Practices",
+    "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+    "publisher": "Model Context Protocol",
+    "concept": "An MCP server must reject access tokens not issued for it. Passing an unvalidated client token through to another API bypasses the intended trust boundaries.",
+    "scope": "The two fictional credential profiles and checkout read are constructed. Correct audience handling does not itself authorize a resource or establish result truth.",
+    "id": "R14",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Enterprise patterns: registry, gateway, versioning and governance",
+    "title": "One read crosses two credential boundaries",
+    "intro": "AegisOps requests an authorized checkout latency read through obs-mcp. Compare two credential configurations for the same request; the backend is metrics-api.",
+    "kind": "fork",
+    "data": {
+      "input": "One checkout read: host -> obs-mcp -> metrics-api.",
+      "left": {
+        "title": "Reuse backend token",
+        "steps": [
+          "Host offers token with audience metrics-api",
+          "obs-mcp detects it was issued elsewhere",
+          "Reject before invoking the read handler"
+        ],
+        "result": "No read: a backend credential is not an MCP credential",
+        "status": "fail"
+      },
+      "right": {
+        "title": "Separate audiences",
+        "steps": [
+          "Host offers valid token for obs-mcp",
+          "Broker supplies scoped metrics-api credential",
+          "Backend checks principal, scope and service"
+        ],
+        "result": "Read proceeds only after both boundaries authorize it",
+        "status": "pass"
+      }
+    },
+    "read": [
+      "The requested business operation is identical on both sides.",
+      "The left token is valid for a different service.",
+      "The right path obtains appropriate credentials and checks authority at each boundary."
+    ],
+    "question": "Can changing the audience text locally repair the left credential?",
+    "answer": "No. The issuer authenticates the token claims; editing the audience does not create an issuer-approved credential. Obtain the correct profile through the authorized identity flow. The MCP server and backend still enforce their own permissions.",
+    "takeaway": "Credentials must be issued for the boundary that validates them.",
+    "assumption": "Fictional profiles; both services enforce trusted identity, current scope and resource policy. Credentials stay outside model context.",
+    "source_label": "MCP security: token passthrough",
+    "id": "14C",
+    "placement": "before_heading",
+    "source_key": "R14"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "chapter": 27,
+  "chapter_title": "AgentOps & Production Operations",
+  "audit": "The airline analogy distinguishes grounding from reversing earlier flights, but the existing diagrams leave that distinction abstract. Lesson A tracks a pinned release, a changing executor restriction and an already applied refund across three records. The unchanged effect cell makes the remaining recovery obligation visible even after enforcement is confirmed. Lesson B replaces a canary percentage with constructed outcome counts and Wilson intervals for two traffic slices. Readers must notice that identical point estimates can carry different uncertainty and that four marginal intervals do not implement a comparative promotion test. Both lessons separate an observable fact from the operational decision that still requires a defined owner and policy.",
+  "lessons": [
+    {
+      "id": "27A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The brakes change; the old refund remains",
+      "intro": "ShopAssist run R-18 uses release 12. An incident owner disables refunds after operation RF-441 has already applied. Inspect what changes and what remains owed.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "10:00 - before stop",
+            "event": "RF-441 applied: USD 40",
+            "fields": [
+              {
+                "key": "release",
+                "value": "12, pinned",
+                "changed": false
+              },
+              {
+                "key": "tool policy",
+                "value": "42: allow",
+                "changed": false
+              },
+              {
+                "key": "RF-441",
+                "value": "applied, USD 40",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "10:02 - stop issued",
+            "event": "Policy 43 published",
+            "fields": [
+              {
+                "key": "release",
+                "value": "12, pinned",
+                "changed": false
+              },
+              {
+                "key": "tool policy",
+                "value": "43: deny, unconfirmed",
+                "changed": true
+              },
+              {
+                "key": "RF-441",
+                "value": "applied, USD 40",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "10:03 - checked",
+            "event": "Executor deny verified",
+            "fields": [
+              {
+                "key": "release",
+                "value": "12, pinned",
+                "changed": false
+              },
+              {
+                "key": "tool policy",
+                "value": "43: deny, enforced",
+                "changed": true
+              },
+              {
+                "key": "RF-441",
+                "value": "applied, USD 40",
+                "changed": false
+              }
+            ]
+          }
+        ],
+        "invariant": "Current restrictions bind pinned runs; past effects remain recorded."
+      },
+      "read": [
+        "Follow the policy cell through publication and verified enforcement.",
+        "The pinned release stays 12 throughout containment.",
+        "RF-441 remains applied; investigate its legitimacy and recovery separately."
+      ],
+      "question": "Does verified enforcement at 10:03 mean the refund incident is fully recovered?",
+      "answer": "No. It establishes the checked executor restriction. RF-441 still exists, and the incident owner must scope other applied or unknown operations and follow authorized reconciliation or compensation procedures. Publication alone also did not establish the enforcement time.",
+      "takeaway": "Containment changes future permission; recovery handles existing obligations.",
+      "assumption": "Fictional drill records; enforcement timing is stipulated for this example, not a measured propagation guarantee."
+    },
+    {
+      "id": "27B",
+      "placement": "before_heading",
+      "anchor": "Shadow, canary and staged release",
+      "title": "A 95% canary can still be thin evidence",
+      "intro": "Constructed fixed-window counts compare eligible stable and candidate outcomes. Each case is independent within its slice; intervals describe each rate, not their difference.",
+      "kind": "intervals",
+      "data": {
+        "rows": [
+          {
+            "label": "Routine stable",
+            "n": 200,
+            "k": 190,
+            "estimate": 0.95,
+            "low": 0.9104209437021562,
+            "high": 0.9726176509713551
+          },
+          {
+            "label": "Routine candidate",
+            "n": 20,
+            "k": 19,
+            "estimate": 0.95,
+            "low": 0.7638641064874331,
+            "high": 0.9911187805671268
+          },
+          {
+            "label": "Restricted stable",
+            "n": 200,
+            "k": 180,
+            "estimate": 0.9,
+            "low": 0.8505931364369146,
+            "high": 0.9343300588284289
+          },
+          {
+            "label": "Restricted candidate",
+            "n": 20,
+            "k": 18,
+            "estimate": 0.9,
+            "low": 0.6989617935882066,
+            "high": 0.9721341060158468
+          }
+        ],
+        "method": "Constructed counts; two-sided Wilson intervals, z = 1.96. No promotion rule encoded."
+      },
+      "read": [
+        "Both routine estimates equal 95%, but their sample sizes differ tenfold.",
+        "The small candidate samples produce wider uncertainty intervals.",
+        "Restricted traffic remains a separate slice; pooling can hide its weaker evidence."
+      ],
+      "question": "Can the candidate promote because both routine estimates are 95%?",
+      "answer": "No. Matching point estimates do not establish non-regression. Use the predeclared comparative analysis, its required counts and critical-slice conditions. These marginal Wilson intervals expose uncertainty but do not replace a two-sample or planned sequential decision rule. Any observed forbidden effect follows its separate containment rule.",
+      "takeaway": "Exposure share and point estimates cannot substitute for a promotion test.",
+      "assumption": "Constructed counts, not measured release results; independent binary outcomes and a fixed observation window are assumed."
+    }
+  ]
+}

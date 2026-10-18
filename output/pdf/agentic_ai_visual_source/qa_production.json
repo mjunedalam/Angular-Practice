@@ -1,0 +1,174 @@
+{
+  "review": "Chapters 27-39: initial rendered visual QA",
+  "status": "changes_required",
+  "method": "Used view_image on every assigned full atlas page and all eight book contact sheets; enlarged six sparse book pages. No lesson JSON or renderer was changed.",
+  "images_inspected": {
+    "atlas_full_pages": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-061.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-062.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-063.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-064.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-065.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-066.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-067.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-068.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-069.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-070.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-071.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-072.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-073.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-074.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-075.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-076.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-077.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-078.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-079.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-080.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-081.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-082.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-083.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-084.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-085.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-086.jpg"
+    ],
+    "book_contact_sheets": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-15.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-16.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-17.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-18.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-19.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-20.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-21.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/contact-22.jpg"
+    ],
+    "book_full_pages": [
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-530.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-555.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-587.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-588.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-591.jpg",
+      "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-592.jpg"
+    ]
+  },
+  "coverage": {
+    "atlas_lessons": 26,
+    "atlas_pdf_pages": [
+      61,
+      86
+    ],
+    "book_contact_pdf_pages": [
+      505,
+      764
+    ],
+    "book_contact_pages_count": 260
+  },
+  "findings": [
+    {
+      "id": "PROD-QA-1",
+      "severity": "P2",
+      "lessons": [
+        "29B",
+        "36A"
+      ],
+      "atlas_pdf_pages": [
+        66,
+        79
+      ],
+      "book_pdf_pages": [
+        468,
+        578
+      ],
+      "issue": "Diagonal swimlane connectors strike through event text. Examples include Load INC-82 at epoch 7, Resume with old epoch 7, Persist P-9 and effect RB-82, and Two privileged approvers.",
+      "fix": "Route connectors through clear corridors with elbows, or use opaque label backplates and connector-first drawing. Reinspect both upward and downward lane transitions."
+    },
+    {
+      "id": "PROD-QA-2",
+      "severity": "P2",
+      "lessons": [
+        "33A"
+      ],
+      "atlas_pdf_pages": [
+        73
+      ],
+      "book_pdf_pages": [
+        529
+      ],
+      "issue": "The nonadjacent denied model-to-executor route crosses the Policy + approval P-9 node. Its numbered marker and stop square overlay the node label and make the stop appear to target the intermediate node.",
+      "fix": "Route nonadjacent links outside intermediate node boxes. Place its numbered marker in a free corridor and the denied stop near the intended destination boundary."
+    },
+    {
+      "id": "PROD-QA-3",
+      "severity": "P2",
+      "lessons": [
+        "37A"
+      ],
+      "atlas_pdf_pages": [
+        81
+      ],
+      "book_pdf_pages": [
+        599
+      ],
+      "issue": "Crossing routes 1 and 2 have the same midpoint, so marker 2 hides marker 1. The denied long route also traverses the intermediate trust zone rather than a clear corridor.",
+      "fix": "Assign edge-specific badge positions away from crossings and use separate routed corridors. Confirm all four route numbers are visible and map unambiguously to the legend."
+    },
+    {
+      "id": "PROD-QA-4",
+      "severity": "P3",
+      "lessons": [
+        "36A"
+      ],
+      "atlas_pdf_pages": [
+        79
+      ],
+      "book_pdf_pages": [
+        578
+      ],
+      "issue": "The Executor/verifier lane label wraps into Executor/verifie plus a lone r.",
+      "fix": "Use a legal break such as Executor / verifier or a deliberate two-line label, while preserving lane width and event space."
+    },
+    {
+      "id": "PROD-QA-5",
+      "severity": "P2",
+      "lessons": [
+        "38B"
+      ],
+      "atlas_pdf_pages": [
+        84
+      ],
+      "book_pdf_pages": [
+        622
+      ],
+      "issue": "The interval renderer labels the numerator as successes (for example 0/40 successes), but this lesson counts forbidden effects. The method defines k correctly, yet the generic row label invites the opposite interpretation.",
+      "fix": "Render an event-specific count label such as 0 / 40 forbidden effects, or use neutral target events with the existing definition of k. Preserve the correct Wilson values."
+    }
+  ],
+  "clean_findings": [
+    "All 26 atlas pages have intact titles, introductions, diagrams, three reading cues, prediction prompts, takeaways, assumptions and answer links. No text clipping, missing glyphs or page-boundary spill was observed.",
+    "Ledger balances, proportional bars, context allocations and interval point/whisker positions match the lesson data. Status words and symbols remain visible.",
+    "The book contact sheets contain no blank pages, clipped page units or split visual lessons. Chapter, appendix, answer and index transitions are intact at contact-sheet resolution."
+  ],
+  "pagination_observations": [
+    {
+      "book_pdf_pages": [
+        530,
+        555,
+        588,
+        591
+      ],
+      "severity": "informational",
+      "note": "Substantial lower-page white space appears before intact figures or full-page visual lessons. Full-page inspection confirms complete prose blocks rather than clipping or missing content. Page 588 is a single memory-design paragraph before visual 36B. This follows the declared keep-units-intact layout and is not a blocking defect."
+    },
+    {
+      "book_pdf_pages": [
+        616,
+        661,
+        679,
+        710,
+        759
+      ],
+      "severity": "informational",
+      "note": "Short exercise, glossary, source-list or answer-section tails precede new chapters/appendices. No blank-page or broken-unit defect is visible."
+    }
+  ],
+  "limits": "Book contact sheets support page-flow review, not character-level proof on all 260 pages. Atlas findings require a fresh rendered-image check after root applies fixes."
+}

@@ -1,0 +1,100 @@
+{
+  "chapter": 4,
+  "design_note": "Separate deployment selection from a run pinned to an immutable instruction release. Three snapshots reveal why rollback changes future instructions without rewriting in-flight provenance or undoing an earlier confirmed effect.",
+  "source": {
+    "title": "Release Engineering",
+    "url": "https://sre.google/sre-book/release-engineering/",
+    "publisher": "Google SRE; Dinah McNutt",
+    "concept": "Versioned release artifacts and traceable configuration make deployments reproducible and allow operators to select known releases during rollback.",
+    "scope": "Prompt-pack versions, run pinning and refund receipt are original application policy. The source describes general software release engineering, not this agent lifecycle.",
+    "id": "R04",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Testing instructions",
+    "title": "Rolling back a pack does not rewind a run",
+    "intro": "ShopAssist pins each run to its starting prompt pack. Run R-42 uses v3 and retains confirmed receipt RF-9. A canary selects v4, then operators restore v3 for new runs.",
+    "kind": "snapshots",
+    "data": {
+      "frames": [
+        {
+          "title": "Before canary",
+          "event": "R-42 began with refund pack v3",
+          "fields": [
+            {
+              "key": "new runs",
+              "value": "refund pack v3",
+              "changed": false
+            },
+            {
+              "key": "R-42 pack",
+              "value": "refund pack v3",
+              "changed": false
+            },
+            {
+              "key": "RF-9 status",
+              "value": "confirmed",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "During canary",
+          "event": "Canary route selects v4",
+          "fields": [
+            {
+              "key": "new runs",
+              "value": "refund pack v4",
+              "changed": true
+            },
+            {
+              "key": "R-42 pack",
+              "value": "refund pack v3",
+              "changed": false
+            },
+            {
+              "key": "RF-9 status",
+              "value": "confirmed",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "After rollback",
+          "event": "Canary route restored to v3",
+          "fields": [
+            {
+              "key": "new runs",
+              "value": "refund pack v3",
+              "changed": true
+            },
+            {
+              "key": "R-42 pack",
+              "value": "refund pack v3",
+              "changed": false
+            },
+            {
+              "key": "RF-9 status",
+              "value": "confirmed",
+              "changed": false
+            }
+          ]
+        }
+      ],
+      "invariant": "Deployment selection does not rewrite pinned manifests or payment history."
+    },
+    "read": [
+      "New runs means new runs on the shown canary route.",
+      "R-42 retains the exact instruction version selected when it began.",
+      "RF-9 stays confirmed through both deployment changes."
+    ],
+    "question": "Would a run started under v4 automatically become a v3 run after this rollback?",
+    "answer": "No. Under the stated pinning policy it keeps v4 until it finishes or follows an explicit recorded migration. Rollback selects v3 for future runs on this route. It does not silently rewrite existing manifests or undo effects already confirmed by the payment service.",
+    "takeaway": "Rollback changes release selection; run provenance and completed effects retain their history.",
+    "assumption": "Fictional canary route with immutable packs and start-time pinning. In-flight migration requires a separate recorded policy; no deployment performance is measured.",
+    "source_label": "Google SRE: release engineering",
+    "id": "4C",
+    "placement": "before_heading",
+    "source_key": "R04"
+  }
+}

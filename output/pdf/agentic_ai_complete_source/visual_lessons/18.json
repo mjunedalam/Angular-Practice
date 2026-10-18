@@ -1,0 +1,149 @@
+{
+  "chapter": 18,
+  "chapter_title": "Human-in-the-Loop, Approval & Escalation",
+  "audit": "The cheque analogy establishes exact binding, but a matching proposal digest can visually overshadow the independent requirement for currently entitled approvers. Lesson A presents an unchanged refund whose binding passes but whose approver lost the required role before resume. The denial is therefore about current authority, not malformed data. Lesson B makes a human correction visibly replace the proposal and clear the old decision, preventing an edited amount from inheriting permission. Readers must distinguish valid binding, approval outcome, current entitlement and downstream resource conditions. Both examples retain immutable historical records and avoid suggesting that either approval or idempotency eliminates execution-time precondition checks.",
+  "lessons": [
+    {
+      "id": "18A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The signature matches; the authority expired",
+      "intro": "Proposal P-208 refunds USD 42 to the original payment. Its approved decision matches exactly, but the approver left the refunds-authorizer group before execution resumed.",
+      "kind": "packet",
+      "data": {
+        "name": "Refund proposal P-208",
+        "fields": [
+          {
+            "key": "operation",
+            "value": "refund OP-208"
+          },
+          {
+            "key": "amount",
+            "value": "USD 42"
+          },
+          {
+            "key": "binding",
+            "value": "P-208 / digest 8b2"
+          },
+          {
+            "key": "decision",
+            "value": "approved by Mira"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Outcome and binding",
+            "detail": "Approved; recomputed digest matches 8b2",
+            "status": "pass"
+          },
+          {
+            "label": "Expiry",
+            "detail": "Resume at 10:15; expires at 10:30",
+            "status": "pass"
+          },
+          {
+            "label": "Current entitlement",
+            "detail": "Mira lost required role at 10:10",
+            "status": "fail"
+          }
+        ],
+        "result": "No mutation; request a currently entitled decision",
+        "result_status": "fail"
+      },
+      "read": [
+        "The recorded decision is approved and matches the unchanged proposal.",
+        "The request has not expired.",
+        "A current role lookup fails, so the executor must not run."
+      ],
+      "question": "Would a stable operation ID make this refund permissible?",
+      "answer": "No. Operation identity can support duplicate prevention under a downstream contract. It cannot restore an approver's current entitlement. A permitted decision and current resource preconditions are still required before execution.",
+      "takeaway": "Exact binding and current authority are separate gates.",
+      "assumption": "Fictional policy requires current entitlement and one independent approver. Other execution gates remain required; digest text is abbreviated."
+    },
+    {
+      "id": "18B",
+      "placement": "before_heading",
+      "anchor": "Escalation, override, rejection and correction",
+      "title": "Changing the amount creates a new decision",
+      "intro": "An approver revises a USD 42 refund to USD 30. The application retains the first proposal for audit and creates a new immutable proposal for the changed action.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "Original proposal",
+            "event": "Prepare P-208 for review",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-208; USD 42",
+                "changed": false
+              },
+              {
+                "key": "digest",
+                "value": "8b2",
+                "changed": false
+              },
+              {
+                "key": "decision",
+                "value": "approved P-208",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "Human correction",
+            "event": "Create changed proposal P-209",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-209; USD 30",
+                "changed": true
+              },
+              {
+                "key": "digest",
+                "value": "c91",
+                "changed": true
+              },
+              {
+                "key": "decision",
+                "value": "pending P-209",
+                "changed": true
+              }
+            ]
+          },
+          {
+            "title": "New review",
+            "event": "Entitled reviewer approves P-209",
+            "fields": [
+              {
+                "key": "proposal",
+                "value": "P-209; USD 30",
+                "changed": false
+              },
+              {
+                "key": "digest",
+                "value": "c91",
+                "changed": false
+              },
+              {
+                "key": "decision",
+                "value": "approved P-209",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "P-208 approval cannot authorize P-209, even for a lower amount."
+      },
+      "read": [
+        "The changed amount changes both proposal identity and digest.",
+        "The middle record has no approval for the new action.",
+        "The final decision binds to the revised proposal only."
+      ],
+      "question": "May execution occur in the middle frame because USD 30 is less than USD 42?",
+      "answer": "No. The first decision authorized a different exact operation. A lower amount does not preserve that binding. P-209 needs its required decision, current entitlement and downstream precondition checks.",
+      "takeaway": "A modification starts a new approval obligation.",
+      "assumption": "Fictional sequence; hashes are abbreviated. Frames show the active proposal pointer; prior immutable proposal and decision records remain retained."
+    }
+  ]
+}

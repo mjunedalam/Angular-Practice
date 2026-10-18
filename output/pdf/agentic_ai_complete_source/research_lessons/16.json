@@ -1,0 +1,69 @@
+{
+  "chapter": 16,
+  "design_note": "The existing labs teach loop guards and stale approval state. This trace adds the replay boundary: a recorded activity result reconstructs orchestration without reissuing the completed read. The prediction explicitly separates that case from an activity whose completion was never durably recorded.",
+  "source": {
+    "title": "Temporal Workflow Definition",
+    "url": "https://docs.temporal.io/workflow-definition",
+    "publisher": "Temporal Technologies",
+    "concept": "Replay reconstructs deterministic workflow decisions from recorded history. Network and model calls belong in activities outside workflow replay; activity retries remain a separate execution concern.",
+    "scope": "A fictional read activity returns E-41 and its completion is durably recorded before the worker fails. The example assumes compatible deterministic workflow code.",
+    "id": "R16",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Long-running timers and durable execution",
+    "title": "Replay consumes the receipt, not another API call",
+    "intro": "AegisOps activity A-41 reads metrics and returns evidence E-41. Its completion reaches durable history before the workflow worker fails. A replacement worker reconstructs the same workflow.",
+    "kind": "swimlane",
+    "data": {
+      "lanes": [
+        "Worker A",
+        "Durable history",
+        "Worker B"
+      ],
+      "steps": [
+        {
+          "time": "t0",
+          "lane": 0,
+          "label": "A-41 returns evidence E-41"
+        },
+        {
+          "time": "t1",
+          "lane": 1,
+          "label": "Save A-41 completion + E-41"
+        },
+        {
+          "time": "t2",
+          "lane": 0,
+          "label": "Workflow worker stops"
+        },
+        {
+          "time": "t3",
+          "lane": 2,
+          "label": "Replay matches activity A-41"
+        },
+        {
+          "time": "t4",
+          "lane": 1,
+          "label": "Supply recorded E-41 result"
+        }
+      ],
+      "wait_after": 2,
+      "wait_label": "Replacement reconstructs workflow",
+      "result": "Use recorded evidence; replay issues no second A-41 read."
+    },
+    "read": [
+      "The completion is durable before the crash.",
+      "Workflow replay matches the recorded activity and consumes its result.",
+      "A fresh measurement would require an explicit new activity, not accidental replay I/O."
+    ],
+    "question": "If A-41 completion never reached history, is another activity attempt ruled out?",
+    "answer": "No. The shown no-repeat result depends on the recorded completion. An unrecorded or failed activity can be retried under its policy. Mutating activities therefore need stable operation identity and downstream deduplication or reconciliation independently of workflow replay.",
+    "takeaway": "Recorded activity results and activity retry have different semantics.",
+    "assumption": "Constructed ordering; compatible deterministic code and durable activity completion are assumed. Times show sequence, not elapsed duration.",
+    "source_label": "Temporal: workflow definition",
+    "id": "16C",
+    "placement": "before_heading",
+    "source_key": "R16"
+  }
+}

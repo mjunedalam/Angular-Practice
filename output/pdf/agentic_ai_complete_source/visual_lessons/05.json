@@ -1,0 +1,114 @@
+{
+  "chapter": 5,
+  "chapter_title": "5. Agent Harness Architecture",
+  "audit": "The railway control-room analogy explains coordination but leaves the difference between instructions, selected evidence and retained execution authority abstract. Lesson A gives a single run three concrete workspaces, including a released definition, a stale balance observation and an unresolved intent. It asks which owner must repair the discrepancy. Lesson B follows an approved refund across cancellation while the payment service is already processing it. The final record distinguishes stopped future scheduling from a confirmed completed effect. This directly addresses the chapter's cancellation and outcome-verification corrections without implying that a harness can physically interrupt every external transaction.",
+  "lessons": [
+    {
+      "id": "5A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Three records for one controlled journey",
+      "intro": "ShopAssist run R-42 has a stale balance observation and a saved refund intent awaiting reconciliation. Inspect what each owner actually retains.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Released brief",
+            "object": "folder",
+            "items": [
+              "Definition: shopassist v8",
+              "Refund guidance: v3",
+              "Never claim unverified success"
+            ],
+            "role": "policy"
+          },
+          {
+            "title": "Decision view",
+            "object": "window",
+            "items": [
+              "Order: ORD-104233",
+              "Balance: 2499 at 09:00",
+              "Current time: 09:40"
+            ],
+            "role": "data"
+          },
+          {
+            "title": "Control record",
+            "object": "server",
+            "items": [
+              "Run: R-42; paused",
+              "Intent: K-17 unresolved",
+              "Next: reconcile K-17"
+            ],
+            "role": "runtime"
+          }
+        ],
+        "relations": [
+          "View supplies facts; brief guides proposals.",
+          "The control record governs the next action."
+        ]
+      },
+      "read": [
+        "The brief says how to behave, not what the current balance is.",
+        "The observation has a timestamp and may need refreshing.",
+        "The unresolved intent must be reconciled before another refund."
+      ],
+      "question": "Would adding stronger refund wording to the brief resolve intent K-17?",
+      "answer": "No. The executor must use the retained effect identity and the payment service's status or deduplication contract to resolve K-17. The context builder can then supply updated evidence. Instructions cannot reconstruct a lost external outcome.",
+      "takeaway": "Fix the owner of the failed contract: guidance, evidence or execution state.",
+      "assumption": "Fictional run; the control-room analogy describes coordination, not physical control of an external service."
+    },
+    {
+      "id": "5B",
+      "placement": "before_heading",
+      "anchor": "Cancellation, pause and resume",
+      "title": "Cancellation arrives after submission",
+      "intro": "The exact refund passed approval, authority and budget checks. Cancellation arrives after submission but before the service reports its result.",
+      "kind": "swimlane",
+      "data": {
+        "lanes": [
+          "Controller",
+          "Payment service",
+          "State store"
+        ],
+        "steps": [
+          {
+            "time": "09:40:00",
+            "lane": 2,
+            "label": "Persist accepted intent K-17"
+          },
+          {
+            "time": "09:40:01",
+            "lane": 1,
+            "label": "Receive refund with K-17"
+          },
+          {
+            "time": "09:40:02",
+            "lane": 0,
+            "label": "Cancel future scheduling"
+          },
+          {
+            "time": "09:40:03",
+            "lane": 1,
+            "label": "Commit refund RF-9"
+          },
+          {
+            "time": "09:40:04",
+            "lane": 2,
+            "label": "Persist verified receipt"
+          }
+        ],
+        "result": "Run cancelled; RF-9 confirmed; no later tools scheduled."
+      },
+      "read": [
+        "Intent persistence precedes the external submission.",
+        "Cancellation prevents future scheduling once observed.",
+        "The committed refund remains a fact after cancellation."
+      ],
+      "question": "If the final receipt cannot be retrieved, may the cancellation message say no refund occurred?",
+      "answer": "No. Submission already occurred, so the outcome remains unknown until reconciliation establishes it. Retain K-17 and the cancellation reason, stop new work, and communicate the uncertainty. Cancellation is not proof of rollback or non-execution.",
+      "takeaway": "Stopping future work and discovering an in-flight outcome are separate responsibilities.",
+      "assumption": "Fictional ordered events; service processing is non-cancellable here. Equal spacing shows sequence, not proportional elapsed duration."
+    }
+  ]
+}

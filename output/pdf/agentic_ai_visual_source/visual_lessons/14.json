@@ -1,0 +1,119 @@
+{
+  "chapter": 14,
+  "chapter_title": "MCP - Model Context Protocol",
+  "audit": "The connector analogy distinguishes connection from permission, but the existing process diagrams do not let readers inspect a particular advertised capability against a pinned host catalog. Lesson A gives the host, connection and server concrete contents and makes a server-only destructive capability visibly absent from model exposure. Lesson B supplies a request whose schema and identity checks pass while its resource permission fails. Readers must explain why invocation stops despite technical compatibility. Neither lesson adds protocol-version claims or treats annotations as authority. The examples retain separate host and server responsibilities and explicitly distinguish model proposals from MCP messages.",
+  "lessons": [
+    {
+      "id": "14A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "One connection, two different catalogs",
+      "intro": "AegisOps connects to the approved observability server. Its model may inspect latency, but the server also advertises a restart capability. Inspect what each container actually owns.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Host registry",
+            "object": "folder",
+            "items": [
+              "Exposed: obs.query_latency",
+              "Pinned contract: hash 7ac",
+              "Restart tool: withheld"
+            ],
+            "role": "policy"
+          },
+          {
+            "title": "Client connection",
+            "object": "window",
+            "items": [
+              "Server: observability",
+              "Compatible protocol selected",
+              "Carries checked invocations"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Server catalog",
+            "object": "server",
+            "items": [
+              "query_latency(service, window)",
+              "restart_service(service)",
+              "Backend checks each request"
+            ],
+            "role": "external"
+          }
+        ],
+        "relations": [
+          "Host chooses which contracts reach its model.",
+          "Client connects to server; it grants no authority."
+        ]
+      },
+      "read": [
+        "Compare the host list with the larger server catalog.",
+        "The connection transports requests; it does not choose task permissions.",
+        "The server still checks each invocation against its resource policy."
+      ],
+      "question": "Does advertising restart_service make it callable by the model?",
+      "answer": "No. The host has withheld that capability. Server discovery describes availability; exposure requires host review, and any eventual invocation still requires independent authorization.",
+      "takeaway": "Discovery describes capabilities; the host chooses exposure.",
+      "assumption": "Fictional registry; compatible transport is assumed. Containers show ownership, not an execution sequence."
+    },
+    {
+      "id": "14B",
+      "placement": "before_heading",
+      "anchor": "Authentication, permissions, consent and trust",
+      "title": "Valid arguments, forbidden service",
+      "intro": "A permitted latency tool receives a structurally valid request for payroll-api. The authenticated caller is allowed to inspect checkout-api only.",
+      "kind": "packet",
+      "data": {
+        "name": "obs.query_latency request",
+        "fields": [
+          {
+            "key": "service",
+            "value": "payroll-api"
+          },
+          {
+            "key": "window_minutes",
+            "value": "60"
+          },
+          {
+            "key": "principal",
+            "value": "aegisops-reader"
+          },
+          {
+            "key": "tenant",
+            "value": "Northwind"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Input schema",
+            "detail": "60 is within the allowed 5-1440 range",
+            "status": "pass"
+          },
+          {
+            "label": "Identity",
+            "detail": "Verified reader; correct server audience",
+            "status": "pass"
+          },
+          {
+            "label": "Resource authority",
+            "detail": "Only checkout-api is in this grant",
+            "status": "fail"
+          }
+        ],
+        "result": "Denied before reading payroll-api metrics",
+        "result_status": "fail"
+      },
+      "read": [
+        "The requested window satisfies the schema.",
+        "An authenticated identity is not a grant for every service.",
+        "The resource check rejects this particular target."
+      ],
+      "question": "Would marking the tool read-only change the decision?",
+      "answer": "No. Read-only describes effects, not entitlement to sensitive metrics. The request still targets a service outside this caller's authorized resource scope.",
+      "takeaway": "Read-only operations still require resource authorization.",
+      "assumption": "Fictional identity and policy; the host permits the tool, but the server restricts resources."
+    }
+  ]
+}

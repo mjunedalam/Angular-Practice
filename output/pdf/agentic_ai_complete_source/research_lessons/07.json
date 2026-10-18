@@ -1,0 +1,55 @@
+{
+  "chapter": 7,
+  "design_note": "Demonstrate duplicate event handling while rebuilding a budget projection from a snapshot. The duplicate delivery does not represent a second model invocation, and the cursor must commit atomically with the accounting update.",
+  "source": {
+    "title": "Event Sourcing pattern",
+    "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing",
+    "publisher": "Microsoft Azure Architecture Center",
+    "concept": "Snapshots allow replay from a recorded stream position, and duplicate event delivery requires idempotent projection updates to avoid counting the same change twice.",
+    "scope": "Original model-turn ledger assumes atomic cursor and projection updates. It explains bookkeeping replay, not external exactly-once execution or a requirement to adopt event sourcing.",
+    "id": "R07",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "State schema evolution",
+    "title": "Replay an event once, even when delivered twice",
+    "intro": "Snapshot E20 retains 8 unused model turns. Rebuilding the projection receives accounting events E21, E22, duplicate E22, and E23. Each unique event represents one already completed generation; replay invokes no model.",
+    "kind": "ledger",
+    "data": {
+      "unit": "model turns left",
+      "start": 8,
+      "entries": [
+        {
+          "label": "E21: first delivery",
+          "delta": -1
+        },
+        {
+          "label": "E22: first delivery",
+          "delta": -1
+        },
+        {
+          "label": "E22: duplicate delivery ignored",
+          "delta": 0
+        },
+        {
+          "label": "E23: first delivery",
+          "delta": -1
+        }
+      ],
+      "rule": "Persist cursor and debit together. Replay restores settled usage; it reserves no new calls."
+    },
+    "read": [
+      "The snapshot already incorporates all accounting through E20.",
+      "A repeated event identity describes the same generation, not additional work.",
+      "Three unique events reduce 8 remaining turns to 5."
+    ],
+    "question": "If E22 arrives a third time after E23, should the remaining allowance fall from 5 to 4?",
+    "answer": "No. The projection has already incorporated E22 and its cursor has passed that position. Ignore the duplicate under the ordered-stream contract. The consumed allowance remains 3 turns since E20, leaving 5. Cursor advancement and the debit must be atomic so a crash cannot split them.",
+    "takeaway": "An accounting projection counts accepted event identities, not delivery attempts.",
+    "assumption": "Constructed ordered event stream and atomic projection/cursor commit. Turns were settled at generation; replay adds no reservation, model call or external effect.",
+    "source_label": "Microsoft: event replay and idempotency",
+    "id": "7C",
+    "placement": "before_heading",
+    "source_key": "R07"
+  }
+}

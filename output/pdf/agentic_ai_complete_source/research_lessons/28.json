@@ -1,0 +1,69 @@
+{
+  "chapter": 28,
+  "design_note": "Makes the critical path numerical without suggesting that parallel calls reduce total work. The reader sees one early result wait for a slower independent branch before synthesis can finish.",
+  "source": {
+    "id": "R28",
+    "title": "Building effective agents",
+    "url": "https://www.anthropic.com/engineering/building-effective-agents",
+    "publisher": "Anthropic; Erik Schluntz and Barry Zhang",
+    "accessed": "2026-10-17",
+    "concept": "Independent subtasks can execute in parallel and their results can be combined. Dependency structure determines which work can overlap.",
+    "scope": "Original ShopAssist tools and timings; the source supplies the parallel-work principle, not these latencies or savings."
+  },
+  "lesson": {
+    "anchor": "Batching, parallelism and latency",
+    "title": "The slow branch sets the join time",
+    "intro": "ShopAssist needs two authorized independent reads: stock takes 3 seconds and carrier status takes 5. Both start at 0; synthesis takes 1 second after both return. These are constructed timings.",
+    "kind": "swimlane",
+    "data": {
+      "lanes": [
+        "Harness",
+        "Stock service",
+        "Carrier service"
+      ],
+      "steps": [
+        {
+          "time": "0 s",
+          "lane": 0,
+          "label": "Launch both scoped reads"
+        },
+        {
+          "time": "3 s",
+          "lane": 1,
+          "label": "Stock result ready"
+        },
+        {
+          "time": "5 s",
+          "lane": 2,
+          "label": "Carrier result ready"
+        },
+        {
+          "time": "5 s",
+          "lane": 0,
+          "label": "Join both evidence records"
+        },
+        {
+          "time": "6 s",
+          "lane": 0,
+          "label": "Synthesis complete"
+        }
+      ],
+      "wait_after": 1,
+      "wait_label": "Stock waits 2 s for carrier",
+      "result": "Elapsed: max(3, 5) + 1 = 6 s; serial equivalent: 9 s."
+    },
+    "read": [
+      "Both reads start together because neither consumes the other result.",
+      "Stock finishing at 3 seconds does not make the combined answer ready.",
+      "The model can synthesize only after the slower result arrives at 5 seconds."
+    ],
+    "question": "If stock takes 7 seconds instead, when does the answer finish under the same assumptions?",
+    "answer": "At 8 seconds: max(7, 5) + 1. The stock branch becomes the critical path. Parallelism overlaps independent work; it does not remove the need to perform or pay for both reads. Quota contention, retries or extra joining overhead would require a different timing model.",
+    "takeaway": "Follow dependencies to calculate elapsed time; count all work separately for cost.",
+    "assumption": "Constructed timings; ample capacity, simultaneous dispatch, no failures, and zero dispatch/join overhead. Diagram spacing represents order, not duration.",
+    "id": "28C",
+    "placement": "before_heading",
+    "source_key": "R28",
+    "source_label": "Anthropic: Building effective agents"
+  }
+}

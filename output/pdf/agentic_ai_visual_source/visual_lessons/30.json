@@ -1,0 +1,109 @@
+{
+  "chapter": 30,
+  "chapter_title": "LLM Gateway, Provider Abstraction & Self-Hosted Inference",
+  "audit": "The restaurant analogy can obscure the difference between a kitchen being open and a request being eligible for that kitchen. Lesson A makes a restricted incident request pass through three independent route criteria; an available route with forbidden placement still fails. This distinguishes model-access policy from downstream remediation authority. Lesson B calculates the chapter's toy KV-cache example across four sequence lengths, using proportional bars rather than an unscaled capacity anatomy. The page names excluded memory and architecture assumptions, so arithmetic is not mistaken for a capacity benchmark. Together these visuals make route qualification and model-serving resource reasoning inspectable without adding volatile provider claims.",
+  "lessons": [
+    {
+      "id": "30A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "An available model can still be ineligible",
+      "intro": "AegisOps sends restricted incident evidence. Its fictional routing registry records placement, required output support and task-quality eligibility for four routes.",
+      "kind": "matrix",
+      "data": {
+        "columns": [
+          "Data placement",
+          "Required format",
+          "Task floor"
+        ],
+        "rows": [
+          {
+            "label": "Managed region A",
+            "cells": [
+              "allow",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "Managed region B",
+            "cells": [
+              "deny",
+              "allow",
+              "allow"
+            ]
+          },
+          {
+            "label": "Local model L",
+            "cells": [
+              "allow",
+              "deny",
+              "allow"
+            ]
+          },
+          {
+            "label": "New local model N",
+            "cells": [
+              "allow",
+              "allow",
+              "unknown"
+            ]
+          }
+        ],
+        "rule": "Select only a row with all allow, then check health, quota and reserved budget."
+      },
+      "read": [
+        "Region B fails before price or latency can matter.",
+        "Model L cannot supply the required response contract.",
+        "Model N lacks approved quality evidence; unknown does not become allow."
+      ],
+      "question": "If region A has no quota, may the gateway choose the available region B?",
+      "answer": "No. Capacity pressure does not override data placement. None of the other listed routes is currently eligible. Use the declared bounded degraded outcome or human escalation. Even a qualified model response remains a proposal and does not authorize a production mutation.",
+      "takeaway": "Route eligibility precedes capacity and economic selection.",
+      "assumption": "Fictional registry entries, not vendor capabilities; allow records approved eligibility, not a guarantee of every future response."
+    },
+    {
+      "id": "30B",
+      "placement": "before_heading",
+      "anchor": "How high-throughput serving works",
+      "title": "Long context consumes concrete KV memory",
+      "intro": "Use the chapter's constructed dense cache: 16 layers, 8 KV heads, head dimension 64, and 2 bytes per value. Each stored token needs 32 KiB.",
+      "kind": "bars",
+      "data": {
+        "unit": "MiB of KV storage",
+        "items": [
+          {
+            "label": "1,024 stored tokens",
+            "value": 32,
+            "role": "data"
+          },
+          {
+            "label": "2,048 stored tokens",
+            "value": 64,
+            "role": "data"
+          },
+          {
+            "label": "4,096 stored tokens",
+            "value": 128,
+            "role": "data"
+          },
+          {
+            "label": "8,192 stored tokens",
+            "value": 256,
+            "role": "data"
+          }
+        ],
+        "rule": "2 x 16 x 8 x 64 x 2 bytes = 32 KiB/token; weights and other allocations excluded."
+      },
+      "read": [
+        "Doubling stored tokens doubles this simplified cache estimate.",
+        "The 4,096-token row reproduces 128 MiB from the chapter.",
+        "These bars encode memory only, not throughput or time to first token."
+      ],
+      "question": "Would four 4,096-token requests need exactly 512 MiB of total device memory?",
+      "answer": "They need an estimated 512 MiB of dense KV storage under these assumptions. Total device memory also includes model weights, working buffers, metadata and other allocations. Sharing, paging, precision and parallelism can change the actual cache layout. Measure the chosen engine before setting admission limits.",
+      "takeaway": "A KV estimate is one memory component, not total serving capacity.",
+      "assumption": "Constructed dense cache arithmetic; no sharing, padding, quantization, metadata or parallelism overhead. MiB uses 1,024 squared bytes."
+    }
+  ]
+}

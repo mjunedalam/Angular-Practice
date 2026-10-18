@@ -1,0 +1,93 @@
+{
+  "chapter": 2,
+  "chapter_title": "2. What Is an AI Agent? Anatomy, Autonomy & Boundaries",
+  "audit": "The taxi comparison explains route choice but can leave autonomy looking like a property of the whole product. Lesson A holds the customer request constant and contrasts a fixed workflow with a model-selected follow-up after a missing capture appears. Both retain explicit incomplete or waiting outcomes, so the agent route is not presented as universally better. Lesson B converts termination into two concrete decision branches: a finish claim needs an authoritative receipt, while an exhausted allowance preserves incomplete work. The lessons make sequencing freedom and controller-owned completion inspectable without implying that all external tools behave deterministically.",
+  "lessons": [
+    {
+      "id": "2A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Two routes after a missing capture",
+      "intro": "The same customer reports two charges. An authorized lookup returns one capture and an unresolved settlement reference.",
+      "kind": "fork",
+      "data": {
+        "input": "ORD-104233: 1 capture; settlement reference SET-8 unresolved",
+        "left": {
+          "title": "Fixed support workflow",
+          "steps": [
+            "Read order and payments under access policy",
+            "Missing settlement selects authored escalation",
+            "Return evidence gap with SET-8 reference"
+          ],
+          "result": "Incomplete investigation; escalation has the records",
+          "status": "wait"
+        },
+        "right": {
+          "title": "Bounded agent route",
+          "steps": [
+            "Model proposes allowed settlement lookup",
+            "Executor authorizes read; finds second capture",
+            "Model proposes refund; controller seeks review"
+          ],
+          "result": "Waiting for approval; no financial effect yet",
+          "status": "wait"
+        }
+      },
+      "read": [
+        "Both routes begin with the same incomplete evidence.",
+        "The agent chooses another permitted read from the observation.",
+        "Discovering a duplicate still does not authorize its refund."
+      ],
+      "question": "If SET-8 lookup is forbidden for this principal, what should the agent route do?",
+      "answer": "The executor denies the lookup. The run records the evidence gap and escalates or returns incomplete under its task policy. Model-directed sequencing cannot expand resource permissions; a fixed workflow could also include a permitted settlement branch if designed to do so.",
+      "takeaway": "Autonomy changes who chooses the next step, not who grants access.",
+      "assumption": "Fictional authored routes; the taxi analogy concerns sequencing only. Tool permissions and completion still require software checks."
+    },
+    {
+      "id": "2B",
+      "placement": "before_heading",
+      "anchor": "Termination: budgets, loop limits and completion criteria",
+      "title": "Who is allowed to say done?",
+      "intro": "Inspect two possible controller inputs for a refund-only task. Completion requires a matching confirmed payment-service receipt.",
+      "kind": "tree",
+      "data": {
+        "root": "Controller input for refund task",
+        "branches": [
+          {
+            "edge": "Finish claim",
+            "question": "Matching confirmed receipt exists?",
+            "yes": {
+              "label": "Completed: retain receipt RF-9",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Incomplete: no acceptance evidence",
+              "role": "fail"
+            }
+          },
+          {
+            "edge": "Continue request",
+            "question": "Required operation fits remaining limits?",
+            "yes": {
+              "label": "Continue through normal execution gates",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Stop with limit and partial evidence",
+              "role": "wait"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The first split identifies the proposed controller input.",
+        "A model finish claim is checked against an external receipt.",
+        "Allowance permits further checking; it does not prove completion."
+      ],
+      "question": "What happens when the model says done but the provider status is pending?",
+      "answer": "Pending is not a confirmed receipt. The finish claim fails this task's acceptance condition, so the controller preserves the pending reference and returns an incomplete or explicit waiting outcome according to its contract. It must not report a successful refund.",
+      "takeaway": "Termination records why work stopped; completion requires task-specific evidence.",
+      "assumption": "Fictional refund-only goal; these two inputs exclude cancellation, provider failure and other controller branches. Pending receipts do not satisfy confirmation."
+    }
+  ]
+}

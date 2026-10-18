@@ -1,0 +1,145 @@
+{
+  "chapter": 19,
+  "chapter_title": "Agent Security Fundamentals",
+  "audit": "The limited-keys analogy and broad attack-surface map explain least privilege without asking readers to trace a specific disclosure route. Lesson A follows an injected email through a summarizer to two different destinations, showing both legitimate content access and denied external egress. It explicitly includes remote image rendering as an effect path rather than assuming the sender is the only exit. Lesson B applies destination and network checks to a redirect that begins with an approved hostname. The narrow two-case tree makes initial URL validation visibly insufficient while preserving the chapter's warning that sanitization and drawn trust boundaries are not implementation guarantees.",
+  "lessons": [
+    {
+      "id": "19A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Trace the stolen invoice route to its stop",
+      "intro": "The user authorized an unread-mail summary. Message M-52 contains an instruction to leak invoice INV-9 through email or a tracking image. The summary task has no external-send authority.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Mailbox data",
+            "nodes": [
+              {
+                "id": "mail",
+                "label": "M-52: untrusted text",
+                "role": "external"
+              },
+              {
+                "id": "inv",
+                "label": "INV-9: private invoice",
+                "role": "data"
+              }
+            ]
+          },
+          {
+            "title": "Task runtime",
+            "nodes": [
+              {
+                "id": "read",
+                "label": "Summary reader",
+                "role": "model"
+              },
+              {
+                "id": "gate",
+                "label": "Egress policy gate",
+                "role": "policy"
+              }
+            ]
+          },
+          {
+            "title": "Destinations",
+            "nodes": [
+              {
+                "id": "user",
+                "label": "Requesting user",
+                "role": "success"
+              },
+              {
+                "id": "out",
+                "label": "Outside inbox / image",
+                "role": "external"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "mail",
+            "to": "read",
+            "label": "Allowed read; embedded commands are data",
+            "status": "allow"
+          },
+          {
+            "from": "inv",
+            "to": "read",
+            "label": "Read within user mailbox entitlement",
+            "status": "allow"
+          },
+          {
+            "from": "gate",
+            "to": "user",
+            "label": "Release scoped summary to its requester",
+            "status": "allow"
+          },
+          {
+            "from": "gate",
+            "to": "out",
+            "label": "Deny external send and remote image fetch",
+            "status": "deny"
+          }
+        ]
+      },
+      "read": [
+        "The reader may encounter both hostile text and private data.",
+        "The four routes show checks on access and release, not every internal hop.",
+        "External disclosure is blocked at sender and renderer boundaries."
+      ],
+      "question": "Does removing the email-send tool alone close the shown image route?",
+      "answer": "No. A generated image URL could still cause a network request from the renderer. The shown policy also denies arbitrary remote image fetches; both routes require effect-level controls.",
+      "takeaway": "Inspect every outbound channel that can carry private data.",
+      "assumption": "Fictional enforced controls; trust zones illustrate required boundaries, not proof of isolation. Permitted summaries remain subject to data-minimization policy."
+    },
+    {
+      "id": "19B",
+      "placement": "before_heading",
+      "anchor": "SSRF, path traversal and unsafe access",
+      "title": "An approved hostname can redirect elsewhere",
+      "intro": "A URL-fetch tool allows HTTPS on docs.vendor.test. In this constructed case, every request either has no redirect or exactly one redirect; all eventual connections undergo destination checks.",
+      "kind": "tree",
+      "data": {
+        "root": "Request starts at https://docs.vendor.test",
+        "branches": [
+          {
+            "edge": "No redirect",
+            "question": "Resolved IP and port allowed at connect?",
+            "yes": {
+              "label": "Fetch within output and time bounds",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Deny internal or disallowed target",
+              "role": "fail"
+            }
+          },
+          {
+            "edge": "One redirect",
+            "question": "New URL and resolved destination allowed?",
+            "yes": {
+              "label": "Fetch approved destination with bounds",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Stop before redirected connection",
+              "role": "fail"
+            }
+          }
+        ]
+      },
+      "read": [
+        "An approved original hostname does not settle the connection decision.",
+        "Redirects introduce a new URL and destination to validate.",
+        "Network enforcement must agree with the address actually contacted."
+      ],
+      "question": "A redirect targets a private metadata address. Which leaf should the request reach?",
+      "answer": "The denied redirect leaf. The new target is outside the allowed destination policy, even though the original hostname was approved. The egress layer must prevent the actual connection, including address changes after earlier validation.",
+      "takeaway": "Validate each actual network destination, including redirects.",
+      "assumption": "Constructed one-redirect case; additional redirects are rejected. The diagram assumes connection-time network enforcement, not only a preliminary URL string check."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "chapter": 23,
+  "design_note": "The existing labs preserve uncertain effects and downstream operation identity. This ledger adds overload containment across runs: three retry allowances belong to one dependency window, rather than to each worker. Completing a retry does not replenish a cumulative traffic allowance.",
+  "source": {
+    "title": "Handling Overload",
+    "url": "https://sre.google/sre-book/handling-overload/",
+    "publisher": "Google SRE; Alejandro Forero Cuervo",
+    "concept": "Per-request retry limits and broader client retry budgets address different amplification paths. Coordinating retries and avoiding retries at every stack layer help contain overload.",
+    "scope": "The fixed three-retry window is a constructed teaching policy, not Google's published ratio. Atomic shared accounting and read-only retry eligibility are explicit assumptions.",
+    "id": "R23",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Loop detection and multi-dimensional budgets",
+    "title": "A dependency budget belongs to every caller",
+    "intro": "Three AegisOps runs share one metrics dependency. This constructed 60-second window permits 3 retry attempts total, after transient read failures. Admission consumes one allowance permanently for that window.",
+    "kind": "ledger",
+    "data": {
+      "unit": "retries available",
+      "start": 3,
+      "entries": [
+        {
+          "label": "Run A: admit first retry",
+          "delta": -1
+        },
+        {
+          "label": "Run B: admit first retry",
+          "delta": -1
+        },
+        {
+          "label": "Run A: admit second retry",
+          "delta": -1
+        },
+        {
+          "label": "Run C: deny retry; no charge",
+          "delta": 0
+        }
+      ],
+      "rule": "Reserve atomically before dispatch; admitted retries settle as spent, never refunded here."
+    },
+    "read": [
+      "Run A and Run B consume the same available balance.",
+      "The third admitted retry exhausts this shared window.",
+      "A completed retry releases no allowance because the ledger limits cumulative attempts."
+    ],
+    "question": "May Run C retry now because it has made no retries of its own?",
+    "answer": "No. Its per-request allowance cannot override the exhausted dependency budget. It must stop, use an approved degraded path, or wait only if deadline and policy allow the next window. The same policy still classifies errors and checks whether an operation is safe to retry.",
+    "takeaway": "Bound retry traffic across callers as well as within each request.",
+    "assumption": "Toy 60-second window; atomic shared admission, no refunds or replenishment within the shown window. Only authorized read retries are eligible.",
+    "source_label": "Google SRE: handling overload",
+    "id": "23C",
+    "placement": "before_heading",
+    "source_key": "R23"
+  }
+}

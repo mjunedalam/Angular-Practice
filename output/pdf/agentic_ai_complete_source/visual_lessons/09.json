@@ -1,0 +1,147 @@
+{
+  "chapter": 9,
+  "chapter_title": "9. Memory Architecture",
+  "audit": "The shopkeeper's file analogy distinguishes memory from current work but can leave readers unsure where an actual fact should live. Lesson A sorts a language preference, a current refund intent and an earlier resolved episode into concrete containers while preserving the payment service's authority. Lesson B shows a keyed preference across an inferred contradiction and a later explicit user correction. The unchanged cells expose the rejected supersession, and the final version demonstrates an authenticated transactional replacement. This teaches source authority for a particular fact without inventing a universal trust score or implying that repeated recall makes an inference verified.",
+  "lessons": [
+    {
+      "id": "9A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "One customer, three different records",
+      "intro": "Customer C-7 returns for support. ShopAssist has a pending refund, session details and a governed customer file with different validity rules.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Working counter",
+            "object": "queue",
+            "items": [
+              "Run: R-42",
+              "Intent: K-17 pending",
+              "Balance: refresh before effect"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Session notes",
+            "object": "folder",
+            "items": [
+              "Session: S-18",
+              "User asks about ORD-104233",
+              "Promise: report actual outcome"
+            ],
+            "role": "data"
+          },
+          {
+            "title": "Customer file",
+            "object": "vault",
+            "items": [
+              "Subject: tenant T-1 / C-7",
+              "Language: Hindi; user stated",
+              "Episode: RF-4 resolved in June"
+            ],
+            "role": "data"
+          }
+        ],
+        "relations": [
+          "Relevant file facts may enter this session view.",
+          "Current balances come from the payment service."
+        ]
+      },
+      "read": [
+        "Language preference can help across sessions under its retention policy.",
+        "The prior refund episode describes history, not current eligibility.",
+        "The pending intent remains exact execution state on the working counter."
+      ],
+      "question": "Which record should establish the current refundable balance: the June episode or the payment service?",
+      "answer": "The payment service. The June episode may guide investigation, but it does not establish today's balance or approval. Refresh current financial facts before action, and keep historical memory attributed to its original event.",
+      "takeaway": "A record's purpose and authority determine its use, not how easily it can be recalled.",
+      "assumption": "Fictional customer records; tiers describe use, not storage speed. Unlike a paper file, software copies require tracked correction and deletion."
+    },
+    {
+      "id": "9B",
+      "placement": "before_heading",
+      "anchor": "Confidence, provenance and source-of-truth reconciliation",
+      "title": "A plausible inference cannot replace a preference",
+      "intro": "For authenticated subject T-1/C-7, Hindi is explicitly confirmed. A later extractor guesses English; the user then explicitly requests English.",
+      "kind": "snapshots",
+      "data": {
+        "frames": [
+          {
+            "title": "Current M-31",
+            "event": "User confirms Hindi",
+            "fields": [
+              {
+                "key": "language",
+                "value": "Hindi",
+                "changed": false
+              },
+              {
+                "key": "source",
+                "value": "user statement U-12",
+                "changed": false
+              },
+              {
+                "key": "current_id",
+                "value": "M-31",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "Candidate reviewed",
+            "event": "English inferred; conflict flagged",
+            "fields": [
+              {
+                "key": "language",
+                "value": "Hindi",
+                "changed": false
+              },
+              {
+                "key": "source",
+                "value": "user statement U-12",
+                "changed": false
+              },
+              {
+                "key": "current_id",
+                "value": "M-31",
+                "changed": false
+              }
+            ]
+          },
+          {
+            "title": "Current M-32",
+            "event": "User explicitly changes preference",
+            "fields": [
+              {
+                "key": "language",
+                "value": "English",
+                "changed": true
+              },
+              {
+                "key": "source",
+                "value": "user statement U-19",
+                "changed": true
+              },
+              {
+                "key": "current_id",
+                "value": "M-32",
+                "changed": true
+              }
+            ]
+          }
+        ],
+        "invariant": "One current language value per authenticated tenant/subject key."
+      },
+      "read": [
+        "The inferred candidate never becomes the current preference.",
+        "The old source remains attached while the conflict is recorded.",
+        "An authenticated correction supersedes M-31 transactionally and retains history."
+      ],
+      "question": "If the extractor labels English with confidence 0.99, should the middle frame change?",
+      "answer": "No. Under this preference policy, an inference cannot silently replace an explicit user statement. Record the conflict or ask for confirmation. The final change is justified by authenticated U-19 and the supersession policy, not by a larger self-reported confidence number.",
+      "takeaway": "Supersession follows source authority and subject binding, not generated confidence alone.",
+      "assumption": "Fictional preference policy; runtime binds tenant and subject. Transactional supersession retains history; user statements do not confer authorization for other facts."
+    }
+  ]
+}

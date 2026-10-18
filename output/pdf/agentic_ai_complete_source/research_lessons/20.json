@@ -1,0 +1,100 @@
+{
+  "chapter": 20,
+  "design_note": "The existing labs cover intersecting privileges and token audience. This sequence adds a hidden data boundary: a cached result may remain stored after the user loses permission. A fresh authorization decision blocks release despite the same principal, tenant and still-valid cache lifetime.",
+  "source": {
+    "title": "Authorization Cheat Sheet",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+    "publisher": "OWASP Cheat Sheet Series",
+    "concept": "Validate authorization on every request and deny when required permission is absent. A previously permitted request cannot substitute for the authorization check on a later access.",
+    "scope": "The cache epochs and revocation timing are original application design choices. The scenario assumes a trusted, current permission lookup at every release boundary.",
+    "id": "R20",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Credential lifetimes, rotation and audit",
+    "title": "A cache hit does not revive revoked access",
+    "intro": "At 10:00, Priya may read order O-481 and ShopAssist caches its result for 10 minutes. At 10:02, her order access is revoked. The next request arrives before cache expiry.",
+    "kind": "snapshots",
+    "data": {
+      "frames": [
+        {
+          "title": "10:00 first read",
+          "event": "Cache authorized result C-7",
+          "fields": [
+            {
+              "key": "principal",
+              "value": "Priya / Northwind",
+              "changed": false
+            },
+            {
+              "key": "permission",
+              "value": "epoch 41: allow",
+              "changed": false
+            },
+            {
+              "key": "release",
+              "value": "C-7 returned",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "10:02 revocation",
+          "event": "Trusted policy removes access",
+          "fields": [
+            {
+              "key": "principal",
+              "value": "Priya / Northwind",
+              "changed": false
+            },
+            {
+              "key": "permission",
+              "value": "epoch 42: deny",
+              "changed": true
+            },
+            {
+              "key": "release",
+              "value": "C-7 remains stored",
+              "changed": true
+            }
+          ]
+        },
+        {
+          "title": "10:03 cache hit",
+          "event": "Recheck current permission",
+          "fields": [
+            {
+              "key": "principal",
+              "value": "Priya / Northwind",
+              "changed": false
+            },
+            {
+              "key": "permission",
+              "value": "epoch 42: deny",
+              "changed": false
+            },
+            {
+              "key": "release",
+              "value": "deny before context",
+              "changed": true
+            }
+          ]
+        }
+      ],
+      "invariant": "Cache freshness cannot replace current entitlement at release."
+    },
+    "read": [
+      "Principal and tenant are unchanged, so those cache keys alone cannot detect revocation.",
+      "The record is only 3 minutes old, within its 10-minute lifetime.",
+      "The current permission decision prevents cached content from entering model context."
+    ],
+    "question": "Does the remaining 7-minute cache lifetime permit returning C-7?",
+    "answer": "No. Cache lifetime concerns result reuse, while authorization controls whether this requester may receive it now. The trusted permission check denies release at 10:03. The system may invalidate or retain the stored entry according to its separate cache and retention policies.",
+    "takeaway": "Revalidate entitlement when releasing a cached result.",
+    "assumption": "Constructed timeline; permission epoch is application metadata, not an OAuth feature. Current authorization is checked before cached data reaches context.",
+    "source_label": "OWASP: authorization on every request",
+    "id": "20C",
+    "placement": "before_heading",
+    "source_key": "R20"
+  }
+}

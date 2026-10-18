@@ -1,0 +1,156 @@
+{
+  "chapter": 4,
+  "chapter_title": "4. Prompt & Instruction Architecture",
+  "audit": "The handbook analogy distinguishes policy from correspondence, but a boundary drawing alone cannot show where hostile text would cross into an effect. Lesson A follows an injected customer email through a constrained model and an executor, displaying the allowed data route and the denied export route. The fence is explicitly a design claim requiring enforcement. Lesson B uses an actual composition candidate containing duplicate refund-pack identities. It exposes the mismatch that would arise if a dictionary manifest retained one version while both texts entered the prompt. This makes provenance fidelity a concrete release prerequisite rather than a documentation preference.",
+  "lessons": [
+    {
+      "id": "4A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "The customer email is not a policy update",
+      "intro": "Email E-44 asks for order help and says to export every customer record. The model may read the email, but the executor has no export grant.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Untrusted input",
+            "nodes": [
+              {
+                "id": "E44",
+                "label": "E-44: export all records",
+                "role": "external"
+              },
+              {
+                "id": "ATT",
+                "label": "Attachment: user text",
+                "role": "external"
+              }
+            ]
+          },
+          {
+            "title": "Controlled runtime",
+            "nodes": [
+              {
+                "id": "MOD",
+                "label": "Model reads case data",
+                "role": "model"
+              },
+              {
+                "id": "GATE",
+                "label": "Check tenant + scope",
+                "role": "policy"
+              }
+            ]
+          },
+          {
+            "title": "Constrained tools",
+            "nodes": [
+              {
+                "id": "ORD",
+                "label": "Read owned ORD-104233",
+                "role": "action"
+              },
+              {
+                "id": "EXP",
+                "label": "Export all customers",
+                "role": "action"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "E44",
+            "to": "MOD",
+            "label": "Allow as attributed, untrusted case data",
+            "status": "allow"
+          },
+          {
+            "from": "MOD",
+            "to": "GATE",
+            "label": "Inspect every proposed operation",
+            "status": "allow"
+          },
+          {
+            "from": "GATE",
+            "to": "ORD",
+            "label": "Allow only verified ownership + read scope",
+            "status": "allow"
+          },
+          {
+            "from": "GATE",
+            "to": "EXP",
+            "label": "Deny: no bulk-export grant",
+            "status": "deny"
+          }
+        ]
+      },
+      "read": [
+        "The email enters as data even when its wording sounds authoritative.",
+        "Every generated operation passes the policy gate.",
+        "The export route terminates before any customer database export."
+      ],
+      "question": "If the email is perfectly escaped and well formatted, should the export route open?",
+      "answer": "No. Escaping protects wrapper structure, not the authority of the message. The executor must still deny the absent export grant even if the model follows the malicious request. Test the protected effect directly; the drawn fence is not enforcement.",
+      "takeaway": "Attribution guides interpretation; execution checks constrain consequences.",
+      "assumption": "Fictional injection and grants; the handbook analogy and drawn fence are design aids, not implementation guarantees."
+    },
+    {
+      "id": "4B",
+      "placement": "before_heading",
+      "anchor": "Versioning, provenance and change control",
+      "title": "The manifest must match the assembled text",
+      "intro": "A release candidate selects two versions of the refund pack. The composer checks identities before producing any prompt body.",
+      "kind": "packet",
+      "data": {
+        "name": "Composition candidate C-8",
+        "fields": [
+          {
+            "key": "identity",
+            "value": "support v1"
+          },
+          {
+            "key": "refund first",
+            "value": "refund v3"
+          },
+          {
+            "key": "refund second",
+            "value": "refund v4"
+          },
+          {
+            "key": "output",
+            "value": "reply v2"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Variables",
+            "detail": "Required locale and tenant values validated",
+            "status": "pass"
+          },
+          {
+            "label": "Unique pack IDs",
+            "detail": "refund appears twice: v3 and v4",
+            "status": "fail"
+          },
+          {
+            "label": "Behavior evaluation",
+            "detail": "Not run on an ambiguous composition",
+            "status": "wait"
+          }
+        ],
+        "result": "Reject C-8 before rendering or publishing its manifest",
+        "result_status": "fail"
+      },
+      "read": [
+        "Versions differ, but both entries have the same refund identity.",
+        "A dictionary could hide the first version while its text survives.",
+        "Rejecting ambiguity preserves the connection between body and manifest."
+      ],
+      "question": "Can keeping only refund v4 in the manifest fix a body containing both versions?",
+      "answer": "No. That manifest would misdescribe the model's instructions. Select one approved refund version, compose deterministically, and evaluate the resulting candidate. The immutable manifest must identify exactly the text used, including all applicable pack versions.",
+      "takeaway": "Provenance is accurate only when the manifest describes the actual instruction body.",
+      "assumption": "Fictional pack versions and validated configuration; this checks composition integrity, not model obedience or financial authorization."
+    }
+  ]
+}

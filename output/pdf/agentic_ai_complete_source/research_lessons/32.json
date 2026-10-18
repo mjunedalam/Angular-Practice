@@ -1,0 +1,72 @@
+{
+  "chapter": 32,
+  "design_note": "Inspects a paused thread against a renamed node in a candidate graph. The compatibility failure shows why valid stored state and an owned thread do not make deployment migration safe.",
+  "source": {
+    "id": "R32",
+    "title": "Graph API overview",
+    "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+    "publisher": "LangChain",
+    "accessed": "2026-10-17",
+    "concept": "Interrupted threads may still refer to pending node names. Renaming or removing those nodes can break continuation; technically compatible changes can also need separate business-logic review.",
+    "scope": "Original graph versions and pending node; the application gate is illustrative, not a new LangGraph API or automatic migration guarantee."
+  },
+  "lesson": {
+    "anchor": "Failure modes",
+    "title": "The saved node must still have somewhere to run",
+    "intro": "ShopAssist thread T-61 paused at approval_wait in graph G-4. Candidate G-5 removes that node and introduces review_card. Its deployment check inspects the old checkpoint before permitting continuation.",
+    "kind": "packet",
+    "data": {
+      "name": "Paused thread T-61",
+      "fields": [
+        {
+          "key": "owner",
+          "value": "Northwind support"
+        },
+        {
+          "key": "saved graph",
+          "value": "G-4"
+        },
+        {
+          "key": "pending node",
+          "value": "approval_wait"
+        },
+        {
+          "key": "candidate graph",
+          "value": "G-5: review_card only"
+        }
+      ],
+      "checks": [
+        {
+          "label": "Owned snapshot",
+          "detail": "Trusted server record; owner verified",
+          "status": "pass"
+        },
+        {
+          "label": "Pending node exists",
+          "detail": "G-5 removed approval_wait",
+          "status": "fail"
+        },
+        {
+          "label": "Business continuation",
+          "detail": "Blocked until migration is tested",
+          "status": "wait"
+        }
+      ],
+      "result": "Keep T-61 on compatible behavior or migrate explicitly.",
+      "result_status": "fail"
+    },
+    "read": [
+      "The checkpoint is intact and belongs to the right tenant.",
+      "G-5 still cannot resume the named pending node.",
+      "Deployment compatibility and business approval require different evidence."
+    ],
+    "question": "Can the operator safely fix this by editing approval_wait to review_card in the checkpoint?",
+    "answer": "That edit alone does not prove safe continuation. The new node may interpret state or approval differently. Use the compatible behavior version or a tested migration that preserves the proposal, pending work, budgets and effect identity. Revalidate current authority before any effect; changing graph state cannot create permission.",
+    "takeaway": "Test stored pending work against the next graph, including the business meaning of continuation.",
+    "assumption": "Fictional application compatibility gate; no automatic state rewrite occurs. Ordinary behavior pinning never overrides current emergency restrictions.",
+    "id": "32C",
+    "placement": "before_heading",
+    "source_key": "R32",
+    "source_label": "LangGraph: Graph migrations"
+  }
+}

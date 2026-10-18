@@ -1,0 +1,100 @@
+{
+  "chapter": 3,
+  "design_note": "Show replanning as a specific change to remaining work after an authoritative observation. The completed lookup stays completed, while a proposed refund becomes unnecessary; no plan step can erase external history.",
+  "source": {
+    "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+    "url": "https://arxiv.org/abs/2210.03629",
+    "publisher": "Shunyu Yao and coauthors",
+    "concept": "Interleaving actions with observations lets a system revise its plan when external information changes the next useful step.",
+    "scope": "Original ShopAssist plan records apply the feedback principle. They do not reproduce ReAct prompts, benchmark results or a framework implementation.",
+    "id": "R03",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "When a deterministic workflow beats an agent",
+    "title": "Replan the remaining work, keep completed facts",
+    "intro": "ShopAssist plans to investigate PAY-B and possibly propose its refund. An authorized lookup discovers that RF-9 already refunded the full captured balance. The plan must respond to that fact.",
+    "kind": "snapshots",
+    "data": {
+      "frames": [
+        {
+          "title": "Before lookup",
+          "event": "Proposed plan, not execution",
+          "fields": [
+            {
+              "key": "lookup",
+              "value": "pending",
+              "changed": false
+            },
+            {
+              "key": "refund step",
+              "value": "conditional proposal",
+              "changed": false
+            },
+            {
+              "key": "next",
+              "value": "read PAY-B",
+              "changed": false
+            }
+          ]
+        },
+        {
+          "title": "After observation",
+          "event": "Service confirms full refund RF-9",
+          "fields": [
+            {
+              "key": "lookup",
+              "value": "complete: RF-9 found",
+              "changed": true
+            },
+            {
+              "key": "refund step",
+              "value": "needs reassessment",
+              "changed": true
+            },
+            {
+              "key": "next",
+              "value": "revise remaining plan",
+              "changed": true
+            }
+          ]
+        },
+        {
+          "title": "After replanning",
+          "event": "No refundable balance remains",
+          "fields": [
+            {
+              "key": "lookup",
+              "value": "complete: RF-9 found",
+              "changed": false
+            },
+            {
+              "key": "refund step",
+              "value": "skipped: already refunded",
+              "changed": true
+            },
+            {
+              "key": "next",
+              "value": "explain confirmed RF-9",
+              "changed": true
+            }
+          ]
+        }
+      ],
+      "invariant": "The completed lookup and confirmed receipt survive every plan revision."
+    },
+    "read": [
+      "The first plan describes conditional work, not a promise to execute.",
+      "The observation supplies an authoritative reason to change the next step.",
+      "Replanning changes the remaining proposal while preserving the completed lookup."
+    ],
+    "question": "Should replanning mark the lookup pending again simply because the plan text changed?",
+    "answer": "No. Its accepted observation remains available with the same provenance. The new plan skips an unnecessary refund and explains RF-9. Refresh only if the task requires newer evidence; changing an outline alone does not invalidate completed work or authorize another financial effect.",
+    "takeaway": "Adapt the path to new observations without rewriting completed history.",
+    "assumption": "Fictional plan states; RF-9 fully refunds PAY-B and is current. No new refund was submitted, and explanation acceptance remains task-specific.",
+    "source_label": "ReAct: observation-driven plan updates",
+    "id": "3C",
+    "placement": "before_heading",
+    "source_key": "R03"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "scope": "Targeted final reinspection of repaired runtime lessons and book pagination",
+  "checked_at_utc": "2026-10-17T06:27:15.893068+00:00",
+  "status": "pass_with_minor_note",
+  "blocking_findings": [],
+  "prior_report": "/Users/junedalam/angular-with-ngrx/Angular-Practice/output/pdf/agentic_ai_visual_source/qa_runtime.json",
+  "images_inspected": [
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-036.jpg",
+      "sha256": "390bc4e4c60633284d10ae3cdbb90fb0fb97055ad7111b265fbbdf54273e7345"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-037.jpg",
+      "sha256": "3924062d750544af3a63f73244e730e8b26eaca0959208f67f4c34f7298888b5"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-043.jpg",
+      "sha256": "0333290154230883ebc86447b7b74b9eac8df864bfa95d3414d2f86b45f92558"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-045.jpg",
+      "sha256": "2827794bac764f04059fbb0af56c85798847f79d4af77c76823e9101896101d7"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-048.jpg",
+      "sha256": "bed0863aff89458bb2216df4308c333dde6854ecc3422a86b5fc822f78f389cb"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-054.jpg",
+      "sha256": "8478157277351cbbc6fe21696cbfc161a9776d53cad6f789b3ed9ef343b6da7d"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-056.jpg",
+      "sha256": "15d91e8d86d2af53a561286b92a95a37d95a708508b9900ffd586b1023a1abac"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-atlas/page-057.jpg",
+      "sha256": "6ea3af2c0cd106b176e79b2f1f35da424b227098b92a1e7fd9fc036d3e343893"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-271.jpg",
+      "sha256": "504236f84654da52512a52099de155e67af1efbe75e3e435cc00e09851d20a7f"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-272.jpg",
+      "sha256": "8557dfc5f49e19ddcbac838adc1cfe71be8081be9e567839319665a1cd84dbaa"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-381.jpg",
+      "sha256": "415d711fd1d97c7e507bad8255b70620eb0e7738f61ed4fd22adba56081ee321"
+    },
+    {
+      "path": "/Users/junedalam/angular-with-ngrx/Angular-Practice/tmp/pdfs/visual-learning/final-book/page-382.jpg",
+      "sha256": "92ffa8062594668e92936897f9b19604f51640a5f690804a25d2d5faef6d1068"
+    }
+  ],
+  "resolved_findings": [
+    {
+      "id": "runtime-qa-01",
+      "status": "resolved",
+      "evidence": "Atlas 15A page 37 and 24B page 56 use orthogonal connectors in gutters. No connector crosses an event label; event numbers and wait markers remain readable."
+    },
+    {
+      "id": "runtime-qa-02",
+      "status": "resolved",
+      "evidence": "Atlas 25A page 57 places interval values in the left text gutter, clear of the 95 percent gate. The shared scale, whiskers, point values and counts remain intact."
+    },
+    {
+      "id": "runtime-qa-03",
+      "status": "resolved",
+      "evidence": "Atlas 20B page 48 now reads Right scope, wrong audience."
+    },
+    {
+      "id": "runtime-qa-04",
+      "status": "resolved",
+      "evidence": "Book page 272 holds the full Provenance and conflicting writes section; page 382 holds the checker code and its explanation. Neither leaves an isolated continuation paragraph. Remaining white space precedes intentionally full-page labs."
+    }
+  ],
+  "remaining_findings": [
+    {
+      "id": "runtime-final-01",
+      "severity": "P3",
+      "blocking": false,
+      "category": "minor_label_wrap",
+      "lesson": "24B",
+      "atlas_pdf_page": 56,
+      "finding": "The t0 label Persist approved OP-8 intent wraps to three lines; its last line extends just beneath the Harness lane background into the empty gutter. It remains readable and does not collide with other text.",
+      "suggested_fix": "Optionally shorten the label to Save approved OP-8 intent or Save OP-8 intent so it fits in two lines."
+    }
+  ],
+  "additional_clean_checks": [
+    "Packet pages 36, 43 and 48 show all keys, values, check descriptions and statuses without clipping.",
+    "Trust-route pages 45 and 54 have legible orthogonal routes, distinct numbered route markers and visible denied-path stops.",
+    "The calculated interval positions and printed values remain consistent with the lesson data; the count wording is neutral.",
+    "Book pages 271, 272, 381 and 382 contain complete readable units with no clipping or split code block."
+  ],
+  "limitations": [
+    "This pass reinspected the requested changed images only; the earlier report covers all 26 runtime atlas lessons and the assigned contact sheets.",
+    "Unchanged image hashes were reported by the lead; this report records current hashes for the 12 images directly reinspected.",
+    "Only the final QA report was written; renderer and lesson content were not edited."
+  ]
+}

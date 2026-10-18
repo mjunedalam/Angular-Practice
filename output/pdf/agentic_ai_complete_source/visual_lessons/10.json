@@ -1,0 +1,110 @@
+{
+  "chapter": 10,
+  "chapter_title": "10. Skills & Reusable Capability Architecture",
+  "audit": "The recipe-kit analogy explains reuse and selective opening but can blur instruction loading with executable authority. Lesson A splits those two requests and gives each its own gate, allowing a reader to predict why opening a reviewed refund procedure is different from running its financial step. Lesson B examines a release manifest with one unresolved dependency range. Its failed check shows exactly why a past invocation cannot be reproduced until versions and hashes are pinned. Together these examples preserve the distinction between the book's local packaging convention and a runtime-specific format, without claiming that signed content or a manifest supplies permission.",
+  "lessons": [
+    {
+      "id": "10A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Opening the recipe is not cooking the refund",
+      "intro": "A caller selects refund kit v2.3.0. The host distinguishes loading its instructions from invoking a financial step inside its procedure.",
+      "kind": "tree",
+      "data": {
+        "root": "Requested use of refund kit v2.3.0",
+        "branches": [
+          {
+            "edge": "Load instructions",
+            "question": "Approved package and loading scope valid?",
+            "yes": {
+              "label": "Load procedure; no financial effect",
+              "role": "pass"
+            },
+            "no": {
+              "label": "Deny loading; retain reason",
+              "role": "fail"
+            }
+          },
+          {
+            "edge": "Execute refund",
+            "question": "Authority and exact approval valid?",
+            "yes": {
+              "label": "Proceed through effect service checks",
+              "role": "pass"
+            },
+            "no": {
+              "label": "No execution; deny or seek valid review",
+              "role": "wait"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The root separates two operations involving the same package.",
+        "A loaded instruction file adds know-how to context.",
+        "Financial execution needs independent authority and an approved exact effect."
+      ],
+      "question": "If the package is signed by its author, may its script grant itself refunds:execute?",
+      "answer": "No. A signature establishes package provenance, not execution authority. The host supplies permitted capabilities, and the service enforces the effect contract. A script included in an approved kit remains subject to those controls.",
+      "takeaway": "Reusable procedure knowledge does not amplify the caller's privileges.",
+      "assumption": "Fictional two-operation scope; execution also needs fresh preconditions, budgets and effect identity. The recipe analogy does not guarantee repeatable model behavior."
+    },
+    {
+      "id": "10B",
+      "placement": "before_heading",
+      "anchor": "Discovery, versioning, trust and access control",
+      "title": "Resolve the recipe's dependencies before release",
+      "intro": "A refund skill release has a compatibility range for one tool but no recorded resolution. The other dependency is pinned.",
+      "kind": "packet",
+      "data": {
+        "name": "Refund kit release candidate",
+        "fields": [
+          {
+            "key": "skill",
+            "value": "handle_refund_request 2.3.0"
+          },
+          {
+            "key": "get_order",
+            "value": "^2.0; unresolved"
+          },
+          {
+            "key": "list_payments",
+            "value": "4.0.2; hash retained"
+          },
+          {
+            "key": "instructions",
+            "value": "v7; hash retained"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Package source",
+            "detail": "Reviewed source and owner recorded",
+            "status": "pass"
+          },
+          {
+            "label": "Exact dependencies",
+            "detail": "get_order has no resolved version or hash",
+            "status": "fail"
+          },
+          {
+            "label": "Release validation",
+            "detail": "Needs the exact resolved assembly",
+            "status": "wait"
+          }
+        ],
+        "result": "Resolve, pin and test the complete assembly first",
+        "result_status": "fail"
+      },
+      "read": [
+        "The range expresses compatibility, not the artifact used by a run.",
+        "The pinned payment tool can be identified without rerunning resolution.",
+        "Release tests must target the same assembly the runtime records."
+      ],
+      "question": "If get_order 2.2.0 is published tomorrow, should a pending approved run silently adopt it?",
+      "answer": "No. The run continues under its exact pinned assembly or follows an explicit recorded migration policy. Re-resolving a mutable range during continuation can alter the implementation after review and make prior behavior difficult to reproduce.",
+      "takeaway": "Compatibility ranges guide resolution; exact versions and hashes explain execution.",
+      "assumption": "Fictional local manifest convention, not an interoperable file-format claim. Dependency pinning improves traceability without guaranteeing behavior or live-data freshness."
+    }
+  ]
+}

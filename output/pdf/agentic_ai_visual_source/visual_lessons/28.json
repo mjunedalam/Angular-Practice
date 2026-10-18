@@ -1,0 +1,87 @@
+{
+  "chapter": 28,
+  "chapter_title": "Cost, Latency & Model Routing Engineering",
+  "audit": "The chapter names reservations and settlement, but a lifecycle arrow does not show which money returns to the available balance. Lesson A makes one tenant allowance numerical: estimates reduce availability, and settlement releases only the unused difference, leaving actual spend charged. This also prevents readers from treating a concurrency permit like reusable financial allowance. Lesson B works through a semantic-cache false hit using opened versus unopened goods. The two traces share one request but differ in their critical-field check, so the changed mechanism explains the changed result. These examples deepen the routing and caching discussion without inventing provider prices, measured savings or a new authority path.",
+  "lessons": [
+    {
+      "id": "28A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Only unused reservation returns",
+      "intro": "A constructed tenant allowance starts at 100 cents. Two model attempts settle below their reservations; the available balance must retain their actual spend.",
+      "kind": "ledger",
+      "data": {
+        "unit": "US cents available",
+        "start": 100,
+        "entries": [
+          {
+            "label": "Reserve attempt A: 40",
+            "delta": -40
+          },
+          {
+            "label": "Settle A at 25: release 15",
+            "delta": 15
+          },
+          {
+            "label": "Reserve attempt B: 30",
+            "delta": -30
+          },
+          {
+            "label": "Settle B at 22: release 8",
+            "delta": 8
+          }
+        ],
+        "rule": "Final availability is 53; actual spend is 25 + 22 = 47. Permits are separate."
+      },
+      "read": [
+        "A reservation reduces spendable allowance before the provider call.",
+        "Settlement returns only the unused part of each reservation.",
+        "The final 53 plus settled spend 47 equals the starting 100."
+      ],
+      "question": "If attempt B times out with unknown usage, should all 30 cents return immediately?",
+      "answer": "No. Preserve the uncertain usage reservation under the accounting policy and reconcile with authoritative usage where possible. A timeout does not prove no processing occurred. Release the concurrency permit separately when the attempt ends; that does not erase financial liability.",
+      "takeaway": "Settling spend releases unused estimates, not the money already consumed.",
+      "assumption": "Constructed cents; no other charges, overruns or currency conversions. Reservations and settlement are atomic."
+    },
+    {
+      "id": "28B",
+      "placement": "before_heading",
+      "anchor": "Prefix, exact, semantic and tool caches",
+      "title": "One changed word defeats a cache hit",
+      "intro": "ShopAssist receives an opened-item question. Its cache contains a permitted answer for unopened items under policy P-7; similarity is high but the deciding field differs.",
+      "kind": "fork",
+      "data": {
+        "input": "Can I return opened headphones under policy P-7?",
+        "left": {
+          "title": "Similarity alone",
+          "steps": [
+            "Retrieve unopened-item answer at 0.98 similarity",
+            "Skip condition comparison",
+            "Serve: return permitted within 30 days"
+          ],
+          "result": "Wrong answer: P-7 excludes opened headphones",
+          "status": "fail"
+        },
+        "right": {
+          "title": "Check the condition",
+          "steps": [
+            "Compare condition: opened != unopened",
+            "Reject cached answer and read P-7",
+            "Serve the opened-item exclusion with source"
+          ],
+          "result": "Applicable policy answer; no refund dispatched",
+          "status": "pass"
+        }
+      },
+      "read": [
+        "Both traces start with the same opened-item request.",
+        "The left trace mistakes textual similarity for equivalent eligibility.",
+        "The right trace tests the field that actually changes the answer."
+      ],
+      "question": "Would raising the similarity threshold to 0.99 prove the next cache hit is safe?",
+      "answer": "No. A similarity score cannot prove semantic equivalence. Evaluate false hits and enforce the relevant condition, policy version, freshness and entitlement checks. If the request cannot satisfy the cache contract, retrieve current evidence instead. Neither answer reuse nor similarity grants permission to issue a refund.",
+      "takeaway": "Cache reuse must preserve the facts that determine the answer.",
+      "assumption": "Fictional policy P-7 and constructed similarity score; this example concerns read-only answers, not authorized financial effects."
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "chapter": 23,
+  "chapter_title": "Reliability Engineering for Agents",
+  "audit": "The delivery analogy warns that a timeout cannot establish non-delivery, but readers need to weigh contradictory observations rather than simply memorize a recovery slogan. Lesson A supplies a timed-out shipment call, an authoritative shipment lookup and a missing fee result, separating observed effects from unresolved ones. Lesson B follows a persisted refund intent through same-key recovery and a prohibited replacement identity. The downstream dedupe record, retention window and unchanged payload are explicit. Neither the local ledger nor a new worker is treated as sufficient for uniqueness, and the examples preserve uncertainty so that compensation or replacement cannot outrun reconciliation of the original operation.",
+  "lessons": [
+    {
+      "id": "23A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Which parcel actually exists?",
+      "intro": "A replacement saga recorded inventory, shipment and fee intents. The shipment response timed out. Recovery now has three observations; decide which conclusions each can establish.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "Shipment S-91 was created."
+          },
+          {
+            "id": "C2",
+            "text": "The shipment timeout proves no parcel was created."
+          },
+          {
+            "id": "C3",
+            "text": "The fee charge definitely failed before taking effect."
+          }
+        ],
+        "sources": [
+          {
+            "id": "S1",
+            "text": "Carrier lookup for OP-S91: succeeded; shipment S-91; status prepared."
+          },
+          {
+            "id": "S2",
+            "text": "Client event: shipment response deadline elapsed after request submission."
+          },
+          {
+            "id": "S3",
+            "text": "Fee journal: OP-F91 intent saved; no result or authoritative lookup yet."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 0,
+            "relation": "conflicts"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "insufficient"
+          }
+        ],
+        "verdict": "Shipment exists; fee outcome unknown. Reconcile before choosing recovery."
+      },
+      "read": [
+        "The carrier lookup is evidence of a shipment effect despite the lost response.",
+        "The timeout alone describes the caller's waiting outcome.",
+        "The incomplete fee journal leaves its external effect unresolved."
+      ],
+      "question": "Should recovery cancel the shipment solely because no fee result is recorded?",
+      "answer": "No. First establish whether the fee took effect. If it succeeded, cancellation may leave a charged customer without the replacement. The saga must choose compensation from known outcomes and preserve unresolved obligations.",
+      "takeaway": "Reconcile effects before deciding what to compensate.",
+      "assumption": "Fictional saga; carrier lookup is authoritative for OP-S91. Absence of a local result does not establish absence of an effect."
+    },
+    {
+      "id": "23B",
+      "placement": "before_heading",
+      "anchor": "Idempotency keys and duplicate side effects",
+      "title": "The same refund must reach the same remote record",
+      "intro": "OP-61 was persisted before payment submission. The provider committed refund R-61, then the worker crashed before saving success. Recovery occurs 5 minutes later within a documented 24-hour dedupe window.",
+      "kind": "faultmap",
+      "data": {
+        "zones": [
+          {
+            "title": "Durable recovery",
+            "nodes": [
+              {
+                "id": "intent",
+                "label": "OP-61: USD 42 intent",
+                "role": "data"
+              },
+              {
+                "id": "gap",
+                "label": "Local success absent",
+                "role": "data"
+              }
+            ]
+          },
+          {
+            "title": "Executor policy",
+            "nodes": [
+              {
+                "id": "same",
+                "label": "Retry OP-61 unchanged",
+                "role": "runtime"
+              },
+              {
+                "id": "new",
+                "label": "Replacement OP-62",
+                "role": "model"
+              }
+            ]
+          },
+          {
+            "title": "Payments service",
+            "nodes": [
+              {
+                "id": "known",
+                "label": "OP-61 maps to R-61",
+                "role": "external"
+              },
+              {
+                "id": "fresh",
+                "label": "Potential second refund",
+                "role": "action"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "intent",
+            "to": "same",
+            "label": "Current checks and same-intent recovery",
+            "status": "allow"
+          },
+          {
+            "from": "gap",
+            "to": "new",
+            "label": "Local absence cannot justify replacement",
+            "status": "deny"
+          },
+          {
+            "from": "same",
+            "to": "known",
+            "label": "Atomic dedupe returns original result R-61",
+            "status": "allow"
+          },
+          {
+            "from": "new",
+            "to": "fresh",
+            "label": "Replacement denied until reconciliation",
+            "status": "deny"
+          }
+        ]
+      },
+      "read": [
+        "The absent local success record is the crash gap.",
+        "The permitted recovery retains the exact operation identity and payload.",
+        "The downstream atomic mapping supplies duplicate protection inside its retention contract."
+      ],
+      "question": "What changes if recovery occurs after the provider has discarded OP-61?",
+      "answer": "The shown same-key guarantee no longer applies. Recovery must use a supported authoritative reconciliation path or escalate before any resubmission. Retaining the local intent cannot recreate an expired downstream dedupe record.",
+      "takeaway": "Match the recovery horizon to downstream dedupe retention.",
+      "assumption": "Fictional provider contract; current authorization checks remain required. Routes represent enforced policy, not guarantees created by this drawing."
+    }
+  ]
+}

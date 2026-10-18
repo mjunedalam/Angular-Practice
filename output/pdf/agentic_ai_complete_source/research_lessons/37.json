@@ -1,0 +1,70 @@
+{
+  "chapter": 37,
+  "design_note": "Places deterministic workflow decisions, recorded activity outcomes and changing external facts in distinct containers. It shows why replay consumes history without treating old observations as current execution authority.",
+  "source": {
+    "id": "R37",
+    "title": "Temporal Workflow Definition",
+    "url": "https://docs.temporal.io/workflow-definition",
+    "publisher": "Temporal Technologies",
+    "accessed": "2026-10-17",
+    "concept": "Workflow replay requires deterministic command sequencing. External API calls, database queries and model invocations belong in activities so recorded outcomes can support deterministic continuation.",
+    "scope": "Original INC-93 records; assumes compatible workflow code and durable recorded activity completion. External-effect safety remains an independent application contract."
+  },
+  "lesson": {
+    "anchor": "Phase 8 - Make the incident durable with Temporal",
+    "title": "Replay a decision without re-asking the model",
+    "intro": "AegisOps recorded a completed diagnosis activity for INC-93, then its worker stopped. A replacement replays the same compatible workflow. The model and live cluster may now return different answers.",
+    "kind": "workspace",
+    "data": {
+      "zones": [
+        {
+          "title": "Workflow control",
+          "object": "folder",
+          "role": "runtime",
+          "items": [
+            "INC-93; behavior W-4",
+            "Wait after diagnosis D-7",
+            "Same history -> same commands"
+          ]
+        },
+        {
+          "title": "Recorded history",
+          "object": "vault",
+          "role": "data",
+          "items": [
+            "D-7 completed and recorded",
+            "Result: inspect revision 42",
+            "Evidence refs E-8 and E-9"
+          ]
+        },
+        {
+          "title": "External activity I/O",
+          "object": "server",
+          "role": "external",
+          "items": [
+            "Model may answer differently",
+            "Cluster may now be revision 43",
+            "New reads are new activities"
+          ]
+        }
+      ],
+      "relations": [
+        "Replay uses the recorded result of completed D-7.",
+        "Fresh I/O is explicit; history is not live truth."
+      ]
+    },
+    "read": [
+      "D-7 completion is durably recorded, not merely reported by the old worker.",
+      "Replay reconstructs the prior decision from its recorded result.",
+      "Later effects still need current resource and authority checks."
+    ],
+    "question": "Should replay call the model again to recreate D-7, because its latest answer might be better?",
+    "answer": "No. Re-asking could change the command sequence and reinterpret prior progress. Replay uses the recorded D-7 result. If the workflow needs refreshed evidence, schedule it explicitly under the compatible workflow contract. An activity whose completion was not recorded may retry, so mutation activities still need stable effect identity and reconciliation.",
+    "takeaway": "Replay preserves the recorded path; explicit new work obtains fresh evidence.",
+    "assumption": "Fictional recorded activity with compatible workflow code; history is available and owned. The example does not claim once-only external execution.",
+    "id": "37C",
+    "placement": "before_heading",
+    "source_key": "R37",
+    "source_label": "Temporal: Workflow determinism"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "chapter": 33,
+  "design_note": "Separates transport redelivery from business correlation through four explicit ingestion outcomes. Repeated delivery repairs its original work, while a new alert can attach to an existing incident.",
+  "source": {
+    "id": "R33",
+    "title": "Amazon SQS at-least-once delivery",
+    "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html",
+    "publisher": "Amazon Web Services",
+    "accessed": "2026-10-17",
+    "concept": "At-least-once message delivery can repeat an already received event. Consumers need idempotent processing so repetition does not create unintended additional work.",
+    "scope": "Original event-ID and incident-correlation decisions. The source supports redelivery handling; the fictional application owns correlation and durable workflow dispatch."
+  },
+  "lesson": {
+    "anchor": "Build it: one reference deployment",
+    "title": "A new delivery is not always a new incident",
+    "intro": "AegisOps receives valid, tenant-scoped alerts with stable source event IDs. A deterministic correlation rule has complete inputs. First decide whether the delivery repeats an event already durably recorded.",
+    "kind": "tree",
+    "data": {
+      "root": "Valid alert: look up source + event ID",
+      "branches": [
+        {
+          "edge": "ID already stored",
+          "question": "Original workflow start recorded?",
+          "yes": {
+            "label": "YES: return existing incident owner",
+            "role": "pass"
+          },
+          "no": {
+            "label": "NO: repair original durable dispatch",
+            "role": "wait"
+          }
+        },
+        {
+          "edge": "ID not stored",
+          "question": "Correlates to an open incident?",
+          "yes": {
+            "label": "YES: attach new event to that incident",
+            "role": "pass"
+          },
+          "no": {
+            "label": "NO: persist new incident + dispatch",
+            "role": "wait"
+          }
+        }
+      ]
+    },
+    "read": [
+      "A repeated transport ID keeps its original durable ownership.",
+      "A missing workflow start needs repair rather than a second incident.",
+      "A different event can share an incident when the stated correlation rule matches."
+    ],
+    "question": "If a correlation window changes overnight, should a redelivered stored event become a new incident?",
+    "answer": "No. Its stable source-plus-event identity still resolves to the original ingestion record. Repair any unfinished dispatch under that identity. Correlation controls how distinct events are grouped; it must not erase transport deduplication. Neither a managed queue nor successful workflow start grants authority for a production change.",
+    "takeaway": "Deduplicate delivery by stable event identity; correlate distinct events by the declared business rule.",
+    "assumption": "Fictional valid events; identity lookup and new ownership are atomic, durable dispatch is recoverable, and correlation yields a definite decision.",
+    "id": "33C",
+    "placement": "before_heading",
+    "source_key": "R33",
+    "source_label": "Amazon SQS: At-least-once delivery"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "chapter": 34,
+  "chapter_title": "Specialized Agent Systems",
+  "audit": "The specialist-team analogy states that tools and completion evidence vary, but it does not demonstrate the selection pressure inside one bounded context. Lesson A packs a coding specialist's task contract, relevant source, current progress and reserved output into a numerical tray while excluding secrets and irrelevant history. The reservation is distinguished from input content, and provider simplification is explicit. Lesson B tests three specialist completion claims against concrete receipts: a supported policy answer, a contradicted patch claim and an operational claim lacking recovery evidence. The visual relationships require readers to judge support rather than reward the presence of a citation, a test label or a successful API response.",
+  "lessons": [
+    {
+      "id": "34A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Pack the specialist workspace for the job",
+      "intro": "A repository specialist fixes ticket T-18 in an isolated checkout. Its constructed 8,000-token context budget prioritizes the repair contract and relevant evidence while reserving output space.",
+      "kind": "packing",
+      "data": {
+        "capacity": 8000,
+        "unit": "tokens",
+        "segments": [
+          {
+            "label": "Trusted task + path rules",
+            "value": 1600,
+            "role": "policy"
+          },
+          {
+            "label": "Relevant source + failure",
+            "value": 3200,
+            "role": "data"
+          },
+          {
+            "label": "Current attempts + state",
+            "value": 1200,
+            "role": "runtime"
+          },
+          {
+            "label": "Reserved output capacity",
+            "value": 2000,
+            "role": "model"
+          }
+        ],
+        "excluded": [
+          {
+            "label": "Production credentials",
+            "reason": "Never belong in candidate context or mounts"
+          },
+          {
+            "label": "Unrelated old transcript",
+            "reason": "No bearing on T-18 acceptance evidence"
+          }
+        ]
+      },
+      "read": [
+        "The output reservation is empty capacity, not another input document.",
+        "Relevant source and failure evidence receive the largest share.",
+        "Exclusion reduces exposure, but sandbox access still requires independent enforcement."
+      ],
+      "question": "Can the agent fill the 2,000-token output reserve with another log dump and keep the same output allowance?",
+      "answer": "No. Under this combined context-budget assumption, the input and reserved output must fit the same 8,000-token bound. Project or compact the new evidence, remove less relevant input, or revise the allowed budget deliberately. Never remove required authority or acceptance constraints merely to fit raw output.",
+      "takeaway": "Bound context around the specialist task and preserve room for its result.",
+      "assumption": "Constructed token allocation; assumes one combined input/output limit. Real adapters must apply provider-specific token and context accounting."
+    },
+    {
+      "id": "34B",
+      "placement": "before_heading",
+      "anchor": "What changes and what stays universal",
+      "title": "Different jobs need different proof",
+      "intro": "Three specialists report completion. Compare each statement with the fictional record actually available before accepting the report.",
+      "kind": "evidence",
+      "data": {
+        "claims": [
+          {
+            "id": "C1",
+            "text": "P-7 permits unopened returns within 30 days."
+          },
+          {
+            "id": "C2",
+            "text": "The patch passes the required payment tests."
+          },
+          {
+            "id": "C3",
+            "text": "order-api has recovered after rollback RB-82."
+          }
+        ],
+        "sources": [
+          {
+            "id": "S1",
+            "text": "Policy P-7, clause 4: unopened goods may be returned within 30 days."
+          },
+          {
+            "id": "S2",
+            "text": "Isolated test run T-18: required payment suite failed; ledger test red."
+          },
+          {
+            "id": "S3",
+            "text": "Deployment receipt RB-82: rollback applied; no post-action metrics attached."
+          }
+        ],
+        "links": [
+          {
+            "claim": 0,
+            "source": 0,
+            "relation": "supports"
+          },
+          {
+            "claim": 1,
+            "source": 1,
+            "relation": "conflicts"
+          },
+          {
+            "claim": 2,
+            "source": 2,
+            "relation": "insufficient"
+          }
+        ],
+        "verdict": "Accept C1 within scope; reject C2; keep C3 unverified pending recovery evidence."
+      },
+      "read": [
+        "C1 states only what the governing passage permits.",
+        "C2 conflicts with the actual required test result.",
+        "C3 exceeds its receipt: applied change is not observed recovery."
+      ],
+      "question": "Would attaching the valid RB-82 receipt as a citation make C3 grounded?",
+      "answer": "No. A valid citation can still be insufficient for its claim. The receipt supports that rollback applied, not that service recovery criteria passed. Obtain the complete authorized post-action observation window and required dependency checks, or report the narrower applied-but-unverified status.",
+      "takeaway": "Choose evidence that establishes the specific completion claim.",
+      "assumption": "Fictional excerpts and results; policy applicability, source authorization and record integrity are stipulated for this exercise."
+    }
+  ]
+}

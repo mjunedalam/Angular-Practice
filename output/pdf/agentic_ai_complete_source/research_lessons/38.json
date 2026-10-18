@@ -1,0 +1,55 @@
+{
+  "chapter": 38,
+  "design_note": "Shows a judge choosing different answer identities after their positions change. The evidence remains identical, exposing a measurement defect that a larger sample of the same biased comparison would not repair.",
+  "source": {
+    "id": "R38",
+    "title": "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena",
+    "url": "https://arxiv.org/abs/2306.05685",
+    "publisher": "Lianmin Zheng and coauthors",
+    "accessed": "2026-10-17",
+    "concept": "Model judges can exhibit position bias: presentation order can influence their preferences. Judge behavior therefore needs evaluation alongside the behavior being scored.",
+    "scope": "Original AegisOps answers and constructed position-sensitive judge outputs. No paper result, model accuracy or frequency of bias is reproduced."
+  },
+  "lesson": {
+    "anchor": "Phase 15 - Run enterprise game days",
+    "title": "The verdict changes when the order changes",
+    "intro": "The only available receipt confirms RB-82 applied; recovery measurements are still pending. Two answer texts stay fixed while their presentation order swaps. These constructed judge outputs expose an order-sensitive preference.",
+    "kind": "fork",
+    "data": {
+      "input": "Same receipt and rubric: reward claims supported by evidence",
+      "left": {
+        "title": "Order A, then B",
+        "steps": [
+          "First A: applied; recovery pending",
+          "Second B: service fully recovered",
+          "Judge selects the first answer: A"
+        ],
+        "result": "Selected A is supported by the available evidence.",
+        "status": "pass"
+      },
+      "right": {
+        "title": "Order B, then A",
+        "steps": [
+          "First B: service fully recovered",
+          "Second A: applied; recovery pending",
+          "Judge selects the first answer: B"
+        ],
+        "result": "Selected B overclaims recovery; content did not improve.",
+        "status": "fail"
+      }
+    },
+    "read": [
+      "Only the presentation order changes between these comparisons.",
+      "A remains the appropriately limited answer in both orders.",
+      "The second verdict rewards an unsupported recovery claim."
+    ],
+    "question": "Can the higher score for B in the second order be reported as an improvement in recovery reporting?",
+    "answer": "No. The text and evidence are unchanged; the preference follows position in this constructed pair. Record the disagreement, review against the support rubric, and calibrate the judge before using it as release evidence. Testing both orders can reveal this failure, but does not remove all judge biases or replace deterministic recovery checks.",
+    "takeaway": "A changing measurement process can create apparent progress without a better answer.",
+    "assumption": "Constructed deterministic judge outputs for one pair; no prevalence claim. The receipt proves application only, and recovery evidence is unavailable.",
+    "id": "38C",
+    "placement": "before_heading",
+    "source_key": "R38",
+    "source_label": "Zheng et al.: LLM-as-a-Judge"
+  }
+}

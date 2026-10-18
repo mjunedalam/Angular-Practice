@@ -1,0 +1,119 @@
+{
+  "chapter": 31,
+  "chapter_title": "Framework Mapping: LangGraph, OpenAI Agents SDK, Spring AI & Others",
+  "audit": "The vehicle analogy makes framework choice approachable but does not show which concrete records travel with an application when its engine changes. Lesson A places a refund proposal, approval, effect identity and remaining allowance beside the adapter and framework execution record. The containers expose application ownership without promising interchangeable checkpoint formats. Lesson B inspects a newly discovered tool whose namespace looks familiar, separating its valid shape from exact-name authorization and downstream eligibility. The denied envelope provides a specific counterexample to treating SDK discovery or preapproval as a complete access-control policy. Neither lesson adds release-specific API claims; both focus on contracts the chapter already assigns to the application.",
+  "lessons": [
+    {
+      "id": "31A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "What must survive an engine change",
+      "intro": "ShopAssist pauses a USD 40 refund. Its team replaces the runtime adapter while preserving the business records and testing continuation compatibility.",
+      "kind": "workspace",
+      "data": {
+        "zones": [
+          {
+            "title": "Application records",
+            "object": "vault",
+            "items": [
+              "Proposal P-40: USD 40",
+              "Approval A-8 binds P-40",
+              "Effect RF-40; budget 60 cents"
+            ],
+            "role": "policy"
+          },
+          {
+            "title": "Adapter contract",
+            "object": "window",
+            "items": [
+              "pending call C-9 -> P-40",
+              "resume from owned snapshot",
+              "translate stop and error types"
+            ],
+            "role": "runtime"
+          },
+          {
+            "title": "Framework engine",
+            "object": "server",
+            "items": [
+              "serialized pending run",
+              "message and tool-call history",
+              "configured loop and tracing"
+            ],
+            "role": "external"
+          }
+        ],
+        "relations": [
+          "Adapter links engine calls to owned proposals.",
+          "Business authority persists outside engine types."
+        ]
+      },
+      "read": [
+        "P-40 and RF-40 identify business obligations, not SDK objects.",
+        "The adapter maps C-9 to one proposal rather than approving every call.",
+        "A new engine still needs a tested snapshot or state-migration path."
+      ],
+      "question": "Can copying conversation messages alone safely resume this approved refund?",
+      "answer": "No. Messages can omit the pending call, bound approval, remaining allowance and unknown effect status. Load the owned application records and a compatible execution snapshot or perform a tested migration. Then revalidate authority and current payment conditions. Preserving history does not establish safe continuation.",
+      "takeaway": "Keep business obligations independent of framework message formats.",
+      "assumption": "Fictional records; no framework migration is claimed complete. Compatibility, authorization and external payment contracts still require tests."
+    },
+    {
+      "id": "31B",
+      "placement": "before_heading",
+      "anchor": "Claude Agent SDK: a production agent loop with built-in tools",
+      "title": "A familiar namespace is not an allowlist",
+      "intro": "An MCP server adds mcp__shop__delete_order. Discovery returns valid arguments, but ShopAssist approves only get_order and propose_refund.",
+      "kind": "packet",
+      "data": {
+        "name": "Discovered shop capability",
+        "fields": [
+          {
+            "key": "tool",
+            "value": "mcp__shop__delete_order"
+          },
+          {
+            "key": "order",
+            "value": "ORD-104233"
+          },
+          {
+            "key": "tenant",
+            "value": "Northwind"
+          },
+          {
+            "key": "schema",
+            "value": "discovered version 3"
+          }
+        ],
+        "checks": [
+          {
+            "label": "Shape parses",
+            "detail": "Required order argument is present",
+            "status": "pass"
+          },
+          {
+            "label": "Exact approved name",
+            "detail": "delete_order absent from registry",
+            "status": "fail"
+          },
+          {
+            "label": "Resource authority",
+            "detail": "Not evaluated after capability denial",
+            "status": "wait"
+          }
+        ],
+        "result": "Denied before downstream call; audit unknown_tool.",
+        "result_status": "fail"
+      },
+      "read": [
+        "Parsing says the envelope is readable, not that it is permitted.",
+        "The exact-name check fails despite the familiar shop namespace.",
+        "Resource authorization cannot repair the missing capability approval."
+      ],
+      "question": "Would adding this name to allowed_tools be sufficient to permit deleting this order?",
+      "answer": "No. A reviewed capability contract must establish server identity, pinned schema, allowed effect and principal scope. The domain service still checks tenant and resource authorization. SDK preapproval does not replace those application controls, and an ordinary refund agent should not acquire deletion merely because discovery exposed it.",
+      "takeaway": "Authorize an exact reviewed capability, then authorize the specific resource.",
+      "assumption": "Fictional discovered capability; no call executes. The example assumes fail-closed discovery and execution checks."
+    }
+  ]
+}

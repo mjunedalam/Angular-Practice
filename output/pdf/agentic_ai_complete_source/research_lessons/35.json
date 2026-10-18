@@ -1,0 +1,74 @@
+{
+  "chapter": 35,
+  "design_note": "Uses the exact capability surface to justify a simplification. The all-denied row identifies an unnecessary API operation, while the one narrowly allowed writer remains behind its authority gate.",
+  "source": {
+    "id": "R35",
+    "title": "Simplicity",
+    "url": "https://sre.google/sre-book/simplicity/",
+    "publisher": "Google SRE; Max Luebbe",
+    "accessed": "2026-10-17",
+    "concept": "Small, focused APIs and clearly separated responsibilities reduce accidental complexity. Removing unused capabilities can make the remaining contract easier to understand and operate.",
+    "scope": "Original ShopAssist capability policy. The source motivates minimal APIs; it does not define these roles, permissions or payment controls."
+  },
+  "lesson": {
+    "anchor": "Production-readiness gates and launch checklist",
+    "title": "Remove the capability no role needs",
+    "intro": "A ShopAssist review maps four capabilities to three roles. Applying P-40 is allowed only for its scoped executor after valid bound authority and atomic payment checks. No role needs payment-history deletion.",
+    "kind": "matrix",
+    "data": {
+      "columns": [
+        "Investigator",
+        "Proposal service",
+        "Effect executor"
+      ],
+      "rows": [
+        {
+          "label": "Read owned payment",
+          "cells": [
+            "allow",
+            "allow",
+            "allow"
+          ]
+        },
+        {
+          "label": "Draft refund proposal",
+          "cells": [
+            "allow",
+            "allow",
+            "deny"
+          ]
+        },
+        {
+          "label": "Apply approved P-40",
+          "cells": [
+            "deny",
+            "deny",
+            "allow"
+          ]
+        },
+        {
+          "label": "Delete payment history",
+          "cells": [
+            "deny",
+            "deny",
+            "deny"
+          ]
+        }
+      ],
+      "rule": "Remove the unused deletion API. Preserve narrow execution, bound authority and effect recovery."
+    },
+    "read": [
+      "The investigator can inspect and propose without applying a refund.",
+      "Only the scoped executor can apply P-40 under the stated conditions.",
+      "Every role denies deletion, so exposing it adds surface without serving this task."
+    ],
+    "question": "Would combining the investigator and executor into one unrestricted credential be the same simplification?",
+    "answer": "No. It would erase the separation shown by the denied execution cell. Removing an unused deletion capability preserves the required work. Merging code or processes can be reasonable only when the same scoped authority checks still hold; an unrestricted credential would broaden the actual action surface.",
+    "takeaway": "Simplify the exposed capability surface while preserving the boundary that authorizes effects.",
+    "assumption": "Fictional role policy; allow never bypasses tenant scope. P-40 authority, live accounting and downstream effect identity must still be enforced.",
+    "id": "35C",
+    "placement": "before_heading",
+    "source_key": "R35",
+    "source_label": "Google SRE: Simplicity"
+  }
+}

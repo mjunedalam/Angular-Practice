@@ -1,0 +1,93 @@
+{
+  "chapter": 35,
+  "chapter_title": "Architecture Selection Patterns & Senior Design Review",
+  "audit": "Architecture-selection prose offers many useful patterns, but readers need a smaller decision they can inspect without interpreting a catalogue. Lesson A narrows the task into known procedure versus exploratory investigation, then tests persistence and scope needs. Its conditional leaves avoid treating a decision tree as an automatic architecture verdict. Lesson B makes a simplification review concrete through a finite run allowance: optional critique cannot spend the reservation protecting required verification. The resulting arithmetic distinguishes useful cuts from removing an acceptance contract. The numbers are constructed allocations, not savings claims, and both pages preserve deterministic authority even when the selected control flow uses model reasoning.",
+  "lessons": [
+    {
+      "id": "35A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "Choose control for the work in front of you",
+      "intro": "ShopAssist splits a billing dispute into a known refund procedure and exploratory diagnosis. Use these two known work classes to inspect the smallest necessary control.",
+      "kind": "tree",
+      "data": {
+        "root": "Which part of the dispute needs control?",
+        "branches": [
+          {
+            "edge": "Known procedure",
+            "question": "Can approval outlive the connection?",
+            "yes": {
+              "label": "YES: durable workflow and owned wait",
+              "role": "pass"
+            },
+            "no": {
+              "label": "NO: bounded deterministic workflow",
+              "role": "pass"
+            }
+          },
+          {
+            "edge": "Open investigation",
+            "question": "Do required permissions need separation?",
+            "yes": {
+              "label": "YES: scoped workers; validate benefit",
+              "role": "wait"
+            },
+            "no": {
+              "label": "NO: start with one bounded investigator",
+              "role": "pass"
+            }
+          }
+        ]
+      },
+      "read": [
+        "The root separates two parts of one product, not competing product labels.",
+        "A durable wait follows lifecycle needs, not the number of model calls.",
+        "Separate permissions can justify workers; their coordination still needs evidence."
+      ],
+      "question": "If investigation uses an agent, may it choose to skip the mandatory refund approval?",
+      "answer": "No. The adaptive investigator returns evidence and a proposal to the fixed procedure. Eligibility, required authority and effect recovery remain deterministic boundaries. Adding an agent inside one part of the workflow does not transfer control of its mandatory gates to the model.",
+      "takeaway": "Match adaptive control to uncertain work and preserve fixed obligations around it.",
+      "assumption": "Fictional design exercise limited to known-procedure and exploratory work; operational capacity and measured benefits still require review."
+    },
+    {
+      "id": "35B",
+      "placement": "before_heading",
+      "anchor": "Production-readiness gates and launch checklist",
+      "title": "Cut optional critique before required verification",
+      "intro": "A constructed ShopAssist run has 100 cents. The design reserves verification capacity before optional critique; the ledger shows actual work and release of unused reservation.",
+      "kind": "ledger",
+      "data": {
+        "unit": "US cents available",
+        "start": 100,
+        "entries": [
+          {
+            "label": "Gather evidence: settled 45",
+            "delta": -45
+          },
+          {
+            "label": "Reserve required verification: 20",
+            "delta": -20
+          },
+          {
+            "label": "Draft proposal: settled 10",
+            "delta": -10
+          },
+          {
+            "label": "Verify at 15: release unused 5",
+            "delta": 5
+          }
+        ],
+        "rule": "Actual spend 70; final availability 30. Verification reserve is not optional headroom."
+      },
+      "read": [
+        "The verification reservation reduces available balance before the draft.",
+        "After drafting, only 25 cents are available for optional work.",
+        "Settlement returns 5 unused cents; the 15 spent on verification stays charged."
+      ],
+      "question": "At the 25-cent balance, may a 30-cent critic run by borrowing the verification reservation?",
+      "answer": "No. That would remove capacity for a required completion check. Omit the optional critic or use a separately qualified option that fits. If verification cannot be funded, report a bounded incomplete outcome. Simplification should cut machinery without removing the evidence contract that makes the result trustworthy.",
+      "takeaway": "A simpler design retains the checks that establish the promised outcome.",
+      "assumption": "Constructed spend; atomic reservations and bounded verifier cost are assumed. No measured benefit from the optional critic is claimed."
+    }
+  ]
+}

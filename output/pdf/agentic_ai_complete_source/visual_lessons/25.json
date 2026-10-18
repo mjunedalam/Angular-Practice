@@ -1,0 +1,105 @@
+{
+  "chapter": 25,
+  "chapter_title": "Evaluation & Quality Measurement",
+  "audit": "The exam analogy and existing conceptual interval discussion do not provide a shared proportional scale on which readers can compare perfect small samples with a predeclared lower-bound gate. Lesson A plots four calculated two-sided Wilson intervals and a 95 percent floor. Its counts are constructed independent binary cases, with the 72 versus 73 perfect-case boundary checked by a separate score-test quadratic calculation. Lesson B displays all four cells of the chapter's judge-calibration example as counts rather than a headline agreement figure. Readers recover both 85 percent agreement and the 30 percent false-acceptance rate among unfaithful answers, keeping denominators and consequences explicit.",
+  "lessons": [
+    {
+      "id": "25A",
+      "placement": "after_analogy",
+      "anchor": "",
+      "title": "A perfect score can still miss the evidence gate",
+      "intro": "These constructed samples contain independent binary case outcomes, not repeated runs of the same prompt. A predeclared gate requires the lower end of a two-sided 95% Wilson interval to reach 95%.",
+      "kind": "intervals",
+      "data": {
+        "rows": [
+          {
+            "label": "45 of 45 cases",
+            "n": 45,
+            "k": 45,
+            "estimate": 1.0,
+            "low": 0.9213457380593594,
+            "high": 1.0
+          },
+          {
+            "label": "72 of 72 cases",
+            "n": 72,
+            "k": 72,
+            "estimate": 1.0,
+            "low": 0.9493470601886036,
+            "high": 1.0
+          },
+          {
+            "label": "73 of 73 cases",
+            "n": 73,
+            "k": 73,
+            "estimate": 1.0,
+            "low": 0.950006246616416,
+            "high": 1.0
+          },
+          {
+            "label": "190 of 200 cases",
+            "n": 200,
+            "k": 190,
+            "estimate": 0.95,
+            "low": 0.9104209437021562,
+            "high": 0.9726176509713551
+          }
+        ],
+        "threshold": 0.95,
+        "method": "Two-sided Wilson, z = 1.96; independently checked by score-test quadratic roots."
+      },
+      "read": [
+        "All four intervals use the same 0-100% probability scale.",
+        "Perfect results with 72 cases still miss the 95% lower-bound floor.",
+        "At 73 perfect cases, the lower bound just crosses that exact gate."
+      ],
+      "question": "Does 190 successes in 200 cases pass merely because the point estimate is 95%?",
+      "answer": "No. Its point estimate is 95%, but the Wilson lower bound is about 91.04%, below the predeclared 95% floor. Gate decisions use the specified bound, not the point estimate.",
+      "takeaway": "Plan sample size for the bound your gate actually uses.",
+      "assumption": "Constructed independent binary cases; nominal coverage assumes this sampling model. Repeated or related cases require appropriate clustering, not this naive calculation."
+    },
+    {
+      "id": "25B",
+      "placement": "before_heading",
+      "anchor": "LLM-as-judge calibration and human review",
+      "title": "A judge can agree often and miss dangerous errors",
+      "intro": "The chapter's constructed 100-answer calibration set contains 70 human-labeled faithful answers and 30 unfaithful answers. Every bar counts answers in one mutually exclusive human/judge outcome.",
+      "kind": "bars",
+      "data": {
+        "unit": "answers",
+        "items": [
+          {
+            "label": "Faithful / judge pass",
+            "value": 64,
+            "role": "success"
+          },
+          {
+            "label": "Faithful / judge fail",
+            "value": 6,
+            "role": "model"
+          },
+          {
+            "label": "Unfaithful / judge pass",
+            "value": 9,
+            "role": "policy"
+          },
+          {
+            "label": "Unfaithful / judge fail",
+            "value": 21,
+            "role": "success"
+          }
+        ],
+        "rule": "64 + 21 = 85 agreements; 9 of 30 unfaithful answers are falsely accepted."
+      },
+      "read": [
+        "The four bars sum to all 100 answers.",
+        "Agreement is 85%, but the false-acceptance denominator is only 30.",
+        "Nine false accepts yield a 30% error rate among unfaithful answers."
+      ],
+      "question": "Would 85% agreement alone justify using this judge as a high-risk release gate?",
+      "answer": "No. It conceals false acceptance of 9 of 30 unfaithful answers. Inspect those errors and critical slices against a task-specific rule. Kappa is about 0.632 for these marginals, but that summary also cannot replace consequence-based review.",
+      "takeaway": "Judge agreement does not substitute for inspecting critical errors.",
+      "assumption": "Constructed counts, not experimental measurements; expert labels are the reviewed reference for this example. No universal acceptance threshold is implied."
+    }
+  ]
+}

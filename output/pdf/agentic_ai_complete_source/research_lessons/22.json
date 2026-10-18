@@ -1,0 +1,70 @@
+{
+  "chapter": 22,
+  "design_note": "The previous labs inspect deletion and audit receipts. This example adds derivation provenance before reuse: a shorter summary remains linked to the confidential record from which it was made. The local purpose rule remains explicit instead of implying that provenance metadata itself grants or denies access.",
+  "source": {
+    "title": "PROV-DM: The PROV Data Model",
+    "url": "https://www.w3.org/TR/prov-dm/",
+    "publisher": "World Wide Web Consortium (W3C)",
+    "concept": "Derivation records connect an entity to the source entity from which it was transformed or constructed. Optional activity and usage information can make that lineage more precise.",
+    "scope": "The customer record, summary and support-only policy are fictional. PROV describes provenance; it does not prescribe classification inheritance or grant processing permission.",
+    "id": "R22",
+    "accessed": "2026-10-17"
+  },
+  "lesson": {
+    "anchor": "Policy versioning, approvals and exceptions",
+    "title": "A shorter summary keeps a longer lineage",
+    "intro": "ShopAssist summarizes confidential case C-7 into S-7. The summary still identifies the customer. A separate marketing job requests S-7, but the reviewed handling rule permits support use only.",
+    "kind": "workspace",
+    "data": {
+      "zones": [
+        {
+          "title": "Source case C-7",
+          "object": "folder",
+          "items": [
+            "Customer: account 481",
+            "Class: confidential",
+            "Purpose: support only"
+          ],
+          "role": "data"
+        },
+        {
+          "title": "Derived summary S-7",
+          "object": "folder",
+          "items": [
+            "Derived from C-7",
+            "Still names account 481",
+            "Class: confidential"
+          ],
+          "role": "data"
+        },
+        {
+          "title": "Reuse policy",
+          "object": "shield",
+          "items": [
+            "Support owner: eligible",
+            "Marketing job: denied",
+            "No approved relabeling"
+          ],
+          "role": "policy"
+        }
+      ],
+      "relations": [
+        "S-7 retains the C-7 derivation reference.",
+        "Every reuse checks its own purpose and principal."
+      ]
+    },
+    "read": [
+      "The summary is a separate artifact with a link to its source.",
+      "It still contains a customer identifier and retains the handling class.",
+      "The marketing purpose fails the stated reuse rule even if storage is approved."
+    ],
+    "question": "Does shortening C-7 into S-7 make the marketing request permissible?",
+    "answer": "No. The summary remains identifiable confidential content, and the explicit rule restricts it to support. The derivation link helps locate the applicable source policy; it does not supply authority. A changed use or classification requires its own reviewed basis.",
+    "takeaway": "Preserve lineage and recheck purpose when reusing derived content.",
+    "assumption": "Fictional handling policy and identified summary; no anonymization or legal compliance claim. Containers show records and authority, not execution order.",
+    "source_label": "W3C PROV-DM: derivation",
+    "id": "22C",
+    "placement": "before_heading",
+    "source_key": "R22"
+  }
+}
