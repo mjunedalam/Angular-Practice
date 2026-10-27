@@ -1,7 +1,7 @@
 <section class="kv-card">
   <h3 class="kv-card__title">{{ title() }}</h3>
   <dl class="kv-card__grid" [style.--kv-rows]="rowCount()">
-    @for (row of rows(); track row.label) {
+    @for (row of visibleRows(); track row.label) {
       <div class="kv-card__field" [attr.data-tone]="row.tone">
         <dt>{{ row.label }}</dt>
         <dd><app-wwell-ir-kv-value [row]="row" /></dd>

@@ -39,29 +39,39 @@
         @for (axis of coordinateAxes(); track axis.label) {
           <div><dt>{{ axis.label }}</dt><dd>{{ axis.value }}</dd></div>
         }
-      } @else {
-        <div><dt>Coordinates</dt><dd>—</dd></div>
       }
-      <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
-      <div><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer || '—' }}</dd></div>
+      @if (ir().requestReference.surfaceElevationFtAsl != null) {
+        <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
+      }
+      @if (ir().requestReference.targetAquifer) {
+        <div><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer || '—' }}</dd></div>
+      }
     </dl>
   </section>
 
   <section class="letter__section">
     <h4>2. Drilling Program</h4>
     <dl class="letter__kv">
+      @if (ir().programDetails.completion) {
       <div>
         <dt>Completion Design</dt>
         <dd>
-          {{ ir().programDetails.completion || '—' }}
+          {{ ir().programDetails.completion }}
           @if (isOpenHole() && ir().programDetails.openHoleSizeIn) {
             ({{ ir().programDetails.openHoleSizeIn }})
           }
         </dd>
       </div>
-      <div><dt>Logging Program</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
-      <div><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
-      <div><dt>Mud Logging</dt><dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd></div>
+      }
+      @if (ir().programDetails.developmentTesting.logging) {
+        <div><dt>Logging Program</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
+      }
+      @if (ir().programDetails.acidization) {
+        <div><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
+      }
+      @if (ir().programDetails.developmentTesting.mudLogging) {
+        <div><dt>Mud Logging</dt><dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd></div>
+      }
     </dl>
   </section>
 
@@ -139,33 +149,57 @@
   <section class="letter__section">
     <h4>6. Production &amp; Testing</h4>
     <dl class="letter__kv">
-      <div><dt>Transmission Method</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
-      <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
-      <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+      @if (ir().programDetails.transmission) {
+        <div><dt>Transmission Method</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
+      }
+      @if (ir().programDetails.developmentTesting.sampling) {
+        <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
+      }
+      @if (ir().programDetails.developmentTesting.flowTest) {
+        <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+      }
     </dl>
   </section>
 
   <section class="letter__section">
     <h4>7. Estimated Hydrogeology</h4>
     <dl class="letter__kv">
-      <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
-      @if (isFlowTest()) {
-        <div><dt>SIWHP</dt><dd>{{ ir().testProgram.siwhpPsi ?? '—' }} psi</dd></div>
-      } @else {
-        <div><dt>Estimated Water Level</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd></div>
-        <div><dt>Estimated Pump Depth</dt><dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd></div>
+      @if (ir().hydrogeology.aquifer) {
+        <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
       }
-      <div><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
-      <div><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
-      <div><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
+      @if (isFlowTest()) {
+        @if (ir().testProgram.siwhpPsi != null) {
+          <div><dt>SIWHP</dt><dd>{{ ir().testProgram.siwhpPsi ?? '—' }} psi</dd></div>
+        }
+      } @else {
+        @if (ir().testProgram.estimatedWaterLevelFt != null) {
+          <div><dt>Estimated Water Level</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd></div>
+        }
+        @if (ir().hydrogeology.estimatedPumpDepthFt != null) {
+          <div><dt>Estimated Pump Depth</dt><dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd></div>
+        }
+      }
+      @if (ir().hydrogeology.estimatedTdsPpm != null) {
+        <div><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
+      }
+      @if (ir().testProgram.estimatedRateGpm != null) {
+        <div><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
+      }
+      @if (ir().hydrogeology.h2sPpm != null) {
+        <div><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
+      }
     </dl>
   </section>
 
   <section class="letter__section">
     <h4>8. Geologist Contact</h4>
     <dl class="letter__kv">
-      <div><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary || '—' }}</dd></div>
-      <div><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
+      @if (ir().contacts.geologistPrimary) {
+        <div><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary || '—' }}</dd></div>
+      }
+      @if (ir().contacts.geologistSecondary) {
+        <div><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
+      }
     </dl>
   </section>
 

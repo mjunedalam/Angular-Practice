@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { KvRow } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
+import { EMPTY_VALUE, KvRow } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
 import { WwellIrKvValueComponent } from '../../wwell-ir-kv-value/wwell-ir-kv-value.component';
 
 /** Read-only label/value card — one per Details/Well Design section (General Information,
@@ -19,10 +19,18 @@ export class WwellIrViewKvCardComponent {
   readonly title = input.required<string>();
   readonly rows = input.required<readonly KvRow[]>();
 
+  /** Rows with no real value ('—', 'N/A' or blank) are left out of the read-only view. */
+  protected readonly visibleRows = computed(() =>
+    this.rows().filter((row) => {
+      const value = row.value?.trim();
+      return !!value && value !== EMPTY_VALUE && value.toUpperCase() !== 'N/A';
+    }),
+  );
+
   // Two-column, *column-major* fill (first half top-to-bottom on the left, second half on the
   // right) — matches the reference screen's field grouping, not CSS Grid's default row-major
   // auto-placement (which would interleave left/right one field at a time instead). Driven
   // through a CSS custom property (see the stylesheet's `grid-template-rows`) since the row count
   // depends on how many fields this particular card was handed.
-  protected readonly rowCount = computed(() => Math.max(1, Math.ceil(this.rows().length / 2)));
+  protected readonly rowCount = computed(() => Math.max(1, Math.ceil(this.visibleRows().length / 2)));
 }
