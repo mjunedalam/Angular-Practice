@@ -13,7 +13,7 @@ import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
 import { appendAttachmentsToLetter, IrLetterAttachmentFile } from '../wwell-ir-letter-attachments.util';
 import { irAttachmentsFor, WWELL_IR_ATTACHMENT_SLOTS } from '../wwell-ir-attachments.config';
-import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus } from '../wwell-ir.config';
+import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
@@ -123,7 +123,12 @@ export class WwellIrViewComponent {
 
     this.downloadingPdf.set(true);
     const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
-    this.wwellIrService.downloadLetterPdf(irSeq, wellboreImageBase64, resolveLetterStampStatus(this.ir())).subscribe({
+    this.wwellIrService.downloadLetterPdf(
+      irSeq,
+      wellboreImageBase64,
+      resolveLetterStampStatus(this.ir()),
+      resolveLetterWorkflow(this.ir()) ?? undefined,
+    ).subscribe({
       next: (blob: Blob) => {
         void this.finishDownload(blob);
       },

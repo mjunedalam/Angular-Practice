@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { WwellIrLetterWorkflow } from './wwell-ir.config';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
@@ -132,11 +133,24 @@ export class WwellIrService {
    *  still renders, just without that section. `stampStatus` is the already-resolved
    *  Approved/Rejected/Pending stamp state (see `resolveLetterStampStatus`, wwell-ir.config.ts) —
    *  sent as a plain value so agwa-planning just stamps whatever it's told instead of keeping its
-   *  own copy of the SAP-text classification logic. `null` when the IR was never submitted. */
-  downloadLetterPdf(irSeq: number, wellboreImageBase64?: string, stampStatus?: string | null): Observable<Blob> {
+   *  own copy of the SAP-text classification logic. `null` when the IR was never submitted.
+   *  `workflow` is the live SAP workflow (id, status text, approval chain) printed as the letter's
+   *  "SAP Approval Workflow" section — see `resolveLetterWorkflow`. */
+  downloadLetterPdf(
+    irSeq: number,
+    wellboreImageBase64?: string,
+    stampStatus?: string | null,
+    workflow?: WwellIrLetterWorkflow,
+  ): Observable<Blob> {
     return this.http.post(
       `${this.apiUrl}/integrated-requirements/${irSeq}/letter-pdf`,
-      { wellboreImageBase64: wellboreImageBase64 ?? null, stampStatus: stampStatus ?? null },
+      {
+        wellboreImageBase64: wellboreImageBase64 ?? null,
+        stampStatus: stampStatus ?? null,
+        workflowId: workflow?.workflowId ?? null,
+        workflowStatusText: workflow?.workflowStatusText ?? null,
+        workflowSteps: workflow?.workflowSteps ?? null,
+      },
       { responseType: 'blob' },
     );
   }

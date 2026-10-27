@@ -103,3 +103,22 @@ export function wwellIrHasRequiredSubmitFields(ir: IntegratedRequirement): boole
     ir.attachments.some(attachment => attachment.slot === 'location-map')
   );
 }
+
+/** The live SAP workflow as printed on the downloaded letter's "SAP Approval Workflow" section. */
+export interface WwellIrLetterWorkflow {
+  readonly workflowId: string | null;
+  readonly workflowStatusText: string | null;
+  readonly workflowSteps: readonly { readonly role: string; readonly name: string; readonly status: string; readonly date: string | null }[];
+}
+
+/** Sends exactly what the editor/view already show for the record (the chain and status text are
+ *  refreshed from SAP on selection), so the letter matches the screen. `null` when the IR was never
+ *  submitted — there is no workflow to print yet. */
+export function resolveLetterWorkflow(ir: IntegratedRequirement): WwellIrLetterWorkflow | null {
+  if (ir.sapWfId == null) return null;
+  return {
+    workflowId: String(ir.sapWfId),
+    workflowStatusText: ir.sapWfStatusText,
+    workflowSteps: ir.chain.map(({ role, name, status, date }) => ({ role, name, status, date })),
+  };
+}
