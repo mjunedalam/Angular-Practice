@@ -361,6 +361,7 @@ export function buildWwellIrFormSchema(
   geologistOptions: Signal<readonly string[]>,
   dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>> = signal({}),
   aquiferOptions: Signal<readonly WwellFieldOption[]> = signal([]),
+  formationOptions: Signal<readonly WwellFieldOption[]> = signal([]),
 ): readonly WwellFormStepConfig[] {
   return WWELL_IR_FORM_SCHEMA.map(step => {
     if (step.key === 'subsurface') {
@@ -372,7 +373,7 @@ export function buildWwellIrFormSchema(
                 ...section,
                 repeatable: {
                   ...section.repeatable,
-                  rowFields: section.repeatable.rowFields.map(field => (field.key === 'name' ? { ...field, options: aquiferOptions } : field)),
+                  rowFields: section.repeatable.rowFields.map(field => (field.key === 'name' ? { ...field, options: formationOptions } : field)),
                 },
               }
             : section,

@@ -17,6 +17,7 @@ import {
   WwellIrDetailTableBlock,
   WwellIrSaveResult,
   mapGwdOpsMemberRaw,
+  StratInfo,
 } from './wwell-ir-form/wwell-ir-payload.model';
 import { mapIrHeaderSummariesToIntegratedRequirements } from './wwell-ir-form/wwell-ir-summary.mapper';
 
@@ -83,6 +84,12 @@ export class WwellIrService {
    */
   getGwdOpsMembers(): Observable<GwdOpsMember[]> {
     return this.http.get<ApiResponse<GwdOpsMemberRaw>>(`${this.apiUrl}/gwd-ops-members`).pipe(map(res => res.data.map(mapGwdOpsMemberRaw)));
+  }
+
+  /** Stratigraphic unit list (exad_agwa_queries_pkg.strat_list) — feeds the Formation Tops "Formation"
+   *  dropdown with st_long_cd values. */
+  getStratInfo(): Observable<StratInfo[]> {
+    return this.http.get<ApiResponse<StratInfo>>(`${this.apiUrl}/strat-info`).pipe(map(res => res.data));
   }
 
   /** Aquifer/formation reference list (daily-operations GET /aquifers, same call the Active Water

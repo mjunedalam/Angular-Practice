@@ -167,6 +167,14 @@ export interface IrEligibleWell {
   readonly supportings: string | null;
 }
 
+/** One stratigraphic unit from GET /strat-info (EXAD_AGWA_QUERIES_PKG.strat_list). `description` is
+ *  st_long_cd — the name the Formation dropdowns show and save. */
+export interface StratInfo {
+  readonly code: number;
+  readonly description: string;
+  readonly stratDesc: string | null;
+}
+
 export interface GwdOpsMemberRaw {
   readonly FULL_NAME: string;
   readonly EMPNUM: number;

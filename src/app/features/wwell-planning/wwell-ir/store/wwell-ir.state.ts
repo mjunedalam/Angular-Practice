@@ -1,7 +1,7 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { Aquifer } from '@models/daily-operation/aquifer.model';
-import { GwdOpsMember, IrEligibleWell } from '../wwell-ir-form/wwell-ir-payload.model';
+import { GwdOpsMember, IrEligibleWell, StratInfo } from '../wwell-ir-form/wwell-ir-payload.model';
 
 export interface WwellIrStoreState {
   readonly irs: IntegratedRequirement[];
@@ -12,6 +12,8 @@ export interface WwellIrStoreState {
   /** GWD ops members — feeds the IR editor's Geologist Contact "Primary"/"Secondary" pickers (see
    *  the store's `geologistOptions` computed for the trimmed FULL_NAME option view). */
   readonly gwdOpsMembers: GwdOpsMember[];
+  /** Stratigraphic units backing the Formation Tops "Formation" dropdown (see `formationOptions`). */
+  readonly stratInfos: StratInfo[];
   /** Aquifer/formation reference list backing every Formation/Aquifer dropdown (see `aquiferOptions`). */
   readonly aquifers: Aquifer[];
   /** EXAD_DHUB_LKUP_DATA dropdown values keyed by LKUP_NAME (`completion_menu`, ...). Empty until
@@ -88,6 +90,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   irs: [],
   linkedRequestWells: [],
   gwdOpsMembers: [],
+  stratInfos: [],
   aquifers: [],
   dropdownMenus: {},
   draftIrSeq: null,

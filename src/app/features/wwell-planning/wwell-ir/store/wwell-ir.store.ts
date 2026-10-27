@@ -99,6 +99,7 @@ export const WwellIrStore = signalStore(
       linkedRequestWellsLoading,
       gwdOpsMembers,
       aquifers,
+      stratInfos,
       irsError,
       linkedRequestWellsError,
       gwdOpsMembersError,
@@ -123,6 +124,9 @@ export const WwellIrStore = signalStore(
       aquiferOptions: computed(() =>
         aquifers().map(aquifer => ({ value: aquifer.code, label: aquifer.description ? `${aquifer.code} - ${aquifer.description}` : aquifer.code })),
       ),
+      /** {value, label} = st_long_cd for the Formation Tops "Formation" dropdown — the name is both what
+       *  the user sees and what gets saved, so there is no separate code to resolve at save time. */
+      formationOptions: computed(() => stratInfos().map(strat => ({ value: strat.description, label: strat.description }))),
       geologistOptions: computed(() => gwdOpsMembers().map(member => member.fullName)),
       /** FULL_NAME → EMPNUM, threaded into buildWwellIrBulkSavePayload's WwellIrSaveContext so
        *  cont_geologist/sub_cont_geologist persist the real employee number, not a display name. */
@@ -366,6 +370,19 @@ export const WwellIrStore = signalStore(
               next: gwdOpsMembers => patchState(store, { gwdOpsMembers, gwdOpsMembersLoading: false }),
               error: (err: unknown) =>
                 patchState(store, { gwdOpsMembersLoading: false, gwdOpsMembersError: errorMessage(err, 'Failed to load GWD ops members') }),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    const loadStratInfos = rxMethod<void>(
+      pipe(
+        switchMap(() =>
+          svc.getStratInfo().pipe(
+            tapResponse({
+              next: stratInfos => patchState(store, { stratInfos }),
+              error: (err: unknown) => notify.error(errorMessage(err, 'Failed to load formation list')),
             }),
           ),
         ),
@@ -687,6 +704,10 @@ export const WwellIrStore = signalStore(
 
       loadAquifers(): void {
         loadAquifers();
+      },
+
+      loadStratInfos(): void {
+        loadStratInfos();
       },
 
       loadDropdownMenus(): void {
