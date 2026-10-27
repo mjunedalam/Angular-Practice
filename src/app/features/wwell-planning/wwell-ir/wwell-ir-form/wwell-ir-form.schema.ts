@@ -115,7 +115,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           addLabel: '+ Add Formation Top',
           minRequiredRows: 1,
           rowFields: [
-            { key: 'name', label: 'Formation', type: 'select', options: [] },
+            { key: 'name', label: 'Formation', type: 'select', options: [], searchable: true },
             { key: 'depthFt', label: 'Depth', type: 'number', suffix: 'ft' },
             { key: 'subSeaFtAsl', label: 'Sub-sea', type: 'number', suffix: 'ft ASL' },
           ],
