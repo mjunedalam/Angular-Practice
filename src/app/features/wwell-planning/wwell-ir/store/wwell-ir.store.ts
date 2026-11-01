@@ -28,6 +28,16 @@ import {
 import { isSapWorkflowRecalled } from '../wwell-ir.config';
 import { WwellIrStoreState, initialWwellIrState } from './wwell-ir.state';
 
+/** Raw base64 (no `data:` prefix) of a blob — the shape SAP's `attachment_files[].b64` expects. */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
 /** Prefers the backend's own `{ message }` (see ApiResponse<T> — every exad_agwa endpoint here
  *  returns that envelope on both success and error) over Angular's generic "Http failure
  *  response for ..." text, so a specific backend validation error (e.g. an Oracle constraint
@@ -207,15 +217,20 @@ export const WwellIrStore = signalStore(
     }
 
     // Pulls every stored attachment's bytes back from the S3 proxy as base64 for the trigger's
-    // `attachment_files`. All-or-nothing: if any read fails the submit fails, rather than silently
-    // sending SAP a review package with documents missing.
-    function loadSapAttachmentFiles(attachments: readonly IrAttachment[]) {
-      if (attachments.length === 0) return of<SapAttachmentFile[]>([]);
-      return forkJoin(
-        attachments.map(attachment =>
-          s3.fetch(attachment.objectKey).pipe(map((response): SapAttachmentFile => ({ file_name: attachment.fileName, b64: response.content }))),
-        ),
+    // `attachment_files`, preceded by the IR letter PDF rendered by agwa-planning from the saved
+    // record. The letter goes out without the wellbore diagram (that image is captured from the
+    // Letter tab's mounted DOM, which isn't available at submit time) and without a stamp or
+    // workflow section (no workflow exists yet). All-or-nothing: if any read fails the submit
+    // fails, rather than silently sending SAP a review package with documents missing.
+    function loadSapAttachmentFiles(ir: IntegratedRequirement, irSeq: number) {
+      const letter$ = svc.downloadLetterPdf(irSeq).pipe(
+        switchMap(blob => blobToBase64(blob)),
+        map((b64): SapAttachmentFile => ({ file_name: `${ir.code}-letter.pdf`, b64 })),
       );
+      const stored$ = ir.attachments.map(attachment =>
+        s3.fetch(attachment.objectKey).pipe(map((response): SapAttachmentFile => ({ file_name: attachment.fileName, b64: response.content }))),
+      );
+      return forkJoin([letter$, ...stored$]);
     }
 
     // Steps 1-2: mint a workflow id (get_wf_next_id_fnc), then push the workflow to SAP under it.
@@ -224,7 +239,7 @@ export const WwellIrStore = signalStore(
       const networkId = authStore.networkId() ?? '';
       svc.getNextSapWorkflowSeq().subscribe({
         next: seq => {
-          loadSapAttachmentFiles(ir.attachments)
+          loadSapAttachmentFiles(ir, irSeq)
             .pipe(
               switchMap(attachmentFiles =>
                 sap.trigger({
@@ -234,7 +249,7 @@ export const WwellIrStore = signalStore(
                   process_id: WWELL_IR_SAP_PROCESS_ID,
                   scenario_id: WWELL_IR_SAP_SCENARIO_ID,
                   workflow_id: String(seq),
-                  ...(attachmentFiles.length > 0 ? { attachment_files: attachmentFiles } : {}),
+                  attachment_files: attachmentFiles,
                   body: [],
                 }),
               ),

@@ -118,5 +118,6 @@ export interface WwellIrFormRawValue {
   readonly attachments: {
     readonly locationMap: WwellIrRawFileField;
     readonly initiationRequest: WwellIrRawFileField;
+    readonly wlda: WwellIrRawFileField;
   };
 }

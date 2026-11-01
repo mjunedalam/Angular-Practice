@@ -18,8 +18,12 @@ import {
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
 
+/** Lets the letter PDF's blob → base64 read (FileReader) finish, which fake timers don't drive. */
+const settleAsyncWork = () => new Promise<void>(resolve => jest.requireActual('timers').setTimeout(resolve, 20));
+
 const serviceMock = {
   createIr: jest.fn(),
+  downloadLetterPdf: jest.fn(),
   getIrDetailBlocks: jest.fn(),
   getIrs: jest.fn(),
   getNextSapWorkflowSeq: jest.fn(),
@@ -281,6 +285,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     jest.useFakeTimers();
     authStoreMock.networkId.mockReturnValue('junedalam');
     s3ServiceMock.fetch.mockReturnValue(of({ content: 'QUJD', content_type: 'application/pdf' }));
+    serviceMock.downloadLetterPdf.mockReturnValue(of(new Blob(['ABC'], { type: 'application/pdf' })));
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(emptyWorkflowStatus));
     TestBed.configureTestingModule({
       providers: [
@@ -305,17 +310,18 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.loadIrs();
   }
 
-  it('refuses to submit, and never calls SAP, when no Location Map is attached', () => {
+  it('refuses to submit, and never calls SAP, when no Location Map is attached', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001, attachments: [] });
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(serviceMock.getNextSapWorkflowSeq).not.toHaveBeenCalled();
     expect(sapServiceMock.trigger).not.toHaveBeenCalled();
     expect(store.sapTriggerError()).toBe('Attach a Location Map before submitting for review.');
   });
 
-  it('runs the three steps in order — mint id, trigger SAP, record a local "in progress" placeholder — without ever asking SAP for a real status', () => {
+  it('runs the three steps in order — mint id, trigger SAP, record a local "in progress" placeholder — without ever asking SAP for a real status', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
@@ -323,9 +329,14 @@ describe('WwellIrStore - submitIrForReview', () => {
     serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
-    expect(sentRequest.attachment_files).toEqual([{ file_name: 'location-map.pdf', b64: 'QUJD' }]);
+    expect(serviceMock.downloadLetterPdf).toHaveBeenCalledWith(9001);
+    expect(sentRequest.attachment_files).toEqual([
+      { file_name: `${ir.code}-letter.pdf`, b64: 'QUJD' },
+      { file_name: 'location-map.pdf', b64: 'QUJD' },
+    ]);
     expect(sentRequest).toMatchObject({
       process_id: WWELL_IR_SAP_PROCESS_ID,
       scenario_id: WWELL_IR_SAP_SCENARIO_ID,
@@ -346,13 +357,14 @@ describe('WwellIrStore - submitIrForReview', () => {
 
   /** The header is stamped only for a workflow SAP actually accepted — a failed trigger must leave
    *  sap_wf_id/sap_wf_status untouched rather than recording a workflow that does not exist in SAP. */
-  it('does not touch the IR header at all when the SAP trigger fails', () => {
+  it('does not touch the IR header at all when the SAP trigger fails', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
     sapServiceMock.trigger.mockReturnValue(throwError(() => new Error('SAP unreachable')));
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
     expect(store.irs()[0].status).toBe('in-progress');
@@ -360,7 +372,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.updatingIrStatus()).toBe(false);
   });
 
-  it('surfaces the SAP 422 validation detail message instead of a generic HTTP failure text', () => {
+  it('surfaces the SAP 422 validation detail message instead of a generic HTTP failure text', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
     sapServiceMock.trigger.mockReturnValue(
@@ -374,6 +386,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     );
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(store.sapTriggerError()).toBe('field required');
   });
@@ -382,7 +395,7 @@ describe('WwellIrStore - submitIrForReview', () => {
    *  `error` holding the transport's own TypeError rather than the backend's ApiResponse envelope.
    *  Reproduced live by pointing sapServiceUrl at a dead port: the toast read "Failed to fetch",
    *  which tells the user nothing about what failed or what to do. */
-  it('uses its own copy when the SAP call never reached a server', () => {
+  it('uses its own copy when the SAP call never reached a server', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
     sapServiceMock.trigger.mockReturnValue(
@@ -397,16 +410,18 @@ describe('WwellIrStore - submitIrForReview', () => {
     );
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(store.sapTriggerError()).toBe('Failed to trigger the SAP review workflow');
   });
 
   /** An unsaved draft has no ir_seq, so there would be nothing to record the SAP outcome against
    *  — the guard must refuse before SAP is called, not after. */
-  it('refuses to submit an IR that has never been saved, without calling SAP', () => {
+  it('refuses to submit an IR that has never been saved, without calling SAP', async () => {
     const ir = buildIntegratedRequirement({ status: 'draft', irSeq: null });
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(serviceMock.getNextSapWorkflowSeq).not.toHaveBeenCalled();
     expect(sapServiceMock.trigger).not.toHaveBeenCalled();
@@ -415,11 +430,12 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.updatingIrStatus()).toBe(false);
   });
 
-  it('never calls the SAP trigger when minting a workflow id fails', () => {
+  it('never calls the SAP trigger when minting a workflow id fails', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(throwError(() => new Error('sequence exhausted')));
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(sapServiceMock.trigger).not.toHaveBeenCalled();
     expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
@@ -427,7 +443,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.updatingIrStatus()).toBe(false);
   });
 
-  it('reports a distinct error, and does not mark the record submitted, when recording the outcome fails', () => {
+  it('reports a distinct error, and does not mark the record submitted, when recording the outcome fails', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
@@ -435,6 +451,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     serviceMock.updateIrSapWorkflow.mockReturnValue(throwError(() => new Error('header locked')));
 
     store.submitIrForReview(ir);
+    await settleAsyncWork();
 
     expect(store.irs()[0].status).toBe('in-progress');
     expect(store.sapTriggerError()).toBe('header locked');
@@ -499,7 +516,7 @@ describe('WwellIrStore - recallIr', () => {
     store.loadIrs();
   }
 
-  it('calls SAP recall under the existing workflow id, then fetches the real status and chain via a follow-up GET', () => {
+  it('calls SAP recall under the existing workflow id, then fetches the real status and chain via a follow-up GET', async () => {
     const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
     seedIrs(ir);
     sapServiceMock.recall.mockReturnValue(of(recallAck));
@@ -527,7 +544,7 @@ describe('WwellIrStore - recallIr', () => {
     expect(store.sapRecallError()).toBeNull();
   });
 
-  it('refuses to recall an IR with no SAP workflow, without calling SAP', () => {
+  it('refuses to recall an IR with no SAP workflow, without calling SAP', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001, sapWfId: null });
 
     store.recallIr(ir);
@@ -537,7 +554,7 @@ describe('WwellIrStore - recallIr', () => {
     expect(store.recallingIr()).toBe(false);
   });
 
-  it('does not touch the IR header at all when the SAP recall itself fails', () => {
+  it('does not touch the IR header at all when the SAP recall itself fails', async () => {
     const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
     seedIrs(ir);
     sapServiceMock.recall.mockReturnValue(throwError(() => new Error('SAP unreachable')));
@@ -550,7 +567,7 @@ describe('WwellIrStore - recallIr', () => {
     expect(store.recallingIr()).toBe(false);
   });
 
-  it('reports a distinct error, and leaves the record\'s status untouched, when the follow-up status fetch fails', () => {
+  it('reports a distinct error, and leaves the record\'s status untouched, when the follow-up status fetch fails', async () => {
     const ir = buildIntegratedRequirement({ status: 'submit-for-review', irSeq: 9001, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS });
     seedIrs(ir);
     sapServiceMock.recall.mockReturnValue(of(recallAck));
@@ -570,7 +587,7 @@ describe('WwellIrStore - recallIr', () => {
 });
 
 describe('WwellIrStore - recallIr polling', () => {
-  it('keeps polling until SAP reports Recalled, showing each status read, then stops and clears the spinner', () => {
+  it('keeps polling until SAP reports Recalled, showing each status read, then stops and clears the spinner', async () => {
     jest.clearAllMocks();
     authStoreMock.networkId.mockReturnValue('junedalam');
     TestBed.configureTestingModule({
@@ -665,7 +682,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
   /** Only the detail fetch's exad_gwd_ir_header block carries sap_wf_id (see
    *  wwell-ir-summary.mapper.ts) — this is what lets loadIrDetail resolve a real one to look SAP
    *  up by. */
-  it('looks up the real SAP workflow once a detail fetch resolves a sap_wf_id', () => {
+  it('looks up the real SAP workflow once a detail fetch resolves a sap_wf_id', async () => {
     const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
     seedIrs(ir);
     serviceMock.getIrDetailBlocks.mockReturnValue(
@@ -684,7 +701,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
   /** An IR that has never been through Submit for Review has no SAP workflow to look up — calling
    *  SAP with nothing to ask about would be meaningless (and, per the mock's own validation, a
    *  422). */
-  it('never calls SAP display for an IR with no sap_wf_id', () => {
+  it('never calls SAP display for an IR with no sap_wf_id', async () => {
     const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
     seedIrs(ir);
     serviceMock.getIrDetailBlocks.mockReturnValue(of([{ table: 'exad_gwd_ir_header', data: [{}] }]));
@@ -696,7 +713,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
     expect(store.irApprovalTimelineLoading()).toBe(false);
   });
 
-  it('surfaces a SAP display failure as irApprovalTimelineError without touching the chain', () => {
+  it('surfaces a SAP display failure as irApprovalTimelineError without touching the chain', async () => {
     const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null, chain: [{ role: 'Existing', name: 'Someone', status: 'pending', date: null }] });
     seedIrs(ir);
     serviceMock.getIrDetailBlocks.mockReturnValue(
@@ -713,7 +730,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
   /** The manual refresh action (Approval Workflow sidebar / detail header) — lets the UI pull
    *  SAP's real current status/chain for an already-selected record on demand, replacing whatever
    *  submitIrForReview's local "in progress" placeholder (or a stale earlier fetch) last left. */
-  it('refreshIrApprovalStatus re-fetches SAP display and updates status/chain for a known sapWfId', () => {
+  it('refreshIrApprovalStatus re-fetches SAP display and updates status/chain for a known sapWfId', async () => {
     const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: 11033, status: 'submit-for-review', sapWfStatusText: 'In Progress' });
     seedIrs(ir);
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(workflowStatusWithOneApprovedStep));
@@ -725,7 +742,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
     expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'approved', date: '2026-09-15' }]);
   });
 
-  it('refreshIrApprovalStatus is a no-op for a record with no sapWfId — nothing in SAP to ask about', () => {
+  it('refreshIrApprovalStatus is a no-op for a record with no sapWfId — nothing in SAP to ask about', async () => {
     const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: null });
     seedIrs(ir);
 

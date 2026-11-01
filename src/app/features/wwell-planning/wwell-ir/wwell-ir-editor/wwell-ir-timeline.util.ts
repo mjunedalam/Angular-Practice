@@ -37,10 +37,10 @@ export function wwellIrTimelineStepStatus(ir: IntegratedRequirement, groupKey: s
     case 'areaWaterWells':
       return ir.offsetWells.length > 0 || !!ir.offsetWellsRemarks?.trim() ? 'completed' : 'pending';
 
-    // Both slots are required by the form schema (see wwell-ir-form.schema.ts), so the step is
+    // The required slots are required by the form schema (see wwell-ir-form.schema.ts), so the step is
     // complete only once each one holds at least one file.
     case 'attachments':
-      return WWELL_IR_ATTACHMENT_SLOTS.every(({ slot }) => ir.attachments.some(attachment => attachment.slot === slot))
+      return WWELL_IR_ATTACHMENT_SLOTS.filter(({ required }) => required).every(({ slot }) => ir.attachments.some(attachment => attachment.slot === slot))
         ? 'completed'
         : 'pending';
 

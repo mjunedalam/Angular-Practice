@@ -83,7 +83,7 @@ export function mapIrFormValueToSubmission(
     },
   };
 
-  const files = [...raw.attachments.locationMap.file, ...raw.attachments.initiationRequest.file];
+  const files = [...raw.attachments.locationMap.file, ...raw.attachments.initiationRequest.file, ...raw.attachments.wlda.file];
 
   return { payload, files };
 }

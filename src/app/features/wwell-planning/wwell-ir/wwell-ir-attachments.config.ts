@@ -13,7 +13,7 @@ export interface WwellIrAttachmentSlotConfig {
 }
 
 /**
- * The IR's two attachment slots, in the order they're appended to the letter PDF as trailing pages.
+ * The IR's attachment slots, in the order they're appended to the letter PDF as trailing pages.
  * Single source of truth for both the editor cards and the letter view, so the two can't drift.
  */
 export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] = [
@@ -32,6 +32,14 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
     icon: 'assignment',
     required: true,
     hint: 'Signed initiation request — appended to the letter after the location map.',
+  },
+  {
+    slot: 'wlda',
+    number: '7.3',
+    label: 'Well Location and Drilling Approval (WLDA)',
+    icon: 'verified',
+    required: false,
+    hint: 'WLDA document — appended to the letter after the initiation request and sent to SAP on submit.',
   },
 ];
 

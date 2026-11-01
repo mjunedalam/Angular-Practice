@@ -147,6 +147,6 @@ export function mapIntegratedRequirementToRawFormValue(ir: IntegratedRequirement
       remarks: patch.contacts.remarks,
     },
     hydrogeology: patch.hydrogeology,
-    attachments: { locationMap: { file: [] }, initiationRequest: { file: [] } },
+    attachments: { locationMap: { file: [] }, initiationRequest: { file: [] }, wlda: { file: [] } },
   };
 }

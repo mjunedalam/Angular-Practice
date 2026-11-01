@@ -94,6 +94,13 @@ export const WWELL_IR_SECTION_RAIL: readonly WwellIrRailGroup[] = [
         stepKey: 'attachments',
         sectionKey: 'initiationRequest',
       },
+      {
+        key: 'wlda',
+        number: '7.3',
+        label: 'WLDA',
+        stepKey: 'attachments',
+        sectionKey: 'wlda',
+      },
     ],
   },
 ];

@@ -51,7 +51,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
         estimatedPumpDepthFt: null,
       },
     },
-    attachments: { locationMap: { file: [] }, initiationRequest: { file: [] } },
+    attachments: { locationMap: { file: [] }, initiationRequest: { file: [] }, wlda: { file: [] } },
     ...overrides,
   };
 }
