@@ -15,6 +15,7 @@ import {
   WWELL_IR_SAP_SCENARIO_ID,
   WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
 } from '../wwell-ir-sap.config';
+import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from './wwell-ir.store';
 
@@ -39,6 +40,10 @@ const sapServiceMock = {
 const s3ServiceMock = {
   store: jest.fn(),
   fetch: jest.fn(),
+};
+
+const letterPdfMock = {
+  buildLetterPdf: jest.fn(),
 };
 
 const authStoreMock = {
@@ -134,6 +139,7 @@ describe('WwellIrStore - createIr', () => {
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
         { provide: S3Service, useValue: s3ServiceMock },
+        { provide: WwellIrLetterPdfService, useValue: letterPdfMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -285,7 +291,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     jest.useFakeTimers();
     authStoreMock.networkId.mockReturnValue('junedalam');
     s3ServiceMock.fetch.mockReturnValue(of({ content: 'QUJD', content_type: 'application/pdf' }));
-    serviceMock.downloadLetterPdf.mockReturnValue(of(new Blob(['ABC'], { type: 'application/pdf' })));
+    letterPdfMock.buildLetterPdf.mockResolvedValue(new Blob(['ABC'], { type: 'application/pdf' }));
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(emptyWorkflowStatus));
     TestBed.configureTestingModule({
       providers: [
@@ -293,6 +299,7 @@ describe('WwellIrStore - submitIrForReview', () => {
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
         { provide: S3Service, useValue: s3ServiceMock },
+        { provide: WwellIrLetterPdfService, useValue: letterPdfMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -332,7 +339,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     await settleAsyncWork();
 
     const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
-    expect(serviceMock.downloadLetterPdf).toHaveBeenCalledWith(9001);
+    expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(ir);
     expect(sentRequest.attachment_files).toEqual([
       { file_name: `${ir.code}-letter.pdf`, b64: 'QUJD' },
       { file_name: 'location-map.pdf', b64: 'QUJD' },
@@ -503,6 +510,7 @@ describe('WwellIrStore - recallIr', () => {
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
         { provide: S3Service, useValue: s3ServiceMock },
+        { provide: WwellIrLetterPdfService, useValue: letterPdfMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -596,6 +604,7 @@ describe('WwellIrStore - recallIr polling', () => {
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
         { provide: S3Service, useValue: s3ServiceMock },
+        { provide: WwellIrLetterPdfService, useValue: letterPdfMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });
@@ -668,6 +677,7 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
         { provide: WwellIrService, useValue: serviceMock },
         { provide: SapService, useValue: sapServiceMock },
         { provide: S3Service, useValue: s3ServiceMock },
+        { provide: WwellIrLetterPdfService, useValue: letterPdfMock },
         { provide: AuthStore, useValue: authStoreMock },
       ],
     });

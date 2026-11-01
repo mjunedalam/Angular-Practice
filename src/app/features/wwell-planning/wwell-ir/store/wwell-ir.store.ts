@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, concatMap, delay, exhaustMap, forkJoin, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
+import { EMPTY, catchError, concatMap, delay, exhaustMap, forkJoin, from, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
@@ -16,6 +16,7 @@ import { mapSapWorkflowStatusToApprovalChain } from '../wwell-ir-form/wwell-ir-a
 import { mergeIrDetailBlocksIntoIntegratedRequirement } from '../wwell-ir-form/wwell-ir-detail-response.mapper';
 import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir-draft.util';
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
+import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { WwellIrService } from '../wwell-ir.service';
 import { labelForSlot, slotFromObjectKey } from '../wwell-ir-attachments.config';
 import {
@@ -186,6 +187,7 @@ export const WwellIrStore = signalStore(
     svc = inject(WwellIrService),
     sap = inject(SapService),
     s3 = inject(S3Service),
+    letterPdf = inject(WwellIrLetterPdfService),
     authStore = inject(AuthStore),
     notify = inject(NotificationService),
   ) => {
@@ -217,13 +219,12 @@ export const WwellIrStore = signalStore(
     }
 
     // Pulls every stored attachment's bytes back from the S3 proxy as base64 for the trigger's
-    // `attachment_files`, preceded by the IR letter PDF rendered by agwa-planning from the saved
-    // record. The letter goes out without the wellbore diagram (that image is captured from the
-    // Letter tab's mounted DOM, which isn't available at submit time) and without a stamp or
-    // workflow section (no workflow exists yet). All-or-nothing: if any read fails the submit
+    // `attachment_files`, preceded by the complete IR letter — identical to the "Download PDF"
+    // output (wellbore diagram captured from an off-screen Letter render, attachments appended as
+    // trailing pages; see WwellIrLetterPdfService). All-or-nothing: if any read fails the submit
     // fails, rather than silently sending SAP a review package with documents missing.
     function loadSapAttachmentFiles(ir: IntegratedRequirement, irSeq: number) {
-      const letter$ = svc.downloadLetterPdf(irSeq).pipe(
+      const letter$ = from(letterPdf.buildLetterPdf(ir)).pipe(
         switchMap(blob => blobToBase64(blob)),
         map((b64): SapAttachmentFile => ({ file_name: `${ir.code}-letter.pdf`, b64 })),
       );
