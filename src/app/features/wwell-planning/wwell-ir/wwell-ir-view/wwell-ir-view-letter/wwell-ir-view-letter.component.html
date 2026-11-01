@@ -40,7 +40,7 @@
           <div><dt>{{ axis.label }}</dt><dd>{{ axis.value }}</dd></div>
         }
       }
-      @if (ir().requestReference.surfaceElevationFtAsl != null) {
+      @if (ir().requestReference.surfaceElevationFtAsl !== null && ir().requestReference.surfaceElevationFtAsl !== undefined) {
         <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
       }
       @if (ir().requestReference.targetAquifer) {
@@ -168,24 +168,24 @@
         <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
       }
       @if (isFlowTest()) {
-        @if (ir().testProgram.siwhpPsi != null) {
+        @if (ir().testProgram.siwhpPsi !== null && ir().testProgram.siwhpPsi !== undefined) {
           <div><dt>SIWHP</dt><dd>{{ ir().testProgram.siwhpPsi ?? '—' }} psi</dd></div>
         }
       } @else {
-        @if (ir().testProgram.estimatedWaterLevelFt != null) {
+        @if (ir().testProgram.estimatedWaterLevelFt !== null && ir().testProgram.estimatedWaterLevelFt !== undefined) {
           <div><dt>Estimated Water Level</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd></div>
         }
-        @if (ir().hydrogeology.estimatedPumpDepthFt != null) {
+        @if (ir().hydrogeology.estimatedPumpDepthFt !== null && ir().hydrogeology.estimatedPumpDepthFt !== undefined) {
           <div><dt>Estimated Pump Depth</dt><dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd></div>
         }
       }
-      @if (ir().hydrogeology.estimatedTdsPpm != null) {
+      @if (ir().hydrogeology.estimatedTdsPpm !== null && ir().hydrogeology.estimatedTdsPpm !== undefined) {
         <div><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
       }
-      @if (ir().testProgram.estimatedRateGpm != null) {
+      @if (ir().testProgram.estimatedRateGpm !== null && ir().testProgram.estimatedRateGpm !== undefined) {
         <div><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
       }
-      @if (ir().hydrogeology.h2sPpm != null) {
+      @if (ir().hydrogeology.h2sPpm !== null && ir().hydrogeology.h2sPpm !== undefined) {
         <div><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
       }
     </dl>
