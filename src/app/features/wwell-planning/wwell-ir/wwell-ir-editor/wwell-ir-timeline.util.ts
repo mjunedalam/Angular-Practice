@@ -13,10 +13,10 @@ export function wwellIrTimelineStepStatus(ir: IntegratedRequirement, groupKey: s
       return ir.requestReference.wellName?.trim() ? 'completed' : 'pending';
 
     case 'general': {
-      const { completion, acidization, transmission, openHoleSizeIn, developmentTesting } = ir.programDetails;
+      const { completionType, completion, acidization, transmission, openHoleSizeIn, developmentTesting } = ir.programDetails;
       const developmentFilled = Object.values(developmentTesting).some(value => value?.trim());
       const geologistFilled = !!ir.contacts.geologistPrimary?.trim();
-      return completion || acidization || transmission || openHoleSizeIn || developmentFilled || geologistFilled
+      return completionType || completion || acidization || transmission || openHoleSizeIn || developmentFilled || geologistFilled
         ? 'completed'
         : 'pending';
     }

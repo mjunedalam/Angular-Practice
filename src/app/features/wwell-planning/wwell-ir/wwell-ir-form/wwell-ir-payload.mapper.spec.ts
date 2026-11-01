@@ -31,7 +31,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       remarks: { topsRemarks: '' },
     },
     programDetails: {
-      main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
+      main: { completionType: '', completion: 'Screened', openHoleSizeIn: '', linerSizeIn: '', acidization: '', transmission: '' },
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: {
@@ -232,8 +232,10 @@ function buildExistingBase(
     hydrogeology: { aquifer: '', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: null },
     testProgram: { testType: 'pump-test', estimatedRateGpm: null, estimatedWaterLevelFt: null },
     programDetails: {
+      completionType: '',
       completion: '',
       openHoleSizeIn: null,
+      linerSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
@@ -420,8 +422,10 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
       wellDesignSeq: 9500,
       hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
       programDetails: {
+        completionType: '',
         completion: 'Screened',
         openHoleSizeIn: null,
+        linerSizeIn: null,
         acidization: '',
         transmission: '',
         developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
@@ -439,8 +443,10 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
       wellDesignSeq: 9500,
       hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
       programDetails: {
+        completionType: '',
         completion: 'Screened',
         openHoleSizeIn: null,
+        linerSizeIn: null,
         acidization: '',
         transmission: '',
         developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
@@ -458,8 +464,10 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
       wellDesignSeq: 9500,
       hydrogeology: { aquifer: 'WASIA', estimatedTdsPpm: null, h2sPpm: null, estimatedPumpDepthFt: 350 },
       programDetails: {
+        completionType: '',
         completion: 'Open Hole',
         openHoleSizeIn: null,
+        linerSizeIn: null,
         acidization: '',
         transmission: '',
         developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },

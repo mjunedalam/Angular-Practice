@@ -13,6 +13,7 @@ import {
   WWELL_TEST_TYPE_OPTIONS,
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
+import { WWELL_COMPLETION_TYPE, WWELL_LINER_COMPLETION_TYPES } from './wwell-ir-completion-type.config';
 import { WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
@@ -180,10 +181,10 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         title: null,
         fields: [
           {
-            key: 'completion',
+            key: 'completionType',
             label: 'Completion',
-            type: 'rich-textarea',
-            options: WWELL_COMPLETION_OPTIONS,
+            type: 'select',
+            options: [],
             validators: { required: true },
             colSpan: 2,
           },
@@ -193,7 +194,25 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             type: 'text',
             placeholder: 'e.g., 8 1/2"',
             hint: 'Bit size below the last casing shoe',
-            visibleWhen: { field: 'completion', includesLine: 'Open Hole' },
+            visibleWhen: { field: 'completionType', equals: WWELL_COMPLETION_TYPE.OPEN_HOLE },
+            validators: { required: true },
+            colSpan: 2,
+          },
+          {
+            key: 'linerSizeIn',
+            label: 'Liner Size',
+            type: 'text',
+            placeholder: 'e.g., 7"',
+            hint: 'Outside diameter of the liner',
+            visibleWhen: { field: 'completionType', oneOf: WWELL_LINER_COMPLETION_TYPES },
+            validators: { required: true },
+            colSpan: 2,
+          },
+          {
+            key: 'completion',
+            label: 'Completion Remarks',
+            type: 'rich-textarea',
+            options: WWELL_COMPLETION_OPTIONS,
             colSpan: 2,
           },
           { key: 'acidization', label: 'Acidization', type: 'rich-textarea', options: WWELL_ACIDIZATION_OPTIONS, colSpan: 2 },

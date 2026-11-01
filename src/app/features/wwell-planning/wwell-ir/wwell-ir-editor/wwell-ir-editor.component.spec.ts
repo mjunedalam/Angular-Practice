@@ -30,8 +30,10 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
     topsRemarks: null,
     casing: [],
     programDetails: {
+      completionType: '',
       completion: 'Open Hole',
       openHoleSizeIn: null,
+      linerSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },

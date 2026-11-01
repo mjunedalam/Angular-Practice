@@ -12,6 +12,12 @@ FROM (
   SELECT 'ir_completion_menu', 'Screened', 2 FROM dual UNION ALL
   SELECT 'ir_completion_menu', 'Screened + Gravel Pack', 3 FROM dual UNION ALL
   SELECT 'ir_completion_menu', 'Liner + Perforated', 4 FROM dual UNION ALL
+  -- Completion type (the single-pick "Completion" dropdown; ir_completion_menu above feeds "Completion Remarks")
+  SELECT 'ir_completion_type_menu', 'Open Hole', 1 FROM dual UNION ALL
+  SELECT 'ir_completion_type_menu', 'Screen', 2 FROM dual UNION ALL
+  SELECT 'ir_completion_type_menu', 'Screen with Gravel Pack', 3 FROM dual UNION ALL
+  SELECT 'ir_completion_type_menu', 'Pre-Perforated Liner', 4 FROM dual UNION ALL
+  SELECT 'ir_completion_type_menu', 'Perforated Liner', 5 FROM dual UNION ALL
   -- Acidization
   SELECT 'ir_acidization_menu', 'HCl Acid Wash', 1 FROM dual UNION ALL
   SELECT 'ir_acidization_menu', 'Mud Acid', 2 FROM dual UNION ALL

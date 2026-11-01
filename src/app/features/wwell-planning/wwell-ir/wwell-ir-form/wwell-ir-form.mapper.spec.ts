@@ -22,7 +22,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       remarks: { topsRemarks: 'Top of Saq' },
     },
     programDetails: {
-      main: { completion: 'Screened', openHoleSizeIn: '', acidization: '', transmission: '' },
+      main: { completionType: '', completion: 'Screened', openHoleSizeIn: '', linerSizeIn: '', acidization: '', transmission: '' },
       developmentTesting: { logging: 'Caliper', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
     },
     contacts: {

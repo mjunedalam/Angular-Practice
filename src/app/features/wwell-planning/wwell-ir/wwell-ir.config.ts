@@ -96,7 +96,7 @@ export function wwellIrHasRequiredSubmitFields(ir: IntegratedRequirement): boole
     !!ir.requestReference.linkedRequestId &&
     !!ir.requestReference.letterNumber?.trim() &&
     !!ir.requestReference.wellName.trim() &&
-    !!ir.programDetails.completion.trim() &&
+    (!!ir.programDetails.completionType.trim() || !!ir.programDetails.completion.trim()) &&
     !!ir.contacts.geologistPrimary.trim() &&
     !!ir.hydrogeology.aquifer.trim() &&
     !!ir.testProgram.testType &&

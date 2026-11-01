@@ -223,7 +223,7 @@ export const WwellIrStore = signalStore(
     // output (wellbore diagram captured from an off-screen Letter render, attachments appended as
     // trailing pages; see WwellIrLetterPdfService). All-or-nothing: if any read fails the submit
     // fails, rather than silently sending SAP a review package with documents missing.
-    function loadSapAttachmentFiles(ir: IntegratedRequirement, irSeq: number) {
+    function loadSapAttachmentFiles(ir: IntegratedRequirement) {
       const letter$ = from(letterPdf.buildLetterPdf(ir)).pipe(
         switchMap(blob => blobToBase64(blob)),
         map((b64): SapAttachmentFile => ({ file_name: `${ir.code}-letter.pdf`, b64 })),
@@ -240,7 +240,7 @@ export const WwellIrStore = signalStore(
       const networkId = authStore.networkId() ?? '';
       svc.getNextSapWorkflowSeq().subscribe({
         next: seq => {
-          loadSapAttachmentFiles(ir, irSeq)
+          loadSapAttachmentFiles(ir)
             .pipe(
               switchMap(attachmentFiles =>
                 sap.trigger({

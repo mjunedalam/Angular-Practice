@@ -10,6 +10,7 @@ import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
 import { ITopsIR } from '@shared/models/wwell/tops-ir.model';
 import { IWellDesign } from '@shared/models/wwell/well-design.model';
 import { parseInchSize } from '@shared/utils/wellbore-math.util';
+import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from './wwell-ir-completion-type.config';
 import {
   WwellIrFormRawValue,
   WwellIrRawCasingRow,
@@ -208,6 +209,31 @@ function buildShoeAnchorFallback(renderableCasings: readonly WwellIrRawCasingRow
   return [{ wCsgOdSz: SHOE_ANCHOR_SENTINEL, wCsgBotDpth: 0, wLnrOdSz: null, wLnrTopDepth: null, wLnrBotDepth: null }];
 }
 
+/**
+ * The Completion dropdown's Liner picks (Pre-Perforated / Perforated Liner + Liner Size) describe a
+ * liner string exactly like a `Liner` row in the Casing table does — and the shared diagram draws a
+ * liner purely from such a row (liner.renderer.ts's `rawLinersFromIR`: a shape hanging from the last
+ * casing shoe, with its size label). Setting the completion alone only flipped the perforated flag,
+ * so no liner appeared. This adds the liner the pick implies, run down to the well's target depth, as
+ * a synthetic Casing row for the drawing only — it is never saved or shown in the Casing table.
+ * Skipped when the Casing table already holds a Liner of that size, so a liner the user entered
+ * themselves (with its own depth/TOL) is never doubled up.
+ */
+function withCompletionLiner(
+  rows: readonly WwellIrRawCasingRow[],
+  programMain: WwellIrRawProgramMain,
+  targetDepthFt: number,
+): WwellIrRawCasingRow[] {
+  const linerSize = programMain.linerSizeIn?.trim();
+  if (!isLinerCompletionType(programMain.completionType) || !linerSize) return [...rows];
+
+  const wantedSize = parseInchSize(linerSize);
+  const alreadyDeclared = rows.some(row => row.type === LINER_TYPE && parseInchSize(row.sizeIn) === wantedSize);
+  if (alreadyDeclared) return [...rows];
+
+  return [...rows, { type: LINER_TYPE, sizeIn: linerSize, depthFtBgl: targetDepthFt, tolFtBgl: null, remarks: '' }];
+}
+
 function mapGeologicTops(
   rows: readonly WwellIrRawFormationTop[],
   surfaceElevationFtAsl: number | null,
@@ -300,7 +326,12 @@ function selectedCompletionLabels(completion: string): ReadonlySet<string> {
 export function deriveCompletionElementFlags(
   completion: string,
   openHoleSizeIn: string | null,
+  completionType = '',
+  linerSizeIn: string | null = null,
 ): IntegratedRequirementWellDesignFlags {
+  const typedFlags = flagsForCompletionType(completionType, openHoleSizeIn, linerSizeIn);
+  if (typedFlags) return typedFlags;
+
   const selected = selectedCompletionLabels(completion);
   const isOpenHole = selected.has(COMPLETION_OPEN_HOLE);
   const isGravelPack = selected.has(COMPLETION_SCREENED_GRAVEL_PACK);
@@ -325,6 +356,90 @@ export function deriveCompletionElementFlags(
     lsFlg: isScreened ? 'Y' : 'N',
     lsRemarks: isScreened ? 'Screen' : null,
   };
+}
+
+const NO_COMPLETION_FLAGS: IntegratedRequirementWellDesignFlags = {
+  ohFlg: 'N',
+  ohRemarks: null,
+  gpFlg: 'N',
+  gpRemarks: null,
+  perforatedFlg: 'N',
+  perforatedRemarks: null,
+  lsFlg: 'N',
+  lsRemarks: null,
+};
+
+const PRE_PERFORATED_SUFFIX = WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER;
+const PERFORATED_SUFFIX = WWELL_COMPLETION_TYPE.PERFORATED_LINER;
+
+function sizedLabel(size: string | null, label: string): string {
+  return size ? `${size} ${label}` : label;
+}
+
+/** Flags for the single-pick Completion dropdown, or `null` when nothing (or an unknown value) is
+ *  picked — the caller then falls back to deriving from the legacy Completion Remarks text. Sizes
+ *  ride in the remarks, same encoding as the open hole's (see `parseOpenHoleSizeFromRemarks`):
+ *  exad_gwd_well_design has no column for either size. The perforated remarks double as the
+ *  diagram's visible label (completion.renderer.ts prefers them over its generic text), which is
+ *  how the entered liner size reaches the drawing. */
+function flagsForCompletionType(
+  completionType: string,
+  openHoleSizeIn: string | null,
+  linerSizeIn: string | null,
+): IntegratedRequirementWellDesignFlags | null {
+  const ohSize = openHoleSizeIn?.trim() || null;
+  const linerSize = linerSizeIn?.trim() || null;
+
+  switch (completionType) {
+    case WWELL_COMPLETION_TYPE.OPEN_HOLE:
+      return { ...NO_COMPLETION_FLAGS, ohFlg: 'Y', ohRemarks: ohSize ? `${ohSize} ${COMPLETION_OPEN_HOLE}` : null };
+    case WWELL_COMPLETION_TYPE.SCREEN:
+      return { ...NO_COMPLETION_FLAGS, lsFlg: 'Y', lsRemarks: 'Screen' };
+    case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
+      return { ...NO_COMPLETION_FLAGS, gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: 'Screen' };
+    case WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER:
+      return { ...NO_COMPLETION_FLAGS, perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PRE_PERFORATED_SUFFIX) };
+    case WWELL_COMPLETION_TYPE.PERFORATED_LINER:
+      return { ...NO_COMPLETION_FLAGS, perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PERFORATED_SUFFIX) };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Reverses `flagsForCompletionType` for a persisted exad_gwd_well_design row — the Completion pick
+ * itself has no column (cmpl_type is VARCHAR2(10), too short), so it round-trips through the flags.
+ * Returns `null` unless the flags are *exactly* what one dropdown pick would have produced: a
+ * legacy record (several options checked, "Cased & Perforated", …) stays unresolved and keeps
+ * deriving from its Completion Remarks text, instead of being silently collapsed onto one pick the
+ * next time it is saved.
+ */
+export function resolveCompletionTypeFromFlags(
+  flags: IntegratedRequirementWellDesignFlags | null | undefined,
+): { readonly completionType: string; readonly linerSizeIn: string | null } | null {
+  if (!flags) return null;
+
+  let completionType: string | null = null;
+  let linerSizeIn: string | null = null;
+  if (flags.perforatedFlg === 'Y') {
+    const remarks = flags.perforatedRemarks ?? '';
+    const suffix = remarks.endsWith(PRE_PERFORATED_SUFFIX) ? PRE_PERFORATED_SUFFIX : remarks.endsWith(PERFORATED_SUFFIX) ? PERFORATED_SUFFIX : null;
+    if (suffix) {
+      completionType = suffix;
+      linerSizeIn = remarks.slice(0, -suffix.length).trim() || null;
+    }
+  } else if (flags.ohFlg === 'Y') {
+    completionType = WWELL_COMPLETION_TYPE.OPEN_HOLE;
+  } else if (flags.gpFlg === 'Y') {
+    completionType = WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK;
+  } else if (flags.lsFlg === 'Y') {
+    completionType = WWELL_COMPLETION_TYPE.SCREEN;
+  }
+  if (!completionType) return null;
+
+  const rebuilt = flagsForCompletionType(completionType, parseOpenHoleSizeFromRemarks(flags.ohRemarks), linerSizeIn);
+  const matches = !!rebuilt && (Object.keys(rebuilt) as (keyof IntegratedRequirementWellDesignFlags)[]).every(key => rebuilt[key] === flags[key]);
+  return matches ? { completionType, linerSizeIn } : null;
 }
 
 /** Reverses the `"<size> Open Hole"` encoding `deriveCompletionElementFlags` bakes into
@@ -374,7 +489,8 @@ function buildWellDesignFromForm(
     prewapSeq: null,
     ...buildWaterLevelFields(hydrology),
     pumpLvl: hydrology.estimatedPumpDepthFt,
-    ...(persistedFlags ?? deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null)),
+    ...(persistedFlags ??
+      deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null)),
   };
 }
 
@@ -392,7 +508,6 @@ function assembleWellboreDiagramData(
   hydrology: WwellIrRawHydrology,
   persistedWellDesignFlags?: IntegratedRequirementWellDesignFlags | null,
 ): WellboreDiagramData {
-  const renderableCasings = casingRows.filter(isRenderableCasingRow);
   const renderableFormationTops = formationRows.filter(isRenderableFormationTop);
   /**
    * `completion.renderer.ts`'s `resolveCompletionBottomDepth` (rule kinds 'none' /
@@ -408,6 +523,7 @@ function assembleWellboreDiagramData(
    * to a real value and others to a fallback.
    */
   const resolvedTargetDepthFt = targetDepthFt > 0 ? targetDepthFt : STATIC_TARGET_DEPTH_FT;
+  const renderableCasings = withCompletionLiner(casingRows.filter(isRenderableCasingRow), programMain, resolvedTargetDepthFt);
   /**
    * Presentation draws its depth scale around whichever is deeper, the target depth or the deepest
    * formation top (`selectDisplayDepth` in well-data.selectors.ts) — this keeps that rule, minus its
@@ -449,7 +565,12 @@ export function hasWellboreDiagramData(raw: WwellIrFormRawValue): boolean {
     raw.subsurface.casing.some(isRenderableCasingRow) ||
     raw.subsurface.formationTops.some(isRenderableFormationTop) ||
     hasCompletionElementFlags(
-      deriveCompletionElementFlags(raw.programDetails.main.completion, raw.programDetails.main.openHoleSizeIn || null),
+      deriveCompletionElementFlags(
+        raw.programDetails.main.completion,
+        raw.programDetails.main.openHoleSizeIn || null,
+        raw.programDetails.main.completionType,
+        raw.programDetails.main.linerSizeIn || null,
+      ),
     )
   );
 }
@@ -491,8 +612,10 @@ function toRawFormationRows(rows: readonly IntegratedRequirementFormationTop[]):
 
 function toRawProgramMain(ir: IntegratedRequirement): WwellIrRawProgramMain {
   return {
+    completionType: ir.programDetails.completionType,
     completion: ir.programDetails.completion,
     openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
+    linerSizeIn: ir.programDetails.linerSizeIn ?? '',
     acidization: ir.programDetails.acidization,
     transmission: ir.programDetails.transmission,
   };
@@ -533,9 +656,19 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
   const casingRows = liveCasingRows ?? toRawCasingRows(ir.casing);
   const formationRows = liveFormationRows ?? toRawFormationRows(ir.formationTops);
   const completionFlags = liveProgramMain
-    ? deriveCompletionElementFlags(liveProgramMain.completion, liveProgramMain.openHoleSizeIn || null)
+    ? deriveCompletionElementFlags(
+        liveProgramMain.completion,
+        liveProgramMain.openHoleSizeIn || null,
+        liveProgramMain.completionType,
+        liveProgramMain.linerSizeIn || null,
+      )
     : (ir.programDetails.wellDesignFlags ??
-      deriveCompletionElementFlags(ir.programDetails.completion, ir.programDetails.openHoleSizeIn));
+      deriveCompletionElementFlags(
+        ir.programDetails.completion,
+        ir.programDetails.openHoleSizeIn,
+        ir.programDetails.completionType,
+        ir.programDetails.linerSizeIn,
+      ));
   return (
     casingRows.some(isRenderableCasingRow) ||
     formationRows.some(isRenderableFormationTop) ||

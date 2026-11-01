@@ -1,5 +1,6 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
+import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../wwell-ir-form/wwell-ir-completion-type.config';
 
 /** Flags a value that's actually meaningful, not just informational — e.g. a nonzero H2S
  *  reading should read as amber/danger regardless of which section it sits in. Omitted (or
@@ -94,11 +95,14 @@ export function buildRequestReferenceRows(
  *  single-selection case and otherwise silently hid an already-entered size. */
 export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[] {
   const p = ir.programDetails;
-  const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completion), options: true }];
+  const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completionType) }];
 
-  if (p.completion.split('\n').some(line => line.trim() === 'Open Hole')) {
+  if (p.completionType === WWELL_COMPLETION_TYPE.OPEN_HOLE) {
     rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
+  } else if (isLinerCompletionType(p.completionType)) {
+    rows.push({ label: 'Liner Size', value: fmtStr(p.linerSizeIn) });
   }
+  rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true });
 
   rows.push(
     { label: 'Acidization', value: fmtStr(p.acidization), options: true },

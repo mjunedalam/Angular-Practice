@@ -392,10 +392,15 @@ function buildWellDesignRow(
   prewapSeq: number | null,
   existingWellDesignSeq: number | null | undefined,
   existingPumpDepthFt: number | null | undefined,
-  existingProgramDetails: Pick<IntegratedRequirementProgramDetails, 'completion' | 'openHoleSizeIn'> | null | undefined,
+  existingProgramDetails: Pick<IntegratedRequirementProgramDetails, 'completionType' | 'completion' | 'openHoleSizeIn' | 'linerSizeIn'> | null | undefined,
 ): IrWellDesignRow | null {
   const wdSeq = existingWellDesignSeq ?? null;
-  const flags = deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null);
+  const flags = deriveCompletionElementFlags(
+    programMain.completion,
+    programMain.openHoleSizeIn || null,
+    programMain.completionType,
+    programMain.linerSizeIn || null,
+  );
   // IntegratedRequirementWellDesignFlags is camelCase (domain-model shape, shared with the
   // wellbore-diagram mapper); the wire payload below needs update_ir_data_prc's own snake_case
   // column names (see docs/ir/update_ir_data_prc.sql) — translate rather than rename one side.
@@ -413,13 +418,15 @@ function buildWellDesignRow(
   if (wdSeq != null) {
     const unchanged =
       (existingPumpDepthFt ?? null) === pumpDepthFt &&
+      (existingProgramDetails?.completionType ?? '') === programMain.completionType &&
       (existingProgramDetails?.completion ?? '') === programMain.completion &&
-      (existingProgramDetails?.openHoleSizeIn ?? null) === (programMain.openHoleSizeIn || null);
+      (existingProgramDetails?.openHoleSizeIn ?? null) === (programMain.openHoleSizeIn || null) &&
+      (existingProgramDetails?.linerSizeIn ?? null) === (programMain.linerSizeIn || null);
     const action: IrRowAction = unchanged ? '' : 'UPDATE';
     return { action, wd_seq: wdSeq, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt, ...flagColumns };
   }
 
-  if ((pumpDepthFt == null && !programMain.completion) || prewapSeq == null) return null;
+  if ((pumpDepthFt == null && !programMain.completion && !programMain.completionType) || prewapSeq == null) return null;
   return { action: 'INSERT', wd_seq: null, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt, ...flagColumns };
 }
 

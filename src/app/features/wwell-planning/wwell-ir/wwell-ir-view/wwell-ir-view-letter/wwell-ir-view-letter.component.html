@@ -52,15 +52,10 @@
   <section class="letter__section">
     <h4>2. Drilling Program</h4>
     <dl class="letter__kv">
-      @if (ir().programDetails.completion) {
+      @if (completionDesign(); as design) {
       <div>
         <dt>Completion Design</dt>
-        <dd>
-          {{ ir().programDetails.completion }}
-          @if (isOpenHole() && ir().programDetails.openHoleSizeIn) {
-            ({{ ir().programDetails.openHoleSizeIn }})
-          }
-        </dd>
+        <dd>{{ design }}</dd>
       </div>
       }
       @if (ir().programDetails.developmentTesting.logging) {

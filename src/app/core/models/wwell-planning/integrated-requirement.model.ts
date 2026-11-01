@@ -65,9 +65,17 @@ export interface IntegratedRequirementWellDesignFlags {
 }
 
 export interface IntegratedRequirementProgramDetails {
+  /** The Completion dropdown pick (Open Hole, Screen, …) — empty for a legacy record that only has
+   *  Completion Remarks. Not a header column of its own: it round-trips through `wellDesignFlags`
+   *  (see resolveCompletionTypeFromFlags in wwell-ir-wellbore-diagram.mapper.ts). */
+  readonly completionType: string;
+  /** "Completion Remarks" (exad_gwd_ir_header.completion) — free text, no longer drives the diagram
+   *  when a `completionType` is picked. */
   readonly completion: string;
-  /** Bit size below the last casing shoe (e.g. `8 1/2"`) — only meaningful when completion is 'Open Hole'. */
+  /** Bit size below the last casing shoe (e.g. `8 1/2"`) — only meaningful when completionType is 'Open Hole'. */
   readonly openHoleSizeIn: string | null;
+  /** Liner size (e.g. `7"`) — only meaningful when completionType is a Liner pick. */
+  readonly linerSizeIn: string | null;
   readonly acidization: string;
   /** exad_gwd_ir_header.dt_rmks — not trns_type (VARCHAR2(10), too short for these labels). */
   readonly transmission: string;

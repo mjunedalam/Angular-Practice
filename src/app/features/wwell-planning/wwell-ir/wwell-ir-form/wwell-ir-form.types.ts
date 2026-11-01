@@ -28,8 +28,13 @@ export interface WwellIrRawCasingRow {
 }
 
 export interface WwellIrRawProgramMain {
+  /** The single-pick Completion dropdown (see wwell-ir-completion-type.config.ts). */
+  readonly completionType: string;
+  /** "Completion Remarks" — the older free-text/multi-select field, still exad_gwd_ir_header.completion. */
   readonly completion: string;
   readonly openHoleSizeIn: string;
+  /** Only asked for when `completionType` is a Liner pick. */
+  readonly linerSizeIn: string;
   readonly acidization: string;
   readonly transmission: string;
 }

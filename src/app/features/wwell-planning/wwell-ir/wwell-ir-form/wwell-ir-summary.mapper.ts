@@ -43,8 +43,10 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     topsRemarks: null,
     casing: [],
     programDetails: {
+      completionType: '',
       completion: row.cmplType ?? '',
       openHoleSizeIn: null,
+      linerSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },

@@ -15,9 +15,8 @@ import {
 import { WWELL_IR_LETTER_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import { resolveScaleDepthFt } from '../../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { todayIsoDate } from '../../../shared/wwell-approvals/wwell-approval-request.util';
+import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../../wwell-ir-form/wwell-ir-completion-type.config';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
-
-const OPEN_HOLE_COMPLETION = 'Open Hole';
 
 /** "Letter" step of the read-only IR view — a printable-looking rendition of the GWD Integrated
  *  Requirements Letter, populated straight from the submitted record (never a separate document
@@ -94,16 +93,14 @@ export class WwellIrViewLetterComponent {
     toUtmAxes(this.ir().requestReference.coordinates ?? ''),
   );
 
-  // `completion` is a multi-select — any number of completion options can be checked at once,
-  // each becoming its own `\n`-joined line (see wwell-ir-wellbore-diagram.mapper.ts's doc comment
-  // on this shape) — so this must check "is 'Open Hole' one of the checked lines?", not a straight
-  // equality that only ever matched the single-selection case and otherwise hid the size on the
-  // letter even though it was correctly entered and parsed.
-  protected readonly isOpenHole = computed(() =>
-    this.ir()
-      .programDetails.completion.split('\n')
-      .some(line => line.trim() === OPEN_HOLE_COMPLETION),
-  );
+  /** The Completion pick with its size where one applies (e.g. "Open Hole (8 1/2")"), followed by
+   *  the Completion Remarks. A legacy record with no pick shows just its remarks text. */
+  protected readonly completionDesign = computed(() => {
+    const { completionType, openHoleSizeIn, linerSizeIn, completion } = this.ir().programDetails;
+    const size = completionType === WWELL_COMPLETION_TYPE.OPEN_HOLE ? openHoleSizeIn : isLinerCompletionType(completionType) ? linerSizeIn : null;
+    const pick = completionType ? (size ? `${completionType} (${size})` : completionType) : '';
+    return [pick, completion].filter(part => part.trim()).join(' — ');
+  });
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');
 
   // The real `well-bore-view` layout (not the wizard's 25%-shrunk preview constant) — the letter

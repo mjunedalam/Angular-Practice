@@ -1,6 +1,8 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
+  deriveCompletionElementFlags,
+  resolveCompletionTypeFromFlags,
   wellboreDiagramDataEqual,
 } from './wwell-ir-wellbore-diagram.mapper';
 import { WwellIrRawReference } from './wwell-ir-form.types';
@@ -193,5 +195,86 @@ describe('wellboreDiagramDataEqual', () => {
     expect(wellboreDiagramDataEqual(null, null)).toBe(true);
     expect(wellboreDiagramDataEqual(data, null)).toBe(false);
     expect(wellboreDiagramDataEqual(null, data)).toBe(false);
+  });
+});
+
+describe('Completion type → completion-element flags', () => {
+  it('Open Hole carries its size in oh_remarks', () => {
+    expect(deriveCompletionElementFlags('', '8 1/2"', 'Open Hole')).toMatchObject({ ohFlg: 'Y', ohRemarks: '8 1/2" Open Hole', lsFlg: 'N', perforatedFlg: 'N' });
+  });
+
+  it('Screen sets only the liner-screen flag', () => {
+    expect(deriveCompletionElementFlags('', null, 'Screen')).toMatchObject({ lsFlg: 'Y', gpFlg: 'N', ohFlg: 'N', perforatedFlg: 'N' });
+  });
+
+  it('Screen with Gravel Pack sets both the gravel-pack and screen flags', () => {
+    expect(deriveCompletionElementFlags('', null, 'Screen with Gravel Pack')).toMatchObject({ gpFlg: 'Y', lsFlg: 'Y', perforatedFlg: 'N' });
+  });
+
+  it.each([
+    ['Pre-Perforated Liner', '7" Pre-Perforated Liner'],
+    ['Perforated Liner', '4 1/2" Perforated Liner'],
+  ])('%s puts the entered liner size in the perforated label the diagram draws', (type, label) => {
+    const size = label.startsWith('7') ? '7"' : '4 1/2"';
+    expect(deriveCompletionElementFlags('', null, type, size)).toMatchObject({ perforatedFlg: 'Y', perforatedRemarks: label });
+  });
+
+  it('ignores the Completion Remarks text once a type is picked', () => {
+    expect(deriveCompletionElementFlags('Open Hole\nScreened', null, 'Screen')).toMatchObject({ ohFlg: 'N', lsFlg: 'Y' });
+  });
+
+  it('still derives from the Completion Remarks text when no type is picked (legacy records)', () => {
+    expect(deriveCompletionElementFlags('Open Hole', '8 1/2"')).toMatchObject({ ohFlg: 'Y', ohRemarks: '8 1/2" Open Hole' });
+  });
+
+  it.each([
+    ['Open Hole', null, '8 1/2"'],
+    ['Screen', null, null],
+    ['Screen with Gravel Pack', null, null],
+    ['Pre-Perforated Liner', '7"', null],
+    ['Perforated Liner', '4 1/2"', null],
+  ])('round-trips %s through the persisted flags', (type, linerSize, ohSize) => {
+    const flags = deriveCompletionElementFlags('', ohSize, type, linerSize);
+    expect(resolveCompletionTypeFromFlags(flags)).toEqual({ completionType: type, linerSizeIn: linerSize });
+  });
+
+  it('leaves a legacy multi-option record unresolved so a re-save cannot collapse it onto one pick', () => {
+    const legacy = deriveCompletionElementFlags('Open Hole\nScreened', '8 1/2"');
+    expect(resolveCompletionTypeFromFlags(legacy)).toBeNull();
+  });
+});
+
+describe('Completion liner → diagram', () => {
+  const withProgram = (overrides: Partial<IntegratedRequirement['programDetails']>, casing: IntegratedRequirement['casing'] = []) => {
+    const base = buildIr();
+    return buildIr({ casing, programDetails: { ...base.programDetails, ...overrides, wellDesignFlags: undefined } });
+  };
+
+  it('draws the picked liner as a Liner casing, run down to the target depth', () => {
+    const data = buildWellboreDiagramDataFromIntegratedRequirement(
+      withProgram({ completionType: 'Pre-Perforated Liner', linerSizeIn: '7"' }, [
+        { type: 'Surface', sizeIn: '13 3/8"', depthFtBgl: 500, tolFtBgl: null, remarks: null },
+      ]),
+    );
+
+    expect(data.casings).toContainEqual(expect.objectContaining({ csgType: 'Liner', csgSize: '7"', csgDepth: data.targetDepth }));
+  });
+
+  it('does not duplicate a liner of that size already in the Casing table', () => {
+    const data = buildWellboreDiagramDataFromIntegratedRequirement(
+      withProgram({ completionType: 'Perforated Liner', linerSizeIn: '7"' }, [
+        { type: 'Liner', sizeIn: '7"', depthFtBgl: 900, tolFtBgl: 450, remarks: null },
+      ]),
+    );
+
+    expect(data.casings.filter(casing => casing.csgType === 'Liner')).toHaveLength(1);
+  });
+
+  it('adds no liner for a non-liner pick or a liner pick without a size', () => {
+    const open = buildWellboreDiagramDataFromIntegratedRequirement(withProgram({ completionType: 'Open Hole', linerSizeIn: '7"' }));
+    const unsized = buildWellboreDiagramDataFromIntegratedRequirement(withProgram({ completionType: 'Perforated Liner', linerSizeIn: null }));
+
+    expect(open.casings.some(casing => casing.csgType === 'Liner')).toBe(false);
+    expect(unsized.casings.some(casing => casing.csgType === 'Liner')).toBe(false);
   });
 });

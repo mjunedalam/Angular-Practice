@@ -42,8 +42,10 @@ export function mapIrFormValueToSubmission(
       remarks: row.remarks || null,
     })),
     programDetails: {
+      completionType: raw.programDetails.main.completionType,
       completion: raw.programDetails.main.completion,
       openHoleSizeIn: raw.programDetails.main.openHoleSizeIn || null,
+      linerSizeIn: raw.programDetails.main.linerSizeIn || null,
       acidization: raw.programDetails.main.acidization,
       transmission: raw.programDetails.main.transmission,
       developmentTesting: { ...raw.programDetails.developmentTesting },

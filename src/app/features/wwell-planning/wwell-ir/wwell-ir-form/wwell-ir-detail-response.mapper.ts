@@ -4,7 +4,7 @@ import {
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { isLegacyIrHtmlText, stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
-import { parseOpenHoleSizeFromRemarks } from './wwell-ir-wellbore-diagram.mapper';
+import { parseOpenHoleSizeFromRemarks, resolveCompletionTypeFromFlags } from './wwell-ir-wellbore-diagram.mapper';
 import { formatUtmCoordinates } from '../wwell-ir-coordinates.util';
 import {
   IrCasingRow,
@@ -68,6 +68,10 @@ function mapWellDesignFlags(row: IrWellDesignRow | undefined): IntegratedRequire
   };
 }
 
+function hasAnyCompletionFlag(flags: IntegratedRequirementWellDesignFlags | null): boolean {
+  return !!flags && (flags.ohFlg === 'Y' || flags.gpFlg === 'Y' || flags.perforatedFlg === 'Y' || flags.lsFlg === 'Y');
+}
+
 function resolveLegacyText(raw: string | null | undefined, fallback: string): string {
   return raw != null ? stripLegacyIrHtml(raw) : fallback;
 }
@@ -85,7 +89,9 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
   const wellDesignRow = rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design')[0] as IrWellDesignRow | undefined;
   const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion);
-  const wellDesignRowBelongsToThisIr = !!wellDesignRow && !!completionText;
+  const persistedFlags = wellDesignRow ? mapWellDesignFlags(wellDesignRow) : null;
+  const wellDesignRowBelongsToThisIr = !!wellDesignRow && (!!completionText || hasAnyCompletionFlag(persistedFlags));
+  const resolvedType = wellDesignRowBelongsToThisIr ? resolveCompletionTypeFromFlags(persistedFlags) : null;
   const hasLegacyMarkup = [
     header?.completion ?? header?.cmpl_type,
     header?.acidization,
@@ -157,7 +163,9 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     })),
     programDetails: {
       ...existing.programDetails,
+      completionType: wellDesignRowBelongsToThisIr ? (resolvedType?.completionType ?? '') : existing.programDetails.completionType,
       completion: completionText,
+      linerSizeIn: wellDesignRowBelongsToThisIr ? (resolvedType?.linerSizeIn ?? null) : existing.programDetails.linerSizeIn,
       // oh_remarks is the only backend column open hole size ever reached (see
       // deriveCompletionElementFlags/parseOpenHoleSizeFromRemarks in wwell-ir-wellbore-diagram.mapper.ts)
       // — without parsing it back out here, the Open Hole Size input silently reverted to blank
@@ -174,7 +182,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
         flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest),
         remarks: resolveLegacyText(header?.dev_pump_test, existing.programDetails.developmentTesting.remarks),
       },
-      wellDesignFlags: wellDesignRowBelongsToThisIr ? mapWellDesignFlags(wellDesignRow) : existing.programDetails.wellDesignFlags,
+      wellDesignFlags: wellDesignRowBelongsToThisIr ? persistedFlags : existing.programDetails.wellDesignFlags,
     },
     hydrogeology: hydroRow
       ? {

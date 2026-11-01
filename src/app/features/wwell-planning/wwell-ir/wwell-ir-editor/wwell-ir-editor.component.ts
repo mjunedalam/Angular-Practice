@@ -354,8 +354,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
     const live = this.programEdit.liveValue();
     if (!live) return null;
     return {
+      completionType: live.completionType,
       completion: live.completion,
       openHoleSizeIn: live.openHoleSizeIn,
+      linerSizeIn: live.linerSizeIn,
       acidization: live.acidization,
       transmission: live.transmission,
     };
@@ -1083,8 +1085,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
         ...raw,
         programDetails: {
           main: {
+            completionType: flat.completionType,
             completion: flat.completion,
             openHoleSizeIn: flat.openHoleSizeIn,
+            linerSizeIn: flat.linerSizeIn,
             acidization: flat.acidization,
             transmission: flat.transmission,
           },

@@ -67,8 +67,10 @@ function buildPayload(): CreateIntegratedRequirementPayload {
     topsRemarks: null,
     casing: [],
     programDetails: {
+      completionType: '',
       completion: 'Screened',
       openHoleSizeIn: null,
+      linerSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
@@ -240,8 +242,10 @@ function buildIntegratedRequirement(overrides: Partial<IntegratedRequirement> = 
     topsRemarks: null,
     casing: [],
     programDetails: {
+      completionType: '',
       completion: 'Screened',
       openHoleSizeIn: null,
+      linerSizeIn: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },
