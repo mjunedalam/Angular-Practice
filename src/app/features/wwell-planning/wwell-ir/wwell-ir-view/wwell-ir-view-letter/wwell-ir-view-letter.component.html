@@ -150,8 +150,12 @@
       @if (ir().programDetails.developmentTesting.sampling) {
         <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
       }
-      @if (ir().programDetails.developmentTesting.flowTest) {
-        <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest || '—' }}</dd></div>
+      @if (isFlowTest()) {
+        @if (ir().programDetails.developmentTesting.flowTest) {
+          <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest }}</dd></div>
+        }
+      } @else if (ir().programDetails.developmentTesting.remarks) {
+        <div><dt>Development Pump Test</dt><dd>{{ ir().programDetails.developmentTesting.remarks }}</dd></div>
       }
     </dl>
   </section>

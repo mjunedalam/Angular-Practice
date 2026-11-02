@@ -138,6 +138,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
         existing.contacts.geologistPrimary,
       geologistSecondary: resolveGeologistName(header?.sub_cont_geologist, geologistNameByEmpNum, existing.contacts.geologistSecondary),
     },
+    offsetWellsRemarks: header?.water_remarks ?? existing.offsetWellsRemarks,
     offsetWells: waterRows.map(row => ({
       epANum: row.ep_a_num,
       distanceKm: row.distanct ?? null,

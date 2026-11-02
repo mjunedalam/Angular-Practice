@@ -297,7 +297,7 @@
 
           @if (programEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
-              <app-dynamic-section [section]="programSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+              <app-dynamic-section [section]="programSectionForTest()" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
               <div class="ire__edit-actions">
                 <button type="button" mat-button (click)="programEdit.close()">Cancel</button>
               </div>
@@ -785,7 +785,7 @@
             <div class="ire__edit-block" appWwellCollapseAnimate>
               <app-dynamic-section
                 [section]="offsetWellsSection"
-                [control]="offsetWellsArrayControl(ctrl)"
+                [control]="ctrl"
                 mode="edit"
                 [selectPanelClass]="selectPanelClass"
               />
@@ -853,18 +853,25 @@
         </section>
 
         <section #sectionEl id="ire-sec-offset-remarks" class="ire__section ire__section--sub">
-          <h3 class="ire__subsection-title">6.2 Remarks</h3>
+          <div class="ire__section-head">
+            <h3 class="ire__subsection-title">6.2 Remarks</h3>
+            @if (!offsetRemarksEdit.visible()) {
+              <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Area Water Wells Remarks" (click)="offsetRemarksEdit.open()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
 
-          @if (offsetWellsEdit.visible() && offsetWellsEdit.control(); as ctrl) {
+          @if (offsetRemarksEdit.visible() && offsetRemarksEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
               <app-dynamic-section
                 [section]="offsetRemarksSection"
-                [control]="offsetWellsRemarksControl(ctrl)"
+                [control]="ctrl"
                 mode="edit"
                 [selectPanelClass]="selectPanelClass"
               />
               <div class="ire__edit-actions">
-                <button type="button" mat-button (click)="offsetWellsEdit.close()">Cancel</button>
+                <button type="button" mat-button (click)="offsetRemarksEdit.close()">Cancel</button>
               </div>
             </div>
           } @else if (ir().offsetWellsRemarks) {

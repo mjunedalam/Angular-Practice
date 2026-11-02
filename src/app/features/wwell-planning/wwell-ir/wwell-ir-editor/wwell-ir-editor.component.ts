@@ -327,6 +327,13 @@ export class WwellIrEditorComponent implements AfterViewInit {
   });
   /** Follows the live edit of the Estimated Hydrology step's Test Type toggle. */
   protected readonly headerTestType = computed(() => this.hydrogeologyEdit.liveValue()?.testType ?? this.ir().testProgram.testType);
+  /** The Program Details form for the current Hydrology Test Type (live while Hydrology is being
+   *  edited): Flow Test (FLOW_RMKS) for a flow test, Development/Testing (DEV_PUMP_TEST) for a pump
+   *  test. The hidden field's control stays in the form, so its stored value is left untouched. */
+  protected readonly programSectionForTest = computed(() => {
+    const hiddenKey = this.headerTestType() === 'flow-test' ? 'remarks' : 'flowTest';
+    return { ...this.programSection, fields: (this.programSection.fields ?? []).filter(field => field.key !== hiddenKey) };
+  });
   protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
@@ -412,16 +419,12 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly casingEdit = new SectionEditState<FormArray, WwellIrRawCasingRow[]>(() =>
     buildAndPatchArray(this.casingSection, this.fb, this.ir().casing, casingRowPatch),
   );
-  protected readonly offsetWellsEdit = new SectionEditState<
-    FormGroup,
-    { offsetWells: WwellIrRawOffsetWell[]; remarks: WwellIrRawRemarks }
-  >(() => {
-    const current = this.ir();
-    return this.fb.group({
-      offsetWells: buildAndPatchArray(this.offsetWellsSection, this.fb, current.offsetWells, offsetWellRowPatch),
-      remarks: buildAndPatchGroup(this.offsetRemarksSection, this.fb, { offsetWellsRemarks: current.offsetWellsRemarks ?? '' }),
-    });
-  });
+  protected readonly offsetWellsEdit = new SectionEditState<FormArray, WwellIrRawOffsetWell[]>(() =>
+    buildAndPatchArray(this.offsetWellsSection, this.fb, this.ir().offsetWells, offsetWellRowPatch),
+  );
+  protected readonly offsetRemarksEdit = new SectionEditState<FormGroup, WwellIrRawRemarks>(() =>
+    buildAndPatchGroup(this.offsetRemarksSection, this.fb, { offsetWellsRemarks: this.ir().offsetWellsRemarks ?? '' }),
+  );
 
   /** The "+" buttons' add-forms. Their control is a standalone array — rows only reach the section's live
    *  FormArray (the one Save diffs) once "Add" commits them — so opening one never flips the section into
@@ -440,7 +443,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
   protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing);
-  protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue()?.offsetWells ?? this.ir().offsetWells);
+  protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue() ?? this.ir().offsetWells);
 
   /** What the Wellbore Preview draws for the casing / formation tops: the section's live rows (edits, deletes, committed
    *  adds) plus the "+" form's row as it is typed, so a row is in the drawing the moment it is complete — not only once
@@ -514,7 +517,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected offsetWellsRowGroup(index: number): FormGroup | null {
     const ctrl = this.offsetWellsEdit.control();
-    return ctrl ? (this.offsetWellsArrayControl(ctrl).at(index) as FormGroup) : null;
+    return ctrl ? (ctrl.at(index) as FormGroup) : null;
   }
 
   protected editFormationTopRowInline(index: number): void {
@@ -621,7 +624,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
       liveArray: () => {
         this.offsetWellsEdit.open({ silent: true });
         const ctrl = this.offsetWellsEdit.control();
-        return ctrl ? this.offsetWellsArrayControl(ctrl) : null;
+        return ctrl;
       },
       duplicate: key => `Area well ${key} already exists — edit that row instead.`,
       added: count => `${count} offset well${count === 1 ? '' : 's'} added — click Save to apply.`,
@@ -815,7 +818,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
       this.formationTopsEdit.isEditing() ||
       this.topsRemarksEdit.isEditing() ||
       this.casingEdit.isEditing() ||
-      this.offsetWellsEdit.isEditing(),
+      this.offsetWellsEdit.isEditing() ||
+      this.offsetRemarksEdit.isEditing(),
   );
 
   private saveSettledResolvers: ((succeeded: boolean) => void)[] = [];
@@ -944,14 +948,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
     else control.enable();
   }
 
-  protected offsetWellsArrayControl(ctrl: FormGroup): FormArray {
-    return ctrl.get('offsetWells') as FormArray;
-  }
-
-  protected offsetWellsRemarksControl(ctrl: FormGroup): FormGroup {
-    return ctrl.get('remarks') as FormGroup;
-  }
-
   protected deleteCasingRow(index: number): void {
     const row = this.casingRows()[index];
     if (!row) return;
@@ -988,7 +984,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     ], () => {
       this.offsetWellsEdit.open({ silent: true });
       const ctrl = this.offsetWellsEdit.control();
-      if (ctrl) this.offsetWellsArrayControl(ctrl).removeAt(index);
+      if (ctrl) ctrl.removeAt(index);
       this.notify.info('Offset well removed — click Save to apply.');
     });
   }
@@ -1119,16 +1115,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
     if (casingCtrl) raw = { ...raw, subsurface: { ...raw.subsurface, casing: casingCtrl.getRawValue() } };
 
     const offsetWellsCtrl = this.offsetWellsEdit.control();
-    if (offsetWellsCtrl) {
-      raw = {
-        ...raw,
-        contacts: {
-          ...raw.contacts,
-          offsetWells: this.offsetWellsArrayControl(offsetWellsCtrl).getRawValue(),
-          remarks: this.offsetWellsRemarksControl(offsetWellsCtrl).getRawValue(),
-        },
-      };
-    }
+    if (offsetWellsCtrl) raw = { ...raw, contacts: { ...raw.contacts, offsetWells: offsetWellsCtrl.getRawValue() } };
+
+    const offsetRemarksCtrl = this.offsetRemarksEdit.control();
+    if (offsetRemarksCtrl) raw = { ...raw, contacts: { ...raw.contacts, remarks: offsetRemarksCtrl.getRawValue() } };
 
     this.saveMergedRaw(raw);
     this.closeAllSections();
@@ -1144,6 +1134,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.topsRemarksEdit.close();
     this.casingEdit.close();
     this.offsetWellsEdit.close();
+    this.offsetRemarksEdit.close();
     this.formationTopAdd.close();
     this.casingAdd.close();
     this.offsetWellAdd.close();

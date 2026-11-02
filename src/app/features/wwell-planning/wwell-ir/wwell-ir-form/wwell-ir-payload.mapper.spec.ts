@@ -136,6 +136,14 @@ describe('buildWwellIrBulkSavePayload', () => {
     expect(header.data?.[0].tops_remarks).toBe('Regional cap rock present');
   });
 
+  it('writes the Area Water Wells remarks to header.water_remarks', () => {
+    const raw = buildRaw({ contacts: { ...buildRaw().contacts, remarks: { offsetWellsRemarks: 'Nearest UMER wells are SHYB-1014 and SHYB-1024' } } });
+
+    const [header] = buildWwellIrBulkSavePayload(raw);
+
+    expect(header.data?.[0].water_remarks).toBe('Nearest UMER wells are SHYB-1014 and SHYB-1024');
+  });
+
   it('omits the well_design row when nothing to persist yet (no pump depth, no Completion selected)', () => {
     const raw = buildRaw({ programDetails: { ...buildRaw().programDetails, main: { ...buildRaw().programDetails.main, completion: '' } } });
     const [, , , , , wellDesign] = buildWwellIrBulkSavePayload(raw);

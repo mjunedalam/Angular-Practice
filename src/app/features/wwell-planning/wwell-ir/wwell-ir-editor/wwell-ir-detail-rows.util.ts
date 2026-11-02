@@ -115,12 +115,16 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
  *  comment for why this is a separate function rather than one combined list. */
 export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[] {
   const d = ir.programDetails.developmentTesting;
+  const isFlowTest = ir.testProgram.testType === 'flow-test';
   return [
     { label: 'Logging', value: fmtStr(d.logging), options: true },
     { label: 'Mud Logging', value: fmtStr(d.mudLogging), options: true },
     { label: 'Sampling', value: fmtStr(d.sampling), options: true },
-    { label: 'Flow Test', value: fmtStr(d.flowTest), options: true },
-    { label: 'Development/Testing', value: fmtStr(d.remarks) },
+    // Hydrology Test Type decides which one applies: a flow test shows Flow Test (FLOW_RMKS) only,
+    // a pump test shows Development/Testing (DEV_PUMP_TEST) only.
+    isFlowTest
+      ? { label: 'Flow Test', value: fmtStr(d.flowTest), options: true }
+      : { label: 'Development/Testing', value: fmtStr(d.remarks) },
   ];
 }
 

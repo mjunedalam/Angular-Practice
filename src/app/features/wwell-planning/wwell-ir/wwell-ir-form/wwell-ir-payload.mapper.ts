@@ -454,7 +454,7 @@ export function buildWwellIrBulkSavePayload(
     publish_by: null,
     cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistPrimary, context.geologistEmpNumByName),
     sub_cont_geologist: resolveGeologistId(raw.contacts.geologist.geologistSecondary, context.geologistEmpNumByName),
-    water_remarks: null,
+    water_remarks: raw.contacts.remarks.offsetWellsRemarks || null,
     gen_remarks: null,
     completion: raw.programDetails.main.completion || null,
     cmpl_type: null,
