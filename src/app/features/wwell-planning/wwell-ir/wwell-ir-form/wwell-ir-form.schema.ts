@@ -3,7 +3,6 @@ import { WwellFieldConfig, WwellFieldOption, WwellFormStepConfig } from '../../s
 import { WWELL_APPROVAL_WELL_NAME_PATTERN } from '../../shared/wwell-approvals/wwell-approvals.config';
 import {
   WWELL_ACIDIZATION_OPTIONS,
-  WWELL_CASING_TYPE_OPTIONS,
   WWELL_COMPLETION_OPTIONS,
   WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS,
   WWELL_DEVELOPMENT_TESTING_OPTIONS,
@@ -14,7 +13,7 @@ import {
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
 import { WWELL_COMPLETION_TYPE, WWELL_LINER_COMPLETION_TYPES } from './wwell-ir-completion-type.config';
-import { WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
+import { WWELL_IR_CASING_TYPE_MENU, WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
 /** Splits the field's single "Northing Xm, Easting Ym, Zone Z" value into its own Northing/
@@ -147,7 +146,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               key: 'type',
               label: 'Type',
               type: 'select',
-              options: WWELL_CASING_TYPE_OPTIONS,
+              options: [],
               placeholder: 'e.g., Conductor',
             },
             { key: 'sizeIn', label: 'Size', type: 'text', placeholder: 'e.g., 20"' },
@@ -407,7 +406,17 @@ export function buildWwellIrFormSchema(
                   rowFields: section.repeatable.rowFields.map(field => (field.key === 'name' ? { ...field, options: formationOptions } : field)),
                 },
               }
-            : section,
+            : section.key === 'casing' && section.repeatable
+              ? {
+                  ...section,
+                  repeatable: {
+                    ...section.repeatable,
+                    rowFields: section.repeatable.rowFields.map(field =>
+                      field.key === 'type' ? { ...field, options: computed(() => dropdownMenus()[WWELL_IR_CASING_TYPE_MENU] ?? []) } : field,
+                    ),
+                  },
+                }
+              : section,
         ),
       };
     }

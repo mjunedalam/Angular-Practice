@@ -69,14 +69,6 @@ export const WWELL_SUPPORTING_BUSINESS_OPTIONS: readonly string[] = [
   'Research',
 ];
 
-export const WWELL_CASING_TYPE_OPTIONS: readonly string[] = [
-  'Conductor',
-  'Surface',
-  'Intermediate',
-  'Production',
-  'Liner',
-];
-
 export const WWELL_ACIDIZATION_OPTIONS: readonly string[] = ['HCl Acid Wash', 'Mud Acid', 'None'];
 
 export const WWELL_TRANSMISSION_OPTIONS: readonly string[] = [
