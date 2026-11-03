@@ -379,6 +379,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             label: 'Well Location and Drilling Approval (WLDA)',
             type: 'file',
             placeholder: 'Click to attach file...',
+            validators: { required: true },
           },
         ],
       },

@@ -38,7 +38,7 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
     number: '7.3',
     label: 'Well Location and Drilling Approval (WLDA)',
     icon: 'verified',
-    required: false,
+    required: true,
     hint: 'WLDA document — appended to the letter after the initiation request and sent to SAP on submit.',
   },
 ];
@@ -48,6 +48,11 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
  * IrAttachmentPdfAppender). Office formats would need a headless converter, so they're refused at
  * upload rather than stored as something that silently never appears in the letter.
  */
+/** True once every slot has at least one stored file — the gate for Submit for Review. */
+export function hasAllRequiredAttachments(attachments: readonly IrAttachment[]): boolean {
+  return WWELL_IR_ATTACHMENT_SLOTS.filter(config => config.required).every(config => irAttachmentsFor(attachments, config.slot).length > 0);
+}
+
 export const WWELL_IR_ATTACHMENT_ACCEPT = '.pdf,.jpg,.jpeg,.png';
 
 /** Purely a client-side guard now — the S3 object-store proxy enforces no size cap of its own, so

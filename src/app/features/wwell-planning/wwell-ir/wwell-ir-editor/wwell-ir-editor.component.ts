@@ -77,6 +77,7 @@ import {
   WWELL_IR_ATTACHMENT_ACCEPT,
   WWELL_IR_ATTACHMENT_MAX_BYTES,
   WWELL_IR_ATTACHMENT_SLOTS,
+  hasAllRequiredAttachments,
   irAttachmentsFor,
 } from '../wwell-ir-attachments.config';
 import { S3Service } from '@services/s3/s3.service';
@@ -208,11 +209,12 @@ export class WwellIrEditorComponent implements AfterViewInit {
    *
    *  Requires `hasSavedIrSeq()` first — an unsaved draft has no `ir_seq` to file the SAP workflow
    *  under, so it must be created (Save) before it can be submitted. Also requires
+   *  every attachment slot (Location Map, Initiation Request, WLDA) holding a file, and
    *  `wwellIrHasRequiredSubmitFields` — a saved-but-incomplete record (missing fields the schema
    *  itself marks required) shouldn't be submittable just because *something* was saved. */
   protected readonly canSubmitForReview = computed(() => {
     const ir = this.ir();
-    if (!this.hasSavedIrSeq() || !wwellIrHasRequiredSubmitFields(ir)) return false;
+    if (!this.hasSavedIrSeq() || !wwellIrHasRequiredSubmitFields(ir) || !hasAllRequiredAttachments(ir.attachments)) return false;
     return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowRecalled(ir.sapWfStatusText);
   });
   /** Once a record has been submitted (a real `sapWfId`), "Submit for Review" no longer applies —

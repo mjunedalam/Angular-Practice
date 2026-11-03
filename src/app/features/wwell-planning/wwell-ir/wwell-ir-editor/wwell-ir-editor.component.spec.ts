@@ -60,6 +60,14 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
         sizeBytes: 1024,
         contentType: 'application/pdf',
       },
+      {
+        slot: 'wlda',
+        objectKey: 'ir-attachments/ir-9001/wlda/test-uuid',
+        label: 'Well Location and Drilling Approval (WLDA)',
+        fileName: 'wlda.pdf',
+        sizeBytes: 1024,
+        contentType: 'application/pdf',
+      },
     ],
     chain: [],
     sapWfId: null,
@@ -252,6 +260,11 @@ describe('WwellIrEditorComponent', () => {
 
   it('hides Submit for Review while no Location Map is attached', async () => {
     await setup({ status: 'draft', attachments: [] });
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
+  });
+
+  it('hides Submit for Review while the WLDA attachment is missing', async () => {
+    await setup({ status: 'draft', attachments: buildIr().attachments.filter(attachment => attachment.slot !== 'wlda') });
     expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
   });
 
