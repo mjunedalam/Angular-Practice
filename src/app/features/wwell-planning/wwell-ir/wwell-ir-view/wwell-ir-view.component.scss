@@ -201,11 +201,6 @@ $accent: tokens.$accent;
   gap: 0.5rem;
 }
 
-.irv__letter-stage {
-  font-size: 0.75rem;
-  color: var(--wp-muted, #6b7385);
-  white-space: nowrap;
-}
 
 .irv__letter-download-wrap {
   flex-shrink: 0;
@@ -334,5 +329,98 @@ $accent: tokens.$accent;
 
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* ── PDF progress: a small centred pill — spinner + stage, then a green tick. No blur, no step list. ── */
+.irv__pdf-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.irv__pdf-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 1.15rem 0.7rem 0.9rem;
+  background: var(--wp-surface-raised);
+  border: 1px solid var(--wp-line);
+  border-radius: 999px;
+  box-shadow: var(--wp-shadow-2);
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: $navy;
+  animation: irv-pdf-rise 180ms ease-out both;
+
+  &--ready {
+    border-color: var(--wp-success-line);
+    color: var(--wp-success);
+  }
+}
+
+.irv__pdf-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid tokens.alpha($accent, 18%);
+  border-top-color: $accent;
+  animation: irv-pdf-spin 0.8s linear infinite;
+}
+
+.irv__pdf-tick {
+  width: 20px;
+  height: 20px;
+}
+
+.irv__pdf-tick-ring {
+  stroke: var(--wp-success);
+  stroke-width: 2;
+}
+
+.irv__pdf-tick-mark {
+  stroke: var(--wp-success);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+  animation: irv-pdf-draw 240ms ease-out 60ms forwards;
+}
+
+@keyframes irv-pdf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes irv-pdf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes irv-pdf-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .irv__pdf-card {
+    animation: none;
+  }
+
+  .irv__pdf-spinner {
+    animation-duration: 2.4s;
+  }
+
+  .irv__pdf-tick-mark {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }

@@ -80,12 +80,25 @@
             }
           </button>
         </span>
-        @if (downloadingPdf()) {
-          <span class="irv__letter-stage" role="status">{{ pdfStageLabel() }}</span>
-        }
       </span>
     }
   </div>
+
+  @if (downloadingPdf()) {
+    <div class="irv__pdf-scrim" role="status" aria-live="polite">
+      <div class="irv__pdf-card" [class.irv__pdf-card--ready]="pdfReady()">
+        @if (pdfReady()) {
+          <svg class="irv__pdf-tick" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="irv__pdf-tick-ring" cx="12" cy="12" r="10.5" fill="none" />
+            <path class="irv__pdf-tick-mark" fill="none" d="M7 12.5l3.2 3.2L17 9" />
+          </svg>
+        } @else {
+          <span class="irv__pdf-spinner" aria-hidden="true"></span>
+        }
+        <span class="irv__pdf-label">{{ pdfReady() ? 'Ready' : pdfStageLabel() }}</span>
+      </div>
+    </div>
+  }
 
   <div class="irv__tab-panel">
     @switch (activeTab()) {

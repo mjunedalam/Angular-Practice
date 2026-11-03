@@ -16,6 +16,18 @@ import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-vi
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
 import { WwellIrViewWellDesignComponent } from './wwell-ir-view-well-design/wwell-ir-view-well-design.component';
 
+type PdfStage = 'diagram' | 'letter' | 'attachments' | 'ready';
+
+const PDF_STAGES: readonly { readonly key: PdfStage; readonly busyLabel: string }[] = [
+  { key: 'diagram', busyLabel: 'Rendering diagram…' },
+  { key: 'letter', busyLabel: 'Generating…' },
+  { key: 'attachments', busyLabel: 'Merging attachments…' },
+  { key: 'ready', busyLabel: 'Ready' },
+];
+
+/** How long the green "Ready" tick stays up before the file is handed to the browser. */
+const PDF_READY_HOLD_MS = 700;
+
 export type WwellIrViewTab = 'details' | 'well-design' | 'letter';
 
 const TABS: readonly { readonly key: WwellIrViewTab; readonly label: string; readonly icon: string }[] = [
@@ -98,19 +110,9 @@ export class WwellIrViewComponent {
 
   protected readonly downloadingPdf = signal(false);
   /** What the button is busy with — shown as its tooltip/label so a slow render never looks frozen. */
-  protected readonly pdfStage = signal<'diagram' | 'letter' | 'attachments' | null>(null);
-  protected readonly pdfStageLabel = computed(() => {
-    switch (this.pdfStage()) {
-      case 'diagram':
-        return 'Rendering diagram…';
-      case 'letter':
-        return 'Generating letter…';
-      case 'attachments':
-        return 'Merging attachments…';
-      default:
-        return '';
-    }
-  });
+  protected readonly pdfStage = signal<PdfStage | null>(null);
+  protected readonly pdfStageLabel = computed(() => PDF_STAGES.find(stage => stage.key === this.pdfStage())?.busyLabel ?? '');
+  protected readonly pdfReady = computed(() => this.pdfStage() === 'ready');
   // Only a persisted record has anything for the backend to render (see IrLetterService, which
   // re-fetches the detail by ir_seq) — a local-only "New IR" draft has never reached the backend.
   protected readonly canDownloadPdf = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
@@ -118,6 +120,10 @@ export class WwellIrViewComponent {
   protected async downloadPdf(): Promise<void> {
     const blob = await this.buildPdfBlob();
     if (!blob) return;
+    this.pdfStage.set('ready');
+    await new Promise<void>(resolve => setTimeout(resolve, PDF_READY_HOLD_MS));
+    this.downloadingPdf.set(false);
+    this.pdfStage.set(null);
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -155,12 +161,11 @@ export class WwellIrViewComponent {
       this.pdfStage.set('attachments');
       return await this.letterPdf.mergeAttachments(letterBlob, this.ir());
     } catch (err: unknown) {
+      this.downloadingPdf.set(false);
+      this.pdfStage.set(null);
       const message = await this.extractDownloadErrorMessage(err);
       this.notify.error(message ?? 'Failed to download the integrated requirement letter PDF.');
       return null;
-    } finally {
-      this.downloadingPdf.set(false);
-      this.pdfStage.set(null);
     }
   }
 

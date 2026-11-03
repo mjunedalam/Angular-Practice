@@ -343,6 +343,7 @@
                 class="letter__attachment-view"
                 [attr.aria-label]="'View ' + attachment.fileName"
                 matTooltip="View"
+                matTooltipClass="ir-attachment-tooltip"
                 [disabled]="openingKey() === attachment.objectKey"
                 (click)="viewAttachment(attachment, slot.label)"
               >
