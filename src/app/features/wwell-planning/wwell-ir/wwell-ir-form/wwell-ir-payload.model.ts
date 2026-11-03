@@ -70,6 +70,8 @@ export interface IrHydrogeologyRow extends IrRow {
 
 export interface IrWaterRow extends IrRow {
   readonly ep_a_num: number;
+  /** Read-only: returned by get_ir_data_prc, never sent on save. */
+  readonly w_gnr_name?: string | null;
   readonly distanct: number | null;
   readonly direction: string | null;
   readonly aquifer: string;

@@ -27,7 +27,8 @@
       <table class="ir-details__table">
         <thead>
           <tr>
-            <th>Well</th>
+            <th>EP A Num</th>
+            <th>Well Name</th>
             <th>Dist (km)</th>
             <th>Location</th>
             <th>Aquifer</th>
@@ -45,6 +46,7 @@
           @for (row of ir().offsetWells; track row.epANum) {
             <tr>
               <td>{{ row.epANum }}</td>
+              <td>{{ row.wellName || '—' }}</td>
               <td class="ir-details__num">{{ row.distanceKm ?? '—' }}</td>
               <td>{{ row.location || '—' }}</td>
               <td>{{ row.aquifer || '—' }}</td>
@@ -59,7 +61,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="12" class="ir-details__table-empty">No offset water wells recorded.</td>
+              <td colspan="13" class="ir-details__table-empty">No offset water wells recorded.</td>
             </tr>
           }
         </tbody>

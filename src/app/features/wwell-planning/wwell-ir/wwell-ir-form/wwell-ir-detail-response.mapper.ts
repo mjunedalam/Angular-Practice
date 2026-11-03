@@ -141,6 +141,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     offsetWellsRemarks: header?.water_remarks ?? existing.offsetWellsRemarks,
     offsetWells: waterRows.map(row => ({
       epANum: row.ep_a_num,
+      wellName: row.w_gnr_name ?? null,
       distanceKm: row.distanct ?? null,
       location: row.direction ?? null,
       aquifer: row.aquifer ?? null,

@@ -242,7 +242,7 @@
         <tbody>
           @for (well of ir().offsetWells; track well.epANum) {
             <tr>
-              <td>{{ well.epANum }}</td>
+              <td>{{ well.wellName || 'EP-' + well.epANum }}</td>
               <td>{{ well.distanceKm ?? '' }}</td>
               <td>{{ well.location ?? '' }}</td>
               <td>{{ well.aquifer ?? '' }}</td>
