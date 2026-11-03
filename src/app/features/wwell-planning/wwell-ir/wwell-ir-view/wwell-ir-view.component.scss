@@ -195,6 +195,18 @@ $accent: tokens.$accent;
   gap: 0.75rem;
 }
 
+.irv__letter-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.irv__letter-stage {
+  font-size: 0.75rem;
+  color: var(--wp-muted, #6b7385);
+  white-space: nowrap;
+}
+
 .irv__letter-download-wrap {
   flex-shrink: 0;
   display: inline-flex;

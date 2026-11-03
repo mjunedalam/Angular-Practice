@@ -203,12 +203,27 @@ describe('Completion type → completion-element flags', () => {
     expect(deriveCompletionElementFlags('', '8 1/2"', 'Open Hole')).toMatchObject({ ohFlg: 'Y', ohRemarks: '8 1/2" Open Hole', lsFlg: 'N', perforatedFlg: 'N' });
   });
 
-  it('Screen sets only the liner-screen flag', () => {
-    expect(deriveCompletionElementFlags('', null, 'Screen')).toMatchObject({ lsFlg: 'Y', gpFlg: 'N', ohFlg: 'N', perforatedFlg: 'N' });
+  it('Screen is drawn inside the open hole: it sets the open-hole and liner-screen flags', () => {
+    expect(deriveCompletionElementFlags('', null, 'Screen')).toMatchObject({ ohFlg: 'Y', lsFlg: 'Y', gpFlg: 'N', perforatedFlg: 'N' });
   });
 
-  it('Screen with Gravel Pack sets both the gravel-pack and screen flags', () => {
-    expect(deriveCompletionElementFlags('', null, 'Screen with Gravel Pack')).toMatchObject({ gpFlg: 'Y', lsFlg: 'Y', perforatedFlg: 'N' });
+  it('Screen with Gravel Pack sets the open-hole, gravel-pack and screen flags', () => {
+    expect(deriveCompletionElementFlags('', null, 'Screen with Gravel Pack')).toMatchObject({ ohFlg: 'Y', gpFlg: 'Y', lsFlg: 'Y', perforatedFlg: 'N' });
+  });
+
+  it('a liner pick is drawn inside the open hole too, and the hole size rides in oh_remarks', () => {
+    expect(deriveCompletionElementFlags('', '8 1/2"', 'Perforated Liner', '4 1/2"')).toMatchObject({
+      ohFlg: 'Y',
+      ohRemarks: '8 1/2" Open Hole',
+      perforatedFlg: 'Y',
+    });
+  });
+
+  it('still resolves a Screen / Screen with Gravel Pack saved before the open hole was implied', () => {
+    const legacyScreen = { ohFlg: 'N', ohRemarks: null, gpFlg: 'N', gpRemarks: null, perforatedFlg: 'N', perforatedRemarks: null, lsFlg: 'Y', lsRemarks: 'Screen' } as const;
+    const legacyGravel = { ...legacyScreen, gpFlg: 'Y', gpRemarks: 'Gravel Pack' } as const;
+    expect(resolveCompletionTypeFromFlags(legacyScreen)?.completionType).toBe('Screen');
+    expect(resolveCompletionTypeFromFlags(legacyGravel)?.completionType).toBe('Screen with Gravel Pack');
   });
 
   it.each([
@@ -220,7 +235,7 @@ describe('Completion type → completion-element flags', () => {
   });
 
   it('ignores the Completion Remarks text once a type is picked', () => {
-    expect(deriveCompletionElementFlags('Open Hole\nScreened', null, 'Screen')).toMatchObject({ ohFlg: 'N', lsFlg: 'Y' });
+    expect(deriveCompletionElementFlags('Open Hole\nScreened', null, 'Screen')).toMatchObject({ ohFlg: 'Y', lsFlg: 'Y', gpFlg: 'N' });
   });
 
   it('still derives from the Completion Remarks text when no type is picked (legacy records)', () => {
@@ -238,9 +253,14 @@ describe('Completion type → completion-element flags', () => {
     expect(resolveCompletionTypeFromFlags(flags)).toEqual({ completionType: type, linerSizeIn: linerSize });
   });
 
-  it('leaves a legacy multi-option record unresolved so a re-save cannot collapse it onto one pick', () => {
+  it('reads Open Hole + Screened as a Screen, which is drawn in an open hole anyway', () => {
     const legacy = deriveCompletionElementFlags('Open Hole\nScreened', '8 1/2"');
-    expect(resolveCompletionTypeFromFlags(legacy)).toBeNull();
+    expect(resolveCompletionTypeFromFlags(legacy)?.completionType).toBe('Screen');
+  });
+
+  it('leaves an unmatched flag mix unresolved so a re-save cannot collapse it onto one pick', () => {
+    const mix = { ohFlg: 'Y', ohRemarks: '8 1/2"', gpFlg: 'Y', gpRemarks: 'Gravel Pack', perforatedFlg: 'N', perforatedRemarks: null, lsFlg: 'N', lsRemarks: null } as const;
+    expect(resolveCompletionTypeFromFlags(mix)).toBeNull();
   });
 });
 

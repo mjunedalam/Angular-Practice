@@ -27,51 +27,286 @@
   </p>
 
   <p class="letter__intro">
-    This letter outlines the integrated drilling and completion requirements for water well
-    {{ ir().requestReference.wellName || '—' }}, supporting {{ ir().requestReference.supportingBusiness || '—' }}
-    operations for client {{ ir().requestReference.client || '—' }}.
+    Following are the integrated requirements for the drilling water supply well
+    <strong>{{ ir().requestReference.wellName || '—' }}</strong>.
   </p>
 
+  <!-- Section order mirrors the downloaded PDF (agwa-planning's irLetter.html). -->
   <section class="letter__section">
-    <h4>1. Well Location</h4>
+    <h4>Well Location</h4>
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Easting</th>
+            <th>Northing</th>
+            <th>UTM Zone</th>
+            <th>Elevation (GL.) Est.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ axisValue('Easting') }}</td>
+            <td>{{ axisValue('Northing') }}</td>
+            <td>{{ axisValue('UTM Zone') }}</td>
+            <td>{{ elevationLabel() }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="letter__section">
+    <h4>Casing Program</h4>
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Casing/Liner Size</th>
+            <th>Depth (ft bgl)</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of ir().casing; track row.type + row.depthFtBgl) {
+            <tr>
+              <td>{{ row.type }}</td>
+              <td>{{ row.sizeIn }}</td>
+              <td>{{ row.depthFtBgl }}</td>
+              <td>{{ row.remarks || '' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="letter__table-empty">No casing program recorded.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  @if (completionDesign(); as design) {
+    <section class="letter__section">
+      <h4>Completion</h4>
+      <p class="letter__text">{{ design }}</p>
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Completion</h4>
+      <p class="letter__text letter__text--empty">Not provided</p>
+    </section>
+  }
+
+  @if (ir().programDetails.developmentTesting.logging; as logging) {
+    <section class="letter__section">
+      <h4>Logging</h4>
+      <p class="letter__text">{{ logging }}</p>
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Logging</h4>
+      <p class="letter__text letter__text--empty">Not provided</p>
+    </section>
+  }
+
+  @if (ir().programDetails.acidization; as acidization) {
+    <section class="letter__section">
+      <h4>Acidization</h4>
+      <p class="letter__text">{{ acidization }}</p>
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Acidization</h4>
+      <p class="letter__text letter__text--empty">Not provided</p>
+    </section>
+  }
+
+  @if (ir().programDetails.transmission || ir().programDetails.developmentTesting.mudLogging) {
+    <section class="letter__section">
+      <h4>Mud Logging &amp; Data Transmission</h4>
+      @if (ir().programDetails.transmission; as transmission) {
+        <p class="letter__text">{{ transmission }}</p>
+      }
+      @if (ir().programDetails.developmentTesting.mudLogging; as mudLogging) {
+        <p class="letter__text">{{ mudLogging }}</p>
+      }
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Mud Logging &amp; Data Transmission</h4>
+      <p class="letter__text letter__text--empty">Not provided</p>
+    </section>
+  }
+
+  @if (ir().programDetails.developmentTesting.sampling; as sampling) {
+    <section class="letter__section">
+      <h4>Sampling</h4>
+      <p class="letter__text">{{ sampling }}</p>
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Sampling</h4>
+      <p class="letter__text letter__text--empty">Not provided</p>
+    </section>
+  }
+
+  <!-- Hydrology Test Type picks one: a flow test prints Flow Test only, a pump test Development Pump Test only. -->
+  @if (isFlowTest()) {
+    <section class="letter__section">
+      <h4>Flow Test</h4>
+      @if (ir().programDetails.developmentTesting.flowTest; as flowTest) {
+        <p class="letter__text">{{ flowTest }}</p>
+      } @else {
+        <p class="letter__text letter__text--empty">Not provided</p>
+      }
+    </section>
+  } @else {
+    <section class="letter__section">
+      <h4>Development Pump Test</h4>
+      @if (ir().programDetails.developmentTesting.remarks; as devPumpTest) {
+        <p class="letter__text">{{ devPumpTest }}</p>
+      } @else {
+        <p class="letter__text letter__text--empty">Not provided</p>
+      }
+    </section>
+  }
+
+  <section class="letter__section">
+    <h4>Formation Tops*</h4>
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Horizon</th>
+            <th>Depth (ft bgl)</th>
+            <th>Subsea Depth (ft asl)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (top of topsRows(); track top.name) {
+            <tr>
+              <td>{{ top.name }}</td>
+              <td>{{ top.depthFt }}</td>
+              <td>{{ top.subSeaFt ?? '' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="letter__table-empty">No formation tops recorded.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (ir().topsRemarks; as topsRemarks) {
+      <p class="letter__text">*{{ topsRemarks }}</p>
+    }
+  </section>
+
+  <section class="letter__section">
+    <h4>Hydrogeology</h4>
     <dl class="letter__kv">
-      @if (coordinateAxes().length > 0) {
-        @for (axis of coordinateAxes(); track axis.label) {
-          <div><dt>{{ axis.label }}</dt><dd>{{ axis.value }}</dd></div>
+      <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || 'N/A' }}</dd></div>
+      @if (isFlowTest()) {
+        @if (ir().testProgram.siwhpPsi !== null && ir().testProgram.siwhpPsi !== undefined) {
+          <div><dt>SIWHP(psi)</dt><dd>{{ ir().testProgram.siwhpPsi }}</dd></div>
         }
+      } @else if (ir().testProgram.estimatedWaterLevelFt !== null && ir().testProgram.estimatedWaterLevelFt !== undefined) {
+        <div><dt>Estimated Water Level (ft bgl)</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt }}</dd></div>
       }
-      @if (ir().requestReference.surfaceElevationFtAsl !== null && ir().requestReference.surfaceElevationFtAsl !== undefined) {
-        <div><dt>Surface Elevation</dt><dd>{{ ir().requestReference.surfaceElevationFtAsl ?? '—' }} ft ASL</dd></div>
-      }
-      @if (ir().requestReference.targetAquifer) {
-        <div><dt>Target Aquifer</dt><dd>{{ ir().requestReference.targetAquifer || '—' }}</dd></div>
-      }
+      <div><dt>Estimated Water Quality (ppm)</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? 'N/A' }}</dd></div>
+      <div><dt>Estimated Productivity (gpm)</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? 'N/A' }}</dd></div>
+      <div><dt>H2S Presence</dt><dd>{{ h2sPresence() }}</dd></div>
     </dl>
   </section>
 
   <section class="letter__section">
-    <h4>2. Drilling Program</h4>
-    <dl class="letter__kv">
-      @if (completionDesign(); as design) {
-      <div>
-        <dt>Completion Design</dt>
-        <dd>{{ design }}</dd>
-      </div>
-      }
-      @if (ir().programDetails.developmentTesting.logging) {
-        <div><dt>Logging Program</dt><dd>{{ ir().programDetails.developmentTesting.logging || '—' }}</dd></div>
-      }
-      @if (ir().programDetails.acidization) {
-        <div><dt>Acidization</dt><dd>{{ ir().programDetails.acidization || '—' }}</dd></div>
-      }
-      @if (ir().programDetails.developmentTesting.mudLogging) {
-        <div><dt>Mud Logging</dt><dd>{{ ir().programDetails.developmentTesting.mudLogging || '—' }}</dd></div>
-      }
-    </dl>
+    <h4>Area Water Well</h4>
+    @if (ir().offsetWellsRemarks; as waterRemarks) {
+      <p class="letter__text">{{ waterRemarks }}</p>
+    } @else {
+      <p class="letter__text letter__text--empty">No remarks.</p>
+    }
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Well</th>
+            <th>Distance (KM)</th>
+            <th>Location</th>
+            <th>Aquifer</th>
+            <th>Q Rate (gpm)</th>
+            <th>SWL (ft bgl)</th>
+            <th>Draw D. (ft)</th>
+            <th>Specific Capacity (gpm/ft)</th>
+            <th>TDS (mg/l)</th>
+            <th>H2S</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (well of ir().offsetWells; track well.epANum) {
+            <tr>
+              <td>{{ well.epANum }}</td>
+              <td>{{ well.distanceKm ?? '' }}</td>
+              <td>{{ well.location ?? '' }}</td>
+              <td>{{ well.aquifer ?? '' }}</td>
+              <td>{{ well.rateGpm ?? '' }}</td>
+              <td>{{ well.swlFt ?? '' }}</td>
+              <td>{{ well.drawdownFt ?? '' }}</td>
+              <td>{{ well.specificCapacity ?? '' }}</td>
+              <td>{{ well.tdsPpm ?? '' }}</td>
+              <td>{{ well.h2sPpm ?? '' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="10" class="letter__table-empty">No offset water wells recorded.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="letter__section">
-    <h4>3. Well Bore Diagram</h4>
+    <h4>Contact</h4>
+    <p class="letter__text">Geologist: <strong>{{ ir().contacts.geologistPrimary || 'N/A' }}</strong></p>
+    @if (ir().contacts.geologistSecondary; as secondary) {
+      <p class="letter__text">
+        Please provide Groundwater Division with copies of the drilling program for this well as soon as possible.
+        If you have any questions, call <strong>{{ secondary }}</strong>.
+      </p>
+    }
+  </section>
+
+  <section class="letter__section">
+    <div class="letter__table-wrap">
+      <table class="letter__table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Approved Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (step of ir().chain; track step.role + step.name) {
+            <tr>
+              <td>{{ step.name }}</td>
+              <td>{{ step.role }}</td>
+              <td class="letter__status" [attr.data-tone]="step.status">{{ stepStatusLabel(step.status) }}</td>
+              <td>{{ step.date || 'N/A' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="letter__table-empty">Pending approval</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (initiatorInitials(); as initials) {
+      <p class="letter__text">/{{ initials }}</p>
+    }
+    <p class="letter__text">cc: Subject File ({{ ir().requestReference.wellName || '—' }}), Letterbook</p>
+  </section>
+
+  <section class="letter__section">
+    <h4>Proposed Water Well Design</h4>
     @if (hasWellboreData()) {
       <div class="letter__diagram-row" #wellboreDiagramRow [class.letter__diagram-row--no-depth]="!hasTargetDepth()">
         <app-wwell-ir-depth-scale
@@ -87,144 +322,6 @@
     }
   </section>
 
-  <section class="letter__section">
-    <h4>4. Formation Tops</h4>
-    <div class="letter__table-wrap">
-      <table class="letter__table">
-        <thead>
-          <tr>
-            <th>Formation</th>
-            <th>Depth (ft bgl)</th>
-            <th>Sub-sea (ft asl)</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (top of ir().formationTops; track top.name) {
-            <tr>
-              <td>{{ top.name }}</td>
-              <td>{{ top.depthFt }}</td>
-              <td>{{ subSeaFt(top.depthFt) ?? '—' }}</td>
-            </tr>
-          } @empty {
-            <tr><td colspan="3" class="letter__table-empty">No formation tops recorded.</td></tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="letter__section">
-    <h4>5. Casing Program</h4>
-    <div class="letter__table-wrap">
-      <table class="letter__table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Size</th>
-            <th>Depth (ft bgl)</th>
-            <th>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of ir().casing; track row.type + row.depthFtBgl) {
-            <tr>
-              <td>{{ row.type }}</td>
-              <td>{{ row.sizeIn }}</td>
-              <td>{{ row.depthFtBgl }}</td>
-              <td>{{ row.remarks || '—' }}</td>
-            </tr>
-          } @empty {
-            <tr><td colspan="4" class="letter__table-empty">No casing recorded.</td></tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="letter__section">
-    <h4>6. Production &amp; Testing</h4>
-    <dl class="letter__kv">
-      @if (ir().programDetails.transmission) {
-        <div><dt>Transmission Method</dt><dd>{{ ir().programDetails.transmission || '—' }}</dd></div>
-      }
-      @if (ir().programDetails.developmentTesting.sampling) {
-        <div><dt>Sampling Program</dt><dd>{{ ir().programDetails.developmentTesting.sampling || '—' }}</dd></div>
-      }
-      @if (isFlowTest()) {
-        @if (ir().programDetails.developmentTesting.flowTest) {
-          <div><dt>Flow Test Type</dt><dd>{{ ir().programDetails.developmentTesting.flowTest }}</dd></div>
-        }
-      } @else if (ir().programDetails.developmentTesting.remarks) {
-        <div><dt>Development Pump Test</dt><dd>{{ ir().programDetails.developmentTesting.remarks }}</dd></div>
-      }
-    </dl>
-  </section>
-
-  <section class="letter__section">
-    <h4>7. Estimated Hydrogeology</h4>
-    <dl class="letter__kv">
-      @if (ir().hydrogeology.aquifer) {
-        <div><dt>Aquifer</dt><dd>{{ ir().hydrogeology.aquifer || '—' }}</dd></div>
-      }
-      @if (isFlowTest()) {
-        @if (ir().testProgram.siwhpPsi !== null && ir().testProgram.siwhpPsi !== undefined) {
-          <div><dt>SIWHP</dt><dd>{{ ir().testProgram.siwhpPsi ?? '—' }} psi</dd></div>
-        }
-      } @else {
-        @if (ir().testProgram.estimatedWaterLevelFt !== null && ir().testProgram.estimatedWaterLevelFt !== undefined) {
-          <div><dt>Estimated Water Level</dt><dd>{{ ir().testProgram.estimatedWaterLevelFt ?? '—' }} ft</dd></div>
-        }
-        @if (ir().hydrogeology.estimatedPumpDepthFt !== null && ir().hydrogeology.estimatedPumpDepthFt !== undefined) {
-          <div><dt>Estimated Pump Depth</dt><dd>{{ ir().hydrogeology.estimatedPumpDepthFt ?? '—' }} ft</dd></div>
-        }
-      }
-      @if (ir().hydrogeology.estimatedTdsPpm !== null && ir().hydrogeology.estimatedTdsPpm !== undefined) {
-        <div><dt>Estimated TDS</dt><dd>{{ ir().hydrogeology.estimatedTdsPpm ?? '—' }} ppm</dd></div>
-      }
-      @if (ir().testProgram.estimatedRateGpm !== null && ir().testProgram.estimatedRateGpm !== undefined) {
-        <div><dt>Estimated Rate</dt><dd>{{ ir().testProgram.estimatedRateGpm ?? '—' }} GPM</dd></div>
-      }
-      @if (ir().hydrogeology.h2sPpm !== null && ir().hydrogeology.h2sPpm !== undefined) {
-        <div><dt>H2S</dt><dd>{{ ir().hydrogeology.h2sPpm ?? '—' }} ppm</dd></div>
-      }
-    </dl>
-  </section>
-
-  <section class="letter__section">
-    <h4>8. Geologist Contact</h4>
-    <dl class="letter__kv">
-      @if (ir().contacts.geologistPrimary) {
-        <div><dt>Primary</dt><dd>{{ ir().contacts.geologistPrimary || '—' }}</dd></div>
-      }
-      @if (ir().contacts.geologistSecondary) {
-        <div><dt>Secondary</dt><dd>{{ ir().contacts.geologistSecondary || '—' }}</dd></div>
-      }
-    </dl>
-  </section>
-
-  <p class="letter__closing">
-    This integrated requirements letter is issued in accordance with GWD standards. All drilling operations must
-    comply with the specifications outlined above. Any deviations require prior written approval from the
-    Groundwater Division.
-  </p>
-
-  <div class="letter__signoff">
-    <div class="letter__signoff-block">
-      <span class="letter__signoff-label">Prepared by:</span>
-      <span class="letter__signoff-value">{{ ir().contacts.geologistPrimary || '—' }}</span>
-      <span class="letter__signoff-role">Hydrogeologist</span>
-    </div>
-    <div class="letter__signoff-block">
-      <span class="letter__signoff-label">Approved by:</span>
-      @if (finalApprover()?.status === 'approved') {
-        <span class="letter__signoff-value">{{ finalApprover()!.name }}</span>
-        <span class="letter__signoff-role">{{ finalApprover()!.role }}</span>
-      } @else {
-        <span class="letter__signoff-value letter__signoff-value--pending">Pending approval</span>
-      }
-    </div>
-  </div>
-
   <!-- Mirrors what the downloaded PDF actually contains: each attached document is appended as its
        own trailing page (agwa-planning's IrAttachmentPdfAppender), in this same slot order. -->
   <section class="letter__attachments">
@@ -234,8 +331,23 @@
         @for (slot of attachmentSlots; track slot.slot) {
           @for (attachment of attachmentsFor(slot.slot); track attachment.objectKey) {
             <li>
-              <mat-icon>{{ slot.icon }}</mat-icon>
+              @if (thumbnails()[attachment.objectKey]; as thumb) {
+                <img class="letter__attachment-thumb" [src]="thumb" [alt]="attachment.fileName" />
+              } @else {
+                <mat-icon>{{ slot.icon }}</mat-icon>
+              }
               <span>{{ slot.label }} — {{ attachment.fileName }}</span>
+              <button
+                type="button"
+                mat-icon-button
+                class="letter__attachment-view"
+                [attr.aria-label]="'View ' + attachment.fileName"
+                matTooltip="View"
+                [disabled]="openingKey() === attachment.objectKey"
+                (click)="viewAttachment(attachment, slot.label)"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
             </li>
           }
         }

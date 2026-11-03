@@ -661,9 +661,13 @@ $master-width: 240px;
   min-height: 0;
   display: flex;
 
+  // `min-width: 0` as well as `min-height: 0`: a flex item's automatic minimum is its content's natural
+  // width, so a record with long program-details text made the editor wider than this panel — the
+  // toolbar, the Save bar and the wellbore diagram were pushed past the clipped right edge.
   > * {
     flex: 1;
     min-height: 0;
+    min-width: 0;
   }
 }
 

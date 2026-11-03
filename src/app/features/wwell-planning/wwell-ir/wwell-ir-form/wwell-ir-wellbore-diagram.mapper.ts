@@ -333,12 +333,14 @@ export function deriveCompletionElementFlags(
   if (typedFlags) return typedFlags;
 
   const selected = selectedCompletionLabels(completion);
-  const isOpenHole = selected.has(COMPLETION_OPEN_HOLE);
   const isGravelPack = selected.has(COMPLETION_SCREENED_GRAVEL_PACK);
   const isScreened = selected.has(COMPLETION_SCREENED) || isGravelPack;
   const isLinerPerforated = selected.has(COMPLETION_LINER_PERFORATED);
   const isCasedPerforated = selected.has(COMPLETION_CASED_PERFORATED);
   const isPerforated = isLinerPerforated || isCasedPerforated;
+  // Open hole is always drawn: a screen, gravel pack or liner completion sits inside it. Only a
+  // cased & perforated completion has no open hole around it.
+  const isOpenHole = selected.has(COMPLETION_OPEN_HOLE) || isScreened || isLinerPerforated;
   const ohSizeText = openHoleSizeIn?.trim() || null;
 
   return {
@@ -394,6 +396,33 @@ function flagsForCompletionType(
     case WWELL_COMPLETION_TYPE.OPEN_HOLE:
       return { ...NO_COMPLETION_FLAGS, ohFlg: 'Y', ohRemarks: ohSize ? `${ohSize} ${COMPLETION_OPEN_HOLE}` : null };
     case WWELL_COMPLETION_TYPE.SCREEN:
+      return { ...openHoleFlags(ohSize), lsFlg: 'Y', lsRemarks: 'Screen' };
+    case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
+      return { ...openHoleFlags(ohSize), gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: 'Screen' };
+    case WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER:
+      return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PRE_PERFORATED_SUFFIX) };
+    case WWELL_COMPLETION_TYPE.PERFORATED_LINER:
+      return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PERFORATED_SUFFIX) };
+    default:
+      return null;
+  }
+}
+
+/** The open hole every completion pick is drawn inside — Screen, Screen with Gravel Pack and the
+ *  liners all run in it, so their picks carry `ohFlg` too (the renderer keeps each of them inside
+ *  the hole's width). */
+function openHoleFlags(ohSize: string | null): IntegratedRequirementWellDesignFlags {
+  return { ...NO_COMPLETION_FLAGS, ohFlg: 'Y', ohRemarks: ohSize ? `${ohSize} ${COMPLETION_OPEN_HOLE}` : null };
+}
+
+/** The same picks as saved before the open hole was implied (no `ohFlg` beside the completion
+ *  element) — still recognised on load so an older record keeps its dropdown value. */
+function legacyFlagsForCompletionType(
+  completionType: string,
+  linerSize: string | null,
+): IntegratedRequirementWellDesignFlags | null {
+  switch (completionType) {
+    case WWELL_COMPLETION_TYPE.SCREEN:
       return { ...NO_COMPLETION_FLAGS, lsFlg: 'Y', lsRemarks: 'Screen' };
     case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
       return { ...NO_COMPLETION_FLAGS, gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: 'Screen' };
@@ -428,17 +457,22 @@ export function resolveCompletionTypeFromFlags(
       completionType = suffix;
       linerSizeIn = remarks.slice(0, -suffix.length).trim() || null;
     }
-  } else if (flags.ohFlg === 'Y') {
-    completionType = WWELL_COMPLETION_TYPE.OPEN_HOLE;
   } else if (flags.gpFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK;
   } else if (flags.lsFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN;
+  } else if (flags.ohFlg === 'Y') {
+    completionType = WWELL_COMPLETION_TYPE.OPEN_HOLE;
   }
   if (!completionType) return null;
 
-  const rebuilt = flagsForCompletionType(completionType, parseOpenHoleSizeFromRemarks(flags.ohRemarks), linerSizeIn);
-  const matches = !!rebuilt && (Object.keys(rebuilt) as (keyof IntegratedRequirementWellDesignFlags)[]).every(key => rebuilt[key] === flags[key]);
+  const candidates = [
+    flagsForCompletionType(completionType, parseOpenHoleSizeFromRemarks(flags.ohRemarks), linerSizeIn),
+    legacyFlagsForCompletionType(completionType, linerSizeIn),
+  ];
+  const matches = candidates.some(
+    candidate => !!candidate && (Object.keys(candidate) as (keyof IntegratedRequirementWellDesignFlags)[]).every(key => candidate[key] === flags[key]),
+  );
   return matches ? { completionType, linerSizeIn } : null;
 }
 

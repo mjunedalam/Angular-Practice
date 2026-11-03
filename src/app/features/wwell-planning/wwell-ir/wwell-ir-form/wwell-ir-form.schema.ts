@@ -193,9 +193,8 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             label: 'Open Hole Size',
             type: 'text',
             placeholder: 'e.g., 8 1/2"',
-            hint: 'Bit size below the last casing shoe',
-            visibleWhen: { field: 'completionType', equals: WWELL_COMPLETION_TYPE.OPEN_HOLE },
-            validators: { required: true },
+            hint: 'Bit size below the last casing shoe — every completion is drawn inside this open hole',
+            visibleWhen: { field: 'completionType', oneOf: Object.values(WWELL_COMPLETION_TYPE) },
             colSpan: 2,
           },
           {

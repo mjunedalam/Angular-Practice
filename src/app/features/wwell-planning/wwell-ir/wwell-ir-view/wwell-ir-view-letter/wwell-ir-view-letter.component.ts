@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Signal, computed, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Signal, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { S3Service } from '@services/s3/s3.service';
+import { NotificationService } from '@shared/components/notification/notification.service';
+import { WwellIrAttachmentViewerComponent } from '../../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
 import { WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
@@ -18,6 +25,19 @@ import { todayIsoDate } from '../../../shared/wwell-approvals/wwell-approval-req
 import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../../wwell-ir-form/wwell-ir-completion-type.config';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
+interface LetterTopsRow {
+  readonly name: string;
+  readonly depthFt: number;
+  readonly subSeaFt: number | null;
+}
+
+const STEP_STATUS_LABELS: Record<ApprovalChainStep['status'], string> = {
+  approved: 'Approved',
+  'in-progress': 'In progress',
+  pending: 'Pending',
+  rejected: 'Rejected',
+};
+
 /** "Letter" step of the read-only IR view — a printable-looking rendition of the GWD Integrated
  *  Requirements Letter, populated straight from the submitted record (never a separate document
  *  fetched from the backend — there is no such endpoint yet). Section numbering/labels follow
@@ -32,7 +52,7 @@ import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 @Component({
   selector: 'app-wwell-ir-view-letter',
   standalone: true,
-  imports: [MatIconModule, WellBoreViewComponent, WwellIrDepthScaleComponent],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, WellBoreViewComponent, WwellIrDepthScaleComponent],
   templateUrl: './wwell-ir-view-letter.component.html',
   styleUrl: './wwell-ir-view-letter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +80,61 @@ export class WwellIrViewLetterComponent {
 
   protected attachmentsFor(slot: IrAttachmentSlot): readonly IrAttachment[] {
     return irAttachmentsFor(this.ir().attachments, slot);
+  }
+
+  private readonly s3 = inject(S3Service);
+  private readonly dialog = inject(MatDialog);
+  private readonly notify = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Object key of the attachment currently being fetched for the viewer — disables just that row's button. */
+  protected readonly openingKey = signal<string | null>(null);
+
+  /** Object-URL thumbnails of the image attachments (PDFs keep their icon), keyed by object key. */
+  protected readonly thumbnails = signal<Readonly<Record<string, string>>>({});
+  private readonly requestedThumbnails = new Set<string>();
+
+  constructor() {
+    effect(() => {
+      for (const attachment of this.ir().attachments) {
+        if (!attachment.contentType.startsWith('image/') || this.requestedThumbnails.has(attachment.objectKey)) continue;
+        this.requestedThumbnails.add(attachment.objectKey);
+        this.s3
+          .download(attachment.objectKey, attachment.fileName)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: file => this.thumbnails.update(current => ({ ...current, [attachment.objectKey]: URL.createObjectURL(file) })),
+            // A missing thumbnail just leaves the slot icon in place; the View button reports real failures.
+            error: () => undefined,
+          });
+      }
+    });
+    this.destroyRef.onDestroy(() => Object.values(this.thumbnails()).forEach(url => URL.revokeObjectURL(url)));
+  }
+
+  /** Opens a stored attachment in the same full-screen viewer the editor uses. */
+  protected viewAttachment(attachment: IrAttachment, label: string): void {
+    this.openingKey.set(attachment.objectKey);
+    this.s3
+      .download(attachment.objectKey, attachment.fileName)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: file => {
+          this.openingKey.set(null);
+          this.dialog.open(WwellIrAttachmentViewerComponent, {
+            data: { file, label },
+            panelClass: 'ir-viewer-panel',
+            width: '92vw',
+            maxWidth: '1500px',
+            height: '92vh',
+            autoFocus: false,
+          });
+        },
+        error: () => {
+          this.openingKey.set(null);
+          this.notify.error(`Failed to open ${attachment.fileName}.`);
+        },
+      });
   }
 
   private readonly wellboreDiagramRow = viewChild<ElementRef<HTMLElement>>('wellboreDiagramRow');
@@ -126,6 +201,48 @@ export class WwellIrViewLetterComponent {
     const chain = this.ir().chain;
     return chain.length ? chain[chain.length - 1] : null;
   });
+
+  protected axisValue(label: string): string {
+    const axes = this.coordinateAxes();
+    const value = axes.find(axis => axis.label === label)?.value ?? (axes.length === 1 && label === 'Easting' ? axes[0].value : 'N/A');
+    return value.replace(/ m$/, ''); // the PDF prints the bare survey number; the unit is in the column's meaning
+  }
+
+  protected readonly elevationLabel = computed(() => {
+    const elevation = this.ir().requestReference.surfaceElevationFtAsl;
+    return elevation === null || elevation === undefined ? 'N/A' : `${elevation} ft`;
+  });
+
+  /** Formation tops in depth order with the well's Total Depth slotted in, as the downloaded letter prints them. */
+  protected readonly topsRows: Signal<readonly LetterTopsRow[]> = computed(() => {
+    const rows: LetterTopsRow[] = this.ir().formationTops.map(top => ({
+      name: top.name,
+      depthFt: top.depthFt,
+      subSeaFt: top.subSeaFtAsl ?? this.subSeaFt(top.depthFt),
+    }));
+    const totalDepth = this.ir().requestReference.targetDepthFt;
+    if (totalDepth > 0) rows.push({ name: 'Total Depth', depthFt: totalDepth, subSeaFt: this.subSeaFt(totalDepth) });
+    return rows.sort((a, b) => a.depthFt - b.depthFt);
+  });
+
+  protected readonly h2sPresence = computed(() => {
+    const ppm = this.ir().hydrogeology.h2sPpm;
+    if (ppm === null || ppm === undefined) return 'N/A';
+    return ppm > 0 ? 'Yes' : 'No';
+  });
+
+  protected readonly initiatorInitials = computed(() => {
+    const name = this.ir().chain[0]?.name ?? '';
+    return name
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map(word => word[0].toUpperCase())
+      .join('');
+  });
+
+  protected stepStatusLabel(status: ApprovalChainStep['status']): string {
+    return STEP_STATUS_LABELS[status];
+  }
 
   protected subSeaFt(depthFt: number): number | null {
     const elevation = this.ir().requestReference.surfaceElevationFtAsl;

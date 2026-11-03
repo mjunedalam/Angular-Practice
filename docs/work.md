@@ -1860,3 +1860,76 @@ on the final architecture — each step driven by a specific user correction, no
   nullable field.
 - Checked: `tsc --noEmit` clean; full `wwell-ir` Jest suite — 86 passed, no spec changes needed. Per
   [[feedback_skip_tests_wwell_ir]], no new tests were written for this UI change.
+
+## 2026-11-02 / 2026-11-03
+
+### IR letter download redesigned to match the approved GWD letter (agwa-planning)
+
+- **Template/assembler:** `irLetter.html` rewritten to the reference layout (masthead + stamp, Objectives → Well Location → Casing → Completion →
+  Logging → Acidization → Mud Logging & Data Transmission → Sampling → Flow Test **or** Development Pump Test → Formation Tops* (+ Total Depth row) →
+  Hydrogeology → Area Water Well → Contact → approval table → `/initials` + `cc:` → Proposed Water Well Design sheet). Full-width navy-header
+  tables, zebra rows, status-coloured approval cells, DejaVu Sans (bundled, `resources/fonts`). Running footer blanked on the diagram sheet by
+  post-processing (`PdfWatermarker.blankLastPageFooter`) — this renderer ignores `@page :last`. `IrLetterService.postProcess` is shared with
+  `IrLetterRenderTest`. No DRAFT/status watermark and no Preview button (both built, then removed on request).
+- **Test type:** Hydrology Test Type picks one remark field everywhere (editor form, Details rows, Letter tab, PDF): flow → `flow_rmks`, pump →
+  `dev_pump_test`; the hidden field keeps its stored value.
+
+### Area Water Well remarks (`water_remarks`)
+
+- Angular was sending `water_remarks: null` on every save and never reading it back. Now written from `offsetWellsRemarks` and loaded from the
+  header; 6.2 Remarks has its own pencil/edit unit (`offsetRemarksEdit`) like Horizons' 3.2.
+
+### Letter tab + download flow (Angular)
+
+- Letter tab follows the PDF's section order and data (UI classes unchanged); "Not provided" placeholders; status-coloured approval table;
+  attachments are viewable (eye button → shared full-screen viewer) with image thumbnails; print CSS keeps sections/rows together.
+- Download: stage label (Rendering diagram / Generating letter / Merging attachments), filename like `GWD-49-2026_SHYB_1031.pdf`, diagram capture
+  waits for the DOM to go quiet instead of a fixed 4 s.
+
+### New rich test IR — IR-9081 on HAIL_601 (prewap 5001)
+
+- Created via `POST /integrated-requirements` (mock JWT): 7 tops, 5 casings (30 / 24 / 18 5/8 / 13 3/8 / liner 9 5/8), 4 area wells (EP 2101 / 2114 /
+  2127 / 2133), pump-test hydrology, well design (open hole, screen, gravel pack, pump 900), and multi-sentence text in every program-details
+  field plus `water_remarks`, `tops_remarks` and `gen_remarks`. It consumed the last eligible well. `gen_remarks` is never written by the editor,
+  so any editor Save will null it.
+- **Found while verifying:** `get_ir_data_prc` (local `04-agwa-queries-package.sql`) built its JSON with the default VARCHAR2(4000) return, so
+  an IR with long remarks failed `GET /integrated-requirements/{id}` with a 500 (`ORA-40478`). Added `RETURNING CLOB` to the header block and the
+  wrapper and re-applied the package to the live container; production's copy of the proc may have the same limit.
+- Started `s3-client-service` (:9091) detached (`./mvnw -o quarkus:dev -Dquarkus.console.enabled=false`), log in the session scratchpad.
+
+### Database reset + two fresh IRs (2026-11-03)
+
+- **Cleared (dev DB only, on request):** all IR data — `exad_gwd_ir_header` (casing/tops/hydrogeology/water cascade), `exad_gwd_well_design`, and
+  `exad_s3_object_storage_index` plus `~/.s3-client-service/objects/ir-attachments`. 14 IRs (9019…9081) and 12 well designs were removed; a JSON
+  copy of each IR was saved first to the session scratchpad (`ir-backup/`). Wells (`exad_rcd_prewap`, 10 rows), strata and lookup data untouched,
+  so all 10 wells became eligible again.
+- **Recreated via `POST /integrated-requirements`:** **IR-9083** on HAIL_601 (pump test, LTR-2026-0601) and **IR-9085** on HAIL_610 (flow test with
+  SIWHP 120, LTR-2026-0702). Each: 7 tops, 5 casings (liner 9 5/8"), 4 area wells, well design, every program-details field multi-sentence, plus
+  tops/area-water/objectives remarks. Read back identical; letters render (4 pages) with Development Pump Test (9083) / Flow Test (9085) only.
+- **Correction (same day): the Completion dropdown came up empty on IR-9083/9085 — my seeded well-design rows were wrong.** The dropdown has no column;
+  it is recovered from `exad_gwd_well_design` only when the flags are *exactly* what one single pick produces (`resolveCompletionTypeFromFlags`). I had
+  inserted a mix (oh/gp/ls all `Y`, `oh_remarks` `8 1/2"`), which matches no pick. Fixed by SQL: 9083 → Open Hole (`oh_flg` Y, `oh_remarks` `8 1/2" Open
+  Hole`, all other flags N/null); 9085 → Screen with Gravel Pack (`gp_flg` Y `Gravel Pack`, `ls_flg` Y `Screen`, others N/null). Confirmed by running the
+  app's own detail mapper on the live API responses (resolves "Open Hole" / "8 1/2\"" and "Screen with Gravel Pack").
+
+### Completion picks are always drawn inside the open hole (wwell-ir)
+
+- **Ask:** an open hole is drawn for every completion pick — Screen = open hole + screen; Screen with Gravel Pack = open hole + screen + gravel pack —
+  and nothing may be wider than the hole.
+- **Change (`wwell-ir-wellbore-diagram.mapper.ts`):** `flagsForCompletionType` now sets `ohFlg` (+ `ohRemarks` = `<size> Open Hole`) for Screen, Screen with
+  Gravel Pack and both liners; the Completion Remarks text path does the same for Screened / Gravel Pack / liner (not "Cased & Perforated", which has
+  no open hole). `resolveCompletionTypeFromFlags` checks perforated → gravel pack → screen → open hole, and still accepts the old flag sets
+  (`legacyFlagsForCompletionType`) so earlier saved records keep their dropdown value. The Open Hole Size field is now shown for every pick (no longer
+  required), and the Details row lists it for every pick.
+- **Width rule needed no renderer change:** `completion.renderer.ts` already sizes the screen (`screenHW`), gravel pack (`gpMaxOuter = ohHW - gap`) and
+  perforated liner (`prePerfHW = ohHW - inset`) from `ohHW`, so once the hole is drawn they sit inside it.
+- Updated five specs that asserted the old flags (`ohFlg: 'N'` for Screen etc.), added legacy-resolve + liner-in-hole cases. IR-9085's well design set to
+  open hole + screen + gravel pack. Not checked visually in the browser.
+
+### wwell-ir editor overflowed its panel (Save + wellbore diagram pushed off-screen)
+
+- **Symptom (IR-9085, long program-details text):** the editor's toolbar, the Save bar and the wellbore panel were clipped at the right edge.
+- **Cause (measured live):** `.wwell-ir__detail-main > *` set `flex: 1; min-height: 0` but not `min-width: 0`, so `app-wwell-ir-editor` kept its content's
+  natural width (1229px inside a 1030px panel) and `.wwell-ir__detail { overflow: hidden }` cut the overflow.
+- **Fix:** `min-width: 0` on `.wwell-ir__detail-main > *` (`wwell-ir.component.scss`). Verified live at 1353×813, 1100×800 and 1920×1000: editor right edge
+  equals the panel's, Save bar and diagram fully visible.

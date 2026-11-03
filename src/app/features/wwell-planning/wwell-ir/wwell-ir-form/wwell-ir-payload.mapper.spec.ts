@@ -212,7 +212,7 @@ describe('buildWwellIrBulkSavePayload', () => {
       gp_remarks: 'Gravel Pack',
       ls_flg: 'Y',
       ls_remarks: 'Screen',
-      oh_flg: 'N',
+      oh_flg: 'Y', // a screen + gravel pack is always drawn inside the open hole
       perforated_flg: 'N',
     });
   });
@@ -491,7 +491,7 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
     expect(wellDesign.data?.[0]).toMatchObject({
       action: 'UPDATE',
       wd_seq: 9500,
-      oh_flg: 'N',
+      oh_flg: 'Y', // a screen is always drawn inside the open hole
       gp_flg: 'N',
       ls_flg: 'Y',
       ls_remarks: 'Screen',

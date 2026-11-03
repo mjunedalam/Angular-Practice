@@ -62,22 +62,27 @@
            matTooltipClass keys into the global override in styles.scss — the tooltip's overlay
            renders as a direct child of <body>, outside `.irv`'s scoped theme, so it needs styling
            that doesn't depend on that theme's CSS custom properties reaching it. -->
-      <span
-        class="irv__letter-download-wrap"
-        [matTooltip]="canDownloadPdf() ? 'Download IR report' : 'Save this integrated requirement before downloading the IR report'"
-        matTooltipClass="irv-download-tooltip"
-        matTooltipPosition="below"
-      >
-        <button type="button" class="irv__letter-download" [disabled]="!canDownloadPdf() || downloadingPdf()" (click)="downloadPdf()">
-          @if (downloadingPdf()) {
-            <mat-spinner diameter="18" />
-          } @else {
-            <span class="irv__letter-download-glyph">
-              <mat-icon>description</mat-icon>
-              <mat-icon class="irv__letter-download-badge">file_download</mat-icon>
-            </span>
-          }
-        </button>
+      <span class="irv__letter-actions">
+        <span
+          class="irv__letter-download-wrap"
+          [matTooltip]="downloadingPdf() ? pdfStageLabel() : canDownloadPdf() ? 'Download IR report' : 'Save this integrated requirement before downloading the IR report'"
+          matTooltipClass="irv-download-tooltip"
+          matTooltipPosition="below"
+        >
+          <button type="button" class="irv__letter-download" aria-label="Download IR report" [disabled]="!canDownloadPdf() || downloadingPdf()" (click)="downloadPdf()">
+            @if (downloadingPdf()) {
+              <mat-spinner diameter="18" />
+            } @else {
+              <span class="irv__letter-download-glyph">
+                <mat-icon>description</mat-icon>
+                <mat-icon class="irv__letter-download-badge">file_download</mat-icon>
+              </span>
+            }
+          </button>
+        </span>
+        @if (downloadingPdf()) {
+          <span class="irv__letter-stage" role="status">{{ pdfStageLabel() }}</span>
+        }
       </span>
     }
   </div>

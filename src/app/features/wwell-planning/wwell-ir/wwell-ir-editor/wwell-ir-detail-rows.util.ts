@@ -1,6 +1,6 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
-import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../wwell-ir-form/wwell-ir-completion-type.config';
+import { isLinerCompletionType } from '../wwell-ir-form/wwell-ir-completion-type.config';
 
 /** Flags a value that's actually meaningful, not just informational — e.g. a nonzero H2S
  *  reading should read as amber/danger regardless of which section it sits in. Omitted (or
@@ -97,9 +97,11 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
   const p = ir.programDetails;
   const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completionType) }];
 
-  if (p.completionType === WWELL_COMPLETION_TYPE.OPEN_HOLE) {
+  // Every pick is drawn inside the open hole, so its size is listed whatever the pick.
+  if (p.completionType) {
     rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
-  } else if (isLinerCompletionType(p.completionType)) {
+  }
+  if (isLinerCompletionType(p.completionType)) {
     rows.push({ label: 'Liner Size', value: fmtStr(p.linerSizeIn) });
   }
   rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true });

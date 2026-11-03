@@ -12,10 +12,37 @@ import { WwellIrViewLetterComponent } from './wwell-ir-view/wwell-ir-view-letter
 
 /** The wellbore diagram's D3 entrance animation (see ANIM in wellbore-diagram.model.ts — staggered
  *  casing/open-hole/gravel reveals) must finish before the SVG is rasterized, or the snapshot
- *  catches a half-drawn well. */
-const DIAGRAM_SETTLE_MS = 4000;
+ *  catches a half-drawn well. Rather than a fixed sleep, the capture waits until the off-screen
+ *  copy has stopped changing (`DIAGRAM_QUIET_MS` without a DOM mutation), bounded below and above
+ *  so a diagram that never mutates still captures and one that never stops still does. */
+const DIAGRAM_MIN_WAIT_MS = 500;
+const DIAGRAM_QUIET_MS = 600;
+const DIAGRAM_MAX_WAIT_MS = 4000;
 const OFFSCREEN_LETTER_WIDTH_PX = 900;
 const DIAGRAM_CAPTURE_ATTEMPTS = 3;
+
+/** Resolves once `host` has gone `DIAGRAM_QUIET_MS` without a DOM mutation (never sooner than
+ *  `DIAGRAM_MIN_WAIT_MS`, never later than `DIAGRAM_MAX_WAIT_MS`). D3 transitions write attributes
+ *  every frame, so silence means the entrance animation is finished. */
+export function waitForDiagramToSettle(host: HTMLElement): Promise<void> {
+  return new Promise(resolve => {
+    let quietTimer: ReturnType<typeof setTimeout> | undefined;
+    const observer = new MutationObserver(() => armQuietTimer());
+    const finish = () => {
+      observer.disconnect();
+      clearTimeout(quietTimer);
+      clearTimeout(maxTimer);
+      resolve();
+    };
+    function armQuietTimer(): void {
+      clearTimeout(quietTimer);
+      quietTimer = setTimeout(finish, DIAGRAM_QUIET_MS);
+    }
+    const maxTimer = setTimeout(finish, DIAGRAM_MAX_WAIT_MS);
+    observer.observe(host, { subtree: true, childList: true, attributes: true, characterData: true });
+    quietTimer = setTimeout(finish, Math.max(DIAGRAM_MIN_WAIT_MS, DIAGRAM_QUIET_MS));
+  });
+}
 
 /** Reads a `Blob` via `FileReader` rather than `Blob.arrayBuffer()` — the latter isn't implemented
  *  by jsdom (this repo's test environment), while `FileReader.readAsArrayBuffer` is. */
@@ -104,7 +131,7 @@ export class WwellIrLetterPdfService {
       componentRef.setInput('ir', ir);
       this.appRef.attachView(componentRef.hostView);
       componentRef.changeDetectorRef.detectChanges();
-      await new Promise<void>(resolve => setTimeout(resolve, DIAGRAM_SETTLE_MS));
+      await waitForDiagramToSettle(host);
       return await componentRef.instance.captureWellboreImage();
     } catch {
       return undefined;

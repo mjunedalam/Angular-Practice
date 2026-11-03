@@ -195,6 +195,12 @@
   min-width: 0;
 }
 
+.letter__text {
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
 .letter__closing {
   margin: 1.5rem 0;
   padding: 0.9rem 1rem;
@@ -278,11 +284,80 @@
   }
 
   span {
+    flex: 1;
     overflow-wrap: anywhere;
   }
+}
+
+.letter__attachment-view {
+  flex: none;
+  color: tokens.$subtle;
 }
 
 .letter__attachments-empty {
   margin: 0;
   color: tokens.$muted;
+}
+
+.letter__text--empty {
+  color: tokens.$subtle;
+  font-style: italic;
+}
+
+// Same status colour families as the downloaded PDF's approval table.
+.letter__status {
+  font-weight: 650;
+
+  &[data-tone='approved'] {
+    background: color-mix(in srgb, #1f9d55 16%, transparent);
+    color: #14663a;
+  }
+
+  &[data-tone='in-progress'] {
+    background: color-mix(in srgb, #e0a100 18%, transparent);
+    color: #86560a;
+  }
+
+  &[data-tone='pending'] {
+    background: color-mix(in srgb, #7b8499 16%, transparent);
+    color: tokens.$muted;
+  }
+
+  &[data-tone='rejected'] {
+    background: color-mix(in srgb, #d64545 16%, transparent);
+    color: #9a1c1c;
+  }
+}
+
+.letter__attachment-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid tokens.$border;
+}
+
+// Printing the tab follows the PDF's pagination: a section or table row is never split, a heading
+// never strands at the bottom of a page, and the attachments start on a fresh page.
+@media print {
+  .letter__section {
+    break-inside: avoid;
+  }
+
+  .letter__section h4 {
+    break-after: avoid;
+  }
+
+  .letter__table tr {
+    break-inside: avoid;
+  }
+
+  .letter__attachments {
+    break-before: page;
+  }
+
+  .letter__attachment-view {
+    display: none;
+  }
 }

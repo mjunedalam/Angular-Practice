@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, output, signal, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -96,43 +97,71 @@ export class WwellIrViewComponent {
   private readonly letterView = viewChild(WwellIrViewLetterComponent);
 
   protected readonly downloadingPdf = signal(false);
+  /** What the button is busy with — shown as its tooltip/label so a slow render never looks frozen. */
+  protected readonly pdfStage = signal<'diagram' | 'letter' | 'attachments' | null>(null);
+  protected readonly pdfStageLabel = computed(() => {
+    switch (this.pdfStage()) {
+      case 'diagram':
+        return 'Rendering diagram…';
+      case 'letter':
+        return 'Generating letter…';
+      case 'attachments':
+        return 'Merging attachments…';
+      default:
+        return '';
+    }
+  });
   // Only a persisted record has anything for the backend to render (see IrLetterService, which
   // re-fetches the detail by ir_seq) — a local-only "New IR" draft has never reached the backend.
   protected readonly canDownloadPdf = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
 
   protected async downloadPdf(): Promise<void> {
-    const irSeq = this.ir().irSeq;
-    if (irSeq === null || irSeq === undefined || this.downloadingPdf()) return;
-
-    this.downloadingPdf.set(true);
-    const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
-    this.wwellIrService.downloadLetterPdf(
-      irSeq,
-      wellboreImageBase64,
-      resolveLetterStampStatus(this.ir()),
-      resolveLetterWorkflow(this.ir()) ?? undefined,
-    ).subscribe({
-      next: (blob: Blob) => {
-        void this.finishDownload(blob);
-      },
-      error: (err: unknown) => {
-        this.downloadingPdf.set(false);
-        void this.extractDownloadErrorMessage(err).then(message => {
-          this.notify.error(message ?? 'Failed to download the integrated requirement letter PDF.');
-        });
-      },
-    });
-  }
-
-  private async finishDownload(letterBlob: Blob): Promise<void> {
-    const blob = await this.letterPdf.mergeAttachments(letterBlob, this.ir());
-    this.downloadingPdf.set(false);
+    const blob = await this.buildPdfBlob();
+    if (!blob) return;
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${this.ir().code}-letter.pdf`;
+    link.download = this.pdfFileName();
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  /** "GWD-49-2026_SHYB_1031.pdf" — the letter number and well, falling back to the IR code. */
+  private pdfFileName(): string {
+    const { letterNumber, wellName } = this.ir().requestReference;
+    const parts = [letterNumber ? `GWD-${letterNumber}` : this.ir().code, wellName].filter((part): part is string => !!part);
+    return `${parts.join('_').replace(/[\\/:*?"<>|\s]+/g, '-')}.pdf`;
+  }
+
+  /** Captures the diagram, has the backend render the letter and merges the attachments; `null` (after
+   *  a toast) when the backend refuses. Drives `downloadingPdf`/`pdfStage` for the download. */
+  private async buildPdfBlob(): Promise<Blob | null> {
+    const irSeq = this.ir().irSeq;
+    if (irSeq === null || irSeq === undefined || this.downloadingPdf()) return null;
+
+    this.downloadingPdf.set(true);
+    try {
+      this.pdfStage.set('diagram');
+      const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
+      this.pdfStage.set('letter');
+      const letterBlob = await firstValueFrom(
+        this.wwellIrService.downloadLetterPdf(
+          irSeq,
+          wellboreImageBase64,
+          resolveLetterStampStatus(this.ir()),
+          resolveLetterWorkflow(this.ir()) ?? undefined,
+        ),
+      );
+      this.pdfStage.set('attachments');
+      return await this.letterPdf.mergeAttachments(letterBlob, this.ir());
+    } catch (err: unknown) {
+      const message = await this.extractDownloadErrorMessage(err);
+      this.notify.error(message ?? 'Failed to download the integrated requirement letter PDF.');
+      return null;
+    } finally {
+      this.downloadingPdf.set(false);
+      this.pdfStage.set(null);
+    }
   }
 
   /** `downloadLetterPdf` requests `responseType: 'blob'` so a successful PDF response can be
