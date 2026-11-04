@@ -31,6 +31,16 @@
     <strong>{{ ir().requestReference.wellName || '—' }}</strong>.
   </p>
 
+  @if (ir().requestReference.supportingBusiness; as supporting) {
+    <section class="letter__section">
+      <h4>Objectives</h4>
+      <p class="letter__text">
+        <strong>{{ ir().requestReference.wellName || '—' }}</strong> will be used as drilling water supply well supporting
+        Development well <strong>{{ supporting }}</strong>.
+      </p>
+    </section>
+  }
+
   <!-- Section order mirrors the downloaded PDF (agwa-planning's irLetter.html). -->
   <section class="letter__section">
     <h4>Well Location</h4>
