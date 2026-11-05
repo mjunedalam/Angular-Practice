@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, output, signal, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,6 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { AuthStore } from '../../../auth/store/auth.store';
+import { EmailService } from '@services/email/email.service';
+import { EmailStore } from '@store/email/email.store';
+import { ConfirmDialogService } from '@shared/components/confirm-dialog/confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
@@ -27,6 +31,18 @@ const PDF_STAGES: readonly { readonly key: PdfStage; readonly busyLabel: string 
 
 /** How long the green "Ready" tick stays up before the file is handed to the browser. */
 const PDF_READY_HOLD_MS = 700;
+
+/** EXAD_DHUB_LKUP_DATA `LKUP_NAME` of the CC list — one row per address. */
+const NOTIFY_CC_MENU = 'ir_notify_cc_recipients';
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
 
 export type WwellIrViewTab = 'details' | 'well-design' | 'letter';
 
@@ -95,6 +111,10 @@ export class WwellIrViewComponent {
   private readonly wwellIrService = inject(WwellIrService);
   private readonly notify = inject(NotificationService);
   private readonly letterPdf = inject(WwellIrLetterPdfService);
+  private readonly emailStore = inject(EmailStore);
+  private readonly emailService = inject(EmailService);
+  private readonly authStore = inject(AuthStore);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   /** Only resolves while the `letter` tab is active — the `@switch` in the template below destroys
    *  the child otherwise. Used solely to reach `captureWellboreImage()`, the one piece of the
@@ -116,6 +136,63 @@ export class WwellIrViewComponent {
   // Only a persisted record has anything for the backend to render (see IrLetterService, which
   // re-fetches the detail by ir_seq) — a local-only "New IR" draft has never reached the backend.
   protected readonly canDownloadPdf = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
+
+  protected readonly notifying = signal(false);
+  protected readonly isSendingEmail = this.emailStore.isSending;
+  /** TEMPORARY (testing): shown for any saved IR. Restore `&& resolveLetterStampStatus(this.ir()) === 'APPROVED'` before release. */
+  protected readonly canNotify = computed(() => this.canDownloadPdf());
+
+  constructor() {
+    effect(() => {
+      if (this.emailStore.isSent()) {
+        this.notify.info('Approved IR copy sent.');
+        this.emailStore.reset();
+      } else if (this.emailStore.hasFailed()) {
+        this.notify.error(this.emailStore.error() ?? 'Failed to send the approved IR copy.');
+        this.emailStore.reset();
+      }
+    });
+  }
+
+  /** Same flow as the morning report's "Send": confirm the recipients, then hand the request to EmailStore
+   *  (whose status effect in the constructor toasts the result). */
+  protected async notifyApproved(): Promise<void> {
+    if (this.notifying() || this.downloadingPdf()) return;
+    const recipientEmail = this.authStore.userEmail();
+    if (!recipientEmail) {
+      this.notify.error('Unable to determine the logged-in user email.');
+      return;
+    }
+    this.notifying.set(true);
+    try {
+      const menus = await firstValueFrom(this.wwellIrService.getDropdownMenus());
+      const cc = [...(menus[NOTIFY_CC_MENU] ?? [])];
+      const confirmed = await firstValueFrom(
+        this.confirmDialog.open({
+          title: 'Send Approved IR',
+          rows: [
+            { label: 'IR', value: this.ir().code },
+            { label: 'Recipient', value: recipientEmail },
+            { label: 'CC', value: cc.length ? cc.join(', ') : '—' },
+          ],
+          confirmLabel: 'Send',
+        }),
+      );
+      if (!confirmed) return;
+      const blob = await this.buildPdfBlob();
+      if (!blob) return;
+      this.downloadingPdf.set(false);
+      this.pdfStage.set(null);
+      const label = this.ir().requestReference.wellName || this.ir().code;
+      this.emailStore.sendEmail(
+        this.emailService.buildIrApprovedEmailRequest(recipientEmail, cc, label, this.pdfFileName(), await blobToBase64(blob)),
+      );
+    } catch {
+      this.notify.error('Failed to send the approved IR copy.');
+    } finally {
+      this.notifying.set(false);
+    }
+  }
 
   protected async downloadPdf(): Promise<void> {
     const blob = await this.buildPdfBlob();

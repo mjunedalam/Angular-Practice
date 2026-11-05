@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MorningReport } from '@models/morning-report/morning-report.model';
-import { EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
+import { EMAIL_PLAIN_TEMPLATE_NAME, EMAIL_SUBJECT, EMAIL_TEMPLATE_NAME } from 'src/app/shared/models/config/email.config';
 import { WaterWellTestEmailResult } from 'src/app/shared/models/wwell/wwell-test-result.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 @Injectable({
@@ -55,6 +55,32 @@ export class EmailService {
         waterWellTestResults,
         mrReportDate: this.formatReportDate(reportDate ?? new Date().toISOString().slice(0, 10))
       }
+    };
+  }
+
+  /** The approved-IR email: sent by and to the logged-in user, CC from EXAD_DHUB_LKUP_DATA, the PDF attached. */
+  buildIrApprovedEmailRequest(
+    recipientEmail: string,
+    cc: string[],
+    label: string,
+    fileName: string,
+    pdfBase64: string,
+  ): EmailRequest {
+    return {
+      subject: `Approved Integrated Requirements - ${label}`,
+      from: recipientEmail,
+      to: [recipientEmail],
+      cc,
+      replyTo: '',
+      templateName: EMAIL_PLAIN_TEMPLATE_NAME,
+      generatePdf: false,
+      templateData: {
+        content: `<p>Please find attached the approved Integrated Requirements letter for <b>${label
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')}</b>.</p>`,
+        attachments: [{ filename: fileName, contentType: 'application/pdf', b64: pdfBase64 }],
+      },
     };
   }
 }

@@ -5,12 +5,29 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { S3Service } from '@services/s3/s3.service';
+import { AuthStore } from '../../../auth/store/auth.store';
+import { EmailService } from '@services/email/email.service';
+import { EmailStore } from '@store/email/email.store';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrViewComponent, WwellIrViewTab } from './wwell-ir-view.component';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
 import { WwellIrViewWellDesignComponent } from './wwell-ir-view-well-design/wwell-ir-view-well-design.component';
+
+const emailStoreStub = {
+  isSending: signal(false),
+  isSent: signal(false),
+  hasFailed: signal(false),
+  error: signal<string | null>(null),
+  sendEmail: jest.fn(),
+  reset: jest.fn(),
+};
+const emailProviders = [
+  { provide: EmailStore, useValue: emailStoreStub },
+  { provide: EmailService, useValue: { buildIrApprovedEmailRequest: jest.fn() } },
+  { provide: AuthStore, useValue: { userEmail: signal('user@aramco.com') } },
+];
 
 /** The header's `sectionProgress` walks every rail section through wwellIrTimelineStepStatus, so
  *  the whole record has to be present even though this spec only exercises the tab bar. */
@@ -113,6 +130,7 @@ describe('WwellIrViewComponent — tab selection', () => {
       providers: [
         { provide: WwellIrService, useValue: { downloadLetterPdf: jest.fn() } },
         { provide: NotificationService, useValue: { error: jest.fn(), show: jest.fn(), notifications: jest.fn(() => []) } },
+        ...emailProviders,
         { provide: S3Service, useValue: { download: jest.fn() } },
       ],
     })
@@ -195,6 +213,7 @@ describe('WwellIrViewComponent — download PDF error message', () => {
       providers: [
         { provide: WwellIrService, useValue: { downloadLetterPdf } },
         { provide: NotificationService, useValue: { error: notifyError, show: jest.fn(), notifications: jest.fn(() => []) } },
+        ...emailProviders,
         { provide: S3Service, useValue: { download: jest.fn() } },
       ],
     })
@@ -292,6 +311,7 @@ describe('WwellIrViewComponent — letter attachment merge', () => {
       providers: [
         { provide: WwellIrService, useValue: { downloadLetterPdf } },
         { provide: NotificationService, useValue: { error: jest.fn(), show: jest.fn(), notifications: jest.fn(() => []) } },
+        ...emailProviders,
         { provide: S3Service, useValue: { download: s3Download } },
       ],
     })

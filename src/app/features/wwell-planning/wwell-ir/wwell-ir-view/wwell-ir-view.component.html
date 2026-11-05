@@ -29,6 +29,16 @@
           {{ badgeMeta(ir()).label }}
         </span>
       }
+      @if (canNotify()) {
+        <button type="button" mat-stroked-button class="irv__edit-btn" [disabled]="notifying() || isSendingEmail() || downloadingPdf()" (click)="notifyApproved()">
+          @if (notifying() || isSendingEmail()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon>forward_to_inbox</mat-icon>
+          }
+          Notify
+        </button>
+      }
       <button type="button" mat-stroked-button class="irv__edit-btn" (click)="editRequested.emit()">
         <mat-icon>edit</mat-icon>
         Edit

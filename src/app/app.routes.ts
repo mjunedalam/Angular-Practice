@@ -76,7 +76,7 @@ export const routes: Routes = [
         // detail panel (see WwellIrComponent's `detailMode`), not a separate route — the master
         // list stays visible and clickable the whole time.
         path: 'integrated-requirements',
-        providers: [WwellIrStore],
+        providers: [EmailStore, WwellIrStore],
         canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
