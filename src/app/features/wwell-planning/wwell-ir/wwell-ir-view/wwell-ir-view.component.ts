@@ -188,7 +188,13 @@ export class WwellIrViewComponent {
       this.pdfStage.set(null);
       const label = this.ir().requestReference.wellName || this.ir().code;
       this.emailStore.sendEmail(
-        this.emailService.buildIrApprovedEmailRequest(recipientEmail, cc, label, this.pdfFileName(), await blobToBase64(blob)),
+        this.emailService.buildIrApprovedEmailRequest(recipientEmail, cc, label, this.pdfFileName(), await blobToBase64(blob), [
+          { label: 'IR', value: this.ir().code },
+          { label: 'Well', value: this.ir().requestReference.wellName },
+          { label: 'Letter Number', value: this.ir().requestReference.letterNumber ?? '' },
+          { label: 'Target Aquifer', value: this.ir().requestReference.targetAquifer },
+          { label: 'Status', value: this.ir().sapWfStatusText ?? '' },
+        ]),
       );
     } catch {
       this.notify.error('Failed to send the approved IR copy.');

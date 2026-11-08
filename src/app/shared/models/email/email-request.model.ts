@@ -10,6 +10,8 @@ export interface MorningReportTemplateData {
 
 /** A ready-made email (templateName 'plain'): the HTML body plus any PDFs, no report template. */
 export interface PlainEmailTemplateData {
+  /** Heading shown in the title banner of the shared header/footer shell; defaults to the subject. */
+  title?: string;
   content: string;
   attachments: { filename: string; contentType: string; b64: string }[];
 }

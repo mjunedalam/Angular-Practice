@@ -58,14 +58,28 @@ export class EmailService {
     };
   }
 
-  /** The approved-IR email: sent by and to the logged-in user, CC from EXAD_DHUB_LKUP_DATA, the PDF attached. */
+  /** The approved-IR email: sent by and to the logged-in user, CC from EXAD_DHUB_LKUP_DATA, the PDF attached.
+   *  The backend wraps `content` in the morning report's header/footer shell; `details` become a table in the same style. */
   buildIrApprovedEmailRequest(
     recipientEmail: string,
     cc: string[],
     label: string,
     fileName: string,
     pdfBase64: string,
+    details: readonly { readonly label: string; readonly value: string }[] = [],
   ): EmailRequest {
+    const escape = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const cell = 'border:1px solid #c0c0c0; padding:6px 10px; font-size:12px; text-align:left;';
+    const rows = details
+      .map(
+        row =>
+          `<tr><td style="${cell} background-color:#ddeaf7; color:#003d99; font-weight:700; width:35%;">${escape(row.label)}</td>` +
+          `<td style="${cell} color:#111827;">${escape(row.value || '—')}</td></tr>`,
+      )
+      .join('');
+    const table = rows
+      ? `<table style="border-collapse:collapse; width:100%; margin:12px 0;"><tr><td colspan="2" style="${cell} background-color:#d0cece; color:#8b0000; font-weight:700; font-size:14px; text-align:center;">INTEGRATED REQUIREMENT</td></tr>${rows}</table>`
+      : '';
     return {
       subject: `Approved Integrated Requirements - ${label}`,
       from: recipientEmail,
@@ -75,10 +89,10 @@ export class EmailService {
       templateName: EMAIL_PLAIN_TEMPLATE_NAME,
       generatePdf: false,
       templateData: {
-        content: `<p>Please find attached the approved Integrated Requirements letter for <b>${label
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')}</b>.</p>`,
+        title: 'Approved Integrated Requirements',
+        content:
+          `<p style="margin:0 0 8px;">Please find below the approved Integrated Requirements for <b>${escape(label)}</b>. ` +
+          `The signed letter is attached as a PDF.</p>${table}`,
         attachments: [{ filename: fileName, contentType: 'application/pdf', b64: pdfBase64 }],
       },
     };

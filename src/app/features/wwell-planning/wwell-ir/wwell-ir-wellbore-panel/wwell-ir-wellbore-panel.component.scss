@@ -1099,7 +1099,7 @@ $td-label-gap: 30;
 
   .geo-depth,
   .geo-code {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .axis-title {
@@ -1145,7 +1145,7 @@ $td-label-gap: 30;
 
   .geo-depth,
   .geo-code {
-    font-size: 29px;
+    font-size: 24px;
   }
 
   .ground-label {
@@ -1193,6 +1193,44 @@ $td-label-gap: 30;
 @container (max-width: 780px) {
   .wbp--expanded .wbp__stage {
     @include stage-type-step-2;
+  }
+}
+
+// A big dialog draws the well at a large scale, so its type can grow with it: everything a step up from the base sizes.
+// The ranges sit outside both small-stage steps above, so only a roomy stage ever takes this.
+@container (min-width: 1100px) and (min-height: 720px) {
+  .wbp--expanded .wbp__stage {
+    .tick-label {
+      font-size: 22px;
+    }
+
+    .geo-depth,
+    .geo-code {
+      font-size: 23px;
+    }
+
+    .casing-label__primary,
+    .water-label,
+    .pump-label {
+      font-size: 23px;
+    }
+
+    .casing-label__secondary {
+      font-size: 19px;
+    }
+
+    .open-hole-text,
+    .screen-label-text {
+      font-size: 22px;
+    }
+
+    .total-depth-main {
+      font-size: 24px;
+    }
+
+    .ground-label {
+      font-size: 21px;
+    }
   }
 }
 
