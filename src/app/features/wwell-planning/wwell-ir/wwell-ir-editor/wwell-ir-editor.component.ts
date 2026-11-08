@@ -36,7 +36,7 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { WwellIrAttachmentUploadDialogComponent } from '../wwell-ir-attachment-upload-dialog/wwell-ir-attachment-upload-dialog.component';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
 import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
-import { approvalRingPercent, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
+import { approvalRingPercent, chainCompletionColor, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
@@ -236,6 +236,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   // exact same WwellApprovalWorkflowCardComponent via a CDK connected overlay, anchored to itself.
   protected readonly countApprovedSteps = countApprovedSteps;
   protected readonly approvalRingPercent = approvalRingPercent;
+  protected readonly chainCompletionColor = chainCompletionColor;
   protected readonly approvalPopoverOpen = signal(false);
   protected readonly approvalPopoverPositions: ConnectedPosition[] = [
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 8 },

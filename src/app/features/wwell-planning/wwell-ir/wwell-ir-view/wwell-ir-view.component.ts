@@ -16,7 +16,7 @@ import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.
 import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { environment } from '@env/environment';
 import { buildSapWorkflowTitle } from '../wwell-ir-sap.config';
-import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
+import { hasKnownIrStatus, irBadgeMeta, isIrFullyApproved, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
@@ -147,8 +147,8 @@ export class WwellIrViewComponent {
    *  Download button or its progress overlay — Notify shows its own spinner on its own button. */
   protected readonly showDownloadProgress = computed(() => this.downloadingPdf() && !this.notifying());
   protected readonly isSendingEmail = this.emailStore.isSending;
-  /** TEMPORARY (testing): shown for any saved IR. Restore `&& resolveLetterStampStatus(this.ir()) === 'APPROVED'` before release. */
-  protected readonly canNotify = computed(() => this.canDownloadPdf());
+  /** Notify only once SAP reports Approved AND every step in the chain is approved. */
+  protected readonly canNotify = computed(() => this.canDownloadPdf() && isIrFullyApproved(this.ir()));
 
   constructor() {
     effect(() => {

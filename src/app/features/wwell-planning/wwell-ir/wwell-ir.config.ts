@@ -47,7 +47,8 @@ export function irBadgeMeta(ir: IntegratedRequirement): WwellStatusMeta {
   const fallback = WWELL_IR_STATUS_META[ir.status];
   if (!text) return fallback;
   if (SAP_TERMINATED_STATUS_TEXT.test(text)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.red);
-  if (SAP_APPROVED_STATUS_TEXT.test(text)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.green);
+  if (SAP_APPROVED_STATUS_TEXT.test(text) && isChainComplete(ir)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.green);
+  if (SAP_APPROVED_STATUS_TEXT.test(text)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.amber);
   return { ...fallback, label: text };
 }
 
@@ -86,8 +87,18 @@ export function resolveLetterStampStatus(ir: IntegratedRequirement): 'APPROVED' 
   const text = ir.sapWfStatusText;
   if (!text) return null;
   if (SAP_TERMINATED_STATUS_TEXT.test(text)) return 'REJECTED';
-  if (SAP_APPROVED_STATUS_TEXT.test(text)) return 'APPROVED';
+  if (SAP_APPROVED_STATUS_TEXT.test(text)) return isChainComplete(ir) ? 'APPROVED' : 'PENDING';
   return 'PENDING';
+}
+
+/** True when every step of a non-empty chain is approved (an empty chain = not loaded, don't block). */
+function isChainComplete(ir: IntegratedRequirement): boolean {
+  return ir.chain.every(step => step.status === 'approved');
+}
+
+/** SAP says Approved and no chain step is still pending / in progress. */
+export function isIrFullyApproved(ir: IntegratedRequirement): boolean {
+  return SAP_APPROVED_STATUS_TEXT.test(ir.sapWfStatusText ?? '') && ir.chain.length > 0 && isChainComplete(ir);
 }
 
 /** Every field the IR form schema marks `required` (wwell-ir-form.schema.ts), outside the

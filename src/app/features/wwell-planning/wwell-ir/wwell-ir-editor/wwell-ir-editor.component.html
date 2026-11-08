@@ -112,6 +112,7 @@
             r="17"
             pathLength="100"
             [style.strokeDashoffset]="100 - approvalRingPercent(ir().chain)"
+            [style.stroke]="ir().chain.length ? chainCompletionColor(ir().chain) : null"
           />
         </svg>
         <span class="ire__approval-pill-count">
