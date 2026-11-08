@@ -18,7 +18,7 @@ export class ActionConfirmDialogService {
    *  never fires without a Discard button to click. */
   openWithResult(data: ActionConfirmDialogData): Observable<ActionConfirmDialogResult> {
     return this.dialog
-      .open(ActionConfirmDialogComponent, { data, disableClose: false, width: '420px', panelClass: 'acd-dialog-panel' })
+      .open(ActionConfirmDialogComponent, { data, disableClose: false, width: '480px', maxWidth: '94vw', panelClass: 'acd-dialog-panel' })
       .afterClosed()
       .pipe(map((result: ActionConfirmDialogResult | undefined) => result ?? 'cancel'));
   }

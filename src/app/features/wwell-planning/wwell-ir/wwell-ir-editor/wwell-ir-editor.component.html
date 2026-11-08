@@ -30,6 +30,12 @@
         <mat-icon>visibility</mat-icon>
         View
       </button>
+      @if (hasPendingEdits()) {
+        <span class="ire__unsaved-chip" role="status">
+          <span class="ire__unsaved-chip-dot" aria-hidden="true"></span>
+          Unsaved changes — shown in green
+        </span>
+      }
       <div class="ire__view-toggle" role="group" aria-label="View mode">
         <button
           type="button"
@@ -462,9 +468,9 @@
                           </button>
                         </td>
                       } @else {
-                        <td>{{ top.name }}</td>
-                        <td>{{ top.depthFt }}</td>
-                        <td>{{ subSeaFt(top.depthFt) ?? "—" }}</td>
+                        <td [class.ire__cell--changed]="topChanged(top, 'name')">{{ top.name }}</td>
+                        <td [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ top.depthFt }}</td>
+                        <td [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ subSeaFt(top.depthFt) ?? "—" }}</td>
                         <td class="ire__row-actions">
                           <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" [matTooltip]="'Edit formation top ' + top.name" matTooltipClass="ir-attachment-tooltip" (click)="editFormationTopRowInline(i)">
                             <mat-icon>edit</mat-icon>
@@ -612,10 +618,10 @@
                         </button>
                       </td>
                     } @else {
-                      <td>{{ row.type }}</td>
-                      <td>{{ row.sizeIn }}</td>
-                      <td>{{ row.depthFtBgl }}</td>
-                      <td>{{ row.remarks || "—" }}</td>
+                      <td [class.ire__cell--changed]="casingChanged(row, 'type')">{{ row.type }}</td>
+                      <td [class.ire__cell--changed]="casingChanged(row, 'sizeIn')">{{ row.sizeIn }}</td>
+                      <td [class.ire__cell--changed]="casingChanged(row, 'depthFtBgl')">{{ row.depthFtBgl }}</td>
+                      <td [class.ire__cell--changed]="casingChanged(row, 'remarks')">{{ row.remarks || "—" }}</td>
                       <td class="ire__row-actions">
                         <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit casing row ' + (i + 1)" [matTooltip]="'Edit casing row ' + (i + 1)" matTooltipClass="ir-attachment-tooltip" (click)="editCasingRowInline(i)">
                           <mat-icon>edit</mat-icon>
@@ -836,10 +842,10 @@
                           </button>
                         </td>
                       } @else {
-                        <td>{{ row.epANum }}</td>
-                        <td>{{ row.aquifer || "—" }}</td>
-                        <td>{{ row.distanceKm ?? "—" }}</td>
-                        <td>{{ row.rateGpm ?? "—" }}</td>
+                        <td [class.ire__cell--changed]="wellChanged(row, 'epANum')">{{ row.epANum }}</td>
+                        <td [class.ire__cell--changed]="wellChanged(row, 'aquifer')">{{ row.aquifer || "—" }}</td>
+                        <td [class.ire__cell--changed]="wellChanged(row, 'distanceKm')">{{ row.distanceKm ?? "—" }}</td>
+                        <td [class.ire__cell--changed]="wellChanged(row, 'rateGpm')">{{ row.rateGpm ?? "—" }}</td>
                         <td class="ire__row-actions">
                           <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + row.epANum" [matTooltip]="'Edit offset well ' + row.epANum" matTooltipClass="ir-attachment-tooltip" (click)="editOffsetWellRowInline(i)">
                             <mat-icon>edit</mat-icon>

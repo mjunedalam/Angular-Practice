@@ -292,44 +292,93 @@ $master-width: 240px;
 }
 
 .wwell-ir__status-chips {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.3rem;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  padding-top: 7px;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 
+/* Small chips in a 3-wide grid, so the statuses sit on two tidy lines. Full status names — a long one
+ * ("Submit for Review") wraps inside its own chip rather than being cut off. */
 .wwell-ir__status-chip {
-  flex-shrink: 0;
+  // Per-status colour: Active blue, In Progress amber, Approved green.
+  --chip-fill: var(--wp-accent-fill);
+  --chip-ink: var(--wp-accent);
+  --chip-soft: var(--wp-accent-soft);
+  --chip-line: var(--wp-accent-line);
+
+  &[data-status='in-progress'] {
+    --chip-fill: #b45309;
+    --chip-ink: var(--wp-warning);
+    --chip-soft: var(--wp-warning-soft);
+    --chip-line: var(--wp-warning-line);
+  }
+
+  &[data-status='approved'] {
+    --chip-fill: var(--wp-success-fill);
+    --chip-ink: var(--wp-success);
+    --chip-soft: var(--wp-success-soft);
+    --chip-line: var(--wp-success-line);
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  min-width: 0;
   border: 1px solid $border;
   background: tokens.$surface;
-  border-radius: 999px;
-  padding: 0.14rem 0.4rem;
-  font-size: tokens.$text-2xs;
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.68rem;
   font-weight: 600;
+  line-height: 1.15;
   color: $muted;
   cursor: pointer;
-  white-space: nowrap;
   transition:
     background 150ms ease,
     border-color 150ms ease,
     color 150ms ease;
 
   &:hover {
-    border-color: tokens.alpha($accent, 40%);
-    color: $navy;
+    border-color: var(--chip-line);
+    color: var(--chip-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--chip-fill);
+    outline-offset: 1px;
   }
 
   &--active {
-    background: tokens.alpha($accent, 12%);
-    border-color: tokens.alpha($accent, 35%);
-    color: $accent;
+    background: var(--chip-soft);
+    border-color: var(--chip-fill);
+    color: var(--chip-ink);
   }
+}
+
+/* Count as a notification-style badge pinned to the chip's top-right corner. */
+.wwell-ir__status-chip-count {
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--chip-fill);
+  color: #fff;
+  box-shadow: 0 0 0 2px tokens.$surface;
+  font-family: tokens.$font-mono;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
 /* `flex: 1` + centering (not just padded text) so the empty/error state actually fills whatever

@@ -131,6 +131,7 @@ export class WwellRichTextareaComponent implements AfterViewInit, OnDestroy {
     this.isOwnEdit = true;
     this.boxText.set(text);
     this.control().setValue(text);
+    this.control().markAsDirty();
     this.control().markAsTouched();
   }
 

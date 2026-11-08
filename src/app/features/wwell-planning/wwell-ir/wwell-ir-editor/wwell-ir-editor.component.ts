@@ -169,6 +169,7 @@ function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly 
   styleUrl: './wwell-ir-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  host: { '[class.ire-flag-unsaved]': 'flagUnsaved()' },
 })
 export class WwellIrEditorComponent implements AfterViewInit {
   readonly ir = input.required<IntegratedRequirement>();
@@ -191,6 +192,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   private readonly notify = inject(NotificationService);
   private readonly s3 = inject(S3Service);
   private readonly dialog = inject(MatDialog);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly hasKnownStatus = hasKnownIrStatus;
   protected readonly badgeMeta = irBadgeMeta;
@@ -445,9 +447,32 @@ export class WwellIrEditorComponent implements AfterViewInit {
     () => buildSectionGroup(this.offsetWellAddSection, this.fb) as FormArray,
   );
 
-  protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops);
-  protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing);
-  protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue() ?? this.ir().offsetWells);
+  protected readonly formationTopsRows = computed(() => this.formationTopsEdit.liveValue() ?? this.ir().formationTops.map(formationTopRowPatch));
+  protected readonly casingRows = computed(() => this.casingEdit.liveValue() ?? this.ir().casing.map(casingRowPatch));
+  protected readonly offsetWellsRows = computed(() => this.offsetWellsEdit.liveValue() ?? this.ir().offsetWells.map(offsetWellRowPatch));
+
+  // The saved rows, by natural key — what a table cell is compared against to decide whether it carries an
+  // unsaved change (green). A row whose key isn't saved yet (added, or its key edited) is wholly green.
+  private readonly savedTops = computed(() => new Map(this.ir().formationTops.map(formationTopRowPatch).map(row => [topKey(row), row])));
+  private readonly savedCasing = computed(() => new Map(this.ir().casing.map(casingRowPatch).map(row => [casingKey(row), row])));
+  private readonly savedWells = computed(() => new Map(this.ir().offsetWells.map(offsetWellRowPatch).map(row => [waterKey(row.epANum ?? 0), row])));
+
+  private cellChanged<TRow extends object>(saved: ReadonlyMap<string, TRow>, key: string, row: TRow, field: keyof TRow): boolean {
+    const original = saved.get(key);
+    return !original || original[field] !== row[field];
+  }
+
+  protected topChanged(row: WwellIrRawFormationTop, field: keyof WwellIrRawFormationTop): boolean {
+    return this.cellChanged(this.savedTops(), topKey(row), row, field);
+  }
+
+  protected casingChanged(row: WwellIrRawCasingRow, field: keyof WwellIrRawCasingRow): boolean {
+    return this.cellChanged(this.savedCasing(), casingKey(row), row, field);
+  }
+
+  protected wellChanged(row: WwellIrRawOffsetWell, field: keyof WwellIrRawOffsetWell): boolean {
+    return this.cellChanged(this.savedWells(), waterKey(row.epANum ?? 0), row, field);
+  }
 
   /** What the Wellbore Preview draws for the casing / formation tops: the section's live rows (edits, deletes, committed
    *  adds) plus the "+" form's row as it is typed, so a row is in the drawing the moment it is complete — not only once
@@ -826,6 +851,33 @@ export class WwellIrEditorComponent implements AfterViewInit {
       this.offsetRemarksEdit.isEditing(),
   );
 
+  /** True while the "Unsaved changes" prompt is up: every pending edit on the page is drawn in solid dark
+   *  green (see the `ire-flag-unsaved` rules in the stylesheet) so the user can see exactly what Save or
+   *  Discard would act on. Cleared on Stay, Save and Discard. */
+  protected readonly flagUnsaved = signal(false);
+
+  /** Edits that are open but not yet committed with their ✓ or "Add" — typed into a "+" add-form's rows.
+   *  `hasUnsavedChanges` deliberately excludes these (Save never commits them), but leaving would drop them. */
+  private readonly hasStagedRows = computed(
+    () => this.formationTopAdd.isEditing() || this.casingAdd.isEditing() || this.offsetWellAdd.isEditing(),
+  );
+
+  /** What the leave-guard asks about: saveable section edits plus rows still staged in an add-form. */
+  public readonly hasPendingEdits = computed(() => this.hasUnsavedChanges() || this.hasStagedRows());
+
+  public showUnsavedHighlight(): void {
+    this.flagUnsaved.set(true);
+    setTimeout(() =>
+      this.host.nativeElement
+        .querySelector('.dyf--modified, .ire__cell--changed')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
+    );
+  }
+
+  public clearUnsavedHighlight(): void {
+    this.flagUnsaved.set(false);
+  }
+
   private saveSettledResolvers: ((succeeded: boolean) => void)[] = [];
   private wasSavingForNavigation = false;
 
@@ -1131,6 +1183,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   private closeAllSections(): void {
+    this.flagUnsaved.set(false);
     this.requestReferenceEdit.close();
     this.programEdit.close();
     this.geologistContactEdit.close();

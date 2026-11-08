@@ -118,6 +118,14 @@ export class DynamicFieldComponent {
     return value === null || value === undefined || value === '' ? '—' : String(value);
   });
 
+  /** True once the user has changed this control (Angular's `dirty`, set only by user input — the
+   *  programmatic patches that seed a form leave it false). Re-evaluated on every value change; stays
+   *  true until the owner resets the control (Save/Discard rebuild or `markAsPristine`). */
+  protected readonly isModified = computed(() => {
+    this.liveValue();
+    return this.control().dirty;
+  });
+
   protected readonly isReviewValueEmpty = computed(() => this.reviewValue() === '—');
 
   /** Non-null only for a field carrying `splitDisplay` — the parts it renders as separate boxes

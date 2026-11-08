@@ -1376,3 +1376,144 @@ app-wwell-ir-editor {
     }
   }
 }
+
+/* Unsaved edits: a field the user has changed shows green until Save or Discard; untouched fields
+ * keep the default colour. Driven by DynamicFieldComponent's `dyf--modified` (control.dirty). */
+.ire .dyf--modified {
+  input,
+  textarea,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-value {
+    color: var(--wp-success) !important;
+    font-weight: 600;
+  }
+
+  .mat-mdc-floating-label,
+  .mdc-floating-label {
+    color: var(--wp-success) !important;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--wp-success-line) !important;
+  }
+
+  .mdc-text-field--outlined {
+    background: var(--wp-success-soft) !important;
+  }
+}
+
+/* Table cells carrying an unsaved change (inline edit, add, key change). */
+.ire__view-table td.ire__cell--changed {
+  color: var(--wp-success);
+  font-weight: 700;
+  background: var(--wp-success-soft);
+}
+
+.ire__unsaved-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: tokens.$text-2xs;
+  font-weight: 650;
+  color: var(--wp-success);
+  background: var(--wp-success-soft);
+  border: 1px solid var(--wp-success-line);
+  white-space: nowrap;
+}
+
+.ire__unsaved-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--wp-success);
+}
+
+/* "Unsaved changes" prompt is open: pending edits become solid dark green with white text, unmissable
+ * behind the dialog. Applies to edited form fields, edited/added table cells and the header chip. */
+app-wwell-ir-editor.ire-flag-unsaved {
+  .dyf--modified {
+    input,
+    textarea,
+    .mat-mdc-select-value-text,
+    .mat-mdc-select-value,
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      color: #fff !important;
+      -webkit-text-fill-color: #fff !important;
+    }
+
+    .mdc-text-field--outlined {
+      background: var(--wp-success-fill) !important;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--wp-success-fill) !important;
+      border-width: 2px !important;
+    }
+  }
+
+  .ire__view-table td.ire__cell--changed {
+    color: #fff;
+    background: var(--wp-success-fill);
+  }
+
+  .ire__unsaved-chip {
+    color: #fff;
+    background: var(--wp-success-fill);
+    border-color: var(--wp-success-fill);
+  }
+
+  .ire__unsaved-chip-dot {
+    background: #fff;
+  }
+}
+
+/* Rich-text boxes (Completion, Logging, Sampling…) and the toggle group: no <input>, so the field rules above miss them. */
+.ire .dyf--modified {
+  .wrt__label,
+  .dyf__toggle-label {
+    color: var(--wp-success) !important;
+  }
+
+  .wrt__field {
+    border-color: var(--wp-success-line) !important;
+    background: var(--wp-success-soft) !important;
+  }
+
+  .wrt__box,
+  .wrt__box div {
+    color: var(--wp-success) !important;
+    font-weight: 600;
+  }
+
+  .mat-button-toggle-checked {
+    background: var(--wp-success-fill) !important;
+    color: #fff !important;
+  }
+}
+
+app-wwell-ir-editor.ire-flag-unsaved .dyf--modified {
+  .wrt__label,
+  .dyf__toggle-label {
+    color: var(--wp-success) !important;
+    font-weight: 700;
+  }
+
+  .wrt__field {
+    background: var(--wp-success-fill) !important;
+    border-color: var(--wp-success-fill) !important;
+  }
+
+  .wrt__box,
+  .wrt__box div {
+    color: #fff !important;
+  }
+}

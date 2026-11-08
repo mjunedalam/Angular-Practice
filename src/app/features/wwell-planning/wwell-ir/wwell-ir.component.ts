@@ -16,7 +16,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable, from, of, switchMap, take } from 'rxjs';
+import { Observable, from, of, switchMap, take, tap } from 'rxjs';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ComponentCanDeactivate } from '@guards/unsaved-changes.guard';
@@ -27,7 +27,6 @@ import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { WwellApprovalWorkflowCardComponent } from '../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';
-import { WwellCollapseAnimateDirective } from '../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';
 import { createPendingSelection } from '../shared/wwell-pending-selection.util';
@@ -85,7 +84,6 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     WwellApprovalWorkflowCardComponent,
     WwellDetailLoadingComponent,
     WwellIrEditorLoadingComponent,
-    WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir.component.html',
   styleUrl: './wwell-ir.component.scss',
@@ -124,7 +122,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   protected readonly statusFilter = signal<IntegratedRequirementStatus | 'all'>('all');
   // Sub-filter chips shown only in the Active bucket — Inactive is exactly one status
   // (approved), so there's nothing left to narrow further once that's selected.
-  protected readonly statusChips: readonly (IntegratedRequirementStatus | 'all')[] = ['all', ...WWELL_IR_ACTIVE_STATUSES];
+  protected readonly statusChips: readonly (IntegratedRequirementStatus | 'all')[] = ['all', 'in-progress', 'approved'];
 
   // Scoped by the lifecycle toggle only (not the status chip or search term) so chip counts stay
   // stable while the user narrows further — each chip shows how many rows *it* would reveal, not
@@ -453,6 +451,21 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     this.setLifecycleFilter(this.lifecycleFilter() === 'active' ? 'inactive' : 'active');
   }
 
+  /** Approved lives in the inactive lifecycle bucket, so its chip switches the bucket rather than filtering within Active. */
+  protected isChipActive(status: IntegratedRequirementStatus | 'all'): boolean {
+    if (status === 'approved') return this.lifecycleFilter() === 'inactive';
+    return this.lifecycleFilter() === 'active' && this.statusFilter() === status;
+  }
+
+  protected selectChip(status: IntegratedRequirementStatus | 'all'): void {
+    if (status === 'approved') {
+      this.setLifecycleFilter('inactive');
+      return;
+    }
+    this.setLifecycleFilter('active');
+    this.setStatusFilter(status);
+  }
+
   protected setStatusFilter(status: IntegratedRequirementStatus | 'all'): void {
     this.statusFilter.set(status);
   }
@@ -466,8 +479,11 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   }
 
   protected statusChipCount(status: IntegratedRequirementStatus | 'all'): number {
-    const scoped = this.lifecycleScopedIrs();
-    return status === 'all' ? scoped.length : scoped.filter(ir => ir.status === status).length;
+    // Independent of which bucket is showing: every chip always reports its own total.
+    const all = this.store.irs();
+    if (status === 'approved') return all.filter(ir => ir.status === 'approved').length;
+    const active = all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
+    return status === 'all' ? active.length : active.filter(ir => ir.status === status).length;
   }
 
   protected selectIr(irSeq: number): void {
@@ -599,8 +615,10 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
    *  Save has settled. `false` means stay (Cancel, or a save that failed). */
   canDeactivate(): Observable<boolean> {
     const editor = this.editorRef;
-    if (!editor?.hasUnsavedChanges()) return of(true);
+    if (!editor?.hasPendingEdits()) return of(true);
 
+    // Draw every pending edit in dark green behind the prompt, so it is clear what Save / Discard acts on.
+    editor.showUnsavedHighlight();
     return this.confirmDialog
       .openWithResult({
         title: 'Unsaved changes',
@@ -612,12 +630,15 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
       })
       .pipe(
         switchMap(result => {
-          if (result === 'cancel') return of(false);
+          if (result === 'cancel') {
+            editor.clearUnsavedHighlight();
+            return of(false);
+          }
           if (result === 'discard') {
             editor.discardUnsavedChanges();
             return of(true);
           }
-          return from(editor.saveUnsavedChangesAndWait());
+          return from(editor.saveUnsavedChangesAndWait()).pipe(tap(saved => !saved && editor.clearUnsavedHighlight()));
         }),
       );
   }
@@ -640,7 +661,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
    *  set and the browser supplies its own generic copy). */
   @HostListener('window:beforeunload', ['$event'])
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
-    if (!this.editorRef?.hasUnsavedChanges()) return;
+    if (!this.editorRef?.hasPendingEdits()) return;
     event.preventDefault();
     event.returnValue = '';
   }

@@ -43,20 +43,20 @@
         <mat-icon>{{ lifecycleFilter() === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
       </button>
 
-      @if (lifecycleFilter() === 'active') {
-        <div class="wwell-ir__status-chips" role="group" aria-label="Status filter" appWwellCollapseAnimate>
-          @for (status of statusChips; track status) {
-            <button
-              type="button"
-              class="wwell-ir__status-chip"
-              [class.wwell-ir__status-chip--active]="statusFilter() === status"
-              (click)="setStatusFilter(status)"
-            >
-              {{ statusChipLabel(status) }} &middot; {{ statusChipCount(status) }}
-            </button>
-          }
-        </div>
-      }
+      <div class="wwell-ir__status-chips" role="group" aria-label="Status filter">
+        @for (status of statusChips; track status) {
+          <button
+            type="button"
+            class="wwell-ir__status-chip"
+            [attr.data-status]="status"
+            [class.wwell-ir__status-chip--active]="isChipActive(status)"
+            (click)="selectChip(status)"
+          >
+            <span class="wwell-ir__status-chip-label">{{ statusChipLabel(status) }}</span>
+            <span class="wwell-ir__status-chip-count">{{ statusChipCount(status) }}</span>
+          </button>
+        }
+      </div>
     </div>
 
     <label class="wwell-ir__search">

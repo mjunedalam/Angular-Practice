@@ -102,6 +102,7 @@ export class InlineRowEditState {
   private readonly indexSignal = signal<number | null>(null);
   readonly index = this.indexSignal.asReadonly();
   private snapshot: unknown = null;
+  private wasPristine = true;
 
   isEditing(rowIndex: number): boolean {
     return this.indexSignal() === rowIndex;
@@ -109,12 +110,17 @@ export class InlineRowEditState {
 
   open(rowIndex: number, control: AbstractControl): void {
     this.snapshot = control.getRawValue();
+    this.wasPristine = control.pristine;
     this.indexSignal.set(rowIndex);
   }
 
   /** No-op if nothing was ever opened (e.g. the row control disappeared from under it). */
   cancel(control: AbstractControl | undefined | null): void {
-    if (control && this.snapshot !== null) control.patchValue(this.snapshot);
+    if (control && this.snapshot !== null) {
+      control.patchValue(this.snapshot);
+      // Restored to what it held before this edit began, so the unsaved-change highlight goes with it.
+      if (this.wasPristine) control.markAsPristine();
+    }
     this.close();
   }
 
