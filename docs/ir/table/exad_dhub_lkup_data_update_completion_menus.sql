@@ -1,3 +1,4 @@
+-- SUPERSEDED: run exad_dhub_lkup_data_final.sql instead (it covers this script and everything added since).
 -- Replaces the Program Details "Completion" dropdown options (ir_completion_type_menu) and adds the
 -- "Open Hole Size" (ir_open_hole_size_menu) and "Liner Screen Size" (ir_liner_size_menu) dropdowns in EXAD.EXAD_DHUB_LKUP_DATA. Safe to re-run.
 -- The completion pick itself is not stored in a column (it round-trips through the well-design flags),

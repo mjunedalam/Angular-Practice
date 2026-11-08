@@ -47,6 +47,7 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
       completion: row.cmplType ?? '',
       openHoleSizeIn: null,
       linerSizeIn: null,
+      linerDepthFt: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },

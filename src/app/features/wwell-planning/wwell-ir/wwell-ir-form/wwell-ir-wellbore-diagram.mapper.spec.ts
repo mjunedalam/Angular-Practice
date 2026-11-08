@@ -239,8 +239,8 @@ describe('Completion type → completion-element flags', () => {
   it('still resolves a pick saved under the old labels (bare Screen, "Pre-Perforated" capitalisation)', () => {
     const oldScreen = { ohFlg: 'Y', ohRemarks: '8 1/2" Open Hole', gpFlg: 'N', gpRemarks: null, perforatedFlg: 'N', perforatedRemarks: null, lsFlg: 'Y', lsRemarks: 'Screen' } as const;
     const oldLiner = { ohFlg: 'Y', ohRemarks: '8 1/2" Open Hole', gpFlg: 'N', gpRemarks: null, perforatedFlg: 'Y', perforatedRemarks: '7" Pre-Perforated Liner', lsFlg: 'N', lsRemarks: null } as const;
-    expect(resolveCompletionTypeFromFlags(oldScreen)).toEqual({ completionType: 'Liner Screen', linerSizeIn: null });
-    expect(resolveCompletionTypeFromFlags(oldLiner)).toEqual({ completionType: 'Pre-perforated Liner', linerSizeIn: '7"' });
+    expect(resolveCompletionTypeFromFlags(oldScreen)).toMatchObject({ completionType: 'Liner Screen', linerSizeIn: null, linerDepthFt: null });
+    expect(resolveCompletionTypeFromFlags(oldLiner)).toMatchObject({ completionType: 'Pre-perforated Liner', linerSizeIn: '7"', linerDepthFt: null });
   });
 
   it('asks for a liner size on every pick except Open-Hole, and the screen label carries it', () => {
@@ -250,6 +250,16 @@ describe('Completion type → completion-element flags', () => {
     expect(isLinerCompletionType('Open-Hole')).toBe(false);
     expect(deriveCompletionElementFlags('', null, 'Liner Screen', '7"')).toMatchObject({ lsFlg: 'Y', lsRemarks: '7" Liner Screen' });
   });
+
+  it.each(['Liner Screen', 'Liner Screen + Gravel pack', 'Pre-perforated Liner'])(
+    '%s round-trips the liner depth through the persisted flags',
+    type => {
+      const flags = deriveCompletionElementFlags('', '8 1/2"', type, '7"', 2500);
+      expect(resolveCompletionTypeFromFlags(flags)).toEqual({ completionType: type, linerSizeIn: '7"', linerDepthFt: 2500 });
+      const depthOnly = deriveCompletionElementFlags('', null, type, '5"', 2500.5);
+      expect(resolveCompletionTypeFromFlags(depthOnly)).toEqual({ completionType: type, linerSizeIn: '5"', linerDepthFt: 2500.5 });
+    },
+  );
 
   it('ignores the Completion Remarks text once a type is picked', () => {
     expect(deriveCompletionElementFlags('Open Hole\nScreened', null, 'Liner Screen')).toMatchObject({ ohFlg: 'Y', lsFlg: 'Y', gpFlg: 'N' });
@@ -268,7 +278,7 @@ describe('Completion type → completion-element flags', () => {
     ['Pre-perforated Liner', '7"', null],
   ])('round-trips %s through the persisted flags', (type, linerSize, ohSize) => {
     const flags = deriveCompletionElementFlags('', ohSize, type, linerSize);
-    expect(resolveCompletionTypeFromFlags(flags)).toEqual({ completionType: type, linerSizeIn: linerSize });
+    expect(resolveCompletionTypeFromFlags(flags)).toMatchObject({ completionType: type, linerSizeIn: linerSize, linerDepthFt: null });
   });
 
   it('reads Open Hole + Screened as a Screen, which is drawn in an open hole anyway', () => {
@@ -319,6 +329,23 @@ describe('Completion liner → diagram', () => {
     expect(data.wellDesign?.lsFlg).toBe('Y');
     expect(data.wellDesign?.ohFlg).toBe('Y');
     expect(rule.targetLiner).not.toBeNull();
+  });
+
+  it('uses the entered liner depth, defaults to the target depth when blank, and always hangs from the last casing shoe', () => {
+    const casing = [{ type: 'Surface', sizeIn: '13 3/8"', depthFtBgl: 500, tolFtBgl: null, remarks: null }];
+    const given = buildWellboreDiagramDataFromIntegratedRequirement(
+      withProgram({ completionType: 'Liner Screen', linerSizeIn: '7"', linerDepthFt: 700 }, casing),
+    );
+    expect(given.casings).toContainEqual(expect.objectContaining({ csgType: 'Liner', csgSize: '7"', csgDepth: 700 }));
+
+    const blank = buildWellboreDiagramDataFromIntegratedRequirement(
+      withProgram({ completionType: 'Liner Screen', linerSizeIn: '7"', linerDepthFt: null }, casing),
+    );
+    expect(blank.casings).toContainEqual(expect.objectContaining({ csgType: 'Liner', csgDepth: blank.targetDepth }));
+    const blankRule = resolveLinerDepths(blank.casings, blank.drlgCasings).find(liner => liner.odSz === '7"');
+    expect(blankRule?.topDepth).toBe(500); // hangs from the last casing shoe
+    const givenRule = resolveLinerDepths(given.casings, given.drlgCasings).find(liner => liner.odSz === '7"');
+    expect(givenRule?.topDepth).toBe(500);
   });
 
   it('adds no liner for a non-liner pick or a liner pick without a size', () => {

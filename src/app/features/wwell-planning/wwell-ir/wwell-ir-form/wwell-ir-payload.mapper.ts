@@ -392,7 +392,7 @@ function buildWellDesignRow(
   prewapSeq: number | null,
   existingWellDesignSeq: number | null | undefined,
   existingPumpDepthFt: number | null | undefined,
-  existingProgramDetails: Pick<IntegratedRequirementProgramDetails, 'completionType' | 'completion' | 'openHoleSizeIn' | 'linerSizeIn'> | null | undefined,
+  existingProgramDetails: Pick<IntegratedRequirementProgramDetails, 'completionType' | 'completion' | 'openHoleSizeIn' | 'linerSizeIn' | 'linerDepthFt'> | null | undefined,
 ): IrWellDesignRow | null {
   const wdSeq = existingWellDesignSeq ?? null;
   const flags = deriveCompletionElementFlags(
@@ -400,6 +400,7 @@ function buildWellDesignRow(
     programMain.openHoleSizeIn || null,
     programMain.completionType,
     programMain.linerSizeIn || null,
+    programMain.linerDepthFt ?? null,
   );
   // IntegratedRequirementWellDesignFlags is camelCase (domain-model shape, shared with the
   // wellbore-diagram mapper); the wire payload below needs update_ir_data_prc's own snake_case
@@ -421,7 +422,8 @@ function buildWellDesignRow(
       (existingProgramDetails?.completionType ?? '') === programMain.completionType &&
       (existingProgramDetails?.completion ?? '') === programMain.completion &&
       (existingProgramDetails?.openHoleSizeIn ?? null) === (programMain.openHoleSizeIn || null) &&
-      (existingProgramDetails?.linerSizeIn ?? null) === (programMain.linerSizeIn || null);
+      (existingProgramDetails?.linerSizeIn ?? null) === (programMain.linerSizeIn || null) &&
+      (existingProgramDetails?.linerDepthFt ?? null) === (programMain.linerDepthFt ?? null);
     const action: IrRowAction = unchanged ? '' : 'UPDATE';
     return { action, wd_seq: wdSeq, prewap_seq: prewapSeq, pump_lvl: pumpDepthFt, ...flagColumns };
   }

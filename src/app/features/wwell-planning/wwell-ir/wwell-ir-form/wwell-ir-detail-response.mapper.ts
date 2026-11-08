@@ -168,6 +168,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       completionType: wellDesignRowBelongsToThisIr ? (resolvedType?.completionType ?? '') : existing.programDetails.completionType,
       completion: completionText,
       linerSizeIn: wellDesignRowBelongsToThisIr ? (resolvedType?.linerSizeIn ?? null) : existing.programDetails.linerSizeIn,
+      linerDepthFt: wellDesignRowBelongsToThisIr ? (resolvedType?.linerDepthFt ?? null) : existing.programDetails.linerDepthFt,
       // oh_remarks is the only backend column open hole size ever reached (see
       // deriveCompletionElementFlags/parseOpenHoleSizeFromRemarks in wwell-ir-wellbore-diagram.mapper.ts)
       // — without parsing it back out here, the Open Hole Size input silently reverted to blank

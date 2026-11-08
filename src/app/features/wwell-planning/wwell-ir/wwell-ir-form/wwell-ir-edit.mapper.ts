@@ -59,6 +59,7 @@ export function mapIntegratedRequirementToFormPatch(ir: IntegratedRequirement): 
         completion: ir.programDetails.completion,
         openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
         linerSizeIn: ir.programDetails.linerSizeIn ?? WWELL_DEFAULT_LINER_SIZE,
+        linerDepthFt: ir.programDetails.linerDepthFt,
         acidization: ir.programDetails.acidization,
         transmission: ir.programDetails.transmission,
       },

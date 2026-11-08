@@ -35,6 +35,7 @@ export interface WwellIrRawProgramMain {
   readonly openHoleSizeIn: string;
   /** Only asked for when `completionType` is a Liner pick. */
   readonly linerSizeIn: string;
+  readonly linerDepthFt: number | null;
   readonly acidization: string;
   readonly transmission: string;
 }

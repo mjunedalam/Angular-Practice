@@ -76,6 +76,8 @@ export interface IntegratedRequirementProgramDetails {
   readonly openHoleSizeIn: string | null;
   /** Liner size (e.g. `7"`) — only meaningful when completionType is a Liner pick. */
   readonly linerSizeIn: string | null;
+  /** Liner shoe depth (ft) — only meaningful for a Liner pick; blank means the target depth. */
+  readonly linerDepthFt: number | null;
   readonly acidization: string;
   /** exad_gwd_ir_header.dt_rmks — not trns_type (VARCHAR2(10), too short for these labels). */
   readonly transmission: string;

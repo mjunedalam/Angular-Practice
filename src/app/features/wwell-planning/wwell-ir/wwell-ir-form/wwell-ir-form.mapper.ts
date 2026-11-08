@@ -46,6 +46,7 @@ export function mapIrFormValueToSubmission(
       completion: raw.programDetails.main.completion,
       openHoleSizeIn: raw.programDetails.main.openHoleSizeIn || null,
       linerSizeIn: raw.programDetails.main.linerSizeIn || null,
+      linerDepthFt: raw.programDetails.main.linerDepthFt ?? null,
       acidization: raw.programDetails.main.acidization,
       transmission: raw.programDetails.main.transmission,
       developmentTesting: { ...raw.programDetails.developmentTesting },

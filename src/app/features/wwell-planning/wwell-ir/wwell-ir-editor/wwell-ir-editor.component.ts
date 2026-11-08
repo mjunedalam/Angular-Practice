@@ -367,6 +367,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
       completion: live.completion,
       openHoleSizeIn: live.openHoleSizeIn,
       linerSizeIn: live.linerSizeIn,
+      linerDepthFt: live.linerDepthFt,
       acidization: live.acidization,
       transmission: live.transmission,
     };
@@ -1087,6 +1088,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
             completion: flat.completion,
             openHoleSizeIn: flat.openHoleSizeIn,
             linerSizeIn: flat.linerSizeIn,
+            linerDepthFt: flat.linerDepthFt,
             acidization: flat.acidization,
             transmission: flat.transmission,
           },

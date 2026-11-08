@@ -103,6 +103,7 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
   }
   if (isLinerCompletionType(p.completionType)) {
     rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn) });
+    rows.push({ label: 'Liner Depth (ft)', value: p.linerDepthFt != null ? String(p.linerDepthFt) : 'Target depth' });
   }
   rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true });
 

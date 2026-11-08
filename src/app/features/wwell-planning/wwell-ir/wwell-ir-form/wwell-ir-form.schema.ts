@@ -210,6 +210,15 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             colSpan: 2,
           },
           {
+            key: 'linerDepthFt',
+            label: 'Liner Depth (ft)',
+            type: 'number',
+            placeholder: 'e.g., 2500',
+            hint: 'Shoe depth of the liner — left blank it runs down to the target depth',
+            visibleWhen: { field: 'completionType', oneOf: WWELL_LINER_COMPLETION_TYPES },
+            colSpan: 1,
+          },
+          {
             key: 'completion',
             label: 'Completion Remarks',
             type: 'rich-textarea',

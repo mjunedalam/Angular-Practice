@@ -231,7 +231,8 @@ function withCompletionLiner(
   const alreadyDeclared = rows.some(row => row.type === LINER_TYPE && parseInchSize(row.sizeIn) === wantedSize);
   if (alreadyDeclared) return [...rows];
 
-  return [...rows, { type: LINER_TYPE, sizeIn: linerSize, depthFtBgl: targetDepthFt, tolFtBgl: null, remarks: '' }];
+  // No depth entered → run to the target depth; its top is left null so the renderer hangs it from the last casing shoe.
+  return [...rows, { type: LINER_TYPE, sizeIn: linerSize, depthFtBgl: programMain.linerDepthFt ?? targetDepthFt, tolFtBgl: null, remarks: '' }];
 }
 
 function mapGeologicTops(
@@ -328,8 +329,9 @@ export function deriveCompletionElementFlags(
   openHoleSizeIn: string | null,
   completionType = '',
   linerSizeIn: string | null = null,
+  linerDepthFt: number | null = null,
 ): IntegratedRequirementWellDesignFlags {
-  const typedFlags = flagsForCompletionType(completionType, openHoleSizeIn, linerSizeIn);
+  const typedFlags = flagsForCompletionType(completionType, openHoleSizeIn, linerSizeIn, { depthFt: linerDepthFt });
   if (typedFlags) return typedFlags;
 
   const selected = selectedCompletionLabels(completion);
@@ -385,6 +387,34 @@ function sizedLabel(size: string | null, label: string): string {
   return size ? `${size} ${label}` : label;
 }
 
+/** Where the picked liner ends — optional: no depth means the target depth. (Its top always hangs from
+ *  the last casing shoe, the renderer's own fallback.) */
+interface LinerExtent {
+  readonly depthFt: number | null;
+}
+
+const NO_LINER_EXTENT: LinerExtent = { depthFt: null };
+
+/** `7" Liner Screen (depth 2500 ft)` — the depth rides in the remarks, like the size does,
+ *  since exad_gwd_well_design has no column for it. Omitted when blank. */
+function linerRemarks(size: string | null, label: string, extent: LinerExtent): string {
+  const base = sizedLabel(size, label);
+  return extent.depthFt != null ? `${base} (depth ${extent.depthFt} ft)` : base;
+}
+
+const LINER_EXTENT_SUFFIX = /\s*\(depth (\d+(?:\.\d+)?) ft\)\s*$/;
+
+/** Reverses `linerRemarks`: the remarks without the extent suffix, plus the extent it carried. */
+function splitLinerRemarks(remarks: string | null): { readonly base: string; readonly extent: LinerExtent } {
+  const text = remarks ?? '';
+  const match = LINER_EXTENT_SUFFIX.exec(text);
+  if (!match) return { base: text, extent: NO_LINER_EXTENT };
+  return {
+    base: text.slice(0, match.index),
+    extent: { depthFt: Number(match[1]) },
+  };
+}
+
 /** Flags for the single-pick Completion dropdown, or `null` when nothing (or an unknown value) is
  *  picked — the caller then falls back to deriving from the legacy Completion Remarks text. Sizes
  *  ride in the remarks, same encoding as the open hole's (see `parseOpenHoleSizeFromRemarks`):
@@ -395,6 +425,7 @@ function flagsForCompletionType(
   completionType: string,
   openHoleSizeIn: string | null,
   linerSizeIn: string | null,
+  extent: LinerExtent = NO_LINER_EXTENT,
 ): IntegratedRequirementWellDesignFlags | null {
   const ohSize = openHoleSizeIn?.trim() || null;
   const linerSize = linerSizeIn?.trim() || null;
@@ -403,11 +434,11 @@ function flagsForCompletionType(
     case WWELL_COMPLETION_TYPE.OPEN_HOLE:
       return { ...NO_COMPLETION_FLAGS, ohFlg: 'Y', ohRemarks: ohSize ? `${ohSize} ${COMPLETION_OPEN_HOLE}` : null };
     case WWELL_COMPLETION_TYPE.SCREEN:
-      return { ...openHoleFlags(ohSize), lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
+      return { ...openHoleFlags(ohSize), lsFlg: 'Y', lsRemarks: linerRemarks(linerSize, LINER_SCREEN_LABEL, extent) };
     case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
-      return { ...openHoleFlags(ohSize), gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
+      return { ...openHoleFlags(ohSize), gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: linerRemarks(linerSize, LINER_SCREEN_LABEL, extent) };
     case WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER:
-      return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PRE_PERFORATED_SUFFIX) };
+      return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: linerRemarks(linerSize, PRE_PERFORATED_SUFFIX, extent) };
     default:
       return null;
   }
@@ -439,9 +470,9 @@ function legacyFlagsForCompletionType(
 }
 
 /** The liner size ridden in `lsRemarks` as `"<size> Liner Screen"` (a bare 'Screen' / 'Liner Screen' has none). */
-function linerSizeFromScreenRemarks(remarks: string | null): string | null {
-  if (!remarks || !remarks.toLowerCase().endsWith(LINER_SCREEN_LABEL.toLowerCase())) return null;
-  return remarks.slice(0, -LINER_SCREEN_LABEL.length).trim() || null;
+function linerSizeFromScreenRemarks(base: string): string | null {
+  if (!base || !base.toLowerCase().endsWith(LINER_SCREEN_LABEL.toLowerCase())) return null;
+  return base.slice(0, -LINER_SCREEN_LABEL.length).trim() || null;
 }
 
 /**
@@ -454,30 +485,36 @@ function linerSizeFromScreenRemarks(remarks: string | null): string | null {
  */
 export function resolveCompletionTypeFromFlags(
   flags: IntegratedRequirementWellDesignFlags | null | undefined,
-): { readonly completionType: string; readonly linerSizeIn: string | null } | null {
+): { readonly completionType: string; readonly linerSizeIn: string | null; readonly linerDepthFt: number | null } | null {
   if (!flags) return null;
 
   let completionType: string | null = null;
   let linerSizeIn: string | null = null;
+  let extent = NO_LINER_EXTENT;
   if (flags.perforatedFlg === 'Y') {
-    const remarks = flags.perforatedRemarks ?? '';
-    if (remarks.toLowerCase().endsWith(PRE_PERFORATED_SUFFIX.toLowerCase())) {
+    const split = splitLinerRemarks(flags.perforatedRemarks);
+    if (split.base.toLowerCase().endsWith(PRE_PERFORATED_SUFFIX.toLowerCase())) {
       completionType = PRE_PERFORATED_SUFFIX;
-      linerSizeIn = remarks.slice(0, -PRE_PERFORATED_SUFFIX.length).trim() || null;
+      linerSizeIn = split.base.slice(0, -PRE_PERFORATED_SUFFIX.length).trim() || null;
+      extent = split.extent;
     }
   } else if (flags.gpFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK;
-    linerSizeIn = linerSizeFromScreenRemarks(flags.lsRemarks);
+    const split = splitLinerRemarks(flags.lsRemarks);
+    linerSizeIn = linerSizeFromScreenRemarks(split.base);
+    extent = split.extent;
   } else if (flags.lsFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN;
-    linerSizeIn = linerSizeFromScreenRemarks(flags.lsRemarks);
+    const split = splitLinerRemarks(flags.lsRemarks);
+    linerSizeIn = linerSizeFromScreenRemarks(split.base);
+    extent = split.extent;
   } else if (flags.ohFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.OPEN_HOLE;
   }
   if (!completionType) return null;
 
   const candidates = [
-    flagsForCompletionType(completionType, parseOpenHoleSizeFromRemarks(flags.ohRemarks), linerSizeIn),
+    flagsForCompletionType(completionType, parseOpenHoleSizeFromRemarks(flags.ohRemarks), linerSizeIn, extent),
     legacyFlagsForCompletionType(completionType, linerSizeIn),
   ];
   const matches = candidates.some(
@@ -487,7 +524,7 @@ export function resolveCompletionTypeFromFlags(
         key.endsWith('Remarks') && key !== 'ohRemarks' ? canonicalRemark(candidate[key]) === canonicalRemark(flags[key]) : candidate[key] === flags[key],
       ),
   );
-  return matches ? { completionType, linerSizeIn } : null;
+  return matches ? { completionType, linerSizeIn, linerDepthFt: extent.depthFt } : null;
 }
 
 /** Reverses the `"<size> Open Hole"` encoding `deriveCompletionElementFlags` bakes into
@@ -538,7 +575,7 @@ function buildWellDesignFromForm(
     ...buildWaterLevelFields(hydrology),
     pumpLvl: hydrology.estimatedPumpDepthFt,
     ...(persistedFlags ??
-      deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null)),
+      deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null, programMain.linerDepthFt)),
   };
 }
 
@@ -618,6 +655,7 @@ export function hasWellboreDiagramData(raw: WwellIrFormRawValue): boolean {
         raw.programDetails.main.openHoleSizeIn || null,
         raw.programDetails.main.completionType,
         raw.programDetails.main.linerSizeIn || null,
+        raw.programDetails.main.linerDepthFt,
       ),
     )
   );
@@ -664,6 +702,7 @@ function toRawProgramMain(ir: IntegratedRequirement): WwellIrRawProgramMain {
     completion: ir.programDetails.completion,
     openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
     linerSizeIn: ir.programDetails.linerSizeIn ?? '',
+    linerDepthFt: ir.programDetails.linerDepthFt ?? null,
     acidization: ir.programDetails.acidization,
     transmission: ir.programDetails.transmission,
   };
@@ -709,6 +748,7 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
         liveProgramMain.openHoleSizeIn || null,
         liveProgramMain.completionType,
         liveProgramMain.linerSizeIn || null,
+        liveProgramMain.linerDepthFt,
       )
     : (ir.programDetails.wellDesignFlags ??
       deriveCompletionElementFlags(
@@ -716,6 +756,7 @@ export function hasWellboreDiagramDataForIntegratedRequirement(
         ir.programDetails.openHoleSizeIn,
         ir.programDetails.completionType,
         ir.programDetails.linerSizeIn,
+        ir.programDetails.linerDepthFt,
       ));
   return (
     casingRows.some(isRenderableCasingRow) ||

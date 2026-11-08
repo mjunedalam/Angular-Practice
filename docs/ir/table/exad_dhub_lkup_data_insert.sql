@@ -1,3 +1,4 @@
+-- SUPERSEDED: run exad_dhub_lkup_data_final.sql instead (it covers this script and everything added since).
 -- Seeds EXAD.EXAD_DHUB_LKUP_DATA with the IR Program Details dropdown options (APP_CODE = 'AGWA').
 -- LKUP_NAME is prefixed 'ir_' (IR module). Safe to re-run: a (APP_CODE, LKUP_NAME, LKUP_VALUE) row that already exists is skipped.
 -- Menu order in the app follows EP_CR_DATA_DT, so each value gets its own second offset.

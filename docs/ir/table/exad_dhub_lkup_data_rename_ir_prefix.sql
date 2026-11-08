@@ -1,3 +1,4 @@
+-- SUPERSEDED: run exad_dhub_lkup_data_final.sql instead (it covers this script and everything added since).
 -- One-off migration for a table already seeded with the un-prefixed names (completion_menu, ...):
 -- renames them to the ir_-prefixed names the IR module now reads (ir_completion_menu, ...).
 -- Run this INSTEAD of the insert script when rows already exist. Safe to re-run.

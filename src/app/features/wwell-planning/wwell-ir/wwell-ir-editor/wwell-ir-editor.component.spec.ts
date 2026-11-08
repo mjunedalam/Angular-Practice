@@ -33,7 +33,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
       completionType: '',
       completion: 'Open Hole',
       openHoleSizeIn: null,
-      linerSizeIn: null,
+      linerSizeIn: null, linerDepthFt: null,
       acidization: '',
       transmission: '',
       developmentTesting: { logging: '', mudLogging: '', sampling: '', flowTest: '', remarks: '' },

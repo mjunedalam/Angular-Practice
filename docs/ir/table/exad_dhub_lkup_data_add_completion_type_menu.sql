@@ -1,4 +1,4 @@
--- (Superseded by exad_dhub_lkup_data_update_completion_menus.sql, which also adds the Open Hole Size menu.)
+-- SUPERSEDED: run exad_dhub_lkup_data_final.sql instead (it covers this script and everything added since).
 -- Adds only the new Program Details "Completion" dropdown options (menu ir_completion_type_menu) to
 -- EXAD.EXAD_DHUB_LKUP_DATA. Safe to re-run: a (APP_CODE, LKUP_NAME, LKUP_VALUE) row that already exists is skipped.
 -- Menu order in the app follows EP_CR_DATA_DT, so each value gets its own second offset.
