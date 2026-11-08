@@ -313,3 +313,10 @@ export function buildScreenHanger(
 
   return { left, right };
 }
+
+/** A casing/liner size as a label: always exactly one inch mark, whether the stored size already carries it
+ *  (`7"` from a dropdown) or not (`7`) — appending `"` blindly printed `7""`. */
+export function inchLabel(size: string | number | null | undefined): string {
+  const text = String(size ?? '').replace(/["″”'′\s]+$/u, '').trim();
+  return text ? `${text}"` : '';
+}

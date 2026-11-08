@@ -146,6 +146,10 @@ export interface IrHeaderSummary {
   // created_dt/updated_dt column at all, so those never existed on the API response.
   readonly epCrDataDt: string | null;
   readonly epLtDataModDt: string | null;
+  // Joined in from the linked exad_rcd_prewap well by get_ir_header_prc — the well name is `${primaryHoleId}_${wellNumber}`.
+  readonly primaryHoleId?: string | null;
+  readonly wellNumber?: string | null;
+  readonly supportingBusiness?: string | null;
 }
 
 export interface WwellIrDetailTableBlock {

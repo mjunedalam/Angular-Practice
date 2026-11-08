@@ -14,6 +14,8 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
 import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
+import { environment } from '@env/environment';
+import { buildSapWorkflowTitle } from '../wwell-ir-sap.config';
 import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
@@ -141,6 +143,9 @@ export class WwellIrViewComponent {
   protected readonly canDownloadPdf = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
 
   protected readonly notifying = signal(false);
+  /** The PDF built for the Notify email runs on the same machinery as a download, but must not light up the
+   *  Download button or its progress overlay — Notify shows its own spinner on its own button. */
+  protected readonly showDownloadProgress = computed(() => this.downloadingPdf() && !this.notifying());
   protected readonly isSendingEmail = this.emailStore.isSending;
   /** TEMPORARY (testing): shown for any saved IR. Restore `&& resolveLetterStampStatus(this.ir()) === 'APPROVED'` before release. */
   protected readonly canNotify = computed(() => this.canDownloadPdf());
@@ -194,7 +199,7 @@ export class WwellIrViewComponent {
           { label: 'Letter Number', value: this.ir().requestReference.letterNumber ?? '' },
           { label: 'Target Aquifer', value: this.ir().requestReference.targetAquifer },
           { label: 'Status', value: this.ir().sapWfStatusText ?? '' },
-        ]),
+        ], buildSapWorkflowTitle(this.ir().code, this.ir().requestReference.wellName, environment.production)),
       );
     } catch {
       this.notify.error('Failed to send the approved IR copy.');

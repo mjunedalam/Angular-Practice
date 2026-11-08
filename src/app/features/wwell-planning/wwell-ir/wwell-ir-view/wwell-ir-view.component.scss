@@ -181,6 +181,14 @@ $accent: tokens.$accent;
 .irv__edit-btn {
   flex-shrink: 0;
   font-size: tokens.$text-base;
+
+  // The busy spinner takes the icon's place: same box, same gap, centred on the label.
+  mat-spinner {
+    display: inline-block;
+    flex: none;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
 }
 
 /* ── Tabs row — the flat tab bar plus, only while the Letter tab is open, the Download PDF

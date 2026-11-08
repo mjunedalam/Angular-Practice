@@ -67,6 +67,7 @@ export class EmailService {
     fileName: string,
     pdfBase64: string,
     details: readonly { readonly label: string; readonly value: string }[] = [],
+    subject = `Approved Integrated Requirements - ${label}`,
   ): EmailRequest {
     const escape = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const cell = 'border:1px solid #c0c0c0; padding:6px 10px; font-size:12px; text-align:left;';
@@ -81,7 +82,7 @@ export class EmailService {
       ? `<table style="border-collapse:collapse; width:100%; margin:12px 0;"><tr><td colspan="2" style="${cell} background-color:#d0cece; color:#8b0000; font-weight:700; font-size:14px; text-align:center;">INTEGRATED REQUIREMENT</td></tr>${rows}</table>`
       : '';
     return {
-      subject: `Approved Integrated Requirements - ${label}`,
+      subject,
       from: recipientEmail,
       to: [recipientEmail],
       cc,

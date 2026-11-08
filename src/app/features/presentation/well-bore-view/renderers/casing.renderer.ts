@@ -12,8 +12,7 @@ import {
     buildGravelPackUPath,
     casingGradientId,
     computeCasingHalfWidth,
-    openHoleHalfWidth,
-} from '@shared/utils/wellbore-math.util';
+    openHoleHalfWidth, inchLabel } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { getCasingTier, resolveCompletionTopDepth } from './wellbore-depth.helpers';
 import { resolveLastCasingShoe, resolveLiners, renderLiners, LinerEntry } from './liner.renderer';
@@ -271,9 +270,9 @@ function renderCasingLabels({
             if (hasActual) {
                 primaryEl
                     .attr('fill', '#22c55e')
-                    .text(`${displaySize}" ${csg.csgType} @ ${displayDepth.toLocaleString()} *`);
+                    .text(`${inchLabel(displaySize)} ${csg.csgType} @ ${displayDepth.toLocaleString()} *`);
             } else {
-                primaryEl.text(`${csg.csgSize}" ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
+                primaryEl.text(`${inchLabel(csg.csgSize)} ${csg.csgType} @ ${csg.csgDepth.toLocaleString()}`);
                 if (csg.csgRemarks) {
                     lg.append('text')
                         .attr('class', 'casing-label__secondary')
@@ -294,7 +293,7 @@ function renderCasingLabels({
                 .style('opacity', 0)
                 .attr('fill', hasActual ? '#0f2d1a' : '')
                 .style('font-weight', hasActual ? '800' : 'normal')
-                .text(`${displaySize}"`)
+                .text(`${inchLabel(displaySize)}`)
                 .transition().delay(innerDelay).duration(animation.fadeDur).ease(easeCubicInOut)
                 .style('opacity', 1);
         }
@@ -332,12 +331,12 @@ function renderCasingLabelsFromActual({
             .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
         lg.append('text').attr('class', 'casing-label__primary')
             .attr('x', labelX).attr('y', shoePx + 4)
-            .text(`${actual.wCsgOdSz}" Casing @ ${actual.wCsgBotDpth.toLocaleString()}`);
+            .text(`${inchLabel(actual.wCsgOdSz)} Casing @ ${actual.wCsgBotDpth.toLocaleString()}`);
 
         rootG.append('text').attr('class', 'casing-size-inner')
             .attr('x', centerX).attr('y', innerMidY).attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .style('opacity', 0).text(`${actual.wCsgOdSz}"`)
+            .style('opacity', 0).text(`${inchLabel(actual.wCsgOdSz)}`)
             .transition().delay(labelsStart + (animation.lineStyle === 'draw' ? animation.lineDur : 0))
             .duration(animation.fadeDur).ease(easeCubicInOut).style('opacity', 1);
 
@@ -499,7 +498,7 @@ function buildCasingTooltipController(
             rows.push({ label: 'actual bottom depth', value: `${actual.wCsgBotDpth.toLocaleString()} ft`, hilite: true });
         }
 
-        renderCard(`${size}" ${typeName}`, badge, accent, rows, hw, mouseX, mouseY);
+        renderCard(`${inchLabel(size)} ${typeName}`, badge, accent, rows, hw, mouseX, mouseY);
     };
 
     const showForLiner = (liner: LinerEntry, mouseX: number, mouseY: number): void => {
@@ -518,7 +517,7 @@ function buildCasingTooltipController(
             { label: 'Bottom Depth', value: `${liner.botDepth.toLocaleString()} ft`, hilite: liner.hasActual },
             { label: 'Length', value: `${length.toLocaleString()} ft` },
         );
-        renderCard(`${liner.odSz}" ${typeName}`, badge, accent, rows, liner.halfWidth, mouseX, mouseY);
+        renderCard(`${inchLabel(liner.odSz)} ${typeName}`, badge, accent, rows, liner.halfWidth, mouseX, mouseY);
     };
 
     return { showForCasing, showForLiner, hide };

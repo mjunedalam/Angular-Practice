@@ -81,7 +81,7 @@
           matTooltipPosition="below"
         >
           <button type="button" class="irv__letter-download" aria-label="Download IR report" [disabled]="!canDownloadPdf() || downloadingPdf()" (click)="downloadPdf()">
-            @if (downloadingPdf()) {
+            @if (showDownloadProgress()) {
               <mat-spinner diameter="18" />
             } @else {
               <span class="irv__letter-download-glyph">
@@ -95,7 +95,7 @@
     }
   </div>
 
-  @if (downloadingPdf()) {
+  @if (showDownloadProgress()) {
     <div class="irv__pdf-scrim" role="status" aria-live="polite">
       <div class="irv__pdf-card" [class.irv__pdf-card--ready]="pdfReady()">
         @if (pdfReady()) {

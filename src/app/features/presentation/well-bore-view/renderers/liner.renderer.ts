@@ -11,8 +11,7 @@ import {
     buildCasingPath,
     buildScreenHanger,
     openHoleHalfWidth,
-    parseInchSize,
-} from '@shared/utils/wellbore-math.util';
+    parseInchSize, inchLabel } from '@shared/utils/wellbore-math.util';
 import { animateLabel } from './animation.helpers';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
 
@@ -510,7 +509,7 @@ function renderLinerLabels({
         const primaryLabel = lg.append('text').attr('class', 'casing-label__primary')
             .attr('fill', primaryFill)
             .attr('x', labelX).attr('y', midY + 4)
-            .text(`${liner.odSz}" Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${prePerfTag}${actualStar}`);
+            .text(`${inchLabel(liner.odSz)} Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${prePerfTag}${actualStar}`);
         if (liner.isScreen) primaryLabel.style('font-weight', '900');
 
         animateLabel(lg, labelsStart, animation);
@@ -527,7 +526,7 @@ function renderLinerLabels({
                 .style('opacity', 0)
                 .attr('fill', innerFill)
                 .style('font-weight', innerWeight)
-                .text(`${liner.odSz}"`)
+                .text(`${inchLabel(liner.odSz)}`)
                 .transition().delay(innerDelay).duration(animation.fadeDur).ease(easeCubicInOut)
                 .style('opacity', 1);
         }

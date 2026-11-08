@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ANIM, DiagramLayout, WellboreDiagramData } from '@models/well-design/wellbore-diagram.model';
 import { ICasingIR } from '@shared/models/wwell/casing-ir.model';
 import { IDrlgCsg } from '@shared/models/wwell/drlg-csg.model';
-import { computeCasingHalfWidth } from '@shared/utils/wellbore-math.util';
+import { computeCasingHalfWidth, inchLabel } from '@shared/utils/wellbore-math.util';
 import { LinerEntry, resolveLiners } from '../../renderers/liner.renderer';
 import { getCasingTier } from '../../renderers/wellbore-depth.helpers';
 import { createCasingMaterial, createLinerMaterial, createScreenGridMaterial } from '../utils/materials.factory';
@@ -62,7 +62,7 @@ function attachPipeLabel(labelsGroup: THREE.Group, text: string, radius: number,
  *  size, centered on the pipe's own axis at the given depth, painted straight onto the pipe. */
 function attachInnerSizeLabel(labelsGroup: THREE.Group, size: string, y: number): void {
   const sprite = createLabelSprite({
-    text: `${size}"`,
+    text: `${inchLabel(size)}`,
     color: INNER_LABEL_COLOR,
     background: 'rgba(255,255,255,0)',
     fontSize: INNER_LABEL_FONT_SIZE,
@@ -100,7 +100,7 @@ function buildLinerHanger(depthScale: Depth3DScale, halfWidth: number, hangerDep
  *  trailing " *" only for as-drilled/actual entries). */
 function casingLabelText(entry: CasingEntry): string {
   const suffix = entry.hasActual ? ' *' : '';
-  return `${entry.size}" ${entry.csgType} @ ${Math.round(entry.bottomDepth).toLocaleString()} ft${suffix}`;
+  return `${inchLabel(entry.size)} ${entry.csgType} @ ${Math.round(entry.bottomDepth).toLocaleString()} ft${suffix}`;
 }
 
 /** Mirrors `renderLinerLabels`' primary label text in liner.renderer.ts (OD/screen/pre-perf tags
@@ -109,7 +109,7 @@ function linerLabelText(liner: LinerEntry): string {
   const screenTag = liner.isScreen ? ' (Screen)' : '';
   const prePerfTag = liner.isPrePerfLiner ? ' (Pre Perf Liner)' : '';
   const suffix = liner.hasActual ? ' *' : '';
-  return `${liner.odSz}" Liner @ ${Math.round(liner.botDepth).toLocaleString()} ft${screenTag}${prePerfTag}${suffix}`;
+  return `${inchLabel(liner.odSz)} Liner @ ${Math.round(liner.botDepth).toLocaleString()} ft${screenTag}${prePerfTag}${suffix}`;
 }
 
 export interface CasingBuildResult {
