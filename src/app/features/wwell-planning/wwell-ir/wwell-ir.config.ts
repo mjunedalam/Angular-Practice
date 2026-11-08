@@ -68,6 +68,13 @@ export function isSapWorkflowRecalled(sapWfStatusText: string | null): boolean {
   return sapWfStatusText !== null && SAP_RECALLED_STATUS_TEXT.test(sapWfStatusText);
 }
 
+/** A workflow SAP closed without approving — rejected, cancelled or recalled — leaves the record open for a
+ *  fresh Submit for Review (a new SAP workflow id is minted, and the letter then prints the new workflow
+ *  only). Approved stays final. Gates `WwellIrEditorComponent.canSubmitForReview`. */
+export function isSapWorkflowResubmittable(sapWfStatusText: string | null): boolean {
+  return sapWfStatusText !== null && SAP_TERMINATED_STATUS_TEXT.test(sapWfStatusText);
+}
+
 /** Classifies the live SAP status text into the IR letter PDF's three stamp states — the exact
  *  same two patterns `irBadgeMeta` uses to colour the badge red/green, reused here so this is the
  *  one place that decision gets made. Sent directly to agwa-planning (see

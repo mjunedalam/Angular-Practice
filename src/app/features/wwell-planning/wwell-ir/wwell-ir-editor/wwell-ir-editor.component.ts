@@ -85,7 +85,7 @@ import {
   WWELL_IR_SUBMITTABLE_STATUSES,
   hasKnownIrStatus,
   irBadgeMeta,
-  isSapWorkflowRecalled,
+  isSapWorkflowResubmittable,
   isSapWorkflowTerminal,
   wwellIrHasRequiredSubmitFields,
 } from '../wwell-ir.config';
@@ -202,10 +202,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
   );
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
-  /** A never-submitted record (no `sapWfId`), or one whose workflow was recalled — a recall was the
-   *  user's own action, not a terminal SAP decision, so they get "Submit for Review" back to
-   *  resubmit fresh under a new SAP workflow id (submitIrForReview mints one regardless of the old
-   *  sapWfId). Approved/Rejected/Cancelled stay terminal — no way back from here.
+  /** A never-submitted record (no `sapWfId`), or one whose workflow was recalled, rejected or cancelled —
+   *  they get "Submit for Review" back to resubmit fresh under a new SAP workflow id (submitIrForReview
+   *  mints one regardless of the old sapWfId). Once submitted, "Recall" replaces it while the workflow is
+   *  live. Only Approved is final — no way back from here.
    *
    *  Requires `hasSavedIrSeq()` first — an unsaved draft has no `ir_seq` to file the SAP workflow
    *  under, so it must be created (Save) before it can be submitted. Also requires
@@ -215,7 +215,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly canSubmitForReview = computed(() => {
     const ir = this.ir();
     if (!this.hasSavedIrSeq() || !wwellIrHasRequiredSubmitFields(ir) || !hasAllRequiredAttachments(ir.attachments)) return false;
-    return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowRecalled(ir.sapWfStatusText);
+    return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowResubmittable(ir.sapWfStatusText);
   });
   /** Once a record has been submitted (a real `sapWfId`), "Submit for Review" no longer applies —
    *  "Recall" takes its place in the same footer slot, but only while the workflow is still live:

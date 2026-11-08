@@ -323,8 +323,15 @@ describe('WwellIrEditorComponent', () => {
     expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
   });
 
-  it('shows neither action once the workflow is a terminal, non-recalled outcome', async () => {
+  it('shows Submit for Review again, not Recall, once the workflow was Rejected', async () => {
     await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'Rejected' });
+
+    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeTruthy();
+    expect(findFooterButtonByText(fixture, 'Recall')).toBeFalsy();
+  });
+
+  it('shows neither action once the workflow is Approved', async () => {
+    await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'Approved' });
 
     expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
     expect(findFooterButtonByText(fixture, 'Recall')).toBeFalsy();
