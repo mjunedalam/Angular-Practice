@@ -1,3 +1,4 @@
+import { WWELL_DEFAULT_LINER_SIZE } from './wwell-ir-completion-type.config';
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import {
   WwellIrFormRawValue,
@@ -57,7 +58,7 @@ export function mapIntegratedRequirementToFormPatch(ir: IntegratedRequirement): 
         completionType: ir.programDetails.completionType,
         completion: ir.programDetails.completion,
         openHoleSizeIn: ir.programDetails.openHoleSizeIn ?? '',
-        linerSizeIn: ir.programDetails.linerSizeIn ?? '',
+        linerSizeIn: ir.programDetails.linerSizeIn ?? WWELL_DEFAULT_LINER_SIZE,
         acidization: ir.programDetails.acidization,
         transmission: ir.programDetails.transmission,
       },

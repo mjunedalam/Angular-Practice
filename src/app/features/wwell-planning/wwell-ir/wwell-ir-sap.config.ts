@@ -17,3 +17,9 @@ export const WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS = 12;
  *  since a workflow that was just created is, by definition, in progress. Viewing the record
  *  (WwellIrStore.loadIrApprovalTimeline) is what reads SAP's real current status back over this. */
 export const WWELL_IR_SAP_WF_STATUS_IN_PROGRESS = 'In Progress';
+
+/** The SAP workflow title: `[IR-11018] Integrated Requirement for AMYL_801` in production, and
+ *  `[TEST-IR-11018] Integrated Requirement for AMYL_801` on every other (dev/test) build. */
+export function buildSapWorkflowTitle(irCode: string, wellName: string, isProduction: boolean): string {
+  return `[${isProduction ? '' : 'TEST-'}${irCode}] Integrated Requirement for ${wellName}`;
+}

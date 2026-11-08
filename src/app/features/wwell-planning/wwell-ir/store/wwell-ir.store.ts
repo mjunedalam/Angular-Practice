@@ -1,9 +1,10 @@
 import { computed, inject } from '@angular/core';
+import { environment } from '@env/environment';
 import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
-import { EMPTY, catchError, concatMap, delay, exhaustMap, forkJoin, from, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
+import { EMPTY, catchError, firstValueFrom, concatMap, delay, exhaustMap, forkJoin, from, map, of, pipe, switchMap, take, takeWhile, tap, timer } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { WWELL_DELETE_DELAY_MS, WWELL_SAVE_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
@@ -20,6 +21,7 @@ import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { WwellIrService } from '../wwell-ir.service';
 import { labelForSlot, slotFromObjectKey } from '../wwell-ir-attachments.config';
 import {
+  buildSapWorkflowTitle,
   WWELL_IR_SAP_PROCESS_ID,
   WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
   WWELL_IR_SAP_RECALL_POLL_MS,
@@ -85,7 +87,10 @@ function sapErrorMessage(err: unknown, fallback: string): string {
  *  reads SAP's real current status and chain back over this placeholder, everywhere it's shown
  *  (list badge, detail header badge, Approval Workflow sidebar) at once. */
 function markSubmittedForReview(list: readonly IntegratedRequirement[], id: string, sapWfId: number, sapWfStatusText: string): IntegratedRequirement[] {
-  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const, sapWfId, sapWfStatusText } : item));
+  // `chain: []` on purpose: a resubmission (after a Rejected/Cancelled/Recalled workflow) mints a brand
+  // new SAP workflow, so the previous workflow's steps must not linger on the record — the letter and
+  // the sidebar would otherwise keep showing the old table until SAP's own chain is read back.
+  return list.map(item => (item.id === id ? { ...item, status: 'submit-for-review' as const, sapWfId, sapWfStatusText, chain: [] } : item));
 }
 
 function upsertByIrSeq(list: readonly IntegratedRequirement[], created: IntegratedRequirement): IntegratedRequirement[] {
@@ -223,12 +228,24 @@ export const WwellIrStore = signalStore(
     // output (wellbore diagram captured from an off-screen Letter render, attachments appended as
     // trailing pages; see WwellIrLetterPdfService). All-or-nothing: if any read fails the submit
     // fails, rather than silently sending SAP a review package with documents missing.
-    function loadSapAttachmentFiles(ir: IntegratedRequirement) {
-      const letter$ = from(letterPdf.buildLetterPdf(ir)).pipe(
+    function loadSapAttachmentFiles(ir: IntegratedRequirement, newWorkflowSeq: number) {
+      // Always the store's current record for the attachments (an upload/replace since the editor
+      // handed `ir` over must not be missed), and always the NEW workflow for the letter: `ir` still
+      // carries the previous workflow's id, status text (e.g. Rejected → a red stamp) and approval
+      // chain on a resubmission, which is exactly what the letter's workflow table would print.
+      const current = store.irs().find(item => item.id === ir.id) ?? ir;
+      const submission: IntegratedRequirement = {
+        ...ir,
+        attachments: current.attachments,
+        sapWfId: newWorkflowSeq,
+        sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
+        chain: [],
+      };
+      const letter$ = from(letterPdf.buildLetterPdf(submission)).pipe(
         switchMap(blob => blobToBase64(blob)),
         map((b64): SapAttachmentFile => ({ file_name: `${ir.code}-letter.pdf`, b64 })),
       );
-      const stored$ = ir.attachments.map(attachment =>
+      const stored$ = submission.attachments.map(attachment =>
         s3.fetch(attachment.objectKey).pipe(map((response): SapAttachmentFile => ({ file_name: attachment.fileName, b64: response.content }))),
       );
       return forkJoin([letter$, ...stored$]);
@@ -240,11 +257,11 @@ export const WwellIrStore = signalStore(
       const networkId = authStore.networkId() ?? '';
       svc.getNextSapWorkflowSeq().subscribe({
         next: seq => {
-          loadSapAttachmentFiles(ir)
+          loadSapAttachmentFiles(ir, seq)
             .pipe(
               switchMap(attachmentFiles =>
                 sap.trigger({
-                  workflow_title: `Integrated Requirement ${ir.code} - ${ir.requestReference.wellName}`,
+                  workflow_title: buildSapWorkflowTitle(ir.code, ir.requestReference.wellName, environment.production),
                   initiator_network_id: networkId,
                   requester_network_id: networkId,
                   process_id: WWELL_IR_SAP_PROCESS_ID,
@@ -844,6 +861,23 @@ export const WwellIrStore = signalStore(
       refreshIrApprovalStatus(irSeq: number, sapWfId: number | null): void {
         if (sapWfId == null) return;
         loadIrApprovalTimeline({ irSeq, sapWfId });
+      },
+
+      /** Reads SAP's live status/chain for the record's CURRENT workflow, writes it into the store
+       *  (so the screen matches) and returns the record with it applied — what the letter/PDF must
+       *  print, rather than whatever was cached when the record was last opened. Resolves with the
+       *  record unchanged when it has no `sapWfId` or SAP can't be reached: a SAP outage must not
+       *  block a download, it just falls back to the last known workflow. */
+      async syncApprovalStatus(ir: IntegratedRequirement): Promise<IntegratedRequirement> {
+        if (ir.irSeq == null || ir.sapWfId == null) return ir;
+        try {
+          const status = await firstValueFrom(sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, ir.sapWfId));
+          const fresh = { chain: mapSapWorkflowStatusToApprovalChain(status), sapWfStatusText: status.header.wf_status_text };
+          patchState(store, { irs: store.irs().map(item => (item.irSeq === ir.irSeq ? { ...item, ...fresh } : item)) });
+          return { ...ir, ...fresh };
+        } catch {
+          return ir;
+        }
       },
 
       /** Deletes the whole IR (header row, cascading to casing/tops/hydrogeology/water — see

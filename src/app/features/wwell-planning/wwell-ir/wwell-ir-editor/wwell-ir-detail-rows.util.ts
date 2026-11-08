@@ -102,7 +102,7 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
     rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
   }
   if (isLinerCompletionType(p.completionType)) {
-    rows.push({ label: 'Liner Size', value: fmtStr(p.linerSizeIn) });
+    rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn) });
   }
   rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true });
 

@@ -15,6 +15,7 @@ import { FormBuilder, FormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, from, of, switchMap, take } from 'rxjs';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
@@ -78,6 +79,7 @@ const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
     ScrollingModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     WwellIrEditorComponent,
     WwellIrViewComponent,
     WwellApprovalWorkflowCardComponent,

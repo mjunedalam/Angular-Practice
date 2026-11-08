@@ -16,13 +16,15 @@ import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.
 import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { hasKnownIrStatus, irBadgeMeta, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
+import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
 import { WwellIrViewWellDesignComponent } from './wwell-ir-view-well-design/wwell-ir-view-well-design.component';
 
-type PdfStage = 'diagram' | 'letter' | 'attachments' | 'ready';
+type PdfStage = 'status' | 'diagram' | 'letter' | 'attachments' | 'ready';
 
 const PDF_STAGES: readonly { readonly key: PdfStage; readonly busyLabel: string }[] = [
+  { key: 'status', busyLabel: 'Checking approval status…' },
   { key: 'diagram', busyLabel: 'Rendering diagram…' },
   { key: 'letter', busyLabel: 'Generating…' },
   { key: 'attachments', busyLabel: 'Merging attachments…' },
@@ -111,6 +113,7 @@ export class WwellIrViewComponent {
   private readonly wwellIrService = inject(WwellIrService);
   private readonly notify = inject(NotificationService);
   private readonly letterPdf = inject(WwellIrLetterPdfService);
+  private readonly irStore = inject(WwellIrStore);
   private readonly emailStore = inject(EmailStore);
   private readonly emailService = inject(EmailService);
   private readonly authStore = inject(AuthStore);
@@ -224,6 +227,10 @@ export class WwellIrViewComponent {
 
     this.downloadingPdf.set(true);
     try {
+      // Always print SAP's live workflow (status, stamp and approval table), never what was cached
+      // when the record was opened — it may have been approved/rejected/resubmitted since.
+      this.pdfStage.set('status');
+      const ir = await this.irStore.syncApprovalStatus(this.ir());
       this.pdfStage.set('diagram');
       const wellboreImageBase64 = await this.letterView()?.captureWellboreImage();
       this.pdfStage.set('letter');
@@ -231,12 +238,12 @@ export class WwellIrViewComponent {
         this.wwellIrService.downloadLetterPdf(
           irSeq,
           wellboreImageBase64,
-          resolveLetterStampStatus(this.ir()),
-          resolveLetterWorkflow(this.ir()) ?? undefined,
+          resolveLetterStampStatus(ir),
+          resolveLetterWorkflow(ir) ?? undefined,
         ),
       );
       this.pdfStage.set('attachments');
-      return await this.letterPdf.mergeAttachments(letterBlob, this.ir());
+      return await this.letterPdf.mergeAttachments(letterBlob, ir);
     } catch (err: unknown) {
       this.downloadingPdf.set(false);
       this.pdfStage.set(null);

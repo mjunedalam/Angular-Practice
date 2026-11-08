@@ -36,7 +36,8 @@
         class="wwell-ir__lifecycle-toggle"
         [class.wwell-ir__lifecycle-toggle--inactive]="lifecycleFilter() === 'inactive'"
         [attr.aria-label]="lifecycleFilter() === 'active' ? 'Showing active records — click for inactive' : 'Showing inactive records — click for active'"
-        [attr.title]="lifecycleFilter() === 'active' ? 'Active' : 'Inactive'"
+        [matTooltip]="lifecycleFilter() === 'active' ? 'Active' : 'Inactive'"
+        matTooltipClass="ir-attachment-tooltip"
         (click)="toggleLifecycleFilter()"
       >
         <mat-icon>{{ lifecycleFilter() === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
@@ -135,7 +136,8 @@
               mat-icon-button
               class="wwell-ir__view-btn"
               aria-label="View integrated requirement"
-              title="View"
+              matTooltip="View"
+              matTooltipClass="ir-attachment-tooltip"
               (click)="$event.stopPropagation(); viewIr(irSeq)"
             >
               <mat-icon>visibility</mat-icon>

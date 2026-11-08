@@ -10,6 +10,7 @@ import { buildIntegratedRequirementFromPayload } from '../wwell-ir-form/wwell-ir
 import { WwellIrBulkSavePayload } from '../wwell-ir-form/wwell-ir-payload.model';
 import {
   WWELL_IR_SAP_PROCESS_ID,
+  buildSapWorkflowTitle,
   WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
   WWELL_IR_SAP_RECALL_POLL_MS,
   WWELL_IR_SAP_SCENARIO_ID,
@@ -343,11 +344,14 @@ describe('WwellIrStore - submitIrForReview', () => {
     await settleAsyncWork();
 
     const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
-    expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(ir);
+    expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(
+      expect.objectContaining({ code: ir.code, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS, chain: [] }),
+    );
     expect(sentRequest.attachment_files).toEqual([
       { file_name: `${ir.code}-letter.pdf`, b64: 'QUJD' },
       { file_name: 'location-map.pdf', b64: 'QUJD' },
     ]);
+    expect(sentRequest.workflow_title).toBe(`[TEST-${ir.code}] Integrated Requirement for ${ir.requestReference.wellName}`);
     expect(sentRequest).toMatchObject({
       process_id: WWELL_IR_SAP_PROCESS_ID,
       scenario_id: WWELL_IR_SAP_SCENARIO_ID,
@@ -364,6 +368,43 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
     expect(store.updatingIrStatus()).toBe(false);
     expect(store.sapTriggerError()).toBeNull();
+  });
+
+  it('syncApprovalStatus asks SAP for the current workflow, and falls back to the record when SAP is unreachable', async () => {
+    const ir = buildIntegratedRequirement({ irSeq: 9001, sapWfId: 3, sapWfStatusText: 'In Progress' });
+    sapServiceMock.getWorkflowStatus.mockReturnValue(throwError(() => new Error('SAP unreachable')));
+
+    await expect(store.syncApprovalStatus(ir)).resolves.toBe(ir);
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 3);
+
+    sapServiceMock.getWorkflowStatus.mockClear();
+    const neverSubmitted = buildIntegratedRequirement({ irSeq: 9002, sapWfId: null });
+    await expect(store.syncApprovalStatus(neverSubmitted)).resolves.toBe(neverSubmitted);
+    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+  });
+
+  it('prints the NEW workflow, not the previous rejected one, in the letter sent on a resubmission', async () => {
+    const staleStep = { role: 'Manager', name: 'Old Approver', status: 'Rejected', date: '2026-11-01' };
+    const ir = buildIntegratedRequirement({
+      status: 'in-progress',
+      irSeq: 9001,
+      sapWfId: 3,
+      sapWfStatusText: 'Rejected',
+      chain: [staleStep] as unknown as IntegratedRequirement['chain'],
+    });
+    seedIrs(ir);
+    serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(7));
+    sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
+
+    store.submitIrForReview(ir);
+    await settleAsyncWork();
+
+    expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(
+      expect.objectContaining({ sapWfId: 7, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS, chain: [] }),
+    );
+    expect(store.irs()[0].sapWfId).toBe(7);
+    expect(store.irs()[0].chain).toEqual([]);
   });
 
   /** The header is stamped only for a workflow SAP actually accepted — a failed trigger must leave
@@ -763,5 +804,15 @@ describe('WwellIrStore - loadIrDetail (approval timeline)', () => {
     store.refreshIrApprovalStatus(9001, null);
 
     expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+  });
+});
+
+describe('buildSapWorkflowTitle', () => {
+  it('adds the TEST- marker inside the brackets on a non-production build', () => {
+    expect(buildSapWorkflowTitle('IR-11018', 'AMYL_801', false)).toBe('[TEST-IR-11018] Integrated Requirement for AMYL_801');
+  });
+
+  it('has no marker in production', () => {
+    expect(buildSapWorkflowTitle('IR-11018', 'AMYL_801', true)).toBe('[IR-11018] Integrated Requirement for AMYL_801');
   });
 });

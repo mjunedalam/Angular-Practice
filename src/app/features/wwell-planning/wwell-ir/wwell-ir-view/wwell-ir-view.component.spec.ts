@@ -10,6 +10,7 @@ import { EmailService } from '@services/email/email.service';
 import { EmailStore } from '@store/email/email.store';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrService } from '../wwell-ir.service';
+import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrViewComponent, WwellIrViewTab } from './wwell-ir-view.component';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
 import { WwellIrViewLetterComponent } from './wwell-ir-view-letter/wwell-ir-view-letter.component';
@@ -27,6 +28,7 @@ const emailProviders = [
   { provide: EmailStore, useValue: emailStoreStub },
   { provide: EmailService, useValue: { buildIrApprovedEmailRequest: jest.fn() } },
   { provide: AuthStore, useValue: { userEmail: signal('user@aramco.com') } },
+  { provide: WwellIrStore, useValue: { syncApprovalStatus: jest.fn(async (ir: IntegratedRequirement) => ir) } },
 ];
 
 /** The header's `sectionProgress` walks every rail section through wwellIrTimelineStepStatus, so

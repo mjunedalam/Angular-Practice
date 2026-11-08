@@ -12,7 +12,7 @@ import {
   WWELL_TEST_TYPE_OPTIONS,
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
-import { WWELL_COMPLETION_TYPE, WWELL_LINER_COMPLETION_TYPES } from './wwell-ir-completion-type.config';
+import { WWELL_COMPLETION_TYPE, WWELL_DEFAULT_LINER_SIZE, WWELL_LINER_COMPLETION_TYPES } from './wwell-ir-completion-type.config';
 import { WWELL_IR_CASING_TYPE_MENU, WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
@@ -190,17 +190,20 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           {
             key: 'openHoleSizeIn',
             label: 'Open Hole Size',
-            type: 'text',
-            placeholder: 'e.g., 8 1/2"',
+            type: 'select',
+            options: [],
+            placeholder: 'Select open hole size',
             hint: 'Bit size below the last casing shoe — every completion is drawn inside this open hole',
             visibleWhen: { field: 'completionType', oneOf: Object.values(WWELL_COMPLETION_TYPE) },
             colSpan: 2,
           },
           {
             key: 'linerSizeIn',
-            label: 'Liner Size',
-            type: 'text',
-            placeholder: 'e.g., 7"',
+            label: 'Liner Screen Size',
+            type: 'select',
+            options: [],
+            defaultValue: WWELL_DEFAULT_LINER_SIZE,
+            placeholder: 'Select liner size',
             hint: 'Outside diameter of the liner',
             visibleWhen: { field: 'completionType', oneOf: WWELL_LINER_COMPLETION_TYPES },
             validators: { required: true },

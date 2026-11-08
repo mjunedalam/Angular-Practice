@@ -4,6 +4,8 @@ export const WWELL_IR_CASING_TYPE_MENU = 'ir_casing_type_menu';
 /** EXAD_DHUB_LKUP_DATA `LKUP_NAME` for each Program Details dropdown, keyed by the form field's key. */
 export const WWELL_IR_DROPDOWN_MENU_BY_FIELD: Readonly<Record<string, string>> = {
   completionType: 'ir_completion_type_menu',
+  openHoleSizeIn: 'ir_open_hole_size_menu',
+  linerSizeIn: 'ir_liner_size_menu',
   completion: 'ir_completion_menu',
   acidization: 'ir_acidization_menu',
   transmission: 'ir_transmission_menu',

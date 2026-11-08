@@ -372,7 +372,14 @@ const NO_COMPLETION_FLAGS: IntegratedRequirementWellDesignFlags = {
 };
 
 const PRE_PERFORATED_SUFFIX = WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER;
-const PERFORATED_SUFFIX = WWELL_COMPLETION_TYPE.PERFORATED_LINER;
+const LINER_SCREEN_LABEL = WWELL_COMPLETION_TYPE.SCREEN;
+
+/** Remarks are compared case-insensitively, and the screen's old bare 'Screen' label equals
+ *  'Liner Screen' — records saved before the Completion menu was renamed must still resolve to their pick. */
+function canonicalRemark(remark: string | null): string | null {
+  const text = remark?.trim().toLowerCase() ?? null;
+  return text === 'screen' ? LINER_SCREEN_LABEL.toLowerCase() : text;
+}
 
 function sizedLabel(size: string | null, label: string): string {
   return size ? `${size} ${label}` : label;
@@ -396,13 +403,11 @@ function flagsForCompletionType(
     case WWELL_COMPLETION_TYPE.OPEN_HOLE:
       return { ...NO_COMPLETION_FLAGS, ohFlg: 'Y', ohRemarks: ohSize ? `${ohSize} ${COMPLETION_OPEN_HOLE}` : null };
     case WWELL_COMPLETION_TYPE.SCREEN:
-      return { ...openHoleFlags(ohSize), lsFlg: 'Y', lsRemarks: 'Screen' };
+      return { ...openHoleFlags(ohSize), lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
     case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
-      return { ...openHoleFlags(ohSize), gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: 'Screen' };
+      return { ...openHoleFlags(ohSize), gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
     case WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER:
       return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PRE_PERFORATED_SUFFIX) };
-    case WWELL_COMPLETION_TYPE.PERFORATED_LINER:
-      return { ...openHoleFlags(ohSize), perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PERFORATED_SUFFIX) };
     default:
       return null;
   }
@@ -423,16 +428,20 @@ function legacyFlagsForCompletionType(
 ): IntegratedRequirementWellDesignFlags | null {
   switch (completionType) {
     case WWELL_COMPLETION_TYPE.SCREEN:
-      return { ...NO_COMPLETION_FLAGS, lsFlg: 'Y', lsRemarks: 'Screen' };
+      return { ...NO_COMPLETION_FLAGS, lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
     case WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK:
-      return { ...NO_COMPLETION_FLAGS, gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: 'Screen' };
+      return { ...NO_COMPLETION_FLAGS, gpFlg: 'Y', gpRemarks: 'Gravel Pack', lsFlg: 'Y', lsRemarks: sizedLabel(linerSize, LINER_SCREEN_LABEL) };
     case WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER:
       return { ...NO_COMPLETION_FLAGS, perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PRE_PERFORATED_SUFFIX) };
-    case WWELL_COMPLETION_TYPE.PERFORATED_LINER:
-      return { ...NO_COMPLETION_FLAGS, perforatedFlg: 'Y', perforatedRemarks: sizedLabel(linerSize, PERFORATED_SUFFIX) };
     default:
       return null;
   }
+}
+
+/** The liner size ridden in `lsRemarks` as `"<size> Liner Screen"` (a bare 'Screen' / 'Liner Screen' has none). */
+function linerSizeFromScreenRemarks(remarks: string | null): string | null {
+  if (!remarks || !remarks.toLowerCase().endsWith(LINER_SCREEN_LABEL.toLowerCase())) return null;
+  return remarks.slice(0, -LINER_SCREEN_LABEL.length).trim() || null;
 }
 
 /**
@@ -452,15 +461,16 @@ export function resolveCompletionTypeFromFlags(
   let linerSizeIn: string | null = null;
   if (flags.perforatedFlg === 'Y') {
     const remarks = flags.perforatedRemarks ?? '';
-    const suffix = remarks.endsWith(PRE_PERFORATED_SUFFIX) ? PRE_PERFORATED_SUFFIX : remarks.endsWith(PERFORATED_SUFFIX) ? PERFORATED_SUFFIX : null;
-    if (suffix) {
-      completionType = suffix;
-      linerSizeIn = remarks.slice(0, -suffix.length).trim() || null;
+    if (remarks.toLowerCase().endsWith(PRE_PERFORATED_SUFFIX.toLowerCase())) {
+      completionType = PRE_PERFORATED_SUFFIX;
+      linerSizeIn = remarks.slice(0, -PRE_PERFORATED_SUFFIX.length).trim() || null;
     }
   } else if (flags.gpFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK;
+    linerSizeIn = linerSizeFromScreenRemarks(flags.lsRemarks);
   } else if (flags.lsFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN;
+    linerSizeIn = linerSizeFromScreenRemarks(flags.lsRemarks);
   } else if (flags.ohFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.OPEN_HOLE;
   }
@@ -471,7 +481,11 @@ export function resolveCompletionTypeFromFlags(
     legacyFlagsForCompletionType(completionType, linerSizeIn),
   ];
   const matches = candidates.some(
-    candidate => !!candidate && (Object.keys(candidate) as (keyof IntegratedRequirementWellDesignFlags)[]).every(key => candidate[key] === flags[key]),
+    candidate =>
+      !!candidate &&
+      (Object.keys(candidate) as (keyof IntegratedRequirementWellDesignFlags)[]).every(key =>
+        key.endsWith('Remarks') && key !== 'ohRemarks' ? canonicalRemark(candidate[key]) === canonicalRemark(flags[key]) : candidate[key] === flags[key],
+      ),
   );
   return matches ? { completionType, linerSizeIn } : null;
 }
