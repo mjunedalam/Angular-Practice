@@ -28,9 +28,9 @@ export const WWELL_IR_SECTION_RAIL: readonly WwellIrRailGroup[] = [
   {
     key: 'wellbore',
     number: '1.0',
-    label: 'Wellbore Details',
+    label: 'Water Well Details',
     icon: 'engineering',
-    leaf: { key: 'wellbore', number: '1.0', label: 'Wellbore Details', stepKey: 'reference', sectionKey: 'main' },
+    leaf: { key: 'wellbore', number: '1.0', label: 'Water Well Details', stepKey: 'reference', sectionKey: 'main' },
   },
   {
     key: 'general',

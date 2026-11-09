@@ -10,6 +10,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormBuilder, FormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -219,6 +220,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   private previousSelectedIrSeq: number | null = null;
   private wasCreatingIr = false;
   private wasDeletingIr = false;
+  private wasLoadingIrs = false;
   private wasSubmittingForReview = false;
   private wasRecallingIr = false;
 
@@ -365,6 +367,21 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
       const firstIrSeq = this.rows()[0]?.irSeq;
       if (firstIrSeq != null && this.selectedIrSeq() === null) {
         this.selectedIrSeq.set(firstIrSeq);
+      }
+    });
+
+    // The store outlives logout/login, so on re-entry the stale list renders instantly and the
+    // default-selection effect opens (and fetches detail for) its first row; the list GET that lands
+    // moments later then replaces every row with a bare summary, wiping that merged detail while the
+    // selection stays put — an empty-looking record. Re-fetch the open record's detail once the list settles.
+    effect(() => {
+      const loading = this.store.irsLoading();
+      const settled = this.wasLoadingIrs && !loading;
+      this.wasLoadingIrs = loading;
+      if (!settled || this.store.irsError()) return;
+      const irSeq = untracked(() => this.selectedIrSeq());
+      if (irSeq !== null && untracked(() => this.store.irs().some(ir => ir.irSeq === irSeq))) {
+        this.store.loadIrDetail(irSeq);
       }
     });
 

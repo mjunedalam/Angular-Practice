@@ -783,12 +783,6 @@ $td-label-gap: 30;
   color: tokens.$muted;
 }
 
-// They sit in the left rail, so they are kept for the wide maximised view (below); the narrower forms print the
-// key depths, casing program and tops only.
-.wbp__metrics {
-  display: none;
-}
-
 // ── Location card (Expand dialog) ──────────────────────────────────
 // The one card in the rails that is lit, and it stands at the foot of the right rail: an accent wash over the surface, an
 // accent rule down its edge, a faint graticule globe in its corner, and per axis a solid accent badge (up-down for
@@ -886,7 +880,7 @@ $td-label-gap: 30;
 .wbp__geo-value {
   grid-area: value;
   font-family: tokens.$font-mono;
-  // A raw UTM northing/easting ("3043496.7774 m") runs longer than the old decimal-degree value
+  // A raw UTM northing/easting ("3043496.7774") runs longer than the old decimal-degree value
   // this card used to show — shown in full (no rounding), so it wraps instead of overflowing the
   // rail's fixed width, rather than a `nowrap` forcing it past the card's edge.
   font-size: 1.0625rem;
@@ -1464,38 +1458,9 @@ $td-label-gap: 30;
       width: 100%;
     }
 
-    // Worked-out readings under the key depths (left rail). The rail's height is what it has to spare, so the tiles are
-    // the key depths' own but denser, with the hint on the label's line; and nothing in the rail may shrink to fit — a
-    // rail too short for what it holds scrolls, it does not clip.
+    // Nothing in the left rail may shrink to fit — a rail too short for what it holds scrolls, it does not clip.
     .wbp__block--stats > * {
       flex-shrink: 0;
-    }
-
-    .wbp__metrics {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.35rem;
-    }
-
-    .wbp__stats--metrics {
-      .wbp__stat {
-        row-gap: 0.1rem;
-        padding: 0.22rem 0.8rem 0.18rem;
-
-        dd {
-          font-size: 1.0625rem;
-          line-height: 1.15;
-        }
-      }
-
-      .wbp__stat-hint {
-        width: auto;
-      }
-
-      .wbp__gauge {
-        height: min(var(--wbp-gauge-h, 16px), 8px);
-      }
     }
   }
 
@@ -1505,18 +1470,6 @@ $td-label-gap: 30;
     grid-template-areas:
       'stats stage facts'
       '.     legend .';
-  }
-}
-
-// A window too short for the metrics' gauges as well as the key depths' keeps the figures and drops the hairlines under
-// them; the rail's blocks also sit a little closer.
-@container wbp-dialog (max-height: 720px) {
-  .wbp--expanded .wbp__stats--metrics .wbp__gauge {
-    display: none;
-  }
-
-  .wbp--expanded .wbp__metrics {
-    margin-top: 0;
   }
 }
 

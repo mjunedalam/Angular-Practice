@@ -13,10 +13,10 @@ import {
   WWELL_TRANSMISSION_OPTIONS,
 } from '../../shared/wwell-planning-reference-data.config';
 import { WWELL_COMPLETION_TYPE, WWELL_DEFAULT_LINER_SIZE, WWELL_LINER_COMPLETION_TYPES } from './wwell-ir-completion-type.config';
-import { WWELL_IR_CASING_TYPE_MENU, WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
+import { WWELL_IR_CASING_SIZE_MENU, WWELL_IR_CASING_TYPE_MENU, WWELL_IR_DROPDOWN_MENU_BY_FIELD } from './wwell-ir-dropdown-menu.config';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 
-/** Splits the field's single "Northing Xm, Easting Ym, Zone Z" value into its own Northing/
+/** Splits the field's single "Northing X, Easting Y, Zone Z" value into its own Northing/
  *  Easting/UTM Zone box, shown exactly as the raw survey values — same fallback `toUtmAxes` uses
  *  elsewhere: text that doesn't read as that shape (or isn't populated yet) keeps one "Coordinates"
  *  box rather than showing empty Easting/Zone boxes next to it. */
@@ -49,15 +49,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             placeholder: 'e.g., LTR-2026-0456',
             validators: { required: true },
           },
-          { key: 'client', label: 'BI Number', type: 'text', readonly: true },
-          {
-            key: 'supportingBusiness',
-            label: 'Supporting Business',
-            type: 'text',
-            placeholder: 'auto',
-            hint: 'From the linked well — select a Link to Request to populate',
-            readonly: true,
-          },
           {
             key: 'wellName',
             label: 'Water Well Name',
@@ -66,20 +57,26 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             validators: { required: true, pattern: WWELL_APPROVAL_WELL_NAME_PATTERN },
           },
           {
+            key: 'supportingBusiness',
+            label: 'Supporting Business',
+            type: 'text',
+            placeholder: 'auto',
+            readonly: true,
+          },
+          {
             key: 'targetAquifer',
             label: 'Target Aquifer',
             type: 'text',
             placeholder: 'auto',
-            hint: 'From the linked well — select a Link to Request to populate',
             readonly: true,
           },
+          { key: 'client', label: 'BI Number', type: 'text', readonly: true },
           {
             key: 'targetDepthFt',
             label: 'Target Depth',
             type: 'number',
             suffix: 'ft',
             placeholder: 'auto',
-            hint: 'From the linked well — select a Link to Request to populate',
             readonly: true,
           },
           {
@@ -87,14 +84,12 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             label: 'Surface Elevation',
             type: 'number',
             suffix: 'ft ASL',
-            hint: 'Used for auto-calculating sub-sea depths',
           },
           {
             key: 'coordinates',
             label: 'Coordinates',
             type: 'text',
             placeholder: 'auto',
-            hint: 'From the linked well — select a Link to Request to populate',
             readonly: true,
             colSpan: 2,
             splitDisplay: splitCoordinatesDisplay,
@@ -149,7 +144,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
               options: [],
               placeholder: 'e.g., Conductor',
             },
-            { key: 'sizeIn', label: 'Size', type: 'text', placeholder: 'e.g., 20"' },
+            { key: 'sizeIn', label: 'Size', type: 'select', options: [], placeholder: 'Select size' },
             { key: 'depthFtBgl', label: 'Depth', type: 'number', suffix: 'ft bgl' },
             {
               key: 'tolFtBgl',
@@ -423,9 +418,11 @@ export function buildWwellIrFormSchema(
                   ...section,
                   repeatable: {
                     ...section.repeatable,
-                    rowFields: section.repeatable.rowFields.map(field =>
-                      field.key === 'type' ? { ...field, options: computed(() => dropdownMenus()[WWELL_IR_CASING_TYPE_MENU] ?? []) } : field,
-                    ),
+                    rowFields: section.repeatable.rowFields.map(field => {
+                      if (field.key === 'type') return { ...field, options: computed(() => dropdownMenus()[WWELL_IR_CASING_TYPE_MENU] ?? []) };
+                      if (field.key === 'sizeIn') return { ...field, options: computed(() => dropdownMenus()[WWELL_IR_CASING_SIZE_MENU] ?? []) };
+                      return field;
+                    }),
                   },
                 }
               : section,

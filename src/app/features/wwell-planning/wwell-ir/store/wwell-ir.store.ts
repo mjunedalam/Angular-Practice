@@ -224,9 +224,9 @@ export const WwellIrStore = signalStore(
     }
 
     // Pulls every stored attachment's bytes back from the S3 proxy as base64 for the trigger's
-    // `attachment_files`, preceded by the complete IR letter — identical to the "Download PDF"
-    // output (wellbore diagram captured from an off-screen Letter render, attachments appended as
-    // trailing pages; see WwellIrLetterPdfService). All-or-nothing: if any read fails the submit
+    // `attachment_files`, preceded by the complete IR letter — the "Download PDF"
+    // output minus the Approval List table (omitted for SAP only; wellbore diagram captured from an
+    // off-screen Letter render, attachments appended as trailing pages; see WwellIrLetterPdfService). All-or-nothing: if any read fails the submit
     // fails, rather than silently sending SAP a review package with documents missing.
     function loadSapAttachmentFiles(ir: IntegratedRequirement, newWorkflowSeq: number) {
       // Always the store's current record for the attachments (an upload/replace since the editor
@@ -241,7 +241,7 @@ export const WwellIrStore = signalStore(
         sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
         chain: [],
       };
-      const letter$ = from(letterPdf.buildLetterPdf(submission)).pipe(
+      const letter$ = from(letterPdf.buildLetterPdf(submission, true)).pipe(
         switchMap(blob => blobToBase64(blob)),
         map((b64): SapAttachmentFile => ({ file_name: `${ir.code}-letter.pdf`, b64 })),
       );

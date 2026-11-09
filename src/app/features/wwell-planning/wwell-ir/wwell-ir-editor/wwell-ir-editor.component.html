@@ -208,7 +208,7 @@
     }
 
     <div class="ire__sections" [class.ire__sections--timeline]="viewMode() === 'timeline'">
-      <!-- 1.0 Wellbore Details -->
+      <!-- 1.0 Water Well Details -->
       <div class="ire__tl-row">
       <div class="ire__tl-rail">
         <span class="ire__tl-dot" [class.ire__tl-dot--done]="timelineStepStatus('wellbore') === 'completed'" [class.ire__tl-dot--active]="viewMode() === 'timeline' && isTimelineStepExpanded('wellbore')">
@@ -227,14 +227,14 @@
           (keydown.enter)="toggleTimelineStep('wellbore')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('wellbore')"
         >
-          <h2 class="ire__section-title">1.0 Wellbore Details</h2>
+          <h2 class="ire__section-title">1.0 Water Well Details</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('wellbore') === 'completed'">
               {{ timelineStepStatus("wellbore") === "completed" ? "Completed" : "Pending" }}
             </span>
           }
           @if (!requestReferenceEdit.isEditing() && isTimelineStepExpanded('wellbore') && !hasSavedIrSeq()) {
-            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Wellbore Details" matTooltip="Edit Wellbore Details" matTooltipClass="ir-attachment-tooltip" (click)="$event.stopPropagation(); requestReferenceEdit.open()">
+            <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Water Well Details" matTooltip="Edit Water Well Details" matTooltipClass="ir-attachment-tooltip" (click)="$event.stopPropagation(); requestReferenceEdit.open()">
               <mat-icon>edit</mat-icon>
             </button>
           }
@@ -303,8 +303,8 @@
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" matTooltip="Edit Program Details" matTooltipClass="ir-attachment-tooltip" (click)="programEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Reset Program Details" matTooltip="Reset Program Details" matTooltipClass="ir-attachment-tooltip" (click)="resetProgramSection()">
-                  <mat-icon>restart_alt</mat-icon>
+                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Program Details" matTooltip="Delete Program Details" matTooltipClass="ir-attachment-tooltip" (click)="resetProgramSection()">
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             }
@@ -338,8 +338,8 @@
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Geologist Contact" matTooltip="Edit Geologist Contact" matTooltipClass="ir-attachment-tooltip" (click)="geologistContactEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Reset Geologist Contact" matTooltip="Reset Geologist Contact" matTooltipClass="ir-attachment-tooltip" (click)="resetGeologistSection()">
-                  <mat-icon>restart_alt</mat-icon>
+                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Geologist Contact" matTooltip="Delete Geologist Contact" matTooltipClass="ir-attachment-tooltip" (click)="resetGeologistSection()">
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             }
@@ -1108,7 +1108,8 @@
         mat-flat-button
         color="primary"
         class="ire__action-btn"
-        [disabled]="anyFooterActionPending()"
+        [disabled]="anyFooterActionPending() || hasPendingEdits()"
+        [attr.title]="hasPendingEdits() ? 'Save your changes before submitting for review' : null"
         (click)="submitForReview()"
       >
         @if (isSubmittingForReview()) {

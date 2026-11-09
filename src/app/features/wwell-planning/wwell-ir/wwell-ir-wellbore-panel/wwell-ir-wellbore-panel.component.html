@@ -119,17 +119,6 @@
             }
           </dl>
 
-          <!-- Worked out from the four above; the maximised views only (the previews stay a read-out). -->
-          @if (isFilled() && f.metrics.length > 0) {
-            <div class="wbp__metrics">
-              <h3 class="wbp__eyebrow">Well metrics</h3>
-              <dl class="wbp__stats wbp__stats--metrics">
-                @for (metric of f.metrics; track metric.label) {
-                  <ng-container *ngTemplateOutlet="statTile; context: { $implicit: metric, i: f.stats.length + $index }" />
-                }
-              </dl>
-            </div>
-          }
         </section>
       }
 

@@ -40,7 +40,7 @@ import { approvalRingPercent, chainCompletionColor, countApprovedSteps } from '.
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
-import { addRepeatableRow, buildSectionGroup, defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
+import { addRepeatableRow, blankValueFor, buildSectionGroup, defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
 import { WwellFieldConfig, WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrWellborePanelComponent } from '../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
@@ -166,7 +166,7 @@ function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly 
     WwellCollapseAnimateDirective,
   ],
   templateUrl: './wwell-ir-editor.component.html',
-  styleUrl: './wwell-ir-editor.component.scss',
+  styleUrls: ['./wwell-ir-editor.component.scss', './wwell-ir-editor.sections.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { '[class.ire-flag-unsaved]': 'flagUnsaved()' },
@@ -1047,27 +1047,41 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected resetProgramSection(): void {
-    this.confirmThenAct({ title: 'Reset Program Details?', confirmLabel: 'Reset' }, () =>
-      this.resetFlatSection(this.programEdit, this.programSection, 'Program Details'),
+    this.confirmThenAct({ title: 'Delete Program Details?', confirmLabel: 'Delete' }, () =>
+      this.resetFlatSection(this.programEdit, this.programSection, 'Program Details', true),
     );
   }
 
   protected resetGeologistSection(): void {
-    this.confirmThenAct({ title: 'Reset Geologist Contact?', confirmLabel: 'Reset' }, () =>
+    this.confirmThenAct({ title: 'Delete Geologist Contact?', confirmLabel: 'Delete' }, () =>
       this.resetFlatSection(this.geologistContactEdit, this.geologistSection, 'Geologist Contact'),
     );
   }
 
-  private resetFlatSection(edit: SectionEditState<FormGroup, unknown>, section: WwellFormSectionConfig, label: string): void {
+  /** `blank` empties every field outright — including those with a schema default (Liner Screen Size) —
+   *  instead of restoring that default. Program Details uses it so the whole General step's program
+   *  data is deleted; Geologist Contact is a separate section and is never touched by that reset. */
+  private resetFlatSection(
+    edit: SectionEditState<FormGroup, unknown>,
+    section: WwellFormSectionConfig,
+    label: string,
+    blank = false,
+  ): void {
     edit.open();
     const ctrl = edit.control();
     if (!ctrl) return;
     const defaults: Record<string, unknown> = {};
     (section.fields ?? []).forEach(field => {
-      defaults[field.key] = defaultValueFor(field);
+      defaults[field.key] = blank ? blankValueFor(field) : defaultValueFor(field);
     });
     ctrl.patchValue(defaults);
-    this.notify.info(`${label} cleared — click Save to apply.`);
+    // A saved record is deleted for real, right now (the button is a delete icon, not a draft edit). A
+    // never-saved draft has nothing stored to delete, so there the form is just emptied.
+    if (this.hasSavedIrSeq()) {
+      this.saveAll();
+      return;
+    }
+    this.notify.info(`${label} cleared.`);
   }
 
   private confirmThenAct(
@@ -1200,6 +1214,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected submitForReview(): void {
+    // The submitted letter/payload is built from the saved record, so unsaved edits would be silently
+    // left out — the button is disabled in that state; this guards any other entry point.
+    if (this.hasPendingEdits()) return;
     this.store.submitIrForReview(this.ir());
   }
 

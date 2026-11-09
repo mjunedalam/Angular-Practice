@@ -1,4 +1,4 @@
-/** One piece of a well's surface location, ready to print: "Northing", "3043496.7774 m". No unit
+/** One piece of a well's surface location, ready to print: "Northing", "3043496.7774". No unit
  *  conversion happens anywhere in here — `exad_rcd_prewap.surfacen`/`surfacee` are real UTM
  *  northing/easting meters in production and `sv_utm_zn` is the zone they were measured in; this
  *  app shows all three exactly as the source gives them rather than computing lat/long from them
@@ -11,7 +11,8 @@ export interface UtmAxis {
 }
 
 const NUMBER = String.raw`(-?\d+(?:\.\d+)?)`;
-const UTM_TEXT = new RegExp(String.raw`^\s*Northing\s+${NUMBER}\s*m,\s*Easting\s+${NUMBER}\s*m,\s*Zone\s+(\d{1,2})\s*$`, 'i');
+// The "m" is optional so IRs saved before the unit was dropped still split into Northing/Easting/Zone.
+const UTM_TEXT = new RegExp(String.raw`^\s*Northing\s+${NUMBER}\s*(?:m\b)?\s*,\s*Easting\s+${NUMBER}\s*(?:m\b)?\s*,\s*Zone\s+(\d{1,2})\s*$`, 'i');
 
 /** Reads a UTM zone field as it actually arrives — a bare number (`38`, what `sv_utm_zn` holds —
  *  Saudi Arabia has no need for a hemisphere letter, every well this app has ever seen is Northern
@@ -32,7 +33,7 @@ export function parseUtmZone(zone: string | number | null | undefined): number |
 export function formatUtmCoordinates(northing: number, easting: number, zone: string | number | null | undefined): string | null {
   const zoneNumber = parseUtmZone(zone);
   if (zoneNumber === null) return null;
-  return `Northing ${northing}m, Easting ${easting}m, Zone ${zoneNumber}`;
+  return `Northing ${northing}, Easting ${easting}, Zone ${zoneNumber}`;
 }
 
 /** Splits that composed string back into Northing / Easting / UTM Zone for display. Text that
@@ -48,8 +49,8 @@ export function toUtmAxes(text: string): readonly UtmAxis[] {
   }
 
   return [
-    { label: 'Northing', value: `${match[1]} m`, icon: 'swap_vert' },
-    { label: 'Easting', value: `${match[2]} m`, icon: 'swap_horiz' },
+    { label: 'Northing', value: match[1], icon: 'swap_vert' },
+    { label: 'Easting', value: match[2], icon: 'swap_horiz' },
     { label: 'UTM Zone', value: match[3], icon: 'public' },
   ];
 }

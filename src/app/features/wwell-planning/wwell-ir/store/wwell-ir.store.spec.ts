@@ -346,6 +346,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     const sentRequest = sapServiceMock.trigger.mock.calls[0][0];
     expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(
       expect.objectContaining({ code: ir.code, sapWfId: 6, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS, chain: [] }),
+      true,
     );
     expect(sentRequest.attachment_files).toEqual([
       { file_name: `${ir.code}-letter.pdf`, b64: 'QUJD' },
@@ -402,6 +403,7 @@ describe('WwellIrStore - submitIrForReview', () => {
 
     expect(letterPdfMock.buildLetterPdf).toHaveBeenCalledWith(
       expect.objectContaining({ sapWfId: 7, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_IN_PROGRESS, chain: [] }),
+      true,
     );
     expect(store.irs()[0].sapWfId).toBe(7);
     expect(store.irs()[0].chain).toEqual([]);

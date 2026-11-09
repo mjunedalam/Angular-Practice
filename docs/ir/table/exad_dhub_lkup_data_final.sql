@@ -87,6 +87,20 @@ FROM (
   SELECT 'ir_casing_type_menu', 'Conductor', 1 FROM dual UNION ALL
   SELECT 'ir_casing_type_menu', 'Casing', 2 FROM dual UNION ALL
   SELECT 'ir_casing_type_menu', 'Liner', 3 FROM dual UNION ALL
+  -- Casing table "Size" dropdown (bare inch sizes, as csg_size is stored)
+  SELECT 'ir_casing_size_menu', '36', 1 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '30', 2 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '26', 3 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '24', 4 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '20', 5 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '18 5/8', 6 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '18', 7 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '15', 8 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '13 3/8', 9 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '9 5/8', 10 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '9', 11 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '7', 12 FROM dual UNION ALL
+  SELECT 'ir_casing_size_menu', '5', 13 FROM dual UNION ALL
   -- "Notify" email recipients for an IR (To / CC) — one row per address; replace or add addresses as needed
   SELECT 'ir_notify_to_recipients', 'alammx1o@aramco.com', 1 FROM dual UNION ALL
   SELECT 'ir_notify_cc_recipients', 'alammx1o@aramco.com', 1 FROM dual

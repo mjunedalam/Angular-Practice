@@ -8,8 +8,6 @@ export interface WellboreFacts {
   readonly stats: readonly WellboreStat[];
   readonly casingRows: readonly WellboreCasingRow[];
   readonly topRows: readonly WellboreTopRow[];
-  /** Readings worked out from the key depths (pump submergence, uncased length). Only the maximised views print them. */
-  readonly metrics: readonly WellboreStat[];
 }
 
 export interface WellboreStat {
@@ -78,7 +76,6 @@ export function formatInches(size: string): string {
 export function buildWellboreFacts(input: WellboreFactsInput): WellboreFacts {
   const total = Math.max(input.totalDepth, 0);
   const casings = sortCasingsByDepth(input.casings);
-  const deepest = casings.at(-1) ?? null;
 
   return {
     stats: buildStats(input, total),
@@ -89,7 +86,6 @@ export function buildWellboreFacts(input: WellboreFactsInput): WellboreFacts {
       belowTarget: total > 0 && casing.csgDepth > total,
     })),
     topRows: buildTopRows(input.tops, total),
-    metrics: buildMetrics(total, deepest),
   };
 }
 
@@ -148,27 +144,4 @@ function buildTopRows(tops: readonly ITopsIR[], total: number): WellboreTopRow[]
       interval: depth > 0 && next > depth ? (next - depth).toLocaleString('en-US') : '—',
     };
   });
-}
-
-const sharePct = (ft: number, total: number): string => `${Math.round(percentOfTotal(ft, total))}% of TD`;
-
-/** What the key depths imply together. Each one needs the depths it is worked from, so a well that has not
- *  got that far yet simply shows fewer. */
-function buildMetrics(total: number, deepest: ICasingIR | null): WellboreStat[] {
-  const metrics: WellboreStat[] = [];
-
-  if (total > 0 && deepest && deepest.csgDepth <= total) {
-    const open = total - deepest.csgDepth;
-    const start = percentOfTotal(deepest.csgDepth, total);
-    metrics.push({
-      label: 'Uncased',
-      short: 'Uncased',
-      value: formatFeet(open),
-      hint: sharePct(open, total),
-      glyph: 'shoe',
-      gauge: { fromPct: start, toPct: 100, markPct: start },
-    });
-  }
-
-  return metrics;
 }

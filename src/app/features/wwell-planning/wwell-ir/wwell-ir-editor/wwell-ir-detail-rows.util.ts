@@ -45,7 +45,7 @@ function resolveLinkedRequestLabel(
   return wellName || wellOptions.find(option => option.value === linkedRequestId)?.label || linkedRequestId;
 }
 
-/** Splits a "Northing Xm, Easting Ym, Zone Z" coordinate string into its own Northing/Easting/UTM
+/** Splits a "Northing X, Easting Y, Zone Z" coordinate string into its own Northing/Easting/UTM
  *  Zone rows — falls back to a single "Coordinates" row when the text doesn't read as that shape
  *  (unset, or hand-typed free text), same fallback `toUtmAxes` uses for the wellbore panel's
  *  Location card. Shown exactly as the raw survey values, no unit conversion. */
@@ -68,10 +68,10 @@ export function buildRequestReferenceRows(
   return [
     { label: 'Link to Request', value: resolveLinkedRequestLabel(r.linkedRequestId, r.wellName, linkedRequestWellOptions) },
     { label: 'Letter Number', value: fmtStr(r.letterNumber), mono: true },
-    { label: 'BI Number', value: fmtStr(r.client) },
-    { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Water Well Name', value: fmtStr(r.wellName) },
+    { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Target Aquifer', value: fmtStr(r.targetAquifer), options: true },
+    { label: 'BI Number', value: fmtStr(r.client) },
     // A brand-new draft is created through the required-number fallback in
     // mapIrFormValueToSubmission (targetDepthFt ?? 0) before the author has entered a real value —
     // treat a literal 0 as "not yet entered" rather than a misleading real reading (see the

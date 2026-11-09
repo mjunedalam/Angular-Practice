@@ -29,6 +29,13 @@ export function defaultValueFor(field: WwellFieldConfig): unknown {
   return '';
 }
 
+/** The empty value for a field, ignoring any schema `defaultValue` — what "clear this field" means. */
+export function blankValueFor(field: WwellFieldConfig): unknown {
+  if (field.type === 'file') return [];
+  if (field.type === 'number') return null;
+  return '';
+}
+
 function buildValidators(field: WwellFieldConfig): ValidatorFn[] {
   const config = field.validators;
   if (!config) return [];

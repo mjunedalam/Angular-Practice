@@ -73,4 +73,9 @@
  * the collapse clean. Mirrors dynamic-section.component.scss's .dys__field-host. */
 .rpg__field-host {
   overflow: hidden;
+  /* An outlined field's floating label sits ~8px above its box; without this headroom the
+   * clip box above slices the label's top. The negative margin cancels the padding so the
+   * grid spacing is unchanged. */
+  padding-top: 0.5rem;
+  margin-top: -0.5rem;
 }

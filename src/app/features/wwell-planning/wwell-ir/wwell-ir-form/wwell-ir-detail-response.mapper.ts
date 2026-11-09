@@ -68,12 +68,22 @@ function mapWellDesignFlags(row: IrWellDesignRow | undefined): IntegratedRequire
   };
 }
 
-function hasAnyCompletionFlag(flags: IntegratedRequirementWellDesignFlags | null): boolean {
-  return !!flags && (flags.ohFlg === 'Y' || flags.gpFlg === 'Y' || flags.perforatedFlg === 'Y' || flags.lsFlg === 'Y');
+/** The row the record's own saves write to: the one it already holds (so a save UPDATEs it), else the newest
+ *  — GET returns every row for the well unordered, and reading `[0]` picked an old, empty one over the
+ *  completion the user had just saved, which then made each later save INSERT yet another row. */
+function pickWellDesignRow(rows: readonly IrWellDesignRow[], heldWdSeq: number | null | undefined): IrWellDesignRow | undefined {
+  const held = rows.find(row => row.wd_seq === heldWdSeq);
+  if (held) return held;
+  return rows.reduce<IrWellDesignRow | undefined>((newest, row) => (!newest || (row.wd_seq ?? 0) > (newest.wd_seq ?? 0) ? row : newest), undefined);
 }
 
-function resolveLegacyText(raw: string | null | undefined, fallback: string): string {
-  return raw != null ? stripLegacyIrHtml(raw) : fallback;
+/** A remark column the backend returns as null/absent on a header row that *is* there means the text was
+ *  deleted — so it reads as blank, not as "keep what the client last had" (which left a deleted
+ *  Mud Logging / Sampling / Flow Test... showing until a full reload). The fallback only applies when the
+ *  response carried no header row at all. */
+function resolveLegacyText(raw: string | null | undefined, fallback: string, headerPresent: boolean): string {
+  if (raw != null) return stripLegacyIrHtml(raw);
+  return headerPresent ? '' : fallback;
 }
 
 export function mergeIrDetailBlocksIntoIntegratedRequirement(
@@ -87,10 +97,14 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const hydroRow = rowsFor<IrHydrogeologyRow>(blocks, 'exad_gwd_ir_hydrogeology')[0] as IrHydrogeologyRow | undefined;
   const waterRows = rowsFor<IrWaterRow>(blocks, 'exad_gwd_ir_water');
   const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
-  const wellDesignRow = rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design')[0] as IrWellDesignRow | undefined;
-  const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion);
+  const wellDesignRow = pickWellDesignRow(rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design'), existing.wellDesignSeq);
+  const headerPresent = header !== undefined;
+  const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion, headerPresent);
   const persistedFlags = wellDesignRow ? mapWellDesignFlags(wellDesignRow) : null;
-  const wellDesignRowBelongsToThisIr = !!wellDesignRow && (!!completionText || hasAnyCompletionFlag(persistedFlags));
+  // exad_gwd_well_design is keyed by prewap_seq alone, so a well can hold several rows (every INSERT adds
+  // one). Whatever row is picked is this record's design — including one whose flags are all 'N': that is
+  // a completion that was *deleted*, and it must read back as blank, not fall back to the stale value.
+  const wellDesignRowBelongsToThisIr = !!wellDesignRow;
   const resolvedType = wellDesignRowBelongsToThisIr ? resolveCompletionTypeFromFlags(persistedFlags) : null;
   const hasLegacyMarkup = [
     header?.completion ?? header?.cmpl_type,
@@ -176,14 +190,14 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       openHoleSizeIn: wellDesignRowBelongsToThisIr
         ? parseOpenHoleSizeFromRemarks(wellDesignRow.oh_remarks)
         : existing.programDetails.openHoleSizeIn,
-      acidization: resolveLegacyText(header?.acidization, existing.programDetails.acidization),
-      transmission: resolveLegacyText(header?.dt_rmks, existing.programDetails.transmission),
+      acidization: resolveLegacyText(header?.acidization, existing.programDetails.acidization, headerPresent),
+      transmission: resolveLegacyText(header?.dt_rmks, existing.programDetails.transmission, headerPresent),
       developmentTesting: {
-        logging: resolveLegacyText(header?.logging, existing.programDetails.developmentTesting.logging),
-        mudLogging: resolveLegacyText(header?.mud_rmks, existing.programDetails.developmentTesting.mudLogging),
-        sampling: resolveLegacyText(header?.sampling, existing.programDetails.developmentTesting.sampling),
-        flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest),
-        remarks: resolveLegacyText(header?.dev_pump_test, existing.programDetails.developmentTesting.remarks),
+        logging: resolveLegacyText(header?.logging, existing.programDetails.developmentTesting.logging, headerPresent),
+        mudLogging: resolveLegacyText(header?.mud_rmks, existing.programDetails.developmentTesting.mudLogging, headerPresent),
+        sampling: resolveLegacyText(header?.sampling, existing.programDetails.developmentTesting.sampling, headerPresent),
+        flowTest: resolveLegacyText(header?.flow_rmks, existing.programDetails.developmentTesting.flowTest, headerPresent),
+        remarks: resolveLegacyText(header?.dev_pump_test, existing.programDetails.developmentTesting.remarks, headerPresent),
       },
       wellDesignFlags: wellDesignRowBelongsToThisIr ? persistedFlags : existing.programDetails.wellDesignFlags,
     },

@@ -142,12 +142,15 @@ export class WwellIrService {
    *  sent as a plain value so agwa-planning just stamps whatever it's told instead of keeping its
    *  own copy of the SAP-text classification logic. `null` when the IR was never submitted.
    *  `workflow` is the live SAP workflow (id, status text, approval chain) printed as the letter's
-   *  "SAP Approval Workflow" section — see `resolveLetterWorkflow`. */
+   *  "SAP Approval Workflow" section — see `resolveLetterWorkflow`. `omitApprovalList` drops the
+   *  "Integrated Requirements Approval List" table; only the Submit-for-Review copy sent to SAP sets
+   *  it, downloads keep the table. */
   downloadLetterPdf(
     irSeq: number,
     wellboreImageBase64?: string,
     stampStatus?: string | null,
     workflow?: WwellIrLetterWorkflow,
+    omitApprovalList = false,
   ): Observable<Blob> {
     return this.http.post(
       `${this.apiUrl}/integrated-requirements/${irSeq}/letter-pdf`,
@@ -157,6 +160,7 @@ export class WwellIrService {
         workflowId: workflow?.workflowId ?? null,
         workflowStatusText: workflow?.workflowStatusText ?? null,
         workflowSteps: workflow?.workflowSteps ?? null,
+        omitApprovalList,
       },
       { responseType: 'blob' },
     );

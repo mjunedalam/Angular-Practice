@@ -73,11 +73,11 @@ export class WwellIrLetterPdfService {
    *  letter missing its diagram: if the record has diagram data and the capture keeps failing, this
    *  rejects instead. Also rejects if the backend refuses to render the letter (the caller owns the
    *  error message). */
-  async buildLetterPdf(ir: IntegratedRequirement): Promise<Blob> {
+  async buildLetterPdf(ir: IntegratedRequirement, omitApprovalList = false): Promise<Blob> {
     if (ir.irSeq == null) throw new Error('Save the integrated requirement before generating its letter.');
     const wellboreImageBase64 = await this.captureRequiredWellboreImage(ir);
     const letter = await firstValueFrom(
-      this.irService.downloadLetterPdf(ir.irSeq, wellboreImageBase64, resolveLetterStampStatus(ir), resolveLetterWorkflow(ir) ?? undefined),
+      this.irService.downloadLetterPdf(ir.irSeq, wellboreImageBase64, resolveLetterStampStatus(ir), resolveLetterWorkflow(ir) ?? undefined, omitApprovalList),
     );
     return this.mergeAttachments(letter, ir);
   }
