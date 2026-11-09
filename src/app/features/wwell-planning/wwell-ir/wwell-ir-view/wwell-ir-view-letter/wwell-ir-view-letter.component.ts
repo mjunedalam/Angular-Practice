@@ -246,6 +246,6 @@ export class WwellIrViewLetterComponent {
 
   protected subSeaFt(depthFt: number): number | null {
     const elevation = this.ir().requestReference.surfaceElevationFtAsl;
-    return elevation === null ? null : elevation - depthFt;
+    return elevation === null ? null : Math.round((elevation - depthFt) * 10) / 10;
   }
 }

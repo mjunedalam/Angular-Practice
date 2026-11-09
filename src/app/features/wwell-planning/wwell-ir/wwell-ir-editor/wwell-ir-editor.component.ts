@@ -958,7 +958,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected subSeaFt(depthFt: number | null): number | null {
     const elevation = this.ir().requestReference.surfaceElevationFtAsl;
-    return elevation === null || depthFt === null ? null : elevation - depthFt;
+    // Elevation is a decimal, so the raw subtraction carries binary-float noise (108.10000000000002).
+    return elevation === null || depthFt === null ? null : Math.round((elevation - depthFt) * 10) / 10;
   }
 
   private applyLinkedRequestWell(referenceGroup: FormGroup, linkedRequestId: string): void {

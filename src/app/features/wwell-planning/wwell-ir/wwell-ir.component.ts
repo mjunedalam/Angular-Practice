@@ -448,7 +448,26 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   }
 
   protected toggleLifecycleFilter(): void {
-    this.setLifecycleFilter(this.lifecycleFilter() === 'active' ? 'inactive' : 'active');
+    this.changeFilter(() => this.setLifecycleFilter(this.lifecycleFilter() === 'active' ? 'inactive' : 'active'));
+  }
+
+  /** Applies a filter change, then opens the first record of the new list — otherwise the detail panel kept
+   *  showing a record the list no longer contains. Guarded like any other "leave the open record" action,
+   *  so unsaved edits get the Save / Discard / Stay prompt before the list swaps under them. */
+  private changeFilter(apply: () => void): void {
+    this.guardNavigation(() => {
+      apply();
+      const firstIrSeq = this.rows()[0]?.irSeq ?? null;
+      if (firstIrSeq !== null) {
+        if (firstIrSeq !== this.selectedIrSeq() || this.pendingDraftIr()) this.performSelectIr(firstIrSeq);
+        return;
+      }
+      // Nothing matches: clear the panel, and let the default-selection effect fill it once rows appear.
+      this.pendingDraftIr.set(null);
+      this.selectedIrSeq.set(null);
+      this.previousSelectedIrSeq = null;
+      this.deselected.set(false);
+    });
   }
 
   /** Approved lives in the inactive lifecycle bucket, so its chip switches the bucket rather than filtering within Active. */
@@ -458,12 +477,14 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   }
 
   protected selectChip(status: IntegratedRequirementStatus | 'all'): void {
-    if (status === 'approved') {
-      this.setLifecycleFilter('inactive');
-      return;
-    }
-    this.setLifecycleFilter('active');
-    this.setStatusFilter(status);
+    this.changeFilter(() => {
+      if (status === 'approved') {
+        this.setLifecycleFilter('inactive');
+        return;
+      }
+      this.setLifecycleFilter('active');
+      this.setStatusFilter(status);
+    });
   }
 
   protected setStatusFilter(status: IntegratedRequirementStatus | 'all'): void {
