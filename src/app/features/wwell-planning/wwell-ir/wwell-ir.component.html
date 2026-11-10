@@ -107,21 +107,13 @@
             class="wwell-ir__row"
             [class.wwell-ir__row--active]="ir.irSeq === selectedIrSeq()"
             [class.wwell-ir__row--pending]="ir.irSeq === pendingId()"
-            [style.borderLeftColor]="chainBorderColor(ir.chain)"
             [disabled]="rowIrSeq(ir) === null"
             (click)="selectIrRow(ir)"
           >
             <div class="wwell-ir__row-top">
               <span class="wwell-ir__row-code">{{ ir.code }}</span>
               @if (hasKnownStatus(ir)) {
-                <span
-                  class="wwell-ir__badge"
-                  [style.background]="badgeMeta(ir).bg"
-                  [style.color]="badgeMeta(ir).color"
-                >
-                  <span class="wwell-ir__badge-dot" [style.background]="badgeMeta(ir).dot"></span>
-                  {{ badgeMeta(ir).label }}
-                </span>
+                <span class="wwell-ir__badge">{{ badgeMeta(ir).label }}</span>
               }
             </div>
             @if (ir.requestReference.wellName) {

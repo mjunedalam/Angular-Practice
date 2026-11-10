@@ -1,4 +1,4 @@
-<div class="ire">
+<div class="ire" [class.ire--busy]="anyFooterActionPending()">
   <header class="ire__header">
     <div class="ire__heading">
       <button
@@ -142,7 +142,7 @@
           [disabled]="store.irApprovalTimelineLoading()"
           (click)="refreshApprovalStatus()"
         >
-          <mat-icon>refresh</mat-icon>
+          <mat-icon [class.ire__spin]="store.irApprovalTimelineLoading()">refresh</mat-icon>
         </button>
       }
 
@@ -227,7 +227,7 @@
           (keydown.enter)="toggleTimelineStep('wellbore')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('wellbore')"
         >
-          <h2 class="ire__section-title">1.0 Water Well Details</h2>
+          <h2 class="ire__section-title"><span class="ire__no">1.0</span>Water Well Details</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('wellbore') === 'completed'">
               {{ timelineStepStatus("wellbore") === "completed" ? "Completed" : "Pending" }}
@@ -284,7 +284,7 @@
           (keydown.enter)="toggleTimelineStep('general')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('general')"
         >
-          <h2 class="ire__section-title">2.0 General</h2>
+          <h2 class="ire__section-title"><span class="ire__no">2.0</span>General</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('general') === 'completed'">
               {{ timelineStepStatus("general") === "completed" ? "Completed" : "Pending" }}
@@ -303,8 +303,12 @@
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" matTooltip="Edit Program Details" matTooltipClass="ir-attachment-tooltip" (click)="programEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Program Details" matTooltip="Delete Program Details" matTooltipClass="ir-attachment-tooltip" (click)="resetProgramSection()">
-                  <mat-icon>delete</mat-icon>
+                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Program Details" matTooltip="Delete Program Details" matTooltipClass="ir-attachment-tooltip" [disabled]="anyFooterActionPending()" (click)="resetProgramSection()">
+                  @if (isProgramDeleting()) {
+                    <mat-spinner diameter="16" class="ire__save-spinner" />
+                  } @else {
+                    <mat-icon>delete</mat-icon>
+                  }
                 </button>
               </div>
             }
@@ -338,8 +342,12 @@
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Geologist Contact" matTooltip="Edit Geologist Contact" matTooltipClass="ir-attachment-tooltip" (click)="geologistContactEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Geologist Contact" matTooltip="Delete Geologist Contact" matTooltipClass="ir-attachment-tooltip" (click)="resetGeologistSection()">
-                  <mat-icon>delete</mat-icon>
+                <button type="button" mat-icon-button class="ire__edit-btn ire__edit-btn--danger" aria-label="Delete Geologist Contact" matTooltip="Delete Geologist Contact" matTooltipClass="ir-attachment-tooltip" [disabled]="anyFooterActionPending()" (click)="resetGeologistSection()">
+                  @if (isGeologistDeleting()) {
+                    <mat-spinner diameter="16" class="ire__save-spinner" />
+                  } @else {
+                    <mat-icon>delete</mat-icon>
+                  }
                 </button>
               </div>
             }
@@ -388,7 +396,7 @@
           (keydown.enter)="toggleTimelineStep('horizons')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('horizons')"
         >
-          <h2 class="ire__section-title">3.0 Horizons</h2>
+          <h2 class="ire__section-title"><span class="ire__no">3.0</span>Horizons</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('horizons') === 'completed'">
               {{ timelineStepStatus("horizons") === "completed" ? "Completed" : "Pending" }}
@@ -545,7 +553,7 @@
           (keydown.enter)="toggleTimelineStep('casing')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('casing')"
         >
-          <h2 class="ire__section-title">4.0 Casing</h2>
+          <h2 class="ire__section-title"><span class="ire__no">4.0</span>Casing</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('casing') === 'completed'">
               {{ timelineStepStatus("casing") === "completed" ? "Completed" : "Pending" }}
@@ -703,7 +711,7 @@
           (keydown.enter)="toggleTimelineStep('hydrogeology')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('hydrogeology')"
         >
-          <h2 class="ire__section-title">5.0 Hydrogeology</h2>
+          <h2 class="ire__section-title"><span class="ire__no">5.0</span>Hydrogeology</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('hydrogeology') === 'completed'">
               {{ timelineStepStatus("hydrogeology") === "completed" ? "Completed" : "Pending" }}
@@ -760,7 +768,7 @@
           (keydown.enter)="toggleTimelineStep('areaWaterWells')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('areaWaterWells')"
         >
-          <h2 class="ire__section-title">6.0 Area Water Wells</h2>
+          <h2 class="ire__section-title"><span class="ire__no">6.0</span>Area Water Wells</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('areaWaterWells') === 'completed'">
               {{ timelineStepStatus("areaWaterWells") === "completed" ? "Completed" : "Pending" }}
@@ -920,7 +928,7 @@
           (keydown.enter)="toggleTimelineStep('attachments')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('attachments')"
         >
-          <h2 class="ire__section-title">7.0 Attachments</h2>
+          <h2 class="ire__section-title"><span class="ire__no">7.0</span>Attachments</h2>
           @if (viewMode() === 'timeline') {
             <span class="ire__tl-status" [class.ire__tl-status--done]="timelineStepStatus('attachments') === 'completed'">
               {{ timelineStepStatus("attachments") === "completed" ? "Completed" : "Pending" }}
@@ -1087,6 +1095,18 @@
   </div>
 
   <footer class="ire__footer">
+    @if (anyFooterActionPending()) {
+      <mat-progress-bar class="ire__footer-progress" mode="indeterminate" aria-label="Working" />
+    }
+    <p
+      class="ire__status"
+      role="status"
+      [class.ire__status--dirty]="hasPendingEdits()"
+      [class.ire__status--new]="!hasPendingEdits() && !hasSavedIrSeq()"
+    >
+      <span class="ire__status-dot" aria-hidden="true"></span>
+      {{ hasPendingEdits() ? 'Unsaved changes' : hasSavedIrSeq() ? 'All changes saved' : 'Not saved yet' }}
+    </p>
     <button
       type="button"
       mat-stroked-button

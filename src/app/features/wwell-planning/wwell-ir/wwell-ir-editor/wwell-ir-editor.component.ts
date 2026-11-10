@@ -1046,15 +1046,21 @@ export class WwellIrEditorComponent implements AfterViewInit {
     });
   }
 
+  /** Which section's delete icon was pressed, while that delete (a real save) is in flight — so the spinner shows on that
+   *  icon alone, not on every delete icon whenever the footer's Save runs. */
+  private readonly deletingSection = signal<'program' | 'geologist' | null>(null);
+  protected readonly isProgramDeleting = computed(() => this.deletingSection() === 'program' && this.isSaving());
+  protected readonly isGeologistDeleting = computed(() => this.deletingSection() === 'geologist' && this.isSaving());
+
   protected resetProgramSection(): void {
     this.confirmThenAct({ title: 'Delete Program Details?', confirmLabel: 'Delete' }, () =>
-      this.resetFlatSection(this.programEdit, this.programSection, 'Program Details', true),
+      this.resetFlatSection(this.programEdit, this.programSection, 'Program Details', 'program', true),
     );
   }
 
   protected resetGeologistSection(): void {
     this.confirmThenAct({ title: 'Delete Geologist Contact?', confirmLabel: 'Delete' }, () =>
-      this.resetFlatSection(this.geologistContactEdit, this.geologistSection, 'Geologist Contact'),
+      this.resetFlatSection(this.geologistContactEdit, this.geologistSection, 'Geologist Contact', 'geologist'),
     );
   }
 
@@ -1065,6 +1071,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     edit: SectionEditState<FormGroup, unknown>,
     section: WwellFormSectionConfig,
     label: string,
+    key: 'program' | 'geologist',
     blank = false,
   ): void {
     edit.open();
@@ -1078,7 +1085,9 @@ export class WwellIrEditorComponent implements AfterViewInit {
     // A saved record is deleted for real, right now (the button is a delete icon, not a draft edit). A
     // never-saved draft has nothing stored to delete, so there the form is just emptied.
     if (this.hasSavedIrSeq()) {
-      this.saveAll();
+      this.deletingSection.set(key);
+      // A save that does not start (nothing to save, a validation stop) never raises `isSaving`, so the marker is dropped here.
+      if (!this.saveAll()) this.deletingSection.set(null);
       return;
     }
     this.notify.info(`${label} cleared.`);

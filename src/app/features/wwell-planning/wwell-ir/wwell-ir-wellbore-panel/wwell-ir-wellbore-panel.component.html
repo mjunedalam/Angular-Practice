@@ -59,7 +59,7 @@
   @if (hasData()) {
     @let f = facts();
 
-    <div class="wbp__stage">
+    <div #stage class="wbp__stage">
       <div
         class="wbp__figure"
         [class.wbp__figure--no-depth]="!hasTargetDepth()"
@@ -73,12 +73,12 @@
             [totalDepth]="scaleDepth()"
             [targetDepth]="diagramData().targetDepth"
             [animTrigger]="0"
-            [diagramLayout]="layout()"
+            [diagramLayout]="drawLayout()"
           />
           <div class="wbp__plot">
             <svg class="wbp__grid" aria-hidden="true" preserveAspectRatio="none" [attr.viewBox]="gridViewBox()">
               @for (line of gridLines(); track line.depth) {
-                <line x1="0" [attr.x2]="layout().wellboreViewWidth" [attr.y1]="line.y" [attr.y2]="line.y" />
+                <line x1="0" [attr.x2]="drawLayout().wellboreViewWidth" [attr.y1]="line.y" [attr.y2]="line.y" />
               }
               @let ground = groundLine();
               <line class="wbp__ground-line" [attr.x1]="ground.x1" [attr.x2]="ground.x2" [attr.y1]="ground.y" [attr.y2]="ground.y" />
@@ -87,7 +87,7 @@
               class="wbp__diagram"
               [diagramData]="diagramData()"
               [animTrigger]="0"
-              [diagramLayout]="layout()"
+              [diagramLayout]="drawLayout()"
               [isFullscreen]="isFilled()"
             />
           </div>

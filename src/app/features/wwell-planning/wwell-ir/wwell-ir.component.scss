@@ -1,10 +1,17 @@
 @use '../shared/wwell-design-tokens' as tokens;
 @use '../shared/wwell-material' as wmat;
+@use './wwell-ir-light-theme' as lt;
 
 $navy: tokens.$navy-deep;
 $muted: tokens.$muted;
 $border: tokens.$border;
 $accent: tokens.$accent;
+
+// The refined light theme for this feature only (see _wwell-ir-light-theme.scss). `:host-context` keeps it off when the
+// page is dark; everything inside the host — the list, editor, view and wellbore panel — inherits these custom properties.
+:host-context(:root:not([data-wp-theme='dark'])) {
+  @include lt.light-scope-tokens;
+}
 
 // Matches the WLDA/Land-Affairs siblings' skinny master column. Rows still truncate cleanly
 // via `text-overflow: ellipsis` below.
@@ -573,10 +580,13 @@ $master-width: 240px;
     box-shadow: var(--wp-shadow-1);
   }
 
+  // The open record: lifted off the list on a ringed, shadowed white card with an accent edge — not a blue wash, so it
+  // reads as chosen (and stays neutral) rather than tinted.
   &--active {
-    background: tokens.alpha($accent, 6%);
-    border-color: tokens.alpha($accent, 16%);
+    background: tokens.$surface;
+    border-color: color-mix(in srgb, var(--wp-ink) 14%, transparent);
     border-left-color: $accent;
+    box-shadow: var(--wp-shadow-2);
   }
 
   &--active:hover {
@@ -641,18 +651,11 @@ $master-width: 240px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 0;
   font-size: tokens.$text-2xs;
   font-weight: 600;
+  color: $muted;
   white-space: nowrap;
-}
-
-.wwell-ir__badge-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 /* ── Detail column ────────────────────────────────────────────── *

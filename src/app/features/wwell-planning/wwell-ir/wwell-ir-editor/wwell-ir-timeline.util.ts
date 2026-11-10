@@ -12,14 +12,9 @@ export function wwellIrTimelineStepStatus(ir: IntegratedRequirement, groupKey: s
     case 'wellbore':
       return ir.requestReference.wellName?.trim() ? 'completed' : 'pending';
 
-    case 'general': {
-      const { completionType, completion, acidization, transmission, openHoleSizeIn, developmentTesting } = ir.programDetails;
-      const developmentFilled = Object.values(developmentTesting).some(value => value?.trim());
-      const geologistFilled = !!ir.contacts.geologistPrimary?.trim();
-      return completionType || completion || acidization || transmission || openHoleSizeIn || developmentFilled || geologistFilled
-        ? 'completed'
-        : 'pending';
-    }
+    // General completes only once the Geologist Contact (2.2) is filled; program details alone don't count.
+    case 'general':
+      return ir.contacts.geologistPrimary?.trim() ? 'completed' : 'pending';
 
     case 'horizons':
       return ir.formationTops.length > 0 || !!ir.topsRemarks?.trim() ? 'completed' : 'pending';

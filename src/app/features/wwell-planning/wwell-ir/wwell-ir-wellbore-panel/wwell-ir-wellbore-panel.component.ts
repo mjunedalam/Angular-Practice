@@ -1,5 +1,18 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  TemplateRef,
+  ViewEncapsulation,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +35,8 @@ const DEFAULT_MAX_HEIGHT_PX = 700;
 /** The maximised view takes most of the window: this share of it, but not less than the floors (any smaller and the
  *  drawing and every figure cannot all be shown without scrolling) nor more than the caps (past them a bigger dialog
  *  only adds margin round the drawing). */
+/** How much taller than its base the sidebar's drawing may grow to fill a tall window (1 = never). */
+const COMPACT_MAX_HEIGHT_STRETCH = 1.9;
 const EXPANDED_VIEWPORT_SHARE_PCT = 92;
 const EXPANDED_MIN_WIDTH_PX = 1240;
 const EXPANDED_MIN_HEIGHT_PX = 700;
@@ -106,6 +121,8 @@ export class WwellIrWellborePanelComponent {
   readonly hasData = input.required<boolean>();
   /** Hides the D3 "TOTAL DEPTH: 0 FT" label (and the readout) until a target depth exists. */
   readonly hasTargetDepth = input(true);
+  /** The coordinate space the parent asks for. The sidebar (`compact`) stretches its height to the room it is given — see
+   *  `drawLayout` below — so on a tall window the drawing fills the card instead of leaving it empty underneath. */
   readonly layout = input<DiagramLayout>(WWELL_IR_PREVIEW_DIAGRAM_LAYOUT);
   readonly title = input('Wellbore Preview');
   /** The record's own identifiers, shown in the Expand dialog (the other forms sit on a page that already names the
@@ -135,6 +152,41 @@ export class WwellIrWellborePanelComponent {
 
   protected readonly expandedLayout = WWELL_IR_EXPANDED_DIAGRAM_LAYOUT;
 
+  /** The sidebar's drawing area (`.wbp__stage`), measured: its content box is what the figure has to fill. */
+  private readonly stageEl = viewChild<ElementRef<HTMLElement>>('stage');
+  private readonly stageSize = signal<{ readonly width: number; readonly height: number } | null>(null);
+
+  /** The layout the drawing is actually built on. Unchanged everywhere but the sidebar, where the drawing's height (in
+   *  viewBox units) follows the stage's shape: a tall, narrow stage gets a taller drawing, so the figure fills its width
+   *  *and* its height — the type, which is sized by width, stays put, and the extra room goes to the well itself (more
+   *  space between casing shoes and horizons). Never shorter than the base, and capped so a very tall window cannot
+   *  stretch the well into a pencil. */
+  readonly drawLayout = computed<DiagramLayout>(() => {
+    const base = this.layout();
+    const stage = this.stageSize();
+    if (!this.compact() || !stage || stage.width <= 0 || stage.height <= 0) return base;
+
+    const totalWidth = base.depthScaleWidth + base.wellboreViewWidth;
+    const wanted = Math.round((totalWidth * stage.height) / stage.width);
+    const svgHeight = Math.min(Math.max(wanted, base.svgHeight), Math.round(base.svgHeight * COMPACT_MAX_HEIGHT_STRETCH));
+    const extra = svgHeight - base.svgHeight;
+    return extra === 0 ? base : { ...base, svgHeight, drawingHeight: base.drawingHeight + extra };
+  });
+
+  constructor() {
+    // Watches the stage while the sidebar form shows one (it is only in the DOM once there is data to draw).
+    effect(onCleanup => {
+      const el = this.stageEl()?.nativeElement;
+      if (!el || !this.compact() || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(entries => {
+        const box = entries[0]?.contentRect;
+        if (box) this.stageSize.set({ width: Math.round(box.width), height: Math.round(box.height) });
+      });
+      observer.observe(el);
+      onCleanup(() => observer.disconnect());
+    });
+  }
+
   private readonly dialog = inject(MatDialog);
   private readonly expandedTemplate = viewChild.required<TemplateRef<unknown>>('expandedTpl');
   private expandedDialog: MatDialogRef<unknown> | null = null;
@@ -148,17 +200,17 @@ export class WwellIrWellborePanelComponent {
   /** Width : height of the whole figure (depth scale + diagram). Matching the SVG viewBoxes'
    *  combined aspect is what keeps `preserveAspectRatio="none"` from distorting the drawing. */
   protected readonly ratio = computed(() => {
-    const { depthScaleWidth, wellboreViewWidth, svgHeight } = this.layout();
+    const { depthScaleWidth, wellboreViewWidth, svgHeight } = this.drawLayout();
     return (depthScaleWidth + wellboreViewWidth) / svgHeight;
   });
 
   protected readonly scalePercent = computed(() => {
-    const { depthScaleWidth, wellboreViewWidth } = this.layout();
+    const { depthScaleWidth, wellboreViewWidth } = this.drawLayout();
     return (depthScaleWidth / (depthScaleWidth + wellboreViewWidth)) * 100;
   });
 
   protected readonly gridViewBox = computed(() => {
-    const { wellboreViewWidth, svgHeight } = this.layout();
+    const { wellboreViewWidth, svgHeight } = this.drawLayout();
     return `0 0 ${wellboreViewWidth} ${svgHeight}`;
   });
 
@@ -167,14 +219,14 @@ export class WwellIrWellborePanelComponent {
   protected readonly scaleDepth = computed(() => resolveScaleDepthFt(this.diagramData()));
 
   /** Depth → y in the diagram SVG's own coordinates, before the top margin: the axis's scale. */
-  private readonly depthScale = computed(() => createDepthScale(this.scaleDepth(), this.layout().drawingHeight));
+  private readonly depthScale = computed(() => createDepthScale(this.scaleDepth(), this.drawLayout().drawingHeight));
 
   /** One hairline per depth tick, in the diagram SVG's own coordinates — the same scale and ticks
    *  the depth axis uses, so each line continues its tick across the diagram. */
   protected readonly gridLines = computed<readonly WellboreGridLine[]>(() => {
     const scaleDepth = this.scaleDepth();
     if (scaleDepth <= 0) return [];
-    const { marginTop, drawingHeight } = this.layout();
+    const { marginTop, drawingHeight } = this.drawLayout();
     const scale = this.depthScale();
     return buildScaleTicks(scaleDepth, drawingHeight, this.diagramData().targetDepth)
       .filter(depth => depth > 0)
@@ -185,7 +237,7 @@ export class WwellIrWellborePanelComponent {
    *  the renderer draws it with, or the open hole. Liners and gravel pack sit inside the casing. */
   private readonly boreHalfWidth = computed(() => {
     const data = this.diagramData();
-    const layout = this.layout();
+    const layout = this.drawLayout();
     const { baseHalfWidth, halfWidthIncrement } = layout;
     const casingHalfWidths = data.casings
       .filter(c => c.csgType !== CASING_TYPE_LINER && c.csgType !== CASING_TYPE_GRAVEL_PACK)
@@ -203,7 +255,7 @@ export class WwellIrWellborePanelComponent {
    *  drawn here instead. One reach for both sides: where the room on one side (the geologic axis on the left, the
    *  diagram's edge on the right) is what limits it, the line still stays centred. */
   protected readonly groundLine = computed<WellboreGroundLine>(() => {
-    const { casingCenterX, geoLineX, wellboreViewWidth, marginTop, baseHalfWidth } = this.layout();
+    const { casingCenterX, geoLineX, wellboreViewWidth, marginTop, baseHalfWidth } = this.drawLayout();
     const reach = Math.min(
       this.boreHalfWidth() + baseHalfWidth * GROUND_LINE_OVERHANG_RATIO,
       casingCenterX - geoLineX - GROUND_LINE_EDGE_GAP_UNITS,

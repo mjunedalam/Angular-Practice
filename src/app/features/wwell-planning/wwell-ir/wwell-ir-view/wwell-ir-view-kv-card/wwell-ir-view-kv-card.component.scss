@@ -1,4 +1,5 @@
 @use '../../../shared/wwell-design-tokens' as tokens;
+@use '../../wwell-ir-light-theme' as lt;
 
 $navy-deep: tokens.$navy-deep;
 $muted: tokens.$muted;
@@ -12,7 +13,7 @@ $muted: tokens.$muted;
 }
 
 .kv-card__title {
-  @include tokens.view-card-title;
+  @include lt.view-card-title;
   margin: 0 0 0.9rem;
 }
 

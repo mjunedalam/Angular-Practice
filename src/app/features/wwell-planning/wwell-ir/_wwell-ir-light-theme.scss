@@ -1,0 +1,70 @@
+// The Integrated Requirements screens' light-theme refinement. Scoped to this feature on purpose: it re-declares `--wp-*`
+// custom properties on the page's own host (`app-wwell-ir`, see wwell-ir.component.scss), so only what renders inside it
+// takes the values — the shell, header and every other wwell-planning page keep the shared theme in `shared/_wwell-theme.scss`.
+// Light only: the dark theme is not touched. Neutral greys, no blue tint; blue stays the one signal/action colour.
+// Anything the host does not contain (a dialog or select panel portalled to <body>) keeps the shared values.
+@use '../shared/wwell-design-tokens' as tokens;
+
+@mixin light-scope-tokens {
+  // Surfaces and lines: a little more separation between page, card and the inset surfaces inside a card.
+  --wp-surface-alt: #f8f8f9;
+  --wp-surface-hover: #f3f3f5;
+  --wp-surface-sunken: #e9e9ec;
+  --wp-line: #e3e3e7;
+  --wp-line-soft: #ededf0;
+
+  // Text: a deeper heading ink, a firmer body.
+  --wp-ink: #111113;
+  --wp-text: #38383f;
+
+  // Accent and primary action: deeper, calmer cobalt (white on the fill is 6.3:1; the accent on white is 6.5:1).
+  --wp-accent: #1a56c8;
+  --wp-accent-hover: #1647a8;
+  --wp-accent-fill: #1f55d4;
+  --wp-accent-soft: rgba(26, 86, 200, 0.07);
+  --wp-accent-line: rgba(26, 86, 200, 0.28);
+  --wp-cta: #1f55d4;
+  --wp-cta-hover: #1a47b8;
+  --wp-cta-shadow: 0 1px 2px rgba(17, 17, 19, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --wp-cta-shadow-hover: 0 3px 8px rgba(17, 17, 19, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  // Status pills: deeper ink, softer fills.
+  --wp-st-green-bg: #e3f4e8;
+  --wp-st-green-ink: #11692f;
+  --wp-st-amber-bg: #fcf0d2;
+  --wp-st-amber-ink: #8f4608;
+  --wp-st-blue-bg: #e1eafb;
+  --wp-st-blue-ink: #1a47b8;
+  --wp-st-red-bg: #fbe4e2;
+
+  // Depth: layered neutral shadows. The panel tokens are re-declared too — a custom property that refers to another is
+  // resolved where it is declared, so they would otherwise keep the shared (root) shadow.
+  --wp-shadow-1: 0 1px 1px rgba(17, 17, 19, 0.04), 0 1px 3px rgba(17, 17, 19, 0.06);
+  --wp-shadow-2: 0 1px 1px rgba(17, 17, 19, 0.03), 0 2px 4px rgba(17, 17, 19, 0.04), 0 10px 28px rgba(17, 17, 19, 0.07);
+  --wp-panel-ring: color-mix(in srgb, #111113 9%, transparent);
+  --wp-panel-shadow: inset 0 0 0 1px var(--wp-panel-ring), inset 0 1px 0 #ffffff, var(--wp-shadow-2);
+}
+
+// The read-only view's card title: dark, tracked, with the accent tick the editor's section titles carry, so the two
+// screens read as one system. (Replaces the shared mixin's large blue uppercase title for this feature.)
+@mixin view-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: tokens.$font-display;
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: var(--wp-ink);
+
+  &::before {
+    content: '';
+    flex: none;
+    width: 3px;
+    height: 1.05em;
+    border-radius: 999px;
+    background: var(--wp-accent);
+  }
+}

@@ -14,10 +14,11 @@ $warning: tokens.$warning;
 // under ViewEncapsulation.None, so the cascade is identical to the old single file.
 
 .ire__subsection-title {
-  margin: 0 0 0.4rem;
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: $navy;
+  margin: 0 0 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: -0.008em;
+  color: tokens.$navy-deep;
 }
 
 /* ── Per-section inline edit ──────────────────────────────────────
@@ -35,6 +36,17 @@ $warning: tokens.$warning;
   .ire__section-title,
   .ire__subsection-title {
     margin: 0;
+  }
+
+  // Pending/Completed pill always sits at the far right edge; any pencil/add buttons slot in just left of it
+  // (otherwise `space-between` parks the pill mid-row on sections that have buttons, e.g. Casing / Hydrogeology).
+  > .ire__tl-status {
+    order: 2;
+  }
+
+  > :not(.ire__section-title):not(.ire__subsection-title):not(.ire__tl-status) {
+    order: 1;
+    margin-left: auto;
   }
 }
 
@@ -102,17 +114,23 @@ $warning: tokens.$warning;
   gap: 0.15rem;
   min-width: 0;
 
+  // Label over value, the way a spec sheet sets them: a small tracked caption, then the figure a clear step larger and
+  // heavier. The caption recedes so a page of fields reads as values first, not as a wall of equal-weight text.
   dt {
     font-size: tokens.$text-2xs;
     font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: $muted;
   }
 
   dd {
     margin: 0;
-    font-size: 0.86rem;
+    font-size: 0.9375rem;
     font-weight: 600;
-    color: $navy;
+    letter-spacing: -0.006em;
+    font-variant-numeric: tabular-nums;
+    color: tokens.$navy-deep;
     // A remarks field's saved value can carry real line breaks (e.g. Development/Testing,
     // Sampling) — without this, `\n` renders as a plain space and a 3-line remark collapses
     // back into one run-on line.
@@ -437,14 +455,88 @@ $warning: tokens.$warning;
 
 /* ── Footer: fixed chrome, never scrolls ─────────────────────────────────── */
 .ire__footer {
+  position: relative;
+  overflow: hidden;
   flex-shrink: 0;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.6rem;
   padding: 0.5rem 0.8rem;
   border: 1px solid transparent;
   border-radius: tokens.$radius-lg;
   @include tokens.glass-panel;
+}
+
+// The thin bar along the footer's top edge while Save / Submit / Recall (or a section delete, which saves) is in flight:
+// the one cue that is the same for every action that talks to the server, whichever button started it.
+.ire__footer-progress {
+  --mat-progress-bar-track-height: 2px;
+  --mat-progress-bar-active-indicator-height: 2px;
+
+  position: absolute;
+  inset: 0 0 auto 0;
+}
+
+// While one of those is running nothing else on the page may start another: the pencils and delete icons are inert (and
+// dimmed) until it settles, so a second edit cannot begin against a record that is mid-save.
+.ire--busy .ire__section-actions,
+.ire--busy .ire__row-actions {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.ire__spin {
+  animation: ire-spin 0.8s linear infinite;
+}
+
+@keyframes ire-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ire__spin {
+    animation-duration: 2.4s;
+  }
+}
+
+// What the Save button is about to do, said before it is pressed: the footer is where the eye goes to save, so it states
+// whether there is anything to save. Pushed to the left; the actions stay on the right.
+.ire__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto 0 0.4rem;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: $muted;
+}
+
+.ire__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wp-success);
+  box-shadow: 0 0 0 3px var(--wp-success-soft);
+}
+
+.ire__status--dirty {
+  color: var(--wp-warning);
+
+  .ire__status-dot {
+    background: var(--wp-warning);
+    box-shadow: 0 0 0 3px var(--wp-warning-soft);
+  }
+}
+
+.ire__status--new {
+  .ire__status-dot {
+    background: var(--wp-subtle);
+    box-shadow: 0 0 0 3px var(--wp-surface-sunken);
+  }
 }
 
 // Keeps the Save button's own width stable whether it's showing the save icon or the

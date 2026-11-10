@@ -517,6 +517,56 @@ $td-label-gap: 30;
   }
 }
 
+// Maximised window: the sidebar is wider and the drawing prints larger, so there is room to step the type up — the depth
+// scale and the geologic horizons most (they are what is read off the drawing), the rest a little. Sizes are viewBox
+// units, bounded by the drawing's own columns (134-unit depth axis, the two-line titles' fixed 19–20 unit line spacing),
+// so the titles stay put. Below 1600px the sizes above apply unchanged.
+@media (min-width: 1600px) {
+  .wbp--compact .wbp__stage {
+    // The depth axis is 134 units wide and its numerals are monospace: 30 units clipped "1,000" at the left edge.
+    .tick-label {
+      font-size: 26px;
+    }
+
+    // Right-anchored against the geologic axis: 30 units pushed a four-digit depth ("2,900") past the column's left edge.
+    .geo-depth {
+      font-size: 26px;
+    }
+
+    // Longer codes (NEOGENE, DAMMAM) run toward the casing; 28 units tucked them under a wide conductor.
+    .geo-code {
+      font-size: 26px;
+    }
+
+    .ground-label {
+      font-size: 25px;
+    }
+
+    // 25, not 28: at ~1600px the stage is narrow and the label ("TOTAL DEPTH: 2,600 FT") ran past the drawing's right edge.
+    .total-depth-main {
+      font-size: 25px;
+    }
+
+    .casing-size-inner {
+      font-size: 27px;
+    }
+  }
+
+  .wbp--compact {
+    .wbp__title {
+      font-size: 1.3125rem;
+    }
+
+    .wbp__sub {
+      font-size: var(--wbp-fs-small);
+    }
+
+    .wbp__stat dd {
+      font-size: 1.0625rem;
+    }
+  }
+}
+
 // Sidebar form: the card fills the sidebar exactly — the well name, the drawing in whatever height is left, and the
 // four key depths under it — so nothing is cut off at the foot and nothing has to be scrolled to. The legend and the
 // casing / formation-top tables are left out here: the editor prints both, in its own Horizons and Casing sections a
@@ -534,6 +584,9 @@ $td-label-gap: 30;
     // Below this the drawing's own numerals fall under 9px; a window too short for it scrolls the card instead.
     min-height: 22rem;
     container-type: size;
+    // Not `stretch`: a stage taller than the drawing's natural height (the min-height above in a short window, or any
+    // tall window) otherwise stretched the figure's height past its aspect ratio, squeezing the drawing's type sideways.
+    align-items: flex-start;
   }
 
   .wbp__figure {
@@ -1088,12 +1141,12 @@ $td-label-gap: 30;
 // `@container` here asks the stage itself — the nearest container above each label.
 @mixin stage-type-step-1 {
   .tick-label {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .geo-depth,
   .geo-code {
-    font-size: 22px;
+    font-size: 27px;
   }
 
   .axis-title {
@@ -1134,12 +1187,12 @@ $td-label-gap: 30;
 
 @mixin stage-type-step-2 {
   .tick-label {
-    font-size: 28px;
+    font-size: 33px;
   }
 
   .geo-depth,
   .geo-code {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .ground-label {
@@ -1191,39 +1244,42 @@ $td-label-gap: 30;
 }
 
 // A big dialog draws the well at a large scale, so its type can grow with it: everything a step up from the base sizes.
-// The ranges sit outside both small-stage steps above, so only a roomy stage ever takes this.
-@container (min-width: 1100px) and (min-height: 720px) {
+// The ranges sit just outside both small-stage steps above, so only a roomy stage ever takes this. A container query reads
+// the stage's *content* box (its padding is excluded), so a stage that measures ~1115px wide queries as ~1095 — the
+// thresholds are the step boundaries themselves rather than round numbers above them, or this never applied.
+@container (min-width: 951px) and (min-height: 681px) {
   .wbp--expanded .wbp__stage {
     .tick-label {
-      font-size: 22px;
+      font-size: 31px;
     }
 
+    // 29, not the ruler's 31: a long code (NEOGENE) at the top ran into the "Static WL" label beside it.
     .geo-depth,
     .geo-code {
-      font-size: 23px;
+      font-size: 29px;
     }
 
     .casing-label__primary,
     .water-label,
     .pump-label {
-      font-size: 23px;
+      font-size: 28px;
     }
 
     .casing-label__secondary {
-      font-size: 19px;
+      font-size: 22px;
     }
 
     .open-hole-text,
     .screen-label-text {
-      font-size: 22px;
+      font-size: 27px;
     }
 
     .total-depth-main {
-      font-size: 24px;
+      font-size: 29px;
     }
 
     .ground-label {
-      font-size: 21px;
+      font-size: 25px;
     }
   }
 }

@@ -1,6 +1,16 @@
 import { DIAGRAM_LAYOUT, DiagramLayout, FULLSCREEN_DIAGRAM_LAYOUT } from '@models/well-design/wellbore-diagram.model';
 
 /**
+ * How far inside the casing's half-width the gravel pack starts, in viewBox units. The shared renderer draws the
+ * screen liner `LINER_HW_DECREMENT` (14) units narrower than the casing, and the pack's inner edge is
+ * `casing half-width - linerScreenInset` — so with any inset above 14 the pack begins *inside* the liner and the
+ * (wider) screen is painted over it, hiding the pack's inner part. At 14 the pack starts exactly at the screen's
+ * wall: open hole outermost, the gravel pack inside it, the screen liner innermost. Every wwell-ir layout sets it,
+ * because Presentation's own layouts (which this folder must not change) use a larger value.
+ */
+const WWELL_IR_GRAVEL_PACK_INNER_INSET = 14;
+
+/**
  * Compact `DiagramLayout` for the wwell-ir Wellbore Preview panel — the inline card in Sections
  * view and the Timeline view's sidebar. `WellBoreViewComponent` and `WwellIrDepthScaleComponent`
  * draw every label at a fixed font size in *viewBox* units, so the on-screen text size is
@@ -46,7 +56,7 @@ export const WWELL_IR_PREVIEW_DIAGRAM_LAYOUT: DiagramLayout = {
   halfWidthIncrement: 19.5,
   shoeCurveOffset: 9,
   openHoleHwMargin: 18.75,
-  linerScreenInset: 15,
+  linerScreenInset: WWELL_IR_GRAVEL_PACK_INNER_INSET,
   gpScreenGap: 2.25,
   gpFillRatio: 1.0,
   // An IR is planned against its target depth, and the hole is what the 7" liner is run into — so it is
@@ -96,6 +106,11 @@ const EXPANDED_BOTTOM_MARGIN = 68;
 export const WWELL_IR_EXPANDED_DIAGRAM_LAYOUT: DiagramLayout = {
   ...FULLSCREEN_DIAGRAM_LAYOUT,
   svgHeight: FULLSCREEN_DIAGRAM_LAYOUT.marginTop + FULLSCREEN_DIAGRAM_LAYOUT.drawingHeight + EXPANDED_BOTTOM_MARGIN,
+  // The depth ruler's numerals print up to ~33 units here and "2,600" in that mono face is ~100 wide, so the strip left
+  // of the axis is 34 units wider than Presentation's (150 / 106) — the numerals would otherwise clip at the left edge.
+  depthScaleWidth: 184,
+  depthAxisX: 140,
+  linerScreenInset: WWELL_IR_GRAVEL_PACK_INNER_INSET,
   openHoleRunsToTargetDepth: true,
 };
 
@@ -106,5 +121,6 @@ export const WWELL_IR_EXPANDED_DIAGRAM_LAYOUT: DiagramLayout = {
  */
 export const WWELL_IR_LETTER_DIAGRAM_LAYOUT: DiagramLayout = {
   ...DIAGRAM_LAYOUT,
+  linerScreenInset: WWELL_IR_GRAVEL_PACK_INNER_INSET,
   openHoleRunsToTargetDepth: true,
 };

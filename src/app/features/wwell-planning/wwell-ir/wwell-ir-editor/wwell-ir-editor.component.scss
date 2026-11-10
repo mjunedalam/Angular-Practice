@@ -139,10 +139,15 @@ app-wwell-ir-editor {
 }
 
 .ire__eyebrow {
-  margin: 0 0 2px;
-  font-size: tokens.$text-xs;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  margin: 0 0 3px;
+  padding: 0.08rem 0.5rem;
+  border-radius: 6px;
+  background: var(--wp-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--wp-accent-line);
+  font-size: tokens.$text-2xs;
+  font-weight: 650;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: $accent;
   font-family: tokens.$font-mono;
@@ -152,7 +157,7 @@ app-wwell-ir-editor {
 .ire__title {
   font-family: tokens.$font-display;
   margin: 0;
-  font-size: tokens.$text-lg;
+  font-size: 1.45rem;
   font-weight: 650;
   line-height: 1.2;
   color: $navy;
@@ -560,7 +565,7 @@ app-wwell-ir-editor {
 .ire__group {
   border: 1px solid transparent;
   border-radius: tokens.$radius-lg;
-  padding: 0.7rem 0.9rem;
+  padding: 0.85rem 1.1rem;
   @include tokens.glass-panel;
   // Keeps a scrolled-to section's heading clear of the sticky app chrome above `.ire__body`.
   scroll-margin-top: 0.5rem;
@@ -594,10 +599,11 @@ app-wwell-ir-editor {
   font-family: tokens.$font-display;
   position: relative;
   margin: 0 0 0.5rem;
-  padding-left: 0.65rem;
-  font-size: 0.95rem;
+  padding-left: 0.7rem;
+  font-size: 1rem;
   font-weight: 650;
-  color: $navy;
+  letter-spacing: -0.012em;
+  color: tokens.$navy-deep;
 
   &::before {
     content: '';
@@ -609,6 +615,12 @@ app-wwell-ir-editor {
     border-radius: 999px;
     background: $accent;
   }
+}
+
+// The number is plain text in the title ("| 1.0 Water Well Details"): the accent bar marks every title the same way.
+.ire__no {
+  margin-right: 0.4em;
+  font-variant-numeric: tabular-nums;
 }
 
 .ire__group > .ire__section-head {
@@ -794,10 +806,11 @@ app-wwell-ir-editor {
   font-size: tokens.$text-2xs;
   font-weight: 600;
   color: $muted;
-  padding: 0.1rem 0.6rem;
+  padding: 0.15rem 0.65rem;
   border-radius: 999px;
   background: tokens.$surface-alt;
   border: 1px solid $border;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
