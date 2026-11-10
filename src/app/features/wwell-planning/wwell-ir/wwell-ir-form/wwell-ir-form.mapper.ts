@@ -20,7 +20,7 @@ export function mapIrFormValueToSubmission(
     requestReference: {
       linkedRequestId: raw.reference.main.linkedRequestId || null,
       letterNumber: raw.reference.main.letterNumber || null,
-      client: raw.reference.main.client,
+      client: raw.reference.main.client ?? '',
       supportingBusiness: raw.reference.main.supportingBusiness,
       wellName: raw.reference.main.wellName,
       targetAquifer: raw.reference.main.targetAquifer,

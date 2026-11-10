@@ -53,7 +53,8 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             key: 'wellName',
             label: 'Water Well Name',
             type: 'text',
-            placeholder: 'e.g., HAIL-500',
+            placeholder: 'auto',
+            readonly: true,
             validators: { required: true, pattern: WWELL_APPROVAL_WELL_NAME_PATTERN },
           },
           {
@@ -70,7 +71,6 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             placeholder: 'auto',
             readonly: true,
           },
-          { key: 'client', label: 'BI Number', type: 'text', readonly: true },
           {
             key: 'targetDepthFt',
             label: 'Target Depth',

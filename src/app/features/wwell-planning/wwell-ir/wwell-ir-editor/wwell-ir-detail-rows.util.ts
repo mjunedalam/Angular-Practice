@@ -71,7 +71,6 @@ export function buildRequestReferenceRows(
     { label: 'Water Well Name', value: fmtStr(r.wellName) },
     { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Target Aquifer', value: fmtStr(r.targetAquifer), options: true },
-    { label: 'BI Number', value: fmtStr(r.client) },
     // A brand-new draft is created through the required-number fallback in
     // mapIrFormValueToSubmission (targetDepthFt ?? 0) before the author has entered a real value —
     // treat a literal 0 as "not yet entered" rather than a misleading real reading (see the

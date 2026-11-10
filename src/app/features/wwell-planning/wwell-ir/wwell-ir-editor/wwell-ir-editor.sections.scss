@@ -564,7 +564,7 @@ $warning: tokens.$warning;
 }
 
 // Material dims disabled fields to 38% alpha, which is near-invisible on the field's grey fill.
-// Water Well Details locks fields that carry the linked well's data (BI Number, Target Aquifer…)
+// Water Well Details locks fields that carry the linked well's data (Target Aquifer, Supporting Business…)
 // and users need to read them, so they get the view-mode look: navy value, muted label, semibold.
 .ire__section--wellbore .mat-mdc-form-field {
   .mat-mdc-input-element,
