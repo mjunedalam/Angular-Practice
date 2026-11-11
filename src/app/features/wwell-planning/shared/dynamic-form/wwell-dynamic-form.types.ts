@@ -78,6 +78,10 @@ export interface WwellFieldConfig {
    *  Request", backed by every well eligible for IR initiation) where scrolling an unfiltered
    *  mat-select is impractical; the short, hand-picked lists most 'select' fields use don't need it. */
   readonly searchable?: boolean;
+  /** 'select' only — when the control already holds a value the option list doesn't contain (a value pre-filled from
+   *  another source, or stored before the list changed), show it as an extra option instead of a blank select, while
+   *  every listed option stays choosable. */
+  readonly keepUnlistedValue?: boolean;
   /** Disables the control — for values derived elsewhere (e.g. a server-computed metric) rather
    *  than typed in directly. Pair with a `placeholder` like 'auto' to signal that visually. */
   readonly readonly?: boolean;

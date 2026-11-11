@@ -183,6 +183,24 @@ export interface StratInfo {
   readonly stratDesc: string | null;
 }
 
+/** One selectable offset water well from GET /offset-water-wells (EXAD_AGWA_QUERIES_PKG.get_ir_offset_water_wells_prc):
+ *  the latest Area Water Well record per well name. Carries every column EXCEPT distance and location, which depend on
+ *  where the new well sits, so the author enters them. The well name identifies it. */
+export interface IrOffsetWellSource {
+  readonly wellName: string;
+  readonly aquifer: string | null;
+  readonly totalDepthFt: number | null;
+  readonly testDurationMin: number | null;
+  readonly rateGpm: number | null;
+  readonly rpm: number | null;
+  readonly swlFt: number | null;
+  readonly pwlFt: number | null;
+  readonly drawdownFt: number | null;
+  readonly specificCapacity: number | null;
+  readonly tdsPpm: number | null;
+  readonly h2sPpm: number | null;
+}
+
 export interface GwdOpsMemberRaw {
   readonly FULL_NAME: string;
   readonly EMPNUM: number;

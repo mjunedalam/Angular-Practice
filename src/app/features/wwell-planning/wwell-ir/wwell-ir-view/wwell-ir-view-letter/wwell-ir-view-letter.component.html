@@ -99,11 +99,6 @@
       <h4>Completion</h4>
       <p class="letter__text">{{ design }}</p>
     </section>
-  } @else {
-    <section class="letter__section">
-      <h4>Completion</h4>
-      <p class="letter__text letter__text--empty">Not provided</p>
-    </section>
   }
 
   @if (ir().programDetails.developmentTesting.logging; as logging) {
@@ -111,22 +106,12 @@
       <h4>Logging</h4>
       <p class="letter__text">{{ logging }}</p>
     </section>
-  } @else {
-    <section class="letter__section">
-      <h4>Logging</h4>
-      <p class="letter__text letter__text--empty">Not provided</p>
-    </section>
   }
 
   @if (ir().programDetails.acidization; as acidization) {
     <section class="letter__section">
       <h4>Acidization</h4>
       <p class="letter__text">{{ acidization }}</p>
-    </section>
-  } @else {
-    <section class="letter__section">
-      <h4>Acidization</h4>
-      <p class="letter__text letter__text--empty">Not provided</p>
     </section>
   }
 
@@ -140,11 +125,6 @@
         <p class="letter__text">{{ mudLogging }}</p>
       }
     </section>
-  } @else {
-    <section class="letter__section">
-      <h4>Mud Logging &amp; Data Transmission</h4>
-      <p class="letter__text letter__text--empty">Not provided</p>
-    </section>
   }
 
   @if (ir().programDetails.developmentTesting.sampling; as sampling) {
@@ -152,31 +132,20 @@
       <h4>Sampling</h4>
       <p class="letter__text">{{ sampling }}</p>
     </section>
-  } @else {
-    <section class="letter__section">
-      <h4>Sampling</h4>
-      <p class="letter__text letter__text--empty">Not provided</p>
-    </section>
   }
 
   <!-- Hydrology Test Type picks one: a flow test prints Flow Test only, a pump test Development Pump Test only. -->
   @if (isFlowTest()) {
-    <section class="letter__section">
-      <h4>Flow Test</h4>
-      @if (ir().programDetails.developmentTesting.flowTest; as flowTest) {
+    @if (ir().programDetails.developmentTesting.flowTest; as flowTest) {
+      <section class="letter__section">
+        <h4>Flow Test</h4>
         <p class="letter__text">{{ flowTest }}</p>
-      } @else {
-        <p class="letter__text letter__text--empty">Not provided</p>
-      }
-    </section>
-  } @else {
+      </section>
+    }
+  } @else if (ir().programDetails.developmentTesting.remarks; as devPumpTest) {
     <section class="letter__section">
       <h4>Development Pump Test</h4>
-      @if (ir().programDetails.developmentTesting.remarks; as devPumpTest) {
-        <p class="letter__text">{{ devPumpTest }}</p>
-      } @else {
-        <p class="letter__text letter__text--empty">Not provided</p>
-      }
+      <p class="letter__text">{{ devPumpTest }}</p>
     </section>
   }
 
@@ -234,19 +203,23 @@
       <p class="letter__text letter__text--empty">No remarks.</p>
     }
     <div class="letter__table-wrap">
-      <table class="letter__table">
+      <table class="letter__table letter__table--wells">
         <thead>
           <tr>
-            <th>Well</th>
-            <th>Distance (KM)</th>
+            <th>Well Name</th>
+            <th>Distance (km)</th>
             <th>Location</th>
             <th>Aquifer</th>
-            <th>Q Rate (gpm)</th>
+            <th>TD (ft bgl)</th>
+            <th>Test Duration (min)</th>
+            <th>Rate (GPM)</th>
+            <th>RPM</th>
             <th>SWL (ft bgl)</th>
-            <th>Draw D. (ft)</th>
-            <th>Specific Capacity (gpm/ft)</th>
-            <th>TDS (mg/l)</th>
-            <th>H2S</th>
+            <th>PWL (ft bgl)</th>
+            <th>Drawdown (ft)</th>
+            <th>Specific Capacity (GPM/ft)</th>
+            <th>Fluid TDS (ppm)</th>
+            <th>H2S (ppm)</th>
           </tr>
         </thead>
         <tbody>
@@ -256,15 +229,19 @@
               <td>{{ well.distanceKm ?? '' }}</td>
               <td>{{ well.location ?? '' }}</td>
               <td>{{ well.aquifer ?? '' }}</td>
+              <td>{{ well.totalDepthFt ?? '' }}</td>
+              <td>{{ well.testDurationMin ?? '' }}</td>
               <td>{{ well.rateGpm ?? '' }}</td>
+              <td>{{ well.rpm ?? '' }}</td>
               <td>{{ well.swlFt ?? '' }}</td>
+              <td>{{ well.pwlFt ?? '' }}</td>
               <td>{{ well.drawdownFt ?? '' }}</td>
               <td>{{ well.specificCapacity ?? '' }}</td>
               <td>{{ well.tdsPpm ?? '' }}</td>
               <td>{{ well.h2sPpm ?? '' }}</td>
             </tr>
           } @empty {
-            <tr><td colspan="10" class="letter__table-empty">No offset water wells recorded.</td></tr>
+            <tr><td colspan="14" class="letter__table-empty">No offset water wells recorded.</td></tr>
           }
         </tbody>
       </table>

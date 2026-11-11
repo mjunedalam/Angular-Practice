@@ -26,7 +26,7 @@ function buildRaw(overrides: Partial<WwellIrFormRawValue> = {}): WwellIrFormRawV
       },
     },
     subsurface: {
-      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 }],
+      formationTops: [{ name: 'ARUM', depthFt: 1855, subSeaFtAsl: -875 }],
       casing: [{ type: 'Conductor', sizeIn: '24"', depthFtBgl: 100, tolFtBgl: null, remarks: 'Cemented' }],
       remarks: { topsRemarks: '' },
     },
@@ -79,7 +79,7 @@ describe('buildWwellIrBulkSavePayload', () => {
     const [, casing, , tops] = buildWwellIrBulkSavePayload(buildRaw());
 
     expect(casing.data?.[0]).toMatchObject({ csg_size: '24"', csg_type: 'Conductor', csg_depth: 100, csg_remarks: 'Cemented' });
-    expect(tops.data?.[0]).toMatchObject({ st_long_cd: 'ARUM', plan_tvd_dpth: 1855, plan_ss_dpth: 1015 });
+    expect(tops.data?.[0]).toMatchObject({ st_long_cd: 'ARUM', plan_tvd_dpth: 1855, plan_ss_dpth: -875 });
   });
 
   it('omits the hydrogeology row when the required aquifer field is still blank (mid-draft)', () => {
@@ -304,19 +304,27 @@ describe('buildWwellIrBulkSavePayload — existing-record diff (update/insert/de
     expect(rows[0]).toMatchObject({ action: 'UPDATE', ir_seq: 7001, csg_depth: 120 });
   });
 
+  it("derives plan_ss_dpth from surface elevation minus depth when the row carries none", () => {
+    const raw = buildRaw({
+      subsurface: { casing: [], formationTops: [{ name: "ARUM", depthFt: 1000, subSeaFtAsl: null }], remarks: { topsRemarks: "" } },
+    });
+    const [, , , tops] = buildWwellIrBulkSavePayload(raw);
+    expect((tops.data as IrTopsRow[])[0].plan_ss_dpth).toBe(-20);
+  });
+
   it('formationTops: keeps an unchanged row as a no-op, tags a brand-new row INSERT, and tags a removed row DELETE', () => {
     const existing = buildExistingBase({
       formationTops: [
-        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 },
-        { name: 'RUS', depthFt: 2200, subSeaFtAsl: 1360 },
+        { name: 'ARUM', depthFt: 1855, subSeaFtAsl: -875 },
+        { name: 'RUS', depthFt: 2200, subSeaFtAsl: -1220 },
       ],
     });
     const raw = buildRaw({
       subsurface: {
         casing: [],
         formationTops: [
-          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: 1015 },
-          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: 2260 },
+          { name: 'ARUM', depthFt: 1855, subSeaFtAsl: -875 },
+          { name: 'BIYADH', depthFt: 3100, subSeaFtAsl: -2120 },
         ],
         remarks: { topsRemarks: '' },
       },

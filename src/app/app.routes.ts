@@ -8,6 +8,7 @@ import { PresentationStore } from './features/presentation/store/presentation.st
 import { ActiveWwellStore } from './features/active-wwell/store/active-wwell.store';
 import { MorningReportStore } from './features/morning-report/store/morning-report.store';
 import { WwellPlanningStore } from './features/wwell-planning/store/wwell-planning.store';
+import { WldaStore } from './features/wwell-planning/wlda/store/wlda.store';
 import { WwellIrStore } from './features/wwell-planning/wwell-ir/store/wwell-ir.store';
 
 export const routes: Routes = [
@@ -82,6 +83,12 @@ export const routes: Routes = [
           import('./features/wwell-planning/wwell-ir/wwell-ir.component').then(
             (m) => m.WwellIrComponent,
           ),
+      },
+      {
+        path: 'wlda',
+        providers: [WldaStore],
+        loadComponent: () =>
+          import('./features/wwell-planning/wlda/wlda.component').then(m => m.WldaComponent),
       },
       {
         path: 'well-profile',

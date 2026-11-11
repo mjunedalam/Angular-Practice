@@ -77,6 +77,19 @@ const casingRowUnchanged = (existingRow: IntegratedRequirementCasingRow, row: Ww
 const topRowUnchanged = (existingRow: IntegratedRequirementFormationTop, row: WwellIrRawFormationTop): boolean =>
   existingRow.depthFt === (row.depthFt ?? 0) && (existingRow.subSeaFtAsl ?? null) === (row.subSeaFtAsl ?? null);
 
+/** Sub-sea depth (ft asl) of a formation top: surface elevation minus depth, rounded to 0.1 to drop binary-float noise.
+ *  `null` when either input is missing. This is what the Horizons table shows, and what plan_ss_dpth stores. */
+export function computeSubSeaFt(elevationFtAsl: number | null | undefined, depthFt: number | null | undefined): number | null {
+  if (elevationFtAsl == null || depthFt == null) return null;
+  return Math.round((elevationFtAsl - depthFt) * 10) / 10;
+}
+
+/** The row with its sub-sea depth derived from the well's surface elevation (the form has no input for it). */
+const withSubSea = (row: WwellIrRawFormationTop, elevationFtAsl: number | null | undefined): WwellIrRawFormationTop => ({
+  ...row,
+  subSeaFtAsl: computeSubSeaFt(elevationFtAsl, row.depthFt),
+});
+
 function buildCasingRows(
   raw: readonly WwellIrRawCasingRow[],
   irSeq: number | null,
@@ -135,8 +148,9 @@ function buildTopsRows(
   raw: readonly WwellIrRawFormationTop[],
   irSeq: number | null,
   existing: readonly IntegratedRequirementFormationTop[] | null | undefined,
+  elevationFtAsl: number | null | undefined,
 ): IrTopsRow[] {
-  const currentRows = raw.filter(row => !isBlankFormationTop(row));
+  const currentRows = raw.filter(row => !isBlankFormationTop(row)).map(row => withSubSea(row, elevationFtAsl));
 
   if (existing == null) {
     const action = resolveRowAction(irSeq);
@@ -268,6 +282,8 @@ function buildHydrogeologyRows(
   return rows;
 }
 
+const NO_AQUIFER = '-';
+
 const isBlankOffsetWell = (row: WwellIrRawOffsetWell): boolean => row.epANum == null && !row.aquifer;
 
 /** Natural key exad_gwd_ir_water is matched on — (ir_seq, ep_a_num) is its primary key. */
@@ -285,6 +301,8 @@ const waterRowUnchanged = (existingRow: IntegratedRequirementOffsetWell, row: Ww
   (existingRow.rpm ?? null) === row.rpm &&
   (existingRow.swlFt ?? null) === row.swlFt &&
   (existingRow.pwlFt ?? null) === row.pwlFt &&
+  (existingRow.drawdownFt ?? null) === row.drawdownFt &&
+  (existingRow.specificCapacity ?? null) === row.specificCapacity &&
   (existingRow.tdsPpm ?? null) === row.tdsPpm &&
   (existingRow.h2sPpm ?? null) === row.h2sPpm;
 
@@ -296,14 +314,15 @@ const toWaterRow = (row: WwellIrRawOffsetWell, action: IrRowAction, irSeq: numbe
   wb_name: row.wellName || null,
   distanct: row.distanceKm,
   direction: row.location || null,
-  aquifer: row.aquifer,
+  // exad_gwd_ir_water.aquifer is NOT NULL — a picked well with no recorded aquifer is still addable, so store a dash.
+  aquifer: row.aquifer || NO_AQUIFER,
   td: row.totalDepthFt,
   rate: row.rateGpm,
   rpm: row.rpm,
   swl: row.swlFt,
   final_pwl: row.pwlFt,
-  drawdown: row.drawdownFt ?? null,
-  spec_capacity: row.specificCapacity ?? null,
+  drawdown: row.drawdownFt,
+  spec_capacity: row.specificCapacity,
   temp: null,
   field_tds: row.tdsPpm,
   test_duration: row.testDurationMin,
@@ -329,12 +348,8 @@ function buildWaterRows(
     const key = waterKey(formRow.epANum ?? 0);
     const existingRow = existingByKey.get(key);
     if (existingRow) keptKeys.add(key);
-    // Drawdown / Spec. Cap. have no form control — keep whatever is already stored for this well.
-    const row = existingRow
-      ? { ...formRow, drawdownFt: existingRow.drawdownFt ?? null, specificCapacity: existingRow.specificCapacity ?? null }
-      : formRow;
-    const action: IrRowAction = existingRow ? (waterRowUnchanged(existingRow, row) ? '' : 'UPDATE') : 'INSERT';
-    return toWaterRow(row, action, existingRow ? irSeq : null);
+    const action: IrRowAction = existingRow ? (waterRowUnchanged(existingRow, formRow) ? '' : 'UPDATE') : 'INSERT';
+    return toWaterRow(formRow, action, existingRow ? irSeq : null);
   });
 
   const deletes: IrWaterRow[] = existing
@@ -473,7 +488,7 @@ export function buildWwellIrBulkSavePayload(
   };
 
   const casing = buildCasingRows(raw.subsurface.casing, irSeq, existing?.casing);
-  const tops = buildTopsRows(raw.subsurface.formationTops, irSeq, existing?.formationTops);
+  const tops = buildTopsRows(raw.subsurface.formationTops, irSeq, existing?.formationTops, raw.reference.main.surfaceElevationFtAsl);
   const hydrogeology = buildHydrogeologyRows(raw.hydrogeology.main, irSeq, existing);
   const water = buildWaterRows(raw.contacts.offsetWells, irSeq, existing?.offsetWells);
   const wellDesign = buildWellDesignRow(

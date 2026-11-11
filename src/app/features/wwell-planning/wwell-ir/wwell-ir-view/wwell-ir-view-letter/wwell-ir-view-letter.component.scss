@@ -156,6 +156,16 @@
   }
 }
 
+// The Area Water Wells table has 14 columns — tighter type and cells keep them all on screen (it still scrolls sideways if not).
+.letter__table--wells {
+  font-size: 0.7rem;
+
+  th,
+  td {
+    padding: 0.3rem 0.35rem;
+  }
+}
+
 .letter__table-empty {
   text-align: center;
   color: tokens.$muted;

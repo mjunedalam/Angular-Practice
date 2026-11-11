@@ -446,6 +446,8 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     this.store.loadAquifers();
     // Formation dropdown options (st_long_cd from strat_info) for Formation Tops.
     this.store.loadStratInfos();
+    // Offset water well options for the Area Water Wells picker.
+    this.store.loadOffsetWellSources();
   }
 
   ngOnDestroy(): void {

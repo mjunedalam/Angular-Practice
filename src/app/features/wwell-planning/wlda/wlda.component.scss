@@ -1,0 +1,409 @@
+@use '../shared/wwell-design-tokens' as tokens;
+@use '../shared/wwell-material' as wmat;
+@use '../wwell-ir/wwell-ir-light-theme' as lt;
+
+// Same light-theme refinement the Integrated Requirements screens use, so the two modules read as one feature.
+:host-context(:root:not([data-wp-theme='dark'])) {
+  @include lt.light-scope-tokens;
+}
+
+:host {
+  display: block;
+  height: 100%;
+  background: tokens.$page-bg;
+  color: tokens.$navy;
+  color-scheme: var(--wp-scheme);
+  font-family: tokens.$font-family;
+  -webkit-font-smoothing: antialiased;
+  @include wmat.buttons;
+}
+
+:host * {
+  box-sizing: border-box;
+}
+
+.wlda {
+  --wwell-gutter: 0.375rem;
+
+  display: flex;
+  align-items: stretch;
+  gap: var(--wwell-gutter);
+  height: 100%;
+  padding: var(--wwell-gutter);
+}
+
+/* ── Master column ── */
+.wlda__master {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 240px;
+  flex-shrink: 0;
+  max-height: 100%;
+  padding: 0.9rem;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  overflow: hidden;
+  @include tokens.glass-panel;
+}
+
+.wlda__header,
+.wlda__heading,
+.wlda__row-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wlda__header {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.wlda__title {
+  margin: 0;
+  font-family: tokens.$font-display;
+  font-size: 1.08rem;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  color: tokens.$navy-deep;
+}
+
+.wlda__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: tokens.alpha(tokens.$accent, 12%);
+  color: tokens.$accent;
+  font-size: tokens.$text-2xs;
+  font-weight: 650;
+}
+
+.wlda__new-btn,
+.wlda__create-btn {
+  height: 34px;
+  border-radius: tokens.$radius-btn;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  box-shadow: var(--wp-cta-shadow);
+  transition:
+    transform tokens.$duration-fast tokens.$ease-out,
+    box-shadow tokens.$duration-fast tokens.$ease-out;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &:disabled {
+    box-shadow: none;
+  }
+}
+
+.wlda__new-btn {
+  width: 100%;
+}
+
+.wlda__new-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    margin: 0;
+  }
+}
+
+.wlda__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.42rem 0.75rem;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+  border-radius: 8px;
+  transition: border-color tokens.$duration-fast ease;
+
+  &:focus-within {
+    border-color: tokens.$accent;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.93rem;
+    color: tokens.$navy;
+
+    &::placeholder {
+      color: tokens.$subtle;
+    }
+  }
+}
+
+.wlda__search-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: tokens.$subtle;
+}
+
+.wlda__status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0.5rem;
+  text-align: center;
+  color: tokens.$muted;
+  font-size: tokens.$text-sm;
+}
+
+.wlda__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wlda__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  font: inherit;
+  background: tokens.$surface;
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    background: tokens.$surface-alt;
+    box-shadow: var(--wp-shadow-1);
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &--active,
+  &--active:hover {
+    background: tokens.$surface;
+    border-color: color-mix(in srgb, var(--wp-ink) 14%, transparent);
+    border-left-color: tokens.$accent;
+    box-shadow: var(--wp-shadow-2);
+  }
+}
+
+.wlda__row-top {
+  justify-content: space-between;
+}
+
+.wlda__row-code {
+  @include tokens.type-mono;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: tokens.$navy;
+}
+
+.wlda__row-name,
+.wlda__row-meta {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wlda__row-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: tokens.$navy;
+}
+
+.wlda__row-meta {
+  font-size: tokens.$text-2xs;
+  color: tokens.$muted;
+}
+
+.wlda__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: tokens.$text-2xs;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--pill {
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 650;
+  }
+}
+
+.wlda__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* ── Detail column ── */
+.wlda__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wwell-gutter);
+  flex: 1;
+  min-width: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.wlda__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.25rem 0.4rem;
+}
+
+.wlda__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  color: tokens.$muted;
+  background: transparent;
+  border: 0;
+  border-radius: tokens.$radius-btn;
+  cursor: pointer;
+
+  &:hover {
+    color: tokens.$accent;
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.wlda__panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: var(--wwell-gutter);
+  flex: 1;
+  min-height: 0;
+}
+
+.wlda__pane {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  @include tokens.glass-panel;
+
+  &--form {
+    padding: 1.15rem 1.4rem;
+  }
+}
+
+.wlda__form-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.55rem 0.7rem;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-btn;
+}
+
+.wlda__new-tag {
+  @include tokens.type-eyebrow;
+  @include tokens.type-mono;
+}
+
+.wlda__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: tokens.$muted;
+  border-radius: tokens.$radius-lg;
+  @include tokens.glass-panel;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: tokens.$text-sm;
+  }
+}
+
+@media (max-width: 1100px) {
+  .wlda__panes {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+
+  .wlda__pane {
+    overflow: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wlda__new-btn,
+  .wlda__create-btn,
+  .wlda__row {
+    transition: none;
+  }
+
+  .wlda__new-btn:hover:not(:disabled),
+  .wlda__create-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}

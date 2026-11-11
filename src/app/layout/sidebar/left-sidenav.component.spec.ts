@@ -42,7 +42,6 @@ describe('LeftSidenavComponent', () => {
     expect(labels).toEqual([
       'Home',
       'Integrated Requirements',
-      'Well Profile',
       'Active Water Well',
       'Report',
       'Presentation',

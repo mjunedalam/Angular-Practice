@@ -25,6 +25,25 @@ function splitCoordinatesDisplay(value: string): readonly { readonly label: stri
   return toUtmAxes(value).map(axis => ({ label: axis.label, value: axis.value }));
 }
 
+/** Column order of the Area Water Wells table (the reference layout). The form lists the same fields with distance and
+ *  location last instead. */
+export const WWELL_IR_OFFSET_WELL_TABLE_ORDER: readonly string[] = [
+  'wellName',
+  'distanceKm',
+  'location',
+  'aquifer',
+  'totalDepthFt',
+  'testDurationMin',
+  'rateGpm',
+  'rpm',
+  'swlFt',
+  'pwlFt',
+  'drawdownFt',
+  'specificCapacity',
+  'tdsPpm',
+  'h2sPpm',
+];
+
 export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
   {
     key: 'reference',
@@ -262,21 +281,26 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         repeatable: {
           key: 'offsetWells',
           addLabel: '+ Add Offset Well',
+          // Every field is editable. Picking a well in "Select Offset Water Well" pre-fills them from its latest record,
+          // and any of them can then be overwritten — or the whole row typed by hand. Distance and location depend on
+          // where the new well sits, so they are never pre-filled and sit last. (The table lists the same fields in the
+          // reference order instead — see WWELL_IR_OFFSET_WELL_TABLE_ORDER.)
           rowFields: [
-            { key: 'wellName', label: 'Well Name', type: 'text', placeholder: 'auto', readonly: true },
-            // The id the save procedure keys a row on — carried with the row but never typed, so no input is drawn.
-            { key: 'epANum', label: 'EP A Num', type: 'number', hidden: true, validators: { required: true } },
-            { key: 'aquifer', label: 'Aquifer', type: 'text', validators: { required: true }, placeholder: 'auto', readonly: true },
-            { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'rateGpm', label: 'Test Rate (GPM)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'rpm', label: 'RPM', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'tdsPpm', label: 'TDS (ppm)', type: 'number', placeholder: 'auto', readonly: true },
-            { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number', placeholder: 'auto', readonly: true },
-            // Everything above is filled by the "Select Offset Water Well" picker and read-only; distance and location
-            // depend on where the new well sits, so they are the only typed fields and come last.
+            { key: 'wellName', label: 'Well Name', type: 'text' },
+            // The id the save procedure keys a row on — assigned when the row is added (see addOffsetWellRow), never typed, so no input is drawn.
+            { key: 'epANum', label: 'EP A Num', type: 'number', hidden: true },
+            // A dropdown of the strat_info aquifer codes — its options are supplied by buildWwellIrFormSchema.
+            { key: 'aquifer', label: 'Aquifer', type: 'select', options: [], keepUnlistedValue: true },
+            { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number' },
+            { key: 'testDurationMin', label: 'Test Duration (min)', type: 'number' },
+            { key: 'rateGpm', label: 'Rate (GPM)', type: 'number' },
+            { key: 'rpm', label: 'RPM', type: 'number' },
+            { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number' },
+            { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number' },
+            { key: 'drawdownFt', label: 'Drawdown (ft)', type: 'number' },
+            { key: 'specificCapacity', label: 'Specific Capacity (GPM/ft)', type: 'number' },
+            { key: 'tdsPpm', label: 'Fluid TDS (ppm)', type: 'number' },
+            { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number' },
             { key: 'distanceKm', label: 'Distance (km)', type: 'number', placeholder: 'e.g., 2.5' },
             { key: 'location', label: 'Location', type: 'text', placeholder: 'e.g., N 2.5 km' },
           ],
@@ -403,6 +427,7 @@ export function buildWwellIrFormSchema(
   dropdownMenus: Signal<Readonly<Record<string, readonly string[]>>> = signal({}),
   aquiferOptions: Signal<readonly WwellFieldOption[]> = signal([]),
   formationOptions: Signal<readonly WwellFieldOption[]> = signal([]),
+  offsetWellAquiferOptions: Signal<readonly WwellFieldOption[]> = signal([]),
 ): readonly WwellFormStepConfig[] {
   return WWELL_IR_FORM_SCHEMA.map(step => {
     if (step.key === 'subsurface') {
@@ -469,6 +494,15 @@ export function buildWwellIrFormSchema(
       return {
         ...step,
         sections: step.sections.map(section => {
+          if (section.key === 'offsetWells' && section.repeatable) {
+            return {
+              ...section,
+              repeatable: {
+                ...section.repeatable,
+                rowFields: section.repeatable.rowFields.map(field => (field.key === 'aquifer' ? { ...field, options: offsetWellAquiferOptions } : field)),
+              },
+            };
+          }
           if (section.key !== 'geologist' || !section.fields) return section;
           return {
             ...section,

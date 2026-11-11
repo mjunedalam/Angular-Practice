@@ -1,0 +1,95 @@
+<section class="wlda">
+  <div class="wlda__master">
+    <header class="wlda__header">
+      <div class="wlda__heading">
+        <h1 class="wlda__title">WLDA</h1>
+        <span class="wlda__count">{{ store.records().length }}</span>
+      </div>
+      <button type="button" mat-flat-button color="primary" class="wlda__new-btn" (click)="newDraft()">
+        <span class="wlda__new-inner"><mat-icon aria-hidden="true">add</mat-icon>New WLDA</span>
+      </button>
+    </header>
+
+    <label class="wlda__search">
+      <mat-icon class="wlda__search-icon">search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search code, well&hellip;"
+        aria-label="Search by code, well, field or well number"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
+    </label>
+
+    @if (rows().length === 0) {
+      <div class="wlda__status">
+        {{ store.records().length === 0 ? 'No WLDA records yet. Create one to get started.' : 'No records match your search.' }}
+      </div>
+    } @else {
+      <ul class="wlda__list" aria-label="WLDA records">
+        @for (record of rows(); track record.id) {
+          <li>
+            <button
+              type="button"
+              class="wlda__row"
+              [class.wlda__row--active]="record.id === store.selectedId()"
+              (click)="select(record)"
+            >
+              <span class="wlda__row-top">
+                <span class="wlda__row-code">{{ record.code }}</span>
+                <span class="wlda__badge" [style.color]="statusMeta[record.status].color">
+                  <span class="wlda__dot" [style.background]="statusMeta[record.status].dot"></span>
+                  {{ statusMeta[record.status].label }}
+                </span>
+              </span>
+              <span class="wlda__row-name">{{ record.waterWellName || 'Untitled well' }}</span>
+              <span class="wlda__row-meta">{{ record.field || 'No field' }} &middot; {{ record.createdAt.slice(0, 10) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="wlda__detail">
+    @if (store.selected(); as record) {
+      <div class="wlda__toolbar">
+        <button type="button" class="wlda__back" (click)="deselect()">
+          <mat-icon>arrow_back</mat-icon>Back to list
+        </button>
+        <button
+          type="button"
+          mat-flat-button
+          color="primary"
+          class="wlda__create-btn"
+          [disabled]="!canCreate()"
+          [attr.title]="canCreate() ? null : record.status === 'draft' ? 'Fill all required fields to create' : 'Already created'"
+          (click)="createWlda(record)"
+        >
+          <span class="wlda__new-inner"><mat-icon aria-hidden="true">description</mat-icon>Create WLDA</span>
+        </button>
+      </div>
+
+      <div class="wlda__panes">
+        <div class="wlda__pane wlda__pane--form">
+          <div class="wlda__form-head">
+            <span class="wlda__new-tag">New</span>
+            <span class="wlda__badge wlda__badge--pill" [style.background]="statusMeta[record.status].bg" [style.color]="statusMeta[record.status].color">
+              <span class="wlda__dot" [style.background]="statusMeta[record.status].dot"></span>
+              {{ statusMeta[record.status].label }}
+            </span>
+          </div>
+          <app-wlda-form [record]="record" (patch)="patch(record, $event)" />
+        </div>
+        <div class="wlda__pane wlda__pane--letter">
+          <app-wlda-letter [record]="record" />
+        </div>
+      </div>
+    } @else {
+      <div class="wlda__empty">
+        <mat-icon>description</mat-icon>
+        <p>Select a WLDA, or create a new one, to get started.</p>
+      </div>
+    }
+  </div>
+</section>

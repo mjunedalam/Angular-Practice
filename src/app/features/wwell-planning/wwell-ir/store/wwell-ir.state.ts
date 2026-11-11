@@ -1,7 +1,7 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { Aquifer } from '@models/daily-operation/aquifer.model';
-import { GwdOpsMember, IrEligibleWell, StratInfo } from '../wwell-ir-form/wwell-ir-payload.model';
+import { GwdOpsMember, IrEligibleWell, IrOffsetWellSource, StratInfo } from '../wwell-ir-form/wwell-ir-payload.model';
 
 export interface WwellIrStoreState {
   readonly irs: IntegratedRequirement[];
@@ -14,6 +14,7 @@ export interface WwellIrStoreState {
   readonly gwdOpsMembers: GwdOpsMember[];
   /** Stratigraphic units backing the Formation Tops "Formation" dropdown (see `formationOptions`). */
   readonly stratInfos: StratInfo[];
+  readonly offsetWellSources: IrOffsetWellSource[];
   /** Aquifer/formation reference list backing every Formation/Aquifer dropdown (see `aquiferOptions`). */
   readonly aquifers: Aquifer[];
   /** EXAD_DHUB_LKUP_DATA dropdown values keyed by LKUP_NAME (`completion_menu`, ...). Empty until
@@ -91,6 +92,7 @@ export const initialWwellIrState: WwellIrStoreState = {
   linkedRequestWells: [],
   gwdOpsMembers: [],
   stratInfos: [],
+  offsetWellSources: [],
   aquifers: [],
   dropdownMenus: {},
   draftIrSeq: null,

@@ -316,7 +316,7 @@
 
           @if (programEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
-              <app-dynamic-section [section]="programSectionForTest()" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
+              <app-dynamic-section [section]="programSection" [control]="ctrl" mode="edit" [selectPanelClass]="selectPanelClass" />
               <div class="ire__edit-actions">
                 <button type="button" mat-button (click)="programEdit.close()">Cancel</button>
               </div>
@@ -818,10 +818,9 @@
               <table class="ire__view-table">
                 <thead>
                   <tr>
-                    <th>Well Name</th>
-                    <th>Aquifer</th>
-                    <th>Distance (km)</th>
-                    <th>Rate (GPM)</th>
+                    @for (col of offsetWellColumns; track col.key) {
+                      <th>{{ col.label }}</th>
+                    }
                     <th class="ire__view-table-actions-col">Actions</th>
                   </tr>
                 </thead>
@@ -829,18 +828,11 @@
                   @for (row of offsetWellsRows(); track row.epANum; let i = $index) {
                     <tr appWwellCollapseAnimate>
                       @if (offsetWellsInlineEdit.isEditing(i) && offsetWellsRowGroup(i); as rowGroup) {
-                        <td>
-                          <app-dynamic-field [config]="offsetWellsFieldConfig('wellName')" [control]="rowFieldControl(rowGroup, 'wellName')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                        </td>
-                        <td>
-                          <app-dynamic-field [config]="offsetWellsFieldConfig('aquifer')" [control]="rowFieldControl(rowGroup, 'aquifer')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                        </td>
-                        <td>
-                          <app-dynamic-field [config]="offsetWellsFieldConfig('distanceKm')" [control]="rowFieldControl(rowGroup, 'distanceKm')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                        </td>
-                        <td>
-                          <app-dynamic-field [config]="offsetWellsFieldConfig('rateGpm')" [control]="rowFieldControl(rowGroup, 'rateGpm')" mode="edit" [selectPanelClass]="selectPanelClass" />
-                        </td>
+                        @for (col of offsetWellColumns; track col.key) {
+                          <td>
+                            <app-dynamic-field [config]="col" [control]="rowFieldControl(rowGroup, col.key)" mode="edit" [selectPanelClass]="selectPanelClass" />
+                          </td>
+                        }
                         <td class="ire__row-actions">
                           <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save offset well" matTooltip="Save offset well" matTooltipClass="ir-attachment-tooltip" [disabled]="rowGroup.invalid" (click)="saveOffsetWellRowInline()">
                             <mat-icon>check</mat-icon>
@@ -850,10 +842,9 @@
                           </button>
                         </td>
                       } @else {
-                        <td [class.ire__cell--changed]="wellChanged(row, 'wellName')">{{ row.wellName || "—" }}</td>
-                        <td [class.ire__cell--changed]="wellChanged(row, 'aquifer')">{{ row.aquifer || "—" }}</td>
-                        <td [class.ire__cell--changed]="wellChanged(row, 'distanceKm')">{{ row.distanceKm ?? "—" }}</td>
-                        <td [class.ire__cell--changed]="wellChanged(row, 'rateGpm')">{{ row.rateGpm ?? "—" }}</td>
+                        @for (col of offsetWellColumns; track col.key) {
+                          <td [class.ire__cell--changed]="wellChanged(row, col.key)">{{ offsetWellCell(row, col.key) }}</td>
+                        }
                         <td class="ire__row-actions">
                           <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + (row.wellName || row.epANum)" [matTooltip]="'Edit offset well ' + (row.wellName || row.epANum)" matTooltipClass="ir-attachment-tooltip" (click)="editOffsetWellRowInline(i)">
                             <mat-icon>edit</mat-icon>
@@ -866,7 +857,7 @@
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="5" class="ire__view-table-empty">No offset wells recorded.</td>
+                      <td [attr.colspan]="offsetWellColumns.length + 1" class="ire__view-table-empty">No offset wells recorded.</td>
                     </tr>
                   }
                 </tbody>

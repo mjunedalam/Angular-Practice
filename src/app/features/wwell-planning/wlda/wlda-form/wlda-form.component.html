@@ -1,0 +1,96 @@
+<form class="wf" (submit)="$event.preventDefault()" autocomplete="off">
+  <div class="wf__grid">
+    <label class="wf__field wf__field--wide">
+      <span class="wf__label">Water Well Name @if (isRequired('waterWellName')) {<i>*</i>}</span>
+      <input class="wf__control" type="text" placeholder="ABCD-123" [value]="record().waterWellName" (input)="setText('waterWellName', $event)" />
+    </label>
+    <label class="wf__field">
+      <span class="wf__label">Field <i>*</i></span>
+      <input class="wf__control" type="text" [value]="record().field" (input)="setText('field', $event)" />
+    </label>
+    <label class="wf__field">
+      <span class="wf__label">Well Number <i>*</i></span>
+      <input class="wf__control" type="text" [value]="record().wellNumber" (input)="setText('wellNumber', $event)" />
+    </label>
+
+    <label class="wf__field wf__field--wide">
+      <span class="wf__label">Reservoir <i>*</i></span>
+      <input class="wf__control" type="text" [value]="record().reservoir" (input)="setText('reservoir', $event)" />
+    </label>
+    <label class="wf__field wf__field--wide">
+      <span class="wf__label">Well Type</span>
+      <select class="wf__control" [value]="record().wellType" (change)="setWellType($event)">
+        <option value="">—</option>
+        @for (type of wellTypes; track type) {
+          <option [value]="type" [selected]="type === record().wellType">{{ type }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="wf__field wf__field--wide">
+      <span class="wf__label">Total Depth <i>*</i></span>
+      <input class="wf__control" type="text" inputmode="decimal" [value]="record().totalDepth" (input)="setText('totalDepth', $event)" />
+    </label>
+    <div class="wf__field wf__field--wide" role="group" aria-labelledby="wf-cp">
+      <span class="wf__label" id="wf-cp">Cathodic Protection Required</span>
+      <div class="wf__seg">
+        <button type="button" class="wf__seg-btn" [class.wf__seg-btn--on]="record().cathodicProtection" [attr.aria-pressed]="record().cathodicProtection" (click)="setCathodic(true)">Yes</button>
+        <button type="button" class="wf__seg-btn" [class.wf__seg-btn--on]="!record().cathodicProtection" [attr.aria-pressed]="!record().cathodicProtection" (click)="setCathodic(false)">No</button>
+      </div>
+    </div>
+  </div>
+
+  <fieldset class="wf__group">
+    <legend class="wf__label">Approved Location <i>*</i></legend>
+    <div class="wf__grid wf__grid--3">
+      <label class="wf__field">
+        <span class="wf__sub">North (Y)</span>
+        <input class="wf__control" type="text" inputmode="decimal" [value]="record().north" (input)="setText('north', $event)" />
+      </label>
+      <label class="wf__field">
+        <span class="wf__sub">East (X)</span>
+        <input class="wf__control" type="text" inputmode="decimal" [value]="record().east" (input)="setText('east', $event)" />
+      </label>
+      <label class="wf__field">
+        <span class="wf__sub">Zone</span>
+        <select class="wf__control" (change)="setZone($event)">
+          @for (zone of zones; track zone) {
+            <option [value]="zone" [selected]="zone === record().zone">{{ zone }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </fieldset>
+
+  <label class="wf__field">
+    <span class="wf__label">Remarks</span>
+    <textarea class="wf__control wf__control--area" rows="4" [value]="record().remarks" (input)="setText('remarks', $event)"></textarea>
+  </label>
+
+  <label class="wf__field">
+    <span class="wf__label">Distribution</span>
+    <textarea class="wf__control wf__control--area" rows="3" [value]="record().distribution" (input)="setText('distribution', $event)"></textarea>
+  </label>
+
+  <div class="wf__field">
+    <span class="wf__label">Supporting Documents</span>
+    @if (record().attachments.length > 0) {
+      <ul class="wf__files">
+        @for (name of record().attachments; track $index) {
+          <li class="wf__file">
+            <mat-icon class="wf__file-icon">attach_file</mat-icon>
+            <span class="wf__file-name">{{ name }}</span>
+            <button type="button" class="wf__file-remove" [attr.aria-label]="'Remove ' + name" (click)="removeFile($index)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+    <label class="wf__attach">
+      <mat-icon>upload</mat-icon>
+      Attach files
+      <input type="file" multiple hidden (change)="addFiles($event)" />
+    </label>
+  </div>
+</form>

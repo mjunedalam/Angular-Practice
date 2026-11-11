@@ -22,7 +22,7 @@ import { LoaderService } from '@shared/components/global-loader/loader.service';
 export class LayoutComponent {
   private  readonly router           = inject(Router);
   private  readonly loader           = inject(LoaderService);
-  protected readonly sidenavCollapsed = signal<boolean>(false);
+  protected readonly sidenavCollapsed = signal<boolean>(true);
   protected readonly activeRoute      = signal<string>('home');
 
   private static readonly AUTO_COLLAPSE_ROUTES = new Set([

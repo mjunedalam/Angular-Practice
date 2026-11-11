@@ -41,7 +41,7 @@ import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-anima
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { addRepeatableRow, blankValueFor, buildSectionGroup, defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
-import { WwellFieldConfig, WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
+import { WwellFieldConfig, WwellFieldOption, WwellFormSectionConfig } from '../../shared/dynamic-form/wwell-dynamic-form.types';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrWellborePanelComponent } from '../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
 import { WwellIrKvValueComponent } from '../wwell-ir-kv-value/wwell-ir-kv-value.component';
@@ -54,8 +54,7 @@ import {
 } from '../wwell-ir-form/wwell-ir-edit.mapper';
 import { CasingSizeWarning, findInvertedCasingSizeRows } from '../wwell-ir-form/wwell-ir-casing-warnings.util';
 import { mapIrFormValueToSubmission } from '../wwell-ir-form/wwell-ir-form.mapper';
-import { WWELL_IR_OFFSET_WELL_SOURCE_OPTIONS, findIrOffsetWellSource } from '../wwell-ir-form/wwell-ir-offset-well-source.config';
-import { buildWwellIrFormSchema } from '../wwell-ir-form/wwell-ir-form.schema';
+import { WWELL_IR_OFFSET_WELL_TABLE_ORDER, buildWwellIrFormSchema } from '../wwell-ir-form/wwell-ir-form.schema';
 import {
   WwellIrFormRawValue,
   WwellIrRawCasingRow,
@@ -150,18 +149,20 @@ function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly 
 
 const OFFSET_WELL_PICKER_KEY = 'sourceWell';
 
-/** Prepends the "Select Offset Water Well" picker to a section's row fields — required in the "+" add form (it supplies
- *  the row's id and name), optional when editing existing rows. */
-function withOffsetWellPicker(section: WwellFormSectionConfig, required: boolean): WwellFormSectionConfig {
+/** Prepends the optional "Select Offset Water Well" picker to a section's row fields: it pre-fills the row from a well's
+ *  latest record, after which every field can still be edited — or the row typed by hand without picking at all. */
+function withOffsetWellPicker(
+  section: WwellFormSectionConfig,
+  options: Signal<readonly WwellFieldOption[]>,
+): WwellFormSectionConfig {
   const repeatable = section.repeatable;
   if (!repeatable) return section;
   const picker: WwellFieldConfig = {
     key: OFFSET_WELL_PICKER_KEY,
     label: 'Select Offset Water Well',
     type: 'select',
-    options: WWELL_IR_OFFSET_WELL_SOURCE_OPTIONS,
+    options,
     placeholder: 'Select a well — fills the fields below',
-    ...(required ? { validators: { required: true } } : {}),
     searchable: true,
     colSpan: 2,
   };
@@ -325,6 +326,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.store.dropdownMenus,
     this.store.aquiferOptions,
     this.store.formationOptions,
+    this.store.stratAquiferOptions,
   );
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
   protected readonly programSection = findSection(this.schema, 'programDetails', 'main');
@@ -335,18 +337,25 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly hydrogeologySection = findSection(this.schema, 'hydrogeology', 'main');
   protected readonly offsetWellsSection = findSection(this.schema, 'contacts', 'offsetWells');
   /** What the section pencil's form is built and drawn from: the section's own rows plus the optional "Select Offset
-   *  Water Well" picker on each (see `withOffsetWellPicker`). Existing rows have no picked well, so it is not required here. */
-  protected readonly offsetWellsEditSection = withOffsetWellPicker(this.offsetWellsSection, false);
+   *  Water Well" picker on each (see `withOffsetWellPicker`). */
+  protected readonly offsetWellsEditSection = withOffsetWellPicker(this.offsetWellsSection, this.store.offsetWellSourceOptions);
+  /** The Area Water Wells table's columns — the section's visible fields in the reference order, so the table's
+   *  headers, the inline-edit cells and the add/edit form share one set of field definitions and can't drift apart. */
+  protected readonly offsetWellColumns: readonly WwellFieldConfig[] = WWELL_IR_OFFSET_WELL_TABLE_ORDER.flatMap(key => {
+    const field = this.offsetWellsSection.repeatable?.rowFields.find(candidate => candidate.key === key);
+    return field && !field.hidden ? [field] : [];
+  });
   protected readonly offsetRemarksSection = findSection(this.schema, 'contacts', 'remarks');
   protected readonly formationTopAddSection = addRowsSection(this.formationTopsSection, ['name', 'depthFt'], '+ Add Formation Top');
   protected readonly casingAddSection = addRowsSection(this.casingSection, ['type', 'sizeIn', 'depthFtBgl'], '+ Add Casing');
   /** The "+" add-form's rows carry one extra, never-saved field up front: "Select Offset Water Well", which fills every
-   *  other column except distance and location (see `applyOffsetWellSource`) and is required, since it is what supplies the
-   *  well's id (EP A number — the save key, no longer typed or shown) and name. It is not part of the section's own
+   *  other column except distance and location (see `applyOffsetWellSource`). It is optional — a row can be typed by hand —
+   *  but the well name is required, since it is the row's identity (the EP A number save key is assigned when the row is
+   *  added). It is not part of the section's own
    *  schema, so the live rows, the saved payload and the read-only table never see it. */
   protected readonly offsetWellAddSection = withOffsetWellPicker(
-    addRowsSection(this.offsetWellsSection, ['aquifer'], '+ Add Offset Well'),
-    true,
+    addRowsSection(this.offsetWellsSection, ['wellName'], '+ Add Offset Well'),
+    this.store.offsetWellSourceOptions,
   );
 
   protected readonly requestReferenceRows = computed(() =>
@@ -363,13 +372,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
   });
   /** Follows the live edit of the Estimated Hydrology step's Test Type toggle. */
   protected readonly headerTestType = computed(() => this.hydrogeologyEdit.liveValue()?.testType ?? this.ir().testProgram.testType);
-  /** The Program Details form for the current Hydrology Test Type (live while Hydrology is being
-   *  edited): Flow Test (FLOW_RMKS) for a flow test, Development/Testing (DEV_PUMP_TEST) for a pump
-   *  test. The hidden field's control stays in the form, so its stored value is left untouched. */
-  protected readonly programSectionForTest = computed(() => {
-    const hiddenKey = this.headerTestType() === 'flow-test' ? 'remarks' : 'flowTest';
-    return { ...this.programSection, fields: (this.programSection.fields ?? []).filter(field => field.key !== hiddenKey) };
-  });
   protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
@@ -501,8 +503,14 @@ export class WwellIrEditorComponent implements AfterViewInit {
     return this.cellChanged(this.savedCasing(), casingKey(row), row, field);
   }
 
-  protected wellChanged(row: WwellIrRawOffsetWell, field: keyof WwellIrRawOffsetWell): boolean {
-    return this.cellChanged(this.savedWells(), waterKey(row.epANum ?? 0), row, field);
+  protected wellChanged(row: WwellIrRawOffsetWell, field: string): boolean {
+    return this.cellChanged(this.savedWells(), waterKey(row.epANum ?? 0), row, field as keyof WwellIrRawOffsetWell);
+  }
+
+  /** A table cell's text: the row's value for a column, or a dash when it has none. */
+  protected offsetWellCell(row: WwellIrRawOffsetWell, key: string): string | number {
+    const value = row[key as keyof WwellIrRawOffsetWell];
+    return value === null || value === undefined || value === '' ? '—' : value;
   }
 
   /** What the Wellbore Preview draws for the casing / formation tops: the section's live rows (edits, deletes, committed
@@ -561,10 +569,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected casingFieldConfig(key: string): WwellFieldConfig {
     return this.fieldConfigFor(this.casingSection, key);
-  }
-
-  protected offsetWellsFieldConfig(key: string): WwellFieldConfig {
-    return this.fieldConfigFor(this.offsetWellsSection, key);
   }
 
   protected formationTopsRowGroup(index: number): FormGroup | null {
@@ -672,21 +676,22 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   /** Fills a staged row from the picked offset water well — every column except distance and location, which are
-   *  specific to the new well and stay as the author typed them. The source list is dummy data for now
-   *  (wwell-ir-offset-well-source.config.ts) until the backend procedure exists. */
+   *  specific to the new well and stay as the author typed them. The source list comes from the store
+   *  (GET /offset-water-wells). */
   private applyOffsetWellSource(row: FormGroup, value: string | null): void {
-    const well = findIrOffsetWellSource(value);
+    const well = this.store.offsetWellSources().find(source => source.wellName === value);
     if (!well) return;
     row.patchValue({
-      epANum: well.epANum,
-      wellName: well.name,
-      aquifer: well.aquifer,
+      wellName: well.wellName,
+      aquifer: well.aquifer ?? '',
       totalDepthFt: well.totalDepthFt,
       testDurationMin: well.testDurationMin,
       rateGpm: well.rateGpm,
       rpm: well.rpm,
       swlFt: well.swlFt,
       pwlFt: well.pwlFt,
+      drawdownFt: well.drawdownFt,
+      specificCapacity: well.specificCapacity,
       tdsPpm: well.tdsPpm,
       h2sPpm: well.h2sPpm,
     });
@@ -719,15 +724,19 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   protected addOffsetWellRow(): void {
+    // exad_gwd_ir_water keys a row on (ir_seq, ep_a_num) and ep_a_num is NOT NULL, but a picked well carries none —
+    // each added well takes the next free number within this IR.
+    let nextEpANum = Math.max(0, ...this.offsetWellsRows().map(row => row.epANum ?? 0));
     this.commitNewRows<WwellIrRawOffsetWell>(this.offsetWellAdd, this.offsetWellsEditSection, {
-      existingKeys: this.offsetWellsRows().map(row => waterKey(row.epANum ?? 0)),
-      keyOf: row => waterKey(row.epANum ?? 0),
+      existingKeys: this.offsetWellsRows().map(row => row.wellName ?? ''),
+      keyOf: row => row.wellName ?? '',
+      prepare: row => ({ ...row, epANum: ++nextEpANum }),
       liveArray: () => {
         this.offsetWellsEdit.open({ silent: true });
         const ctrl = this.offsetWellsEdit.control();
         return ctrl;
       },
-      duplicate: key => `Area well ${key} already exists — edit that row instead.`,
+      duplicate: key => `${key} is already in the list — edit that row instead.`,
       added: count => `${count} offset well${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
   }
@@ -743,6 +752,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     commit: {
       readonly existingKeys: readonly string[];
       readonly keyOf: (row: TRow) => string;
+      /** Last tweak to each row as it is committed (e.g. assigning its save key). */
+      readonly prepare?: (row: TRow) => TRow;
       readonly liveArray: () => FormArray | null;
       readonly duplicate: (key: string) => string;
       readonly added: (count: number) => string;
@@ -764,7 +775,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
     const array = commit.liveArray();
     if (!array) return;
-    rows.forEach(row => {
+    rows.forEach(staged => {
+      const row = commit.prepare ? commit.prepare(staged) : staged;
       addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
       array.at(array.length - 1).patchValue(row as object);
     });

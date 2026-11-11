@@ -51,7 +51,12 @@ export class DynamicFieldComponent {
 
   /** Resolves the config's `options` (static array or live Signal) once per change — every
    *  options `@for` loop below reads this instead of `config().options` directly. */
-  protected readonly resolvedOptions = computed(() => resolveFieldOptions(this.config()));
+  protected readonly resolvedOptions = computed(() => {
+    const options = resolveFieldOptions(this.config());
+    const current = this.liveValue();
+    if (!this.config().keepUnlistedValue || typeof current !== 'string' || !current.trim()) return options;
+    return options.some(option => wwellFieldOptionValue(option) === current) ? options : [...options, current];
+  });
 
   /** Backs the filter input a `searchable: true` 'select' field projects into its own mat-select
    *  panel (see the template) — mat-select has no built-in search. Stays '' for every other

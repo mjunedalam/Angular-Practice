@@ -116,6 +116,7 @@ export const WwellIrStore = signalStore(
       gwdOpsMembers,
       aquifers,
       stratInfos,
+      offsetWellSources,
       irsError,
       linkedRequestWellsError,
       gwdOpsMembersError,
@@ -143,6 +144,13 @@ export const WwellIrStore = signalStore(
       /** {value, label} = st_long_cd for the Formation Tops "Formation" dropdown — the name is both what
        *  the user sees and what gets saved, so there is no separate code to resolve at save time. */
       formationOptions: computed(() => stratInfos().map(strat => ({ value: strat.description, label: strat.description }))),
+      /** {value, label} = st_long_cd / "st_long_cd - st_desc" for the Area Water Wells Aquifer dropdown — strat_info is
+       *  where the aquifer codes and their descriptions live (same GET /strat-info the Formation dropdown reads). */
+      stratAquiferOptions: computed(() =>
+        stratInfos().map(strat => ({ value: strat.description, label: strat.stratDesc ? `${strat.description} - ${strat.stratDesc}` : strat.description })),
+      ),
+      /** {value, label} = well name for the Area Water Wells "Select Offset Water Well" picker. */
+      offsetWellSourceOptions: computed(() => offsetWellSources().map(well => ({ value: well.wellName, label: well.wellName }))),
       geologistOptions: computed(() => gwdOpsMembers().map(member => member.fullName)),
       /** FULL_NAME → EMPNUM, threaded into buildWwellIrBulkSavePayload's WwellIrSaveContext so
        *  cont_geologist/sub_cont_geologist persist the real employee number, not a display name. */
@@ -416,6 +424,20 @@ export const WwellIrStore = signalStore(
             tapResponse({
               next: stratInfos => patchState(store, { stratInfos }),
               error: (err: unknown) => notify.error(errorMessage(err, 'Failed to load formation list')),
+            }),
+          ),
+        ),
+      ),
+    );
+
+    const loadOffsetWellSources = rxMethod<void>(
+      pipe(
+        switchMap(() =>
+          svc.getOffsetWellSources().pipe(
+            tapResponse({
+              // A well is identified by its name, so one without a name can't be picked.
+              next: wells => patchState(store, { offsetWellSources: wells.filter(well => !!well.wellName?.trim()) }),
+              error: (err: unknown) => notify.error(errorMessage(err, 'Failed to load offset water wells')),
             }),
           ),
         ),
@@ -741,6 +763,10 @@ export const WwellIrStore = signalStore(
 
       loadStratInfos(): void {
         loadStratInfos();
+      },
+
+      loadOffsetWellSources(): void {
+        loadOffsetWellSources();
       },
 
       loadDropdownMenus(): void {

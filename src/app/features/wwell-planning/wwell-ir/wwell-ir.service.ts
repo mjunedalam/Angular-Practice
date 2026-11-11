@@ -18,6 +18,7 @@ import {
   WwellIrSaveResult,
   mapGwdOpsMemberRaw,
   StratInfo,
+  IrOffsetWellSource,
 } from './wwell-ir-form/wwell-ir-payload.model';
 import { mapIrHeaderSummariesToIntegratedRequirements } from './wwell-ir-form/wwell-ir-summary.mapper';
 
@@ -90,6 +91,12 @@ export class WwellIrService {
    *  dropdown with st_long_cd values. */
   getStratInfo(): Observable<StratInfo[]> {
     return this.http.get<ApiResponse<StratInfo>>(`${this.apiUrl}/strat-info`).pipe(map(res => res.data));
+  }
+
+  /** Offset water wells (exad_agwa_queries_pkg.get_ir_offset_water_wells_prc) — feeds the Area Water Wells
+   *  "Select Offset Water Well" picker. */
+  getOffsetWellSources(): Observable<IrOffsetWellSource[]> {
+    return this.http.get<ApiResponse<IrOffsetWellSource>>(`${this.apiUrl}/offset-water-wells`).pipe(map(res => res.data));
   }
 
   /** Aquifer/formation reference list (daily-operations GET /aquifers, same call the Active Water
