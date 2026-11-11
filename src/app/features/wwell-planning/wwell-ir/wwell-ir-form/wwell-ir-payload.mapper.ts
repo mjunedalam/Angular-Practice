@@ -275,6 +275,7 @@ export const waterKey = (epANum: number): string => String(epANum);
 
 /** Only the columns save_water's UPDATE branch writes — ep_a_num is the match key itself. */
 const waterRowUnchanged = (existingRow: IntegratedRequirementOffsetWell, row: WwellIrRawOffsetWell): boolean =>
+  (existingRow.wellName ?? '') === (row.wellName ?? '') &&
   (existingRow.distanceKm ?? null) === row.distanceKm &&
   (existingRow.location ?? null) === (row.location || null) &&
   (existingRow.aquifer ?? null) === (row.aquifer || null) &&
@@ -292,6 +293,7 @@ const toWaterRow = (row: WwellIrRawOffsetWell, action: IrRowAction, irSeq: numbe
   action,
   ir_seq: irSeq,
   ep_a_num: row.epANum ?? 0,
+  wb_name: row.wellName || null,
   distanct: row.distanceKm,
   direction: row.location || null,
   aquifer: row.aquifer,
@@ -345,6 +347,7 @@ function buildWaterRows(
 /** Domain → raw shape, so a DELETE row is built by the same toWaterRow() as every other action. */
 const offsetWellToRaw = (row: IntegratedRequirementOffsetWell): WwellIrRawOffsetWell => ({
   epANum: row.epANum,
+  wellName: row.wellName ?? '',
   distanceKm: row.distanceKm ?? null,
   location: row.location ?? '',
   aquifer: row.aquifer ?? '',

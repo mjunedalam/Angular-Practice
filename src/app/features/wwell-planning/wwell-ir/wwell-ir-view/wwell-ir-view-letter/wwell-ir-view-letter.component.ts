@@ -31,13 +31,6 @@ interface LetterTopsRow {
   readonly subSeaFt: number | null;
 }
 
-const STEP_STATUS_LABELS: Record<ApprovalChainStep['status'], string> = {
-  approved: 'Approved',
-  'in-progress': 'In progress',
-  pending: 'Pending',
-  rejected: 'Rejected',
-};
-
 /** "Letter" step of the read-only IR view — a printable-looking rendition of the GWD Integrated
  *  Requirements Letter, populated straight from the submitted record (never a separate document
  *  fetched from the backend — there is no such endpoint yet). Section numbering/labels follow
@@ -49,6 +42,13 @@ const STEP_STATUS_LABELS: Record<ApprovalChainStep['status'], string> = {
  *  The Well Bore Diagram section reuses the exact same diagram build (
  *  buildWellboreDiagramDataFromIntegratedRequirement) as the "Well Design" step's own preview, so
  *  the letter's picture of the well always agrees with what that tab shows for the same record. */
+/** `"*" + remarks`, or '' when there are none (blank/whitespace); a remark that already starts with "*" is kept as typed. */
+function letterFootnote(remarks: string | null | undefined): string {
+  const text = remarks?.trim();
+  if (!text) return '';
+  return text.startsWith('*') ? text : `*${text}`;
+}
+
 @Component({
   selector: 'app-wwell-ir-view-letter',
   standalone: true,
@@ -178,6 +178,12 @@ export class WwellIrViewLetterComponent {
   });
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');
 
+  /** The Formation Tops / Area Water Well footnotes — empty when there are no remarks, so the heading's "*" and the
+   *  footnote line only appear when something is there. Same rule as the downloaded letter (IrLetterDataAssembler.footnote):
+   *  the "*" is added unless the author already typed one. */
+  protected readonly topsFootnote = computed(() => letterFootnote(this.ir().topsRemarks));
+  protected readonly waterFootnote = computed(() => letterFootnote(this.ir().offsetWellsRemarks));
+
   // The real `well-bore-view` layout (not the wizard's 25%-shrunk preview constant) — the letter
   // card is wide enough to afford it, and the shrunk layout's smaller `drawingHeight` was packing
   // casing shoe labels too close together to read (colliding secondary lines) and clipping the
@@ -239,10 +245,6 @@ export class WwellIrViewLetterComponent {
       .map(word => word[0].toUpperCase())
       .join('');
   });
-
-  protected stepStatusLabel(status: ApprovalChainStep['status']): string {
-    return STEP_STATUS_LABELS[status];
-  }
 
   protected subSeaFt(depthFt: number): number | null {
     const elevation = this.ir().requestReference.surfaceElevationFtAsl;

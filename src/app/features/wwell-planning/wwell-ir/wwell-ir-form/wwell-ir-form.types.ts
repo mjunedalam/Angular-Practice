@@ -62,6 +62,8 @@ export interface WwellIrRawGeologist {
 
 export interface WwellIrRawOffsetWell {
   readonly epANum: number | null;
+  /** exad_gwd_ir_water.wb_name — the offset well's name. */
+  readonly wellName?: string;
   readonly distanceKm: number | null;
   readonly location: string;
   readonly aquifer: string;

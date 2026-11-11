@@ -72,6 +72,8 @@ export interface IrWaterRow extends IrRow {
   readonly ep_a_num: number;
   /** Read-only: returned by get_ir_data_prc, never sent on save. */
   readonly w_gnr_name?: string | null;
+  /** The offset well's name — saved with the row (VARCHAR2(20)) and returned by get_ir_data_prc. */
+  readonly wb_name?: string | null;
   readonly distanct: number | null;
   readonly direction: string | null;
   readonly aquifer: string;

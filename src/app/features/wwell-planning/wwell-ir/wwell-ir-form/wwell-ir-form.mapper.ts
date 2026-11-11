@@ -57,6 +57,7 @@ export function mapIrFormValueToSubmission(
     },
     offsetWells: raw.contacts.offsetWells.map(row => ({
       epANum: row.epANum ?? 0,
+      wellName: row.wellName || null,
       distanceKm: row.distanceKm,
       location: row.location || null,
       aquifer: row.aquifer || null,

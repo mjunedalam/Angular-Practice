@@ -36,18 +36,11 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
         fields: [
           {
             key: 'linkedRequestId',
-            label: 'Link to Request',
+            label: 'Link to Water Well',
             type: 'select',
             options: [],
             validators: { required: true },
             searchable: true,
-          },
-          {
-            key: 'letterNumber',
-            label: 'Letter Number',
-            type: 'text',
-            placeholder: 'e.g., LTR-2026-0456',
-            validators: { required: true },
           },
           {
             key: 'wellName',
@@ -56,6 +49,13 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             placeholder: 'auto',
             readonly: true,
             validators: { required: true, pattern: WWELL_APPROVAL_WELL_NAME_PATTERN },
+          },
+          {
+            key: 'letterNumber',
+            label: 'Letter Number',
+            type: 'text',
+            placeholder: 'e.g., LTR-2026-0456',
+            validators: { required: true },
           },
           {
             key: 'supportingBusiness',
@@ -263,18 +263,22 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           key: 'offsetWells',
           addLabel: '+ Add Offset Well',
           rowFields: [
-            { key: 'epANum', label: 'EP A Num', type: 'number', placeholder: 'e.g., 200', validators: { required: true } },
+            { key: 'wellName', label: 'Well Name', type: 'text', placeholder: 'auto', readonly: true },
+            // The id the save procedure keys a row on — carried with the row but never typed, so no input is drawn.
+            { key: 'epANum', label: 'EP A Num', type: 'number', hidden: true, validators: { required: true } },
+            { key: 'aquifer', label: 'Aquifer', type: 'text', validators: { required: true }, placeholder: 'auto', readonly: true },
+            { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'rateGpm', label: 'Test Rate (GPM)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'rpm', label: 'RPM', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'tdsPpm', label: 'TDS (ppm)', type: 'number', placeholder: 'auto', readonly: true },
+            { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number', placeholder: 'auto', readonly: true },
+            // Everything above is filled by the "Select Offset Water Well" picker and read-only; distance and location
+            // depend on where the new well sits, so they are the only typed fields and come last.
             { key: 'distanceKm', label: 'Distance (km)', type: 'number', placeholder: 'e.g., 2.5' },
             { key: 'location', label: 'Location', type: 'text', placeholder: 'e.g., N 2.5 km' },
-            { key: 'aquifer', label: 'Aquifer', type: 'text', placeholder: 'e.g., Wasia-Biyadh', validators: { required: true } },
-            { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number', placeholder: 'e.g., 530' },
-            { key: 'testDurationMin', label: 'Test Dur. (min)', type: 'number', placeholder: 'e.g., 1440' },
-            { key: 'rateGpm', label: 'Test Rate (GPM)', type: 'number', placeholder: 'e.g., 380' },
-            { key: 'rpm', label: 'RPM', type: 'number', placeholder: 'e.g., 1200' },
-            { key: 'swlFt', label: 'SWL (ft bgl)', type: 'number', placeholder: 'e.g., 85' },
-            { key: 'pwlFt', label: 'PWL (ft bgl)', type: 'number', placeholder: 'e.g., 110' },
-            { key: 'tdsPpm', label: 'TDS (ppm)', type: 'number', placeholder: 'e.g., 1200' },
-            { key: 'h2sPpm', label: 'H2S (ppm)', type: 'number', placeholder: 'e.g., 5' },
           ],
         },
       },

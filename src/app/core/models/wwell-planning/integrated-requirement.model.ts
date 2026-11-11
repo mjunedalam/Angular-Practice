@@ -97,7 +97,7 @@ export interface IntegratedRequirementOffsetWell {
   /** exad_gwd_ir_water.ep_a_num — the offset well's numeric id, and (with ir_seq) the natural key
    *  the save proc matches rows on. See docs/ir/p2-ir.md. */
   readonly epANum: number;
-  /** exad_gwd_ir_water.w_gnr_name — the offset well's display name ("Area Water Well" name). */
+  /** exad_gwd_ir_water.wb_name — the offset well's display name ("Area Water Well" name); older rows may only have w_gnr_name. */
   readonly wellName?: string | null;
   /** Everything below is historical test-result data — usually enriched after creation, not captured at intake. */
   readonly distanceKm?: number | null;

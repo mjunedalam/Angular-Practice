@@ -27,7 +27,6 @@
       <table class="ir-details__table">
         <thead>
           <tr>
-            <th>EP A Num</th>
             <th>Well Name</th>
             <th>Dist (km)</th>
             <th>Location</th>
@@ -45,7 +44,6 @@
         <tbody>
           @for (row of ir().offsetWells; track row.epANum) {
             <tr>
-              <td>{{ row.epANum }}</td>
               <td>{{ row.wellName || '—' }}</td>
               <td class="ir-details__num">{{ row.distanceKm ?? '—' }}</td>
               <td>{{ row.location || '—' }}</td>

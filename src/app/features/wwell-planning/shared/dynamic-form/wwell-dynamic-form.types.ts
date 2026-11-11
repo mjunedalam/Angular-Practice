@@ -68,6 +68,9 @@ export interface WwellFieldConfig {
   readonly validators?: WwellFieldValidatorConfig;
   readonly colSpan?: 1 | 2;
   readonly visibleWhen?: WwellFieldVisibilityCondition;
+  /** Keeps the field's control in the row/section group (so its value is still carried, validated and saved) but draws no
+   *  input for it — for an identifier the user never types, such as the offset well's EP A number. */
+  readonly hidden?: boolean;
   /** Overrides the type-based empty default (e.g. pre-selecting a toggle-group option). */
   readonly defaultValue?: string | number;
   /** 'select' only — adds a filter input inside the option panel, narrowing `options` as the user

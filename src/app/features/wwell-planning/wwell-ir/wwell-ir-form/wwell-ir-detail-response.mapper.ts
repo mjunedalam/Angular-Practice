@@ -115,6 +115,8 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     header?.sampling,
     header?.flow_rmks,
     header?.dev_pump_test,
+    header?.tops_remarks,
+    header?.water_remarks,
   ].some(isLegacyIrHtmlText);
 
   return {
@@ -145,17 +147,17 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       depthFt: row.plan_tvd_dpth,
       subSeaFtAsl: row.plan_ss_dpth ?? null,
     })),
-    topsRemarks: header?.tops_remarks ?? existing.topsRemarks,
+    topsRemarks: header?.tops_remarks != null ? stripLegacyIrHtml(header.tops_remarks) : existing.topsRemarks,
     contacts: {
       geologistPrimary:
         resolveGeologistName(header?.cont_geologist, geologistNameByEmpNum, existing.contacts.geologistPrimary) ??
         existing.contacts.geologistPrimary,
       geologistSecondary: resolveGeologistName(header?.sub_cont_geologist, geologistNameByEmpNum, existing.contacts.geologistSecondary),
     },
-    offsetWellsRemarks: header?.water_remarks ?? existing.offsetWellsRemarks,
+    offsetWellsRemarks: header?.water_remarks != null ? stripLegacyIrHtml(header.water_remarks) : existing.offsetWellsRemarks,
     offsetWells: waterRows.map(row => ({
       epANum: row.ep_a_num,
-      wellName: row.w_gnr_name ?? null,
+      wellName: row.wb_name ?? row.w_gnr_name ?? null,
       distanceKm: row.distanct ?? null,
       location: row.direction ?? null,
       aquifer: row.aquifer ?? null,

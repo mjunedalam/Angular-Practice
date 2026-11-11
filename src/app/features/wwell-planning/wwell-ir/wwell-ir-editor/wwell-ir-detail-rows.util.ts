@@ -63,12 +63,17 @@ function coordinateKvRows(coordinates: string | null | undefined): readonly KvRo
 export function buildRequestReferenceRows(
   ir: IntegratedRequirement,
   linkedRequestWellOptions: readonly { readonly value: string; readonly label: string }[] = [],
+  /** "Link to Water Well" is only a picker for creating/editing an IR — read-only displays leave it out (the
+   *  Water Well Name row below already says which well it is). */
+  includeLinkedWell = false,
 ): readonly KvRow[] {
   const r = ir.requestReference;
   return [
-    { label: 'Link to Request', value: resolveLinkedRequestLabel(r.linkedRequestId, r.wellName, linkedRequestWellOptions) },
-    { label: 'Letter Number', value: fmtStr(r.letterNumber), mono: true },
+    ...(includeLinkedWell
+      ? [{ label: 'Link to Water Well', value: resolveLinkedRequestLabel(r.linkedRequestId, r.wellName, linkedRequestWellOptions) }]
+      : []),
     { label: 'Water Well Name', value: fmtStr(r.wellName) },
+    { label: 'Letter Number', value: fmtStr(r.letterNumber), mono: true },
     { label: 'Supporting Business', value: fmtStr(r.supportingBusiness) },
     { label: 'Target Aquifer', value: fmtStr(r.targetAquifer), options: true },
     // A brand-new draft is created through the required-number fallback in

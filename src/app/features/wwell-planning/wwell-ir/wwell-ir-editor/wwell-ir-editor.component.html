@@ -807,7 +807,7 @@
           @if (offsetWellsEdit.visible() && offsetWellsEdit.control(); as ctrl) {
             <div class="ire__edit-block" appWwellCollapseAnimate>
               <app-dynamic-section
-                [section]="offsetWellsSection"
+                [section]="offsetWellsEditSection"
                 [control]="ctrl"
                 mode="edit"
                 [selectPanelClass]="selectPanelClass"
@@ -818,7 +818,7 @@
               <table class="ire__view-table">
                 <thead>
                   <tr>
-                    <th>EP A Num</th>
+                    <th>Well Name</th>
                     <th>Aquifer</th>
                     <th>Distance (km)</th>
                     <th>Rate (GPM)</th>
@@ -830,7 +830,7 @@
                     <tr appWwellCollapseAnimate>
                       @if (offsetWellsInlineEdit.isEditing(i) && offsetWellsRowGroup(i); as rowGroup) {
                         <td>
-                          <app-dynamic-field [config]="offsetWellsFieldConfig('epANum')" [control]="rowFieldControl(rowGroup, 'epANum')" mode="edit" [selectPanelClass]="selectPanelClass" />
+                          <app-dynamic-field [config]="offsetWellsFieldConfig('wellName')" [control]="rowFieldControl(rowGroup, 'wellName')" mode="edit" [selectPanelClass]="selectPanelClass" />
                         </td>
                         <td>
                           <app-dynamic-field [config]="offsetWellsFieldConfig('aquifer')" [control]="rowFieldControl(rowGroup, 'aquifer')" mode="edit" [selectPanelClass]="selectPanelClass" />
@@ -850,15 +850,15 @@
                           </button>
                         </td>
                       } @else {
-                        <td [class.ire__cell--changed]="wellChanged(row, 'epANum')">{{ row.epANum }}</td>
+                        <td [class.ire__cell--changed]="wellChanged(row, 'wellName')">{{ row.wellName || "—" }}</td>
                         <td [class.ire__cell--changed]="wellChanged(row, 'aquifer')">{{ row.aquifer || "—" }}</td>
                         <td [class.ire__cell--changed]="wellChanged(row, 'distanceKm')">{{ row.distanceKm ?? "—" }}</td>
                         <td [class.ire__cell--changed]="wellChanged(row, 'rateGpm')">{{ row.rateGpm ?? "—" }}</td>
                         <td class="ire__row-actions">
-                          <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + row.epANum" [matTooltip]="'Edit offset well ' + row.epANum" matTooltipClass="ir-attachment-tooltip" (click)="editOffsetWellRowInline(i)">
+                          <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + (row.wellName || row.epANum)" [matTooltip]="'Edit offset well ' + (row.wellName || row.epANum)" matTooltipClass="ir-attachment-tooltip" (click)="editOffsetWellRowInline(i)">
                             <mat-icon>edit</mat-icon>
                           </button>
-                          <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete offset well ' + row.epANum" [matTooltip]="'Delete offset well ' + row.epANum" matTooltipClass="ir-attachment-tooltip" (click)="deleteOffsetWellRow(i)">
+                          <button type="button" mat-icon-button class="ire__row-action-btn ire__row-action-btn--danger" [attr.aria-label]="'Delete offset well ' + (row.wellName || row.epANum)" [matTooltip]="'Delete offset well ' + (row.wellName || row.epANum)" matTooltipClass="ir-attachment-tooltip" (click)="deleteOffsetWellRow(i)">
                             <mat-icon>delete</mat-icon>
                           </button>
                         </td>

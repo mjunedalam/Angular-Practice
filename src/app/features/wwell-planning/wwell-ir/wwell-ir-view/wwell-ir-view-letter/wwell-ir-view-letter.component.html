@@ -27,7 +27,7 @@
   </p>
 
   <p class="letter__intro">
-    Following are the integrated requirements for the drilling water supply well
+    Following are the integrated requirements for the water supply well
     <strong>{{ ir().requestReference.wellName || '—' }}</strong>.
   </p>
 
@@ -35,8 +35,8 @@
     <section class="letter__section">
       <h4>Objectives</h4>
       <p class="letter__text">
-        <strong>{{ ir().requestReference.wellName || '—' }}</strong> will be used as drilling water supply well supporting
-        Development well <strong>{{ supporting }}</strong>.
+        <strong>{{ ir().requestReference.wellName || '—' }}</strong> will be used as water supply well supporting
+        <strong>{{ supporting }}</strong>.
       </p>
     </section>
   }
@@ -181,7 +181,7 @@
   }
 
   <section class="letter__section">
-    <h4>Formation Tops*</h4>
+    <h4>Formation Tops{{ topsFootnote() ? '*' : '' }}</h4>
     <div class="letter__table-wrap">
       <table class="letter__table">
         <thead>
@@ -204,8 +204,8 @@
         </tbody>
       </table>
     </div>
-    @if (ir().topsRemarks; as topsRemarks) {
-      <p class="letter__text">*{{ topsRemarks }}</p>
+    @if (topsFootnote(); as topsRemarks) {
+      <p class="letter__text">{{ topsRemarks }}</p>
     }
   </section>
 
@@ -227,8 +227,8 @@
   </section>
 
   <section class="letter__section">
-    <h4>Area Water Well</h4>
-    @if (ir().offsetWellsRemarks; as waterRemarks) {
+    <h4>Area Water Well{{ waterFootnote() ? '*' : '' }}</h4>
+    @if (waterFootnote(); as waterRemarks) {
       <p class="letter__text">{{ waterRemarks }}</p>
     } @else {
       <p class="letter__text letter__text--empty">No remarks.</p>
@@ -283,33 +283,7 @@
   </section>
 
   <section class="letter__section">
-    <h4>Integrated Requirements Approval List</h4>
-    <div class="letter__table-wrap">
-      <table class="letter__table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Approved Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (step of ir().chain; track step.role + step.name) {
-            <tr>
-              <td>{{ step.name }}</td>
-              <td>{{ step.role }}</td>
-              <td class="letter__status" [attr.data-tone]="step.status">{{ stepStatusLabel(step.status) }}</td>
-              <td>{{ step.date || 'N/A' }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="letter__table-empty">Pending approval</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <!-- No approval list here: the copy filed in SAP omits it (the Submit-for-Review flow renders the letter with omitApprovalList), and this tab mirrors that copy. -->
     @if (initiatorInitials(); as initials) {
       <p class="letter__text">/{{ initials }}</p>
     }
