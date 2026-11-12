@@ -216,6 +216,26 @@ transition: 0.3s ease;
     var(--wp-shadow-2) !important;
 }
 
+// A calculation tooltip (formula + current numbers): several lines, left-aligned, light and airy. Colours come from the
+// theme tooltip tokens (--wp-tooltip-*), so it follows light/dark with the rest of the app.
+.mat-mdc-tooltip.dyf-derived-tooltip .mdc-tooltip__surface {
+  max-width: 300px;
+  padding: 0.7rem 0.95rem !important;
+  border-radius: 10px !important;
+  white-space: pre !important;
+  text-align: left !important;
+  font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace !important;
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  line-height: 1.7 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  // the formula line reads as the heading
+  &::first-line {
+    opacity: 0.65;
+  }
+}
+
 // ── IR attachment viewer toolbar ─────────────────────────────────────────────
 // Inverted on purpose: the viewer's chrome is near-black (#1b1e26), so the dark surface used above
 // would sit almost invisibly on top of it. A light chip is the readable choice over that stage.

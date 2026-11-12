@@ -432,3 +432,11 @@ $accent: tokens.$accent;
     stroke-dashoffset: 0;
   }
 }
+
+// Keyboard focus: these controls had a hover state only.
+.irv__back-btn:focus-visible,
+.irv__letter-download:focus-visible,
+.irv__tab:focus-visible {
+  outline: 2px solid var(--wp-accent);
+  outline-offset: 2px;
+}

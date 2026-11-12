@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { AgwaConfig } from '@shared/models/config/agwa-config';
 import { environment } from '@env/environment';
+import { registerServiceEndpoints } from '@core/utils/http-error.util';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class ExternalConfigService {
   async loadConfig(): Promise<void> {
     const url = `${environment.externalConfigFileUrl}?t=${Date.now()}`;
     this.config = await lastValueFrom(this.http.get<AgwaConfig>(url));
+    registerServiceEndpoints(this.config);
   }
 
   get settings(): AgwaConfig {

@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { switchMap, startWith } from 'rxjs';
 import { WwellAttachmentDropzoneComponent } from '../../wwell-attachment-dropzone/wwell-attachment-dropzone.component';
 import { WwellRichTextareaComponent } from '../rich-textarea/wwell-rich-textarea.component';
@@ -31,6 +32,7 @@ export type WwellDynamicFieldMode = 'edit' | 'review';
     MatButtonToggleModule,
     MatAutocompleteModule,
     MatIconModule,
+    MatTooltipModule,
     WwellAttachmentDropzoneComponent,
     WwellRichTextareaComponent,
   ],
@@ -129,6 +131,15 @@ export class DynamicFieldComponent {
   protected readonly isModified = computed(() => {
     this.liveValue();
     return this.control().dirty;
+  });
+
+  /** Tooltip text for a `derived` field: its formula with the row's current numbers. Re-evaluates whenever this
+   *  field's value changes, which is exactly when an input of the formula did. */
+  protected readonly derivedInfo = computed(() => {
+    const derived = this.config().derived;
+    if (!derived) return null;
+    this.liveValue();
+    return derived.explain(this.control().parent?.getRawValue() ?? {});
   });
 
   protected readonly isReviewValueEmpty = computed(() => this.reviewValue() === '—');

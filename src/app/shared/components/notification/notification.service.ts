@@ -26,6 +26,8 @@ export class NotificationService {
     type: NotificationType = 'info',
     options?: NotificationOptions,
   ): void {
+    // The same failure is often reported twice (global interceptor + the caller's own handler).
+    if (this.notifications().some(n => n.type === type && n.message === message)) return;
     const id = ++this.nextId;
     const durationMs = Math.max(1000, options?.durationMs ?? this.defaultDurationMs());
     this.notifications.update(list => [...list, { id, type, message, durationMs }]);

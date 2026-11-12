@@ -129,3 +129,13 @@ export class InlineRowEditState {
     this.snapshot = null;
   }
 }
+
+/** Reorders an array's rows shallowest-first by the named depth control, in place. Rows are reshuffled by rewriting
+ *  their values (every row group has the same shape), so the controls and the array stay the same objects. */
+export function sortFormArrayByDepth(array: FormArray, depthKey: string): void {
+  const rows = array.controls.map(control => (control as FormGroup).getRawValue() as Record<string, unknown>);
+  const depth = (row: Record<string, unknown>): number => (typeof row[depthKey] === 'number' ? (row[depthKey] as number) : Number.POSITIVE_INFINITY);
+  const sorted = [...rows].sort((a, b) => depth(a) - depth(b));
+  if (sorted.every((row, index) => row === rows[index])) return;
+  sorted.forEach((row, index) => array.at(index).patchValue(row));
+}

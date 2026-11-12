@@ -241,6 +241,84 @@ $master-width: 240px;
   }
 }
 
+.wwell-ir__search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: tokens.$subtle;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: var(--wp-surface-hover);
+    color: $navy;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: 1px;
+  }
+}
+
+.wwell-ir__result-count {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0 0.15rem;
+  font-size: tokens.$text-2xs;
+  color: $muted;
+  font-variant-numeric: tabular-nums;
+
+  strong {
+    color: $navy;
+    font-weight: 650;
+  }
+}
+
+.wwell-ir__result-clear {
+  margin-left: auto;
+  padding: 0.1rem 0.4rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: $accent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--wp-accent-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: 1px;
+  }
+
+  &--solid {
+    margin-left: 0;
+    margin-top: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--wp-accent-line);
+    font-size: 0.82rem;
+  }
+}
+
 .wwell-ir__search-icon {
   width: 18px;
   height: 18px;
@@ -405,6 +483,32 @@ $master-width: 240px;
   &--error {
     color: var(--wp-danger);
   }
+
+  &--empty {
+    flex-direction: column;
+    gap: 0.25rem;
+
+    mat-icon {
+      width: 34px;
+      height: 34px;
+      font-size: 34px;
+      color: var(--wp-line-strong);
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.wwell-ir__status-title {
+  font-weight: 650;
+  color: $navy;
+}
+
+.wwell-ir__status-hint {
+  font-size: 0.85rem;
+  max-width: 24ch;
 }
 
 /* ── Loading skeleton ─────────────────────────────────────────────
@@ -566,7 +670,7 @@ $master-width: 240px;
   padding: 0.6rem 0.7rem;
   background: tokens.$surface;
   border: 1px solid transparent;
-  border-left: 2px solid transparent;
+  border-left: 3px solid var(--row-accent, transparent);
   border-radius: 7px;
   cursor: pointer;
   font: inherit;
@@ -619,43 +723,59 @@ $master-width: 240px;
   gap: 0.5rem;
 }
 
+/* The IR code is secondary to the well name, so it reads as a small muted reference. */
 .wwell-ir__row-code {
-  font-size: 0.82rem;
-  font-weight: 650;
-  color: $navy;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: $muted;
   letter-spacing: 0.01em;
   font-family: tokens.$font-mono;
   font-variant-numeric: tabular-nums;
 }
 
+/* The well name is the row's headline: it may wrap to a second line rather than be cut off. */
 .wwell-ir__row-name {
   margin: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.94rem;
+  font-weight: 650;
+  line-height: 1.25;
   color: $navy;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .wwell-ir__row-meta {
   margin: 0;
   font-size: tokens.$text-2xs;
   color: $muted;
-  white-space: nowrap;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .wwell-ir__badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 0;
   font-size: tokens.$text-2xs;
   font-weight: 600;
   color: $muted;
   white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--badge-dot, currentColor);
+  }
 }
 
 /* ── Detail column ────────────────────────────────────────────── *

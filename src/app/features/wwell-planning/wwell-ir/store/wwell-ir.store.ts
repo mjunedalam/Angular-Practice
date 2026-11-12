@@ -1,3 +1,4 @@
+import { extractHttpErrorMessage } from '@core/utils/http-error.util';
 import { computed, inject } from '@angular/core';
 import { environment } from '@env/environment';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -51,7 +52,7 @@ function errorMessage(err: unknown, fallback: string): string {
     // CORS rejection, offline). There is no ApiResponse envelope to prefer, and `err.error` holds
     // the transport's own TypeError — surfacing its "Failed to fetch" as though it were a backend
     // message tells the user nothing, so the caller's own copy wins here.
-    if (err.status === 0) return fallback;
+    if (err.status === 0) return extractHttpErrorMessage(err, fallback);
     const body: unknown = err.error;
     const backendMessage = body && typeof body === 'object' ? (body as { message?: unknown }).message : undefined;
     if (typeof backendMessage === 'string' && backendMessage) return backendMessage;
@@ -144,11 +145,6 @@ export const WwellIrStore = signalStore(
       /** {value, label} = st_long_cd for the Formation Tops "Formation" dropdown — the name is both what
        *  the user sees and what gets saved, so there is no separate code to resolve at save time. */
       formationOptions: computed(() => stratInfos().map(strat => ({ value: strat.description, label: strat.description }))),
-      /** {value, label} = st_long_cd / "st_long_cd - st_desc" for the Area Water Wells Aquifer dropdown — strat_info is
-       *  where the aquifer codes and their descriptions live (same GET /strat-info the Formation dropdown reads). */
-      stratAquiferOptions: computed(() =>
-        stratInfos().map(strat => ({ value: strat.description, label: strat.stratDesc ? `${strat.description} - ${strat.stratDesc}` : strat.description })),
-      ),
       /** {value, label} = well name for the Area Water Wells "Select Offset Water Well" picker. */
       offsetWellSourceOptions: computed(() => offsetWellSources().map(well => ({ value: well.wellName, label: well.wellName }))),
       geologistOptions: computed(() => gwdOpsMembers().map(member => member.fullName)),

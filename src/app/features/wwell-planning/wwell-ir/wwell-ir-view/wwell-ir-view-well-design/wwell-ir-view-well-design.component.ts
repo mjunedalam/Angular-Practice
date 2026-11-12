@@ -17,6 +17,8 @@ import {
 } from '../../wwell-ir-form/wwell-ir-wellbore-diagram.mapper';
 import { WwellIrWellborePanelComponent } from '../../wwell-ir-wellbore-panel/wwell-ir-wellbore-panel.component';
 import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-view-kv-card.component';
+import { WwellIrSubSeaInfoComponent } from '../../wwell-ir-sub-sea-info/wwell-ir-sub-sea-info.component';
+import { sortByDepthAscending } from '../../wwell-ir-form/wwell-ir-detail-response.mapper';
 
 /** "Well Design" step of the read-only IR view: the same submitted-record wellbore diagram
  *  WwellIrEditorComponent's own "Wellbore Preview" card renders (via
@@ -39,7 +41,7 @@ import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-vi
 @Component({
   selector: 'app-wwell-ir-view-well-design',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, WwellIrWellborePanelComponent, WwellIrViewKvCardComponent],
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, WwellIrWellborePanelComponent, WwellIrViewKvCardComponent, WwellIrSubSeaInfoComponent],
   templateUrl: './wwell-ir-view-well-design.component.html',
   styleUrl: './wwell-ir-view-well-design.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +68,7 @@ export class WwellIrViewWellDesignComponent {
   // (wwell-ir-editor.component.ts's `hasTargetDepth`) — for the rare submitted record whose
   // target depth never actually got filled in.
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
+  protected readonly casingRows = computed(() => sortByDepthAscending(this.ir().casing, row => row.depthFtBgl));
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
 
   /** Depths read as figures, not raw numbers: same thousands separators the panel's own tables use. */

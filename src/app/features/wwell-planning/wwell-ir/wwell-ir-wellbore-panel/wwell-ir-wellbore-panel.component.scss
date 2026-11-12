@@ -1563,3 +1563,21 @@ $td-label-gap: 30;
     justify-content: flex-start;
   }
 }
+
+// Legend: pointing at one entry brings it forward and quiets the rest, so a single swatch is easy to find in a long legend.
+@media (hover: hover) {
+  .wbp__legend:hover .wbp__key {
+    opacity: 0.45;
+    transition: opacity 150ms ease;
+  }
+
+  .wbp__legend:hover .wbp__key:hover {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wbp__legend:hover .wbp__key {
+    transition: none;
+  }
+}

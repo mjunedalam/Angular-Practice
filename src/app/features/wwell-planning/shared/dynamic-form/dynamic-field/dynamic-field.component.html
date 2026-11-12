@@ -139,6 +139,11 @@
           @if (config().suffix) {
             <span matTextSuffix class="dyf__suffix">&nbsp;{{ config().suffix }}</span>
           }
+          @if (derivedInfo(); as info) {
+            <button type="button" matIconSuffix class="dyf__info" [attr.aria-label]="'How ' + config().label + ' is calculated'" [matTooltip]="info" matTooltipClass="ir-attachment-tooltip dyf-derived-tooltip" matTooltipPosition="above" [matTooltipShowDelay]="0">
+              <mat-icon>info_outline</mat-icon>
+            </button>
+          }
           @if (config().hint && !errorMessage()) {
             <mat-hint>{{ config().hint }}</mat-hint>
           }

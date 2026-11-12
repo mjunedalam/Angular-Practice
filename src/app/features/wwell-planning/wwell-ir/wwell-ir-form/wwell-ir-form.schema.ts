@@ -289,7 +289,7 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
             { key: 'wellName', label: 'Well Name', type: 'text' },
             // The id the save procedure keys a row on — assigned when the row is added (see addOffsetWellRow), never typed, so no input is drawn.
             { key: 'epANum', label: 'EP A Num', type: 'number', hidden: true },
-            // A dropdown of the strat_info aquifer codes — its options are supplied by buildWwellIrFormSchema.
+            // The same aquifer dropdown as Estimated Hydrology — its options are supplied by buildWwellIrFormSchema.
             { key: 'aquifer', label: 'Aquifer', type: 'select', options: [], keepUnlistedValue: true },
             { key: 'totalDepthFt', label: 'TD (ft bgl)', type: 'number' },
             { key: 'testDurationMin', label: 'Test Duration (min)', type: 'number' },

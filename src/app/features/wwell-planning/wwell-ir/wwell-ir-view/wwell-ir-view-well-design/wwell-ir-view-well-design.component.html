@@ -30,7 +30,7 @@
             <tr>
               <td>{{ top.name }}</td>
               <td class="ir-well-design__num">{{ formatDepth(top.depthFt) }}</td>
-              <td class="ir-well-design__num">{{ subSeaFt(top.depthFt) ?? '—' }}</td>
+              <td class="ir-well-design__num">{{ subSeaFt(top.depthFt) ?? '—' }}<app-wwell-ir-sub-sea-info [elevation]="ir().requestReference.surfaceElevationFtAsl" [depth]="top.depthFt" /></td>
             </tr>
           } @empty {
             <tr>
@@ -95,7 +95,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of ir().casing; track row.type + row.depthFtBgl) {
+          @for (row of casingRows(); track row.type + row.depthFtBgl) {
             <tr>
               <td>{{ row.type }}</td>
               <td class="ir-well-design__num">{{ row.sizeIn }}</td>

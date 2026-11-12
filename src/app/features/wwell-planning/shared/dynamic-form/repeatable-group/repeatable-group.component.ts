@@ -81,6 +81,7 @@ export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.syncDerivedFields();
     this.syncConditionalRowFields();
     this.valueChangesSubscription = this.formArray().valueChanges.subscribe(() => this.onFormArrayChanged());
     // Re-sync whenever the query list's elements change (row added/removed) — a freshly
@@ -118,6 +119,7 @@ export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
    * isn't enough when nothing ever walks back down to it on its own.
    */
   private onFormArrayChanged(): void {
+    this.syncDerivedFields();
     this.syncConditionalRowFields();
     this.cdr.detectChanges();
   }
@@ -144,6 +146,21 @@ export class RepeatableGroupComponent implements AfterViewInit, OnDestroy {
       this.formArray().removeAt(index);
       this.lastVisibility.delete(row);
     }));
+  }
+
+  /** Writes each `derived` field's computed value into its control. Only a changed value is written, so the
+   *  valueChanges this triggers settles on the next pass instead of looping. */
+  private syncDerivedFields(): void {
+    const derivedFields = this.config().rowFields.filter(field => field.derived);
+    if (!derivedFields.length) return;
+
+    for (const row of this.rows()) {
+      for (const field of derivedFields) {
+        const control = this.fieldControl(row, field.key);
+        const value = field.derived?.compute(row.getRawValue()) ?? null;
+        if (control.value !== value) control.setValue(value);
+      }
+    }
   }
 
   private syncConditionalRowFields(): void {

@@ -41,6 +41,7 @@ import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper
 import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
 import { WWELL_IR_STATUS_META, hasKnownIrStatus, irBadgeMeta } from './wwell-ir.config';
+import { relativeUpdatedLabel } from './wwell-ir-relative-date.util';
 
 /** Which surface WwellIrEditorComponent's slot in the detail panel currently shows for the
  *  selected record — 'edit' is the existing view-with-inline-edit surface, 'view' is the
@@ -56,7 +57,7 @@ const SKELETON_ROW_COUNT = 6;
 // (see cdk-virtual-scroll-viewport's `itemSize`) — every `.wwell-ir__row-item` is pinned to
 // exactly this height in wwell-ir.component.scss so the two never drift out of sync (a mismatch
 // shows up as overlapping or gapped rows, since the viewport positions each one by index * itemSize).
-const WWELL_IR_ROW_ITEM_SIZE_PX = 84;
+const WWELL_IR_ROW_ITEM_SIZE_PX = 96;
 
 /** Coarse lifecycle split for the master list's top toggle — "Active" is every status before the
  *  record leaves the author's hands, "Inactive" is the one terminal status. Kept separate from the
@@ -456,6 +457,28 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
 
   protected onSearchChange(term: string): void {
     this.searchTerm.set(term);
+  }
+
+  protected readonly relativeUpdated = relativeUpdatedLabel;
+
+  /** The row's status colour for its dot and edge bar. "Submit for Review" is a filled badge whose dot is white, which would vanish on a white row, so it uses its fill instead. */
+  protected statusAccent(ir: IntegratedRequirement): string {
+    const meta = this.badgeMeta(ir);
+    return meta.dot.includes('on-accent') ? meta.bg : meta.dot;
+  }
+
+  /** Records the current lifecycle bucket holds before the status chip and search narrow it — the "of M" in the result count. */
+  protected readonly scopedTotal = computed(() => this.lifecycleScopedIrs().length);
+  protected readonly hasActiveNarrowing = computed(() => this.searchTerm().trim() !== '' || this.statusFilter() !== 'all');
+
+  protected clearSearch(): void {
+    this.searchTerm.set('');
+  }
+
+  /** Drops the search and the status chip, back to every record in the current bucket. */
+  protected clearFilters(): void {
+    this.searchTerm.set('');
+    this.statusFilter.set('all');
   }
 
   /** Switching lifecycle bucket resets the status chip back to "All" — a chip selected in the old

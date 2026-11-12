@@ -223,6 +223,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('wellbore')"
           (click)="toggleTimelineStep('wellbore')"
           (keydown.enter)="toggleTimelineStep('wellbore')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('wellbore')"
@@ -280,6 +281,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('general')"
           (click)="toggleTimelineStep('general')"
           (keydown.enter)="toggleTimelineStep('general')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('general')"
@@ -392,6 +394,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('horizons')"
           (click)="toggleTimelineStep('horizons')"
           (keydown.enter)="toggleTimelineStep('horizons')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('horizons')"
@@ -451,8 +454,8 @@
                 <thead>
                   <tr>
                     <th>Formation</th>
-                    <th>Depth (ft bgl)</th>
-                    <th>Sub-sea (ft asl)</th>
+                    <th class="ire__num">Depth (ft bgl)</th>
+                    <th class="ire__num">Sub-sea (ft asl)</th>
                     <th class="ire__view-table-actions-col">Actions</th>
                   </tr>
                 </thead>
@@ -466,7 +469,7 @@
                         <td>
                           <app-dynamic-field [config]="formationTopsFieldConfig('depthFt')" [control]="rowFieldControl(rowGroup, 'depthFt')" mode="edit" [selectPanelClass]="selectPanelClass" />
                         </td>
-                        <td>{{ subSeaFt(rowFieldControl(rowGroup, 'depthFt').value) ?? "—" }}</td>
+                        <td>{{ subSeaFt(rowFieldControl(rowGroup, 'depthFt').value) ?? "—" }}<app-wwell-ir-sub-sea-info [elevation]="savedElevation()" [depth]="rowFieldControl(rowGroup, 'depthFt').value" /></td>
                         <td class="ire__row-actions">
                           <button type="button" mat-icon-button class="ire__row-action-btn" aria-label="Save formation top" matTooltip="Save formation top" matTooltipClass="ir-attachment-tooltip" [disabled]="rowGroup.invalid" (click)="saveFormationTopRowInline()">
                             <mat-icon>check</mat-icon>
@@ -477,9 +480,9 @@
                         </td>
                       } @else {
                         <td [class.ire__cell--changed]="topChanged(top, 'name')">{{ top.name }}</td>
-                        <td [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ top.depthFt }}</td>
-                        <td [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ subSeaFt(top.depthFt) ?? "—" }}</td>
-                        <td class="ire__row-actions">
+                        <td class="ire__num" [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ top.depthFt }}</td>
+                        <td class="ire__num" [class.ire__cell--changed]="topChanged(top, 'depthFt')">{{ subSeaFt(top.depthFt) ?? "—" }}<app-wwell-ir-sub-sea-info [elevation]="savedElevation()" [depth]="top.depthFt" /></td>
+                        <td class="ire__row-actions ire__row-actions--rest">
                           <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit formation top ' + top.name" [matTooltip]="'Edit formation top ' + top.name" matTooltipClass="ir-attachment-tooltip" (click)="editFormationTopRowInline(i)">
                             <mat-icon>edit</mat-icon>
                           </button>
@@ -491,7 +494,12 @@
                     </tr>
                   } @empty {
                     <tr>
-                      <td colspan="4" class="ire__view-table-empty">No formation tops recorded.</td>
+                      <td colspan="4" class="ire__view-table-empty">
+                        No formation tops recorded.
+                        <button type="button" class="ire__empty-add" (click)="addFormationTopAddRow()">
+                          <mat-icon aria-hidden="true">add</mat-icon>Add horizon
+                        </button>
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -549,6 +557,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('casing')"
           (click)="toggleTimelineStep('casing')"
           (keydown.enter)="toggleTimelineStep('casing')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('casing')"
@@ -595,8 +604,8 @@
               <thead>
                 <tr>
                   <th>Type</th>
-                  <th>Size</th>
-                  <th>Depth (ft bgl)</th>
+                  <th class="ire__num">Size</th>
+                  <th class="ire__num">Depth (ft bgl)</th>
                   <th>Remarks</th>
                   <th class="ire__view-table-actions-col">Actions</th>
                 </tr>
@@ -627,10 +636,10 @@
                       </td>
                     } @else {
                       <td [class.ire__cell--changed]="casingChanged(row, 'type')">{{ row.type }}</td>
-                      <td [class.ire__cell--changed]="casingChanged(row, 'sizeIn')">{{ row.sizeIn }}</td>
-                      <td [class.ire__cell--changed]="casingChanged(row, 'depthFtBgl')">{{ row.depthFtBgl }}</td>
+                      <td class="ire__num" [class.ire__cell--changed]="casingChanged(row, 'sizeIn')">{{ row.sizeIn }}</td>
+                      <td class="ire__num" [class.ire__cell--changed]="casingChanged(row, 'depthFtBgl')">{{ row.depthFtBgl }}</td>
                       <td [class.ire__cell--changed]="casingChanged(row, 'remarks')">{{ row.remarks || "—" }}</td>
-                      <td class="ire__row-actions">
+                      <td class="ire__row-actions ire__row-actions--rest">
                         <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit casing row ' + (i + 1)" [matTooltip]="'Edit casing row ' + (i + 1)" matTooltipClass="ir-attachment-tooltip" (click)="editCasingRowInline(i)">
                           <mat-icon>edit</mat-icon>
                         </button>
@@ -642,7 +651,12 @@
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="5" class="ire__view-table-empty">No casing recorded.</td>
+                    <td colspan="5" class="ire__view-table-empty">
+                        No casing recorded.
+                        <button type="button" class="ire__empty-add" (click)="addCasingAddRow()">
+                          <mat-icon aria-hidden="true">add</mat-icon>Add casing
+                        </button>
+                      </td>
                   </tr>
                 }
               </tbody>
@@ -707,6 +721,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('hydrogeology')"
           (click)="toggleTimelineStep('hydrogeology')"
           (keydown.enter)="toggleTimelineStep('hydrogeology')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('hydrogeology')"
@@ -764,6 +779,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('areaWaterWells')"
           (click)="toggleTimelineStep('areaWaterWells')"
           (keydown.enter)="toggleTimelineStep('areaWaterWells')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('areaWaterWells')"
@@ -819,7 +835,7 @@
                 <thead>
                   <tr>
                     @for (col of offsetWellColumns; track col.key) {
-                      <th>{{ col.label }}</th>
+                      <th [class.ire__num]="col.type === 'number'">{{ col.label }}</th>
                     }
                     <th class="ire__view-table-actions-col">Actions</th>
                   </tr>
@@ -843,9 +859,9 @@
                         </td>
                       } @else {
                         @for (col of offsetWellColumns; track col.key) {
-                          <td [class.ire__cell--changed]="wellChanged(row, col.key)">{{ offsetWellCell(row, col.key) }}</td>
+                          <td [class.ire__num]="col.type === 'number'" [class.ire__cell--changed]="wellChanged(row, col.key)">{{ offsetWellCell(row, col.key) }}</td>
                         }
-                        <td class="ire__row-actions">
+                        <td class="ire__row-actions ire__row-actions--rest">
                           <button type="button" mat-icon-button class="ire__row-action-btn" [attr.aria-label]="'Edit offset well ' + (row.wellName || row.epANum)" [matTooltip]="'Edit offset well ' + (row.wellName || row.epANum)" matTooltipClass="ir-attachment-tooltip" (click)="editOffsetWellRowInline(i)">
                             <mat-icon>edit</mat-icon>
                           </button>
@@ -857,7 +873,12 @@
                     </tr>
                   } @empty {
                     <tr>
-                      <td [attr.colspan]="offsetWellColumns.length + 1" class="ire__view-table-empty">No offset wells recorded.</td>
+                      <td [attr.colspan]="offsetWellColumns.length + 1" class="ire__view-table-empty">
+                        No offset wells recorded.
+                        <button type="button" class="ire__empty-add" (click)="addOffsetWellAddRow()">
+                          <mat-icon aria-hidden="true">add</mat-icon>Add area water well
+                        </button>
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -915,6 +936,7 @@
           class="ire__section-head"
           role="button"
           tabindex="0"
+          [attr.aria-expanded]="isTimelineStepExpanded('attachments')"
           (click)="toggleTimelineStep('attachments')"
           (keydown.enter)="toggleTimelineStep('attachments')"
           (keydown.space)="$event.preventDefault(); toggleTimelineStep('attachments')"
@@ -942,7 +964,15 @@
              single file — any number of documents can be attached to it, each its own row with its
              own independent View/Upload/Delete and its own progress bar. -->
         @for (slot of attachmentSlots; track slot.slot) {
-          <section #sectionEl [id]="'ire-sec-' + slot.slot" class="ire__section ire__section--sub">
+          <section
+            #sectionEl
+            [id]="'ire-sec-' + slot.slot"
+            class="ire__section ire__section--sub ire__drop-zone"
+            [class.ire__drop-zone--over]="dragOverSlot() === slot.slot"
+            (dragover)="onSlotDragOver(slot.slot, $event)"
+            (dragleave)="onSlotDragLeave(slot.slot, $event)"
+            (drop)="onSlotDrop(slot.slot, $event)"
+          >
             <div class="ire__section-head">
               <h3 class="ire__subsection-title">
                 <mat-icon class="ire__attachment-slot-icon">{{ slot.icon }}</mat-icon>
@@ -1063,7 +1093,10 @@
                 }
               </ul>
             } @else {
-              <p class="ire__attachment-empty-hint" appWwellCollapseAnimate>{{ slot.hint }} PDF, JPG or PNG · max 25 MB</p>
+              <p class="ire__attachment-empty-hint" appWwellCollapseAnimate>
+                <mat-icon aria-hidden="true">upload_file</mat-icon>
+                <span>{{ slot.hint }} Drag a file here or use <strong>+</strong> · PDF, JPG or PNG · max 25 MB</span>
+              </p>
             }
           </section>
         }
@@ -1096,8 +1129,14 @@
       [class.ire__status--new]="!hasPendingEdits() && !hasSavedIrSeq()"
     >
       <span class="ire__status-dot" aria-hidden="true"></span>
-      {{ hasPendingEdits() ? 'Unsaved changes' : hasSavedIrSeq() ? 'All changes saved' : 'Not saved yet' }}
+      {{ footerStatus() }}
     </p>
+    @if (hasPendingEdits() && hasSavedIrSeq()) {
+      <button type="button" mat-button class="ire__discard-btn" [disabled]="anyFooterActionPending()" (click)="discardAll()">
+        <mat-icon>undo</mat-icon>
+        Discard
+      </button>
+    }
     <button
       type="button"
       mat-stroked-button

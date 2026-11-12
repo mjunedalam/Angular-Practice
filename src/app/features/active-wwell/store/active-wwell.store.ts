@@ -1,3 +1,5 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { extractHttpErrorMessage } from '@core/utils/http-error.util';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -213,7 +215,7 @@ export const ActiveWwellStore = signalStore(
                             },
                             error: (err: Error) => {
                                 patchState(store, { aquifersLoading: false });
-                                notify.error(err.message ?? 'Failed to load aquifer list');
+                                notify.error(err instanceof HttpErrorResponse ? extractHttpErrorMessage(err) : (err.message ?? 'Failed to load aquifer list'));
                             },
                         }),
                     ),

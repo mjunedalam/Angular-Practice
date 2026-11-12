@@ -449,7 +449,7 @@ describe('WwellIrStore - submitIrForReview', () => {
    *  `error` holding the transport's own TypeError rather than the backend's ApiResponse envelope.
    *  Reproduced live by pointing sapServiceUrl at a dead port: the toast read "Failed to fetch",
    *  which tells the user nothing about what failed or what to do. */
-  it('uses its own copy when the SAP call never reached a server', async () => {
+  it('names the unreachable service when the SAP call never reached a server', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
     sapServiceMock.trigger.mockReturnValue(
@@ -466,7 +466,7 @@ describe('WwellIrStore - submitIrForReview', () => {
     store.submitIrForReview(ir);
     await settleAsyncWork();
 
-    expect(store.sapTriggerError()).toBe('Failed to trigger the SAP review workflow');
+    expect(store.sapTriggerError()).toBe('Unable to reach the server. Check your connection and try again.');
   });
 
   /** An unsaved draft has no ir_seq, so there would be nothing to record the SAP outcome against

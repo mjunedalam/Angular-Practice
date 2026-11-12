@@ -815,3 +815,186 @@ app-wwell-ir-editor.ire-flag-unsaved .dyf--modified {
     color: #fff !important;
   }
 }
+
+// Keyboard focus: these controls had a hover state only.
+.ire__edit-btn:focus-visible,
+.ire__row-action-btn:focus-visible,
+.ire__attachment-add-btn:focus-visible,
+.ire__attachment-action:focus-visible {
+  outline: 2px solid var(--wp-accent);
+  outline-offset: 2px;
+}
+
+/* ── UX polish ────────────────────────────────────────────────────────────── */
+
+// Tables: long ones scroll inside their card with the header pinned; numbers line up on their digits.
+.ire__view-table-wrap {
+  max-height: min(60vh, 460px);
+  overflow: auto;
+}
+
+.ire__view-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ire__view-table .ire__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// A saved row keeps its Edit/Delete icons out of the way until the row is hovered or focused; they are always shown
+// on touch screens (no hover) and while a row is being edited (those buttons are not `--rest`).
+@media (hover: hover) {
+  .ire__view-table tbody tr .ire__row-actions--rest {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .ire__view-table tbody tr:hover .ire__row-actions--rest,
+  .ire__view-table tbody tr .ire__row-actions--rest:focus-within {
+    opacity: 1;
+  }
+
+  .ire--busy .ire__view-table tbody tr:hover .ire__row-actions--rest {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ire__view-table tbody tr .ire__row-actions--rest {
+    transition: none;
+  }
+}
+
+// Collapsible timeline steps: a chevron at the right edge of the header says it opens and closes.
+.ire__sections--timeline .ire__section-head[role='button'] {
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    order: 3;
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    margin: 0 0.35rem 0 0.25rem;
+    border-right: 2px solid $muted;
+    border-bottom: 2px solid $muted;
+    transform: rotate(45deg) translate(-2px, -2px);
+    transition: transform 200ms ease, border-color 150ms ease;
+  }
+
+  // The status pill and the chevron form one cluster at the right edge: the pill takes the free space itself, unless
+  // pencil/add buttons are already doing that.
+  > .ire__tl-status {
+    margin-left: auto;
+  }
+
+  &:has(> .ire__edit-btn, > .ire__section-actions) > .ire__tl-status {
+    margin-left: 0.35rem;
+  }
+
+  &[aria-expanded='true']::after {
+    transform: rotate(-135deg) translate(-2px, -2px);
+  }
+
+  &:hover::after {
+    border-color: $accent;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ire__sections--timeline .ire__section-head[role='button']::after {
+    transition: none;
+  }
+}
+
+// Footer: the Discard button sits beside the status text, quiet until it is needed.
+.ire__discard-btn {
+  flex-shrink: 0;
+  color: $muted;
+
+  &:hover:not(:disabled) {
+    color: var(--wp-danger-ink);
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// Attachments: the whole slot is a drop target; it outlines while a file is dragged over it.
+.ire__drop-zone {
+  position: relative;
+  border-radius: 10px;
+  transition: box-shadow 150ms ease, background 150ms ease;
+
+  &--over {
+    background: var(--wp-accent-soft);
+    box-shadow: inset 0 0 0 2px var(--wp-accent-line);
+  }
+}
+
+.ire__attachment-empty-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--wp-subtle);
+  }
+
+  strong {
+    color: $accent;
+  }
+}
+
+// Empty table: the dead-end "No … recorded" gets its own way forward.
+.ire__view-table-empty {
+  padding-block: 0.8rem;
+}
+
+.ire__empty-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: 0.6rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.35rem;
+  border: 1px solid var(--wp-accent-line);
+  border-radius: 999px;
+  background: transparent;
+  color: $accent;
+  font: inherit;
+  font-style: normal;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: var(--wp-accent-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}

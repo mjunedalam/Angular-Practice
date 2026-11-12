@@ -337,3 +337,10 @@
     margin-left: 0;
   }
 }
+
+// A still placeholder for people who ask for less motion.
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}

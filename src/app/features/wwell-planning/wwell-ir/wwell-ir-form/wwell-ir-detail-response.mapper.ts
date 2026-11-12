@@ -86,6 +86,12 @@ function resolveLegacyText(raw: string | null | undefined, fallback: string, hea
   return headerPresent ? '' : fallback;
 }
 
+/** Rows shallowest first (stable; a row with no depth goes last) — the order the casing and formation-tops grids list them. */
+export function sortByDepthAscending<T>(rows: readonly T[], depthOf: (row: T) => number | null | undefined): T[] {
+  const depth = (row: T): number => depthOf(row) ?? Number.POSITIVE_INFINITY;
+  return [...rows].sort((a, b) => depth(a) - depth(b));
+}
+
 export function mergeIrDetailBlocksIntoIntegratedRequirement(
   existing: IntegratedRequirement,
   blocks: readonly WwellIrDetailTableBlock[],
@@ -142,11 +148,14 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       targetAquifer: linkedWell?.target_form ?? existing.requestReference.targetAquifer,
       supportingBusiness: linkedWell?.expl_wb_name ?? existing.requestReference.supportingBusiness,
     },
-    formationTops: topsRows.map(row => ({
-      name: row.st_long_cd,
-      depthFt: row.plan_tvd_dpth,
-      subSeaFtAsl: row.plan_ss_dpth ?? null,
-    })),
+    formationTops: sortByDepthAscending(
+      topsRows.map(row => ({
+        name: row.st_long_cd,
+        depthFt: row.plan_tvd_dpth,
+        subSeaFtAsl: row.plan_ss_dpth ?? null,
+      })),
+      row => row.depthFt,
+    ),
     topsRemarks: header?.tops_remarks != null ? stripLegacyIrHtml(header.tops_remarks) : existing.topsRemarks,
     contacts: {
       geologistPrimary:
@@ -172,13 +181,16 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       tdsPpm: row.field_tds ?? null,
       h2sPpm: row.h2s ?? null,
     })),
-    casing: casingRows.map(row => ({
-      type: row.csg_type,
-      sizeIn: row.csg_size,
-      depthFtBgl: row.csg_depth,
-      tolFtBgl: null,
-      remarks: row.csg_remarks ?? null,
-    })),
+    casing: sortByDepthAscending(
+      casingRows.map(row => ({
+        type: row.csg_type,
+        sizeIn: row.csg_size,
+        depthFtBgl: row.csg_depth,
+        tolFtBgl: null,
+        remarks: row.csg_remarks ?? null,
+      })),
+      row => row.depthFtBgl,
+    ),
     programDetails: {
       ...existing.programDetails,
       completionType: wellDesignRowBelongsToThisIr ? (resolvedType?.completionType ?? '') : existing.programDetails.completionType,

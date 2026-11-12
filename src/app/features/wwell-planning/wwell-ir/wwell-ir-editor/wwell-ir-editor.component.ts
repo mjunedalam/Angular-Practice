@@ -67,7 +67,9 @@ import {
   WwellIrRawRemarks,
   WwellIrRawTopsRemarks,
 } from '../wwell-ir-form/wwell-ir-form.types';
-import { buildWwellIrBulkSavePayload, casingKey, topKey, waterKey } from '../wwell-ir-form/wwell-ir-payload.mapper';
+import { explainSubSea } from '../wwell-ir-form/wwell-ir-sub-sea.util';
+import { WwellIrSubSeaInfoComponent } from '../wwell-ir-sub-sea-info/wwell-ir-sub-sea-info.component';
+import { buildWwellIrBulkSavePayload, casingKey, computeSubSeaFt, topKey, waterKey } from '../wwell-ir-form/wwell-ir-payload.mapper';
 import {
   buildWellboreDiagramDataFromIntegratedRequirement,
   hasWellboreDiagramDataForIntegratedRequirement,
@@ -106,7 +108,7 @@ import {
   linkedWellHasTargetAquifer,
   linkedWellHasTargetDepth,
 } from '../wwell-ir-form/wwell-ir-linked-well.util';
-import { InlineRowEditState, SectionEditState, buildAndPatchArray, buildAndPatchGroup } from './wwell-ir-section-edit.util';
+import { InlineRowEditState, SectionEditState, buildAndPatchArray, buildAndPatchGroup, sortFormArrayByDepth } from './wwell-ir-section-edit.util';
 import { SectionRailController } from './wwell-ir-section-rail.util';
 import { WWELL_IR_SECTION_RAIL, WwellIrRailGroup, wwellIrRailLeaves } from './wwell-ir-section-rail.config';
 import { WwellIrTimelineStepStatus, wwellIrTimelineStepStatus } from './wwell-ir-timeline.util';
@@ -143,6 +145,32 @@ function addRowsSection(section: WwellFormSectionConfig, requiredKeys: readonly 
       rowFields: rowFields.map(field =>
         requiredKeys.includes(field.key) ? { ...field, validators: { ...field.validators, required: true } } : field,
       ),
+    },
+  };
+}
+
+function asNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/** Turns the Formation Tops "Sub-sea" field into a read-only, calculated one: surface elevation minus the row's depth,
+ *  with an (i) tooltip that spells the formula out with the current numbers. */
+function withDerivedSubSea(section: WwellFormSectionConfig, elevation: () => number | null): WwellFormSectionConfig {
+  const repeatable = section.repeatable;
+  if (!repeatable) return section;
+  const subSea: Partial<WwellFieldConfig> = {
+    readonly: true,
+    placeholder: 'auto',
+    derived: {
+      compute: row => computeSubSeaFt(elevation(), asNumber(row['depthFt'])),
+      explain: row => explainSubSea(elevation(), asNumber(row['depthFt'])),
+    },
+  };
+  return {
+    ...section,
+    repeatable: {
+      ...repeatable,
+      rowFields: repeatable.rowFields.map(field => (field.key === 'subSeaFtAsl' ? { ...field, ...subSea } : field)),
     },
   };
 }
@@ -184,6 +212,7 @@ function withOffsetWellPicker(
     DynamicSectionComponent,
     WwellIrWellborePanelComponent,
     WwellIrKvValueComponent,
+    WwellIrSubSeaInfoComponent,
     WwellApprovalWorkflowCardComponent,
     WwellCollapseAnimateDirective,
   ],
@@ -326,12 +355,19 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.store.dropdownMenus,
     this.store.aquiferOptions,
     this.store.formationOptions,
-    this.store.stratAquiferOptions,
+    // Area Water Wells' Aquifer dropdown shares Estimated Hydrology's list (daily-operations GET /aquifers).
+    this.store.aquiferOptions,
   );
   protected readonly referenceMainSection = findSection(this.schema, 'reference', 'main');
+  /** The well's surface elevation, following the Water Well Details edit while it is open. Sub-sea is calculated from it. */
+  private surfaceElevation(): number | null {
+    const live = this.requestReferenceEdit.liveValue();
+    return (live ? live.surfaceElevationFtAsl : this.ir().requestReference.surfaceElevationFtAsl) ?? null;
+  }
+
   protected readonly programSection = findSection(this.schema, 'programDetails', 'main');
   protected readonly geologistSection = findSection(this.schema, 'contacts', 'geologist');
-  protected readonly formationTopsSection = findSection(this.schema, 'subsurface', 'formationTops');
+  protected readonly formationTopsSection = withDerivedSubSea(findSection(this.schema, 'subsurface', 'formationTops'), () => this.surfaceElevation());
   protected readonly topsRemarksSection = findSection(this.schema, 'subsurface', 'remarks');
   protected readonly casingSection = findSection(this.schema, 'subsurface', 'casing');
   protected readonly hydrogeologySection = findSection(this.schema, 'hydrogeology', 'main');
@@ -592,7 +628,13 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected saveFormationTopRowInline(): void {
     this.formationTopsInlineEdit.close();
+    this.sortRows(this.formationTopsEdit.control(), 'depthFt');
     this.notify.info('Formation top updated — click Save to apply.');
+  }
+
+  /** Keeps the grid shallowest-first once a row's depth has been settled (✓ or Add) — not while it is being typed, so a row never jumps away mid-edit. */
+  private sortRows(array: FormArray | null, depthKey: string): void {
+    if (array) sortFormArrayByDepth(array, depthKey);
   }
 
   protected cancelFormationTopRowInline(): void {
@@ -608,6 +650,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected saveCasingRowInline(): void {
     this.casingInlineEdit.close();
+    this.sortRows(this.casingEdit.control(), 'depthFtBgl');
     this.notify.info('Casing row updated — click Save to apply.');
   }
 
@@ -705,6 +748,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
         this.formationTopsEdit.open({ silent: true });
         return this.formationTopsEdit.control();
       },
+      afterCommit: array => this.sortRows(array, 'depthFt'),
       duplicate: key => `Formation ${key} already has a horizon — edit that row instead.`,
       added: count => `${count} formation top${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
@@ -718,6 +762,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
         this.casingEdit.open({ silent: true });
         return this.casingEdit.control();
       },
+      afterCommit: array => this.sortRows(array, 'depthFtBgl'),
       duplicate: key => `Casing ${key} already exists — edit that row instead.`,
       added: count => `${count} casing row${count === 1 ? '' : 's'} added — click Save to apply.`,
     });
@@ -755,6 +800,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
       /** Last tweak to each row as it is committed (e.g. assigning its save key). */
       readonly prepare?: (row: TRow) => TRow;
       readonly liveArray: () => FormArray | null;
+      /** Runs once every staged row is in the live array (e.g. to re-sort it). */
+      readonly afterCommit?: (array: FormArray) => void;
       readonly duplicate: (key: string) => string;
       readonly added: (count: number) => string;
     },
@@ -780,6 +827,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
       addRepeatableRow(array, section.repeatable?.rowFields ?? [], this.fb);
       array.at(array.length - 1).patchValue(row as object);
     });
+    commit.afterCommit?.(array);
     add.close();
     this.notify.info(commit.added(rows.length));
   }
@@ -859,12 +907,44 @@ export class WwellIrEditorComponent implements AfterViewInit {
     return contentType === 'application/pdf' ? 'picture_as_pdf' : 'image';
   }
 
+  /** The slot a file is currently being dragged over — it lights up as the drop target. */
+  protected readonly dragOverSlot = signal<IrAttachmentSlot | null>(null);
+
+  protected onSlotDragOver(slot: IrAttachmentSlot, event: DragEvent): void {
+    if (!event.dataTransfer?.types.includes('Files')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    if (this.dragOverSlot() !== slot) this.dragOverSlot.set(slot);
+  }
+
+  protected onSlotDragLeave(slot: IrAttachmentSlot, event: DragEvent): void {
+    const next = event.relatedTarget as Node | null;
+    if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+    if (this.dragOverSlot() === slot) this.dragOverSlot.set(null);
+  }
+
+  protected onSlotDrop(slot: IrAttachmentSlot, event: DragEvent): void {
+    event.preventDefault();
+    this.dragOverSlot.set(null);
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    const extension = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`;
+    if (!WWELL_IR_ATTACHMENT_ACCEPT.split(',').includes(extension)) {
+      this.notify.error('Only PDF, JPG or PNG files can be attached.');
+      return;
+    }
+    this.stageAttachment(slot, file);
+  }
+
   protected onAttachmentPicked(slot: IrAttachmentSlot, event: Event): void {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0];
     if (input) input.value = '';
     if (!file) return;
+    this.stageAttachment(slot, file);
+  }
 
+  private stageAttachment(slot: IrAttachmentSlot, file: File): void {
     if (file.size > WWELL_IR_ATTACHMENT_MAX_BYTES) {
       this.notify.error('Attachment exceeds the 25 MB limit.');
       return;
@@ -948,6 +1028,45 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   /** What the leave-guard asks about: saveable section edits plus rows still staged in an add-form. */
   public readonly hasPendingEdits = computed(() => this.hasUnsavedChanges() || this.hasStagedRows());
+
+  /** How many sections carry something unsaved — the footer says "3 sections" instead of a bare "Unsaved changes". */
+  protected readonly pendingSectionCount = computed(
+    () =>
+      [
+        this.hasUnsavedReferenceEdits(),
+        this.programEdit.isEditing(),
+        this.geologistContactEdit.isEditing(),
+        this.hydrogeologyEdit.isEditing(),
+        this.formationTopsEdit.isEditing() || this.formationTopAdd.isEditing(),
+        this.topsRemarksEdit.isEditing(),
+        this.casingEdit.isEditing() || this.casingAdd.isEditing(),
+        this.offsetWellsEdit.isEditing() || this.offsetWellAdd.isEditing(),
+        this.offsetRemarksEdit.isEditing(),
+      ].filter(Boolean).length,
+  );
+
+  protected readonly footerStatus = computed(() => {
+    if (this.hasPendingEdits()) {
+      const count = this.pendingSectionCount();
+      return count > 1 ? `Unsaved changes · ${count} sections` : 'Unsaved changes';
+    }
+    return this.hasSavedIrSeq() ? 'All changes saved' : 'Not saved yet';
+  });
+
+  /** Throws away every open edit and staged row, after a confirm — the way back to the saved record without leaving the page. */
+  protected discardAll(): void {
+    this.confirmThenAct(
+      {
+        title: 'Discard unsaved changes?',
+        rows: [{ label: 'Affected', value: `${this.pendingSectionCount()} section${this.pendingSectionCount() === 1 ? '' : 's'}` }],
+        confirmLabel: 'Discard',
+      },
+      () => {
+        this.closeAllSections();
+        this.notify.info('Unsaved changes discarded.');
+      },
+    );
+  }
 
   public showUnsavedHighlight(): void {
     this.flagUnsaved.set(true);
@@ -1040,6 +1159,11 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected isLeafActive(leafKey: string): boolean {
     return this.rail.activeIndex() === this.leafIndex(leafKey);
+  }
+
+  /** The well's surface elevation as saved — what the read-only Sub-sea (i) tooltips work from. */
+  protected savedElevation(): number | null {
+    return this.ir().requestReference.surfaceElevationFtAsl ?? null;
   }
 
   protected subSeaFt(depthFt: number | null): number | null {
@@ -1236,6 +1360,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     if (!raw.reference.main.letterNumber?.trim()) {
       this.requestReferenceEdit.open();
       this.requestReferenceEdit.control()?.get('letterNumber')?.markAsTouched();
+      this.expandedTimelineSteps.update(current => new Set(current).add('wellbore'));
+      this.focusField('ire-sec-wellbore', 'Letter Number');
       this.notify.error('Letter Number is required before saving.');
       return false;
     }
@@ -1290,6 +1416,18 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.saveMergedRaw(raw);
     this.closeAllSections();
     return true;
+  }
+
+  /** Scrolls a labelled field of an open edit form into view and focuses it — what a blocked Save points at. */
+  private focusField(sectionId: string, label: string): void {
+    setTimeout(() => {
+      const fields = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>(`#${sectionId} mat-form-field`));
+      const field = fields.find(candidate => candidate.querySelector('mat-label')?.textContent?.includes(label));
+      const input = field?.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+      if (!input) return;
+      input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      input.focus({ preventScroll: true });
+    }, 50);
   }
 
   private closeAllSections(): void {

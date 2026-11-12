@@ -236,3 +236,18 @@
     padding: 0.6rem;
   }
 }
+
+// Keyboard focus on the dark viewer chrome: a light ring, since the accent blue is too dim on near-black.
+.irv__tool:focus-visible,
+.irv__zoom:focus-visible {
+  outline: 2px solid rgb(232 234 240 / 90%);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .irv__tool,
+  .irv__zoom,
+  img {
+    transition: none;
+  }
+}

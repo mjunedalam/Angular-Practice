@@ -55,6 +55,27 @@ $danger: tokens.$danger;
 
 /* Narrow columns (e.g. a repeatable row's "ft bgl" depth field) otherwise wrap this onto a
  * second line inside the input, which reads as a layout bug rather than a unit label. */
+.dyf__info {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.25rem;
+  color: $muted;
+  background: transparent;
+  border: 0;
+  cursor: help;
+
+  &:hover,
+  &:focus-visible {
+    color: $accent;
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
 .dyf__suffix {
   white-space: nowrap;
 }

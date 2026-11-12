@@ -23,6 +23,7 @@ import { WWELL_IR_LETTER_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-p
 import { resolveScaleDepthFt } from '../../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { todayIsoDate } from '../../../shared/wwell-approvals/wwell-approval-request.util';
 import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../../wwell-ir-form/wwell-ir-completion-type.config';
+import { sortByDepthAscending } from '../../wwell-ir-form/wwell-ir-detail-response.mapper';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
 interface LetterTopsRow {
@@ -68,6 +69,9 @@ export class WwellIrViewLetterComponent {
    *  pinned back to the light tokens (`.wp-paper`), or a dark-mode print would come out light-on-white.
    *  The PDF download is unaffected either way — it is built server-side, and the diagram in it is
    *  captured from a paper-scoped copy (see wwell-ir-wellbore-snapshot.util.ts). */
+  /** Casing shallowest first, as the downloaded PDF and the SAP copy list it. */
+  protected readonly casingRows = computed(() => sortByDepthAscending(this.ir().casing, row => row.depthFtBgl));
+
   protected readonly printing = signal(false);
 
   // The masthead's "Date" line is the letter's issue date, not the record's last-modified date

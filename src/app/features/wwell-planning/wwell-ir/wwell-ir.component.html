@@ -69,7 +69,21 @@
         [ngModel]="searchTerm()"
         (ngModelChange)="onSearchChange($event)"
       />
+      @if (searchTerm()) {
+        <button type="button" class="wwell-ir__search-clear" aria-label="Clear search" (click)="$event.preventDefault(); clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </label>
+
+    @if (!isLoading() && !loadError()) {
+      <p class="wwell-ir__result-count" role="status" aria-live="polite">
+        Showing <strong>{{ rows().length }}</strong> of <strong>{{ scopedTotal() }}</strong>
+        @if (hasActiveNarrowing()) {
+          <button type="button" class="wwell-ir__result-clear" (click)="clearFilters()">Clear filters</button>
+        }
+      </p>
+    }
 
     @if (isLoading()) {
       <ul class="wwell-ir__list wwell-ir__list--skeleton" aria-hidden="true">
@@ -87,7 +101,16 @@
     } @else if (loadError()) {
       <div class="wwell-ir__status wwell-ir__status--error">{{ loadError() }}</div>
     } @else if (rows().length === 0) {
-      <div class="wwell-ir__status">No integrated requirements found.</div>
+      <div class="wwell-ir__status wwell-ir__status--empty">
+        <mat-icon aria-hidden="true">{{ hasActiveNarrowing() ? 'search_off' : 'inbox' }}</mat-icon>
+        <p class="wwell-ir__status-title">{{ hasActiveNarrowing() ? 'No records match' : 'No integrated requirements yet' }}</p>
+        <p class="wwell-ir__status-hint">
+          {{ hasActiveNarrowing() ? 'Nothing fits the current search or status filter.' : 'Records in this view will appear here.' }}
+        </p>
+        @if (hasActiveNarrowing()) {
+          <button type="button" class="wwell-ir__result-clear wwell-ir__result-clear--solid" (click)="clearFilters()">Clear filters</button>
+        }
+      </div>
     } @else {
       <cdk-virtual-scroll-viewport
         [itemSize]="rowItemSize"
@@ -107,19 +130,25 @@
             class="wwell-ir__row"
             [class.wwell-ir__row--active]="ir.irSeq === selectedIrSeq()"
             [class.wwell-ir__row--pending]="ir.irSeq === pendingId()"
+            [style.--row-accent]="hasKnownStatus(ir) ? statusAccent(ir) : null"
             [disabled]="rowIrSeq(ir) === null"
             (click)="selectIrRow(ir)"
           >
             <div class="wwell-ir__row-top">
               <span class="wwell-ir__row-code">{{ ir.code }}</span>
               @if (hasKnownStatus(ir)) {
-                <span class="wwell-ir__badge">{{ badgeMeta(ir).label }}</span>
+                <span class="wwell-ir__badge" [style.--badge-dot]="statusAccent(ir)">{{ badgeMeta(ir).label }}</span>
               }
             </div>
             @if (ir.requestReference.wellName) {
-              <p class="wwell-ir__row-name">{{ ir.requestReference.wellName }}</p>
+              <p class="wwell-ir__row-name" [attr.title]="ir.requestReference.wellName">{{ ir.requestReference.wellName }}</p>
             }
-            <p class="wwell-ir__row-meta">{{ ir.requestReference.client }} &middot; {{ ir.updatedDate ? 'Updated ' + ir.updatedDate : 'Update date unknown' }}</p>
+            <p class="wwell-ir__row-meta" [attr.title]="ir.updatedDate ?? null">
+              @if (ir.requestReference.client) {
+                {{ ir.requestReference.client }} &middot;
+              }
+              {{ relativeUpdated(ir.updatedDate) }}
+            </p>
           </button>
 
           @if (rowIrSeq(ir); as irSeq) {
