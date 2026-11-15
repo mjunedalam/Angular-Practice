@@ -196,10 +196,29 @@ $warning: tokens.$warning;
 }
 
 .ire__row-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
   white-space: nowrap;
+
+  > * {
+    vertical-align: middle;
+  }
+}
+
+// The Actions column is pinned to the right edge of its table, so Edit / Delete stay visible however wide the
+// table is (Area Water Wells has 14 data columns and scrolls sideways inside a narrow panel).
+.ire__view-table th:last-child,
+.ire__view-table td.ire__row-actions {
+  position: sticky;
+  right: 0;
+  box-shadow: -1px 0 0 var(--wp-line-soft);
+}
+
+.ire__view-table td.ire__row-actions {
+  z-index: 1;
+  background: tokens.$surface;
+}
+
+.ire__view-table th:last-child {
+  z-index: 2;
 }
 
 .ire__row-action-btn {
@@ -842,30 +861,6 @@ app-wwell-ir-editor.ire-flag-unsaved .dyf--modified {
 .ire__view-table .ire__num {
   text-align: right;
   font-variant-numeric: tabular-nums;
-}
-
-// A saved row keeps its Edit/Delete icons out of the way until the row is hovered or focused; they are always shown
-// on touch screens (no hover) and while a row is being edited (those buttons are not `--rest`).
-@media (hover: hover) {
-  .ire__view-table tbody tr .ire__row-actions--rest {
-    opacity: 0;
-    transition: opacity 150ms ease;
-  }
-
-  .ire__view-table tbody tr:hover .ire__row-actions--rest,
-  .ire__view-table tbody tr .ire__row-actions--rest:focus-within {
-    opacity: 1;
-  }
-
-  .ire--busy .ire__view-table tbody tr:hover .ire__row-actions--rest {
-    opacity: 0.55;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ire__view-table tbody tr .ire__row-actions--rest {
-    transition: none;
-  }
 }
 
 // Collapsible timeline steps: a chevron at the right edge of the header says it opens and closes.
