@@ -1,17 +1,55 @@
+@use '@angular/material' as mat;
+@use '../../shared/wwell-select-panel-mixin' as wsel;
 @use '../../shared/wwell-design-tokens' as tokens;
 
-:host {
+// ViewEncapsulation.None (the select panel is portaled to <body>), so the tag selector replaces :host.
+app-wlda-form {
   display: block;
 }
 
-:host * {
+app-wlda-form * {
   box-sizing: border-box;
+}
+
+// Same scoped M3 theme the IR editor gives its dropdowns, on the form and on its portaled option panel.
+.wf,
+.wf-select-panel {
+  color-scheme: var(--wp-scheme);
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: color-scheme,
+        primary: mat.$blue-palette,
+        tertiary: mat.$azure-palette,
+      ),
+      typography: (
+        plain-family: tokens.$font-family,
+        brand-family: tokens.$font-family,
+      ),
+      density: -4,
+    )
+  );
+}
+
+.wf-select-panel {
+  @include wsel.panel(tokens.$accent, tokens.$navy-deep);
+  // A hair of air between the box and its list.
+  margin-top: 4px;
+
+  // Options read at the same size as the trigger and never wrap, however narrow the field is.
+  .mat-mdc-option {
+    min-height: 38px;
+    white-space: nowrap;
+    --mat-option-label-text-size: #{tokens.$text-sm};
+  }
 }
 
 .wf {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  @include wsel.trigger(tokens.$accent);
 }
 
 .wf__grid {
@@ -78,6 +116,48 @@
     resize: vertical;
     min-height: 5.5rem;
     line-height: 1.45;
+  }
+}
+
+// The dropdown trigger: the same box as the text inputs. The box (border, fill, padding) lives on Material's own
+// trigger element, not on the <mat-select> host, because the option panel anchors to that trigger: with the box on
+// the host the panel sat 13px right of it and overlapped its bottom edge.
+.wf__select.mat-mdc-select {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  --mat-select-enabled-trigger-text-color: var(--wp-ink);
+  --mat-select-placeholder-text-color: #{tokens.$subtle};
+  --mat-select-enabled-arrow-color: #{tokens.$muted};
+  --mat-select-focused-arrow-color: #{tokens.$accent};
+  --mat-select-trigger-text-size: #{tokens.$text-sm};
+  --mat-select-trigger-text-weight: 500;
+
+  .mat-mdc-select-trigger {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 36px;
+    padding: 0.45rem 0.7rem;
+    background: tokens.$surface-alt;
+    border: 1px solid tokens.$border;
+    border-radius: tokens.$radius-btn;
+    transition:
+      border-color tokens.$duration-fast tokens.$ease-out,
+      box-shadow tokens.$duration-fast tokens.$ease-out;
+  }
+
+  &:hover .mat-mdc-select-trigger {
+    border-color: var(--wp-accent-line);
+  }
+
+  &:focus-visible .mat-mdc-select-trigger,
+  &[aria-expanded='true'] .mat-mdc-select-trigger {
+    border-color: var(--wp-accent);
+    @include tokens.focus-ring;
+  }
+
+  &:focus-visible {
+    outline: none;
   }
 }
 
