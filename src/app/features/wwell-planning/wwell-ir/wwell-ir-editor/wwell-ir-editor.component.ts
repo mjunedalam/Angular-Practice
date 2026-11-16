@@ -32,6 +32,7 @@ import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwel
 import { IrAttachment, IrAttachmentSlot, IrPendingAttachment } from '@models/wwell-planning/ir-attachment.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
+import { toExtensionLabel } from '@core/config/file-upload.config';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrAttachmentUploadDialogComponent } from '../wwell-ir-attachment-upload-dialog/wwell-ir-attachment-upload-dialog.component';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
@@ -79,6 +80,7 @@ import {
   WWELL_IR_ATTACHMENT_ACCEPT,
   WWELL_IR_ATTACHMENT_MAX_BYTES,
   WWELL_IR_ATTACHMENT_SLOTS,
+  hasAcceptedIrAttachmentExtension,
   hasAllRequiredAttachments,
   irAttachmentsFor,
 } from '../wwell-ir-attachments.config';
@@ -834,6 +836,7 @@ export class WwellIrEditorComponent implements AfterViewInit {
 
   protected readonly attachmentSlots = WWELL_IR_ATTACHMENT_SLOTS;
   protected readonly acceptedAttachmentTypes = WWELL_IR_ATTACHMENT_ACCEPT;
+  protected readonly attachmentTypeHint = toExtensionLabel();
 
   /** Every stored attachment in a slot — a slot holds any number of files, not just one. */
   protected attachmentsFor(slot: IrAttachmentSlot): readonly IrAttachment[] {
@@ -928,9 +931,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
     this.dragOverSlot.set(null);
     const file = event.dataTransfer?.files?.[0];
     if (!file) return;
-    const extension = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`;
-    if (!WWELL_IR_ATTACHMENT_ACCEPT.split(',').includes(extension)) {
-      this.notify.error('Only PDF, JPG or PNG files can be attached.');
+    if (!hasAcceptedIrAttachmentExtension(file.name)) {
+      this.notify.error(`Only ${toExtensionLabel()} files can be attached.`);
       return;
     }
     this.stageAttachment(slot, file);
@@ -945,6 +947,10 @@ export class WwellIrEditorComponent implements AfterViewInit {
   }
 
   private stageAttachment(slot: IrAttachmentSlot, file: File): void {
+    if (!hasAcceptedIrAttachmentExtension(file.name)) {
+      this.notify.error(`Unsupported file type. Attach ${toExtensionLabel()}.`);
+      return;
+    }
     if (file.size > WWELL_IR_ATTACHMENT_MAX_BYTES) {
       this.notify.error('Attachment exceeds the 25 MB limit.');
       return;

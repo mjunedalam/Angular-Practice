@@ -1,14 +1,12 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { isUploadFileAllowed, toAcceptAttribute } from '@core/config/file-upload.config';
 
 interface AttachmentItem {
   readonly id: string;
   readonly file: File;
 }
-
-const MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024;
-const ALLOWED_ATTACHMENT_EXTENSIONS: readonly string[] = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
 
 @Component({
   selector: 'app-wwell-attachment-dropzone',
@@ -26,6 +24,7 @@ export class WwellAttachmentDropzoneComponent {
   readonly displayNames = input<readonly string[] | null>(null);
   readonly filesChange = output<File[]>();
 
+  protected readonly accept = toAcceptAttribute();
   protected readonly isDragOver = signal(false);
   protected readonly attachments = signal<AttachmentItem[]>([]);
 
@@ -70,7 +69,7 @@ export class WwellAttachmentDropzoneComponent {
   private addFiles(selected: File[]): void {
     if (!selected.length) return;
 
-    const valid = selected.filter(file => this.hasAllowedExtension(file) && file.size <= MAX_ATTACHMENT_SIZE_BYTES);
+    const valid = selected.filter(file => isUploadFileAllowed(file));
     if (!valid.length) return;
 
     this.attachments.update(existing => [
@@ -82,10 +81,5 @@ export class WwellAttachmentDropzoneComponent {
 
   private emitFiles(): void {
     this.filesChange.emit(this.attachments().map(item => item.file));
-  }
-
-  private hasAllowedExtension(file: File): boolean {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    return ALLOWED_ATTACHMENT_EXTENSIONS.includes(ext);
   }
 }

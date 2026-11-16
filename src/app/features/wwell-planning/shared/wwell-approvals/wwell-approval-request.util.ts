@@ -3,9 +3,22 @@ import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 const REQ_NO_MIN = 10000;
 const REQ_NO_MAX = 99999;
 
+const UINT32_RANGE = 0x100000000;
+
+// Uniform integer in [min, max] from the CSPRNG (not Math.random — Fortify "Insecure Randomness").
+// Rejection sampling discards the biased tail so every value stays equally likely.
+function secureRandomInt(min: number, max: number): number {
+  const span = max - min + 1;
+  const limit = UINT32_RANGE - (UINT32_RANGE % span);
+  const buffer = new Uint32Array(1);
+  do {
+    crypto.getRandomValues(buffer);
+  } while (buffer[0] >= limit);
+  return min + (buffer[0] % span);
+}
+
 export function generateApprovalReqNo(): string {
-  const digits = Math.floor(Math.random() * (REQ_NO_MAX - REQ_NO_MIN + 1)) + REQ_NO_MIN;
-  return `REQ-${digits}`;
+  return `REQ-${secureRandomInt(REQ_NO_MIN, REQ_NO_MAX)}`;
 }
 
 export function todayIsoDate(): string {

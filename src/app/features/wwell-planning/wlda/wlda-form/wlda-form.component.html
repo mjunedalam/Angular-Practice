@@ -1,21 +1,21 @@
-<form class="wf" (submit)="$event.preventDefault()" autocomplete="off">
+<div class="wf" role="group" aria-label="Water well location details">
   <div class="wf__grid">
     <label class="wf__field wf__field--wide">
       <span class="wf__label">Water Well Name @if (isRequired('waterWellName')) {<i>*</i>}</span>
-      <input class="wf__control" type="text" placeholder="ABCD-123" [value]="record().waterWellName" (input)="setText('waterWellName', $event)" />
+      <input class="wf__control" type="text" autocomplete="off" placeholder="ABCD-123" [value]="record().waterWellName" (input)="setText('waterWellName', $event)" />
     </label>
     <label class="wf__field">
       <span class="wf__label">Field <i>*</i></span>
-      <input class="wf__control" type="text" [value]="record().field" (input)="setText('field', $event)" />
+      <input class="wf__control" type="text" autocomplete="off" [value]="record().field" (input)="setText('field', $event)" />
     </label>
     <label class="wf__field">
       <span class="wf__label">Well Number <i>*</i></span>
-      <input class="wf__control" type="text" [value]="record().wellNumber" (input)="setText('wellNumber', $event)" />
+      <input class="wf__control" type="text" autocomplete="off" [value]="record().wellNumber" (input)="setText('wellNumber', $event)" />
     </label>
 
     <label class="wf__field wf__field--wide">
       <span class="wf__label">Reservoir <i>*</i></span>
-      <input class="wf__control" type="text" [value]="record().reservoir" (input)="setText('reservoir', $event)" />
+      <input class="wf__control" type="text" autocomplete="off" [value]="record().reservoir" (input)="setText('reservoir', $event)" />
     </label>
     <label class="wf__field wf__field--wide">
       <span class="wf__label">Well Type</span>
@@ -36,7 +36,7 @@
 
     <label class="wf__field wf__field--wide">
       <span class="wf__label">Total Depth <i>*</i></span>
-      <input class="wf__control" type="text" inputmode="decimal" [value]="record().totalDepth" (input)="setText('totalDepth', $event)" />
+      <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().totalDepth" (input)="setText('totalDepth', $event)" />
     </label>
     <div class="wf__field wf__field--wide" role="group" aria-labelledby="wf-cp">
       <span class="wf__label" id="wf-cp">Cathodic Protection Required</span>
@@ -52,11 +52,11 @@
     <div class="wf__grid wf__grid--3">
       <label class="wf__field">
         <span class="wf__sub">North (Y)</span>
-        <input class="wf__control" type="text" inputmode="decimal" [value]="record().north" (input)="setText('north', $event)" />
+        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().north" (input)="setText('north', $event)" />
       </label>
       <label class="wf__field">
         <span class="wf__sub">East (X)</span>
-        <input class="wf__control" type="text" inputmode="decimal" [value]="record().east" (input)="setText('east', $event)" />
+        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().east" (input)="setText('east', $event)" />
       </label>
       <label class="wf__field">
         <span class="wf__sub">Zone</span>
@@ -103,7 +103,7 @@
     <label class="wf__attach">
       <mat-icon>upload</mat-icon>
       Attach files
-      <input type="file" multiple hidden (change)="addFiles($event)" />
+      <input type="file" multiple hidden [accept]="attachAccept" (change)="addFiles($event)" />
     </label>
   </div>
-</form>
+</div>

@@ -5,7 +5,7 @@
     [requiredHint]="!isViewMode"
     (closed)="close()"
   >
-    <form class="wrf__form" [formGroup]="form">
+    <div class="wrf__form" role="group" aria-label="Water well request" [formGroup]="form">
       <app-dynamic-section
         [section]="formSection"
         [control]="form"
@@ -22,7 +22,7 @@
           (filesChange)="onFilesChange($event)"
         />
       </div>
-    </form>
+    </div>
 
     <ng-container dialogActions>
       @if (isViewMode) {

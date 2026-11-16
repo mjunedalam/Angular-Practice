@@ -7,7 +7,7 @@
       (dragleave)="onDragLeave($event)"
       (drop)="onDrop($event)"
     >
-      <input type="file" multiple class="wad__file-input" (change)="onFileInputChange($event)" />
+      <input type="file" multiple class="wad__file-input" [accept]="accept" (change)="onFileInputChange($event)" />
       <mat-icon class="wad__dropzone-icon">attach_file</mat-icon>
       <span class="wad__dropzone-text">{{ hint() }}</span>
     </label>

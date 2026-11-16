@@ -5,7 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ALLOWED_UPLOAD_EXTENSIONS, MAX_UPLOAD_SIZE_BYTES, UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
+import { UploadFileItem } from '@models/active-wwell/active-wwell-view.model';
+import { MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_LABEL, hasAllowedExtension, toAcceptAttribute, toExtensionLabel } from '@core/config/file-upload.config';
 import { WellDocsStore } from '@store/well-docs/well-docs.store';
 import { PresDocsService } from '@services/pres-docs.service';
 import { NotificationService } from '../notification/notification.service';
@@ -30,6 +31,8 @@ export class FileUploadComponent {
   protected readonly docsStore = inject(WellDocsStore);
 
   protected readonly files = signal<UploadFileItem[]>([]);
+  protected readonly accept = toAcceptAttribute();
+  protected readonly extensionHint = `${toExtensionLabel()} · Max ${MAX_UPLOAD_SIZE_LABEL}`;
   protected readonly isDragOver = signal(false);
   protected readonly viewLoading = signal<Set<string>>(new Set());
 
@@ -75,8 +78,8 @@ export class FileUploadComponent {
   }
 
   private addFiles(selected: File[]): void {
-    const invalidType = selected.filter(f => !this.hasAllowedExtension(f));
-    const allowedType = selected.filter(f => this.hasAllowedExtension(f));
+    const invalidType = selected.filter(f => !hasAllowedExtension(f.name));
+    const allowedType = selected.filter(f => hasAllowedExtension(f.name));
     const oversized = allowedType.filter(f => f.size > MAX_UPLOAD_SIZE_BYTES);
     const valid = allowedType.filter(f => f.size <= MAX_UPLOAD_SIZE_BYTES);
 
@@ -87,7 +90,7 @@ export class FileUploadComponent {
 
     if (oversized.length) {
       const names = oversized.map(f => f.name).join(', ');
-      this.notify.error(`File(s) exceed 25 MB limit and were skipped: ${names}`);
+      this.notify.error(`File(s) exceed ${MAX_UPLOAD_SIZE_LABEL} limit and were skipped: ${names}`);
     }
 
     if (!valid.length) return;
@@ -98,11 +101,6 @@ export class FileUploadComponent {
         id: `${file.name}-${file.size}-${existing.length + index}`,
       })),
     ]);
-  }
-
-  private hasAllowedExtension(file: File): boolean {
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    return (ALLOWED_UPLOAD_EXTENSIONS as readonly string[]).includes(ext);
   }
 
   protected previewFile(file: File): void {

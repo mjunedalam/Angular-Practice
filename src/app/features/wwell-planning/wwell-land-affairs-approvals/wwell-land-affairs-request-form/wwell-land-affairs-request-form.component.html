@@ -1,6 +1,6 @@
 <div class="laf">
   <app-wwell-form-dialog-shell title="Request Land Affairs Approval" [subtitle]="chainSubtitle" (closed)="close()">
-    <form class="laf__form" [formGroup]="form">
+    <div class="laf__form" role="group" aria-label="Land affairs approval request" [formGroup]="form">
       <div class="laf__grid">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="laf__field">
           <mat-label>Client</mat-label>
@@ -99,7 +99,7 @@
           (filesChange)="onFilesChange($event)"
         />
       </div>
-    </form>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" mat-stroked-button (click)="saveDraft()">

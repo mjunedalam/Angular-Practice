@@ -1,3 +1,4 @@
+import { MAX_UPLOAD_SIZE_BYTES, hasAllowedExtension, toAcceptAttribute } from '@core/config/file-upload.config';
 import { IrAttachment, IrAttachmentSlot } from '@models/wwell-planning/ir-attachment.model';
 
 export interface WwellIrAttachmentSlotConfig {
@@ -53,11 +54,16 @@ export function hasAllRequiredAttachments(attachments: readonly IrAttachment[]):
   return WWELL_IR_ATTACHMENT_SLOTS.filter(config => config.required).every(config => irAttachmentsFor(attachments, config.slot).length > 0);
 }
 
-export const WWELL_IR_ATTACHMENT_ACCEPT = '.pdf,.jpg,.jpeg,.png';
+export const WWELL_IR_ATTACHMENT_ACCEPT = toAcceptAttribute();
+
+/** The `accept` attribute is only a picker hint, so handlers re-check against the same list. */
+export function hasAcceptedIrAttachmentExtension(fileName: string): boolean {
+  return hasAllowedExtension(fileName);
+}
 
 /** Purely a client-side guard now — the S3 object-store proxy enforces no size cap of its own, so
  *  this exists only to fail fast before spending time on an upload that's almost certainly wrong. */
-export const WWELL_IR_ATTACHMENT_MAX_BYTES = 25 * 1024 * 1024;
+export const WWELL_IR_ATTACHMENT_MAX_BYTES = MAX_UPLOAD_SIZE_BYTES;
 
 /** Every file occupying a slot, oldest-uploaded first — shared by the editor, letter and details
  *  views. A slot can hold any number of attachments, not just one, so callers render this as a list

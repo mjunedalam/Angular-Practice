@@ -102,9 +102,8 @@ function resolveKind(file: File): ViewerKind {
   const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
   if (file.type.startsWith('image/') || ['jpg', 'jpeg', 'png'].includes(extension)) return 'image';
   if (file.type === 'application/pdf' || extension === 'pdf') return 'pdf';
-  // Only PDF/JPG/PNG can be uploaded (see wwell-ir-attachments.config.ts), so this is the
-  // belt-and-braces branch for a file that somehow got past that — it still offers a download
-  // rather than rendering a broken frame.
+  // Only PDFs and images preview inline; every other allowed type (see core/config/file-upload.config.ts)
+  // offers a download rather than rendering a broken frame.
   return 'unsupported';
 }
 

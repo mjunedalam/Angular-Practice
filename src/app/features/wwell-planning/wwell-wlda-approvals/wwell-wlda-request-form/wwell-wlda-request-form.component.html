@@ -1,6 +1,6 @@
 <div class="wldaf">
   <app-wwell-form-dialog-shell title="Request WLDA Approval" [subtitle]="chainSubtitle" (closed)="close()">
-    <form class="wldaf__form" [formGroup]="form">
+    <div class="wldaf__form" role="group" aria-label="WLDA approval request" [formGroup]="form">
       <app-dynamic-section
         [section]="formSection"
         [control]="form"
@@ -15,7 +15,7 @@
           (filesChange)="onFilesChange($event)"
         />
       </div>
-    </form>
+    </div>
 
     <ng-container dialogActions>
       <button type="button" mat-stroked-button (click)="saveDraft()">

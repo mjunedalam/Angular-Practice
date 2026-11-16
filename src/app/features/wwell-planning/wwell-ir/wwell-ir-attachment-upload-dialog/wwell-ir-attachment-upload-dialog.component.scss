@@ -1,5 +1,39 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+@use '../../shared/wwell-material' as wmat;
+
+// The dialog's surface is themed globally (`.ir-upload-panel` in styles.scss), but Material's own
+// title / body text tokens (`--mdc-dialog-*`, `--mat-sys-*`) are not defined app-wide, so their text
+// fell back to near-black — unreadable on the dark surface. Every colour here reads the theme tokens
+// instead, so light and dark both follow `--wp-*`.
 .iud {
   min-width: min(420px, 82vw);
+  color: tokens.$navy;
+  --mdc-dialog-subhead-color: #{tokens.$navy-deep};
+  --mdc-dialog-supporting-text-color: #{tokens.$navy};
+  --mat-dialog-subhead-color: #{tokens.$navy-deep};
+  --mat-dialog-supporting-text-color: #{tokens.$navy};
+  @include wmat.buttons;
+}
+
+// Beats the stylesheet-order tie with Material's own `.mdc-dialog__title` / `__content` colour rules.
+.iud .iud__title,
+.iud .iud__body {
+  letter-spacing: normal;
+}
+
+.iud .iud__title {
+  color: tokens.$navy-deep;
+  font-size: tokens.$text-md;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.iud .iud__body {
+  color: tokens.$navy;
+}
+
+.iud__slot-icon {
+  color: tokens.$accent;
 }
 
 .iud__head {
@@ -25,8 +59,9 @@
   align-items: center;
   gap: 14px;
   padding: 12px;
-  border: 1px solid var(--mat-sys-outline-variant, rgb(128 128 128 / 30%));
-  border-radius: 12px;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-md;
+  background: tokens.$surface-alt;
 }
 
 .iud__thumb {
@@ -38,7 +73,8 @@
   height: 64px;
   overflow: hidden;
   border-radius: 8px;
-  background: rgb(128 128 128 / 12%);
+  background: tokens.$surface-sunken;
+  color: tokens.$subtle;
 
   img {
     width: 100%;
@@ -52,8 +88,8 @@
   inset: 0;
   display: grid;
   place-items: center;
-  color: #fff;
-  background: rgb(34 160 90 / 88%);
+  color: tokens.$on-accent;
+  background: tokens.$success-fill;
   animation: iud-pop 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -69,22 +105,25 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+  color: tokens.$navy-deep;
 }
 
 .iud__sub {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  opacity: 0.75;
+  font-size: tokens.$text-xs;
+  color: tokens.$muted;
 }
 
 .iud__badge {
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgb(128 128 128 / 18%);
-  font-size: 11px;
-  font-weight: 600;
+  background: tokens.$accent-soft;
+  color: tokens.$accent;
+  font-size: tokens.$text-2xs;
+  font-weight: 650;
+  letter-spacing: 0.04em;
 }
 
 // Reserved height so swapping hint → progress → success doesn't resize the dialog.
@@ -99,16 +138,16 @@
 
 .iud__hint,
 .iud__percent {
-  opacity: 0.75;
+  color: tokens.$muted;
 }
 
 .iud__success {
-  color: #1f9d55;
+  color: tokens.$success;
   font-weight: 600;
 }
 
 .iud__error {
-  color: var(--mat-sys-error, #d32f2f);
+  color: tokens.$danger-ink;
 }
 
 @keyframes iud-pop {
