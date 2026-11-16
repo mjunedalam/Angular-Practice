@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input } from '@angular/core';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
-import { playIfMotionAllowed } from '../../dynamic-form/gsap-motion.util';
+import { playIfMotionAllowed } from '../../dynamic-form/motion.util';
 import { WWELL_APPROVAL_STEP_STATUS_META } from '../wwell-approvals.config';
 import { buildApprovalStepsRevealTimeline } from './wwell-approval-steps-reveal.animation';
 

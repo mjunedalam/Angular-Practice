@@ -18,7 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import { ApprovalChainStep, WldaApproval } from '@models/wwell-planning/wwell-planning.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
-import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
+import { playIfMotionAllowed } from '../shared/dynamic-form/motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { WwellPlanningService } from '../wwell-planning.service';
 import { WwellPlanningStore } from '../store/wwell-planning.store';

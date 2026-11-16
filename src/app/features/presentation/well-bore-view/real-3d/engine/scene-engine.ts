@@ -1,13 +1,13 @@
-import gsap from 'gsap';
 import * as THREE from 'three';
 
 import { OrbitCameraController } from '../utils/orbit-camera.controller';
+import { frameTicker } from '../utils/frame-ticker.util';
 import { SCENE_HEIGHT_UNITS } from '../utils/depth-3d.util';
 
 /**
  * Owns the Three.js renderer/scene/camera/lights and the render loop for one wellbore-3d-view
- * instance. Rendering is driven by GSAP's own ticker (rather than a bare `requestAnimationFrame`
- * loop) so the render pass and every GSAP-driven reveal/camera tween share one clock.
+ * instance. Rendering is driven by the shared `frameTicker` (one `requestAnimationFrame` loop), so the
+ * render pass and the component's zoom sync run in a fixed order each frame.
  */
 export class WellboreSceneEngine {
   readonly scene = new THREE.Scene();
@@ -75,7 +75,7 @@ export class WellboreSceneEngine {
       this.orbit.update(deltaTime / 1000);
       this.renderer.render(this.scene, this.camera);
     };
-    gsap.ticker.add(this.tickFn);
+    frameTicker.add(this.tickFn);
   }
 
   private setupLights(): void {
@@ -109,7 +109,7 @@ export class WellboreSceneEngine {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    gsap.ticker.remove(this.tickFn);
+    frameTicker.remove(this.tickFn);
     this.resizeObserver.disconnect();
     this.orbit.dispose();
     this.renderer.dispose();

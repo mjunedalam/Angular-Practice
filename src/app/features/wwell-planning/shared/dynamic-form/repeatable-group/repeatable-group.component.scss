@@ -68,7 +68,7 @@
   }
 }
 
-/* Conditional row-field wrapper — GSAP animates opacity/height on this element when its
+/* Conditional row-field wrapper — the motion helper animates opacity/height on this element when its
  * controlling sibling field within the same row (e.g. Type) toggles; overflow:hidden keeps
  * the collapse clean. Mirrors dynamic-section.component.scss's .dys__field-host. */
 .rpg__field-host {

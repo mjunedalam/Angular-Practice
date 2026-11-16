@@ -37,7 +37,7 @@
   align-items: start;
 }
 
-/* Conditional field wrapper — GSAP animates opacity/height on this element when its
+/* Conditional field wrapper — the motion helper animates opacity/height on this element when its
  * controlling field (e.g. Test Type) toggles; overflow:hidden keeps the collapse clean. */
 .dys__field-host {
   overflow: hidden;

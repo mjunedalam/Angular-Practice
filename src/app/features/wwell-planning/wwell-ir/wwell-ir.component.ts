@@ -24,7 +24,7 @@ import { ComponentCanDeactivate } from '@guards/unsaved-changes.guard';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
-import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
+import { playIfMotionAllowed } from '../shared/dynamic-form/motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { WwellApprovalWorkflowCardComponent } from '../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { chainCompletionColor } from '../shared/wwell-approvals/wwell-approvals.config';

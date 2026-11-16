@@ -42,7 +42,7 @@
     />
   }
 
-  <!-- Three.js/GSAP only download once the user actually asks for the 3D view — keeps the
+  <!-- Three.js only download once the user actually asks for the 3D view — keeps the
        always-loaded presentation bundle free of the extra weight these libraries add. -->
   @defer (when mode() === '3d') {
     @if (mode() === '3d') {

@@ -23,7 +23,7 @@ import {
   setConditionalFieldVisibility,
 } from '../dynamic-section/conditional-field.animation';
 import { DynamicFieldComponent, WwellDynamicFieldMode } from '../dynamic-field/dynamic-field.component';
-import { playIfMotionAllowed } from '../gsap-motion.util';
+import { playIfMotionAllowed } from '../motion.util';
 import { addRepeatableRow, defaultValueFor } from '../wwell-dynamic-form.builder';
 import { WwellFieldConfig, WwellRepeatableRowConfig } from '../wwell-dynamic-form.types';
 import { buildRowEnterTimeline, buildRowExitTimeline } from './repeatable-row.animation';

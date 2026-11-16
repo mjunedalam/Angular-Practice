@@ -42,7 +42,7 @@ describe('WellboreViewToggleComponent', () => {
 
   it('should hide the 2D view and mark the 3D toggle active when clicked', () => {
     // The 3D view itself sits behind an `@defer` block (see wellbore-view-toggle.component.html)
-    // so Three.js/GSAP only download once the user actually asks for the 3D mode — that dynamic
+    // so Three.js only download once the user actually asks for the 3D mode — that dynamic
     // import doesn't resolve deterministically under Jest, so this only asserts the synchronous
     // part of the switch (2D unmounting, toggle state). The 3D view itself renders in the browser.
     const toggle = fixture.debugElement.query(By.css('.wellbore-mode-btn--3d'));

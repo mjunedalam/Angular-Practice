@@ -38,6 +38,7 @@ import { WwellIrAttachmentUploadDialogComponent } from '../wwell-ir-attachment-u
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
 import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { approvalRingPercent, chainCompletionColor, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
+import { prefersReducedMotion } from '../../shared/dynamic-form/motion.util';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
@@ -118,6 +119,8 @@ import { WwellIrTimelineStepStatus, wwellIrTimelineStepStatus } from './wwell-ir
 export type WwellIrEditorViewMode = 'sections' | 'timeline';
 
 const SELECT_PANEL_CLASS = 'ire-select-panel';
+/** Matches the `--closing` keyframe length in the stylesheet. */
+const APPROVAL_POPOVER_EXIT_MS = 140;
 
 function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey: string, sectionKey: string): WwellFormSectionConfig {
   const section = schema.find(step => step.key === stepKey)?.sections.find(s => s.key === sectionKey);
@@ -298,8 +301,34 @@ export class WwellIrEditorComponent implements AfterViewInit {
     { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -8 },
   ];
 
+  /** True for the length of the exit animation: the overlay stays mounted so the card can fade/scale out. */
+  protected readonly approvalPopoverClosing = signal(false);
+  private approvalPopoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
   protected toggleApprovalPopover(): void {
-    this.approvalPopoverOpen.update(open => !open);
+    if (this.approvalPopoverOpen() && !this.approvalPopoverClosing()) {
+      this.closeApprovalPopover();
+      return;
+    }
+    this.cancelApprovalPopoverClose();
+    this.approvalPopoverOpen.set(true);
+  }
+
+  protected closeApprovalPopover(): void {
+    if (!this.approvalPopoverOpen() || this.approvalPopoverClosing()) return;
+    if (prefersReducedMotion()) {
+      this.approvalPopoverOpen.set(false);
+      return;
+    }
+    this.approvalPopoverClosing.set(true);
+    this.approvalPopoverCloseTimer = setTimeout(() => this.cancelApprovalPopoverClose(true), APPROVAL_POPOVER_EXIT_MS);
+  }
+
+  private cancelApprovalPopoverClose(finish = false): void {
+    if (this.approvalPopoverCloseTimer !== null) clearTimeout(this.approvalPopoverCloseTimer);
+    this.approvalPopoverCloseTimer = null;
+    this.approvalPopoverClosing.set(false);
+    if (finish) this.approvalPopoverOpen.set(false);
   }
 
   protected readonly railGroups = WWELL_IR_SECTION_RAIL;

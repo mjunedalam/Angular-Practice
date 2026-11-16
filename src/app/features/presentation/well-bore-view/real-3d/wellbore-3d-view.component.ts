@@ -8,7 +8,7 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import gsap from 'gsap';
+import { frameTicker } from './utils/frame-ticker.util';
 import * as THREE from 'three';
 
 import { FormationInfoViewModel } from '@models/active-wwell/active-wwell-view.model';
@@ -42,7 +42,7 @@ const WORLD_UP = new THREE.Vector3(0, 1, 0);
 /**
  * TEMP scope reduction, per request: this view currently draws ONLY the conductor/casing/liner
  * pipes, fully visible and static (no reveal animation, no cinematic camera). Open hole, gravel
- * pack, water level, drill string, pump marker and geologic-top rings — plus the GSAP reveal
+ * pack, water level, drill string, pump marker and geologic-top rings — plus the reveal
  * timeline that animated all of it — are on hold until the core casing/liner geometry itself is
  * confirmed to render correctly. See the `real-3d/builders/` and `real-3d/animation/` folders
  * for that code; nothing was deleted, this component just doesn't call into it right now.
@@ -116,9 +116,9 @@ export class Wellbore3DViewComponent {
       this.rebuildScene(data, layout);
     });
 
-    gsap.ticker.add(this.zoomSyncFn);
+    frameTicker.add(this.zoomSyncFn);
     this.destroyRef.onDestroy(() => {
-      gsap.ticker.remove(this.zoomSyncFn);
+      frameTicker.remove(this.zoomSyncFn);
       this.teardownEngine();
     });
   }
@@ -177,7 +177,7 @@ export class Wellbore3DViewComponent {
     labelsGroup.add(casings.labelsGroup);
 
     // No reveal animation for now — snap every clip plane straight to "fully shown" so the
-    // conductor/casing/liner pipes are immediately visible instead of waiting on a GSAP timeline.
+    // conductor/casing/liner pipes are immediately visible instead of waiting on a reveal timeline.
     casings.reveals.forEach(({ clipPlane, bottomY }) => {
       clipPlane.constant = -bottomY;
     });

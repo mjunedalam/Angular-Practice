@@ -94,7 +94,7 @@ export class OrbitCameraController {
     this.target.y = y;
   }
 
-  /** GSAP-tweenable orbit radius — lets the reveal timeline drive a cinematic dolly with its
+  /** Tweenable orbit radius — lets the reveal timeline drive a cinematic dolly with its
    *  own easing curve, on top of the controller's own per-frame damping. */
   get radius(): number {
     return this.targetRadius;
@@ -118,7 +118,7 @@ export class OrbitCameraController {
     return this.target.clone();
   }
 
-  /** GSAP-tweenable azimuth (radians) — used for the establishing-shot swing-around. */
+  /** Tweenable azimuth (radians) — used for the establishing-shot swing-around. */
   get azimuth(): number {
     return this.targetTheta;
   }

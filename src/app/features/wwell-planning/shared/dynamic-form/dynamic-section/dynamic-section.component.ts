@@ -12,7 +12,7 @@ import {
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { DynamicFieldComponent, WwellDynamicFieldMode } from '../dynamic-field/dynamic-field.component';
-import { playIfMotionAllowed } from '../gsap-motion.util';
+import { playIfMotionAllowed } from '../motion.util';
 import { RepeatableGroupComponent } from '../repeatable-group/repeatable-group.component';
 import { defaultValueFor } from '../wwell-dynamic-form.builder';
 import { WwellFieldConfig, WwellFormSectionConfig } from '../wwell-dynamic-form.types';

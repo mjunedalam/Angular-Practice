@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WwellPlanningRequest } from '@models/wwell-planning/wwell-planning.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
-import { playIfMotionAllowed } from '../shared/dynamic-form/gsap-motion.util';
+import { playIfMotionAllowed } from '../shared/dynamic-form/motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
 import { WWELL_LOAD_DELAY_MS } from '@models/wwell-planning/wwell-planning-loading.constants';
 import { WwellDetailLoadingComponent } from '../shared/wwell-detail-loading/wwell-detail-loading.component';

@@ -16,7 +16,7 @@ export type WellboreViewMode = '2d' | '3d';
 
 /**
  * Thin presentation switcher — forwards the exact same inputs the 2D `WellBoreViewComponent`
- * already takes to either that (untouched) component or the new Three.js/GSAP `real-3d` view.
+ * already takes to either that (untouched) component or the new Three.js `real-3d` view.
  * Business logic (data, store, animation config) is unchanged; only the rendered surface differs.
  *
  * The flat `<app-depth-scale>` SVG ruler is only rendered alongside the 2D view here. In 3D mode

@@ -1,6 +1,6 @@
 import { Directive, ElementRef, inject } from '@angular/core';
 import type { AnimationCallbackEvent } from '@angular/core';
-import { playIfMotionAllowed } from '../dynamic-form/gsap-motion.util';
+import { playIfMotionAllowed } from '../dynamic-form/motion.util';
 import { buildCollapseEnterTimeline, buildCollapseExitTimeline } from './wwell-collapse-animate.animation';
 
 /**
@@ -12,7 +12,7 @@ import { buildCollapseEnterTimeline, buildCollapseExitTimeline } from './wwell-c
  *
  * Hooks Angular's native `animate.enter`/`animate.leave` (fired right before insertion / right
  * before removal — see @angular/core's `AnimationCallbackEvent`) to run a lightweight, compositor-
- * only (opacity + transform, never height — see wwell-collapse-animate.animation.ts) GSAP tween
+ * only (opacity + transform, never height — see wwell-collapse-animate.animation.ts) animation
  * instead of nothing. `animate.leave`'s `animationComplete()` is what actually lets Angular
  * detach the node, so the exit tween is guaranteed to finish on screen before the element
  * disappears, no matter what triggered the removal. Respects prefers-reduced-motion via the

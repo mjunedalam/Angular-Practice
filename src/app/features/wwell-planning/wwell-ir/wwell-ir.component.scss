@@ -515,7 +515,7 @@ $master-width: 240px;
  * Mirrors `.wwell-ir__row`'s shape so the swap into real rows reads as a
  * content refresh, not a layout jump. Shimmer is a CSS keyframe loop
  * (indefinite duration), matching the approval-timeline pulse convention —
- * GSAP is reserved for the finite, one-shot reveal transitions.
+ * Scripted motion (motion.util) is reserved for the finite, one-shot reveal transitions.
  */
 .wwell-ir__list--skeleton {
   overflow: hidden;

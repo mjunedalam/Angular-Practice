@@ -128,7 +128,7 @@
             {{ countApprovedSteps(ir().chain) }}/{{ ir().chain.length }}
           }
         </span>
-        <mat-icon class="ire__approval-pill-chevron">{{ approvalPopoverOpen() ? "expand_less" : "expand_more" }}</mat-icon>
+        <mat-icon class="ire__approval-pill-chevron" [class.ire__approval-pill-chevron--open]="approvalPopoverOpen() && !approvalPopoverClosing()">expand_more</mat-icon>
       </button>
 
       @if (ir().sapWfId !== null) {
@@ -153,10 +153,14 @@
         [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
         [cdkConnectedOverlayPositions]="approvalPopoverPositions"
-        (backdropClick)="approvalPopoverOpen.set(false)"
+        (backdropClick)="closeApprovalPopover()"
         (detach)="approvalPopoverOpen.set(false)"
       >
-        <div class="ire__approval-popover">
+        <div
+          class="ire__approval-popover"
+          animate.enter="ire__approval-popover--enter"
+          [class.ire__approval-popover--closing]="approvalPopoverClosing()"
+        >
           <app-wwell-approval-workflow-card
             [ir]="ir()"
             [loading]="store.irApprovalTimelineLoading()"

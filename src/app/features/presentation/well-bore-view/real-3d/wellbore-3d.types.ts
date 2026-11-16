@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-/** A mesh reveal driven by the GSAP timeline — clipped top-to-bottom like the 2D clip-rect grow. */
+/** A mesh reveal driven by the reveal timeline — clipped top-to-bottom like the 2D clip-rect grow. */
 export interface Reveal3DTarget {
   readonly mesh: THREE.Object3D;
   readonly clipPlane: THREE.Plane;

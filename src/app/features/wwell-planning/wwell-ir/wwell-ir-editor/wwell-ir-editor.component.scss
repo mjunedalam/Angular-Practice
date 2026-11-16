@@ -280,6 +280,11 @@ app-wwell-ir-editor {
   font-size: 16px;
   color: currentColor;
   opacity: 0.6;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--open {
+    transform: rotate(180deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -314,7 +319,25 @@ app-wwell-ir-editor {
 /* The overlay pane itself has no size/background of its own — this inner box just bounds
  * WwellApprovalWorkflowCardComponent to a sane popover size; the card supplies its own padding,
  * glass background and shadow (same component the sidebar uses, unstyled here). */
+/* Opens from the pill's corner: fades, drops in a few px and scales up from top-right (opacity +
+ * transform only, so it stays on the compositor). `animate.enter` adds the --enter class; --closing
+ * is toggled by the component for the exit, then the overlay is detached. */
+@keyframes ire-approval-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+@keyframes ire-approval-popover-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
 .ire__approval-popover {
+  transform-origin: top right;
   display: flex;
   flex-direction: column;
   width: 280px;
@@ -323,6 +346,22 @@ app-wwell-ir-editor {
   app-wwell-approval-workflow-card {
     flex: 1;
     min-height: 0;
+  }
+
+  &--enter {
+    animation: ire-approval-popover-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &--closing {
+    animation: ire-approval-popover-out 140ms cubic-bezier(0.32, 0, 0.67, 1) forwards;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &--enter,
+    &--closing {
+      animation: none;
+    }
   }
 }
 
