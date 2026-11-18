@@ -17,14 +17,14 @@
       <span class="wf__label">Reservoir <i>*</i></span>
       <input class="wf__control" type="text" autocomplete="off" [value]="record().reservoir" (input)="setText('reservoir', $event)" />
     </label>
-    <label class="wf__field wf__field--wide">
-      <span class="wf__label">Well Type</span>
+    <div class="wf__field wf__field--wide">
+      <span class="wf__label" id="wf-well-type">Well Type</span>
       <mat-select
         class="wf__select"
         [value]="record().wellType"
         [panelClass]="selectPanelClass"
         placeholder="Select a well type"
-        aria-label="Well Type"
+        aria-labelledby="wf-well-type"
         (selectionChange)="setWellType($event)"
       >
         <mat-option value="">None</mat-option>
@@ -32,7 +32,7 @@
           <mat-option [value]="type">{{ type }}</mat-option>
         }
       </mat-select>
-    </label>
+    </div>
 
     <label class="wf__field wf__field--wide">
       <span class="wf__label">Total Depth <i>*</i></span>
@@ -58,20 +58,20 @@
         <span class="wf__sub">East (X)</span>
         <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().east" (input)="setText('east', $event)" />
       </label>
-      <label class="wf__field">
-        <span class="wf__sub">Zone</span>
+      <div class="wf__field">
+        <span class="wf__sub" id="wf-zone">Zone</span>
         <mat-select
           class="wf__select"
           [value]="record().zone"
           [panelClass]="selectPanelClass"
-          aria-label="Zone"
+          aria-labelledby="wf-zone"
           (selectionChange)="setZone($event)"
         >
           @for (zone of zones; track zone) {
             <mat-option [value]="zone">{{ zone }}</mat-option>
           }
         </mat-select>
-      </label>
+      </div>
     </div>
   </fieldset>
 
