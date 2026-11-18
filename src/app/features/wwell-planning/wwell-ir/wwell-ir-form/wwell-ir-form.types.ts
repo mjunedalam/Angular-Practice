@@ -49,7 +49,7 @@ export interface WwellIrRawDevelopmentTesting {
 }
 
 /** Flat shape of the IR editor's merged "Program Details" FormGroup — Program Details
- *  (completion/acidization/transmission) and Development & Testing (logging/mudLogging/sampling/
+ *  (completion/acidization/transmission) and Pumping Test (logging/mudLogging/sampling/
  *  flowTest/remarks) are one combined, one-pencil-edit section there (see
  *  wwell-ir-editor.component.ts's `programEdit`) even though they still split back into `main`/
  *  `developmentTesting` on the way to `WwellIrFormRawValue`. */

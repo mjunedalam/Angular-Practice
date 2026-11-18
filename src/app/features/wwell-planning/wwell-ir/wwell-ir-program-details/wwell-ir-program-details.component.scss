@@ -49,7 +49,7 @@ $border: tokens.$border;
   }
 }
 
-// A step's read display split into captioned blocks (General → Completion / Treatment / Development & Testing): the caption
+// A step's read display split into captioned blocks (General → Completion / Treatment / Pumping Test): the caption
 // leads each block with a hairline, so a long list of fields reads as a few short groups instead of one column.
 .pd {
   display: flex;
@@ -76,21 +76,6 @@ $border: tokens.$border;
     border-radius: 2px;
     background: $accent;
   }
-
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, $border, transparent);
-  }
-}
-
-// A block with no caption is set apart by the same fading rule the captions carry.
-.pd__group-rule {
-  height: 1px;
-  margin: 0 0 0.9rem;
-  border: 0;
-  background: linear-gradient(to right, $border, transparent);
 }
 
 // Short values (completion type, sizes, depth) in one strip across the top of a block, hairline-divided so the row reads
@@ -113,8 +98,6 @@ $border: tokens.$border;
     // beneath it share a row wide enough for their labels to stay on one line.
     &:first-child {
       flex: 1 1 100%;
-      border-bottom: 1px solid $border;
-
       dd {
         font-size: 1.125rem;
       }
@@ -138,7 +121,6 @@ $border: tokens.$border;
 
     &:first-child {
       flex: 1.6 1 0;
-      border-bottom: 0;
     }
 
     & + .pd__field {
@@ -173,17 +155,17 @@ $border: tokens.$border;
 .pd__list {
   --pd-label-w: 13rem;
 
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+// Each option is its own row with a clear break after it, never fused into one block with its neighbours.
+.pd__row {
   border: 1px solid $border;
   border-radius: 10px;
   overflow: hidden;
   background: tokens.$surface-alt;
-}
-
-.pd__row {
-  & + & {
-    border-top: 1px solid $border;
-  }
-
   transition: background-color 0.15s ease;
 
   // Only a folded row lights up on hover: an opened one keeps its fill so the step circles' ring still matches it.
@@ -323,46 +305,25 @@ button.pd__row-head {
   }
 }
 
-// A card's instructions as a numbered procedure: accent-filled step numbers on a connecting line.
+// A card's instructions as a bulleted list.
 .pd__steps {
-  position: relative;
   margin: 0;
   padding: 0;
   list-style: none;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0.6875rem;
-    top: 0.7rem;
-    bottom: 1rem;
-    width: 2px;
-    border-radius: 2px;
-    background: color-mix(in srgb, #{$accent} 22%, transparent);
-  }
-
   li {
     position: relative;
-    padding: 0 0 0.6rem 2.1rem;
-  }
+    padding: 0 0 0.45rem 1.1rem;
 
-  i {
-    position: absolute;
-    left: 0;
-    top: 0.1rem;
-    display: grid;
-    place-items: center;
-    width: 1.375rem;
-    height: 1.375rem;
-    border-radius: 50%;
-    font-size: 0.6875rem;
-    font-style: normal;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: tokens.$on-accent;
-    background: tokens.$accent-fill;
-    // A ring in the card's own fill keeps the connecting line from touching the circle.
-    box-shadow: 0 0 0 3px tokens.$surface-alt;
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0.2rem;
+      top: 0.55em;
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+      background: $accent;
+    }
   }
 }
-

@@ -475,6 +475,27 @@ function linerSizeFromScreenRemarks(base: string): string | null {
   return base.slice(0, -LINER_SCREEN_LABEL.length).trim() || null;
 }
 
+/** Header `cmpl_type` short codes (VARCHAR2(10)) that name a Completion pick outright. */
+const COMPLETION_TYPE_BY_CODE: Readonly<Record<string, string>> = { PPL: WWELL_COMPLETION_TYPE.PRE_PERFORATED_LINER };
+
+/** The Completion pick a header `cmpl_type` code stands for (`PPL` → Pre-perforated Liner), or `null` for anything else. */
+export function completionTypeFromCode(code: string | null | undefined): string | null {
+  return COMPLETION_TYPE_BY_CODE[code?.trim().toUpperCase() ?? ''] ?? null;
+}
+
+// Hand-written / legacy perforated remarks: "+/- 1570 ft of 7" Pre-Perforated Liner", "7" Pre Perforated Liner", "PPL 7in".
+const PRE_PERFORATED_REMARK = /pre[\s-]*perforated|\bppl\b/i;
+const LINER_SIZE_IN_REMARK = /(\d+(?:\s+\d+\/\d+|\.\d+|\/\d+)?)\s*(?:"|''|in\b)/i;
+
+/** Reads a free-typed Pre-Perforated Liner remark: its size (`7"`), with the leading "+/- N ft of" length ignored.
+ *  `null` when the text isn't a pre-perforated liner remark at all. */
+function parsePrePerforatedRemark(remarks: string | null): { readonly linerSizeIn: string | null } | null {
+  if (!remarks || !PRE_PERFORATED_REMARK.test(remarks)) return null;
+  const withoutLength = remarks.replace(/^\s*(?:\+\/-|±)?\s*[\d,.]+\s*(?:ft|feet|')\s+of\s+/i, '');
+  const size = LINER_SIZE_IN_REMARK.exec(withoutLength)?.[1]?.replace(/\s+/g, ' ').trim();
+  return { linerSizeIn: size ? `${size}"` : null };
+}
+
 /**
  * Reverses `flagsForCompletionType` for a persisted exad_gwd_well_design row — the Completion pick
  * itself has no column (cmpl_type is VARCHAR2(10), too short), so it round-trips through the flags.
@@ -493,10 +514,20 @@ export function resolveCompletionTypeFromFlags(
   let extent = NO_LINER_EXTENT;
   if (flags.perforatedFlg === 'Y') {
     const split = splitLinerRemarks(flags.perforatedRemarks);
-    if (split.base.toLowerCase().endsWith(PRE_PERFORATED_SUFFIX.toLowerCase())) {
+    const ownSize = split.base.toLowerCase().endsWith(PRE_PERFORATED_SUFFIX.toLowerCase())
+      ? split.base.slice(0, -PRE_PERFORATED_SUFFIX.length).trim() || null
+      : undefined;
+    // A prefix like "+/- 1570 ft of 7\"" is someone else's wording, not our bare size — the lenient parse below handles it.
+    if (ownSize !== undefined && !/\bft\b|\bof\b/i.test(ownSize ?? '')) {
       completionType = PRE_PERFORATED_SUFFIX;
-      linerSizeIn = split.base.slice(0, -PRE_PERFORATED_SUFFIX.length).trim() || null;
+      linerSizeIn = ownSize;
       extent = split.extent;
+    } else {
+      // Not our own encoding (e.g. "+/- 1570 ft of 7" Pre-Perforated Liner" from another tool): read the size out of it.
+      const parsed = parsePrePerforatedRemark(flags.perforatedRemarks);
+      if (parsed) {
+        return { completionType: PRE_PERFORATED_SUFFIX, linerSizeIn: parsed.linerSizeIn, linerDepthFt: null };
+      }
     }
   } else if (flags.gpFlg === 'Y') {
     completionType = WWELL_COMPLETION_TYPE.SCREEN_GRAVEL_PACK;
@@ -573,7 +604,8 @@ function buildWellDesignFromForm(
     name: null,
     prewapSeq: null,
     ...buildWaterLevelFields(hydrology),
-    pumpLvl: hydrology.estimatedPumpDepthFt,
+    // A flow test has no pump: the pump-depth field is hidden for it, but a value saved while the IR was a pump test must not still draw one.
+    pumpLvl: hydrology.testType === FLOW_TEST_TYPE ? null : hydrology.estimatedPumpDepthFt,
     ...(persistedFlags ??
       deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null, programMain.linerDepthFt)),
   };

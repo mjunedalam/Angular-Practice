@@ -59,7 +59,7 @@ $muted: tokens.$muted;
     font-variant-numeric: tabular-nums;
     color: $navy-deep;
     overflow-wrap: break-word;
-    // A remarks field's saved value can carry real line breaks (e.g. Development/Testing,
+    // A remarks field's saved value can carry real line breaks (e.g. Pumping Test,
     // Sampling) — without this, `\n` renders as a plain space and a 3-line remark collapses
     // back into one run-on line.
     white-space: pre-line;

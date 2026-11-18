@@ -134,7 +134,7 @@
     </section>
   }
 
-  <!-- Hydrology Test Type picks one: a flow test prints Flow Test only, a pump test Development Pump Test only. -->
+  <!-- Hydrology Test Type picks one: a flow test prints Flow Test only, a pump test Pumping Test only. -->
   @if (isFlowTest()) {
     @if (ir().programDetails.developmentTesting.flowTest; as flowTest) {
       <section class="letter__section">
@@ -144,7 +144,7 @@
     }
   } @else if (ir().programDetails.developmentTesting.remarks; as devPumpTest) {
     <section class="letter__section">
-      <h4>Development Pump Test</h4>
+      <h4>Pumping Test</h4>
       <p class="letter__text">{{ devPumpTest }}</p>
     </section>
   }

@@ -22,6 +22,9 @@ export interface LinerEntry {
     readonly halfWidth: number;
     readonly isScreen: boolean;
     readonly isPrePerfLiner: boolean;
+    /** The well design's own perforated remarks (e.g. `+/- 1570 ft of 7" Pre-Perforated Liner`), shown in parentheses under a
+     *  pre-perf liner's label so that one label carries everything — the completion renderer then draws no second one. */
+    readonly prePerfRemarks?: string | null;
     readonly hasActual: boolean;
     /** True only when `topDepth` is a genuine top-of-liner value (as-drilled DRLG_CSG data, or
      *  an explicitly entered IR TOL) — false when it's a computed attach-point fallback (last
@@ -218,6 +221,7 @@ function attachRenderFlags(
         halfWidth: widths[i],
         isScreen: i === targetIndex && lsFlgYes,
         isPrePerfLiner: isPrePerforatedLiner(liner.odSz, wellDesign),
+        prePerfRemarks: isPrePerforatedLiner(liner.odSz, wellDesign) ? wellDesign?.perforatedRemarks?.trim() || null : null,
     }));
 }
 
@@ -478,6 +482,7 @@ function renderLinerShapes({
 
 function renderLinerLabels({
     rootG,
+    layout,
     liners,
     centerX,
     scale,
@@ -511,6 +516,19 @@ function renderLinerLabels({
             .attr('x', labelX).attr('y', midY + 4)
             .text(`${inchLabel(liner.odSz)} Liner @ ${liner.botDepth.toLocaleString()}${screenTag}${prePerfTag}${actualStar}`);
         if (liner.isScreen) primaryLabel.style('font-weight', '900');
+        if (liner.prePerfRemarks) {
+            // Second line in font-relative units (the label's size is themed per view, so a pixel gap overlapped in the
+            // big views), in the same secondary style as a casing's own remark, and squeezed to the room left of the diagram's right edge if it would clip.
+            const remarks = lg.append('text').attr('class', 'casing-label__secondary')
+                .attr('x', labelX).attr('y', midY + 4);
+            const remarkLine = remarks.append('tspan').attr('x', labelX).attr('dy', '1.6em')
+                .text(`(${liner.prePerfRemarks})`);
+            const room = layout.wellboreViewWidth - labelX - 6;
+            const measured = (remarkLine.node() as SVGTSpanElement | null)?.getComputedTextLength?.() ?? 0;
+            if (room > 0 && measured > room) {
+                remarkLine.attr('textLength', room).attr('lengthAdjust', 'spacingAndGlyphs');
+            }
+        }
 
         animateLabel(lg, labelsStart, animation);
 

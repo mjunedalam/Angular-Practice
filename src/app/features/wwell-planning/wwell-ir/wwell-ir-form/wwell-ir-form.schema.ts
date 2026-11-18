@@ -246,8 +246,8 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
           { key: 'flowTest', groupTitle: 'Flow Test', label: 'Flow Test', type: 'rich-textarea', options: WWELL_DEVELOPMENT_FLOW_TEST_OPTIONS, colSpan: 2 },
           {
             key: 'remarks',
-            groupTitle: 'Development/Testing',
-            label: 'Development/Testing',
+            groupTitle: 'Pumping Test',
+            label: 'Pumping Test',
             type: 'rich-textarea',
             options: WWELL_DEVELOPMENT_TESTING_OPTIONS,
             colSpan: 2,

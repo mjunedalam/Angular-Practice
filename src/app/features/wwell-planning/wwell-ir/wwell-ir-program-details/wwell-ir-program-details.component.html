@@ -3,8 +3,6 @@
     <div class="pd__group">
       @if (group.showTitle) {
         <h4 class="pd__group-title">{{ group.title }}</h4>
-      } @else {
-        <hr class="pd__group-rule" />
       }
       @if (group.specs.length) {
         <dl class="pd__specs">
@@ -51,7 +49,7 @@
                 <div class="pd__row-body" appWwellCollapseAnimate>
                   <ol class="pd__steps">
                     @for (step of card.steps; track $index) {
-                      <li><i aria-hidden="true">{{ $index + 1 }}</i>{{ step }}</li>
+                      <li>{{ step }}</li>
                     }
                   </ol>
                 </div>

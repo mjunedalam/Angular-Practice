@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
+  production: true,
   externalConfigFileUrl: 'assets/external-config.json'
 };

@@ -102,6 +102,7 @@
         @if (collapsed()) {
           <div class="sidenav__build-popover" role="tooltip">
             <div class="sidenav__build-popover-title">Build Info</div>
+            @if (!isProd) {
             <div class="sidenav__build-popover-row">
               <span>Branch</span>
               <strong>{{ buildInfo.branch }}</strong>
@@ -110,14 +111,17 @@
               <span>Commit</span>
               <strong>{{ shortHash }}</strong>
             </div>
+            }
             <div class="sidenav__build-popover-row">
               <span>Version</span>
               <strong>v{{ buildInfo.version }}</strong>
             </div>
+            @if (!isProd) {
             <div class="sidenav__build-popover-row">
               <span>Env</span>
               <strong>{{ buildInfo.env }}</strong>
             </div>
+            }
           </div>
         }
       </div>

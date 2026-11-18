@@ -284,6 +284,8 @@ function renderPrePerforatedLiner({
   // <title> tooltip, which is invisible until hover, so perforatedRemarks effectively never
   // showed up even when populated. Prefer the remarks text itself over perfTitle's generic
   // "Pre Perf Liner"/"Perforated Interval" fallback.
+  // A liner anchors the interval → the liner's own label already carries these remarks (liner.renderer.ts), so no second label.
+  if (perfInfo.linerOdSz) return;
   const perfLabel = wellDesign.perforatedRemarks ?? perfTitle;
   const perfLY = perfTopPx + (perfBottomPx - perfTopPx) * 0.7;
   const perfLG = rootG.append('g').attr('class', 'perf-label');

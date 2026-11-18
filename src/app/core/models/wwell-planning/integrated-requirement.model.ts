@@ -38,8 +38,8 @@ export interface IntegratedRequirementDevelopmentTesting {
   readonly mudLogging: string;
   readonly sampling: string;
   readonly flowTest: string;
-  /** General Development/Testing remarks (exad_gwd_ir_header.dev_pump_test) — a catch-all note for
-   *  the whole Development/Testing group, distinct from logging/mudLogging/sampling/flowTest's own
+  /** General Pumping Test remarks (exad_gwd_ir_header.dev_pump_test) — a catch-all note for
+   *  the whole Pumping Test group, distinct from logging/mudLogging/sampling/flowTest's own
    *  per-topic remarks. */
   readonly remarks: string;
 }

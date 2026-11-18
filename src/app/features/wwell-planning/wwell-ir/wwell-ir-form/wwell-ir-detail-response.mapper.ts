@@ -4,7 +4,7 @@ import {
   IntegratedRequirementWellDesignFlags,
 } from '@models/wwell-planning/integrated-requirement.model';
 import { isLegacyIrHtmlText, stripLegacyIrHtml } from './wwell-ir-legacy-html.util';
-import { parseOpenHoleSizeFromRemarks, resolveCompletionTypeFromFlags } from './wwell-ir-wellbore-diagram.mapper';
+import { completionTypeFromCode, parseOpenHoleSizeFromRemarks, resolveCompletionTypeFromFlags } from './wwell-ir-wellbore-diagram.mapper';
 import { formatUtmCoordinates } from '../wwell-ir-coordinates.util';
 import {
   IrCasingRow,
@@ -44,6 +44,18 @@ function parseH2sPpm(h2s: string | null | undefined): number | null {
   if (!h2s) return null;
   const value = parseFloat(h2s);
   return Number.isFinite(value) ? value : null;
+}
+
+/** header.test_type as the app writes it ('flow-test' / 'pump-test') or as other tools store it ('FT' / 'PT'). */
+const TEST_TYPE_BY_CODE: Readonly<Record<string, IntegratedRequirementTestType>> = {
+  'FLOW-TEST': 'flow-test',
+  FT: 'flow-test',
+  'PUMP-TEST': 'pump-test',
+  PT: 'pump-test',
+};
+
+function normalizeTestType(value: string | null | undefined): IntegratedRequirementTestType | null {
+  return TEST_TYPE_BY_CODE[value?.trim().toUpperCase() ?? ''] ?? null;
 }
 
 function normalizeFlag(value: unknown): 'Y' | 'N' {
@@ -105,15 +117,21 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
   const linkedWell = rowsFor<IrLinkedWellRow>(blocks, 'exad_rcd_prewap')[0] as IrLinkedWellRow | undefined;
   const wellDesignRow = pickWellDesignRow(rowsFor<IrWellDesignRow>(blocks, 'exad_gwd_well_design'), existing.wellDesignSeq);
   const headerPresent = header !== undefined;
-  const completionText = resolveLegacyText(header?.completion ?? header?.cmpl_type, existing.programDetails.completion, headerPresent);
+  // `cmpl_type` can hold a short code (PPL = Pre-perforated Liner) rather than remarks text — that is a pick, not text to show.
+  const headerCompletionType = completionTypeFromCode(header?.cmpl_type);
+  const completionRaw = header?.completion ?? (headerCompletionType ? null : header?.cmpl_type);
+  const completionText = resolveLegacyText(completionRaw, existing.programDetails.completion, headerPresent);
   const persistedFlags = wellDesignRow ? mapWellDesignFlags(wellDesignRow) : null;
   // exad_gwd_well_design is keyed by prewap_seq alone, so a well can hold several rows (every INSERT adds
   // one). Whatever row is picked is this record's design — including one whose flags are all 'N': that is
   // a completion that was *deleted*, and it must read back as blank, not fall back to the stale value.
   const wellDesignRowBelongsToThisIr = !!wellDesignRow;
-  const resolvedType = wellDesignRowBelongsToThisIr ? resolveCompletionTypeFromFlags(persistedFlags) : null;
+  const flagsType = wellDesignRowBelongsToThisIr ? resolveCompletionTypeFromFlags(persistedFlags) : null;
+  // The header code fills in the pick when the design row's flags don't decode to one (a size is still read from the remarks if there).
+  const resolvedType =
+    flagsType ?? (headerCompletionType ? { completionType: headerCompletionType, linerSizeIn: null, linerDepthFt: null } : null);
   const hasLegacyMarkup = [
-    header?.completion ?? header?.cmpl_type,
+    completionRaw,
     header?.acidization,
     header?.dt_rmks,
     header?.logging,
@@ -193,7 +211,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     ),
     programDetails: {
       ...existing.programDetails,
-      completionType: wellDesignRowBelongsToThisIr ? (resolvedType?.completionType ?? '') : existing.programDetails.completionType,
+      completionType: wellDesignRowBelongsToThisIr || headerCompletionType ? (resolvedType?.completionType ?? '') : existing.programDetails.completionType,
       completion: completionText,
       linerSizeIn: wellDesignRowBelongsToThisIr ? (resolvedType?.linerSizeIn ?? null) : existing.programDetails.linerSizeIn,
       linerDepthFt: wellDesignRowBelongsToThisIr ? (resolvedType?.linerDepthFt ?? null) : existing.programDetails.linerDepthFt,
@@ -225,7 +243,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       : existing.hydrogeology,
     testProgram: {
       ...existing.testProgram,
-      testType: (header?.test_type as IntegratedRequirementTestType | null | undefined) ?? existing.testProgram.testType,
+      testType: normalizeTestType(header?.test_type) ?? existing.testProgram.testType,
       estimatedRateGpm: hydroRow?.est_productivity ?? existing.testProgram.estimatedRateGpm,
       estimatedWaterLevelFt: hydroRow?.est_sta_water_lvl ?? existing.testProgram.estimatedWaterLevelFt,
       siwhpPsi: hydroRow?.siwhp ?? existing.testProgram.siwhpPsi,

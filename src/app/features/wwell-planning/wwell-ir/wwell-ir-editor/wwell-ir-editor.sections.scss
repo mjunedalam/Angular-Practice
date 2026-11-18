@@ -200,7 +200,7 @@ $warning: tokens.$warning;
     letter-spacing: -0.006em;
     font-variant-numeric: tabular-nums;
     color: tokens.$navy-deep;
-    // A remarks field's saved value can carry real line breaks (e.g. Development/Testing,
+    // A remarks field's saved value can carry real line breaks (e.g. Pumping Test,
     // Sampling) — without this, `\n` renders as a plain space and a 3-line remark collapses
     // back into one run-on line.
     white-space: pre-line;

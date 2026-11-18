@@ -24,11 +24,11 @@ function hasValue(value: string): boolean {
 
 /** Read-only Program Details, shared by the editor's General step and the IR view's Details page.
  *
- *  Three blocks — Completion (captioned), Treatment and Development & Testing (set apart by a rule); a block with nothing
+ *  Three blocks — Completion (captioned), Treatment and Pumping Test (set apart by a rule); a block with nothing
  *  to show is left out. In each, short values (type, sizes) are a spec strip across the top and long-form ones (picked
  *  instructions, remarks) are rows of one aligned accordion list: label on the left, then the first instruction as a
  *  one-line preview (or, opened, every instruction as a numbered step), then a chevron. Rows with nothing entered are
- *  hidden, except Flow Test and Development/Testing. The first card (Completion Remarks) starts open. The host can fold/unfold everything through
+ *  hidden, except Flow Test and Pumping Test. The first card (Completion Remarks) starts open. The host can fold/unfold everything through
  *  `toggleAll()` / `allOpen()` (the editor's section-head button does). */
 @Component({
   selector: 'app-wwell-ir-program-details',
@@ -52,13 +52,13 @@ export class WwellIrProgramDetailsComponent {
     return [
       { title: 'Completion', showTitle: true, rows: buildProgramCompletionRows(ir) },
       { title: 'Treatment', showTitle: false, rows: buildProgramTreatmentRows(ir) },
-      { title: 'Development & Testing', showTitle: false, rows: buildProgramDevRows(ir) },
+      { title: 'Pumping Test', showTitle: false, rows: buildProgramDevRows(ir) },
     ]
       .map(({ title, showTitle, rows }) => ({
         title,
         showTitle,
         // Nothing entered means nothing shown — a blank spec cell or an empty row is noise. Only rows flagged `alwaysShow`
-        // (Flow Test, Development/Testing) stay listed, as "Not specified".
+        // (Flow Test, Pumping Test) stay listed, as "Not specified".
         specs: rows.filter(row => !row.options && !row.wide && hasValue(row.value)),
         cards: rows
           .filter(row => row.options || row.wide)

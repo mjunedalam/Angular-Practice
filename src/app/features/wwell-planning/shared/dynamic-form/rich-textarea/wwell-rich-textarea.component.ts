@@ -14,7 +14,7 @@ import {
 
 /**
  * "Dropdown + big textarea" control for the IR Program Details remarks fields (Acidization,
- * Transmission, Logging, Mud Logging, Sampling, Flow Test, Development/Testing) — several of
+ * Transmission, Logging, Mud Logging, Sampling, Flow Test, Pumping Test) — several of
  * these carry long, multi-line legacy remarks (see wwell-ir-legacy-html.util.ts), too much for the
  * single-line `combo` autocomplete input the rest of the dynamic-form engine uses.
  *

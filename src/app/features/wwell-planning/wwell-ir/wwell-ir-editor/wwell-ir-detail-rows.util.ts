@@ -93,7 +93,7 @@ export function buildRequestReferenceRows(
 }
 
 /** Mirrors the schema's "Program Details" section (2.1) — its own rail leaf/edit unit, separate
- *  from Development & Testing (2.2) below. `openHoleSizeIn` only ever means something when the
+ *  from Pumping Test (2.2) below. `openHoleSizeIn` only ever means something when the
  *  completion type includes 'Open Hole' (see the field's `visibleWhen` gate in the schema), so
  *  it's only included then rather than showing a dangling "—" the rest of the time.
  *
@@ -118,7 +118,7 @@ export function buildProgramCompletionRows(ir: IntegratedRequirement): readonly 
   }
   if (isLinerCompletionType(p.completionType)) {
     rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn), mono: true });
-    rows.push({ label: 'Liner Depth (ft)', value: p.linerDepthFt != null ? String(p.linerDepthFt) : 'Target depth', mono: true });
+    rows.push({ label: 'Liner Depth (ft)', value: fmtNum(p.linerDepthFt), mono: true });
   }
   rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true, wide: true, icon: 'construction' });
   return rows;
@@ -133,7 +133,7 @@ export function buildProgramTreatmentRows(ir: IntegratedRequirement): readonly K
   ];
 }
 
-/** Mirrors the schema's "Development & Testing" section (2.2) — see buildProgramMainRows' doc
+/** Mirrors the schema's "Pumping Test" section (2.2) — see buildProgramMainRows' doc
  *  comment for why this is a separate function rather than one combined list. */
 export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[] {
   const d = ir.programDetails.developmentTesting;
@@ -143,7 +143,7 @@ export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[]
     { label: 'Sampling', value: fmtStr(d.sampling), options: true, icon: 'colorize' },
     // Both are always listed here; the IR letter / PDF / SAP copy print only the one matching the Hydrology Test Type.
     { label: 'Flow Test', value: fmtStr(d.flowTest), options: true, icon: 'speed', alwaysShow: true },
-    { label: 'Development/Testing', value: fmtStr(d.remarks), wide: true, icon: 'engineering', alwaysShow: true },
+    { label: 'Pumping Test', value: fmtStr(d.remarks), wide: true, icon: 'engineering', alwaysShow: true },
   ];
 }
 
