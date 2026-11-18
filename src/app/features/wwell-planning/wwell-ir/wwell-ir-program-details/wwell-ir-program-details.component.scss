@@ -1,0 +1,368 @@
+@use '../../shared/wwell-design-tokens' as tokens;
+
+$muted: tokens.$muted;
+$accent: tokens.$accent;
+$border: tokens.$border;
+
+:host {
+  display: block;
+  // The strip and the rows below respond to the width of the space they are given, not the window: the same component
+  // sits in a narrow editor column and a wide View card.
+  container-type: inline-size;
+}
+
+// Label over value, the way a spec sheet sets them: a small tracked caption, then the figure a clear step larger and
+// heavier. The caption recedes so a page of fields reads as values first, not as a wall of equal-weight text.
+.pd__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  dt {
+    font-size: tokens.$text-2xs;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $muted;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.006em;
+    font-variant-numeric: tabular-nums;
+    color: tokens.$navy-deep;
+  }
+
+  &[data-tone='warning'] dd {
+    color: var(--wp-warning);
+  }
+
+  &[data-tone='danger'] dd {
+    color: var(--wp-danger-ink);
+  }
+
+  &[data-tone='success'] dd {
+    color: var(--wp-success);
+  }
+}
+
+// A step's read display split into captioned blocks (General → Completion / Treatment / Development & Testing): the caption
+// leads each block with a hairline, so a long list of fields reads as a few short groups instead of one column.
+.pd {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.pd__group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.7rem;
+  font-size: tokens.$text-2xs;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $muted;
+
+  // A short accent tick leads the caption; a rule fades out to the right.
+  &::before {
+    content: '';
+    width: 0.2rem;
+    height: 0.9rem;
+    border-radius: 2px;
+    background: $accent;
+  }
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, $border, transparent);
+  }
+}
+
+// A block with no caption is set apart by the same fading rule the captions carry.
+.pd__group-rule {
+  height: 1px;
+  margin: 0 0 0.9rem;
+  border: 0;
+  background: linear-gradient(to right, $border, transparent);
+}
+
+// Short values (completion type, sizes, depth) in one strip across the top of a block, hairline-divided so the row reads
+// as a single line of specs.
+.pd__specs {
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid $border;
+  border-radius: 10px;
+  overflow: hidden;
+  background: tokens.$surface-alt;
+  box-shadow: tokens.$shadow-1;
+
+  .pd__field {
+    flex: 1 1 7rem;
+    padding: 0.65rem 0.95rem 0.7rem;
+
+    // The completion type is the strip's headline: its own full-width row in the largest type, so the three measurements
+    // beneath it share a row wide enough for their labels to stay on one line.
+    &:first-child {
+      flex: 1 1 100%;
+      border-bottom: 1px solid $border;
+
+      dd {
+        font-size: 1.125rem;
+      }
+    }
+
+    & + .pd__field:not(:nth-child(2)) {
+      border-left: 1px solid $border;
+    }
+
+    dd {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Wide host: the whole strip is one row of equal cells, the type just a little wider — not a full-width headline over a
+// short row.
+@container (min-width: 720px) {
+  .pd__specs .pd__field {
+    flex: 1 1 0;
+
+    &:first-child {
+      flex: 1.6 1 0;
+      border-bottom: 0;
+    }
+
+    & + .pd__field {
+      border-left: 1px solid $border;
+    }
+  }
+}
+
+// Icon chip beside a row's label.
+.pd__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
+  color: $accent;
+  background: linear-gradient(135deg, color-mix(in srgb, #{$accent} 20%, transparent), color-mix(in srgb, #{$accent} 8%, transparent));
+
+  mat-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 1.05rem;
+    line-height: 1.05rem;
+  }
+}
+
+// Long-form values (picked instructions, remarks) as ONE aligned list: a solid bordered panel, a hairline between rows,
+// every row the same three columns (label · preview · chevron). A row opening grows only itself, so the rows never
+// stagger into columns of mixed heights the way free-floating cards did on a wide screen.
+.pd__list {
+  --pd-label-w: 13rem;
+
+  border: 1px solid $border;
+  border-radius: 10px;
+  overflow: hidden;
+  background: tokens.$surface-alt;
+}
+
+.pd__row {
+  & + & {
+    border-top: 1px solid $border;
+  }
+
+  transition: background-color 0.15s ease;
+
+  // Only a folded row lights up on hover: an opened one keeps its fill so the step circles' ring still matches it.
+  &:not([data-static]):not([data-open]):hover {
+    background: tokens.$surface-hover;
+  }
+}
+
+.pd__row-head {
+  display: grid;
+  grid-template-columns: var(--pd-label-w) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.7rem 0.95rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+
+  &--static {
+    // Same columns, nothing to open: just the label and a muted note, with an empty chevron slot so rows stay aligned.
+    &::after {
+      content: '';
+      width: 1.25rem;
+    }
+  }
+}
+
+button.pd__row-head {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: -2px;
+  }
+
+  &:hover .pd__row-label {
+    color: tokens.$navy-deep;
+  }
+}
+
+.pd__row-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  font-size: tokens.$text-2xs;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $muted;
+}
+
+.pd__row-preview {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: tokens.$navy-deep;
+
+  &--empty {
+    color: tokens.$subtle;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  // A single instruction is the whole content: shown in full and wrapped, not cut to a one-line preview.
+  &--full {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    line-height: 1.5;
+  }
+}
+
+.pd__chevron {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+  color: tokens.$subtle;
+  transition: transform 0.2s ease;
+}
+
+.pd__row[data-open] .pd__chevron {
+  transform: rotate(180deg);
+}
+
+// The opened steps line up under the preview column, and stop at a readable line length however wide the screen is.
+.pd__row-body {
+  padding: 0.1rem 2.75rem 0.9rem calc(var(--pd-label-w) + 0.95rem + 1rem);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: tokens.$navy-deep;
+
+  .pd__steps,
+  &.pd__row-body--text {
+    max-width: 86ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd__chevron,
+  .pd__row {
+    transition: none;
+  }
+}
+
+// A narrow host (the editor beside the wellbore panel): the preview drops under the label instead of squeezing beside it,
+// and opened steps use the full row.
+@container (max-width: 540px) {
+  .pd__row-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.15rem;
+  }
+
+  .pd__row-preview {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pd__chevron {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .pd__row-head--static::after {
+    display: none;
+  }
+
+  .pd__row-body {
+    padding-left: 0.95rem;
+    padding-right: 0.95rem;
+  }
+}
+
+// A card's instructions as a numbered procedure: accent-filled step numbers on a connecting line.
+.pd__steps {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.6875rem;
+    top: 0.7rem;
+    bottom: 1rem;
+    width: 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, #{$accent} 22%, transparent);
+  }
+
+  li {
+    position: relative;
+    padding: 0 0 0.6rem 2.1rem;
+  }
+
+  i {
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    display: grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 50%;
+    font-size: 0.6875rem;
+    font-style: normal;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: tokens.$on-accent;
+    background: tokens.$accent-fill;
+    // A ring in the card's own fill keeps the connecting line from touching the circle.
+    box-shadow: 0 0 0 3px tokens.$surface-alt;
+  }
+}
+

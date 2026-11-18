@@ -1,12 +1,14 @@
 <div class="wrt" [class.wrt--disabled]="control().disabled">
-  <div class="wrt__head">
-    <span class="wrt__label">
-      {{ config().label }}
-      @if (config().validators?.required) {
-        <span class="wrt__required">*</span>
-      }
-    </span>
-  </div>
+  @if (!repeatsGroupTitle() || config().validators?.required) {
+    <div class="wrt__head">
+      <span class="wrt__label">
+        {{ config().label }}
+        @if (config().validators?.required) {
+          <span class="wrt__required">*</span>
+        }
+      </span>
+    </div>
+  }
 
   <div class="wrt__field">
     @if (hasOptions()) {
@@ -40,6 +42,9 @@
       <div
         #box
         class="wrt__box"
+        role="textbox"
+        aria-multiline="true"
+        [attr.aria-label]="config().label"
         [class.wrt__box--no-dropdown]="!hasOptions()"
         [attr.contenteditable]="control().disabled ? null : true"
         [attr.data-placeholder]="config().placeholder ?? 'Type or select from dropdown'"

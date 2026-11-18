@@ -17,6 +17,7 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -40,6 +41,7 @@ import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals
 import { approvalRingPercent, chainCompletionColor, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
 import { prefersReducedMotion } from '../../shared/dynamic-form/motion.util';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
+import { WwellIrProgramDetailsComponent } from '../wwell-ir-program-details/wwell-ir-program-details.component';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
 import { DynamicSectionComponent } from '../../shared/dynamic-form/dynamic-section/dynamic-section.component';
 import { addRepeatableRow, blankValueFor, buildSectionGroup, defaultValueFor } from '../../shared/dynamic-form/wwell-dynamic-form.builder';
@@ -97,8 +99,6 @@ import {
 import {
   buildGeologistContactRows,
   buildHydrogeologyRows,
-  buildProgramDevRows,
-  buildProgramMainRows,
   buildRequestReferenceRows,
 } from './wwell-ir-detail-rows.util';
 import { WWELL_IR_PREVIEW_DIAGRAM_LAYOUT, WWELL_IR_SIDEBAR_DIAGRAM_LAYOUT } from './wwell-ir-preview-diagram-layout';
@@ -220,6 +220,7 @@ function withOffsetWellPicker(
     WwellIrSubSeaInfoComponent,
     WwellApprovalWorkflowCardComponent,
     WwellCollapseAnimateDirective,
+    WwellIrProgramDetailsComponent,
   ],
   templateUrl: './wwell-ir-editor.component.html',
   styleUrls: ['./wwell-ir-editor.component.scss', './wwell-ir-editor.sections.scss'],
@@ -439,7 +440,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   });
   /** Follows the live edit of the Estimated Hydrology step's Test Type toggle. */
   protected readonly headerTestType = computed(() => this.hydrogeologyEdit.liveValue()?.testType ?? this.ir().testProgram.testType);
-  protected readonly programRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
+  /** The Program Details read display — only present outside edit mode; the section-head expand/collapse-all button drives it. */
+  protected readonly programDetails = viewChild(WwellIrProgramDetailsComponent);
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
 

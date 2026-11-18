@@ -92,6 +92,9 @@ export interface WwellFieldConfig {
    *  Longitude box. Applies in both edit and review mode; the control itself is untouched (still
    *  one value, one key), this only changes how DynamicFieldComponent draws it. */
   readonly splitDisplay?: (value: string) => readonly { readonly label: string; readonly value: string }[];
+  /** Draws a full-width sub-heading with a divider line above this field, to break a long flat
+   *  section into labelled groups without splitting its form group (keys stay in the same section). */
+  readonly groupTitle?: string;
 }
 
 /** A field whose value is worked out from its row's other fields instead of typed. The form keeps it in sync as those

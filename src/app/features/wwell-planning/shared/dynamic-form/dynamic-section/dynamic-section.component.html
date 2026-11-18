@@ -6,6 +6,9 @@
   @if (section().fields) {
     <div class="dys__grid">
       @for (field of section().fields!; track field.key) {
+        @if (field.groupTitle && !field.hidden) {
+          <h4 class="dys__group-title">{{ field.groupTitle }}</h4>
+        }
         @if (field.visibleWhen) {
           <div class="dys__field-host" [class.dys__field-host--span-2]="field.colSpan === 2" #fieldHost>
             <app-dynamic-field

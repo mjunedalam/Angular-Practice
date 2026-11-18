@@ -53,6 +53,8 @@ export class WwellRichTextareaComponent implements AfterViewInit, OnDestroy {
   protected readonly optionValue = wwellFieldOptionValue;
   protected readonly resolvedOptions = computed(() => resolveFieldOptions(this.config()));
   protected readonly hasOptions = computed(() => this.resolvedOptions().length > 0);
+  /** The section's own sub-heading (`groupTitle`) already says exactly what this label would — printing both stacks the same word twice. */
+  protected readonly repeatsGroupTitle = computed(() => this.config().groupTitle === this.config().label);
 
   private readonly boxRef = viewChild<ElementRef<HTMLDivElement>>('box');
   private valueChangesSubscription?: Subscription;

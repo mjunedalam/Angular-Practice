@@ -1,6 +1,22 @@
 <div class="ir-details">
   <app-wwell-ir-view-kv-card title="General Information" [rows]="generalInfoRows()" />
-  <app-wwell-ir-view-kv-card title="Program Details" [rows]="programDetailsRows()" />
+  <section class="ir-details__program">
+    <h3 class="ir-details__section-title">
+      Program Details
+      <button
+        type="button"
+        mat-icon-button
+        class="ir-details__fold-btn"
+        [class.ir-details__fold-btn--on]="program.allOpen()"
+        [attr.aria-pressed]="program.allOpen()"
+        [attr.aria-label]="program.allOpen() ? 'Collapse all' : 'Expand all'"
+        (click)="program.toggleAll()"
+      >
+        <mat-icon>{{ program.allOpen() ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+      </button>
+    </h3>
+    <app-wwell-ir-program-details #program [ir]="ir()" />
+  </section>
   <app-wwell-ir-view-kv-card title="Geologist Contact" [rows]="geologistContactRows()" />
 
   <section class="ir-details__attachments">

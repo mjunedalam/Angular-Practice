@@ -16,6 +16,12 @@ export interface KvRow {
   readonly options?: boolean;
   /** An identifier or a measurement (an IR number, a depth, a reading): set in the mono face, like the figures elsewhere. */
   readonly mono?: boolean;
+  /** Long free text (a remark): the editor's read display gives it a full-width card instead of a short spec cell. */
+  readonly wide?: boolean;
+  /** Material icon name the editor's card display shows beside the label. */
+  readonly icon?: string;
+  /** Listed in the Program Details read display even with nothing entered ("Not specified"); every other long-form row is hidden when empty. */
+  readonly alwaysShow?: boolean;
 }
 
 export const EMPTY_VALUE = '—';
@@ -98,24 +104,33 @@ export function buildRequestReferenceRows(
  *  (dynamic-section.component.ts), not a straight equality that only ever matched the
  *  single-selection case and otherwise silently hid an already-entered size. */
 export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[] {
+  return [...buildProgramCompletionRows(ir), ...buildProgramTreatmentRows(ir)];
+}
+
+/** The completion half of `buildProgramMainRows`: type, the sizes that go with it, and the remarks picks (one line). */
+export function buildProgramCompletionRows(ir: IntegratedRequirement): readonly KvRow[] {
   const p = ir.programDetails;
   const rows: KvRow[] = [{ label: 'Completion', value: fmtStr(p.completionType) }];
 
   // Every pick is drawn inside the open hole, so its size is listed whatever the pick.
   if (p.completionType) {
-    rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn) });
+    rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn), mono: true });
   }
   if (isLinerCompletionType(p.completionType)) {
-    rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn) });
-    rows.push({ label: 'Liner Depth (ft)', value: p.linerDepthFt != null ? String(p.linerDepthFt) : 'Target depth' });
+    rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn), mono: true });
+    rows.push({ label: 'Liner Depth (ft)', value: p.linerDepthFt != null ? String(p.linerDepthFt) : 'Target depth', mono: true });
   }
-  rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true });
-
-  rows.push(
-    { label: 'Acidization', value: fmtStr(p.acidization), options: true },
-    { label: 'Transmission', value: fmtStr(p.transmission), options: true },
-  );
+  rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true, wide: true, icon: 'construction' });
   return rows;
+}
+
+/** The acidization / transmission half of `buildProgramMainRows`. */
+export function buildProgramTreatmentRows(ir: IntegratedRequirement): readonly KvRow[] {
+  const p = ir.programDetails;
+  return [
+    { label: 'Acidization', value: fmtStr(p.acidization), options: true, icon: 'science' },
+    { label: 'Transmission', value: fmtStr(p.transmission), options: true, icon: 'settings_input_antenna' },
+  ];
 }
 
 /** Mirrors the schema's "Development & Testing" section (2.2) — see buildProgramMainRows' doc
@@ -123,12 +138,12 @@ export function buildProgramMainRows(ir: IntegratedRequirement): readonly KvRow[
 export function buildProgramDevRows(ir: IntegratedRequirement): readonly KvRow[] {
   const d = ir.programDetails.developmentTesting;
   return [
-    { label: 'Logging', value: fmtStr(d.logging), options: true },
-    { label: 'Mud Logging', value: fmtStr(d.mudLogging), options: true },
-    { label: 'Sampling', value: fmtStr(d.sampling), options: true },
+    { label: 'Logging', value: fmtStr(d.logging), options: true, icon: 'query_stats' },
+    { label: 'Mud Logging', value: fmtStr(d.mudLogging), options: true, icon: 'water_drop' },
+    { label: 'Sampling', value: fmtStr(d.sampling), options: true, icon: 'colorize' },
     // Both are always listed here; the IR letter / PDF / SAP copy print only the one matching the Hydrology Test Type.
-    { label: 'Flow Test', value: fmtStr(d.flowTest), options: true },
-    { label: 'Development/Testing', value: fmtStr(d.remarks) },
+    { label: 'Flow Test', value: fmtStr(d.flowTest), options: true, icon: 'speed', alwaysShow: true },
+    { label: 'Development/Testing', value: fmtStr(d.remarks), wide: true, icon: 'engineering', alwaysShow: true },
   ];
 }
 
@@ -167,7 +182,7 @@ export function buildHydrogeologyRows(ir: IntegratedRequirement): readonly KvRow
 export function buildGeologistContactRows(ir: IntegratedRequirement): readonly KvRow[] {
   const c = ir.contacts;
   return [
-    { label: 'Primary', value: fmtStr(c.geologistPrimary) },
-    { label: 'Secondary', value: fmtStr(c.geologistSecondary) },
+    { label: 'Primary', value: fmtStr(c.geologistPrimary), icon: 'person' },
+    { label: 'Secondary', value: fmtStr(c.geologistSecondary), icon: 'person_outline' },
   ];
 }

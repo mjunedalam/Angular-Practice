@@ -17,6 +17,7 @@
   gap: 1rem;
 }
 
+.ir-details__program,
 .ir-details__attachments,
 .ir-details__offset-wells,
 .ir-details__approval {
@@ -35,6 +36,30 @@
     width: 18px;
     height: 18px;
     color: inherit;
+  }
+}
+
+// Program Details' expand/collapse-all toggle sits at the end of the card title; tinted while every card is open.
+.ir-details__fold-btn {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: tokens.$muted;
+
+  &:hover {
+    color: tokens.$accent;
+  }
+
+  &--on {
+    color: tokens.$accent;
+    background: color-mix(in srgb, #{tokens.$accent} 14%, transparent);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
   }
 }
 

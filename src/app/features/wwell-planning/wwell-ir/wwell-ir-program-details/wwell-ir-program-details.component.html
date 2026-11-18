@@ -1,0 +1,65 @@
+<div class="pd">
+  @for (group of groups(); track group.title) {
+    <div class="pd__group">
+      @if (group.showTitle) {
+        <h4 class="pd__group-title">{{ group.title }}</h4>
+      } @else {
+        <hr class="pd__group-rule" />
+      }
+      @if (group.specs.length) {
+        <dl class="pd__specs">
+          @for (row of group.specs; track row.label) {
+            <div class="pd__field" [attr.data-tone]="row.tone">
+              <dt>{{ row.label }}</dt>
+              <dd><app-wwell-ir-kv-value [row]="row" /></dd>
+            </div>
+          }
+        </dl>
+      }
+      @if (group.cards.length) {
+        <div class="pd__list">
+          @for (card of group.cards; track card.row.label) {
+            @let isOpen = openCards().has(card.row.label);
+            <div class="pd__row" [attr.data-open]="isOpen || null" [attr.data-static]="card.steps.length < 2 || null">
+              @if (card.steps.length > 1) {
+                <button type="button" class="pd__row-head" [attr.aria-expanded]="isOpen" (click)="toggleCard(card.row.label)">
+                  <span class="pd__row-label">
+                    @if (card.row.icon) {
+                      <span class="pd__icon" aria-hidden="true"><mat-icon>{{ card.row.icon }}</mat-icon></span>
+                    }
+                    {{ card.row.label }}
+                  </span>
+                  <span class="pd__row-preview">{{ isOpen ? '' : card.steps[0] }}</span>
+                  <mat-icon class="pd__chevron" aria-hidden="true">expand_more</mat-icon>
+                </button>
+              } @else {
+                <div class="pd__row-head pd__row-head--static">
+                  <span class="pd__row-label">
+                    @if (card.row.icon) {
+                      <span class="pd__icon" aria-hidden="true"><mat-icon>{{ card.row.icon }}</mat-icon></span>
+                    }
+                    {{ card.row.label }}
+                  </span>
+                  @if (card.steps.length) {
+                    <span class="pd__row-preview pd__row-preview--full">{{ card.steps[0] }}</span>
+                  } @else {
+                    <span class="pd__row-preview pd__row-preview--empty">Not specified</span>
+                  }
+                </div>
+              }
+              @if (isOpen && card.steps.length > 1) {
+                <div class="pd__row-body" appWwellCollapseAnimate>
+                  <ol class="pd__steps">
+                    @for (step of card.steps; track $index) {
+                      <li><i aria-hidden="true">{{ $index + 1 }}</i>{{ step }}</li>
+                    }
+                  </ol>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -10,12 +10,11 @@ import {
   KvRow,
   buildGeologistContactRows,
   buildHydrogeologyRows,
-  buildProgramDevRows,
-  buildProgramMainRows,
   buildRequestReferenceRows,
 } from '../../wwell-ir-editor/wwell-ir-detail-rows.util';
 import { WwellIrStore } from '../../store/wwell-ir.store';
 import { WWELL_IR_SUBMITTABLE_STATUSES, wwellIrHasRequiredSubmitFields } from '../../wwell-ir.config';
+import { WwellIrProgramDetailsComponent } from '../../wwell-ir-program-details/wwell-ir-program-details.component';
 import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-view-kv-card.component';
 
 /** "Details" step of the read-only IR view: General Information, Program Details, Geologist
@@ -27,7 +26,7 @@ import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-vi
 @Component({
   selector: 'app-wwell-ir-view-details',
   standalone: true,
-  imports: [MatIconModule, MatButtonModule, MatProgressSpinnerModule, WwellIrViewKvCardComponent],
+  imports: [MatIconModule, MatButtonModule, MatProgressSpinnerModule, WwellIrViewKvCardComponent, WwellIrProgramDetailsComponent],
   templateUrl: './wwell-ir-view-details.component.html',
   styleUrl: './wwell-ir-view-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,7 +53,6 @@ export class WwellIrViewDetailsComponent {
     ...buildRequestReferenceRows(this.ir(), this.linkedRequestWellOptions()),
     { label: 'Last Updated', value: this.ir().updatedDate ?? EMPTY_VALUE, mono: true },
   ]);
-  protected readonly programDetailsRows = computed(() => [...buildProgramMainRows(this.ir()), ...buildProgramDevRows(this.ir())]);
   protected readonly geologistContactRows = computed(() => buildGeologistContactRows(this.ir()));
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
 

@@ -306,6 +306,19 @@
             <h3 class="ire__subsection-title">2.1 Program Details</h3>
             @if (!programEdit.isEditing()) {
               <div class="ire__section-actions">
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="ire__edit-btn ire__edit-btn--toggle"
+                  [class.ire__edit-btn--on]="programDetails()?.allOpen()"
+                  [attr.aria-pressed]="programDetails()?.allOpen()"
+                  [attr.aria-label]="programDetails()?.allOpen() ? 'Collapse all' : 'Expand all'"
+                  [matTooltip]="programDetails()?.allOpen() ? 'Collapse all' : 'Expand all'"
+                  matTooltipClass="ir-attachment-tooltip"
+                  (click)="programDetails()?.toggleAll()"
+                >
+                  <mat-icon>{{ programDetails()?.allOpen() ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+                </button>
                 <button type="button" mat-icon-button class="ire__edit-btn" aria-label="Edit Program Details" matTooltip="Edit Program Details" matTooltipClass="ir-attachment-tooltip" (click)="programEdit.open()">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -328,14 +341,7 @@
               </div>
             </div>
           } @else {
-            <dl class="ire__view-grid" appWwellCollapseAnimate>
-              @for (row of programRows(); track row.label) {
-                <div class="ire__view-field" [attr.data-tone]="row.tone">
-                  <dt>{{ row.label }}</dt>
-                  <dd><app-wwell-ir-kv-value [row]="row" /></dd>
-                </div>
-              }
-            </dl>
+            <app-wwell-ir-program-details appWwellCollapseAnimate [ir]="ir()" />
           }
         </section>
 
@@ -367,11 +373,14 @@
               </div>
             </div>
           } @else {
-            <dl class="ire__view-grid" appWwellCollapseAnimate>
+            <dl class="ire__contact-grid" appWwellCollapseAnimate>
               @for (row of geologistContactRows(); track row.label) {
-                <div class="ire__view-field" [attr.data-tone]="row.tone">
-                  <dt>{{ row.label }}</dt>
-                  <dd><app-wwell-ir-kv-value [row]="row" /></dd>
+                <div class="ire__contact" [attr.data-empty]="row.value === '—' || null">
+                  <span class="ire__contact-avatar" aria-hidden="true"><mat-icon>{{ row.icon }}</mat-icon></span>
+                  <div class="ire__contact-text">
+                    <dt>{{ row.label }}</dt>
+                    <dd><app-wwell-ir-kv-value [row]="row" /></dd>
+                  </div>
                 </div>
               }
             </dl>
