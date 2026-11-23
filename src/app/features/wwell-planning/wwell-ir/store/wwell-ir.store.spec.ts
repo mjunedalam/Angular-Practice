@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { environment } from '@env/environment';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
@@ -352,7 +353,7 @@ describe('WwellIrStore - submitIrForReview', () => {
       { file_name: `${ir.code}-letter.pdf`, b64: 'QUJD' },
       { file_name: 'location-map.pdf', b64: 'QUJD' },
     ]);
-    expect(sentRequest.workflow_title).toBe(`[TEST-${ir.code}] Integrated Requirement for ${ir.requestReference.wellName}`);
+    expect(sentRequest.workflow_title).toBe(`[${environment.production ? '' : 'TEST-'}${ir.code}] Integrated Requirement for ${ir.requestReference.wellName}`);
     expect(sentRequest).toMatchObject({
       process_id: WWELL_IR_SAP_PROCESS_ID,
       scenario_id: WWELL_IR_SAP_SCENARIO_ID,
