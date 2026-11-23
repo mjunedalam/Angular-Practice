@@ -64,3 +64,20 @@ export function applyPop(wrap: GSel, cx: number, cy: number, delay: number, anim
     .transition().delay(delay).duration(animation.popDur).ease(animation.popEase)
     .attr('transform', `translate(${cx},${cy}) scale(1)`);
 }
+
+/** Squeezes a right-hand leader label to the room left of the diagram's right edge, so its last characters are never clipped
+ *  by the SVG (e.g. `30" Conductor @ 100` losing its final digit). A label that already fits is left untouched. */
+export function fitLabelToRoom(
+  text: { attr(name: string, value: string | number): unknown; node(): unknown },
+  labelX: number,
+  viewWidth: number,
+): void {
+  const room = viewWidth - labelX - RIGHT_EDGE_PADDING;
+  const measured = (text.node() as SVGTextElement | null)?.getComputedTextLength?.() ?? 0;
+  if (room > 0 && measured > room) {
+    text.attr('textLength', room);
+    text.attr('lengthAdjust', 'spacingAndGlyphs');
+  }
+}
+
+const RIGHT_EDGE_PADDING = 6;

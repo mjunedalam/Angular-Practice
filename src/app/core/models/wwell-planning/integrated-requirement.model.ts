@@ -11,6 +11,8 @@ export interface IntegratedRequirementRequestReference {
   readonly client: string;
   readonly supportingBusiness: string;
   readonly wellName: string;
+  /** Full well name, e.g. SHYB_1031(SHAYBAH) (`W_PRIM_HID`_`W_NUM` + `(W_PRIM_HID_NAME)`) — what the letter, SAP workflow and approved email print. */
+  readonly wellFullName?: string | null;
   readonly targetAquifer: string;
   readonly targetDepthFt: number;
   readonly surfaceElevationFtAsl: number | null;

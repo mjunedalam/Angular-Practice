@@ -98,7 +98,7 @@
           @for (row of casingRows(); track row.type + row.depthFtBgl) {
             <tr>
               <td>{{ row.type }}</td>
-              <td class="ir-well-design__num">{{ row.sizeIn }}</td>
+              <td class="ir-well-design__num">{{ inch(row.sizeIn) }}</td>
               <td class="ir-well-design__num">{{ formatDepth(row.depthFtBgl) }}</td>
               <td>{{ row.remarks || '—' }}</td>
             </tr>

@@ -600,14 +600,20 @@ function buildWellDesignFromForm(
   hydrology: WwellIrRawHydrology,
   persistedFlags?: IntegratedRequirementWellDesignFlags | null,
 ): IWellDesign {
+  const flags =
+    persistedFlags ??
+    deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null, programMain.linerDepthFt);
   return {
     name: null,
     prewapSeq: null,
     ...buildWaterLevelFields(hydrology),
     // A flow test has no pump: the pump-depth field is hidden for it, but a value saved while the IR was a pump test must not still draw one.
     pumpLvl: hydrology.testType === FLOW_TEST_TYPE ? null : hydrology.estimatedPumpDepthFt,
-    ...(persistedFlags ??
-      deriveCompletionElementFlags(programMain.completion, programMain.openHoleSizeIn || null, programMain.completionType, programMain.linerSizeIn || null, programMain.linerDepthFt)),
+    ...flags,
+    // The pre-perforated liner's own label already says "(Pre Perf Liner)": the remark ("7" Pre-Perforated Liner",
+    // "+/- 1570 ft of 7" Pre-Perforated Liner") would only repeat it as a second line under that label. Drawing-only —
+    // the saved flags (derived separately for the payload) keep their remarks.
+    perforatedRemarks: flags.perforatedRemarks && PRE_PERFORATED_REMARK.test(flags.perforatedRemarks) ? null : flags.perforatedRemarks,
   };
 }
 

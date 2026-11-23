@@ -23,6 +23,8 @@ const SIWHP_TO_DEPTH_FACTOR = 2.37;
 
 /** Distance (px, local coords) above ground level used to draw above-ground water positions. */
 const ABOVE_GROUND_OFFSET = 24;
+/** Gap between the above-ground water line's right end and the relocated "Ground Level" label. */
+const GROUND_LABEL_GAP = 14;
 
 const WATER_ACCENT = '#0ea5e9';
 const WATER_ACCENT_MUTED = 'rgba(14,165,233,0.16)';
@@ -139,10 +141,15 @@ export function renderWaterLevel({
     .style('opacity', 1);
 
   const labelY = wPx < 0 ? wPx - 6 : Math.max(wPx + 4, 16);
+  // A flowing well's line sits above ground, where the left side is taken by the "Geologic Horizons" heading: centre the
+  // label over the line instead of running it left into the heading, and move "Ground Level" clear of the dashed line.
+  if (isAboveGround) {
+    rootG.select('.ground-label').attr('x', lR + GROUND_LABEL_GAP).attr('text-anchor', 'start');
+  }
   wg.append('text')
     .attr('class', 'water-label')
-    .attr('x', lL - 22).attr('y', labelY)
-    .attr('text-anchor', 'end').text(label)
+    .attr('x', isAboveGround ? centerX : lL - 22).attr('y', labelY)
+    .attr('text-anchor', isAboveGround ? 'middle' : 'end').text(label)
     .style('opacity', 0)
     .transition().delay(afterLine).duration(animation.fadeDur).ease(easeCubicInOut)
     .style('opacity', 1);

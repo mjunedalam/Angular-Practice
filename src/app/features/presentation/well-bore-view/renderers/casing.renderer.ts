@@ -13,7 +13,7 @@ import {
     casingGradientId,
     computeCasingHalfWidth,
     openHoleHalfWidth, inchLabel } from '@shared/utils/wellbore-math.util';
-import { animateLabel } from './animation.helpers';
+import { animateLabel, fitLabelToRoom } from './animation.helpers';
 import { getCasingTier, resolveCompletionTopDepth } from './wellbore-depth.helpers';
 import { resolveLastCasingShoe, resolveLiners, renderLiners, LinerEntry } from './liner.renderer';
 import { DefsSel, DepthScale, GSel, ResolvedAnimation } from './wellbore-renderer.types';
@@ -281,6 +281,8 @@ function renderCasingLabels({
                 }
             }
 
+            fitLabelToRoom(primaryEl, labelX, layout.wellboreViewWidth);
+
             const innerDelay = labelsStart + (animation.lineStyle === 'draw' ? animation.lineDur : 0);
             const rank = sortedShoeDepths.indexOf(displayDepth);
             const topDepth = rank > 0 ? sortedShoeDepths[rank - 1] : 0;
@@ -329,9 +331,10 @@ function renderCasingLabelsFromActual({
             .attr('x1', rEdge).attr('x2', lEnd).attr('y1', shoePx).attr('y2', shoePx);
         lg.append('path').attr('class', 'casing-label__arrow')
             .attr('d', buildArrowHeadRight(lEnd, shoePx, 6));
-        lg.append('text').attr('class', 'casing-label__primary')
+        const actualPrimary = lg.append('text').attr('class', 'casing-label__primary')
             .attr('x', labelX).attr('y', shoePx + 4)
             .text(`${inchLabel(actual.wCsgOdSz)} Casing @ ${actual.wCsgBotDpth.toLocaleString()}`);
+        fitLabelToRoom(actualPrimary, labelX, layout.wellboreViewWidth);
 
         rootG.append('text').attr('class', 'casing-size-inner')
             .attr('x', centerX).attr('y', innerMidY).attr('text-anchor', 'middle')

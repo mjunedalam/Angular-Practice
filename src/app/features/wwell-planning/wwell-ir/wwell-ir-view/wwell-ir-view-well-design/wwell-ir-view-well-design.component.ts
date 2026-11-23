@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Signal, computed, inject, input, signal } from '@angular/core';
+import { formatInchSize } from '../../wwell-ir-inch-size.util';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -68,6 +69,7 @@ export class WwellIrViewWellDesignComponent {
   // (wwell-ir-editor.component.ts's `hasTargetDepth`) — for the rare submitted record whose
   // target depth never actually got filled in.
   protected readonly hasTargetDepth: Signal<boolean> = computed(() => (this.ir().requestReference.targetDepthFt ?? 0) > 0);
+  protected readonly inch = formatInchSize;
   protected readonly casingRows = computed(() => sortByDepthAscending(this.ir().casing, row => row.depthFtBgl));
   protected readonly hydrogeologyRows = computed(() => buildHydrogeologyRows(this.ir()));
 

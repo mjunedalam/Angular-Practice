@@ -23,6 +23,7 @@ import { WwellIrService } from '../wwell-ir.service';
 import { labelForSlot, slotFromObjectKey } from '../wwell-ir-attachments.config';
 import {
   buildSapWorkflowTitle,
+  irWellFullName,
   WWELL_IR_SAP_PROCESS_ID,
   WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
   WWELL_IR_SAP_RECALL_POLL_MS,
@@ -265,7 +266,7 @@ export const WwellIrStore = signalStore(
             .pipe(
               switchMap(attachmentFiles =>
                 sap.trigger({
-                  workflow_title: buildSapWorkflowTitle(ir.code, ir.requestReference.wellName, environment.production),
+                  workflow_title: buildSapWorkflowTitle(ir.code, irWellFullName(ir), environment.production),
                   initiator_network_id: networkId,
                   requester_network_id: networkId,
                   process_id: WWELL_IR_SAP_PROCESS_ID,

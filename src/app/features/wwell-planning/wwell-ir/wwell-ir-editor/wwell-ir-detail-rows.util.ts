@@ -1,4 +1,5 @@
 import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
+import { formatInchSize, normalizeInchMarks } from '../wwell-ir-inch-size.util';
 import { toUtmAxes } from '../wwell-ir-coordinates.util';
 import { isLinerCompletionType } from '../wwell-ir-form/wwell-ir-completion-type.config';
 
@@ -114,13 +115,13 @@ export function buildProgramCompletionRows(ir: IntegratedRequirement): readonly 
 
   // Every pick is drawn inside the open hole, so its size is listed whatever the pick.
   if (p.completionType) {
-    rows.push({ label: 'Open Hole Size', value: fmtStr(p.openHoleSizeIn), mono: true });
+    rows.push({ label: 'Open Hole Size', value: fmtStr(formatInchSize(p.openHoleSizeIn)), mono: true });
   }
   if (isLinerCompletionType(p.completionType)) {
-    rows.push({ label: 'Liner Screen Size', value: fmtStr(p.linerSizeIn), mono: true });
+    rows.push({ label: 'Liner Screen Size', value: fmtStr(formatInchSize(p.linerSizeIn)), mono: true });
     rows.push({ label: 'Liner Depth (ft)', value: fmtNum(p.linerDepthFt), mono: true });
   }
-  rows.push({ label: 'Completion Remarks', value: fmtStr(p.completion), options: true, wide: true, icon: 'construction' });
+  rows.push({ label: 'Completion Remarks', value: fmtStr(normalizeInchMarks(p.completion)), options: true, wide: true, icon: 'construction' });
   return rows;
 }
 
@@ -128,8 +129,8 @@ export function buildProgramCompletionRows(ir: IntegratedRequirement): readonly 
 export function buildProgramTreatmentRows(ir: IntegratedRequirement): readonly KvRow[] {
   const p = ir.programDetails;
   return [
-    { label: 'Acidization', value: fmtStr(p.acidization), options: true, icon: 'science' },
-    { label: 'Transmission', value: fmtStr(p.transmission), options: true, icon: 'settings_input_antenna' },
+    { label: 'Acidization', value: fmtStr(normalizeInchMarks(p.acidization)), options: true, icon: 'science' },
+    { label: 'Transmission', value: fmtStr(normalizeInchMarks(p.transmission)), options: true, icon: 'settings_input_antenna' },
   ];
 }
 

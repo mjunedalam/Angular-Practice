@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Signal, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { formatInchSize, normalizeInchMarks } from '../../wwell-ir-inch-size.util';
+import { irWellFullName } from '../../wwell-ir-sap.config';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -70,6 +72,9 @@ export class WwellIrViewLetterComponent {
    *  The PDF download is unaffected either way — it is built server-side, and the diagram in it is
    *  captured from a paper-scoped copy (see wwell-ir-wellbore-snapshot.util.ts). */
   /** Casing shallowest first, as the downloaded PDF and the SAP copy list it. */
+  protected readonly inch = formatInchSize;
+  protected readonly inchText = normalizeInchMarks;
+  protected readonly wellFullName = computed(() => irWellFullName(this.ir()));
   protected readonly casingRows = computed(() => sortByDepthAscending(this.ir().casing, row => row.depthFtBgl));
 
   protected readonly printing = signal(false);
@@ -177,7 +182,7 @@ export class WwellIrViewLetterComponent {
   protected readonly completionDesign = computed(() => {
     const { completionType, openHoleSizeIn, linerSizeIn, completion } = this.ir().programDetails;
     const size = completionType === WWELL_COMPLETION_TYPE.OPEN_HOLE ? openHoleSizeIn : isLinerCompletionType(completionType) ? linerSizeIn : null;
-    const pick = completionType ? (size ? `${completionType} (${size})` : completionType) : '';
+    const pick = completionType ? (size ? `${completionType} (${formatInchSize(size)})` : completionType) : '';
     return [pick, completion].filter(part => part.trim()).join(' — ');
   });
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');

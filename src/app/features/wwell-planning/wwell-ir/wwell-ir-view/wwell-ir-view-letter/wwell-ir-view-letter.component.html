@@ -23,19 +23,19 @@
   </header>
 
   <p class="letter__subject">
-    <strong>Subject:</strong> Integrated Requirements for Water Well {{ ir().requestReference.wellName || '—' }}
+    <strong>Subject:</strong> Integrated Requirements for Water Well {{ wellFullName() || '—' }}
   </p>
 
   <p class="letter__intro">
     Following are the integrated requirements for the water supply well
-    <strong>{{ ir().requestReference.wellName || '—' }}</strong>.
+    <strong>{{ wellFullName() || '—' }}</strong>.
   </p>
 
   @if (ir().requestReference.supportingBusiness; as supporting) {
     <section class="letter__section">
       <h4>Objectives</h4>
       <p class="letter__text">
-        <strong>{{ ir().requestReference.wellName || '—' }}</strong> will be used as water supply well supporting
+        <strong>{{ wellFullName() || '—' }}</strong> will be used as water supply well supporting
         <strong>{{ supporting }}</strong>.
       </p>
     </section>
@@ -82,7 +82,7 @@
           @for (row of casingRows(); track row.type + row.depthFtBgl) {
             <tr>
               <td>{{ row.type }}</td>
-              <td>{{ row.sizeIn }}</td>
+              <td>{{ inch(row.sizeIn) }}</td>
               <td>{{ row.depthFtBgl }}</td>
               <td>{{ row.remarks || '' }}</td>
             </tr>
@@ -97,21 +97,21 @@
   @if (completionDesign(); as design) {
     <section class="letter__section">
       <h4>Completion</h4>
-      <p class="letter__text">{{ design }}</p>
+      <p class="letter__text">{{ inchText(design) }}</p>
     </section>
   }
 
   @if (ir().programDetails.developmentTesting.logging; as logging) {
     <section class="letter__section">
       <h4>Logging</h4>
-      <p class="letter__text">{{ logging }}</p>
+      <p class="letter__text">{{ inchText(logging) }}</p>
     </section>
   }
 
   @if (ir().programDetails.acidization; as acidization) {
     <section class="letter__section">
       <h4>Acidization</h4>
-      <p class="letter__text">{{ acidization }}</p>
+      <p class="letter__text">{{ inchText(acidization) }}</p>
     </section>
   }
 
@@ -119,10 +119,10 @@
     <section class="letter__section">
       <h4>Mud Logging &amp; Data Transmission</h4>
       @if (ir().programDetails.transmission; as transmission) {
-        <p class="letter__text">{{ transmission }}</p>
+        <p class="letter__text">{{ inchText(transmission) }}</p>
       }
       @if (ir().programDetails.developmentTesting.mudLogging; as mudLogging) {
-        <p class="letter__text">{{ mudLogging }}</p>
+        <p class="letter__text">{{ inchText(mudLogging) }}</p>
       }
     </section>
   }
@@ -130,7 +130,7 @@
   @if (ir().programDetails.developmentTesting.sampling; as sampling) {
     <section class="letter__section">
       <h4>Sampling</h4>
-      <p class="letter__text">{{ sampling }}</p>
+      <p class="letter__text">{{ inchText(sampling) }}</p>
     </section>
   }
 
@@ -139,13 +139,13 @@
     @if (ir().programDetails.developmentTesting.flowTest; as flowTest) {
       <section class="letter__section">
         <h4>Flow Test</h4>
-        <p class="letter__text">{{ flowTest }}</p>
+        <p class="letter__text">{{ inchText(flowTest) }}</p>
       </section>
     }
   } @else if (ir().programDetails.developmentTesting.remarks; as devPumpTest) {
     <section class="letter__section">
       <h4>Pumping Test</h4>
-      <p class="letter__text">{{ devPumpTest }}</p>
+      <p class="letter__text">{{ inchText(devPumpTest) }}</p>
     </section>
   }
 
@@ -174,7 +174,7 @@
       </table>
     </div>
     @if (topsFootnote(); as topsRemarks) {
-      <p class="letter__text">{{ topsRemarks }}</p>
+      <p class="letter__text">{{ inchText(topsRemarks) }}</p>
     }
   </section>
 
@@ -198,7 +198,7 @@
   <section class="letter__section">
     <h4>Area Water Well{{ waterFootnote() ? '*' : '' }}</h4>
     @if (waterFootnote(); as waterRemarks) {
-      <p class="letter__text">{{ waterRemarks }}</p>
+      <p class="letter__text">{{ inchText(waterRemarks) }}</p>
     } @else {
       <p class="letter__text letter__text--empty">No remarks.</p>
     }
@@ -210,10 +210,7 @@
             <th>Distance (km)</th>
             <th>Location</th>
             <th>Aquifer</th>
-            <th>TD (ft bgl)</th>
-            <th>Test Duration (min)</th>
             <th>Rate (GPM)</th>
-            <th>RPM</th>
             <th>SWL (ft bgl)</th>
             <th>PWL (ft bgl)</th>
             <th>Drawdown (ft)</th>
@@ -229,10 +226,7 @@
               <td>{{ well.distanceKm ?? '' }}</td>
               <td>{{ well.location ?? '' }}</td>
               <td>{{ well.aquifer ?? '' }}</td>
-              <td>{{ well.totalDepthFt ?? '' }}</td>
-              <td>{{ well.testDurationMin ?? '' }}</td>
               <td>{{ well.rateGpm ?? '' }}</td>
-              <td>{{ well.rpm ?? '' }}</td>
               <td>{{ well.swlFt ?? '' }}</td>
               <td>{{ well.pwlFt ?? '' }}</td>
               <td>{{ well.drawdownFt ?? '' }}</td>
@@ -241,7 +235,7 @@
               <td>{{ well.h2sPpm ?? '' }}</td>
             </tr>
           } @empty {
-            <tr><td colspan="14" class="letter__table-empty">No offset water wells recorded.</td></tr>
+            <tr><td colspan="11" class="letter__table-empty">No offset water wells recorded.</td></tr>
           }
         </tbody>
       </table>

@@ -93,6 +93,7 @@ export interface IrWaterRow extends IrRow {
 export interface IrLinkedWellRow {
   readonly prewap_seq: number;
   readonly w_prim_hid: string | null;
+  readonly w_prim_hid_name?: string | null;
   readonly w_num: string | null;
   readonly surfacen: number | null;
   readonly surfacee: number | null;

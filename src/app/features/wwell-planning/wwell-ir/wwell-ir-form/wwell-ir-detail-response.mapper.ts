@@ -153,6 +153,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       linkedRequestId: header?.prewap_seq != null ? String(header.prewap_seq) : existing.requestReference.linkedRequestId,
       letterNumber: header?.ltr_no ?? existing.requestReference.letterNumber,
       wellName: linkedWell ? `${linkedWell.w_prim_hid ?? ''}_${linkedWell.w_num ?? ''}` : existing.requestReference.wellName,
+      wellFullName: linkedWell ? buildWellFullName(linkedWell.w_prim_hid, linkedWell.w_num, linkedWell.w_prim_hid_name) : existing.requestReference.wellFullName,
       surfaceElevationFtAsl: linkedWell?.sv_surf_elevf ?? existing.requestReference.surfaceElevationFtAsl,
       // `surfacen`/`surfacee` are UTM northing/easting meters, not decimal-degree lat/long — shown
       // as the raw survey values (Northing/Easting/Zone), not converted — see
@@ -249,4 +250,11 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
       siwhpPsi: hydroRow?.siwhp ?? existing.testProgram.siwhpPsi,
     },
   };
+}
+
+/** `SHYB_1031(SHAYBAH)` — the short well name plus the primary hole's full name in brackets, dropped when missing or just repeating the code. */
+export function buildWellFullName(primaryHoleId: string | null, wellNumber: string | null, primaryHoleName: string | null | undefined): string {
+  const base = `${primaryHoleId ?? ''}_${wellNumber ?? ''}`;
+  const name = primaryHoleName?.trim();
+  return name && name.toLowerCase() !== (primaryHoleId ?? '').toLowerCase() ? `${base}(${name})` : base;
 }

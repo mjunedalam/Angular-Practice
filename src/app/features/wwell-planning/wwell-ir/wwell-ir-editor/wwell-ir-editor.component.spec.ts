@@ -63,7 +63,7 @@ function buildIr(overrides: Partial<IntegratedRequirement> = {}): IntegratedRequ
       {
         slot: 'wlda',
         objectKey: 'ir-attachments/ir-9001/wlda/test-uuid',
-        label: 'Well Location and Drilling Approval (WLDA)',
+        label: 'Drilling Approval Letter',
         fileName: 'wlda.pdf',
         sizeBytes: 1024,
         contentType: 'application/pdf',

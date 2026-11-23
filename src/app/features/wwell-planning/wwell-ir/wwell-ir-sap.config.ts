@@ -18,6 +18,11 @@ export const WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS = 12;
  *  (WwellIrStore.loadIrApprovalTimeline) is what reads SAP's real current status back over this. */
 export const WWELL_IR_SAP_WF_STATUS_IN_PROGRESS = 'In Progress';
 
+/** The well's full name for letters, SAP and email (e.g. SHYB_1031(SHAYBAH)), else the short wellName. */
+export function irWellFullName(ir: { readonly requestReference: { readonly wellName: string; readonly wellFullName?: string | null } }): string {
+  return ir.requestReference.wellFullName?.trim() || ir.requestReference.wellName;
+}
+
 /** The SAP workflow title: `[IR-11018] Integrated Requirement for AMYL_801` in production, and
  *  `[TEST-IR-11018] Integrated Requirement for AMYL_801` on every other (dev/test) build. */
 export function buildSapWorkflowTitle(irCode: string, wellName: string, isProduction: boolean): string {

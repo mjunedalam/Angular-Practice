@@ -406,11 +406,11 @@ export const WWELL_IR_FORM_SCHEMA: readonly WwellFormStepConfig[] = [
       },
       {
         key: 'wlda',
-        title: 'Well Location and Drilling Approval (WLDA)',
+        title: 'Drilling Approval Letter',
         fields: [
           {
             key: 'file',
-            label: 'Well Location and Drilling Approval (WLDA)',
+            label: 'Drilling Approval Letter',
             type: 'file',
             placeholder: 'Click to attach file...',
             validators: { required: true },

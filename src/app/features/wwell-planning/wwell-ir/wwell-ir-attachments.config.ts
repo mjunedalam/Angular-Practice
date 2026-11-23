@@ -37,7 +37,7 @@ export const WWELL_IR_ATTACHMENT_SLOTS: readonly WwellIrAttachmentSlotConfig[] =
   {
     slot: 'wlda',
     number: '7.3',
-    label: 'Well Location and Drilling Approval (WLDA)',
+    label: 'Drilling Approval Letter',
     icon: 'verified',
     required: true,
     hint: 'WLDA document — appended to the letter after the initiation request and sent to SAP on submit.',
