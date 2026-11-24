@@ -116,13 +116,12 @@ export class LeftSidenavComponent {
       icon: 'M9 2h6a1 1 0 011 1v2H8V3a1 1 0 011-1z M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2 M9 12h6 M9 16h6',
     },
 
-    // WLDA temporarily hidden from the nav (route still exists) — uncomment to restore.
-    // {
-    //   id: 'wlda',
-    //   label: 'WLDA',
-    //   section: 'PLANNING',
-    //   icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z M9.5 9.5l2 2 3.5-4',
-    // },
+    {
+      id: 'wlda',
+      label: 'WLDA',
+      section: 'PLANNING',
+      icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z M9.5 9.5l2 2 3.5-4',
+    },
 
     // {
     //   id: 'well-profile',

@@ -407,3 +407,171 @@
     transform: none;
   }
 }
+
+.wlda__errors {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  font-size: tokens.$text-sm;
+  color: var(--wp-danger);
+}
+
+.wlda__spacer {
+  flex: 1;
+}
+
+// Segmented View / Edit switch, the same idea as the IR editor's mode toggle.
+.wlda__mode {
+  display: inline-flex;
+  padding: 2px;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-btn;
+}
+
+.wlda__mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  font: inherit;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  color: tokens.$muted;
+  background: transparent;
+  border: 0;
+  border-radius: calc(#{tokens.$radius-btn} - 2px);
+  cursor: pointer;
+
+  mat-icon {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+  }
+
+  &--on {
+    color: var(--wp-accent);
+    background: var(--wp-accent-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-accent);
+  }
+}
+
+.wlda__danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 34px;
+  padding: 0 0.8rem;
+  font: inherit;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: var(--wp-danger);
+  background: transparent;
+  border: 1px solid currentcolor;
+  border-radius: tokens.$radius-btn;
+  cursor: pointer;
+
+  mat-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 1.1rem;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-danger);
+    outline-offset: 1px;
+  }
+}
+
+.wlda__panes--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// One tab for now: the Form 6208 sheet. The strip is a real tablist so more tabs can join later.
+.wlda__tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem 0.6rem 0;
+  border-bottom: 1px solid tokens.$border;
+}
+
+.wlda__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: -1px;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: tokens.$muted;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+
+  mat-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 1.05rem;
+  }
+
+  &--active {
+    color: var(--wp-accent);
+    border-bottom-color: var(--wp-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: -2px;
+  }
+}
+
+.wlda__tabpanel {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.wlda__ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 34px;
+  padding: 0 0.8rem;
+  font: inherit;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: var(--wp-accent);
+  background: transparent;
+  border: 1px solid var(--wp-accent-line);
+  border-radius: tokens.$radius-btn;
+  cursor: pointer;
+  transition: background tokens.$duration-fast tokens.$ease-out;
+
+  mat-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 1.1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--wp-accent-soft);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: 1px;
+  }
+}

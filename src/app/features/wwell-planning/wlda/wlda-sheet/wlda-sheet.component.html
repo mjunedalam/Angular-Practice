@@ -1,0 +1,124 @@
+<article class="ws">
+  <div class="ws__paper">
+    <header class="ws__head">
+      <div class="ws__title-block">
+        <h2 class="ws__title">{{ formTitle }}</h2>
+        <p class="ws__form-no">{{ formNumber }} &middot; {{ view().code }}</p>
+      </div>
+      <div class="ws__date">
+        <span class="ws__label">Date</span>
+        <strong>{{ (view().date ?? today) | date: 'MMMM d, y' }}</strong>
+      </div>
+    </header>
+
+    <div class="ws__to">
+      <p><span class="ws__to-label">TO:</span>{{ toLine }}</p>
+      @if (view().status === 'approved') {
+        <span class="ws__stamp" aria-label="Approved">APPROVED</span>
+      }
+    </div>
+
+    <div class="ws__block ws__row-a">
+      <div class="ws__cell ws__field"><span class="ws__label">Field:</span><span class="ws__value">{{ orDash(view().field) }}</span></div>
+      <div class="ws__cell ws__well-no"><span class="ws__label">Well No.</span><span class="ws__value">{{ orDash(view().wellName || (view().field + ' ' + view().wellNumber).trim()) }}</span></div>
+      <div class="ws__cell ws__type">
+        <span class="ws__label">Well Type/Reservoir</span>
+        <span class="ws__value">{{ orDash(view().wellType) }}</span>
+        <span class="ws__value">{{ orDash(view().reservoir) }}</span>
+      </div>
+      <div class="ws__cell ws__drillsite"><span class="ws__label">DRILLSITE No./Type:</span></div>
+      <div class="ws__cell ws__depth">
+        <span class="ws__label">Total Depth:</span>
+        <span class="ws__value">{{ view().totalDepth.trim() ? '+/- ' + view().totalDepth + ' ft' : '—' }}</span>
+      </div>
+      <div class="ws__cell ws__cathodic">
+        <span class="ws__label">Cathodic Protection Required:</span>
+        <span class="ws__checks"><span class="ws__box" [class.ws__box--on]="view().cathodic === true"></span>Yes<span class="ws__box" [class.ws__box--on]="view().cathodic === false"></span>No</span>
+      </div>
+    </div>
+
+    <div class="ws__block ws__row-b">
+      <div class="ws__cell ws__surface">
+        <span class="ws__label">Surface Location (UTM Coordinates):</span>
+        <dl class="ws__coords">
+          <div><dt>NORTH</dt><dd>{{ orDash(view().north) }}</dd></div>
+          <div><dt>EAST</dt><dd>{{ orDash(view().east) }}</dd></div>
+          <div><dt>ZONE</dt><dd>{{ orDash(view().zone) }}</dd></div>
+        </dl>
+      </div>
+      <div class="ws__cell ws__bottom">
+        <span class="ws__label">Bottomhole Location (for Deviated Wells Only):</span>
+        <dl class="ws__coords ws__coords--blank"><div><dt>NORTH</dt><dd></dd></div><div><dt>EAST</dt><dd></dd></div></dl>
+      </div>
+      <div class="ws__cell ws__planning"><span class="ws__label">Planning Designation</span></div>
+      <div class="ws__cell ws__gosp"><span class="ws__label">GOSP, Area or Injection Plant:</span><span class="ws__value">{{ view().gosp }}</span></div>
+    </div>
+
+    <div class="ws__block ws__row-c">
+      <div class="ws__cell"><span class="ws__label">Initiated By:</span></div>
+      <div class="ws__cell"><span class="ws__label">Endorsed By:</span><span class="ws__value">Production &amp; Facilities Development Dept.</span></div>
+      <div class="ws__cell"><span class="ws__label">Endorsed By:</span><span class="ws__value ws__value--link">Land Affairs Dept.</span></div>
+      <div class="ws__cell"><span class="ws__label">Approved By:</span><span class="ws__value">Sr. VP PETROLEUM ENGRG &amp; DEVEL</span></div>
+    </div>
+
+    <h3 class="ws__band">FOR RELOCATION OF WELL PREVIOUSLY APPROVED</h3>
+    <div class="ws__block ws__row-d">
+      <div class="ws__cell"><span class="ws__label">Original Location (UTM Coordinates):</span></div>
+      <div class="ws__cell"><span class="ws__label">Original Approval Date:</span></div>
+    </div>
+
+    <section class="ws__remarks" aria-label="Remarks">
+      <span class="ws__label">Remarks</span>
+      <p class="ws__remarks-text">{{ orDash(view().remarks) }}</p>
+    </section>
+
+    <table class="ws__workflow" aria-label="SAP approval workflow">
+      <thead>
+        <tr>
+          @for (column of workflowColumns; track column) {
+            <th scope="col">{{ column }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of view().workflow; track $index) {
+          <tr><td>{{ row.name }}</td><td>{{ row.title }}</td><td>{{ row.status }}</td><td>{{ row.approvedDate }}</td></tr>
+        } @empty {
+          <tr class="ws__placeholder"><td [attr.colspan]="workflowColumns.length">{{ workflowPlaceholder }}</td></tr>
+        }
+      </tbody>
+    </table>
+
+    <section class="ws__distribution" aria-label="Distribution">
+      <span class="ws__label">DISTRIBUTION:</span>
+      @if (view().distribution.length > 0) {
+        <ul class="ws__dist-list">
+          @for (entry of view().distribution; track $index) {
+            <li>{{ entry }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="ws__placeholder-text">{{ distributionPlaceholder }}</p>
+      }
+    </section>
+  </div>
+
+  <section class="ws__docs" aria-label="Supporting documents">
+    <h3 class="ws__docs-title">Supporting Documents</h3>
+    @if (view().attachments.length === 0) {
+      <p class="ws__docs-empty">No documents attached.</p>
+    } @else {
+      <ul class="ws__files">
+        @for (file of view().attachments; track $index) {
+          <li class="ws__file">
+            <mat-icon>attach_file</mat-icon>
+            <span class="ws__file-name">{{ file.name }}</span>
+            @if (!file.key) {
+              <span class="ws__file-tag">Pending upload</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</article>

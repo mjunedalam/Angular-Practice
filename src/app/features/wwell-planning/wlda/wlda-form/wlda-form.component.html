@@ -1,99 +1,149 @@
-<div class="wf" role="group" aria-label="Water well location details">
+<div class="wf" role="group" aria-label="WLDA letter details">
+  @if (isCreate()) {
+    <p class="wf__hint">
+      <mat-icon>info</mat-icon>
+      Pick the water well to link; its details fill in below. Location, zone, remarks and files are saved with it; other details appear on the letter and PDF only.
+    </p>
+  }
+
+  <div class="wf__field" [class.wf__field--modified]="changed('prewapSeq')">
+    <span class="wf__label" id="wf-link">Link to Water Well @if (isRequired()) {<i>*</i>}</span>
+    <mat-select
+      class="wf__select"
+      [value]="draft().prewapSeq ?? ''"
+      [disabled]="locked()"
+      [panelClass]="selectPanelClass"
+      placeholder="Select a water well to populate the fields"
+      aria-labelledby="wf-link"
+      (selectionChange)="setLink($event)"
+      (closed)="touch('prewapSeq')"
+    >
+      <mat-option value="">None</mat-option>
+      @for (option of linkOptions(); track option.prewapSeq) {
+        <mat-option [value]="option.prewapSeq">{{ option.label }}</mat-option>
+      }
+    </mat-select>
+      @if (errorOf('prewapSeq'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
+  </div>
+
   <div class="wf__grid">
-    <label class="wf__field wf__field--wide">
-      <span class="wf__label">Water Well Name @if (isRequired('waterWellName')) {<i>*</i>}</span>
-      <input class="wf__control" type="text" autocomplete="off" placeholder="ABCD-123" [value]="record().waterWellName" (input)="setText('waterWellName', $event)" />
+    <label [class.wf__field--modified]="changed('waterWellName')" class="wf__field wf__field--wide">
+      <span class="wf__label">Water Well Name @if (isRequired()) {<i>*</i>}</span>
+      <input class="wf__control" type="text" autocomplete="off" placeholder="ABCD-123" [disabled]="locked()" [value]="draft().waterWellName" (input)="setText('waterWellName', $event)" (blur)="touch('waterWellName')" />
+      @if (errorOf('waterWellName'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
     </label>
-    <label class="wf__field">
-      <span class="wf__label">Field <i>*</i></span>
-      <input class="wf__control" type="text" autocomplete="off" [value]="record().field" (input)="setText('field', $event)" />
+    <label [class.wf__field--modified]="changed('field')" class="wf__field">
+      <span class="wf__label">Field @if (isRequired()) {<i>*</i>}</span>
+      <input class="wf__control" type="text" autocomplete="off" [disabled]="locked()" [value]="draft().field" list="wf-field-options" (input)="setText('field', $event)" (blur)="touch('field')" />
+      @if (errorOf('field'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
+      <datalist id="wf-field-options">@for (option of fieldOptions(); track option) {<option [value]="option"></option>}</datalist>
     </label>
-    <label class="wf__field">
-      <span class="wf__label">Well Number <i>*</i></span>
-      <input class="wf__control" type="text" autocomplete="off" [value]="record().wellNumber" (input)="setText('wellNumber', $event)" />
+    <label [class.wf__field--modified]="changed('wellNumber')" class="wf__field">
+      <span class="wf__label">Well Number @if (isRequired()) {<i>*</i>}</span>
+      <input class="wf__control" type="text" autocomplete="off" [disabled]="locked()" [value]="draft().wellNumber" list="wf-wellno-options" (input)="setText('wellNumber', $event)" (blur)="touch('wellNumber')" />
+      @if (errorOf('wellNumber'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
+      <datalist id="wf-wellno-options">@for (option of wellNumberOptions(); track option) {<option [value]="option"></option>}</datalist>
     </label>
 
-    <label class="wf__field wf__field--wide">
-      <span class="wf__label">Reservoir <i>*</i></span>
-      <input class="wf__control" type="text" autocomplete="off" [value]="record().reservoir" (input)="setText('reservoir', $event)" />
+    <label [class.wf__field--modified]="changed('reservoir')" class="wf__field wf__field--wide">
+      <span class="wf__label">Reservoir @if (isRequired()) {<i>*</i>}</span>
+      <input class="wf__control" type="text" autocomplete="off" [disabled]="locked()" [value]="draft().reservoir" (input)="setText('reservoir', $event)" (blur)="touch('reservoir')" />
+      @if (errorOf('reservoir'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
     </label>
-    <div class="wf__field wf__field--wide">
-      <span class="wf__label" id="wf-well-type">Well Type</span>
+    <div [class.wf__field--modified]="changed('wellType')" class="wf__field wf__field--wide">
+      <span class="wf__label" id="wf-well-type">Well Type @if (isRequired()) {<i>*</i>}</span>
       <mat-select
         class="wf__select"
-        [value]="record().wellType"
+        [value]="draft().wellType"
+        [disabled]="locked()"
         [panelClass]="selectPanelClass"
         placeholder="Select a well type"
         aria-labelledby="wf-well-type"
         (selectionChange)="setWellType($event)"
+        (closed)="touch('wellType')"
       >
         <mat-option value="">None</mat-option>
-        @for (type of wellTypes; track type) {
+        @for (type of wellTypes(); track type) {
           <mat-option [value]="type">{{ type }}</mat-option>
         }
       </mat-select>
+      @if (errorOf('wellType'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
     </div>
 
-    <label class="wf__field wf__field--wide">
-      <span class="wf__label">Total Depth <i>*</i></span>
-      <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().totalDepth" (input)="setText('totalDepth', $event)" />
+    <label [class.wf__field--modified]="changed('totalDepth')" class="wf__field wf__field--wide">
+      <span class="wf__label">Total Depth @if (isRequired()) {<i>*</i>}</span>
+      <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [disabled]="locked()" [value]="draft().totalDepth" (input)="setText('totalDepth', $event)" (blur)="touch('totalDepth')" />
+      @if (errorOf('totalDepth'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
     </label>
-    <div class="wf__field wf__field--wide" role="group" aria-labelledby="wf-cp">
+    <div [class.wf__field--modified]="changed('cathodicProtection')" class="wf__field wf__field--wide" role="group" aria-labelledby="wf-cp">
       <span class="wf__label" id="wf-cp">Cathodic Protection Required</span>
       <div class="wf__seg">
-        <button type="button" class="wf__seg-btn" [class.wf__seg-btn--on]="record().cathodicProtection" [attr.aria-pressed]="record().cathodicProtection" (click)="setCathodic(true)">Yes</button>
-        <button type="button" class="wf__seg-btn" [class.wf__seg-btn--on]="!record().cathodicProtection" [attr.aria-pressed]="!record().cathodicProtection" (click)="setCathodic(false)">No</button>
+        <button type="button" class="wf__seg-btn" [disabled]="locked()" [class.wf__seg-btn--on]="draft().cathodicProtection" [attr.aria-pressed]="draft().cathodicProtection" (click)="setCathodic(true)">Yes</button>
+        <button type="button" class="wf__seg-btn" [disabled]="locked()" [class.wf__seg-btn--on]="!draft().cathodicProtection" [attr.aria-pressed]="!draft().cathodicProtection" (click)="setCathodic(false)">No</button>
       </div>
     </div>
   </div>
 
   <fieldset class="wf__group">
-    <legend class="wf__label">Approved Location <i>*</i></legend>
+    <legend class="wf__label">Approved Location @if (isRequired()) {<i>*</i>}</legend>
     <div class="wf__grid wf__grid--3">
-      <label class="wf__field">
+      <label [class.wf__field--modified]="changed('svYutmCord')" class="wf__field">
         <span class="wf__sub">North (Y)</span>
-        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().north" (input)="setText('north', $event)" />
+        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [disabled]="locked()" [value]="draft().svYutmCord" (input)="setText('svYutmCord', $event)" (blur)="touch('svYutmCord')" />
+      @if (errorOf('svYutmCord'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
       </label>
-      <label class="wf__field">
+      <label [class.wf__field--modified]="changed('svXutmCord')" class="wf__field">
         <span class="wf__sub">East (X)</span>
-        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [value]="record().east" (input)="setText('east', $event)" />
+        <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [disabled]="locked()" [value]="draft().svXutmCord" (input)="setText('svXutmCord', $event)" (blur)="touch('svXutmCord')" />
+      @if (errorOf('svXutmCord'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
       </label>
-      <div class="wf__field">
+      <div [class.wf__field--modified]="changed('svUtmZn')" class="wf__field">
         <span class="wf__sub" id="wf-zone">Zone</span>
         <mat-select
           class="wf__select"
-          [value]="record().zone"
+          [value]="draft().svUtmZn"
+          [disabled]="locked()"
           [panelClass]="selectPanelClass"
           aria-labelledby="wf-zone"
           (selectionChange)="setZone($event)"
+          (closed)="touch('svUtmZn')"
         >
+          <mat-option value="">None</mat-option>
           @for (zone of zones; track zone) {
             <mat-option [value]="zone">{{ zone }}</mat-option>
           }
         </mat-select>
+      @if (errorOf('svUtmZn'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
       </div>
     </div>
+    @if (locked()) {
+      <p class="wf__lock"><mat-icon>lock</mat-icon>The well and location can't be changed after the letter is created.</p>
+    }
   </fieldset>
 
-  <label class="wf__field">
+  <label [class.wf__field--modified]="changed('ltrRmks')" class="wf__field">
     <span class="wf__label">Remarks</span>
-    <textarea class="wf__control wf__control--area" rows="4" [value]="record().remarks" (input)="setText('remarks', $event)"></textarea>
+    <textarea class="wf__control wf__control--area" rows="4" [value]="draft().ltrRmks" (input)="setText('ltrRmks', $event)" (blur)="touch('ltrRmks')"></textarea>
+    @if (errorOf('ltrRmks'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
   </label>
 
-  <label class="wf__field">
+  <label [class.wf__field--modified]="changed('distribution')" class="wf__field">
     <span class="wf__label">Distribution</span>
-    <textarea class="wf__control wf__control--area" rows="3" [value]="record().distribution" (input)="setText('distribution', $event)"></textarea>
+    <textarea class="wf__control wf__control--area" rows="3" placeholder="One recipient per line" [disabled]="locked()" [value]="draft().distribution" (input)="setText('distribution', $event)"></textarea>
   </label>
 
-  <div class="wf__field">
+  <div [class.wf__field--modified]="changed('files')" class="wf__field">
     <span class="wf__label">Supporting Documents</span>
-    @if (record().attachments.length > 0) {
+    @if (attachments().length > 0) {
       <ul class="wf__files">
-        @for (name of record().attachments; track $index) {
+        @for (file of attachments(); track $index) {
           <li class="wf__file">
             <mat-icon class="wf__file-icon">attach_file</mat-icon>
-            <span class="wf__file-name">{{ name }}</span>
-            <button type="button" class="wf__file-remove" [attr.aria-label]="'Remove ' + name" (click)="removeFile($index)">
+            <span class="wf__file-name">{{ file.name }}</span>
+            @if (!file.key) {
+              <span class="wf__file-tag">Pending upload</span>
+            }
+            <button type="button" class="wf__file-remove" [attr.aria-label]="'Remove ' + file.name" (click)="removeAttachment(file)">
               <mat-icon>close</mat-icon>
             </button>
           </li>

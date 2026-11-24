@@ -315,3 +315,80 @@ app-wlda-form * {
     transition: none;
   }
 }
+
+// Read-only readout/lock notes added for the plan-backed create flow.
+.wf__static {
+  margin: 0;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  color: var(--wp-ink);
+}
+
+.wf__hint,
+.wf__lock {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin: 0;
+  font-size: tokens.$text-2xs;
+  color: tokens.$muted;
+
+  mat-icon {
+    flex: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.9rem;
+  }
+}
+
+.wf__file-tag {
+  font-size: tokens.$text-2xs;
+  color: tokens.$muted;
+}
+
+.wf__control:disabled,
+.wf__seg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Unsaved edits: a field changed from its saved value shows green until Save or Discard (as in the IR editor).
+.wf__field--modified {
+  .wf__label,
+  .wf__sub {
+    color: var(--wp-success);
+  }
+
+  .wf__control,
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text {
+    color: var(--wp-success);
+    font-weight: 600;
+  }
+
+  .wf__control,
+  .wf__select .mat-mdc-select-trigger {
+    background: var(--wp-success-soft);
+    border-color: var(--wp-success-line);
+  }
+
+  .wf__seg-btn--on {
+    background: var(--wp-success-fill);
+    border-color: var(--wp-success-fill);
+    color: #fff;
+  }
+}
+
+// Inline validation message, directly under the field it belongs to.
+.wf__error {
+  font-size: tokens.$text-2xs;
+  font-weight: 500;
+  color: var(--wp-danger);
+}
+
+.wf__field:has(.wf__error) {
+  .wf__control,
+  .wf__select .mat-mdc-select-trigger {
+    border-color: var(--wp-danger);
+  }
+}

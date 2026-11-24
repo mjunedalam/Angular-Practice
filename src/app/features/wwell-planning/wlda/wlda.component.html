@@ -3,9 +3,9 @@
     <header class="wlda__header">
       <div class="wlda__heading">
         <h1 class="wlda__title">WLDA</h1>
-        <span class="wlda__count">{{ store.records().length }}</span>
+        <span class="wlda__count">{{ store.letters().length }}</span>
       </div>
-      <button type="button" mat-flat-button color="primary" class="wlda__new-btn" (click)="newDraft()">
+      <button type="button" mat-flat-button color="primary" class="wlda__new-btn" [disabled]="store.loading()" (click)="newDraft()">
         <span class="wlda__new-inner"><mat-icon aria-hidden="true">add</mat-icon>New WLDA</span>
       </button>
     </header>
@@ -15,35 +15,37 @@
       <input
         type="search"
         placeholder="Search code, well&hellip;"
-        aria-label="Search by code, well, field or well number"
+        aria-label="Search by code or well"
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
       />
     </label>
 
-    @if (rows().length === 0) {
+    @if (store.loading()) {
+      <div class="wlda__status">Loading WLDA letters…</div>
+    } @else if (store.loadError(); as loadError) {
+      <div class="wlda__status" role="alert">
+        {{ loadError }}
+        <button type="button" class="wlda__back" (click)="store.loadAll()">Retry</button>
+      </div>
+    } @else if (rows().length === 0) {
       <div class="wlda__status">
-        {{ store.records().length === 0 ? 'No WLDA records yet. Create one to get started.' : 'No records match your search.' }}
+        {{ store.letters().length === 0 ? 'No WLDA letters yet. Create one to get started.' : 'No letters match your search.' }}
       </div>
     } @else {
-      <ul class="wlda__list" aria-label="WLDA records">
-        @for (record of rows(); track record.id) {
+      <ul class="wlda__list" aria-label="WLDA letters">
+        @for (letter of rows(); track $index) {
           <li>
-            <button
-              type="button"
-              class="wlda__row"
-              [class.wlda__row--active]="record.id === store.selectedId()"
-              (click)="select(record)"
-            >
+            <button type="button" class="wlda__row" [class.wlda__row--active]="isActive(letter)" (click)="select(letter)">
               <span class="wlda__row-top">
-                <span class="wlda__row-code">{{ record.code }}</span>
-                <span class="wlda__badge" [style.color]="statusMeta[record.status].color">
-                  <span class="wlda__dot" [style.background]="statusMeta[record.status].dot"></span>
-                  {{ statusMeta[record.status].label }}
+                <span class="wlda__row-code">{{ code(letter) }}</span>
+                <span class="wlda__badge" [style.color]="status(letter).color">
+                  <span class="wlda__dot" [style.background]="status(letter).dot"></span>
+                  {{ status(letter).label }}
                 </span>
               </span>
-              <span class="wlda__row-name">{{ record.waterWellName || 'Untitled well' }}</span>
-              <span class="wlda__row-meta">{{ record.field || 'No field' }} &middot; {{ record.createdAt.slice(0, 10) }}</span>
+              <span class="wlda__row-name">{{ wellLabel(letter) }}</span>
+              <span class="wlda__row-meta">Plan #{{ letter.prewapSeq }}@if (letter.epCrDataDt) { &middot; {{ letter.epCrDataDt.slice(0, 10) }} }</span>
             </button>
           </li>
         }
@@ -52,37 +54,85 @@
   </div>
 
   <div class="wlda__detail">
-    @if (store.selected(); as record) {
+    @if (view(); as letterView) {
       <div class="wlda__toolbar">
-        <button type="button" class="wlda__back" (click)="deselect()">
-          <mat-icon>arrow_back</mat-icon>Back to list
+        <button type="button" class="wlda__back" (click)="store.mode() === 'create' ? leaveDraft() : back()">
+          <mat-icon>arrow_back</mat-icon>{{ store.mode() === 'create' ? 'Discard' : 'Back to list' }}
         </button>
-        <button
-          type="button"
-          mat-flat-button
-          color="primary"
-          class="wlda__create-btn"
-          [disabled]="!canCreate()"
-          [attr.title]="canCreate() ? null : record.status === 'draft' ? 'Fill all required fields to create' : 'Already created'"
-          (click)="createWlda(record)"
-        >
-          <span class="wlda__new-inner"><mat-icon aria-hidden="true">description</mat-icon>Create WLDA</span>
+
+        @if (store.mode() === 'view' || store.mode() === 'edit') {
+          <div class="wlda__mode" role="group" aria-label="Letter mode">
+            <button type="button" class="wlda__mode-btn" [class.wlda__mode-btn--on]="store.mode() === 'view'" [attr.aria-pressed]="store.mode() === 'view'" (click)="leaveDraft()">
+              <mat-icon>visibility</mat-icon>View
+            </button>
+            <button type="button" class="wlda__mode-btn" [class.wlda__mode-btn--on]="store.mode() === 'edit'" [attr.aria-pressed]="store.mode() === 'edit'" (click)="store.mode() === 'edit' ? null : store.startEdit()">
+              <mat-icon>edit</mat-icon>Edit
+            </button>
+          </div>
+        }
+
+        <span class="wlda__spacer"></span>
+
+        <button type="button" class="wlda__ghost" [disabled]="downloading()" [attr.aria-busy]="downloading()" (click)="download(letterView)">
+          <mat-icon>download</mat-icon>{{ downloading() ? 'Preparing…' : 'Download WLDA' }}
         </button>
+        @if (store.mode() !== 'create') {
+          <button type="button" class="wlda__danger" [disabled]="store.deleting() || store.saving()" (click)="confirmDelete()">
+            <mat-icon>delete</mat-icon>{{ store.deleting() ? 'Deleting…' : 'Delete' }}
+          </button>
+        }
+        @if (store.mode() === 'create' || store.mode() === 'edit') {
+          <button
+            type="button"
+            mat-flat-button
+            color="primary"
+            class="wlda__create-btn"
+            [disabled]="!canSave()"
+            [attr.title]="store.draftErrors()[0] || null"
+            (click)="save()"
+          >
+            <span class="wlda__new-inner">
+              <mat-icon aria-hidden="true">{{ store.mode() === 'create' ? 'description' : 'save' }}</mat-icon>
+              {{ store.saving() ? 'Saving…' : store.mode() === 'create' ? 'Create WLDA' : 'Save changes' }}
+            </span>
+          </button>
+        }
       </div>
 
-      <div class="wlda__panes">
-        <div class="wlda__pane wlda__pane--form">
-          <div class="wlda__form-head">
-            <span class="wlda__new-tag">New</span>
-            <span class="wlda__badge wlda__badge--pill" [style.background]="statusMeta[record.status].bg" [style.color]="statusMeta[record.status].color">
-              <span class="wlda__dot" [style.background]="statusMeta[record.status].dot"></span>
-              {{ statusMeta[record.status].label }}
-            </span>
+      <div class="wlda__panes" [class.wlda__panes--single]="!store.draft()">
+        @if (store.draft(); as draft) {
+          <div class="wlda__pane wlda__pane--form">
+            <div class="wlda__form-head">
+              <span class="wlda__new-tag">{{ store.mode() === 'create' ? 'New' : 'Editing' }}</span>
+              <span class="wlda__badge wlda__badge--pill" [style.background]="statusMeta[letterView.status].bg" [style.color]="statusMeta[letterView.status].color">
+                <span class="wlda__dot" [style.background]="statusMeta[letterView.status].dot"></span>
+                {{ statusMeta[letterView.status].label }}
+              </span>
+            </div>
+            <app-wlda-form
+              [draft]="draft"
+              [baseline]="baseline()"
+              [errors]="store.draftFieldErrors()"
+              [linkOptions]="linkOptions()"
+              [fieldOptions]="fieldOptions()"
+              [wellNumberOptions]="wellNumberOptions()"
+              [mode]="store.mode() === 'create' ? 'create' : 'edit'"
+              [attachments]="letterView.attachments"
+              (patch)="store.patchDraft($event)"
+              (linkWell)="store.linkWell($event)"
+            />
           </div>
-          <app-wlda-form [record]="record" (patch)="patch(record, $event)" />
-        </div>
+        }
+
         <div class="wlda__pane wlda__pane--letter">
-          <app-wlda-letter [record]="record" />
+          <div class="wlda__tabs" role="tablist" aria-label="Letter">
+            <button type="button" role="tab" id="wlda-tab-letter" class="wlda__tab wlda__tab--active" aria-selected="true" aria-controls="wlda-tabpanel-letter">
+              <mat-icon>description</mat-icon>WLDA Letter
+            </button>
+          </div>
+          <div class="wlda__tabpanel" role="tabpanel" id="wlda-tabpanel-letter" aria-labelledby="wlda-tab-letter">
+            <app-wlda-sheet [view]="letterView" />
+          </div>
         </div>
       </div>
     } @else {
