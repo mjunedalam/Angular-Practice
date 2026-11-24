@@ -14,8 +14,7 @@ import { NotificationService } from '@shared/components/notification/notificatio
 import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.config';
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
 import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
-import { environment } from '@env/environment';
-import { buildSapWorkflowTitle, irWellFullName } from '../wwell-ir-sap.config';
+import { irWellFullName } from '../wwell-ir-sap.config';
 import { hasKnownIrStatus, irBadgeMeta, isIrFullyApproved, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
@@ -191,15 +190,15 @@ export class WwellIrViewComponent {
       if (!blob) return;
       this.downloadingPdf.set(false);
       this.pdfStage.set(null);
-      const label = irWellFullName(this.ir()) || this.ir().code;
+      const label = this.ir().requestReference.wellName || this.ir().code;
       this.emailStore.sendEmail(
         this.emailService.buildIrApprovedEmailRequest(recipientEmail, cc, label, this.pdfFileName(), await blobToBase64(blob), [
           { label: 'IR', value: this.ir().code },
-          { label: 'Well', value: irWellFullName(this.ir()) },
+          { label: 'Well', value: this.ir().requestReference.wellName },
           { label: 'Letter Number', value: this.ir().requestReference.letterNumber ?? '' },
           { label: 'Target Aquifer', value: this.ir().requestReference.targetAquifer },
           { label: 'Status', value: this.ir().sapWfStatusText ?? '' },
-        ], buildSapWorkflowTitle(this.ir().code, irWellFullName(this.ir()), environment.production)),
+        ], `Integrated Requirements for Water Well ${irWellFullName(this.ir()) || this.ir().code}`),
       );
     } catch {
       this.notify.error('Failed to send the approved IR copy.');

@@ -2,7 +2,7 @@
   <header class="letter__masthead">
     <div>
       <p class="letter__org">Groundwater Division</p>
-      <h3 class="letter__doc-title">Integrated Requirements Letter</h3>
+      <h3 class="letter__doc-title">Integrated Requirements For {{ wellFullName() || '—' }}</h3>
     </div>
     <dl class="letter__meta">
       <div>
@@ -23,19 +23,19 @@
   </header>
 
   <p class="letter__subject">
-    <strong>Subject:</strong> Integrated Requirements for Water Well {{ wellFullName() || '—' }}
+    <strong>Subject: Integrated Requirements for Water Well {{ wellFullName() || '—' }}</strong>
   </p>
 
   <p class="letter__intro">
     Following are the integrated requirements for the water supply well
-    <strong>{{ wellFullName() || '—' }}</strong>.
+    <strong>{{ wellName() || '—' }}</strong>.
   </p>
 
   @if (ir().requestReference.supportingBusiness; as supporting) {
     <section class="letter__section">
       <h4>Objectives</h4>
       <p class="letter__text">
-        <strong>{{ wellFullName() || '—' }}</strong> will be used as water supply well supporting
+        <strong>{{ wellName() || '—' }}</strong> will be used as water supply well supporting
         <strong>{{ supporting }}</strong>.
       </p>
     </section>

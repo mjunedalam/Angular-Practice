@@ -24,7 +24,6 @@ import {
 import { WWELL_IR_LETTER_DIAGRAM_LAYOUT } from '../../wwell-ir-editor/wwell-ir-preview-diagram-layout';
 import { resolveScaleDepthFt } from '../../wwell-ir-depth-scale/wwell-ir-depth-ticks.util';
 import { todayIsoDate } from '../../../shared/wwell-approvals/wwell-approval-request.util';
-import { WWELL_COMPLETION_TYPE, isLinerCompletionType } from '../../wwell-ir-form/wwell-ir-completion-type.config';
 import { sortByDepthAscending } from '../../wwell-ir-form/wwell-ir-detail-response.mapper';
 import { captureWellboreSnapshot } from './wwell-ir-wellbore-snapshot.util';
 
@@ -74,7 +73,9 @@ export class WwellIrViewLetterComponent {
   /** Casing shallowest first, as the downloaded PDF and the SAP copy list it. */
   protected readonly inch = formatInchSize;
   protected readonly inchText = normalizeInchMarks;
+  /** Full name (with the hole name) only in the Subject title; the body uses the short name. */
   protected readonly wellFullName = computed(() => irWellFullName(this.ir()));
+  protected readonly wellName = computed(() => this.ir().requestReference.wellName);
   protected readonly casingRows = computed(() => sortByDepthAscending(this.ir().casing, row => row.depthFtBgl));
 
   protected readonly printing = signal(false);
@@ -177,14 +178,8 @@ export class WwellIrViewLetterComponent {
     toUtmAxes(this.ir().requestReference.coordinates ?? ''),
   );
 
-  /** The Completion pick with its size where one applies (e.g. "Open Hole (8 1/2")"), followed by
-   *  the Completion Remarks. A legacy record with no pick shows just its remarks text. */
-  protected readonly completionDesign = computed(() => {
-    const { completionType, openHoleSizeIn, linerSizeIn, completion } = this.ir().programDetails;
-    const size = completionType === WWELL_COMPLETION_TYPE.OPEN_HOLE ? openHoleSizeIn : isLinerCompletionType(completionType) ? linerSizeIn : null;
-    const pick = completionType ? (size ? `${completionType} (${formatInchSize(size)})` : completionType) : '';
-    return [pick, completion].filter(part => part.trim()).join(' — ');
-  });
+  /** Completion shows the remarks only — the completion type and size (e.g. "Pre-perforated Liner (7\")") are left off the letter. */
+  protected readonly completionDesign = computed(() => this.ir().programDetails.completion.trim());
   protected readonly isFlowTest = computed(() => this.ir().testProgram.testType === 'flow-test');
 
   /** The Formation Tops / Area Water Well footnotes — empty when there are no remarks, so the heading's "*" and the
