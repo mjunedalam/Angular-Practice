@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { WldaLetter, WldaLetterView } from '@models/wwell-planning/wlda.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
@@ -17,7 +18,7 @@ import { WLDA_EMPTY_DRAFT, draftOfLetter, statusOfLetter, viewOfDraft, viewOfLet
 @Component({
   selector: 'app-wlda',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, WldaFormComponent, WldaSheetComponent],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, WldaFormComponent, WldaSheetComponent],
   templateUrl: './wlda.component.html',
   styleUrl: './wlda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +32,10 @@ export class WldaComponent {
   protected readonly searchTerm = signal('');
   protected readonly downloading = signal(false);
   protected readonly statusMeta = WLDA_STATUS_META;
+
+  /** Sticky like the IR page: rows open in 'edit' until a row's eye icon (or the View toggle) switches to read-only. */
+  protected readonly detailMode = signal<'view' | 'edit'>('edit');
+  protected readonly viewTab = signal<'details' | 'letter'>('details');
 
   protected readonly rows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -77,7 +82,7 @@ export class WldaComponent {
     effect(() => {
       if (this.deselected() || this.store.draft() || this.store.selectedKey() !== null) return;
       const first = this.rows()[0];
-      if (first) untracked(() => this.store.select(wldaKey(first)));
+      if (first) untracked(() => this.open(wldaKey(first)));
     });
   }
 
@@ -86,6 +91,31 @@ export class WldaComponent {
   protected code(letter: WldaLetter): string {
     return wldaCode(letter.ltrId);
   }
+
+  protected detailRows(view: WldaLetterView): readonly { label: string; value: string }[] {
+    return [
+      { label: 'Letter', value: view.code },
+      { label: 'Status', value: this.statusMeta[view.status].label },
+      { label: 'Field', value: view.field },
+      { label: 'Well Number', value: view.wellNumber },
+      { label: 'Well Type', value: view.wellType },
+      { label: 'Reservoir', value: view.reservoir },
+      { label: 'Total Depth', value: view.totalDepth },
+      { label: 'GOSP / Area Plant', value: view.gosp },
+      { label: 'Northing', value: view.north },
+      { label: 'Easting', value: view.east },
+      { label: 'UTM Zone', value: view.zone },
+      { label: 'Remarks', value: view.remarks },
+      { label: 'Attachments', value: view.attachments.map(file => file.name).join(', ') },
+    ];
+  }
+
+  /** Title of the detail header: the typed well name while creating, the plan's well name for a saved letter. */
+  protected readonly headline = computed(() => {
+    const letter = this.store.selectedLetter();
+    const typed = this.store.draft()?.waterWellName.trim() ?? '';
+    return (letter ? wldaWellName(letter) : typed) || 'Untitled well';
+  });
 
   protected wellLabel(letter: WldaLetter): string {
     return wldaWellName(letter) || 'Unnamed well';
@@ -102,8 +132,35 @@ export class WldaComponent {
   protected select(letter: WldaLetter): void {
     this.guardUnsaved(() => {
       this.deselected.set(false);
+      this.open(wldaKey(letter));
+    });
+  }
+
+  /** The row's eye icon: opens the letter read-only (Details / WLDA Letter tabs) and stays read-only for the next rows. */
+  protected viewLetter(letter: WldaLetter): void {
+    this.guardUnsaved(() => {
+      this.deselected.set(false);
+      this.detailMode.set('view');
       this.store.select(wldaKey(letter));
     });
+  }
+
+  /** The toolbar's View toggle: drop the draft and show the saved letter read-only. */
+  protected showView(): void {
+    this.guardUnsaved(() => {
+      this.detailMode.set('view');
+      this.store.discardDraft();
+    });
+  }
+
+  protected showEdit(): void {
+    this.detailMode.set('edit');
+    this.store.startEdit();
+  }
+
+  private open(key: string): void {
+    this.store.select(key);
+    if (this.detailMode() === 'edit') this.store.startEdit();
   }
 
   protected newDraft(): void {
@@ -113,16 +170,9 @@ export class WldaComponent {
     });
   }
 
-  /** Back / View: leaves the draft (create → nothing open, edit → the saved letter), confirming first if it changed. */
+  /** Discard (create): leaves the draft, confirming first if it changed. */
   protected leaveDraft(): void {
     this.guardUnsaved(() => this.store.discardDraft());
-  }
-
-  protected back(): void {
-    this.guardUnsaved(() => {
-      this.deselected.set(true);
-      this.store.select(null);
-    });
   }
 
   protected save(): void {

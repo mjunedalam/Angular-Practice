@@ -287,11 +287,127 @@
 }
 
 .wlda__toolbar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.25rem 0.4rem;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: tokens.$radius-lg;
+  @include tokens.glass-panel;
+}
+
+.wlda__headline {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.wlda__headline-text {
+  min-width: 0;
+}
+
+.wlda__eyebrow {
+  margin: 0 0 2px;
+  font-family: tokens.$font-mono;
+  font-size: tokens.$text-xs;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: tokens.$accent;
+}
+
+.wlda__headline-title {
+  margin: 0;
+  font-family: tokens.$font-display;
+  font-size: tokens.$text-lg;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: tokens.$navy-deep;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wlda__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wlda__icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  line-height: 36px;
+  color: tokens.$muted;
+  border-radius: tokens.$radius-btn;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  ::ng-deep .mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    color: tokens.$accent;
+    background: tokens.alpha(tokens.$accent, 10%);
+  }
+
+  &--danger:hover:not(:disabled) {
+    color: var(--wp-danger);
+    background: var(--wp-danger-soft, rgb(220 38 38 / 10%));
+  }
+}
+
+.wlda__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 36px;
+  padding: 0 1rem;
+  font: inherit;
+  font-size: tokens.$text-sm;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  background: tokens.$accent;
+  border: 0;
+  border-radius: tokens.$radius-btn;
+  box-shadow: var(--wp-cta-shadow);
+  cursor: pointer;
+  transition:
+    transform tokens.$duration-fast tokens.$ease-out,
+    box-shadow tokens.$duration-fast tokens.$ease-out;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    @include tokens.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
 }
 
 .wlda__back {
@@ -413,6 +529,12 @@
   }
 }
 
+@media (max-width: 900px) {
+  .wlda__toolbar {
+    flex-wrap: wrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wlda__new-btn,
   .wlda__create-btn,
@@ -440,19 +562,20 @@
 // Segmented View / Edit switch, the same idea as the IR editor's mode toggle.
 .wlda__mode {
   display: inline-flex;
-  padding: 2px;
+  padding: 3px;
   background: tokens.$surface-alt;
   border: 1px solid tokens.$border;
   border-radius: tokens.$radius-btn;
+  height: 36px;
 }
 
 .wlda__mode-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.25rem 0.7rem;
+  padding: 0 0.85rem;
   font: inherit;
-  font-size: tokens.$text-xs;
+  font-size: tokens.$text-sm;
   font-weight: 600;
   color: tokens.$muted;
   background: transparent;
@@ -516,34 +639,42 @@
 .wlda__tabs {
   display: flex;
   gap: 0.25rem;
-  padding: 0.35rem 0.6rem 0;
-  border-bottom: 1px solid tokens.$border;
+  margin: 0.6rem 0.75rem 0;
+  padding: 0.3rem;
+  background: tokens.$surface-alt;
+  border-radius: tokens.$radius-btn;
 }
 
 .wlda__tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin-bottom: -1px;
-  padding: 0.4rem 0.9rem;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
   font: inherit;
   font-size: tokens.$text-sm;
   font-weight: 600;
   color: tokens.$muted;
   background: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: calc(#{tokens.$radius-btn} - 2px);
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 
   mat-icon {
-    width: 1.05rem;
-    height: 1.05rem;
-    font-size: 1.05rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    color: tokens.$navy;
   }
 
   &--active {
     color: var(--wp-accent);
-    border-bottom-color: var(--wp-accent);
+    background: var(--wp-accent-soft);
   }
 
   &:focus-visible {
@@ -615,4 +746,67 @@
   height: 6px;
   border-radius: 50%;
   background: var(--wp-success);
+}
+
+.wlda__row-item {
+  position: relative;
+
+  .wlda__row {
+    padding-right: 2.1rem;
+  }
+}
+
+// Bottom-right of the row, always visible (reachable on touch) — same placement as the IR list's eye icon.
+.wlda__view-btn {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 28px;
+  color: tokens.$muted;
+
+  ::ng-deep .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  &:hover {
+    color: var(--wp-accent);
+  }
+}
+
+.wlda__kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.9rem 0.75rem 1.15rem;
+}
+
+.wlda__kv-row {
+  min-width: 0;
+  padding: 0.65rem 0.85rem;
+  background: tokens.$surface-alt;
+  border: 1px solid tokens.$border;
+  border-radius: tokens.$radius-btn;
+
+  dt {
+    font-size: tokens.$text-2xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: tokens.$muted;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-size: tokens.$text-sm;
+    font-weight: 600;
+    color: tokens.$navy;
+    overflow-wrap: anywhere;
+  }
 }
