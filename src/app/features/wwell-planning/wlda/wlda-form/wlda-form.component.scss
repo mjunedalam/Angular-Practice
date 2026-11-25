@@ -392,3 +392,15 @@ app-wlda-form * {
     border-color: var(--wp-danger);
   }
 }
+
+// The chosen Yes/No carries a tick, so the selection reads without relying on colour alone.
+.wf__seg-btn[aria-pressed='true']::before {
+  content: '';
+  display: inline-block;
+  width: 0.28rem;
+  height: 0.55rem;
+  margin: 0 0.45rem 0.18rem 0;
+  border: solid currentcolor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}

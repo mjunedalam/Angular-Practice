@@ -71,6 +71,13 @@
           </div>
         }
 
+        @if (store.draft() && store.isDirty()) {
+          <span class="wlda__unsaved-chip" role="status">
+            <span class="wlda__unsaved-chip-dot" aria-hidden="true"></span>
+            Unsaved changes — shown in green
+          </span>
+        }
+
         <span class="wlda__spacer"></span>
 
         <button type="button" class="wlda__ghost" [disabled]="downloading()" [attr.aria-busy]="downloading()" (click)="download(letterView)">

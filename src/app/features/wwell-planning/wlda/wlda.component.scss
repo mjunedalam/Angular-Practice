@@ -37,7 +37,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  width: 240px;
+  width: clamp(240px, 15vw, 480px);
   flex-shrink: 0;
   max-height: 100%;
   padding: 0.9rem;
@@ -325,7 +325,7 @@
 
 .wlda__panes {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: var(--wwell-gutter);
   flex: 1;
   min-height: 0;
@@ -381,6 +381,24 @@
   p {
     margin: 0;
     font-size: tokens.$text-sm;
+  }
+}
+
+// Big monitors: scale the chrome up with the screen so the page keeps filling it instead of floating as a small
+// island. (The letter sheet scales itself — see WldaSheetComponent.)
+@media (min-width: 1920px) {
+  .wlda__master,
+  .wlda__toolbar,
+  .wlda__pane--form {
+    zoom: 1.2;
+  }
+}
+
+@media (min-width: 2560px) {
+  .wlda__master,
+  .wlda__toolbar,
+  .wlda__pane--form {
+    zoom: 1.5;
   }
 }
 
@@ -535,8 +553,7 @@
 }
 
 .wlda__tabpanel {
-  max-width: 920px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .wlda__ghost {
@@ -574,4 +591,28 @@
     outline: 2px solid var(--wp-accent);
     outline-offset: 1px;
   }
+}
+
+// Same pending-edit chip the IR editor shows in its top bar.
+.wlda__unsaved-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: tokens.$text-2xs;
+  font-weight: 650;
+  color: var(--wp-success);
+  background: var(--wp-success-soft);
+  border: 1px solid var(--wp-success-line);
+  white-space: nowrap;
+}
+
+.wlda__unsaved-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--wp-success);
 }

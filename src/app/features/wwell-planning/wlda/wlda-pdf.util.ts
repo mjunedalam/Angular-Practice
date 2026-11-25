@@ -225,7 +225,15 @@ function drawFieldGrid(sheet: Sheet, view: WldaLetterView): void {
   sheet.text('Yes', boxX + 18, boxTop + 10, 8.5, regular);
   sheet.rect(boxX + 66, boxTop, 12, 12, { border: LINE, borderWidth: 0.8 });
   sheet.text('No', boxX + 84, boxTop + 10, 8.5, regular);
-  if (view.cathodic !== null) sheet.centered('X', view.cathodic ? boxX + 6 : boxX + 72, boxTop + 9.5, 10, sheet.fonts.bold);
+  if (view.cathodic !== null) {
+    // Tick mark (Helvetica has no ✓ glyph, so it is two strokes).
+    const x = view.cathodic ? boxX : boxX + 66;
+    const y = PAGE_HEIGHT - boxTop;
+    const start = { x: x + 2.5, y: y - 6.5 };
+    const mid = { x: x + 5, y: y - 9.5 };
+    sheet.page.drawLine({ start, end: mid, thickness: 1.6, color: INK });
+    sheet.page.drawLine({ start: mid, end: { x: x + 10, y: y - 2.5 }, thickness: 1.6, color: INK });
+  }
   sheet.y = top1 + rowHeight * 2;
   sheet.hline(MARGIN, right, sheet.y, 0.8);
 
