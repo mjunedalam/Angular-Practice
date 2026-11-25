@@ -10,9 +10,6 @@ export const WLDA_WELL_TYPES: readonly string[] = [
   'Injection',
 ];
 
-/** Zones offered in the picker; the column itself accepts any whole number 1–60 (see wlda.util.ts). */
-export const WLDA_UTM_ZONES: readonly string[] = ['37', '38', '39', '40'];
-
 export const WLDA_DIVISION = 'Groundwater Division';
 export const WLDA_LETTER_TITLE = 'Well Location & Drilling Approval';
 

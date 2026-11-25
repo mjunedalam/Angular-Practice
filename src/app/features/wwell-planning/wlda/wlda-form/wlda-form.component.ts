@@ -5,7 +5,7 @@ import { MAX_UPLOAD_SIZE_LABEL, isUploadFileAllowed, toAcceptAttribute } from '@
 import { WldaAttachment, WldaDraft } from '@models/wwell-planning/wlda.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WldaFieldErrors } from '../wlda.util';
-import { WLDA_UTM_ZONES, WLDA_WELL_TYPES } from '../wlda.config';
+import { WLDA_WELL_TYPES } from '../wlda.config';
 
 type TextField =
   | 'waterWellName'
@@ -46,10 +46,11 @@ export class WldaFormComponent {
   readonly attachments = input<readonly WldaAttachment[]>([]);
   readonly patch = output<Partial<WldaDraft>>();
   readonly linkWell = output<number | null>();
+  /** Valid picks, handed to the page, which runs each through the upload dialog. */
+  readonly filesPicked = output<readonly File[]>();
 
   private readonly notify = inject(NotificationService);
 
-  protected readonly zones = WLDA_UTM_ZONES;
   protected readonly selectPanelClass = 'wf-select-panel';
   protected readonly attachAccept = toAcceptAttribute();
   protected readonly isCreate = computed(() => this.mode() === 'create');
@@ -102,10 +103,6 @@ export class WldaFormComponent {
     this.patch.emit({ wellType: change.value as string });
   }
 
-  protected setZone(change: MatSelectChange): void {
-    this.patch.emit({ svUtmZn: change.value as string });
-  }
-
   protected setCathodic(required: boolean): void {
     this.patch.emit({ cathodicProtection: required });
   }
@@ -120,7 +117,7 @@ export class WldaFormComponent {
       this.notify.error(`Skipped (unsupported type or over ${MAX_UPLOAD_SIZE_LABEL}): ${rejected.map(file => file.name).join(', ')}`);
     }
     const accepted = selected.filter(file => isUploadFileAllowed(file));
-    if (accepted.length > 0) this.patch.emit({ files: [...this.draft().files, ...accepted] });
+    if (accepted.length > 0) this.filesPicked.emit(accepted);
   }
 
   protected removeAttachment(attachment: WldaAttachment): void {

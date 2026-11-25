@@ -416,3 +416,17 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.ws__file-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid tokens.$border;
+}
+
+.ws__file-view {
+  flex: none;
+  color: tokens.$subtle;
+}

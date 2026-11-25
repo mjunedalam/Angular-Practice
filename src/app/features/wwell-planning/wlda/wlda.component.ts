@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { WldaLetter, WldaLetterView } from '@models/wwell-planning/wlda.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
 import { WldaStore } from './store/wlda.store';
+import { WldaUploadDialogComponent } from './wlda-upload-dialog/wlda-upload-dialog.component';
 import { WldaFormComponent } from './wlda-form/wlda-form.component';
 import { WldaSheetComponent } from './wlda-sheet/wlda-sheet.component';
 import { WLDA_STATUS_META } from './wlda.config';
@@ -24,6 +26,7 @@ export class WldaComponent {
   protected readonly store = inject(WldaStore);
   private readonly confirmDialog = inject(ActionConfirmDialogService);
   private readonly notify = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly searchTerm = signal('');
   protected readonly downloading = signal(false);
@@ -52,7 +55,7 @@ export class WldaComponent {
 
   /** Options of the "Link to Water Well" dropdown: every pre-well plan, labelled like the IR picker. */
   protected readonly linkOptions = computed(() =>
-    this.store.prewaps().map(plan => ({ prewapSeq: plan.prewapSeq, label: [wldaWellName(plan), plan.wellType].filter(Boolean).join(' · ') || `Plan #${plan.prewapSeq}` })),
+    this.store.prewaps().map(plan => ({ prewapSeq: plan.prewapSeq, label: wldaWellName(plan) || `Plan #${plan.prewapSeq}` })),
   );
 
   /** Known plans' field codes / well numbers, offered as suggestions so a typo can't leave Create disabled. */
@@ -138,6 +141,28 @@ export class WldaComponent {
     } finally {
       this.downloading.set(false);
     }
+  }
+
+  /** Each picked file gets its own upload dialog, one after another: a saved letter uploads now, a new one stages the file for Create. */
+  protected uploadPicked(files: readonly File[]): void {
+    const [file, ...rest] = files;
+    if (!file) return;
+    const canUpload = this.store.mode() === 'edit';
+    this.store.resetUpload();
+    this.dialog
+      .open<WldaUploadDialogComponent, unknown, boolean>(WldaUploadDialogComponent, {
+        data: { store: this.store, file, canUpload },
+        panelClass: 'ir-upload-panel',
+        autoFocus: false,
+      })
+      .afterClosed()
+      .subscribe(accepted => {
+        if (accepted && !canUpload) {
+          const draft = this.store.draft();
+          if (draft) this.store.patchDraft({ files: [...draft.files, file] });
+        }
+        this.uploadPicked(rest);
+      });
   }
 
   protected confirmDelete(): void {

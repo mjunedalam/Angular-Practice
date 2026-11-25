@@ -127,6 +127,7 @@
               [attachments]="letterView.attachments"
               (patch)="store.patchDraft($event)"
               (linkWell)="store.linkWell($event)"
+              (filesPicked)="uploadPicked($event)"
             />
           </div>
         }
@@ -138,7 +139,7 @@
             </button>
           </div>
           <div class="wlda__tabpanel" role="tabpanel" id="wlda-tabpanel-letter" aria-labelledby="wlda-tab-letter">
-            <app-wlda-sheet [view]="letterView" />
+            <app-wlda-sheet [view]="letterView" [pendingFiles]="store.draft()?.files ?? []" />
           </div>
         </div>
       </div>

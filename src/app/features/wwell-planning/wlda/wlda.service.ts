@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { WldaCreatePayload, WldaCreateResult, WldaLetter, WldaPrewap, WldaUpdatePayload } from '@models/wwell-planning/wlda.model';
+import { IrEligibleWell } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
 
@@ -16,9 +17,13 @@ export class WldaService {
     return `${serverUrl}/planning/api/v1`;
   }
 
-  /** Every pre-well plan — the plan a new letter is created under. */
+  /**
+   * The wells the "Link to Water Well" dropdown offers: the same `GET /wells/eligible-for-ir` list the IR wizard's
+   * "Link to Request" picker uses, reshaped into the plan fields a letter is created from. That endpoint has no
+   * GOSP column, so GOSP stays blank.
+   */
   getPrewaps(): Observable<WldaPrewap[]> {
-    return this.http.get<ApiResponse<WldaPrewap>>(`${this.apiUrl}/prewaps`).pipe(map(res => res.data));
+    return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(map(res => res.data.map(toPrewap)));
   }
 
   /** Every letter of every plan. */
@@ -48,4 +53,20 @@ export class WldaService {
   deleteLetter(prewapSeq: number, ltrId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/prewaps/${prewapSeq}/wlda-letters/${ltrId}`);
   }
+}
+
+function toPrewap(well: IrEligibleWell): WldaPrewap {
+  const zone = Number.parseInt(well.utmZone ?? '', 10);
+  return {
+    prewapSeq: well.prewapSeq,
+    wPrimHid: well.primaryHoleId,
+    wNum: well.wellNumber,
+    wellType: well.wellType,
+    tdMd: well.targetDepth,
+    targetForm: well.targetAquifer,
+    gospAreaPlant: null,
+    svUtmZn: Number.isNaN(zone) ? null : zone,
+    surfaceNorth: well.surfaceNorth,
+    surfaceEast: well.surfaceEast,
+  };
 }

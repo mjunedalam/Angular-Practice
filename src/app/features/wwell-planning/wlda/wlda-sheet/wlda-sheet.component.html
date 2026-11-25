@@ -103,19 +103,35 @@
     </section>
   </div>
 
-  <section class="ws__docs" aria-label="Supporting documents">
-    <h3 class="ws__docs-title">Supporting Documents</h3>
+  <section class="ws__docs" aria-label="Attachments">
+    <h3 class="ws__docs-title">Attachments</h3>
     @if (view().attachments.length === 0) {
-      <p class="ws__docs-empty">No documents attached.</p>
+      <p class="ws__docs-empty">No attachments uploaded.</p>
     } @else {
       <ul class="ws__files">
-        @for (file of view().attachments; track $index) {
+        @for (file of view().attachments; track file.key ?? $index) {
           <li class="ws__file">
-            <mat-icon>attach_file</mat-icon>
+            @if (file.key && thumbnails()[file.key]; as thumb) {
+              <img class="ws__file-thumb" [src]="thumb" [alt]="file.name" />
+            } @else {
+              <mat-icon>attach_file</mat-icon>
+            }
             <span class="ws__file-name">{{ file.name }}</span>
             @if (!file.key) {
               <span class="ws__file-tag">Pending upload</span>
             }
+            <button
+              type="button"
+              mat-icon-button
+              class="ws__file-view"
+              [attr.aria-label]="'View ' + file.name"
+              matTooltip="View"
+              matTooltipClass="ir-attachment-tooltip"
+              [disabled]="(!file.key && !pendingFiles()[file.pendingIndex ?? -1]) || openingName() === file.key"
+              (click)="viewAttachment(file)"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
           </li>
         }
       </ul>

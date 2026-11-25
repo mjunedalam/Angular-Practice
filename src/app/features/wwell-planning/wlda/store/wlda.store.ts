@@ -37,6 +37,10 @@ interface WldaState {
   readonly saving: boolean;
   readonly deleting: boolean;
   readonly loadError: string | null;
+  /** The one-file upload dialog for a saved letter: in flight, byte progress (null = unknown), last failure. */
+  readonly uploadingFile: boolean;
+  readonly uploadPercent: number | null;
+  readonly uploadError: string | null;
 }
 
 const initialState: WldaState = {
@@ -49,6 +53,9 @@ const initialState: WldaState = {
   saving: false,
   deleting: false,
   loadError: null,
+  uploadingFile: false,
+  uploadPercent: null,
+  uploadError: null,
 };
 
 /** Prefers the backend's own `{ message }` over Angular's generic "Http failure response" text. */
@@ -73,6 +80,8 @@ function fillFromPlan(draft: WldaDraft, plan: WldaPrewap, overwrite = false): Wl
     reservoir: blank(draft.reservoir) ? (plan.targetForm ?? '') : draft.reservoir,
     wellType: blank(draft.wellType) ? (plan.wellType ?? '') : draft.wellType,
     totalDepth: blank(draft.totalDepth) ? (plan.tdMd == null ? '' : String(plan.tdMd)) : draft.totalDepth,
+    svYutmCord: blank(draft.svYutmCord) ? (plan.surfaceNorth == null ? '' : String(plan.surfaceNorth)) : draft.svYutmCord,
+    svXutmCord: blank(draft.svXutmCord) ? (plan.surfaceEast == null ? '' : String(plan.surfaceEast)) : draft.svXutmCord,
     svUtmZn: blank(draft.svUtmZn) ? (plan.svUtmZn == null ? '' : String(plan.svUtmZn)) : draft.svUtmZn,
   };
 }
@@ -156,11 +165,15 @@ export const WldaStore = signalStore(
     }
 
     /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. */
-    function refreshLetter(prewapSeq: number, ltrId: number): void {
+    /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. `reopenEdit` re-bases the open draft on the fresh row. */
+    function refreshLetter(prewapSeq: number, ltrId: number, reopenEdit = false): void {
       const key = wldaKey({ prewapSeq, ltrId });
       wldaService.getLetter(prewapSeq, ltrId).subscribe({
         next: fresh => {
-          patchState(store, { letters: store.letters().map(item => (wldaKey(item) === key ? fresh : item)) });
+          patchState(store, {
+            letters: store.letters().map(item => (wldaKey(item) === key ? fresh : item)),
+            ...(reopenEdit && store.selectedKey() === key ? { draft: draftOfLetter(fresh) } : {}),
+          });
           loadStored(fresh, key);
         },
         error: (err: unknown) => notify.error(errorMessage(err, 'Failed to refresh the WLDA letter')),
@@ -168,6 +181,34 @@ export const WldaStore = signalStore(
     }
 
     return {
+      /** Uploads one file straight to the opened letter's S3 folder (edit mode) and lists it on success. */
+      uploadLetterFile(file: File): void {
+        const letter = store.selectedLetter();
+        if (!letter || store.uploadingFile()) return;
+        patchState(store, { uploadingFile: true, uploadPercent: null, uploadError: null });
+        s3.store(file, wldaS3Prefix(letter.prewapSeq, letter.ltrId), networkId(), file.name).subscribe({
+          next: ({ percent, response }) => {
+            if (!response) {
+              patchState(store, { uploadPercent: percent });
+              return;
+            }
+            patchState(store, {
+              uploadingFile: false,
+              uploadPercent: null,
+              storedAttachments: [...store.storedAttachments(), { key: response.key, name: file.name, pendingIndex: null }],
+            });
+            notify.info(`${file.name} uploaded.`);
+          },
+          error: (err: unknown) =>
+            patchState(store, { uploadingFile: false, uploadPercent: null, uploadError: errorMessage(err, `Failed to upload ${file.name}`) }),
+        });
+      },
+
+      /** Clears a previous upload failure before the next file's dialog opens. */
+      resetUpload(): void {
+        patchState(store, { uploadError: null, uploadPercent: null });
+      },
+
       loadAll(): void {
         patchState(store, { loading: true, loadError: null });
         forkJoin({ prewaps: wldaService.getPrewaps(), letters: wldaService.getLetters() }).subscribe({
@@ -233,14 +274,17 @@ export const WldaStore = signalStore(
           .pipe(switchMap(result => uploadFiles(draft.files, result.prewapSeq, result.ltrId).pipe(map(failed => ({ result, failed })))))
           .subscribe({
             next: ({ result, failed }) => {
-              patchState(store, { saving: false, draft: null, selectedKey: wldaKey(result), storedAttachments: [] });
+              // The draft stays up (now keyed to the saved letter) until the fresh row lands, so the page stays in the editor.
+              patchState(store, { saving: false, selectedKey: wldaKey(result), storedAttachments: [], draft: { ...draft, prewapSeq: result.prewapSeq, files: [], removedKeys: [] } });
               notify.info(`${wldaCode(result.ltrId)} created.`);
               if (failed.length > 0) notify.error(`Letter saved, but these files did not upload: ${failed.join(', ')}`);
               wldaService.getLetters().subscribe({
                 next: letters => {
                   patchState(store, { letters });
-                  refreshLetter(result.prewapSeq, result.ltrId);
+                  refreshLetter(result.prewapSeq, result.ltrId, true);
                 },
+                // Saved, but the list could not reload: fall back to viewing so a second Create can't duplicate it.
+                error: () => patchState(store, { draft: null }),
               });
             },
             error: (err: unknown) => {
@@ -270,11 +314,11 @@ export const WldaStore = signalStore(
           )
           .subscribe({
             next: ({ removeFailed, uploadFailed }) => {
-              patchState(store, { saving: false, draft: null });
+              patchState(store, { saving: false, draft: { ...draft, files: [], removedKeys: [] } });
               notify.info(`${wldaCode(letter.ltrId)} updated.`);
               if (removeFailed.length > 0) notify.error(`Could not remove: ${removeFailed.join(', ')}`);
               if (uploadFailed.length > 0) notify.error(`Letter saved, but these files did not upload: ${uploadFailed.join(', ')}`);
-              refreshLetter(letter.prewapSeq, letter.ltrId);
+              refreshLetter(letter.prewapSeq, letter.ltrId, true);
             },
             error: (err: unknown) => {
               patchState(store, { saving: false });

@@ -39,6 +39,9 @@ export interface WldaPrewap {
   readonly targetForm: string | null;
   readonly gospAreaPlant: string | null;
   readonly svUtmZn: number | null;
+  /** UTM northing / easting of the surface location, when the source list carries them. */
+  readonly surfaceNorth?: number | null;
+  readonly surfaceEast?: number | null;
 }
 
 /** Body of `POST /planning/api/v1/prewaps/{prewapSeq}/wlda-letters`; prewapSeq travels in the path. */

@@ -97,24 +97,10 @@
         <input class="wf__control" type="text" autocomplete="off" inputmode="decimal" [disabled]="locked()" [value]="draft().svXutmCord" (input)="setText('svXutmCord', $event)" (blur)="touch('svXutmCord')" />
       @if (errorOf('svXutmCord'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
       </label>
-      <div [class.wf__field--modified]="changed('svUtmZn')" class="wf__field">
-        <span class="wf__sub" id="wf-zone">Zone</span>
-        <mat-select
-          class="wf__select"
-          [value]="draft().svUtmZn"
-          [disabled]="locked()"
-          [panelClass]="selectPanelClass"
-          aria-labelledby="wf-zone"
-          (selectionChange)="setZone($event)"
-          (closed)="touch('svUtmZn')"
-        >
-          <mat-option value="">None</mat-option>
-          @for (zone of zones; track zone) {
-            <mat-option [value]="zone">{{ zone }}</mat-option>
-          }
-        </mat-select>
-      @if (errorOf('svUtmZn'); as message) {<span class="wf__error" role="alert">{{ message }}</span>}
-      </div>
+      <label class="wf__field">
+        <span class="wf__sub">Zone</span>
+        <input class="wf__control" type="text" readonly tabindex="-1" aria-readonly="true" placeholder="From the linked well" [value]="draft().svUtmZn" />
+      </label>
     </div>
     @if (locked()) {
       <p class="wf__lock"><mat-icon>lock</mat-icon>The well and location can't be changed after the letter is created.</p>
