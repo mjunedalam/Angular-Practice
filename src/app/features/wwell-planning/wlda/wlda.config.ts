@@ -1,4 +1,5 @@
 import { WldaStatus } from '@models/wwell-planning/wlda.model';
+import { WWELL_IR_SAP_PROCESS_ID, WWELL_IR_SAP_SCENARIO_ID } from '../wwell-ir/wwell-ir-sap.config';
 import { WWELL_STATUS_COLORS, WwellStatusMeta, wwellStatusMeta } from '../shared/wwell-status.config';
 
 export const WLDA_WELL_TYPES: readonly string[] = [
@@ -30,10 +31,9 @@ export const WLDA_WORKFLOW_PLACEHOLDER = 'SAP approval workflow steps will appea
 export const WLDA_DISTRIBUTION_PLACEHOLDER = 'Distribution list to be provided.';
 export const WLDA_WORKFLOW_COLUMNS: readonly string[] = ['Name', 'Title', 'Status', 'Approved Date'];
 
-/** SAP AAE trigger identifiers for the WLDA "Submit for Approval" workflow — same process as the IR, its own scenario.
- *  NOTE: the scenario id is an assumption; confirm it with the SAP workflow owners. */
-export const WLDA_SAP_PROCESS_ID = '1406';
-export const WLDA_SAP_SCENARIO_ID = 'WLDA';
+/** SAP AAE trigger identifiers for the WLDA "Submit for Approval" workflow — the same process and scenario as the IR. */
+export const WLDA_SAP_PROCESS_ID = WWELL_IR_SAP_PROCESS_ID;
+export const WLDA_SAP_SCENARIO_ID = WWELL_IR_SAP_SCENARIO_ID;
 
 /** Written to exad_agwa_wlda_ltr.sap_wf_status: Draft when the letter is first inserted, In Progress once SAP accepted the workflow. */
 export const WLDA_SAP_WF_STATUS_DRAFT = 'Draft';
