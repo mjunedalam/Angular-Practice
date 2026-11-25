@@ -7,6 +7,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { WldaLetter, WldaLetterView } from '@models/wwell-planning/wlda.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
+import { WwellApprovalPillComponent } from '../shared/wwell-approvals/wwell-approval-pill/wwell-approval-pill.component';
+import { WwellApprovalWorkflowCardComponent } from '../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
+import { isSapWorkflowTerminal } from '../wwell-ir/wwell-ir.config';
 import { WldaStore } from './store/wlda.store';
 import { WldaUploadDialogComponent } from './wlda-upload-dialog/wlda-upload-dialog.component';
 import { WldaFormComponent } from './wlda-form/wlda-form.component';
@@ -18,7 +21,7 @@ import { WLDA_EMPTY_DRAFT, draftOfLetter, statusOfLetter, viewOfDraft, viewOfLet
 @Component({
   selector: 'app-wlda',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, WldaFormComponent, WldaSheetComponent],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, WldaFormComponent, WldaSheetComponent, WwellApprovalWorkflowCardComponent, WwellApprovalPillComponent],
   templateUrl: './wlda.component.html',
   styleUrl: './wlda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,7 +51,7 @@ export class WldaComponent {
   protected readonly view = computed<WldaLetterView | null>(() => {
     const draft = this.store.draft();
     const letter = this.store.selectedLetter();
-    if (letter) return viewOfLetter(letter, this.store.storedAttachments(), draft);
+    if (letter) return viewOfLetter(letter, this.store.storedAttachments(), draft, this.store.approvalChain());
     return draft ? viewOfDraft(draft, this.store.draftPlan()) : null;
   });
 
@@ -173,6 +176,52 @@ export class WldaComponent {
   /** Discard (create): leaves the draft, confirming first if it changed. */
   protected leaveDraft(): void {
     this.guardUnsaved(() => this.store.discardDraft());
+  }
+
+  /** Only a Draft or a rejected/recalled letter can be (re)submitted, and only once its edits are saved. */
+  protected readonly canSubmit = computed(() => {
+    const letter = this.store.selectedLetter();
+    if (!letter || this.store.saving() || this.store.isDirty()) return false;
+    const status = statusOfLetter(letter);
+    return status === 'draft' || status === 'rejected';
+  });
+
+  /** Recall replaces Submit once SAP has the workflow, but only while it is still live (nothing left to pull back otherwise). */
+  protected readonly canRecall = computed(() => {
+    const letter = this.store.selectedLetter();
+    return !!letter && letter.sapWfId != null && statusOfLetter(letter) === 'submitted' && !isSapWorkflowTerminal(letter.sapWfStatus);
+  });
+
+  /** What the shared Approval Workflow card renders: the live chain plus the workflow id (null = never submitted). */
+  protected readonly approval = computed(() => ({ chain: this.store.approvalChain(), sapWfId: this.store.selectedLetter()?.sapWfId ?? null }));
+
+  protected readonly hasWorkflow = computed(() => this.approval().sapWfId !== null);
+
+  protected refreshApproval(): void {
+    this.store.refreshApproval();
+  }
+
+  protected recall(): void {
+    const letter = this.store.selectedLetter();
+    if (!letter) return;
+    this.confirmDialog
+      .open({
+        title: 'Recall this WLDA letter?',
+        rows: [
+          { label: 'Letter', value: wldaCode(letter.ltrId) },
+          { label: 'Well', value: wldaWellName(letter) || '—' },
+        ],
+        confirmLabel: 'Recall',
+        severity: 'warning',
+        hint: 'This pulls the letter back from the SAP approval workflow. You can submit it again afterwards.',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) this.store.recallLetter();
+      });
+  }
+
+  protected submit(): void {
+    this.store.submitLetter();
   }
 
   protected save(): void {

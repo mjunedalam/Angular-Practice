@@ -103,6 +103,10 @@
           </span>
         }
 
+        @if (store.mode() === 'edit' && hasWorkflow()) {
+          <app-wwell-approval-pill [approval]="approval()" [status]="statusMeta[letterView.status]" [loading]="store.approvalLoading()" (refresh)="refreshApproval()" />
+        }
+
         <div class="wlda__actions">
           <button
             type="button"
@@ -131,11 +135,31 @@
               <mat-icon>delete</mat-icon>
             </button>
           }
-          @if (store.mode() === 'create' || store.mode() === 'edit') {
-            <button type="button" class="wlda__save" [disabled]="!canSave()" [attr.title]="store.draftErrors()[0] || null" (click)="save()">
-              <mat-icon aria-hidden="true">{{ store.mode() === 'create' ? 'add' : 'save' }}</mat-icon>
-              {{ store.saving() ? 'Saving…' : store.mode() === 'create' ? 'Create WLDA' : 'Save changes' }}
+          @if (store.mode() === 'edit') {
+            <button type="button" class="wlda__ghost" [disabled]="!canSave() || !store.isDirty()" [attr.title]="store.draftErrors()[0] || null" (click)="save()">
+              <mat-icon aria-hidden="true">save</mat-icon>
+              {{ store.saving() ? 'Saving…' : 'Save changes' }}
             </button>
+          }
+          @if (store.mode() === 'create') {
+            <button type="button" class="wlda__save" [disabled]="!canSave()" [attr.title]="store.draftErrors()[0] || null" (click)="save()">
+              <mat-icon aria-hidden="true">send</mat-icon>
+              {{ store.saving() ? 'Submitting…' : 'Submit for Approval' }}
+            </button>
+          }
+          @if (canRecall()) {
+            <button type="button" class="wlda__ghost" [disabled]="store.recalling()" [attr.aria-busy]="store.recalling()" (click)="recall()">
+              <mat-icon aria-hidden="true">undo</mat-icon>
+              {{ store.recalling() ? 'Recalling…' : 'Recall' }}
+            </button>
+          }
+          @if (store.mode() === 'edit' || store.mode() === 'view') {
+            @if (canSubmit()) {
+              <button type="button" class="wlda__save" [attr.title]="'Send this letter to the SAP approval workflow'" (click)="submit()">
+                <mat-icon aria-hidden="true">send</mat-icon>
+                Submit for Approval
+              </button>
+            }
           }
         </div>
       </header>
@@ -194,6 +218,11 @@
             </div>
           }
         </div>
+        @if (!store.draft()) {
+          <aside class="wlda__approval">
+            <app-wwell-approval-workflow-card [ir]="approval()" [loading]="store.approvalLoading()" (refresh)="refreshApproval()" />
+          </aside>
+        }
       </div>
     } @else {
       <div class="wlda__empty">

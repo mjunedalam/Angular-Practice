@@ -1,24 +1,35 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
-import { Observable, catchError, forkJoin, last, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, concatMap, forkJoin, from, last, map, of, switchMap, take, takeWhile, tap, throwError, timer } from 'rxjs';
 import { WldaAttachment, WldaDraft, WldaLetter, WldaPrewap } from '@models/wwell-planning/wlda.model';
+import { environment } from '@env/environment';
+import { SapAttachmentFile } from '@models/sap/sap-trigger.model';
+import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
 import { S3Service } from '@services/s3/s3.service';
+import { SapService } from '@services/sap/sap.service';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { AuthStore } from 'src/app/features/auth/store/auth.store';
+import { mapSapWorkflowStatusToApprovalChain } from '../../wwell-ir/wwell-ir-form/wwell-ir-approval.mapper';
+import { isSapWorkflowRecalled } from '../../wwell-ir/wwell-ir.config';
+import { WwellIrService } from '../../wwell-ir/wwell-ir.service';
 import { WldaService } from '../wlda.service';
+import { WLDA_SAP_RECALL_POLL_MAX_ATTEMPTS, WLDA_SAP_RECALL_POLL_MS, WLDA_SAP_PROCESS_ID, WLDA_SAP_SCENARIO_ID, WLDA_SAP_WF_STATUS_IN_PROGRESS, buildWldaSapWorkflowTitle } from '../wlda.config';
+import { buildWldaPdf } from '../wlda-pdf.util';
 import {
   WLDA_EMPTY_DRAFT,
   draftOfLetter,
   isWldaDraftDirty,
   toWldaCreatePayload,
   toWldaUpdatePayload,
+  viewOfLetter,
   findPlanForWell,
   validateWldaDraft,
   wldaFieldErrors,
   wldaCode,
   wldaKey,
   wldaS3Prefix,
+  wldaWellName,
 } from '../wlda.util';
 
 /** `empty` = nothing open; `view` = a saved letter, read-only; `create` / `edit` = the draft is live. */
@@ -41,6 +52,10 @@ interface WldaState {
   readonly uploadingFile: boolean;
   readonly uploadPercent: number | null;
   readonly uploadError: string | null;
+  /** The selected letter's SAP approval chain (read live from SAP's GET /display) and whether it is loading. */
+  readonly approvalChain: readonly ApprovalChainStep[];
+  readonly approvalLoading: boolean;
+  readonly recalling: boolean;
 }
 
 const initialState: WldaState = {
@@ -56,6 +71,9 @@ const initialState: WldaState = {
   uploadingFile: false,
   uploadPercent: null,
   uploadError: null,
+  approvalChain: [],
+  approvalLoading: false,
+  recalling: false,
 };
 
 /** Prefers the backend's own `{ message }` over Angular's generic "Http failure response" text. */
@@ -66,6 +84,31 @@ function errorMessage(err: unknown, fallback: string): string {
     return err.status !== 0 && typeof message === 'string' && message ? message : fallback;
   }
   return err instanceof Error ? err.message : fallback;
+}
+
+/** Prefers SAP's own 422 `detail[].msg` list over the generic `{ message }` envelope. */
+function sapErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof HttpErrorResponse) {
+    const body: unknown = err.error;
+    const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : undefined;
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map(item => (item && typeof item === 'object' ? (item as { msg?: unknown }).msg : undefined))
+        .filter((msg): msg is string => typeof msg === 'string' && msg.length > 0);
+      if (messages.length > 0) return messages.join('; ');
+    }
+  }
+  return errorMessage(err, fallback);
+}
+
+/** Raw base64 (no `data:` prefix) of bytes — the shape SAP's `attachment_files[].b64` expects. */
+function bytesToBase64(bytes: Uint8Array): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(new Blob([bytes as BlobPart]));
+  });
 }
 
 /** Copies the plan's details into the draft; `overwrite` (an explicit well link) replaces typed values, otherwise only blanks are filled. */
@@ -119,7 +162,7 @@ export const WldaStore = signalStore(
     };
   }),
 
-  withMethods((store, wldaService = inject(WldaService), s3 = inject(S3Service), authStore = inject(AuthStore), notify = inject(NotificationService)) => {
+  withMethods((store, wldaService = inject(WldaService), irService = inject(WwellIrService), sap = inject(SapService), s3 = inject(S3Service), authStore = inject(AuthStore), notify = inject(NotificationService)) => {
     const networkId = () => authStore.networkId() ?? '';
 
     /** Uploads each file under the letter's prefix; resolves to the names that failed (letter stays saved). */
@@ -164,6 +207,95 @@ export const WldaStore = signalStore(
       });
     }
 
+    /**
+     * "Submit for Approval", same three steps as the IR: mint a workflow id, push the workflow to SAP (the
+     * letter PDF plus every stored file as `attachment_files`), then stamp the id and "In Progress" on the
+     * letter. A refused trigger leaves the letter exactly as it was (Draft).
+     */
+    function submitToSap(letter: WldaLetter): Observable<void> {
+      const prefix = `${wldaS3Prefix(letter.prewapSeq, letter.ltrId)}/`;
+      return irService.getNextSapWorkflowSeq().pipe(
+        switchMap(seq => {
+          const submitted: WldaLetter = { ...letter, sapWfId: seq, sapWfStatus: WLDA_SAP_WF_STATUS_IN_PROGRESS };
+          return s3.search(prefix).pipe(
+            switchMap(res => {
+              const objects = res.objects;
+              const stored = objects.map(object => ({ key: object.OBJ_KEY, name: object.ORIGINAL_FILENAME, pendingIndex: null }));
+              const code = wldaCode(letter.ltrId);
+              const letter$ = from(buildWldaPdf(viewOfLetter(submitted, stored))).pipe(
+                switchMap(bytes => bytesToBase64(bytes)),
+                map((b64): SapAttachmentFile => ({ file_name: `${code}-letter.pdf`, b64 })),
+              );
+              const files$ = objects.map(object =>
+                s3.fetch(object.OBJ_KEY).pipe(map((response): SapAttachmentFile => ({ file_name: object.ORIGINAL_FILENAME, b64: response.content }))),
+              );
+              return forkJoin([letter$, ...files$]);
+            }),
+            switchMap(attachmentFiles =>
+              sap
+                .trigger({
+                  workflow_title: buildWldaSapWorkflowTitle(wldaCode(letter.ltrId), wldaWellName(letter) || `Plan #${letter.prewapSeq}`, environment.production),
+                  initiator_network_id: networkId(),
+                  requester_network_id: networkId(),
+                  process_id: WLDA_SAP_PROCESS_ID,
+                  scenario_id: WLDA_SAP_SCENARIO_ID,
+                  workflow_id: String(seq),
+                  attachment_files: attachmentFiles,
+                  body: [],
+                })
+                .pipe(catchError((err: unknown) => throwError(() => new Error(sapErrorMessage(err, 'Failed to trigger the SAP approval workflow'))))),
+            ),
+            switchMap(() =>
+              wldaService
+                .updateLetter(letter.prewapSeq, letter.ltrId, { ltrRmks: letter.ltrRmks, sapWfId: seq, sapWfStatus: WLDA_SAP_WF_STATUS_IN_PROGRESS, sapWfAprvDt: letter.sapWfAprvDt })
+                .pipe(catchError((err: unknown) => throwError(() => new Error(errorMessage(err, 'SAP workflow triggered, but failed to record it on the letter'))))),
+            ),
+            map((): void => undefined),
+          );
+        }),
+      );
+    }
+
+    /** Stamps SAP's live status text onto the listed letter (local only), so the badge follows SAP like the IR's does. */
+    function withStatusText(prewapSeq: number, ltrId: number, statusText: string): readonly WldaLetter[] {
+      const key = wldaKey({ prewapSeq, ltrId });
+      return store.letters().map(item => (wldaKey(item) === key ? { ...item, sapWfStatus: statusText } : item));
+    }
+
+    /** Reads the letter's real approval chain and status from SAP; a never-submitted letter has nothing to ask about. */
+    function loadApproval(letter: WldaLetter): void {
+      const key = wldaKey(letter);
+      if (letter.sapWfId == null) {
+        patchState(store, { approvalChain: [], approvalLoading: false });
+        return;
+      }
+      patchState(store, { approvalLoading: true });
+      sap.getWorkflowStatus(WLDA_SAP_PROCESS_ID, letter.sapWfId).subscribe({
+        next: status => {
+          if (store.selectedKey() !== key) return;
+          patchState(store, {
+            approvalChain: mapSapWorkflowStatusToApprovalChain(status),
+            approvalLoading: false,
+            letters: withStatusText(letter.prewapSeq, letter.ltrId, status.header.wf_status_text),
+          });
+        },
+        error: (err: unknown) => {
+          if (store.selectedKey() !== key) return;
+          patchState(store, { approvalLoading: false });
+          notify.error(sapErrorMessage(err, 'Failed to load the SAP approval workflow status'));
+        },
+      });
+    }
+
+    /** Reads the saved letter back and submits it; resolves to null on success or the failure text (never errors). */
+    function submitSaved(prewapSeq: number, ltrId: number): Observable<string | null> {
+      return wldaService.getLetter(prewapSeq, ltrId).pipe(
+        switchMap(letter => submitToSap(letter)),
+        map((): string | null => null),
+        catchError((err: unknown) => of(err instanceof Error ? err.message : 'Unexpected error')),
+      );
+    }
+
     /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. */
     /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. `reopenEdit` re-bases the open draft on the fresh row. */
     function refreshLetter(prewapSeq: number, ltrId: number, reopenEdit = false): void {
@@ -175,6 +307,7 @@ export const WldaStore = signalStore(
             ...(reopenEdit && store.selectedKey() === key ? { draft: draftOfLetter(fresh) } : {}),
           });
           loadStored(fresh, key);
+          if (store.selectedKey() === key) loadApproval(fresh);
         },
         error: (err: unknown) => notify.error(errorMessage(err, 'Failed to refresh the WLDA letter')),
       });
@@ -257,7 +390,7 @@ export const WldaStore = signalStore(
 
       /** Opens a saved letter: the listed row at once, then a fresh single-letter GET and its S3 files. */
       select(key: string | null): void {
-        patchState(store, { selectedKey: key, storedAttachments: [], draft: null });
+        patchState(store, { selectedKey: key, storedAttachments: [], draft: null, approvalChain: [], approvalLoading: false });
         const letter = store.letters().find(item => wldaKey(item) === key);
         if (letter && key) refreshLetter(letter.prewapSeq, letter.ltrId);
       },
@@ -271,12 +404,21 @@ export const WldaStore = signalStore(
 
         wldaService
           .createLetter(plan.prewapSeq, toWldaCreatePayload(draft))
-          .pipe(switchMap(result => uploadFiles(draft.files, result.prewapSeq, result.ltrId).pipe(map(failed => ({ result, failed })))))
+          .pipe(
+            switchMap(result =>
+              uploadFiles(draft.files, result.prewapSeq, result.ltrId).pipe(
+                // Inserted as Draft; only now is the SAP workflow started. Whatever goes wrong from here on
+                // leaves the saved Draft in place, so the author can fix it and submit again from the editor.
+                switchMap(failed => submitSaved(result.prewapSeq, result.ltrId).pipe(map(sapError => ({ result, failed, sapError })))),
+              ),
+            ),
+          )
           .subscribe({
-            next: ({ result, failed }) => {
+            next: ({ result, failed, sapError }) => {
               // The draft stays up (now keyed to the saved letter) until the fresh row lands, so the page stays in the editor.
               patchState(store, { saving: false, selectedKey: wldaKey(result), storedAttachments: [], draft: { ...draft, prewapSeq: result.prewapSeq, files: [], removedKeys: [] } });
-              notify.info(`${wldaCode(result.ltrId)} created.`);
+              if (sapError) notify.error(`${wldaCode(result.ltrId)} saved as Draft, but submitting it for approval failed: ${sapError}`);
+              else notify.info(`${wldaCode(result.ltrId)} submitted for approval.`);
               if (failed.length > 0) notify.error(`Letter saved, but these files did not upload: ${failed.join(', ')}`);
               wldaService.getLetters().subscribe({
                 next: letters => {
@@ -289,7 +431,7 @@ export const WldaStore = signalStore(
             },
             error: (err: unknown) => {
               patchState(store, { saving: false });
-              notify.error(errorMessage(err, 'Failed to create the WLDA letter'));
+              notify.error(errorMessage(err, 'Failed to save the WLDA letter'));
             },
           });
       },
@@ -325,6 +467,67 @@ export const WldaStore = signalStore(
               notify.error(errorMessage(err, 'Failed to update the WLDA letter'));
             },
           });
+      },
+
+      /** Submits an already-saved Draft (or a rejected/recalled letter) for approval. */
+      submitLetter(): void {
+        const letter = store.selectedLetter();
+        if (!letter || store.saving() || store.isDirty()) return;
+        patchState(store, { saving: true });
+        submitSaved(letter.prewapSeq, letter.ltrId).subscribe(sapError => {
+          patchState(store, { saving: false });
+          if (sapError) notify.error(`Submitting ${wldaCode(letter.ltrId)} for approval failed: ${sapError}`);
+          else notify.info(`${wldaCode(letter.ltrId)} submitted for approval.`);
+          refreshLetter(letter.prewapSeq, letter.ltrId, store.mode() === 'edit');
+        });
+      },
+
+      /** The approval card's refresh button: re-reads the chain from SAP. */
+      refreshApproval(): void {
+        const letter = store.selectedLetter();
+        if (letter) loadApproval(letter);
+      },
+
+      /**
+       * Recall: DELETE /recall against the workflow's existing id, then poll GET /display (SAP applies it
+       * asynchronously) until it reports Recalled. Nothing is persisted: the live status is read back everywhere.
+       */
+      recallLetter(): void {
+        const letter = store.selectedLetter();
+        if (!letter || letter.sapWfId == null || store.recalling()) return;
+        const sapWfId = letter.sapWfId;
+        const key = wldaKey(letter);
+        patchState(store, { recalling: true });
+        sap.recall(WLDA_SAP_PROCESS_ID, sapWfId, networkId()).subscribe({
+          next: () => {
+            let sawStatus = false;
+            timer(WLDA_SAP_RECALL_POLL_MS, WLDA_SAP_RECALL_POLL_MS)
+              .pipe(
+                take(WLDA_SAP_RECALL_POLL_MAX_ATTEMPTS),
+                concatMap(() => sap.getWorkflowStatus(WLDA_SAP_PROCESS_ID, sapWfId).pipe(catchError(() => of(null)))),
+                tap(status => {
+                  if (!status) return;
+                  sawStatus = true;
+                  patchState(store, {
+                    letters: withStatusText(letter.prewapSeq, letter.ltrId, status.header.wf_status_text),
+                    ...(store.selectedKey() === key ? { approvalChain: mapSapWorkflowStatusToApprovalChain(status) } : {}),
+                  });
+                }),
+                takeWhile(status => !status || !isSapWorkflowRecalled(status.header.wf_status_text), true),
+              )
+              .subscribe({
+                complete: () => {
+                  patchState(store, { recalling: false });
+                  if (sawStatus) notify.info(`${wldaCode(letter.ltrId)} recalled.`);
+                  else notify.error('Workflow recalled, but failed to refresh its latest status');
+                },
+              });
+          },
+          error: (err: unknown) => {
+            patchState(store, { recalling: false });
+            notify.error(sapErrorMessage(err, 'Failed to recall the SAP approval workflow'));
+          },
+        });
       },
 
       /** Deletes the letter, then its S3 files best-effort (the row is already gone, so a failure only leaves orphans). */

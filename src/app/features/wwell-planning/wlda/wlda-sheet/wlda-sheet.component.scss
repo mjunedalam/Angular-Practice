@@ -199,10 +199,13 @@
 
 .ws__box {
   display: inline-block;
+  box-sizing: border-box;
+  flex: 0 0 1.1rem;
   width: 1.1rem;
   height: 1.1rem;
+  aspect-ratio: 1 / 1;
   margin-left: 1.2rem;
-  border: 1px solid var(--ws-line);
+  border: 2px solid var(--ws-line);
 
   &:first-child {
     margin-left: 0;
@@ -211,17 +214,12 @@
   &--on {
     position: relative;
 
-    // Tick mark, drawn with borders so it renders the same in every font.
+    // Bold solid square filling the box.
     &::after {
       content: '';
       position: absolute;
-      left: 50%;
-      top: 44%;
-      width: 0.28rem;
-      height: 0.58rem;
-      border: solid currentcolor;
-      border-width: 0 2px 2px 0;
-      transform: translate(-50%, -50%) rotate(45deg);
+      inset: 1px;
+      background: currentcolor;
     }
   }
 }

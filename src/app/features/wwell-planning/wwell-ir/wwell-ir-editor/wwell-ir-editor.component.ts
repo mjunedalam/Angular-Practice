@@ -21,7 +21,6 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,9 +36,7 @@ import { toExtensionLabel } from '@core/config/file-upload.config';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { WwellIrAttachmentUploadDialogComponent } from '../wwell-ir-attachment-upload-dialog/wwell-ir-attachment-upload-dialog.component';
 import { WwellIrAttachmentViewerComponent } from '../wwell-ir-attachment-viewer/wwell-ir-attachment-viewer.component';
-import { WwellApprovalWorkflowCardComponent } from '../../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
-import { approvalRingPercent, chainCompletionColor, countApprovedSteps } from '../../shared/wwell-approvals/wwell-approvals.config';
-import { prefersReducedMotion } from '../../shared/dynamic-form/motion.util';
+import { WwellApprovalPillComponent } from '../../shared/wwell-approvals/wwell-approval-pill/wwell-approval-pill.component';
 import { WwellCollapseAnimateDirective } from '../../shared/wwell-collapse-animate/wwell-collapse-animate.directive';
 import { WwellIrProgramDetailsComponent } from '../wwell-ir-program-details/wwell-ir-program-details.component';
 import { DynamicFieldComponent } from '../../shared/dynamic-form/dynamic-field/dynamic-field.component';
@@ -120,7 +117,6 @@ export type WwellIrEditorViewMode = 'sections' | 'timeline';
 
 const SELECT_PANEL_CLASS = 'ire-select-panel';
 /** Matches the `--closing` keyframe length in the stylesheet. */
-const APPROVAL_POPOVER_EXIT_MS = 140;
 
 function findSection(schema: ReturnType<typeof buildWwellIrFormSchema>, stepKey: string, sectionKey: string): WwellFormSectionConfig {
   const section = schema.find(step => step.key === stepKey)?.sections.find(s => s.key === sectionKey);
@@ -207,7 +203,6 @@ function withOffsetWellPicker(
   standalone: true,
   imports: [
     NgTemplateOutlet,
-    OverlayModule,
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
@@ -218,7 +213,7 @@ function withOffsetWellPicker(
     WwellIrWellborePanelComponent,
     WwellIrKvValueComponent,
     WwellIrSubSeaInfoComponent,
-    WwellApprovalWorkflowCardComponent,
+    WwellApprovalPillComponent,
     WwellCollapseAnimateDirective,
     WwellIrProgramDetailsComponent,
   ],
@@ -286,50 +281,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
     const ir = this.ir();
     if (ir.irSeq == null || ir.sapWfId == null) return;
     this.store.refreshIrApprovalStatus(ir.irSeq, ir.sapWfId);
-  }
-
-  // ── Approval-workflow header pill — the editor's own compact stand-in for the main IR page's
-  // persistent approval sidebar (View mode only, see WwellIrComponent's template): reserving a
-  // fixed-width column here would compete with the rail/sections/wellbore-preview columns this
-  // view already has, so instead a small ring+count pill sits in the header and expands into the
-  // exact same WwellApprovalWorkflowCardComponent via a CDK connected overlay, anchored to itself.
-  protected readonly countApprovedSteps = countApprovedSteps;
-  protected readonly approvalRingPercent = approvalRingPercent;
-  protected readonly chainCompletionColor = chainCompletionColor;
-  protected readonly approvalPopoverOpen = signal(false);
-  protected readonly approvalPopoverPositions: ConnectedPosition[] = [
-    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 8 },
-    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -8 },
-  ];
-
-  /** True for the length of the exit animation: the overlay stays mounted so the card can fade/scale out. */
-  protected readonly approvalPopoverClosing = signal(false);
-  private approvalPopoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
-  protected toggleApprovalPopover(): void {
-    if (this.approvalPopoverOpen() && !this.approvalPopoverClosing()) {
-      this.closeApprovalPopover();
-      return;
-    }
-    this.cancelApprovalPopoverClose();
-    this.approvalPopoverOpen.set(true);
-  }
-
-  protected closeApprovalPopover(): void {
-    if (!this.approvalPopoverOpen() || this.approvalPopoverClosing()) return;
-    if (prefersReducedMotion()) {
-      this.approvalPopoverOpen.set(false);
-      return;
-    }
-    this.approvalPopoverClosing.set(true);
-    this.approvalPopoverCloseTimer = setTimeout(() => this.cancelApprovalPopoverClose(true), APPROVAL_POPOVER_EXIT_MS);
-  }
-
-  private cancelApprovalPopoverClose(finish = false): void {
-    if (this.approvalPopoverCloseTimer !== null) clearTimeout(this.approvalPopoverCloseTimer);
-    this.approvalPopoverCloseTimer = null;
-    this.approvalPopoverClosing.set(false);
-    if (finish) this.approvalPopoverOpen.set(false);
   }
 
   protected readonly railGroups = WWELL_IR_SECTION_RAIL;

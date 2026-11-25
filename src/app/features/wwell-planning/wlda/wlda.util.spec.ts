@@ -53,14 +53,14 @@ describe('wlda.util', () => {
     expect(validateWldaDraft({ ...valid, ltrRmks: 'ع'.repeat(1001) }, 'create', plan)).toHaveLength(1);
   });
 
-  it('builds a payload with nulls for blanks and untouched SAP columns', () => {
+  it('builds a payload with nulls for blanks and a Draft SAP status', () => {
     expect(toWldaCreatePayload({ ...valid, svYutmCord: '', ltrRmks: '  ' })).toEqual({
       svXutmCord: 512345.67,
       svYutmCord: null,
       svUtmZn: 38,
       ltrRmks: null,
       sapWfId: null,
-      sapWfStatus: null,
+      sapWfStatus: 'Draft',
       sapWfAprvDt: null,
     });
   });

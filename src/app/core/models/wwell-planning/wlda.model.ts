@@ -4,8 +4,8 @@
  * own: the well name, number, depth and so on are read from its plan.
  */
 
-/** `draft` = not saved yet; `created` = saved, no SAP workflow result yet; `approved` = SAP APPROVED. */
-export type WldaStatus = 'draft' | 'created' | 'approved';
+/** `draft` = saved, not yet sent to SAP; `submitted` = SAP workflow in progress; `approved` = SAP APPROVED; `rejected` = SAP Rejected/Cancelled/Recalled. */
+export type WldaStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
 
 /** One row of `GET /planning/api/v1/wlda-letters` — the letter columns plus its joined plan columns. */
 export interface WldaLetter {

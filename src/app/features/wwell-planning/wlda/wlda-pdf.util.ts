@@ -139,7 +139,7 @@ function columnEdges(weights: readonly number[]): number[] {
 function drawHeader(sheet: Sheet, view: WldaLetterView): void {
   const { bold, regular } = sheet.fonts;
   sheet.text(WLDA_FORM_TITLE, MARGIN, sheet.y + 20, 19, bold);
-  sheet.text(`${WLDA_FORM_NUMBER}  ·  ${view.code}`, MARGIN + 6, sheet.y + 33, 7.5, regular, LABEL);
+  sheet.text(WLDA_FORM_NUMBER, MARGIN + 6, sheet.y + 33, 7.5, regular, LABEL);
   const dateX = MARGIN + CONTENT_WIDTH - 118;
   sheet.vline(dateX, sheet.y + 4, sheet.y + 38, 0.8);
   sheet.text('Date', dateX + 8, sheet.y + 14, 8, regular, LABEL);
@@ -221,18 +221,14 @@ function drawFieldGrid(sheet: Sheet, view: WldaLetterView): void {
   sheet.hline(a[2] ?? 0, right, top1 + rowHeight, 0.8);
   const boxTop = top1 + rowHeight + 24;
   const boxX = (a[3] ?? 0) + 30;
-  sheet.rect(boxX, boxTop, 12, 12, { border: LINE, borderWidth: 0.8 });
+  sheet.rect(boxX, boxTop, 12, 12, { border: LINE, borderWidth: 1.2 });
   sheet.text('Yes', boxX + 18, boxTop + 10, 8.5, regular);
-  sheet.rect(boxX + 66, boxTop, 12, 12, { border: LINE, borderWidth: 0.8 });
+  sheet.rect(boxX + 66, boxTop, 12, 12, { border: LINE, borderWidth: 1.2 });
   sheet.text('No', boxX + 84, boxTop + 10, 8.5, regular);
   if (view.cathodic !== null) {
-    // Tick mark (Helvetica has no ✓ glyph, so it is two strokes).
+    // Solid square filling the ticked box.
     const x = view.cathodic ? boxX : boxX + 66;
-    const y = PAGE_HEIGHT - boxTop;
-    const start = { x: x + 2.5, y: y - 6.5 };
-    const mid = { x: x + 5, y: y - 9.5 };
-    sheet.page.drawLine({ start, end: mid, thickness: 1.6, color: INK });
-    sheet.page.drawLine({ start: mid, end: { x: x + 10, y: y - 2.5 }, thickness: 1.6, color: INK });
+    sheet.rect(x + 1.5, boxTop + 1.5, 9, 9, { fill: INK });
   }
   sheet.y = top1 + rowHeight * 2;
   sheet.hline(MARGIN, right, sheet.y, 0.8);

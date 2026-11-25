@@ -7,7 +7,10 @@ import {
   WldaPrewap,
   WldaStatus,
   WldaUpdatePayload,
+  WldaWorkflowRow,
 } from '@models/wwell-planning/wlda.model';
+import { ApprovalChainStep, ApprovalStepStatus } from '@models/wwell-planning/wwell-planning.model';
+import { WLDA_SAP_WF_STATUS_DRAFT } from './wlda.config';
 
 /** Column bounds of EXAD_AGWA_WLDA_LTR — checked here so a bad value is explained, not an ORA error. */
 export const WLDA_MAX_X_UTM = 999_999.99;
@@ -132,7 +135,7 @@ export function toWldaCreatePayload(draft: WldaDraft): WldaCreatePayload {
     svUtmZn: numberOrNull(draft.svUtmZn),
     ltrRmks: draft.ltrRmks.trim() || null,
     sapWfId: null,
-    sapWfStatus: null,
+    sapWfStatus: WLDA_SAP_WF_STATUS_DRAFT,
     sapWfAprvDt: null,
   };
 }
@@ -142,7 +145,11 @@ function textOf(value: string | number | null | undefined): string {
 }
 
 export function statusOfLetter(letter: Pick<WldaLetter, 'sapWfStatus'>): WldaStatus {
-  return letter.sapWfStatus?.toUpperCase() === 'APPROVED' ? 'approved' : 'created';
+  const text = letter.sapWfStatus?.trim().toUpperCase() ?? '';
+  if (text === 'APPROVED') return 'approved';
+  if (text === '' || text === 'DRAFT') return 'draft';
+  if (/REJECT|CANCEL|RECALL/.test(text)) return 'rejected';
+  return 'submitted';
 }
 
 /** The edit draft starts from the saved letter's own values; coordinates are shown but not editable. */
@@ -232,7 +239,19 @@ export function viewOfDraft(draft: WldaDraft, plan: WldaPrewap | null): WldaLett
 }
 
 /** A saved letter. While editing (`draft` set) remarks and files come from the draft instead. */
-export function viewOfLetter(letter: WldaLetter, stored: readonly WldaAttachment[], draft: WldaDraft | null = null): WldaLetterView {
+const STEP_STATUS_LABEL: Record<ApprovalStepStatus, string> = { approved: 'Approved', rejected: 'Rejected', 'in-progress': 'In Progress', pending: 'Pending' };
+
+/** The approval chain as the letter's SAP workflow table rows. */
+export function workflowRowsOf(chain: readonly ApprovalChainStep[]): readonly WldaWorkflowRow[] {
+  return chain.map(step => ({ name: step.name, title: step.role, status: STEP_STATUS_LABEL[step.status], approvedDate: step.status === 'approved' ? (step.date ?? '') : '' }));
+}
+
+export function viewOfLetter(
+  letter: WldaLetter,
+  stored: readonly WldaAttachment[],
+  draft: WldaDraft | null = null,
+  chain: readonly ApprovalChainStep[] = [],
+): WldaLetterView {
   const visibleStored = draft ? stored.filter(file => !draft.removedKeys.includes(file.key ?? '')) : stored;
   return {
     ...baseView(letter),
@@ -246,7 +265,7 @@ export function viewOfLetter(letter: WldaLetter, stored: readonly WldaAttachment
     zone: textOf(letter.svUtmZn),
     remarks: draft ? draft.ltrRmks : textOf(letter.ltrRmks),
     attachments: [...visibleStored, ...pendingAttachments(draft?.files ?? [])],
-    workflow: [],
+    workflow: workflowRowsOf(chain),
     distribution: [],
   };
 }

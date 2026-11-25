@@ -23,7 +23,7 @@ import { WwellApprovalTimelineComponent } from '../wwell-approval-timeline/wwell
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WwellApprovalWorkflowCardComponent {
-  readonly ir = input.required<IntegratedRequirement>();
+  readonly ir = input.required<Pick<IntegratedRequirement, 'chain' | 'sapWfId'>>();
   readonly loading = input(false);
 
   /** The caller owns the actual refresh call (it already has the store injected) — this component

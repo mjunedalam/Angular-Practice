@@ -632,7 +632,7 @@
 }
 
 .wlda__panes--single {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(260px, 22vw, 340px);
 }
 
 // One tab for now: the Form 6208 sheet. The strip is a real tablist so more tabs can join later.
@@ -808,5 +808,21 @@
     font-weight: 600;
     color: tokens.$navy;
     overflow-wrap: anywhere;
+  }
+}
+
+.wlda__approval {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .wlda__panes--single {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
