@@ -60,6 +60,11 @@ export function wldaWellName(plan: Pick<WldaPrewap, 'wPrimHid' | 'wNum'> | null)
   return [plan.wPrimHid, plan.wNum].filter(part => !!part?.trim()).join(' ');
 }
 
+/** "Link to Water Well" dropdown label: w_prim_hid and w_num joined the way the IR picker names a well. */
+export function wldaLinkLabel(plan: Pick<WldaPrewap, 'wPrimHid' | 'wNum'>): string {
+  return [plan.wPrimHid, plan.wNum].filter(part => !!part?.trim()).join('_');
+}
+
 function utf8Bytes(value: string): number {
   return new Blob([value]).size;
 }
@@ -150,6 +155,12 @@ export function statusOfLetter(letter: Pick<WldaLetter, 'sapWfStatus'>): WldaSta
   if (text === '' || text === 'DRAFT') return 'draft';
   if (/REJECT|CANCEL|RECALL/.test(text)) return 'rejected';
   return 'submitted';
+}
+
+/** A submitted or approved letter is read-only: editing it first resets it to Draft, with the user's consent, and it
+ *  must then be routed for approval again (same rule as the IR, see isIrLockedForEdit). */
+export function isWldaLocked(letter: Pick<WldaLetter, 'sapWfId' | 'sapWfStatus'>): boolean {
+  return letter.sapWfId != null || statusOfLetter(letter) === 'approved';
 }
 
 /** The edit draft starts from the saved letter's own values; coordinates are shown but not editable. */

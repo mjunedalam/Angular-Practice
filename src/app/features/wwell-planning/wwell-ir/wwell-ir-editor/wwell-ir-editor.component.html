@@ -1100,22 +1100,6 @@
         }
         Submit for Review
       </button>
-    } @else if (canRecallIr()) {
-      <button
-        type="button"
-        mat-stroked-button
-        color="warn"
-        class="ire__action-btn"
-        [disabled]="anyFooterActionPending()"
-        (click)="recallIr()"
-      >
-        @if (isRecalling()) {
-          <mat-spinner diameter="16" class="ire__save-spinner" />
-        } @else {
-          <mat-icon>undo</mat-icon>
-        }
-        Recall
-      </button>
     }
   </footer>
 </div>

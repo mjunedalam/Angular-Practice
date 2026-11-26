@@ -148,6 +148,7 @@ export function mergeIrDetailBlocksIntoIntegratedRequirement(
     hasLegacyMarkup,
     wellDesignSeq: wellDesignRowBelongsToThisIr ? wellDesignRow.wd_seq : existing.wellDesignSeq,
     sapWfId: header?.sap_wf_id ?? existing.sapWfId,
+    sapWfStatusText: header?.sap_wf_status?.trim() || existing.sapWfStatusText,
     requestReference: {
       ...existing.requestReference,
       linkedRequestId: header?.prewap_seq != null ? String(header.prewap_seq) : existing.requestReference.linkedRequestId,

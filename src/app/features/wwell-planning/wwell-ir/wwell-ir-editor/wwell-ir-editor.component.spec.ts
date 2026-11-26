@@ -316,13 +316,6 @@ describe('WwellIrEditorComponent', () => {
     expect(findFooterButtonByText(fixture, 'Recall')).toBeFalsy();
   });
 
-  it('shows Recall, not Submit for Review, while the workflow is still in progress', async () => {
-    await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'In Progress' });
-
-    expect(findFooterButtonByText(fixture, 'Recall')).toBeTruthy();
-    expect(findFooterButtonByText(fixture, 'Submit for Review')).toBeFalsy();
-  });
-
   it('shows Submit for Review again, not Recall, once the workflow was Rejected', async () => {
     await setup({ status: 'submit-for-review', sapWfId: 6, sapWfStatusText: 'Rejected' });
 

@@ -1,5 +1,6 @@
 import { CreateIntegratedRequirementPayload, IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { WWELL_IR_CHAIN_ROLES } from '../../shared/wwell-approvals/wwell-approvals.config';
+import { WWELL_IR_SAP_WF_STATUS_DRAFT } from '../wwell-ir-sap.config';
 import { buildInitialApprovalChain, todayIsoDate } from '../../shared/wwell-approvals/wwell-approval-request.util';
 
 /** Identity fields the two callers below resolve differently — a real save mints them from the
@@ -40,6 +41,6 @@ export function buildIntegratedRequirementFromPayload(
     // A brand-new record (draft or just-saved, pre-merge) has never been through Submit for
     // Review — mergeIrDetailBlocksIntoIntegratedRequirement overrides this once a real one exists.
     sapWfId: null,
-    sapWfStatusText: null,
+    sapWfStatusText: WWELL_IR_SAP_WF_STATUS_DRAFT,
   };
 }

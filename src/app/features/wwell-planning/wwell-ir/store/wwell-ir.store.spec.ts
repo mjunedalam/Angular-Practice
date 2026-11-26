@@ -137,6 +137,7 @@ describe('WwellIrStore - createIr', () => {
     // empty detail response here means "nothing extra to merge," so `irs()` ends up exactly what
     // buildIntegratedRequirementFromPayload alone would build, matching most of these assertions.
     serviceMock.getIrDetailBlocks.mockReturnValue(of([]));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
     TestBed.configureTestingModule({
       providers: [
         WwellIrStore,
@@ -177,6 +178,15 @@ describe('WwellIrStore - createIr', () => {
 
   /** Attachments are real files fetched per ir_seq (loadIrAttachments), never part of a save — so a
    *  freshly created record starts with none until that separate fetch resolves. */
+  it('stamps a brand-new record as Draft (no workflow id yet) before reading it back', () => {
+    serviceMock.createIr.mockReturnValue(of(9001));
+
+    store.createIr(buildPayload(), buildIrBulkPayload());
+    jest.advanceTimersByTime(WWELL_SAVE_DELAY_MS);
+
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, null, 'Draft');
+  });
+
   it('starts a newly created record with no attachments', () => {
     serviceMock.createIr.mockReturnValue(of(9001));
 
@@ -334,12 +344,13 @@ describe('WwellIrStore - submitIrForReview', () => {
     expect(store.sapTriggerError()).toBe('Attach a Location Map before submitting for review.');
   });
 
-  it('runs the three steps in order — mint id, trigger SAP, record a local "in progress" placeholder — without ever asking SAP for a real status', async () => {
+  it('runs the three steps in order — mint id, trigger SAP, record the "in progress" placeholder, then read SAP\'s real status', async () => {
     const ir = buildIntegratedRequirement({ status: 'in-progress', irSeq: 9001 });
     seedIrs(ir);
     serviceMock.getNextSapWorkflowSeq.mockReturnValue(of(6));
     sapServiceMock.trigger.mockReturnValue(of({ message: 'Agents were successfully resolved' }));
     serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
+    sapServiceMock.getWorkflowStatus.mockReturnValue(of({ header: { wf_status_text: 'Pending Approval' }, approval_chain: [] }));
 
     store.submitIrForReview(ir);
     await settleAsyncWork();
@@ -362,12 +373,12 @@ describe('WwellIrStore - submitIrForReview', () => {
       workflow_id: '6',
       body: [],
     });
-    // Submitting must stay a fast, local-only write — no round-trip to SAP's own GET /display.
-    expect(sapServiceMock.getWorkflowStatus).not.toHaveBeenCalled();
+    expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6);
     expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, 6, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
     expect(store.irs()[0].status).toBe('submit-for-review');
     expect(store.irs()[0].sapWfId).toBe(6);
-    expect(store.irs()[0].sapWfStatusText).toBe(WWELL_IR_SAP_WF_STATUS_IN_PROGRESS);
+    expect(store.irs()[0].sapWfStatusText).toBe('Pending Approval');
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenLastCalledWith(9001, 6, 'Pending Approval');
     expect(store.updatingIrStatus()).toBe(false);
     expect(store.sapTriggerError()).toBeNull();
   });
@@ -577,6 +588,7 @@ describe('WwellIrStore - recallIr', () => {
     seedIrs(ir);
     sapServiceMock.recall.mockReturnValue(of(recallAck));
     sapServiceMock.getWorkflowStatus.mockReturnValue(of(recalledWorkflowStatus));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
 
     jest.useFakeTimers();
     store.recallIr(ir);
@@ -587,15 +599,12 @@ describe('WwellIrStore - recallIr', () => {
     // The recall response is a bare ack with no status of its own — the real status/chain only ever
     // comes from a separate GET /display call, made under the same existing workflow id.
     expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledWith(WWELL_IR_SAP_PROCESS_ID, 6);
-    // Recall never PATCHes the IR header: it doesn't mint a new sapWfId (unlike the trigger flow),
-    // and sapWfStatusText is set here straight from the live GET, not from a persisted placeholder.
-    expect(serviceMock.updateIrSapWorkflow).not.toHaveBeenCalled();
-    // Recalling doesn't change ir.status or sapWfId — only the SAP text badgeMeta reads changes,
-    // same as a real Rejected/Approved response from SAP would.
-    expect(store.irs()[0].status).toBe('submit-for-review');
-    expect(store.irs()[0].sapWfId).toBe(6);
-    expect(store.irs()[0].sapWfStatusText).toBe('Recalled');
-    expect(store.irs()[0].chain).toEqual([{ role: 'Initiator', name: 'Mohammad Juned Alam', status: 'in-progress', date: '2026-09-16' }]);
+    // A recalled workflow is gone for good, so once SAP confirms it the IR is reset to an unsubmitted Draft:
+    // workflow id cleared, status "Draft" written to the header, approval chain dropped.
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, null, 'Draft');
+    expect(store.irs()[0].sapWfId).toBeNull();
+    expect(store.irs()[0].sapWfStatusText).toBe('Draft');
+    expect(store.irs()[0].chain).toEqual([]);
     expect(store.recallingIr()).toBe(false);
     expect(store.sapRecallError()).toBeNull();
   });
@@ -667,6 +676,7 @@ describe('WwellIrStore - recallIr polling', () => {
       approval_chain: [],
     });
     sapServiceMock.recall.mockReturnValue(of({ message: 'ok' }));
+    serviceMock.updateIrSapWorkflow.mockReturnValue(of(undefined));
     sapServiceMock.getWorkflowStatus
       .mockReturnValueOnce(of(statusWith('In Progress')))
       .mockReturnValueOnce(of(statusWith('In Progress')))
@@ -680,7 +690,10 @@ describe('WwellIrStore - recallIr polling', () => {
     jest.advanceTimersByTime(WWELL_IR_SAP_RECALL_POLL_MS * 2);
     jest.useRealTimers();
 
-    expect(store.irs()[0].sapWfStatusText).toBe('Recalled');
+    // Once SAP confirms the recall the IR goes back to being an unsubmitted Draft.
+    expect(serviceMock.updateIrSapWorkflow).toHaveBeenCalledWith(9001, null, 'Draft');
+    expect(store.irs()[0].sapWfStatusText).toBe('Draft');
+    expect(store.irs()[0].sapWfId).toBeNull();
     expect(store.recallingIr()).toBe(false);
     expect(sapServiceMock.getWorkflowStatus).toHaveBeenCalledTimes(3);
   });

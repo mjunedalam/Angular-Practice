@@ -90,7 +90,6 @@ import {
   hasKnownIrStatus,
   irBadgeMeta,
   isSapWorkflowResubmittable,
-  isSapWorkflowTerminal,
   wwellIrHasRequiredSubmitFields,
 } from '../wwell-ir.config';
 import {
@@ -250,9 +249,8 @@ export class WwellIrEditorComponent implements AfterViewInit {
   protected readonly badgeMeta = irBadgeMeta;
   protected readonly isSaving = this.store.creatingIr;
   protected readonly isSubmittingForReview = this.store.updatingIrStatus;
-  protected readonly isRecalling = this.store.recallingIr;
   protected readonly anyFooterActionPending = computed(
-    () => this.isSaving() || this.isSubmittingForReview() || this.isRecalling(),
+    () => this.isSaving() || this.isSubmittingForReview(),
   );
   protected readonly hasSavedIrSeq = computed(() => this.ir().irSeq !== null && this.ir().irSeq !== undefined);
   protected readonly selectPanelClass = SELECT_PANEL_CLASS;
@@ -271,12 +269,6 @@ export class WwellIrEditorComponent implements AfterViewInit {
     if (!this.hasSavedIrSeq() || !wwellIrHasRequiredSubmitFields(ir) || !hasAllRequiredAttachments(ir.attachments)) return false;
     return (WWELL_IR_SUBMITTABLE_STATUSES.includes(ir.status) && ir.sapWfId == null) || isSapWorkflowResubmittable(ir.sapWfStatusText);
   });
-  /** Once a record has been submitted (a real `sapWfId`), "Submit for Review" no longer applies —
-   *  "Recall" takes its place in the same footer slot, but only while the workflow is still live:
-   *  an already-Approved/Rejected/Cancelled/Recalled workflow has nothing left to pull back
-   *  (Recalled instead brings back "Submit for Review", see canSubmitForReview above). */
-  protected readonly canRecallIr = computed(() => this.ir().sapWfId != null && !isSapWorkflowTerminal(this.ir().sapWfStatusText));
-
   protected refreshApprovalStatus(): void {
     const ir = this.ir();
     if (ir.irSeq == null || ir.sapWfId == null) return;
@@ -1439,23 +1431,5 @@ export class WwellIrEditorComponent implements AfterViewInit {
     // left out — the button is disabled in that state; this guards any other entry point.
     if (this.hasPendingEdits()) return;
     this.store.submitIrForReview(this.ir());
-  }
-
-  /** Recalling stops a live SAP workflow — uses the same "confirm, then act" pattern as the other
-   *  row-delete actions above, since it's not reversible from here (SAP itself would need a fresh
-   *  Submit for Review). */
-  protected recallIr(): void {
-    const ir = this.ir();
-    this.confirmThenAct(
-      {
-        title: 'Recall this Integrated Requirement?',
-        rows: [
-          { label: 'IR', value: ir.code },
-          { label: 'Well', value: ir.requestReference.wellName || 'Untitled Well' },
-        ],
-        confirmLabel: 'Recall',
-      },
-      () => this.store.recallIr(ir),
-    );
   }
 }

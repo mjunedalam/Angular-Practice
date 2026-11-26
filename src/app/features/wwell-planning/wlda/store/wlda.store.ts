@@ -14,7 +14,7 @@ import { mapSapWorkflowStatusToApprovalChain } from '../../wwell-ir/wwell-ir-for
 import { isSapWorkflowRecalled } from '../../wwell-ir/wwell-ir.config';
 import { WwellIrService } from '../../wwell-ir/wwell-ir.service';
 import { WldaService } from '../wlda.service';
-import { WLDA_SAP_RECALL_POLL_MAX_ATTEMPTS, WLDA_SAP_RECALL_POLL_MS, WLDA_SAP_PROCESS_ID, WLDA_SAP_SCENARIO_ID, WLDA_SAP_WF_STATUS_IN_PROGRESS, buildWldaSapWorkflowTitle } from '../wlda.config';
+import { WLDA_SAP_RECALL_POLL_MAX_ATTEMPTS, WLDA_SAP_RECALL_POLL_MS, WLDA_SAP_PROCESS_ID, WLDA_SAP_SCENARIO_ID, WLDA_SAP_WF_STATUS_APPROVED, WLDA_SAP_WF_STATUS_DRAFT, WLDA_SAP_WF_STATUS_IN_PROGRESS, buildWldaSapWorkflowTitle } from '../wlda.config';
 import { buildWldaPdf } from '../wlda-pdf.util';
 import {
   WLDA_EMPTY_DRAFT,
@@ -24,6 +24,7 @@ import {
   toWldaUpdatePayload,
   viewOfLetter,
   findPlanForWell,
+  isWldaLocked,
   validateWldaDraft,
   wldaFieldErrors,
   wldaCode,
@@ -262,6 +263,52 @@ export const WldaStore = signalStore(
       return store.letters().map(item => (wldaKey(item) === key ? { ...item, sapWfStatus: statusText } : item));
     }
 
+    function listedLetter(key: string): WldaLetter | undefined {
+      return store.letters().find(item => wldaKey(item) === key);
+    }
+
+    /**
+     * Saves SAP's live status on the letter, so the list and the database follow SAP. "Approved" is stored as
+     * 'APPROVED' (get_wlda_letters_prc's current_flg matches it exactly) together with the last approval date.
+     * Fire-and-forget: a failed write only means the next view tries again.
+     */
+    function syncStatus(letter: WldaLetter, statusText: string, chain: readonly ApprovalChainStep[]): void {
+      const isApproved = /^approved$/i.test(statusText.trim());
+      const sapWfStatus = isApproved ? WLDA_SAP_WF_STATUS_APPROVED : statusText;
+      const approvalDates = chain.flatMap(step => (step.status === 'approved' && step.date ? [step.date] : [])).sort();
+      const sapWfAprvDt = isApproved ? (approvalDates.at(-1) ?? letter.sapWfAprvDt) : letter.sapWfAprvDt;
+      if (letter.sapWfStatus === sapWfStatus && letter.sapWfAprvDt === sapWfAprvDt) return;
+      const key = wldaKey(letter);
+      patchState(store, { letters: store.letters().map(item => (wldaKey(item) === key ? { ...item, sapWfStatus, sapWfAprvDt } : item)) });
+      wldaService
+        .updateLetter(letter.prewapSeq, letter.ltrId, { ltrRmks: letter.ltrRmks, sapWfId: letter.sapWfId, sapWfStatus, sapWfAprvDt })
+        .subscribe({ error: () => undefined });
+    }
+
+    /** Back to an unsubmitted Draft: workflow id and approval date cleared, status "Draft". Used once SAP confirms a
+     *  recall, and when the user reopens a closed workflow for editing. A failed write leaves the letter locked. */
+    function resetToDraft(letter: WldaLetter, openForEdit: boolean, failureMessage: string, successMessage: string): void {
+      const key = wldaKey(letter);
+      const reset = { sapWfId: null, sapWfStatus: WLDA_SAP_WF_STATUS_DRAFT, sapWfAprvDt: null };
+      wldaService.updateLetter(letter.prewapSeq, letter.ltrId, { ltrRmks: letter.ltrRmks, ...reset }).subscribe({
+        next: () => {
+          const fresh: WldaLetter = { ...(listedLetter(key) ?? letter), ...reset };
+          const isOpen = store.selectedKey() === key;
+          patchState(store, {
+            recalling: false,
+            letters: store.letters().map(item => (wldaKey(item) === key ? fresh : item)),
+            ...(isOpen ? { approvalChain: [], approvalLoading: false } : {}),
+            ...(isOpen && openForEdit ? { draft: draftOfLetter(fresh) } : {}),
+          });
+          notify.info(successMessage);
+        },
+        error: (err: unknown) => {
+          patchState(store, { recalling: false });
+          notify.error(errorMessage(err, failureMessage));
+        },
+      });
+    }
+
     /** Reads the letter's real approval chain and status from SAP; a never-submitted letter has nothing to ask about. */
     function loadApproval(letter: WldaLetter): void {
       const key = wldaKey(letter);
@@ -273,11 +320,15 @@ export const WldaStore = signalStore(
       sap.getWorkflowStatus(WLDA_SAP_PROCESS_ID, letter.sapWfId).subscribe({
         next: status => {
           if (store.selectedKey() !== key) return;
-          patchState(store, {
-            approvalChain: mapSapWorkflowStatusToApprovalChain(status),
-            approvalLoading: false,
-            letters: withStatusText(letter.prewapSeq, letter.ltrId, status.header.wf_status_text),
-          });
+          // Reset or resubmitted while this read was in flight: saving it would restore the old workflow.
+          const current = listedLetter(key);
+          if (!current || current.sapWfId !== letter.sapWfId) {
+            patchState(store, { approvalLoading: false });
+            return;
+          }
+          const chain = mapSapWorkflowStatusToApprovalChain(status);
+          patchState(store, { approvalChain: chain, approvalLoading: false });
+          syncStatus(current, status.header.wf_status_text, chain);
         },
         error: (err: unknown) => {
           if (store.selectedKey() !== key) return;
@@ -296,15 +347,16 @@ export const WldaStore = signalStore(
       );
     }
 
-    /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. */
     /** Re-reads one letter (single-letter GET) and its files, e.g. after a save. `reopenEdit` re-bases the open draft on the fresh row. */
     function refreshLetter(prewapSeq: number, ltrId: number, reopenEdit = false): void {
       const key = wldaKey({ prewapSeq, ltrId });
       wldaService.getLetter(prewapSeq, ltrId).subscribe({
         next: fresh => {
+          const isOpen = store.selectedKey() === key;
           patchState(store, {
             letters: store.letters().map(item => (wldaKey(item) === key ? fresh : item)),
-            ...(reopenEdit && store.selectedKey() === key ? { draft: draftOfLetter(fresh) } : {}),
+            // A letter that turns out to be locked (just submitted, here or elsewhere) drops out of the editor.
+            ...(isOpen && isWldaLocked(fresh) ? { draft: null } : isOpen && reopenEdit ? { draft: draftOfLetter(fresh) } : {}),
           });
           loadStored(fresh, key);
           if (store.selectedKey() === key) loadApproval(fresh);
@@ -350,14 +402,23 @@ export const WldaStore = signalStore(
         });
       },
 
+      /** Re-reads the wells the "Link to Water Well" dropdown offers. */
+      loadPrewaps(): void {
+        wldaService.getPrewaps().subscribe({
+          next: prewaps => patchState(store, { prewaps }),
+          error: (err: unknown) => notify.error(errorMessage(err, 'Failed to refresh the water well list')),
+        });
+      },
+
       startDraft(): void {
         patchState(store, { draft: WLDA_EMPTY_DRAFT, selectedKey: null, storedAttachments: [] });
+        this.loadPrewaps();
       },
 
       /** Switches the opened letter from view to edit. */
       startEdit(): void {
         const letter = store.selectedLetter();
-        if (letter) patchState(store, { draft: draftOfLetter(letter) });
+        if (letter && !isWldaLocked(letter)) patchState(store, { draft: draftOfLetter(letter) });
       },
 
       patchDraft(patch: Partial<WldaDraft>): void {
@@ -406,19 +467,14 @@ export const WldaStore = signalStore(
           .createLetter(plan.prewapSeq, toWldaCreatePayload(draft))
           .pipe(
             switchMap(result =>
-              uploadFiles(draft.files, result.prewapSeq, result.ltrId).pipe(
-                // Inserted as Draft; only now is the SAP workflow started. Whatever goes wrong from here on
-                // leaves the saved Draft in place, so the author can fix it and submit again from the editor.
-                switchMap(failed => submitSaved(result.prewapSeq, result.ltrId).pipe(map(sapError => ({ result, failed, sapError })))),
-              ),
+              uploadFiles(draft.files, result.prewapSeq, result.ltrId).pipe(map(failed => ({ result, failed }))),
             ),
           )
           .subscribe({
-            next: ({ result, failed, sapError }) => {
+            next: ({ result, failed }) => {
               // The draft stays up (now keyed to the saved letter) until the fresh row lands, so the page stays in the editor.
               patchState(store, { saving: false, selectedKey: wldaKey(result), storedAttachments: [], draft: { ...draft, prewapSeq: result.prewapSeq, files: [], removedKeys: [] } });
-              if (sapError) notify.error(`${wldaCode(result.ltrId)} saved as Draft, but submitting it for approval failed: ${sapError}`);
-              else notify.info(`${wldaCode(result.ltrId)} submitted for approval.`);
+              notify.info(`${wldaCode(result.ltrId)} saved as Draft.`);
               if (failed.length > 0) notify.error(`Letter saved, but these files did not upload: ${failed.join(', ')}`);
               wldaService.getLetters().subscribe({
                 next: letters => {
@@ -490,9 +546,9 @@ export const WldaStore = signalStore(
 
       /**
        * Recall: DELETE /recall against the workflow's existing id, then poll GET /display (SAP applies it
-       * asynchronously) until it reports Recalled. Nothing is persisted: the live status is read back everywhere.
+       * asynchronously) until it reports Recalled, and only then reset the letter to Draft.
        */
-      recallLetter(): void {
+      recallLetter(openForEdit = false): void {
         const letter = store.selectedLetter();
         if (!letter || letter.sapWfId == null || store.recalling()) return;
         const sapWfId = letter.sapWfId;
@@ -500,14 +556,14 @@ export const WldaStore = signalStore(
         patchState(store, { recalling: true });
         sap.recall(WLDA_SAP_PROCESS_ID, sapWfId, networkId()).subscribe({
           next: () => {
-            let sawStatus = false;
+            let lastText: string | null = null;
             timer(WLDA_SAP_RECALL_POLL_MS, WLDA_SAP_RECALL_POLL_MS)
               .pipe(
                 take(WLDA_SAP_RECALL_POLL_MAX_ATTEMPTS),
                 concatMap(() => sap.getWorkflowStatus(WLDA_SAP_PROCESS_ID, sapWfId).pipe(catchError(() => of(null)))),
                 tap(status => {
                   if (!status) return;
-                  sawStatus = true;
+                  lastText = status.header.wf_status_text;
                   patchState(store, {
                     letters: withStatusText(letter.prewapSeq, letter.ltrId, status.header.wf_status_text),
                     ...(store.selectedKey() === key ? { approvalChain: mapSapWorkflowStatusToApprovalChain(status) } : {}),
@@ -517,9 +573,14 @@ export const WldaStore = signalStore(
               )
               .subscribe({
                 complete: () => {
+                  if (isSapWorkflowRecalled(lastText)) {
+                    resetToDraft(letter, openForEdit, 'Workflow recalled, but the letter could not be reset to Draft', `${wldaCode(letter.ltrId)} recalled and returned to Draft.`);
+                    return;
+                  }
                   patchState(store, { recalling: false });
-                  if (sawStatus) notify.info(`${wldaCode(letter.ltrId)} recalled.`);
-                  else notify.error('Workflow recalled, but failed to refresh its latest status');
+                  notify.error(
+                    lastText === null ? 'Workflow recalled, but failed to refresh its latest status' : 'SAP has not confirmed the recall yet — refresh the approval status shortly',
+                  );
                 },
               });
           },
@@ -528,6 +589,15 @@ export const WldaStore = signalStore(
             notify.error(sapErrorMessage(err, 'Failed to recall the SAP approval workflow'));
           },
         });
+      },
+
+      /** Reopens a letter whose workflow is already closed (approved, rejected, cancelled or recalled) for editing.
+       *  A live workflow must go through recallLetter instead, or it would stay pending in SAP. */
+      reopenLetter(): void {
+        const letter = store.selectedLetter();
+        if (!letter || !isWldaLocked(letter) || store.recalling()) return;
+        patchState(store, { recalling: true });
+        resetToDraft(letter, true, 'Failed to reopen the letter for editing', `${wldaCode(letter.ltrId)} reopened as Draft.`);
       },
 
       /** Deletes the letter, then its S3 files best-effort (the row is already gone, so a failure only leaves orphans). */

@@ -42,7 +42,7 @@
     </div>
     <div class="ir-well-design__remarks-head">
       <span class="ir-well-design__remarks-label">Remarks</span>
-      @if (!editingRemarks()) {
+      @if (!editingRemarks() && !isLocked()) {
         <button
           type="button"
           mat-icon-button

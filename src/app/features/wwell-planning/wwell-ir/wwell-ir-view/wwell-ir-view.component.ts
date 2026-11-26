@@ -15,7 +15,7 @@ import { WWELL_IR_SECTION_RAIL } from '../wwell-ir-editor/wwell-ir-section-rail.
 import { wwellIrTimelineStepStatus } from '../wwell-ir-editor/wwell-ir-timeline.util';
 import { WwellIrLetterPdfService } from '../wwell-ir-letter-pdf.service';
 import { irWellFullName } from '../wwell-ir-sap.config';
-import { hasKnownIrStatus, irBadgeMeta, isIrFullyApproved, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
+import { hasKnownIrStatus, irBadgeMeta, isIrFullyApproved, isSapWorkflowTerminal, resolveLetterStampStatus, resolveLetterWorkflow } from '../wwell-ir.config';
 import { WwellIrService } from '../wwell-ir.service';
 import { WwellIrStore } from '../store/wwell-ir.store';
 import { WwellIrViewDetailsComponent } from './wwell-ir-view-details/wwell-ir-view-details.component';
@@ -93,6 +93,8 @@ export class WwellIrViewComponent {
   /** WwellIrComponent listens and flips its `detailMode` back to 'edit' for this same record —
    *  this component has no editing surface of its own. */
   readonly editRequested = output<void>();
+  /** Recall lives here because a submitted record only ever shows this read-only view. */
+  readonly recallRequested = output<void>();
   /** The header's back arrow — WwellIrComponent listens and closes the whole detail panel
    *  (deselects). Unlike the editor's own `backRequested`, nothing here needs a save/discard guard
    *  first: this is a read-only surface with no edits of its own to lose. */
@@ -103,6 +105,7 @@ export class WwellIrViewComponent {
   // and via its own "Refresh" button; this badge just mirrors whatever it last resolved.
   protected readonly hasKnownStatus = hasKnownIrStatus;
   protected readonly badgeMeta = irBadgeMeta;
+  protected readonly canRecall = computed(() => this.ir().sapWfId != null && !isSapWorkflowTerminal(this.ir().sapWfStatusText));
 
   protected readonly tabs = TABS;
   /** Owned by WwellIrComponent, not by this component: the whole detail panel is torn down and
@@ -115,6 +118,7 @@ export class WwellIrViewComponent {
   private readonly notify = inject(NotificationService);
   private readonly letterPdf = inject(WwellIrLetterPdfService);
   private readonly irStore = inject(WwellIrStore);
+  protected readonly isRecalling = this.irStore.recallingIr;
   private readonly emailStore = inject(EmailStore);
   private readonly emailService = inject(EmailService);
   private readonly authStore = inject(AuthStore);

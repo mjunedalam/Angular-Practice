@@ -88,7 +88,7 @@
             <button type="button" class="wlda__mode-btn" [class.wlda__mode-btn--on]="store.mode() === 'view'" [attr.aria-pressed]="store.mode() === 'view'" (click)="store.mode() === 'view' ? null : showView()">
               <mat-icon>visibility</mat-icon>View
             </button>
-            <button type="button" class="wlda__mode-btn" [class.wlda__mode-btn--on]="store.mode() === 'edit'" [attr.aria-pressed]="store.mode() === 'edit'" (click)="store.mode() === 'edit' ? null : showEdit()">
+            <button type="button" class="wlda__mode-btn" [class.wlda__mode-btn--on]="store.mode() === 'edit'" [attr.aria-pressed]="store.mode() === 'edit'" [disabled]="store.recalling()" (click)="store.mode() === 'edit' ? null : showEdit()">
               <mat-icon>edit</mat-icon>Edit
             </button>
           </div>
@@ -101,10 +101,6 @@
             <span class="wlda__unsaved-chip-dot" aria-hidden="true"></span>
             Unsaved changes
           </span>
-        }
-
-        @if (store.mode() === 'edit' && hasWorkflow()) {
-          <app-wwell-approval-pill [approval]="approval()" [status]="statusMeta[letterView.status]" [loading]="store.approvalLoading()" (refresh)="refreshApproval()" />
         }
 
         <div class="wlda__actions">
@@ -143,8 +139,8 @@
           }
           @if (store.mode() === 'create') {
             <button type="button" class="wlda__save" [disabled]="!canSave()" [attr.title]="store.draftErrors()[0] || null" (click)="save()">
-              <mat-icon aria-hidden="true">send</mat-icon>
-              {{ store.saving() ? 'Submitting…' : 'Submit for Approval' }}
+              <mat-icon aria-hidden="true">save</mat-icon>
+              {{ store.saving() ? 'Saving…' : 'Save as Draft' }}
             </button>
           }
           @if (canRecall()) {

@@ -16,7 +16,7 @@ const SAP_RECALLED_STATUS_TEXT = /recall/i;
 export const WWELL_IR_SUBMITTABLE_STATUSES: readonly IntegratedRequirementStatus[] = ['draft', 'in-progress'];
 
 export const WWELL_IR_STATUS_META: Record<IntegratedRequirementStatus, WwellStatusMeta> = {
-  draft: wwellStatusMeta('Draft', WWELL_STATUS_COLORS.slate),
+  draft: wwellStatusMeta('Draft', WWELL_STATUS_COLORS.amber),
   'in-progress': wwellStatusMeta('In Progress', WWELL_STATUS_COLORS.blue),
   'submit-for-review': { label: 'Submit for Review', bg: 'var(--wp-accent-fill)', color: 'var(--wp-on-accent)', dot: 'var(--wp-on-accent)' },
   'in-review': wwellStatusMeta('In Review', WWELL_STATUS_COLORS.purple),
@@ -46,6 +46,7 @@ export function irBadgeMeta(ir: IntegratedRequirement): WwellStatusMeta {
   const text = ir.sapWfStatusText;
   const fallback = WWELL_IR_STATUS_META[ir.status];
   if (!text) return fallback;
+  if (/^draft$/i.test(text.trim())) return WWELL_IR_STATUS_META.draft;
   if (SAP_TERMINATED_STATUS_TEXT.test(text)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.red);
   if (SAP_APPROVED_STATUS_TEXT.test(text) && isChainComplete(ir)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.green);
   if (SAP_APPROVED_STATUS_TEXT.test(text)) return wwellStatusMeta(text, WWELL_STATUS_COLORS.amber);
@@ -58,6 +59,12 @@ export function irBadgeMeta(ir: IntegratedRequirement): WwellStatusMeta {
  *  to recall, same as a real SAP recall would refuse it. */
 export function isSapWorkflowTerminal(sapWfStatusText: string | null): boolean {
   return sapWfStatusText !== null && (SAP_TERMINATED_STATUS_TEXT.test(sapWfStatusText) || SAP_APPROVED_STATUS_TEXT.test(sapWfStatusText));
+}
+
+/** A submitted or approved IR is read-only: editing it first resets it to Draft, with the user's consent, and it must
+ *  then be routed for approval again. */
+export function isIrLockedForEdit(ir: IntegratedRequirement): boolean {
+  return ir.sapWfId != null || ir.status === 'approved';
 }
 
 /** True only for the recalled subset of `isSapWorkflowTerminal` — unlike Approved/Rejected/Cancelled,
@@ -139,4 +146,27 @@ export function resolveLetterWorkflow(ir: IntegratedRequirement): WwellIrLetterW
     workflowStatusText: ir.sapWfStatusText,
     workflowSteps: ir.chain.map(({ role, name, status, date }) => ({ role, name, status, date })),
   };
+}
+
+/** The list's four mutually exclusive buckets: a record shows in exactly one, never in several. */
+export type WwellIrListBucket = 'active' | 'in-progress' | 'rejected' | 'approved';
+
+export const WWELL_IR_LIST_BUCKETS: readonly WwellIrListBucket[] = ['active', 'in-progress', 'rejected', 'approved'];
+
+export const WWELL_IR_LIST_BUCKET_LABEL: Record<WwellIrListBucket, string> = {
+  active: 'Active',
+  'in-progress': 'In Progress',
+  rejected: 'Rejected',
+  approved: 'Approved',
+};
+
+/** Which bucket a record belongs to, from the SAP workflow columns on exad_gwd_ir_header: approved → Approved;
+ *  rejected / cancelled / recalled → Rejected; submitted and still moving → In Progress; never submitted
+ *  (no workflow id, or a Draft status) → Active. */
+export function irListBucket(ir: IntegratedRequirement): WwellIrListBucket {
+  const text = ir.sapWfStatusText;
+  if (ir.status === 'approved' || (text !== null && SAP_APPROVED_STATUS_TEXT.test(text))) return 'approved';
+  if (text !== null && SAP_TERMINATED_STATUS_TEXT.test(text)) return 'rejected';
+  if (ir.sapWfId == null || text === null || /^draft$/i.test(text.trim())) return 'active';
+  return 'in-progress';
 }

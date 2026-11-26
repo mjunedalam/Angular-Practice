@@ -31,18 +31,6 @@
     </header>
 
     <div class="wwell-ir__filter-bar">
-      <button
-        type="button"
-        class="wwell-ir__lifecycle-toggle"
-        [class.wwell-ir__lifecycle-toggle--inactive]="lifecycleFilter() === 'inactive'"
-        [attr.aria-label]="lifecycleFilter() === 'active' ? 'Showing active records — click for inactive' : 'Showing inactive records — click for active'"
-        [matTooltip]="lifecycleFilter() === 'active' ? 'Active' : 'Inactive'"
-        matTooltipClass="ir-attachment-tooltip"
-        (click)="toggleLifecycleFilter()"
-      >
-        <mat-icon>{{ lifecycleFilter() === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-      </button>
-
       <div class="wwell-ir__status-chips" role="group" aria-label="Status filter">
         @for (status of statusChips; track status) {
           <button
@@ -183,12 +171,13 @@
       <div class="wwell-ir__detail-panel" [style.--chain-color]="chainBorderColor(ir.chain)" #detailHost>
         <div class="wwell-ir__detail-layout">
           <div class="wwell-ir__detail-main">
-            @if (detailMode() === 'view') {
+            @if (shownDetailMode() === 'view') {
               <app-wwell-ir-view
                 [ir]="ir"
                 [linkedRequestWellOptions]="store.linkedRequestWellOptions()"
                 [(activeTab)]="viewTab"
-                (editRequested)="setDetailMode('edit')"
+                (editRequested)="requestEdit(ir)"
+                (recallRequested)="requestRecall(ir)"
                 (backRequested)="deselect()"
               />
             } @else {
@@ -201,7 +190,7 @@
             }
           </div>
 
-          @if (detailMode() === 'view') {
+          @if (shownDetailMode() === 'view') {
             <aside class="wwell-ir__approval-sidebar">
               <app-wwell-approval-workflow-card
                 [ir]="ir"

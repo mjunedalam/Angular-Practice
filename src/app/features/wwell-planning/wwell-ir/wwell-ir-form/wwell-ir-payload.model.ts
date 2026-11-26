@@ -153,6 +153,9 @@ export interface IrHeaderSummary {
   readonly primaryHoleId?: string | null;
   readonly wellNumber?: string | null;
   readonly supportingBusiness?: string | null;
+  // SAP approval workflow on the header — what the list buckets Active / In Progress / Rejected / Approved by.
+  readonly sapWfId?: number | null;
+  readonly sapWfStatus?: string | null;
 }
 
 export interface WwellIrDetailTableBlock {

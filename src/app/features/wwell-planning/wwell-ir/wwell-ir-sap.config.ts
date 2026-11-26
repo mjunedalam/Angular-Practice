@@ -18,6 +18,10 @@ export const WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS = 12;
  *  (WwellIrStore.loadIrApprovalTimeline) is what reads SAP's real current status back over this. */
 export const WWELL_IR_SAP_WF_STATUS_IN_PROGRESS = 'In Progress';
 
+/** Stamped on exad_gwd_ir_header.sap_wf_status when an IR is first created (no workflow id yet); replaced by the
+ *  placeholder above on Submit for Review and by SAP's own text from then on. */
+export const WWELL_IR_SAP_WF_STATUS_DRAFT = 'Draft';
+
 /** The well's full name for letters, SAP and email (e.g. SHYB_1031(SHAYBAH)), else the short wellName. */
 export function irWellFullName(ir: { readonly requestReference: { readonly wellName: string; readonly wellFullName?: string | null } }): string {
   return ir.requestReference.wellFullName?.trim() || ir.requestReference.wellName;

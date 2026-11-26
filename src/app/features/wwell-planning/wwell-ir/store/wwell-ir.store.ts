@@ -27,6 +27,7 @@ import {
   WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS,
   WWELL_IR_SAP_RECALL_POLL_MS,
   WWELL_IR_SAP_SCENARIO_ID,
+  WWELL_IR_SAP_WF_STATUS_DRAFT,
   WWELL_IR_SAP_WF_STATUS_IN_PROGRESS,
 } from '../wwell-ir-sap.config';
 import { isSapWorkflowRecalled } from '../wwell-ir.config';
@@ -213,12 +214,15 @@ export const WwellIrStore = signalStore(
     // pointing at an id no SAP workflow was ever created under.
     function persistSapWorkflow(ir: IntegratedRequirement, irSeq: number, seq: number): void {
       svc.updateIrSapWorkflow(irSeq, seq, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS).subscribe({
-        next: () =>
+        next: () => {
           patchState(store, {
             updatingIrStatus: false,
             sapTriggerError: null,
             irs: markSubmittedForReview(store.irs(), ir.id, seq, WWELL_IR_SAP_WF_STATUS_IN_PROGRESS),
-          }),
+          });
+          // "In Progress" is only the placeholder: read SAP's real status and chain now (also saved to the header).
+          loadIrApprovalTimeline({ irSeq, sapWfId: seq });
+        },
         error: (err: unknown) =>
           patchState(store, {
             updatingIrStatus: false,
@@ -318,6 +322,7 @@ export const WwellIrStore = signalStore(
         // WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS; a failed read is just retried on the next tick.
         next: () => {
           let sawStatus = false;
+          let lastText: string | null = null;
           timer(WWELL_IR_SAP_RECALL_POLL_MS, WWELL_IR_SAP_RECALL_POLL_MS)
             .pipe(
               take(WWELL_IR_SAP_RECALL_POLL_MAX_ATTEMPTS),
@@ -325,6 +330,7 @@ export const WwellIrStore = signalStore(
               tap(status => {
                 if (!status) return;
                 sawStatus = true;
+                lastText = status.header.wf_status_text;
                 patchState(store, {
                   irs: store.irs().map(item =>
                     item.irSeq === irSeq
@@ -336,11 +342,20 @@ export const WwellIrStore = signalStore(
               takeWhile(status => !status || !isSapWorkflowRecalled(status.header.wf_status_text), true),
             )
             .subscribe({
-              complete: () =>
+              complete: () => {
+                if (isSapWorkflowRecalled(lastText)) {
+                  resetIrToDraft(irSeq, sapWfId, 'Workflow recalled, but the IR could not be reset to Draft');
+                  return;
+                }
+                // Recall not confirmed within the polling window: keep what SAP last said, and say so.
+                if (lastText !== null) syncSapStatusToTable(irSeq, sapWfId, null, lastText);
                 patchState(store, {
                   recallingIr: false,
-                  sapRecallError: sawStatus ? null : 'Workflow recalled, but failed to refresh its latest status',
-                }),
+                  sapRecallError: sawStatus
+                    ? 'SAP has not confirmed the recall yet — refresh the approval status shortly'
+                    : 'Workflow recalled, but failed to refresh its latest status',
+                });
+              },
             });
         },
         // SAP refused the recall — surface the failure and leave the header exactly as it was, same
@@ -351,6 +366,32 @@ export const WwellIrStore = signalStore(
             sapRecallError: sapErrorMessage(err, 'Failed to recall the SAP review workflow'),
           }),
       });
+    }
+
+    // Back to an unsubmitted Draft: workflow id cleared and status "Draft" written to the header, the approval chain
+    // dropped. Used once SAP confirms a recall, and when the user reopens a closed workflow for editing.
+    function resetIrToDraft(irSeq: number, sapWfId: number | null, failureMessage: string): void {
+      svc.updateIrSapWorkflow(irSeq, null, WWELL_IR_SAP_WF_STATUS_DRAFT).subscribe({
+        next: () =>
+          patchState(store, {
+            recallingIr: false,
+            sapRecallError: null,
+            irs: store.irs().map(item =>
+              item.irSeq === irSeq && item.sapWfId === sapWfId
+                ? { ...item, status: 'draft' as const, sapWfId: null, sapWfStatusText: WWELL_IR_SAP_WF_STATUS_DRAFT, chain: [] }
+                : item,
+            ),
+          }),
+        error: () => patchState(store, { recallingIr: false, sapRecallError: failureMessage }),
+      });
+    }
+
+    // Keeps exad_gwd_ir_header.sap_wf_status in step with what SAP actually reports, so the list (which reads that
+    // column) files the record under the right bucket without having to open it. Fire-and-forget: a failed write
+    // only means the next view tries again.
+    function syncSapStatusToTable(irSeq: number, sapWfId: number, previousText: string | null, text: string): void {
+      if (previousText === text) return;
+      svc.updateIrSapWorkflow(irSeq, sapWfId, text).subscribe({ error: () => undefined });
     }
 
     const loadIrs = rxMethod<void>(
@@ -520,6 +561,14 @@ export const WwellIrStore = signalStore(
           return sap.getWorkflowStatus(WWELL_IR_SAP_PROCESS_ID, sapWfId).pipe(
             tapResponse({
               next: status => {
+                // The record was reset or resubmitted while this read was in flight: writing it back would restore
+                // the old workflow id on the header.
+                const current = store.irs().find(item => item.irSeq === irSeq);
+                if (current && current.sapWfId !== sapWfId) {
+                  patchState(store, { irApprovalTimelineLoading: false });
+                  return;
+                }
+                syncSapStatusToTable(irSeq, sapWfId, store.irs().find(item => item.irSeq === irSeq)?.sapWfStatusText ?? null, status.header.wf_status_text);
                 patchState(store, {
                   // header.wf_status_text is the real workflow status SAP is showing right now —
                   // surfaced on the list badge (wwell-ir.component.html) in place of the local
@@ -787,6 +836,16 @@ export const WwellIrStore = signalStore(
           .createIr(irBulkPayload)
           .pipe(
             delay(WWELL_SAVE_DELAY_MS),
+            // A brand-new IR is inserted with status Draft (no workflow id yet); a re-save of an existing one leaves
+            // its status alone. A failed stamp must not read as a failed save — the list then simply files it under Active.
+            switchMap(irSeq => {
+              const isNew = irSeq !== null && store.draftIrSeq() !== irSeq && !store.irs().some(item => item.irSeq === irSeq);
+              if (!isNew) return of(irSeq);
+              return svc.updateIrSapWorkflow(irSeq, null, WWELL_IR_SAP_WF_STATUS_DRAFT).pipe(
+                map(() => irSeq),
+                catchError(() => of(irSeq)),
+              );
+            }),
             switchMap(irSeq => {
               if (irSeq === null) return of({ irSeq, blocks: null });
               return svc.getIrDetailBlocks(irSeq).pipe(
@@ -873,6 +932,14 @@ export const WwellIrStore = signalStore(
         }
         patchState(store, { recallingIr: true, sapRecallError: null });
         recallSapWorkflow(ir.irSeq, ir.sapWfId);
+      },
+
+      /** Reopens an IR whose workflow is already closed (rejected, recalled, cancelled or approved) for editing. A live
+       *  workflow must go through recallIr instead, or it would stay pending in SAP. */
+      reopenIr(ir: IntegratedRequirement): void {
+        if (ir.irSeq == null) return;
+        patchState(store, { sapRecallError: null });
+        resetIrToDraft(ir.irSeq, ir.sapWfId ?? null, 'Failed to reopen the integrated requirement for editing');
       },
 
       /** On-demand counterpart to the automatic loadIrDetail → loadIrApprovalTimeline refresh: lets

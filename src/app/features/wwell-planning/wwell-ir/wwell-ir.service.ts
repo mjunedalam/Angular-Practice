@@ -256,7 +256,7 @@ export class WwellIrService {
    * failure here is a real, visible error (WwellIrStore's sapTriggerError), not a silently
    * swallowed one, since it would otherwise mask the header never actually getting stamped.
    */
-  updateIrSapWorkflow(irSeq: number, wfId: number, wfStatus: string): Observable<void> {
+  updateIrSapWorkflow(irSeq: number, wfId: number | null, wfStatus: string): Observable<void> {
     return this.http
       .patch<ApiResponse<never>>(`${this.apiUrl}/integrated-requirements/${irSeq}/sap-workflow`, { wfId, wfStatus })
       .pipe(map(() => undefined));

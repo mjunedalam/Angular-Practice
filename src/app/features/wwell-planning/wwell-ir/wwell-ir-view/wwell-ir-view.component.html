@@ -40,7 +40,17 @@
           Notify
         </button>
       }
-      <button type="button" mat-stroked-button class="irv__edit-btn" (click)="editRequested.emit()">
+      @if (canRecall()) {
+        <button type="button" mat-stroked-button class="irv__edit-btn" [disabled]="isRecalling()" (click)="recallRequested.emit()">
+          @if (isRecalling()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon>undo</mat-icon>
+          }
+          Recall
+        </button>
+      }
+      <button type="button" mat-stroked-button class="irv__edit-btn" [disabled]="isRecalling()" (click)="editRequested.emit()">
         <mat-icon>edit</mat-icon>
         Edit
       </button>

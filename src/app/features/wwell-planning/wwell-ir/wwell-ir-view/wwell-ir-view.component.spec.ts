@@ -28,7 +28,7 @@ const emailProviders = [
   { provide: EmailStore, useValue: emailStoreStub },
   { provide: EmailService, useValue: { buildIrApprovedEmailRequest: jest.fn() } },
   { provide: AuthStore, useValue: { userEmail: signal('user@aramco.com') } },
-  { provide: WwellIrStore, useValue: { syncApprovalStatus: jest.fn(async (ir: IntegratedRequirement) => ir) } },
+  { provide: WwellIrStore, useValue: { recallingIr: signal(false), syncApprovalStatus: jest.fn(async (ir: IntegratedRequirement) => ir) } },
 ];
 
 /** The header's `sectionProgress` walks every rail section through wwellIrTimelineStepStatus, so

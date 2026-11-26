@@ -2,9 +2,23 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { WldaCreatePayload, WldaCreateResult, WldaLetter, WldaPrewap, WldaUpdatePayload } from '@models/wwell-planning/wlda.model';
-import { IrEligibleWell } from '../wwell-ir/wwell-ir-form/wwell-ir-payload.model';
 import { ApiResponse } from 'src/app/shared/models/wwell/api-response.model';
 import { ExternalConfigService } from 'src/app/shared/services/external-config.service';
+
+/** An exad_rcd_prewap row as `GET /prewaps` returns it (`select a.*`, column names camel-cased; an empty column can be
+ *  missing). Only the columns WLDA reads are listed. */
+interface WldaPrewapRow {
+  readonly prewapSeq: number;
+  readonly wPrimHid?: string | null;
+  readonly wNum?: string | null;
+  readonly wellType?: string | null;
+  readonly tdMd?: number | null;
+  readonly targetForm?: string | null;
+  readonly gospAreaPlant?: string | null;
+  readonly svUtmZn?: number | null;
+  readonly surfacen?: number | null;
+  readonly surfacee?: number | null;
+}
 
 /** agwa-planning's WLDA letter endpoints. Attachments are not here — they go to the S3 service. */
 @Injectable({ providedIn: 'root' })
@@ -18,12 +32,11 @@ export class WldaService {
   }
 
   /**
-   * The wells the "Link to Water Well" dropdown offers: the same `GET /wells/eligible-for-ir` list the IR wizard's
-   * "Link to Request" picker uses, reshaped into the plan fields a letter is created from. That endpoint has no
-   * GOSP column, so GOSP stays blank.
+   * Every pre-well plan, for the "Link to Water Well" dropdown: `GET /prewaps`
+   * (EXAD_AGWA_QUERIES_PKG.get_prewap_data_prc, docs/wlda/get_prewap_data_prc.sql).
    */
   getPrewaps(): Observable<WldaPrewap[]> {
-    return this.http.get<ApiResponse<IrEligibleWell>>(`${this.apiUrl}/wells/eligible-for-ir`).pipe(map(res => res.data.map(toPrewap)));
+    return this.http.get<ApiResponse<WldaPrewapRow>>(`${this.apiUrl}/prewaps`).pipe(map(res => res.data.map(toPrewap)));
   }
 
   /** Every letter of every plan. */
@@ -55,18 +68,17 @@ export class WldaService {
   }
 }
 
-function toPrewap(well: IrEligibleWell): WldaPrewap {
-  const zone = Number.parseInt(well.utmZone ?? '', 10);
+function toPrewap(row: WldaPrewapRow): WldaPrewap {
   return {
-    prewapSeq: well.prewapSeq,
-    wPrimHid: well.primaryHoleId,
-    wNum: well.wellNumber,
-    wellType: well.wellType,
-    tdMd: well.targetDepth,
-    targetForm: well.targetAquifer,
-    gospAreaPlant: null,
-    svUtmZn: Number.isNaN(zone) ? null : zone,
-    surfaceNorth: well.surfaceNorth,
-    surfaceEast: well.surfaceEast,
+    prewapSeq: row.prewapSeq,
+    wPrimHid: row.wPrimHid ?? null,
+    wNum: row.wNum ?? null,
+    wellType: row.wellType ?? null,
+    tdMd: row.tdMd ?? null,
+    targetForm: row.targetForm ?? null,
+    gospAreaPlant: row.gospAreaPlant ?? null,
+    svUtmZn: row.svUtmZn ?? null,
+    surfaceNorth: row.surfacen ?? null,
+    surfaceEast: row.surfacee ?? null,
   };
 }

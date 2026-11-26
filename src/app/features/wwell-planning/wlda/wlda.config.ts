@@ -38,6 +38,7 @@ export const WLDA_SAP_SCENARIO_ID = WWELL_IR_SAP_SCENARIO_ID;
 /** Written to exad_agwa_wlda_ltr.sap_wf_status: Draft when the letter is first inserted, In Progress once SAP accepted the workflow. */
 export const WLDA_SAP_WF_STATUS_DRAFT = 'Draft';
 export const WLDA_SAP_WF_STATUS_IN_PROGRESS = 'In Progress';
+export const WLDA_SAP_WF_STATUS_APPROVED = 'APPROVED';
 
 /** The SAP workflow title: `[WLDA-11] WLDA for SHYB-1031`, prefixed `TEST-` on every non-production build. */
 export function buildWldaSapWorkflowTitle(code: string, wellName: string, isProduction: boolean): string {

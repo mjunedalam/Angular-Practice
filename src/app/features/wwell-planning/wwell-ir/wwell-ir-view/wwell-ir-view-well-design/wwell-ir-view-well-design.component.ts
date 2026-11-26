@@ -20,6 +20,7 @@ import { WwellIrWellborePanelComponent } from '../../wwell-ir-wellbore-panel/wwe
 import { WwellIrViewKvCardComponent } from '../wwell-ir-view-kv-card/wwell-ir-view-kv-card.component';
 import { WwellIrSubSeaInfoComponent } from '../../wwell-ir-sub-sea-info/wwell-ir-sub-sea-info.component';
 import { sortByDepthAscending } from '../../wwell-ir-form/wwell-ir-detail-response.mapper';
+import { isIrLockedForEdit } from '../../wwell-ir.config';
 
 /** "Well Design" step of the read-only IR view: the same submitted-record wellbore diagram
  *  WwellIrEditorComponent's own "Wellbore Preview" card renders (via
@@ -90,6 +91,8 @@ export class WwellIrViewWellDesignComponent {
   protected readonly editingRemarks = signal(false);
   protected readonly remarksDraft = signal('');
   protected readonly savingRemarks = this.store.creatingIr;
+  /** A submitted or approved IR changes only after it is reopened — see isIrLockedForEdit. */
+  protected readonly isLocked = computed(() => isIrLockedForEdit(this.ir()));
 
   protected openRemarksEdit(): void {
     this.remarksDraft.set(this.ir().topsRemarks ?? '');

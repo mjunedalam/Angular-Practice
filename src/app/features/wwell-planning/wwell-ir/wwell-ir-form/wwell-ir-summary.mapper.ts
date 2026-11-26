@@ -1,5 +1,6 @@
 import { IntegratedRequirement, IntegratedRequirementTestType } from '@models/wwell-planning/integrated-requirement.model';
 import { IrHeaderSummary } from './wwell-ir-payload.model';
+import { WWELL_IR_SAP_WF_STATUS_DRAFT } from '../wwell-ir-sap.config';
 
 /**
  * Backend list rows are backed only by exad_gwd_ir_header — the domain fields the UI displays
@@ -22,7 +23,8 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     updatedDate: (row.epLtDataModDt ?? row.epCrDataDt)?.slice(0, 10) ?? null,
     // publish_flg is the only status-shaped signal this table carries — collapses the domain
     // model's finer-grained statuses (draft/in-progress/submit-for-review/in-review) into one.
-    status: row.publishFlg === 'Y' ? 'approved' : 'in-progress',
+    // A header stamped Draft with no workflow was reopened for editing, whatever publish_flg still says.
+    status: row.publishFlg === 'Y' && !(row.sapWfId == null && /^draft$/i.test(row.sapWfStatus?.trim() ?? '')) ? 'approved' : 'in-progress',
     requestReference: {
       // prewap_seq/ltr_no are real exad_gwd_ir_header columns (unlike wellName/coordinates/etc.
       // below) — read straight off the list row so a record's "Link to Request" is known
@@ -67,8 +69,11 @@ export function mapIrHeaderSummaryToIntegratedRequirement(row: IrHeaderSummary):
     // stays empty until a selection's detail fetch resolves one, rather than preview a chain this
     // row can't actually back yet.
     chain: [],
-    sapWfId: null,
-    sapWfStatusText: null,
+    // Straight off exad_gwd_ir_header: lets the list file each record under Active / In Progress / Rejected / Approved
+    // (and show SAP's own status text) without opening it first.
+    sapWfId: row.sapWfId ?? null,
+    // Never submitted (no workflow id) means Draft, whether or not the column was ever stamped.
+    sapWfStatusText: row.sapWfStatus?.trim() || (row.sapWfId == null ? WWELL_IR_SAP_WF_STATUS_DRAFT : null),
   };
 }
 

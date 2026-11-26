@@ -7,7 +7,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { WldaLetter, WldaLetterView } from '@models/wwell-planning/wlda.model';
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ActionConfirmDialogService } from '@shared/components/action-confirm-dialog/action-confirm-dialog.service';
-import { WwellApprovalPillComponent } from '../shared/wwell-approvals/wwell-approval-pill/wwell-approval-pill.component';
 import { WwellApprovalWorkflowCardComponent } from '../shared/wwell-approvals/wwell-approval-workflow-card/wwell-approval-workflow-card.component';
 import { isSapWorkflowTerminal } from '../wwell-ir/wwell-ir.config';
 import { WldaStore } from './store/wlda.store';
@@ -16,12 +15,12 @@ import { WldaFormComponent } from './wlda-form/wlda-form.component';
 import { WldaSheetComponent } from './wlda-sheet/wlda-sheet.component';
 import { WLDA_STATUS_META } from './wlda.config';
 import { downloadWldaPdf } from './wlda-pdf.util';
-import { WLDA_EMPTY_DRAFT, draftOfLetter, statusOfLetter, viewOfDraft, viewOfLetter, wldaCode, wldaKey, wldaWellName } from './wlda.util';
+import { WLDA_EMPTY_DRAFT, draftOfLetter, statusOfLetter, viewOfDraft, viewOfLetter, isWldaLocked, wldaCode, wldaLinkLabel, wldaKey, wldaWellName } from './wlda.util';
 
 @Component({
   selector: 'app-wlda',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, WldaFormComponent, WldaSheetComponent, WwellApprovalWorkflowCardComponent, WwellApprovalPillComponent],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, WldaFormComponent, WldaSheetComponent, WwellApprovalWorkflowCardComponent],
   templateUrl: './wlda.component.html',
   styleUrl: './wlda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,9 +60,9 @@ export class WldaComponent {
     return letter ? draftOfLetter(letter) : WLDA_EMPTY_DRAFT;
   });
 
-  /** Options of the "Link to Water Well" dropdown: every pre-well plan, labelled like the IR picker. */
+  /** Options of the "Link to Water Well" dropdown: every pre-well plan, labelled w_prim_hid_w_num. */
   protected readonly linkOptions = computed(() =>
-    this.store.prewaps().map(plan => ({ prewapSeq: plan.prewapSeq, label: wldaWellName(plan) || `Plan #${plan.prewapSeq}` })),
+    this.store.prewaps().map(plan => ({ prewapSeq: plan.prewapSeq, label: wldaLinkLabel(plan) || `Plan #${plan.prewapSeq}` })),
   );
 
   /** Known plans' field codes / well numbers, offered as suggestions so a typo can't leave Create disabled. */
@@ -157,8 +156,35 @@ export class WldaComponent {
   }
 
   protected showEdit(): void {
-    this.detailMode.set('edit');
-    this.store.startEdit();
+    const letter = this.store.selectedLetter();
+    if (!letter || !isWldaLocked(letter)) {
+      this.detailMode.set('edit');
+      this.store.startEdit();
+      return;
+    }
+    // A live workflow can't just lose its id — it would stay pending in SAP — so it is recalled first.
+    const isLive = letter.sapWfId != null && !isSapWorkflowTerminal(letter.sapWfStatus);
+    this.confirmDialog
+      .open({
+        title: 'Open this WLDA letter for editing?',
+        subtitle: `You are opening the WLDA letter for water well ${wldaWellName(letter) || 'Unnamed well'} for editing. ${
+          isLive ? 'Its approval is still in progress and will be recalled. ' : ''
+        }It will return to Draft, its SAP workflow will be removed, and it must be routed for approval again.`,
+        rows: [
+          { label: 'Letter', value: wldaCode(letter.ltrId) },
+          { label: 'Current status', value: this.statusMeta[statusOfLetter(letter)].label },
+        ],
+        confirmLabel: isLive ? 'Recall and Edit' : 'Open for Editing',
+        severity: 'warning',
+        hint: 'The current approval will no longer apply.',
+      })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        // The panel stays read-only until the reset is saved, then switches to the editor.
+        this.detailMode.set('edit');
+        if (isLive) this.store.recallLetter(true);
+        else this.store.reopenLetter();
+      });
   }
 
   private open(key: string): void {
@@ -178,10 +204,10 @@ export class WldaComponent {
     this.guardUnsaved(() => this.store.discardDraft());
   }
 
-  /** Only a Draft or a rejected/recalled letter can be (re)submitted, and only once its edits are saved. */
+  /** Only an unlocked Draft can be submitted (a closed workflow is reopened first), and only once its edits are saved. */
   protected readonly canSubmit = computed(() => {
     const letter = this.store.selectedLetter();
-    if (!letter || this.store.saving() || this.store.isDirty()) return false;
+    if (!letter || isWldaLocked(letter) || this.store.saving() || this.store.isDirty()) return false;
     const status = statusOfLetter(letter);
     return status === 'draft' || status === 'rejected';
   });
@@ -194,8 +220,6 @@ export class WldaComponent {
 
   /** What the shared Approval Workflow card renders: the live chain plus the workflow id (null = never submitted). */
   protected readonly approval = computed(() => ({ chain: this.store.approvalChain(), sapWfId: this.store.selectedLetter()?.sapWfId ?? null }));
-
-  protected readonly hasWorkflow = computed(() => this.approval().sapWfId !== null);
 
   protected refreshApproval(): void {
     this.store.refreshApproval();
@@ -213,10 +237,13 @@ export class WldaComponent {
         ],
         confirmLabel: 'Recall',
         severity: 'warning',
-        hint: 'This pulls the letter back from the SAP approval workflow. You can submit it again afterwards.',
+        hint: 'This pulls the letter back from the SAP approval workflow and returns it to Draft.',
       })
       .subscribe(confirmed => {
-        if (confirmed) this.store.recallLetter();
+        if (!confirmed) return;
+        // Recalling alone is not a request to edit.
+        this.detailMode.set('view');
+        this.store.recallLetter();
       });
   }
 

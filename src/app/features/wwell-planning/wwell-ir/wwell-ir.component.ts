@@ -22,7 +22,7 @@ import { ActionConfirmDialogService } from '@shared/components/action-confirm-di
 import { NotificationService } from '@shared/components/notification/notification.service';
 import { ComponentCanDeactivate } from '@guards/unsaved-changes.guard';
 import { ApprovalChainStep } from '@models/wwell-planning/wwell-planning.model';
-import { IntegratedRequirement, IntegratedRequirementStatus } from '@models/wwell-planning/integrated-requirement.model';
+import { IntegratedRequirement } from '@models/wwell-planning/integrated-requirement.model';
 import { buildDetailRevealTimeline } from '../shared/dynamic-form/detail-reveal.animation';
 import { playIfMotionAllowed } from '../shared/dynamic-form/motion.util';
 import { buildListRowsRevealTimeline } from '../shared/dynamic-form/list-reveal.animation';
@@ -40,7 +40,17 @@ import { buildIntegratedRequirementFromPayload } from './wwell-ir-form/wwell-ir-
 import { mapIrFormValueToSubmission } from './wwell-ir-form/wwell-ir-form.mapper';
 import { WWELL_IR_FORM_SCHEMA } from './wwell-ir-form/wwell-ir-form.schema';
 import { WwellIrFormRawValue } from './wwell-ir-form/wwell-ir-form.types';
-import { WWELL_IR_STATUS_META, hasKnownIrStatus, irBadgeMeta } from './wwell-ir.config';
+import {
+  WWELL_IR_LIST_BUCKETS,
+  WWELL_IR_LIST_BUCKET_LABEL,
+  WWELL_IR_STATUS_META,
+  WwellIrListBucket,
+  hasKnownIrStatus,
+  irBadgeMeta,
+  irListBucket,
+  isIrLockedForEdit,
+  isSapWorkflowTerminal,
+} from './wwell-ir.config';
 import { relativeUpdatedLabel } from './wwell-ir-relative-date.util';
 
 /** Which surface WwellIrEditorComponent's slot in the detail panel currently shows for the
@@ -58,19 +68,6 @@ const SKELETON_ROW_COUNT = 6;
 // exactly this height in wwell-ir.component.scss so the two never drift out of sync (a mismatch
 // shows up as overlapping or gapped rows, since the viewport positions each one by index * itemSize).
 const WWELL_IR_ROW_ITEM_SIZE_PX = 96;
-
-/** Coarse lifecycle split for the master list's top toggle — "Active" is every status before the
- *  record leaves the author's hands, "Inactive" is the one terminal status. Kept separate from the
- *  finer-grained `statusFilter` chips below (which only make sense to show *within* Active, since
- *  Inactive only ever has one possible status). */
-type WwellIrLifecycleFilter = 'active' | 'inactive';
-
-const WWELL_IR_ACTIVE_STATUSES: readonly IntegratedRequirementStatus[] = [
-  'draft',
-  'in-progress',
-  'submit-for-review',
-  'in-review',
-];
 
 @Component({
   selector: 'app-wwell-ir',
@@ -120,21 +117,14 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
    *  Details. Two-way bound to the view's `activeTab` model. */
   protected readonly viewTab = signal<WwellIrViewTab>('details');
 
-  protected readonly lifecycleFilter = signal<WwellIrLifecycleFilter>('active');
-  protected readonly statusFilter = signal<IntegratedRequirementStatus | 'all'>('all');
-  // Sub-filter chips shown only in the Active bucket — Inactive is exactly one status
-  // (approved), so there's nothing left to narrow further once that's selected.
-  protected readonly statusChips: readonly (IntegratedRequirementStatus | 'all')[] = ['all', 'in-progress', 'approved'];
+  /** The one list bucket showing: a record lives in exactly one (see irListBucket), so counts never overlap. */
+  protected readonly bucketFilter = signal<WwellIrListBucket>('active');
+  protected readonly statusChips = WWELL_IR_LIST_BUCKETS;
 
-  // Scoped by the lifecycle toggle only (not the status chip or search term) so chip counts stay
-  // stable while the user narrows further — each chip shows how many rows *it* would reveal, not
-  // how many remain after some other filter already trimmed the set.
+  // Scoped by the bucket only (not the search term) so every chip's count stays stable while typing.
   private readonly lifecycleScopedIrs = computed(() => {
-    const all = this.store.irs();
-    const scoped =
-      this.lifecycleFilter() === 'inactive'
-        ? all.filter(ir => ir.status === 'approved')
-        : all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
+    const bucket = this.bucketFilter();
+    const scoped = this.store.irs().filter(ir => irListBucket(ir) === bucket);
     // Newest first: updatedDate already falls back to the created date; irSeq (monotonic) breaks
     // same-day ties, and undated records sink below dated ones.
     return [...scoped].sort(
@@ -145,8 +135,7 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
 
   protected readonly rows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const status = this.statusFilter();
-    const scoped = this.lifecycleScopedIrs().filter(ir => status === 'all' || ir.status === status);
+    const scoped = this.lifecycleScopedIrs();
     if (!term) return scoped;
 
     return scoped.filter(
@@ -186,6 +175,12 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   // `rows()` reference check below and replay the list-reveal animation across every row on every
   // click. This string only changes on an actual add/remove/reorder/filter.
   protected readonly rowsSignature = computed(() => this.rows().map(ir => ir.irSeq ?? ir.id).join('|'));
+
+  /** A locked record always shows read-only, whatever the sticky mode, so no editor control can change it. */
+  protected readonly shownDetailMode = computed<WwellIrDetailMode>(() => {
+    const ir = this.selectedIr();
+    return ir && isIrLockedForEdit(ir) ? 'view' : this.detailMode();
+  });
 
   protected readonly statusMeta = WWELL_IR_STATUS_META;
   protected readonly hasKnownStatus = hasKnownIrStatus;
@@ -469,28 +464,15 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
 
   /** Records the current lifecycle bucket holds before the status chip and search narrow it — the "of M" in the result count. */
   protected readonly scopedTotal = computed(() => this.lifecycleScopedIrs().length);
-  protected readonly hasActiveNarrowing = computed(() => this.searchTerm().trim() !== '' || this.statusFilter() !== 'all');
+  protected readonly hasActiveNarrowing = computed(() => this.searchTerm().trim() !== '');
 
   protected clearSearch(): void {
     this.searchTerm.set('');
   }
 
-  /** Drops the search and the status chip, back to every record in the current bucket. */
+  /** Drops the search, back to every record in the current bucket. */
   protected clearFilters(): void {
     this.searchTerm.set('');
-    this.statusFilter.set('all');
-  }
-
-  /** Switching lifecycle bucket resets the status chip back to "All" — a chip selected in the old
-   *  bucket (e.g. "In Review") would otherwise carry over into Inactive, where it can never match
-   *  anything, silently showing an empty list. */
-  protected setLifecycleFilter(filter: WwellIrLifecycleFilter): void {
-    this.lifecycleFilter.set(filter);
-    this.statusFilter.set('all');
-  }
-
-  protected toggleLifecycleFilter(): void {
-    this.changeFilter(() => this.setLifecycleFilter(this.lifecycleFilter() === 'active' ? 'inactive' : 'active'));
   }
 
   /** Applies a filter change, then opens the first record of the new list — otherwise the detail panel kept
@@ -512,41 +494,22 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     });
   }
 
-  /** Approved lives in the inactive lifecycle bucket, so its chip switches the bucket rather than filtering within Active. */
-  protected isChipActive(status: IntegratedRequirementStatus | 'all'): boolean {
-    if (status === 'approved') return this.lifecycleFilter() === 'inactive';
-    return this.lifecycleFilter() === 'active' && this.statusFilter() === status;
+  protected isChipActive(bucket: WwellIrListBucket): boolean {
+    return this.bucketFilter() === bucket;
   }
 
-  protected selectChip(status: IntegratedRequirementStatus | 'all'): void {
-    this.changeFilter(() => {
-      if (status === 'approved') {
-        this.setLifecycleFilter('inactive');
-        return;
-      }
-      this.setLifecycleFilter('active');
-      this.setStatusFilter(status);
-    });
+  protected selectChip(bucket: WwellIrListBucket): void {
+    if (bucket === this.bucketFilter()) return;
+    this.changeFilter(() => this.bucketFilter.set(bucket));
   }
 
-  protected setStatusFilter(status: IntegratedRequirementStatus | 'all'): void {
-    this.statusFilter.set(status);
+  protected statusChipLabel(bucket: WwellIrListBucket): string {
+    return WWELL_IR_LIST_BUCKET_LABEL[bucket];
   }
 
-  // Chips only ever render within the Active lifecycle bucket (see the template's
-  // `@if (lifecycleFilter() === 'active')` gate) — "All" here already only ever means "every
-  // active-status record", never the inactive/approved ones the toggle hides. Labeling it
-  // "Active" instead of the bare, easy-to-misread "All" makes that scope explicit.
-  protected statusChipLabel(status: IntegratedRequirementStatus | 'all'): string {
-    return status === 'all' ? 'Active' : this.statusMeta[status].label;
-  }
-
-  protected statusChipCount(status: IntegratedRequirementStatus | 'all'): number {
+  protected statusChipCount(bucket: WwellIrListBucket): number {
     // Independent of which bucket is showing: every chip always reports its own total.
-    const all = this.store.irs();
-    if (status === 'approved') return all.filter(ir => ir.status === 'approved').length;
-    const active = all.filter(ir => WWELL_IR_ACTIVE_STATUSES.includes(ir.status));
-    return status === 'all' ? active.length : active.filter(ir => ir.status === status).length;
+    return this.store.irs().filter(ir => irListBucket(ir) === bucket).length;
   }
 
   protected selectIr(irSeq: number): void {
@@ -592,8 +555,55 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
   /** WwellIrViewComponent's own "Edit" button — switches the currently-open record's detail
    *  panel back to the inline-edit surface. Unguarded: the read-only view has no edits of its own
    *  to lose, so there's nothing this direction could discard. */
-  protected setDetailMode(mode: WwellIrDetailMode): void {
-    this.detailMode.set(mode);
+  protected requestEdit(ir: IntegratedRequirement): void {
+    if (!isIrLockedForEdit(ir)) {
+      this.detailMode.set('edit');
+      return;
+    }
+    // A live workflow can't just lose its id — it would stay pending in SAP — so it is recalled first.
+    const isLive = ir.sapWfId != null && !isSapWorkflowTerminal(ir.sapWfStatusText);
+    this.confirmDialog
+      .open({
+        title: 'Open this IR for editing?',
+        subtitle: `You are opening the Integrated Requirement for water well ${ir.requestReference.wellName || 'Untitled Well'} for editing. ${
+          isLive ? 'Its approval is still in progress and will be recalled. ' : ''
+        }It will return to Draft, its SAP workflow will be removed, and it must be routed for approval again.`,
+        rows: [
+          { label: 'IR', value: ir.code },
+          { label: 'Current status', value: this.badgeMeta(ir).label },
+        ],
+        confirmLabel: isLive ? 'Recall and Edit' : 'Open for Editing',
+        severity: 'warning',
+        hint: 'The current approval will no longer apply.',
+      })
+      .pipe(take(1))
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        // The panel stays read-only until the reset is saved, then switches to the editor by itself.
+        this.detailMode.set('edit');
+        if (isLive) this.store.recallIr(ir);
+        else this.store.reopenIr(ir);
+      });
+  }
+
+  protected requestRecall(ir: IntegratedRequirement): void {
+    this.confirmDialog
+      .open({
+        title: 'Recall this Integrated Requirement?',
+        rows: [
+          { label: 'IR', value: ir.code },
+          { label: 'Well', value: ir.requestReference.wellName || 'Untitled Well' },
+        ],
+        confirmLabel: 'Recall',
+        severity: 'danger',
+      })
+      .pipe(take(1))
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        // Recalling alone is not a request to edit: stay on the read-only view once it unlocks.
+        this.detailMode.set('view');
+        this.store.recallIr(ir);
+      });
   }
 
   /** The editor's own "View" toggle — switching the same record to the read-only stepper destroys
@@ -638,6 +648,8 @@ export class WwellIrComponent implements OnInit, OnDestroy, ComponentCanDeactiva
     const draft = buildIntegratedRequirementFromPayload(payload, { id: 'draft', code: 'New IR', irSeq: null });
     // Start the new draft with empty slots — a previous draft's held files must not carry over.
     this.store.clearPendingAttachments();
+    // The "Link to Request" list must be current for a new record; the selection effect skips a draft (no irSeq).
+    this.store.loadLinkedRequestWells();
 
     this.pendingDraftIr.set(draft);
     this.selectedIrSeq.set(null);
